@@ -28,3 +28,5 @@ target
 build
 # gradlew generated files
 .gradle
+# intellij "artifact" configs
+.idea/artifacts
