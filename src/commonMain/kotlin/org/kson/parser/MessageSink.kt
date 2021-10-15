@@ -2,15 +2,14 @@ package org.kson.parser
 
 /**
  * todo improve errors:
- *         - need char ranges for proper error highlights
  *         - need to centralize message definitions, assign types for testing ease
  *         - need to have test coverage for known error cases
  */
 class MessageSink {
     private val messages = mutableListOf<String>()
 
-    fun error(line: Int, message:String) {
-        messages.add(format(line, message))
+    fun error(lexeme: Lexeme, message:String) {
+        messages.add(format(lexeme.location, message))
     }
 
     fun hasErrors(): Boolean {
@@ -21,7 +20,7 @@ class MessageSink {
         return messages.joinToString("\n")
     }
 
-    private fun format(line: Int, message: String): String {
-        return "Line: $line, $message"
+    private fun format(location: Location, message: String): String {
+        return "Error:${location.firstLine}.${location.firstColumn}\u2013${location.lastLine}.${location.lastColumn}, $message"
     }
 }

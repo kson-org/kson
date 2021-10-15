@@ -37,77 +37,153 @@ private val KEYWORDS =
  */
 private const val EOF: Char = '\u0000'
 
-class Token(val tokenType: TokenType, val value: Any?, val line: Int)
+/**
+ * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
+ */
+private class SourceScanner(private val source: String) {
+    private var selectionFirstLine = 1
+    private var selectionStartOffset = 1
+    private var selectionEndLine = 1
+    private var selectionEndOffset = 1
 
-class Lexer(private val source: String, private val messageSink: MessageSink) {
+    fun peek(): Char {
+        return if (isAtEnd()) EOF else source[selectionEndOffset]
+    }
+
+    fun peekNext(): Char {
+        return if (selectionEndOffset + 1 >= source.length) EOF else source[selectionEndOffset + 1]
+    }
+
+    fun peekNextNext(): Char {
+        return if (selectionEndOffset + 2 >= source.length) EOF else source[selectionEndOffset + 2]
+    }
+
     /**
-     * List of [Token]s scanned from [source]
+     * Increase the current text selection by one character, returning that character
      */
+    fun advance(): Char {
+        val currentChar = source[selectionEndOffset++]
+        if (currentChar == '\n') {
+            // note the line increase so our Lexeme locations are accurate
+            selectionEndLine++
+        }
+        return currentChar
+    }
+
+    /**
+     * Move the scanner past the currently selected text, completely ignoring it
+     */
+    fun dropLexeme() {
+        selectionFirstLine = selectionEndLine
+        selectionStartOffset = selectionEndOffset
+    }
+
+    /**
+     * Extract the currently selected text as a [Lexeme], moving the scanner past it
+     */
+    fun extractLexeme(): Lexeme {
+        if (isAtEnd()) {
+            return Lexeme("", Location(-1, -1, -1, -1))
+        }
+
+        val lexeme = Lexeme(
+            source.substring(selectionStartOffset, selectionEndOffset),
+            Location(selectionFirstLine, selectionStartOffset, selectionEndLine, selectionEndOffset)
+        )
+        selectionFirstLine = selectionEndLine
+        selectionStartOffset = selectionEndOffset
+        return lexeme
+    }
+
+    private fun isAtEnd(): Boolean {
+        return selectionEndOffset >= source.length
+    }
+}
+
+/**
+ * A [String]/[Location] pair representing the raw [text] of a [Token]
+ * along with its [location] in the parsed source input
+ */
+data class Lexeme(val text: String, val location: Location)
+
+data class Location(
+    val firstLine: Int,
+    val firstColumn: Int,
+    val lastLine: Int,
+    val lastColumn: Int
+)
+
+data class Token(
+    /**
+     * The [TokenType] of this [Token]
+     */
+    val tokenType: TokenType,
+    /**
+     * The [Lexeme] (raw token text and original location) for this token
+     */
+    val lexeme: Lexeme,
+    /**
+     * The actual parsed [value] of this token, extracted from [lexeme]
+     */
+    val value: Any
+)
+
+class Lexer(source: String, private val messageSink: MessageSink) {
+
+    private val sourceScanner = SourceScanner(source)
     private val tokens = mutableListOf<Token>()
 
-    /**
-     * Start position in [source]
-     */
-    private var tokenStart = 0
-
-    /**
-     * Current character offset from start of [source]
-     */
-    private var currentOffset = 0
-
-    /**
-     * Current line of [currentOffset] in [source]
-     */
-    private var currentLine = 0
-
     fun tokenize(): ImmutableList<Token> {
-        while (!isAtEnd()) {
+        while (sourceScanner.peek() != EOF) {
             scan()
         }
 
-        tokens.add(Token(TokenType.EOF, EOF, currentLine))
+        tokens.add(Token(TokenType.EOF, sourceScanner.extractLexeme(), EOF))
         return tokens.toImmutableList()
     }
 
     private fun scan() {
-        val char = advance()
-        if (isInlineWhitespace(char)) {
+        val char = sourceScanner.advance()
+        if (isInlineWhitespace(char) || char == '\n') {
             // ignore whitespace
-            dropCurrentChar()
+            sourceScanner.dropLexeme()
             return
         }
         when (char) {
             '#' -> {
                 // comments extend to end of the line
-                while (peek() != '\n' && !isAtEnd()) advance()
-                // we retain comments rather than ignore them in the hopes of preserving them in YAML serialization
-                addToken(TokenType.COMMENT)
+                while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) sourceScanner.advance()
+
+                // we retain comments rather than ignore them in the hopes of preserving them in
+                // various serialization use cases (such as YAML serialization)
+                addLiteralToken(TokenType.COMMENT)
             }
-            '{' -> addToken(TokenType.BRACE_L)
-            '}' -> addToken(TokenType.BRACE_R)
-            '[' -> addToken(TokenType.BRACKET_L)
-            ']' -> addToken(TokenType.BRACKET_R)
-            ':' -> addToken(TokenType.COLON)
-            ',' -> addToken(TokenType.COMMA)
-            '\n' -> {
-                currentLine++
-                dropCurrentChar()
-            }
+            '{' -> addLiteralToken(TokenType.BRACE_L)
+            '}' -> addLiteralToken(TokenType.BRACE_R)
+            '[' -> addLiteralToken(TokenType.BRACKET_L)
+            ']' -> addLiteralToken(TokenType.BRACKET_R)
+            ':' -> addLiteralToken(TokenType.COLON)
+            ',' -> addLiteralToken(TokenType.COMMA)
             '"' -> {
+                // drop this opening quote---it's not part of the string
+                sourceScanner.dropLexeme()
                 string()
             }
             '`' -> {
-                if (peek() == '`') {
-                    advance()
-                    if (peek() == '`') {
-                        advance()
-                        addToken(TokenType.EMBED_START)
+                if (sourceScanner.peek() == '`') {
+                    sourceScanner.advance()
+                    if (sourceScanner.peek() == '`') {
+                        sourceScanner.advance()
+                        addLiteralToken(TokenType.EMBED_START)
                         embeddedBlock()
                     } else {
-                        messageSink.error(currentLine, "Dangling double-backtick.  Did you mean \"```\"?")
+                        messageSink.error(
+                            sourceScanner.extractLexeme(),
+                            "Dangling double-backtick.  Did you mean \"```\"?"
+                        )
                     }
                 } else {
-                    messageSink.error(currentLine, "Dangling backtick.  Did you mean \"```\"?")
+                    messageSink.error(sourceScanner.extractLexeme(), "Dangling backtick.  Did you mean \"```\"?")
                 }
             }
             else -> {
@@ -119,7 +195,7 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
                         identifier()
                     }
                     else -> {
-                        messageSink.error(currentLine, "Unexpected character: $char")
+                        messageSink.error(sourceScanner.extractLexeme(), "Unexpected character: $char")
                     }
                 }
             }
@@ -134,85 +210,81 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
     }
 
     private fun identifier() {
-        while (isAlphaNumeric(peek())) advance()
+        while (isAlphaNumeric(sourceScanner.peek())) sourceScanner.advance()
 
-        val text = source.substring(tokenStart, currentOffset)
-        val type: TokenType = KEYWORDS[text] ?: TokenType.IDENTIFIER
-        addToken(type)
+        val lexeme = sourceScanner.extractLexeme()
+        val type: TokenType = KEYWORDS[lexeme.text] ?: TokenType.IDENTIFIER
+        addLiteralToken(type)
     }
 
     private fun string() {
-        while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') currentLine++
-            advance()
+        while (sourceScanner.peek() != '"' && sourceScanner.peek() != EOF) {
+            sourceScanner.advance()
         }
-        if (isAtEnd()) {
-            messageSink.error(currentLine, "Unterminated string")
+        if (sourceScanner.peek() == EOF) {
+            messageSink.error(sourceScanner.extractLexeme(), "Unterminated string")
             return
         }
 
-        // Eat the closing `"`
-        advance()
+        addLiteralToken(TokenType.STRING)
 
-        // Trim the surrounding quotes.
-        val value = source.substring(tokenStart + 1, currentOffset - 1)
-        addToken(TokenType.STRING, value)
+        // Eat the closing `"`
+        sourceScanner.advance()
+        sourceScanner.dropLexeme()
     }
 
     private fun embeddedBlock() {
-        val embedTag = if (isAlphaNumeric(peek())) {
-            while (isAlphaNumeric(peek())) {
-                advance()
+        val embedTag = if (isAlphaNumeric(sourceScanner.peek())) {
+            while (isAlphaNumeric(sourceScanner.peek())) {
+                sourceScanner.advance()
             }
 
-            val tag = source.substring(tokenStart, currentOffset)
-            addToken(TokenType.EMBED_TAG, tag)
+            addLiteralToken(TokenType.EMBED_TAG)
         } else {
             null
         }
 
-        while (isInlineWhitespace(peek())) {
+        while (isInlineWhitespace(sourceScanner.peek())) {
             // ignore any inline whitespace between the '```[tag]' and the required newline
-            advance()
-            dropCurrentChar()
+            sourceScanner.advance()
+            sourceScanner.dropLexeme()
         }
 
-        if (peek() != '\n') {
-            // todo highlight all non-whitespace content in this error
+        if (sourceScanner.peek() != '\n') {
             messageSink.error(
-                currentLine,
+                sourceScanner.extractLexeme(),
                 "This Embedded Block's content must start on the line after the opening '```${embedTag ?: ""}'"
             )
         } else {
             // found the required newline---drop it since it's not part of the content
-            advance()
-            dropCurrentChar()
+            sourceScanner.advance()
+            sourceScanner.dropLexeme()
         }
 
         // read embedded content until the closing ```
         while (
-            !(peek() == '`' && peekNext() == '`' && peekNextNext() == '`')
-            && peek() != EOF
+            !(sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`' && sourceScanner.peekNextNext() == '`')
+            && sourceScanner.peek() != EOF
         ) {
-            advance()
+            sourceScanner.advance()
         }
 
-        if (peek() == EOF) {
-            messageSink.error(currentLine, "Unclosed ```...")
+        if (sourceScanner.peek() == EOF) {
+            messageSink.error(sourceScanner.extractLexeme(), "Unclosed ```...")
             return
         }
 
-        val embedBlockContent = source.substring(tokenStart, currentOffset)
+        val embedBlockLexeme = sourceScanner.extractLexeme()
 
-        val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockContent)
+        val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
 
-        addToken(TokenType.EMBEDDED_BLOCK, trimmedEmbedBlockContent)
+        addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, trimmedEmbedBlockContent)
 
         // process our closing ```
-        advance()
-        advance()
-        advance()
-        addToken(TokenType.EMBED_END)
+        sourceScanner.advance()
+        sourceScanner.advance()
+        sourceScanner.advance()
+        addLiteralToken(TokenType.EMBED_END)
     }
 
     /**
@@ -247,45 +319,30 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
 
     // dm todo match JSON number spec
     private fun number() {
-        while (isDigit(peek())) advance()
+        while (isDigit(sourceScanner.peek())) sourceScanner.advance()
 
         // Look for a fractional part
-        if (peek() == '.' && isDigit(peekNext())) {
+        if (sourceScanner.peek() == '.' && isDigit(sourceScanner.peekNext())) {
             // Consume the "."
-            advance()
-            while (isDigit(peek())) advance()
+            sourceScanner.advance()
+            while (isDigit(sourceScanner.peek())) sourceScanner.advance()
         }
-        addToken(TokenType.NUMBER, source.substring(tokenStart, currentOffset).toDouble())
+
+        val numberLexeme = sourceScanner.extractLexeme()
+        addToken(TokenType.NUMBER, numberLexeme, numberLexeme.text.toDouble())
     }
 
-    private fun advance(): Char {
-        return source[currentOffset++]
+    /**
+     * Convenience method for adding a [tokenType] [Token] with a "literal" value---i.e. its value is the
+     * currently selected text in [sourceScanner]
+     */
+    private fun addLiteralToken(tokenType: TokenType) {
+        val lexeme = sourceScanner.extractLexeme()
+        addToken(tokenType, lexeme, lexeme.text)
     }
 
-    private fun dropCurrentChar() {
-        tokenStart = currentOffset
-    }
-
-    private fun peek(): Char {
-        return if (isAtEnd()) EOF else source[currentOffset]
-    }
-
-    private fun peekNext(): Char {
-        return if (currentOffset + 1 >= source.length) EOF else source[currentOffset + 1]
-    }
-
-    private fun peekNextNext(): Char {
-        return if (currentOffset + 2 >= source.length) EOF else source[currentOffset + 2]
-    }
-
-    private fun addToken(type: TokenType) {
-        addToken(type, null)
-    }
-
-    private fun addToken(type: TokenType, value: Any?) {
-        val text = source.substring(tokenStart, currentOffset)
-        tokens.add(Token(type, value ?: text, currentLine))
-        tokenStart = currentOffset
+    private fun addToken(type: TokenType, lexeme: Lexeme, value: Any) {
+        tokens.add(Token(type, lexeme, value))
     }
 
     private fun isDigit(c: Char): Boolean {
@@ -302,9 +359,5 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
 
     private fun isAlphaNumeric(c: Char): Boolean {
         return isAlpha(c) || isDigit(c)
-    }
-
-    private fun isAtEnd(): Boolean {
-        return currentOffset >= source.length
     }
 }
