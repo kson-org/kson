@@ -9,12 +9,14 @@ enum class TokenType {
     BRACE_R,
     BRACKET_L,
     BRACKET_R,
-    EOF,
-    // dm todo implement code block lexing
-    CODE_BLOCK,
     COLON,
     COMMA,
     COMMENT,
+    EMBED_END,
+    EMBED_START,
+    EMBED_TAG,
+    EMBEDDED_BLOCK,
+    EOF,
     FALSE,
     IDENTIFIER,
     NULL,
@@ -23,14 +25,19 @@ enum class TokenType {
     TRUE
 }
 
-private val KEYWORDS = mapOf("null" to TokenType.NULL, "true" to TokenType.TRUE, "false" to TokenType.FALSE).toImmutableMap()
+private val KEYWORDS =
+    mapOf(
+        "null" to TokenType.NULL,
+        "true" to TokenType.TRUE,
+        "false" to TokenType.FALSE
+    ).toImmutableMap()
 
 /**
  * Use the null byte to represent EOF
  */
 private const val EOF: Char = '\u0000'
 
-class Token(val tokenType: TokenType, val lexeme: String, val literal: Any?, val line: Int)
+class Token(val tokenType: TokenType, val value: Any?, val line: Int)
 
 class Lexer(private val source: String, private val messageSink: MessageSink) {
     /**
@@ -55,16 +62,21 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
 
     fun tokenize(): ImmutableList<Token> {
         while (!isAtEnd()) {
-            tokenStart = currentOffset
-            scanToken()
+            scan()
         }
 
-        tokens.add(Token(TokenType.EOF, "", EOF, currentLine))
+        tokens.add(Token(TokenType.EOF, EOF, currentLine))
         return tokens.toImmutableList()
     }
 
-    private fun scanToken() {
-        when(val char = advance()) {
+    private fun scan() {
+        val char = advance()
+        if (isInlineWhitespace(char)) {
+            // ignore whitespace
+            dropCurrentChar()
+            return
+        }
+        when (char) {
             '#' -> {
                 // comments extend to end of the line
                 while (peek() != '\n' && !isAtEnd()) advance()
@@ -77,14 +89,26 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
             ']' -> addToken(TokenType.BRACKET_R)
             ':' -> addToken(TokenType.COLON)
             ',' -> addToken(TokenType.COMMA)
-            ' ', '\r', '\t' -> {
-                // ignore whitespace
-            }
             '\n' -> {
                 currentLine++
+                dropCurrentChar()
             }
             '"' -> {
                 string()
+            }
+            '`' -> {
+                if (peek() == '`') {
+                    advance()
+                    if (peek() == '`') {
+                        advance()
+                        addToken(TokenType.EMBED_START)
+                        embeddedBlock()
+                    } else {
+                        messageSink.error(currentLine, "Dangling double-backtick.  Did you mean \"```\"?")
+                    }
+                } else {
+                    messageSink.error(currentLine, "Dangling backtick.  Did you mean \"```\"?")
+                }
             }
             else -> {
                 when {
@@ -100,6 +124,13 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if the given [char] is a non-newline whitespace
+     */
+    private fun isInlineWhitespace(char: Char): Boolean {
+        return char == ' ' || char == '\r' || char == '\t'
     }
 
     private fun identifier() {
@@ -128,6 +159,92 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
         addToken(TokenType.STRING, value)
     }
 
+    private fun embeddedBlock() {
+        val embedTag = if (isAlphaNumeric(peek())) {
+            while (isAlphaNumeric(peek())) {
+                advance()
+            }
+
+            val tag = source.substring(tokenStart, currentOffset)
+            addToken(TokenType.EMBED_TAG, tag)
+        } else {
+            null
+        }
+
+        while (isInlineWhitespace(peek())) {
+            // ignore any inline whitespace between the '```[tag]' and the required newline
+            advance()
+            dropCurrentChar()
+        }
+
+        if (peek() != '\n') {
+            // todo highlight all non-whitespace content in this error
+            messageSink.error(
+                currentLine,
+                "This Embedded Block's content must start on the line after the opening '```${embedTag ?: ""}'"
+            )
+        } else {
+            // found the required newline---drop it since it's not part of the content
+            advance()
+            dropCurrentChar()
+        }
+
+        // read embedded content until the closing ```
+        while (
+            !(peek() == '`' && peekNext() == '`' && peekNextNext() == '`')
+            && peek() != EOF
+        ) {
+            advance()
+        }
+
+        if (peek() == EOF) {
+            messageSink.error(currentLine, "Unclosed ```...")
+            return
+        }
+
+        val embedBlockContent = source.substring(tokenStart, currentOffset)
+
+        val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockContent)
+
+        addToken(TokenType.EMBEDDED_BLOCK, trimmedEmbedBlockContent)
+
+        // process our closing ```
+        advance()
+        advance()
+        advance()
+        addToken(TokenType.EMBED_END)
+    }
+
+    /**
+     * Given a [textBlock], computes the minimum indent of all its lines, then returns
+     * the [textBlock] with that indent trimmed from each line.
+     *
+     * NOTE: blank lines are considered pure indent and used in this calculation, so for instance:
+     *
+     * "   this string
+     *         has a minimum indent defined
+     *       by its last line
+     *    "
+     *
+     * becomes:
+     *
+     * "  this string
+     *      has a minimum indent defined
+     *    by its blank last line
+     * "
+     */
+    private fun trimMinimumIndent(textBlock: String): String {
+        val linesWithNewlines = textBlock.split("\n").map { it + "\n" }
+
+        val minCommonIndent = linesWithNewlines
+            .map { it.indexOfFirst { char -> !isInlineWhitespace(char) } }
+            .minOrNull() ?: 0
+
+        return textBlock
+            .split("\n")
+            .joinToString("\n") { it.drop(minCommonIndent) }
+    }
+
     // dm todo match JSON number spec
     private fun number() {
         while (isDigit(peek())) advance()
@@ -145,6 +262,10 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
         return source[currentOffset++]
     }
 
+    private fun dropCurrentChar() {
+        tokenStart = currentOffset
+    }
+
     private fun peek(): Char {
         return if (isAtEnd()) EOF else source[currentOffset]
     }
@@ -153,13 +274,18 @@ class Lexer(private val source: String, private val messageSink: MessageSink) {
         return if (currentOffset + 1 >= source.length) EOF else source[currentOffset + 1]
     }
 
+    private fun peekNextNext(): Char {
+        return if (currentOffset + 2 >= source.length) EOF else source[currentOffset + 2]
+    }
+
     private fun addToken(type: TokenType) {
         addToken(type, null)
     }
 
-    private fun addToken(type: TokenType, literal: Any?) {
+    private fun addToken(type: TokenType, value: Any?) {
         val text = source.substring(tokenStart, currentOffset)
-        tokens.add(Token(type, text, literal, currentLine))
+        tokens.add(Token(type, value ?: text, currentLine))
+        tokenStart = currentOffset
     }
 
     private fun isDigit(c: Char): Boolean {

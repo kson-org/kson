@@ -1,5 +1,11 @@
 package org.kson.parser
 
+/**
+ * todo improve errors:
+ *         - need char ranges for proper error highlights
+ *         - need to centralize message definitions, assign types for testing ease
+ *         - need to have test coverage for known error cases
+ */
 class MessageSink {
     private val messages = mutableListOf<String>()
 
