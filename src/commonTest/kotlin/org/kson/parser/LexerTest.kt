@@ -40,6 +40,17 @@ class LexerTest {
         return actualTokens
     }
 
+    /**
+     * Ensure we're well-behaved on source which has no leading or trailing whitespace
+     */
+    @Test
+    fun testNoWhitespaceSource() {
+        assertTokenizesTo(
+            "1",
+            listOf(NUMBER)
+        )
+    }
+
     @Test
     fun testStringLiteralSource() {
         assertTokenizesTo(

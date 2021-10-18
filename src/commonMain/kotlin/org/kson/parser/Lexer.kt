@@ -41,13 +41,13 @@ private const val EOF: Char = '\u0000'
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  */
 private class SourceScanner(private val source: String) {
-    private var selectionFirstLine = 1
-    private var selectionStartOffset = 1
-    private var selectionEndLine = 1
-    private var selectionEndOffset = 1
+    private var selectionFirstLine = 0
+    private var selectionStartOffset = 0
+    private var selectionEndLine = 0
+    private var selectionEndOffset = 0
 
     fun peek(): Char {
-        return if (isAtEnd()) EOF else source[selectionEndOffset]
+        return if (selectionEndOffset >= source.length) EOF else source[selectionEndOffset]
     }
 
     fun peekNext(): Char {
@@ -82,8 +82,8 @@ private class SourceScanner(private val source: String) {
      * Extract the currently selected text as a [Lexeme], moving the scanner past it
      */
     fun extractLexeme(): Lexeme {
-        if (isAtEnd()) {
-            return Lexeme("", Location(-1, -1, -1, -1))
+        if (selectionEndOffset > source.length) {
+            throw RuntimeException("Scanner has been advanced past end of source---missing some needed calls to peek()?")
         }
 
         val lexeme = Lexeme(
@@ -111,7 +111,15 @@ data class Location(
     val firstColumn: Int,
     val lastLine: Int,
     val lastColumn: Int
-)
+) {
+    /**
+     * Common syntax error conventions call for base-1 indexed [Location]s, so pretty much any end-user facing
+     * rendering of this message should use the [Location] returned here
+     */
+    fun asBase1Indexed(): Location {
+        return Location(firstLine + 1, firstColumn + 1, lastLine + 1, lastColumn + 1)
+    }
+}
 
 data class Token(
     /**
@@ -138,7 +146,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             scan()
         }
 
-        tokens.add(Token(TokenType.EOF, sourceScanner.extractLexeme(), EOF))
+        tokens.add(Token(TokenType.EOF, Lexeme("", Location(-1, -1, -1, -1)), EOF))
         return tokens.toImmutableList()
     }
 

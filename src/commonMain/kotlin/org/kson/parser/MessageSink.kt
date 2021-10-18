@@ -21,6 +21,7 @@ class MessageSink {
     }
 
     private fun format(location: Location, message: String): String {
-        return "Error:${location.firstLine}.${location.firstColumn}\u2013${location.lastLine}.${location.lastColumn}, $message"
+        val base1IndexedLocation = location.asBase1Indexed()
+        return "Error:${base1IndexedLocation.firstLine}.${base1IndexedLocation.firstColumn}\u2013${base1IndexedLocation.lastLine}.${base1IndexedLocation.lastColumn}, $message"
     }
 }
