@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
+import org.kson.parser.messages.Message
 
 enum class TokenType {
     BRACE_L,
@@ -71,11 +72,14 @@ private class SourceScanner(private val source: String) {
     }
 
     /**
-     * Move the scanner past the currently selected text, completely ignoring it
+     * Move the scanner past the currently selected text, completely ignoring it.  Returns the dropped
+     * [Lexeme]'s [Location]---useful for reporting errors, etc., on dropped [Lexeme]s
      */
-    fun dropLexeme() {
+    fun dropLexeme(): Location {
+        val droppedLexemeLocation = currentLocation()
         selectionFirstLine = selectionEndLine
         selectionStartOffset = selectionEndOffset
+        return droppedLexemeLocation
     }
 
     /**
@@ -88,12 +92,15 @@ private class SourceScanner(private val source: String) {
 
         val lexeme = Lexeme(
             source.substring(selectionStartOffset, selectionEndOffset),
-            Location(selectionFirstLine, selectionStartOffset, selectionEndLine, selectionEndOffset)
+            currentLocation()
         )
         selectionFirstLine = selectionEndLine
         selectionStartOffset = selectionEndOffset
         return lexeme
     }
+
+    private fun currentLocation() =
+        Location(selectionFirstLine, selectionStartOffset, selectionEndLine, selectionEndOffset)
 }
 
 /**
@@ -181,13 +188,10 @@ class Lexer(source: String, private val messageSink: MessageSink) {
                         addLiteralToken(TokenType.EMBED_START)
                         embeddedBlock()
                     } else {
-                        messageSink.error(
-                            sourceScanner.extractLexeme(),
-                            "Dangling double-backtick.  Did you mean \"```\"?"
-                        )
+                        messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
                     }
                 } else {
-                    messageSink.error(sourceScanner.extractLexeme(), "Dangling backtick.  Did you mean \"```\"?")
+                    messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_DANGLING_TICK)
                 }
             }
             else -> {
@@ -199,7 +203,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
                         identifier()
                     }
                     else -> {
-                        messageSink.error(sourceScanner.extractLexeme(), "Unexpected character: $char")
+                        messageSink.error(sourceScanner.dropLexeme(), Message.UNEXPECTED_CHAR, char.toString())
                     }
                 }
             }
@@ -226,7 +230,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             sourceScanner.advance()
         }
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.extractLexeme(), "Unterminated string")
+            messageSink.error(sourceScanner.dropLexeme(), Message.STRING_NO_CLOSE)
             return
         }
 
@@ -242,8 +246,10 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             while (isAlphaNumeric(sourceScanner.peek())) {
                 sourceScanner.advance()
             }
+            val embedTagLexeme = sourceScanner.extractLexeme()
 
-            addLiteralToken(TokenType.EMBED_TAG)
+            addToken(TokenType.EMBED_TAG, embedTagLexeme, embedTagLexeme.text)
+            embedTagLexeme.text
         } else {
             null
         }
@@ -251,18 +257,15 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         while (isInlineWhitespace(sourceScanner.peek())) {
             // ignore any inline whitespace between the '```[tag]' and the required newline
             sourceScanner.advance()
-            sourceScanner.dropLexeme()
         }
+        sourceScanner.dropLexeme()
 
-        if (sourceScanner.peek() != '\n') {
-            messageSink.error(
-                sourceScanner.extractLexeme(),
-                "This Embedded Block's content must start on the line after the opening '```${embedTag ?: ""}'"
-            )
-        } else {
+        if (sourceScanner.peek() == '\n') {
             // found the required newline---drop it since it's not part of the content
             sourceScanner.advance()
             sourceScanner.dropLexeme()
+        } else {
+            messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_BAD_START, embedTag)
         }
 
         // read embedded content until the closing ```
@@ -274,7 +277,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         }
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.extractLexeme(), "Unclosed ```...")
+            messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_NO_CLOSE)
             return
         }
 

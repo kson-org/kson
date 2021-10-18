@@ -1,6 +1,7 @@
 package org.kson.parser
 
 import org.kson.parser.TokenType.*
+import org.kson.parser.messages.Message
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -49,6 +50,15 @@ class LexerTest {
             "1",
             listOf(NUMBER)
         )
+    }
+
+    /**
+     * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
+     */
+    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
+        val messageSink = MessageSink()
+        Lexer(source, messageSink).tokenize()
+        assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
     }
 
     @Test
@@ -311,7 +321,7 @@ class LexerTest {
         )
 
         assertEquals(
-            "this on the other hand,\nshould have spaces but no newline at the end    ".trimIndent(),
+            "this on the other hand,\nshould have spaces but no newline at the end    ",
             zeroTrailingWhitespaceTokens[1].value
         )
     }
@@ -338,6 +348,68 @@ class LexerTest {
             """,
             listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END),
             "should allow trailing whitespace after the opening '```embedTag'"
+        )
+    }
+
+    @Test
+    fun testEmbedBlockDanglingTick() {
+        assertTokenizesWithMessages(
+            """
+            test: `
+            """,
+            listOf(Message.EMBED_BLOCK_DANGLING_TICK)
+        )
+    }
+
+    @Test
+    fun testEmbedBlockDanglingDoubleTick() {
+        assertTokenizesWithMessages(
+            """
+            test: ``
+            """,
+            listOf(Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
+        )
+    }
+
+    @Test
+    fun testEmbedBlockBadStart() {
+        assertTokenizesWithMessages(
+            """
+            ``` this can't be here
+            because content must start on first line after opening ticks
+            ```
+            """,
+            listOf(Message.EMBED_BLOCK_BAD_START)
+        )
+
+        assertTokenizesWithMessages(
+            """
+            ```embedTag this can't be here
+            because content must start on first line after opening ticks+embed tag
+            ```
+            """,
+            listOf(Message.EMBED_BLOCK_BAD_START)
+        )
+    }
+
+    @Test
+    fun testUnclosedEmbedBlock() {
+        assertTokenizesWithMessages(
+            """
+            ```
+            This embed block lacks its closing ticks
+            """,
+            listOf(Message.EMBED_BLOCK_NO_CLOSE)
+        )
+    }
+
+    @Test
+    fun testUnterminatedString() {
+        assertTokenizesWithMessages(
+            """
+            "this string has no end quote
+            """,
+            listOf(Message.STRING_NO_CLOSE)
         )
     }
 }
