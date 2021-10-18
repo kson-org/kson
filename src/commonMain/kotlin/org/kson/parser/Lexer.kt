@@ -94,10 +94,6 @@ private class SourceScanner(private val source: String) {
         selectionStartOffset = selectionEndOffset
         return lexeme
     }
-
-    private fun isAtEnd(): Boolean {
-        return selectionEndOffset >= source.length
-    }
 }
 
 /**
