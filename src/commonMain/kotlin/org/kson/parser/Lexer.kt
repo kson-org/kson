@@ -199,7 +199,8 @@ class Lexer(source: String, private val messageSink: MessageSink) {
                     isDigit(char) -> {
                         number()
                     }
-                    isAlpha(char) -> {
+                    // identifiers start with an alphabetic character or an underscore
+                    isAlphaOrUnderscore(char) -> {
                         identifier()
                     }
                     else -> {
@@ -356,15 +357,12 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         return c in '0'..'9'
     }
 
-    /**
-     * dm todo are underscores the only special character we'll allow in identifiers?
-     */
-    private fun isAlpha(c: Char): Boolean {
+    private fun isAlphaOrUnderscore(c: Char): Boolean {
         return c in 'a'..'z' ||
                 c in 'A'..'Z' || c == '_'
     }
 
     private fun isAlphaNumeric(c: Char): Boolean {
-        return isAlpha(c) || isDigit(c)
+        return isAlphaOrUnderscore(c) || isDigit(c)
     }
 }
