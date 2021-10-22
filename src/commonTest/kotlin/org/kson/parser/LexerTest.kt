@@ -412,4 +412,17 @@ class LexerTest {
             listOf(Message.STRING_NO_CLOSE)
         )
     }
+
+    @Test
+    fun testIdentifierLexemeContent() {
+        val tokens = assertTokenizesTo(
+            """   
+                a_key: "a_value"
+            """,
+            listOf(IDENTIFIER, COLON, STRING)
+        )
+
+        assertEquals("a_key", tokens[0].value)
+        assertEquals("a_value", tokens[2].value)
+    }
 }

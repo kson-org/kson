@@ -223,7 +223,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
 
         val lexeme = sourceScanner.extractLexeme()
         val type: TokenType = KEYWORDS[lexeme.text] ?: TokenType.IDENTIFIER
-        addLiteralToken(type)
+        addToken(type, lexeme, lexeme.text)
     }
 
     private fun string() {
