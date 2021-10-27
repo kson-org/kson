@@ -41,6 +41,24 @@ class LexerTest {
         return actualTokens
     }
 
+    @Test
+    fun testEmptySource() {
+        assertTokenizesTo(
+            "",
+            emptyList()
+        )
+
+        assertTokenizesTo(
+            " ",
+            emptyList()
+        )
+
+        assertTokenizesTo(
+            "\t\n",
+            emptyList()
+        )
+    }
+
     /**
      * Ensure we're well-behaved on source which has no leading or trailing whitespace
      */
@@ -267,7 +285,7 @@ class LexerTest {
         )
 
         assertEquals(
-"""      this is a multi-line
+            """      this is a multi-line
           raw embed
   who's indent will be determined by
                   the leftmost line,
