@@ -41,6 +41,15 @@ class LexerTest {
         return actualTokens
     }
 
+    /**
+     * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
+     */
+    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
+        val messageSink = MessageSink()
+        Lexer(source, messageSink).tokenize()
+        assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
+    }
+
     @Test
     fun testEmptySource() {
         assertTokenizesTo(
@@ -68,15 +77,6 @@ class LexerTest {
             "1",
             listOf(NUMBER)
         )
-    }
-
-    /**
-     * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
-     */
-    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
-        val messageSink = MessageSink()
-        Lexer(source, messageSink).tokenize()
-        assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
     }
 
     @Test
