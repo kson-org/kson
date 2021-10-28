@@ -7,8 +7,12 @@ class KsonTest {
     @Test
     fun sanityCheck() {
         // TODO make this placeholder a real test
-        val source = "some source"
+        val source = "some: source"
         val result = Kson().parse(source)
-        assertEquals("placeholder parse: $source", result)
+        assertEquals("""
+            {
+              some: source
+            }
+        """.trimIndent(), result.debugPrint())
     }
 }
