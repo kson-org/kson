@@ -85,19 +85,19 @@ class NumberNode(private val value: Number) : ValueNode {
 
 class TrueNode : ValueNode {
     override fun debugPrint(indentLevel: Int, indent: String): String {
-        return "true"
+        return indent.repeat(indentLevel) + "true"
     }
 }
 
 class FalseNode : ValueNode {
     override fun debugPrint(indentLevel: Int, indent: String): String {
-        return "false"
+        return indent.repeat(indentLevel) + "false"
     }
 }
 
 class NullNode : ValueNode {
     override fun debugPrint(indentLevel: Int, indent: String): String {
-        return "null"
+        return indent.repeat(indentLevel) + "null"
     }
 }
 

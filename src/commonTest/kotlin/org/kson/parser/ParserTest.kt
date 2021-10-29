@@ -117,13 +117,13 @@ class ParserTest {
 
         assertParsesTo(
             """
-                [42.4, 43.1, 44.7,]
+                [true, false, null,]
             """,
             """
                 [
-                  42.4,
-                  43.1,
-                  44.7
+                  true,
+                  false,
+                  null
                 ]
             """.trimIndent(),
             "should support an optional trailing comma in lists"
