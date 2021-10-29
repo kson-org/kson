@@ -325,7 +325,8 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             .joinToString("\n") { it.drop(minCommonIndent) }
     }
 
-    // dm todo match JSON number spec
+    // parser todo match JSON number spec (note: there was a multiplatform inconsistency around
+    //             numbers with a 0 decimal, ie. 42.0.  Ensure there's testing around that case)
     private fun number() {
         while (isDigit(sourceScanner.peek())) sourceScanner.advance()
 

@@ -43,7 +43,7 @@ class ParserTest {
 
     @Test
     fun testNumberLiteralSource() {
-        // dm todo add test for integers and scientific notation to match JSON spec
+        // parser todo add test for integers and scientific notation to match JSON spec
         assertParsesTo(
             """
                 42.1
@@ -104,11 +104,11 @@ class ParserTest {
 
         assertParsesTo(
             """
-                [42.0, 43.1, 44.7]
+                [42.4, 43.1, 44.7]
             """,
             """
                 [
-                  42.0,
+                  42.4,
                   43.1,
                   44.7
                 ]
@@ -117,11 +117,11 @@ class ParserTest {
 
         assertParsesTo(
             """
-                [42.0, 43.1, 44.7,]
+                [42.4, 43.1, 44.7,]
             """,
             """
                 [
-                  42.0,
+                  42.4,
                   43.1,
                   44.7
                 ]
