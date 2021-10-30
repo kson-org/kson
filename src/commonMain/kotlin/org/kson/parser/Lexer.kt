@@ -42,10 +42,13 @@ private const val EOF: Char = '\u0000'
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  */
 private class SourceScanner(private val source: String) {
-    private var selectionFirstLine = 0
     private var selectionStartOffset = 0
-    private var selectionEndLine = 0
     private var selectionEndOffset = 0
+
+    private var selectionFirstLine = 0
+    private var selectionFirstColumn = 0
+    private var selectionEndLine = 0
+    private var selectionEndColumn = 0
 
     fun peek(): Char {
         return if (selectionEndOffset >= source.length) EOF else source[selectionEndOffset]
@@ -64,9 +67,12 @@ private class SourceScanner(private val source: String) {
      */
     fun advance(): Char {
         val currentChar = source[selectionEndOffset++]
+        selectionEndColumn++
         if (currentChar == '\n') {
             // note the line increase so our Lexeme locations are accurate
             selectionEndLine++
+            // reset our endColumn counter for this new line
+            selectionEndColumn = 0
         }
         return currentChar
     }
@@ -77,8 +83,7 @@ private class SourceScanner(private val source: String) {
      */
     fun dropLexeme(): Location {
         val droppedLexemeLocation = currentLocation()
-        selectionFirstLine = selectionEndLine
-        selectionStartOffset = selectionEndOffset
+        startNextSelection()
         return droppedLexemeLocation
     }
 
@@ -94,13 +99,28 @@ private class SourceScanner(private val source: String) {
             source.substring(selectionStartOffset, selectionEndOffset),
             currentLocation()
         )
-        selectionFirstLine = selectionEndLine
-        selectionStartOffset = selectionEndOffset
+        startNextSelection()
         return lexeme
     }
 
+    private fun startNextSelection() {
+        selectionStartOffset = selectionEndOffset
+        selectionFirstLine = selectionEndLine
+        selectionFirstColumn = selectionEndColumn
+    }
+
+    /**
+     * Returns a [Location] object representing this [SourceScanner]'s current selection in [source]
+     * NOTE: these [Location]s are base-1 indexed since they are user facing and so follow
+     *       [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+     */
     private fun currentLocation() =
-        Location(selectionFirstLine, selectionStartOffset, selectionEndLine, selectionEndOffset)
+        Location(
+            selectionFirstLine + 1,
+            selectionFirstColumn + 1,
+            selectionEndLine + 1,
+            selectionEndColumn + 1
+        )
 }
 
 /**
@@ -114,15 +134,7 @@ data class Location(
     val firstColumn: Int,
     val lastLine: Int,
     val lastColumn: Int
-) {
-    /**
-     * Common syntax error conventions call for base-1 indexed [Location]s, so pretty much any end-user facing
-     * rendering of this message should use the [Location] returned here
-     */
-    fun asBase1Indexed(): Location {
-        return Location(firstLine + 1, firstColumn + 1, lastLine + 1, lastColumn + 1)
-    }
-}
+)
 
 data class Token(
     /**
