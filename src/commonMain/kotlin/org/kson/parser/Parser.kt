@@ -14,9 +14,7 @@ import org.kson.ast.*
  *        | literal
  *        | embedBlock ;
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
- * list -> "[" "]"
- *       | "[" value "]"
- *       | "[" (value ",")* value? "]"
+ * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING, NUMBER, "true", "false", "null" ;
  * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
@@ -107,9 +105,7 @@ class Parser(tokens: List<Token>) {
     }
 
     /**
-     * list -> "[" "]"
-     *       | "[" value "]"
-     *       | "[" (value ",")* value? "]"
+     * list -> "[" (value ",")* value? "]"
      */
     private fun list(): ListNode? {
         if (tokenScanner.peek() == TokenType.BRACKET_L) {
