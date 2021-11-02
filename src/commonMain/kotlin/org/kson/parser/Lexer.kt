@@ -104,6 +104,8 @@ private class SourceScanner(private val source: String) {
     }
 
     private fun startNextSelection() {
+        // catch our select start indexes up to the current end indexes to start this
+        // scanner's next selection from the next as-yet unconsumed char
         selectionStartOffset = selectionEndOffset
         selectionFirstLine = selectionEndLine
         selectionFirstColumn = selectionEndColumn
