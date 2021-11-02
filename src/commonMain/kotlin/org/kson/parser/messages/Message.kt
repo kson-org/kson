@@ -63,6 +63,25 @@ enum class Message {
         override fun doFormat(parsedArgs: Map<String, String?>): String {
             return "Unterminated string"
         }
+    },
+    UNPARSEABLE_NUMBER {
+        override fun expectedArgs(): List<String> {
+            return listOf("Unparseable Number")
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            val unparseableNumber = parsedArgs["Unparseable Number"]
+            return "Unparseable number: $unparseableNumber"
+        }
+    },
+    DANGLING_EXP_INDICATOR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Dangling exponent indicator"
+        }
     };
 
     /**

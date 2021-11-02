@@ -325,8 +325,6 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             .joinToString("\n") { it.drop(minCommonIndent) }
     }
 
-    // parser todo match JSON number spec (note: there was a multiplatform inconsistency around
-    //             numbers with a 0 decimal, ie. 42.0.  Ensure there's testing around that case)
     private fun number() {
         while (isDigit(sourceScanner.peek())) sourceScanner.advance()
 
@@ -337,8 +335,28 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()
         }
 
+        // Look for numbers with an exponent part (ex: 1.74e22, 2.801E12, 4.11e-12)
+        if (sourceScanner.peek() == 'E' || sourceScanner.peek() == 'e') {
+            // consume the 'e'
+            sourceScanner.advance()
+            if (sourceScanner.peek() == '-' || sourceScanner.peek() == '+') {
+                // consume the negative (or less common positive) exponent sign
+                sourceScanner.advance()
+            }
+            if (!isDigit(sourceScanner.peek())) {
+                messageSink.error(sourceScanner.dropLexeme(), Message.DANGLING_EXP_INDICATOR)
+                return
+            }
+            while (isDigit(sourceScanner.peek())) sourceScanner.advance()
+        }
+
         val numberLexeme = sourceScanner.extractLexeme()
-        addToken(TokenType.NUMBER, numberLexeme, numberLexeme.text.toDouble())
+        try {
+            addToken(TokenType.NUMBER, numberLexeme, numberLexeme.text.toDouble())
+        } catch (e: NumberFormatException) {
+            messageSink.error(sourceScanner.dropLexeme(), Message.UNPARSEABLE_NUMBER, e.message)
+            return
+        }
     }
 
     /**
