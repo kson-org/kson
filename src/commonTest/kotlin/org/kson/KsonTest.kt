@@ -13,6 +13,6 @@ class KsonTest {
             {
               some: source
             }
-        """.trimIndent(), result.debugPrint())
+        """.trimIndent(), result.toKsonSource())
     }
 }

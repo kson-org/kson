@@ -6,3 +6,5 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# No need to share run configurations
+runConfigurations.xml

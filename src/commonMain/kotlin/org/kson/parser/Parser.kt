@@ -14,9 +14,7 @@ import org.kson.ast.*
  *        | literal
  *        | embedBlock ;
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
- * list -> "[" "]"
- *       | "[" value "]"
- *       | "[" (value ",")* value? "]"
+ * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING, NUMBER, "true", "false", "null" ;
  * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
@@ -107,9 +105,7 @@ class Parser(tokens: List<Token>) {
     }
 
     /**
-     * list -> "[" "]"
-     *       | "[" value "]"
-     *       | "[" (value ",")* value? "]"
+     * list -> "[" (value ",")* value? "]"
      */
     private fun list(): ListNode? {
         if (tokenScanner.peek() == TokenType.BRACKET_L) {
@@ -225,16 +221,17 @@ class Parser(tokens: List<Token>) {
 }
 
 /**
- * scanner todo this functions near identically to [SourceScanner], but rather than scanning [Char]s, it scans [Token]s.
- *             See if it makes sense to refactor duplication into into a base "[StreamScanner]"
+ * [TokenScanner] provides a [Token]-by-[Token] scanning interface.
+ *
+ * This is similar to [SourceScanner] in design, but distinct enough to stand alone
  */
 private class TokenScanner(private val source: List<Token>) {
     private var selectionStartOffset = 0
     private var selectionEndOffset = 0
 
-    // scanner todo: refactor musing: we want TokenType here for peak peek convenience, not Token.
-    //               Perhaps had we prematurely refactored into a base "[StreamScanner]"
-    //               this optimization would have been missed
+    /**
+     * Note that for convenience this returns the [TokenType] rather than the whole current [Token]
+     */
     fun peek(): TokenType {
         return if (selectionEndOffset >= source.size) TokenType.EOF else source[selectionEndOffset].tokenType
     }
@@ -254,6 +251,11 @@ private class TokenScanner(private val source: List<Token>) {
         return droppedLexemeLocation
     }
 
+    /**
+     * Return the [Location] in the underlying source file of the currently selected
+     * sequence of tokens.  Note that these [Location]s are pure passthroughs to the
+     * [Location]s of the underlying tokens.
+     */
     private fun currentLocation(): Location {
         val startTokenLocation = source[selectionStartOffset].lexeme.location
         val endTokenLocation = source[selectionEndOffset].lexeme.location
