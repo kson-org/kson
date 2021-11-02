@@ -268,7 +268,15 @@ class Lexer(source: String, private val messageSink: MessageSink) {
     }
 
     private fun string() {
+        // we use this var to track if we need to consume escapes in a string so we only walk its text
+        // trying to replace escapes if we know we need to
+        var hasEscapedQuotes = false
         while (sourceScanner.peek() != '"' && sourceScanner.peek() != EOF) {
+            if (sourceScanner.peek() == '\\' && sourceScanner.peekNext() == '"') {
+                hasEscapedQuotes = true
+                // ensure we advance past it so it's part of the string
+                sourceScanner.advance()
+            }
             sourceScanner.advance()
         }
         if (sourceScanner.peek() == EOF) {
@@ -276,7 +284,13 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             return
         }
 
-        addLiteralToken(TokenType.STRING)
+        if (hasEscapedQuotes) {
+            val rawStringLexeme = sourceScanner.extractLexeme()
+            val escapedString = rawStringLexeme.text.replace("\\\"", "\"")
+            addToken(TokenType.STRING, rawStringLexeme, escapedString)
+        } else {
+            addLiteralToken(TokenType.STRING)
+        }
 
         // Eat the closing `"`
         sourceScanner.advance()
@@ -310,11 +324,27 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_BAD_START, embedTag)
         }
 
+        // we use this var to track if we need to consume escapes in an embed blcok so we only walk its text
+        // trying to replace escapes if we know we need to
+        var hasEscapedEmbedEnd = false
+
         // read embedded content until the closing ```
         while (
             !(sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`' && sourceScanner.peekNextNext() == '`')
             && sourceScanner.peek() != EOF
         ) {
+            if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '\\') {
+                // if this is all slashes until "``", we're looking at an escaped EMBED_END
+                sourceScanner.advance()
+                while (sourceScanner.peek() == '\\') {
+                    sourceScanner.advance()
+                }
+                if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`') {
+                    hasEscapedEmbedEnd = true
+                    sourceScanner.advance()
+                    sourceScanner.advance()
+                }
+            }
             sourceScanner.advance()
         }
 
@@ -326,8 +356,27 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
+        val embedTokenValue = if (hasEscapedEmbedEnd) {
+            /**
+             * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
+             * so some here's some clarifying notes:
+             *
+             * - an escaped EMBED_END has its second tick escaped: `\`` yields ``` inside of an embed.
+             *   Note that this moves the escaping goalpost since we also need to allow `\`` literally inside
+             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary \s before the second
+             *   tick, and consume one of them.  Then, `\\`` gives `\`` in the output, `\\\`` gives `\\`` in
+             *   the output, etc
+             *
+             * - the regex for this ends up looking a bit crazy since \ needs to be double escaped in regex, so
+             *   matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional slashes
+             *   in the output
+             */
+            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"),"`$1``")
+        } else {
+            trimmedEmbedBlockContent
+        }
 
-        addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, trimmedEmbedBlockContent)
+        addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, embedTokenValue)
 
         // process our closing ```
         sourceScanner.advance()
