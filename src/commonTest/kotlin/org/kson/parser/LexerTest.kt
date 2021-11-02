@@ -443,4 +443,39 @@ class LexerTest {
         assertEquals("a_key", tokens[0].value)
         assertEquals("a_value", tokens[2].value)
     }
+
+    @Test
+    fun testStringEscapes() {
+        val tokens = assertTokenizesTo(
+            """   
+                "string with \"embedded\" quotes"
+            """,
+            listOf(STRING)
+        )
+
+        assertEquals("string with \"embedded\" quotes", tokens[0].value)
+    }
+
+    @Test
+    fun testEmbeddedBlockEscapes() {
+        val singleEscapeTokens = assertTokenizesTo(
+            """   
+                ```
+                these triple `\`` ticks are embedded but escaped```
+            """,
+            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+        )
+
+        assertEquals("these triple ``` ticks are embedded but escaped", singleEscapeTokens[1].value)
+
+        val multiEscapeTokens = assertTokenizesTo(
+            """   
+                ```
+                these triple `\\\\`` ticks are embedded and multi-escaped```
+            """,
+            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+        )
+
+        assertEquals("these triple `\\\\\\`` ticks are embedded and multi-escaped", multiEscapeTokens[1].value)
+    }
 }
