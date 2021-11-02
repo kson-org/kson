@@ -113,10 +113,12 @@ private class SourceScanner(private val source: String) {
 
     /**
      * Returns a [Location] object representing this [SourceScanner]'s current selection in [source]
-     * NOTE: these [Location]s are base-1 indexed since they are user facing and so follow
-     *       [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
      */
     private fun currentLocation() =
+        /**
+         * note that we adjust our internal 0-based indexes to adhere to the 1-based
+         * interface of [Location].  See the doc on [Location] for details on this.
+         */
         Location(
             selectionFirstLine + 1,
             selectionFirstColumn + 1,
@@ -131,10 +133,33 @@ private class SourceScanner(private val source: String) {
  */
 data class Lexeme(val text: String, val location: Location)
 
+/**
+ * [Location]s mark the position of a chunk of source inside a given kson source file.
+ * These are part of the end-user interface, used to report errors, etc.
+ *
+ * [Location] objects should be created using base-1 indexes for each position
+ * since they are targeted at the end user and so follow [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+ *
+ * We currently enforce this 1-based rule simply using doc since these are created once, in this file,
+ * as part of Lexing in [SourceScanner.currentLocation].  If/when we hit off-by-1 errors because of
+ * this trade-off [Location]s, we'll see if we can better formalize/guardrail this
+ */
 data class Location(
+    /**
+     * Line where this location starts (counting lines starting at 1, not zero)
+     */
     val firstLine: Int,
+    /**
+     * Column of [firstLine] where this location starts (counting columns starting at 1, not zero)
+     */
     val firstColumn: Int,
+    /**
+     * Line where this location ends (counting lines starting at 1, not zero)
+     */
     val lastLine: Int,
+    /**
+     * Column of [lastLine] where this location ends (counting columns starting at 1, not zero)
+     */
     val lastColumn: Int
 )
 

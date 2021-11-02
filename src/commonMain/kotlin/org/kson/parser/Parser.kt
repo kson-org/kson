@@ -254,6 +254,11 @@ private class TokenScanner(private val source: List<Token>) {
         return droppedLexemeLocation
     }
 
+    /**
+     * Return the [Location] in the underlying source file of the currently selected
+     * sequence of tokens.  Note that these [Location]s are pure passthroughs to the
+     * [Location]s of the underlying tokens.
+     */
     private fun currentLocation(): Location {
         val startTokenLocation = source[selectionStartOffset].lexeme.location
         val endTokenLocation = source[selectionEndOffset].lexeme.location
