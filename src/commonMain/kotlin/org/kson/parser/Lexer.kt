@@ -40,6 +40,8 @@ private const val EOF: Char = '\u0000'
 
 /**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
+ *
+ * This is similar to [TokenScanner] in design, but distinct enough to stand alone
  */
 private class SourceScanner(private val source: String) {
     private var selectionStartOffset = 0

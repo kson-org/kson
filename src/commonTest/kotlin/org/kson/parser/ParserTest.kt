@@ -8,15 +8,18 @@ import org.kson.ast.KsonRoot
 class ParserTest {
 
     /**
-     * Assertion helper for testing [source] produces the AST described by [expectedAstDebugPrint]
+     * Assertion helper for testing that [source] parses without error and produces the AST described by
+     * [expectedSourceFromAst] (this often looks like a truism, ie. `key: val` parses to `key: val`, but it's
+     * an easy/quick/clear way to quickly produce platform- and implementation-agnostic tests that ensure
+     * AST parsing is correct)
      *
      * @param source is the kson source to parse into a [KsonRoot]
-     * @param expectedAstDebugPrint the expected [KsonRoot.debugPrint] output for the parsed [source]
+     * @param expectedSourceFromAst the expected [KsonRoot.toKsonSource] output for the parsed [source]
      * @param message optionally pass a custom failure message for this assertion
      */
     private fun assertParsesTo(
         source: String,
-        expectedAstDebugPrint: String,
+        expectedSourceFromAst: String,
         message: String? = null
     ) {
         val messageSink = MessageSink()
@@ -25,8 +28,8 @@ class ParserTest {
 
         assertFalse(messageSink.hasErrors(), "Should not have parsing errors, got:\n\n" + messageSink.print())
         assertEquals(
-            expectedAstDebugPrint,
-            parseResult.debugPrint(0),
+            expectedSourceFromAst,
+            parseResult.toKsonSource(0),
             message
         )
     }
