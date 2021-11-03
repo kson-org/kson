@@ -54,9 +54,9 @@ class MessageSink {
 
     fun print(): String {
         return messages.map {
-            val base1Location = it.location.asBase1Indexed()
-            "Error:${base1Location.firstLine}.${base1Location.firstColumn}" +
-                    "\u2013${base1Location.lastLine}.${base1Location.lastColumn}, ${
+            val location = it.location
+            "Error:${location.firstLine}.${location.firstColumn}" +
+                    "\u2013${location.lastLine}.${location.lastColumn}, ${
                         it.message.format(
                             *it.args
                         )

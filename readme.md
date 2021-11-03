@@ -1,5 +1,10 @@
 # Kson: Kson Structured Object Notion
 
+TODO document the language, remembering to clearly note:
+- string escapes
+- embed block escapes
+- ... todo other stuff
+
 ### Development setup
 
 * Clone this repo, then run `./gradlew check` in its root dir to validate everything builds and runs correctly.
