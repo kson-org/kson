@@ -63,6 +63,15 @@ enum class Message {
         override fun doFormat(parsedArgs: Map<String, String?>): String {
             return "Unterminated string"
         }
+    },
+    DANGLING_EXP_INDICATOR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Dangling exponent indicator"
+        }
     };
 
     /**
