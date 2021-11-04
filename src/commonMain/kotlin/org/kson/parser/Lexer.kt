@@ -416,24 +416,27 @@ class Lexer(source: String, private val messageSink: MessageSink) {
     }
 
     private fun number() {
+        // Consume the whole part of the decimal-formatted number
+        // NOTE: numbers with leading 0's are still treated as decimal (not octal)
         while (isDigit(sourceScanner.peek())) sourceScanner.advance()
 
-        // Look for a fractional part
+        // Consume an optional fractional part (following a decimal point)
         if (sourceScanner.peek() == '.' && isDigit(sourceScanner.peekNext())) {
-            // Consume the "."
+            // Consume the decimal point
             sourceScanner.advance()
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()
         }
 
-        // Look for numbers with an exponent part (ex: 1.74e22, 2.801E12, 4.11e-12)
+        // Consume optional exponent part (ex: 1.74e22, 2.801E12, 4.11e-12, 1e16)
         if (sourceScanner.peek() == 'E' || sourceScanner.peek() == 'e') {
-            // consume the 'e'
+            // Consume the 'E' or 'e'
             sourceScanner.advance()
             if (sourceScanner.peek() == '-' || sourceScanner.peek() == '+') {
-                // consume the negative (or less common positive) exponent sign
+                // Consume the optional exponent sign
                 sourceScanner.advance()
             }
             if (!isDigit(sourceScanner.peek())) {
+                // Double.parseDouble considers a trailing 'E' without an exponent part to be a NumberFormatException
                 messageSink.error(sourceScanner.dropLexeme(), Message.DANGLING_EXP_INDICATOR)
                 return
             }
@@ -441,12 +444,24 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         }
 
         val numberLexeme = sourceScanner.extractLexeme()
-        try {
-            addToken(TokenType.NUMBER, numberLexeme, numberLexeme.text.toDouble())
-        } catch (e: NumberFormatException) {
-            messageSink.error(sourceScanner.dropLexeme(), Message.UNPARSEABLE_NUMBER, e.message)
-            return
-        }
+
+        /* numberLexeme is now made up of three parts:
+         * * one or more digits (required, but may be 0) representing the whole part;
+         * * (optional) a decimal point, which is required to be followed by digits representing the fractional part;
+         * * (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
+         *   representing the exponent part
+         *
+         * This all matches both the JSON grammar and the expectations of Java's double parser, so we'll forward parsing
+         * on to that.
+         *
+         * The parseDouble function throws a NumberFormatException which we aren't catching here, allowing it to bubble
+         * out as a RuntimeException to loudly error when/if a new edge case is found.
+         *
+         * See also java.lang.Double.parseDouble and jdk.internal.math.FloatingDecimal.ASCIIToBinaryBuffer.doubleValue
+         */
+        val parsedDouble = numberLexeme.text.toDouble()
+
+        addToken(TokenType.NUMBER, numberLexeme, parsedDouble)
     }
 
     /**
