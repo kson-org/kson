@@ -1,3 +1,8 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
+import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+
 plugins {
     kotlin("multiplatform") version "1.5.31"
 }
@@ -7,6 +12,23 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+
+tasks {
+    withType<KotlinJvmTest> {
+        testLogging.showStandardStreams = true
+        testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
+    }
+
+    withType<KotlinJsTest> {
+        testLogging.showStandardStreams = true
+        testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
+    }
+
+    withType<KotlinNativeTest> {
+        testLogging.showStandardStreams = true
+        testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
+    }
 }
 
 kotlin {
