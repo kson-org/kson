@@ -1,0 +1,57 @@
+version: 2.1
+
+orbs:
+  # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
+  # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
+  browser-tools: circleci/browser-tools@1.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      # Choose the `-browsers variant` of the openjdk 11 image, see https://circleci.com/developer/images/image/cimg/openjdk#browsers
+      # for details
+      - image: circleci/openjdk:11-browsers
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      # Install Chrome according to https://circleci.com/developer/orbs/orb/circleci/browser-tools#usage-install_chrome
+      - browser-tools/install-chrome
+      - checkout
+      - run: |
+          java --version
+          google-chrome --version
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle.kts" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      # installed needed native dependency on Linux
+      - run: sudo apt install libncurses5
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle.kts" }}
+
+      # run tests!
+      - run: ./gradlew check
