@@ -6,5 +6,5 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
-# No need to share run configurations
-runConfigurations.xml
+
+## NOTE: prefer editing the root .gitnore to this one.  See the "Intellij exceptions" section there.
