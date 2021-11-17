@@ -29,6 +29,12 @@ class LexerTest {
         val eof = actualTokenTypes.removeLast()
         if (eof != EOF) {
             throw Exception("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
+        } else {
+            val eofToken = actualTokens.last()
+
+            // ensure EOF renders how we want when we render token lists to strings
+            assertEquals("", eofToken.lexeme.text, "EOF Token's raw text should be empty (can't render an EOF)")
+            assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
         }
 
         assertFalse(messageSink.hasErrors(), "Should not have lexing errors, got:\n\n" + messageSink.print())
