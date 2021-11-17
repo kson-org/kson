@@ -33,5 +33,5 @@ expect fun getPlatformShim(): PlatformShim
  * Custom [TODO]-style exception for marking platform-specific unimplemented (yet!) behavior
  */
 @Suppress("FunctionName") // allow the all-caps here
-inline fun PLATFORM_TODO(): Nothing =
+fun PLATFORM_TODO(): Nothing =
     throw NotImplementedError("This operation is not supported on this platform, but is planned for the future")
