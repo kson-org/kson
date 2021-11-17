@@ -1,14 +1,17 @@
 package org.kson
 
 import org.kson.ast.KsonRoot
-import org.kson.parser.Lexer
-import org.kson.parser.MessageSink
-import org.kson.parser.Parser
+import org.kson.parser.*
 
 class Kson {
-    fun parse(source: String): KsonRoot {
-        val messageSink = MessageSink()
-        val tokens = Lexer(source, messageSink).tokenize()
-        return Parser(tokens).parse()
+    companion object {
+        fun parse(source: String): ParseResult {
+            val messageSink = MessageSink()
+            val tokens = Lexer(source, messageSink).tokenize()
+            val ast = Parser(tokens).parse()
+            return ParseResult(ast, tokens, messageSink.loggedMessages())
+        }
     }
 }
+
+data class ParseResult(val ast: KsonRoot, val lexedTokens: List<Token>, val messages: List<LoggedMessage>)

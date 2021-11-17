@@ -8,11 +8,11 @@ class KsonTest {
     fun sanityCheck() {
         // TODO make this placeholder a real test
         val source = "some: source"
-        val result = Kson().parse(source)
+        val result = Kson.parse(source)
         assertEquals("""
             {
               some: source
             }
-        """.trimIndent(), result.toKsonSource())
+        """.trimIndent(), result.ast.toKsonSource())
     }
 }
