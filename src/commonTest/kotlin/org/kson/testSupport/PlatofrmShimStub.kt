@@ -24,13 +24,18 @@ open class PlatformShimStub(interactiveInput: String? = null) : PlatformShim {
     }
 
     override fun exitSuccess(): Nothing {
-        throw Success()
+        throw SimulatedSuccessExit()
     }
 
     override fun exitFailure(): Nothing {
-        throw Failure()
+        throw SimulatedFailureExit()
     }
 
-    class Success: RuntimeException("Fake success exit")
-    class Failure: RuntimeException("Fake failure exit")
+    /**
+     * Since our exit methods return [`Nothing`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-nothing.html),
+     * we must stub them with exceptions
+     */
+    abstract class SimulatedExit(msg: String): RuntimeException(msg)
+    class SimulatedSuccessExit: SimulatedExit("Fake success exit")
+    class SimulatedFailureExit: SimulatedExit("Fake failure exit")
 }

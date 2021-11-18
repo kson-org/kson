@@ -22,12 +22,23 @@ class CommandLineInterfaceTest {
             cliOutput.appendLine(it)
         }
 
-        when (expectedExit) {
-            ExpectedExit.SUCCESS -> assertFailsWith<PlatformShimStub.Success> {
-                cli.run(args)
-            }
-            ExpectedExit.FAILURE -> assertFailsWith<PlatformShimStub.Failure> {
-                cli.run(args)
+        try {
+            cli.run(args)
+        } catch (exit: PlatformShimStub.SimulatedExit) {
+            val formattedCliOutput = cliOutput.toString().split("\n").joinToString("\n\t", "\t")
+            when (expectedExit) {
+                ExpectedExit.SUCCESS -> {
+                    assertTrue(
+                        exit is PlatformShimStub.SimulatedSuccessExit,
+                        "Did not exit successfully as expected.  Cli output was:\n$formattedCliOutput"
+                    )
+                }
+                ExpectedExit.FAILURE -> {
+                    assertTrue(
+                        exit is PlatformShimStub.SimulatedFailureExit,
+                        "Did not exit with failure as expected.  Cli output was:\n$formattedCliOutput"
+                    )
+                }
             }
         }
 
@@ -112,5 +123,12 @@ class CommandLineInterfaceTest {
             """.trimIndent(), false,
             "should get file read error"
         )
+    }
+
+    @Test
+    fun testFailedParseExitStatus() {
+        testCliRun(emptyArray(),
+            // this unclosed ``` will definitely fail parsing
+            PlatformShimStub("```"), ExpectedExit.FAILURE)
     }
 }

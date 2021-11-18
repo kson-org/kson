@@ -10,7 +10,7 @@ import org.kson.mpp.PlatformShim
  */
 class CommandLineInterface(private val platformShim: PlatformShim, private val out: (String) -> Unit) {
     fun run(args: Array<String>) {
-        if (args.size > 1) {
+        val ksonSource = if (args.size > 1) {
             out("Usage: kson [file]")
             platformShim.exitFailure()
         } else if (args.size == 1) {
@@ -21,7 +21,7 @@ class CommandLineInterface(private val platformShim: PlatformShim, private val o
                 out("Failed to read file at path: $ksonFilePath")
                 platformShim.exitFailure()
             }
-            out(parseAndFormat(ksonSourceFileContents))
+            ksonSourceFileContents
         } else {
             out("--- Enter some kson source (Ctrl-D to finish): ---\n")
             val inputBuilder = StringBuilder()
@@ -36,14 +36,18 @@ class CommandLineInterface(private val platformShim: PlatformShim, private val o
                 }
             }
 
-            out(parseAndFormat(inputBuilder.toString()))
+            inputBuilder.toString()
         }
-        platformShim.exitSuccess()
-    }
-}
 
-private fun parseAndFormat(ksonSource: String): String {
-    return formatParseResult(Kson.parse(ksonSource))
+        val parseResult = Kson.parse(ksonSource)
+        out(formatParseResult(parseResult))
+
+        if (parseResult.hasErrors()) {
+            platformShim.exitFailure()
+        } else {
+            platformShim.exitSuccess()
+        }
+    }
 }
 
 private fun formatParseResult(parseResult: ParseResult): String {
