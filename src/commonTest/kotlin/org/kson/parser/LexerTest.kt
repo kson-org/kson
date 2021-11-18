@@ -37,7 +37,10 @@ class LexerTest {
             assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
         }
 
-        assertFalse(messageSink.hasErrors(), "Should not have lexing errors, got:\n\n" + messageSink.print())
+        assertFalse(
+            messageSink.hasErrors(),
+            "Should not have lexing errors, got:\n\n" + LoggedMessage.print(messageSink.loggedMessages())
+        )
         assertEquals(
             expectedTokenTypes,
             actualTokenTypes,
