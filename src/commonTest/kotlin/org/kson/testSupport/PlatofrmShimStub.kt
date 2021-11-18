@@ -9,13 +9,18 @@ import org.kson.mpp.PlatformShim
  */
 open class PlatformShimStub(interactiveInput: String? = null) : PlatformShim {
     private val linesToRead = interactiveInput?.split("\n")?.toMutableList()
-    override fun readLine(): String? {
+
+    /**
+     * Customize the lines returned by [readLine] by passing a [String] as `interactiveInput` in the constructor
+     */
+    final override fun readLine(): String? {
         if (linesToRead == null) {
             throw RuntimeException("No interactiveInput provided in constructor, so should call readline()")
         }
         if (linesToRead.isEmpty()) {
             return null
         }
+
         return linesToRead.removeFirst()
     }
 
