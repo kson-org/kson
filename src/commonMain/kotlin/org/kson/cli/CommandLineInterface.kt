@@ -59,7 +59,7 @@ private fun formatParseResult(parseResult: ParseResult): String {
         |]
         |
         |serializedAst: ```
-        |${parseResult.ast.toKsonSource()}
+        |${parseResult.ast?.toKsonSource()}
         |```
     """.trimMargin()
 }
