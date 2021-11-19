@@ -1,7 +1,5 @@
 package org.kson.parser
 
-import org.kson.ast.KsonRoot
-import org.kson.ast.NullNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
