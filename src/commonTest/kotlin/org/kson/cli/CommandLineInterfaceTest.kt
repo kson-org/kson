@@ -16,7 +16,11 @@ class CommandLineInterfaceTest {
      *
      * Configure the input by customizing the given [platformShimStub]
      */
-    private fun testCliRun(args: Array<String>, platformShimStub: PlatformShimStub, expectedExit: ExpectedExit): String {
+    private fun testCliRun(
+        args: Array<String>,
+        platformShimStub: PlatformShimStub,
+        expectedExit: ExpectedExit
+    ): String {
         val cliOutput = StringBuilder()
         val cli = CommandLineInterface(platformShimStub) {
             cliOutput.appendLine(it)
