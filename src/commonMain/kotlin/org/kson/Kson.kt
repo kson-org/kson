@@ -47,7 +47,7 @@ data class ParseResult(
     val messages = messageSink.loggedMessages()
 
     /**
-     * True if the input source was unpassable.  [messages] will contain errors in this case.
+     * True if the input source could not be parsed.  [messages] will contain errors in this case.
      */
     fun hasErrors(): Boolean {
         return messageSink.hasErrors()
