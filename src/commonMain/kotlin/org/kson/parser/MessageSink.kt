@@ -9,6 +9,22 @@ data class LoggedMessage(
     val message: Message,
     val args: Array<out String?>
 ) {
+    companion object {
+        /**
+         * Print a user-friendly version of a [List] of [LoggedMessage]
+         */
+        fun print(messages: List<LoggedMessage>): String {
+            return messages.map {
+                val location = it.location
+                "Error:${location.firstLine}.${location.firstColumn}" +
+                        "\u2013${location.lastLine}.${location.lastColumn}, ${
+                            it.message.format(
+                                *it.args
+                            )
+                        }"
+            }.joinToString("\n")
+        }
+    }
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -50,17 +66,5 @@ class MessageSink {
      */
     fun loggedMessages(): ImmutableList<LoggedMessage> {
         return messages.toImmutableList()
-    }
-
-    fun print(): String {
-        return messages.map {
-            val location = it.location
-            "Error:${location.firstLine}.${location.firstColumn}" +
-                    "\u2013${location.lastLine}.${location.lastColumn}, ${
-                        it.message.format(
-                            *it.args
-                        )
-                    }"
-        }.joinToString("\n")
     }
 }

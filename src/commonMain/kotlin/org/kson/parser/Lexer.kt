@@ -190,7 +190,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             scan()
         }
 
-        tokens.add(Token(TokenType.EOF, Lexeme("", Location(-1, -1, -1, -1)), EOF))
+        tokens.add(Token(TokenType.EOF, Lexeme("", Location(-1, -1, -1, -1)), ""))
         return tokens.toImmutableList()
     }
 

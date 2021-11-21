@@ -28,5 +28,13 @@ target
 build
 # gradlew generated files
 .gradle
-# intellij "artifact" configs
+
+##
+# Intellij exceptions.  In addition to the defaults provided by Intellij in `.idea/.gitignore`,
+#      we exclude these too-often/mysteriously changing config files
+# no need to share run configurations
+.idea/runConfigurations.xml
+# all "artifact" configs get excluded
 .idea/artifacts
+# uiDesigner.xml changes often and for no apparent reason
+.idea/uiDesigner.xml
