@@ -14,13 +14,11 @@ data class LoggedMessage(
          * Print a user-friendly version of a [List] of [LoggedMessage]
          */
         fun print(messages: List<LoggedMessage>): String {
-            return messages.map {
-                val location = it.location
+            return messages.map { message ->
+                val location = message.location
                 "Error:${location.firstLine}.${location.firstColumn}" +
-                        "\u2013${location.lastLine}.${location.lastColumn}, ${
-                            it.message.format(
-                                *it.args
-                            )
+                        " - ${location.lastLine}.${location.lastColumn}, ${
+                            message.message.format(*message.args)
                         }"
             }.joinToString("\n")
         }
