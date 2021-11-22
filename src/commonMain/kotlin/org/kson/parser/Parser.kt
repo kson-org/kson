@@ -32,14 +32,21 @@ class Parser(tokens: List<Token>) {
     /**
      * kson -> (objectInternals | value) EOF ;
      */
-    fun parse(): KsonRoot {
+    fun parse(): KsonRoot? {
         val objectInternals = objectInternals()
         if (objectInternals != null) {
             return KsonRoot(ObjectDefinitionNode(internalsNode = objectInternals))
         }
 
-        return KsonRoot(value() ?: TODO("make this a user-friendly parse error"))
+        val parsedValue = value()
         // parser todo validate we're at EOF to ensure we've parsed everything
+
+        if (parsedValue != null) {
+            return KsonRoot(parsedValue)
+        } else {
+            // invalid KSON cannot be parsed into a useful AST
+            return null
+        }
     }
 
     /**

@@ -16,6 +16,6 @@ class ParserTest {
     @Test
     fun testSanityCheckParse() {
         val nullTokenStream = listOf(Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4)), "null"))
-        assertEquals(Parser(nullTokenStream).parse().toKsonSource(0), "null")
+        assertEquals(Parser(nullTokenStream).parse()?.toKsonSource(0), "null")
     }
 }
