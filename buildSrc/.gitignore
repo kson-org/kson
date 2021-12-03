@@ -1,0 +1,32 @@
+# Always-ignore extensions for common app-generated files
+*.diff
+*.err
+*.orig
+*.log
+*.rej
+*.swo
+*.swp
+*.vi
+*~
+*.sass-cache
+*.iml
+*.md.html
+
+# OS or Editor folders
+.DS_Store
+.cache
+.project
+.settings
+.tmproj
+nbproject
+Thumbs.db
+
+## Directories to ignore
+# build directories
+out
+target
+build
+# gradlew generated files
+.gradle
+# intellij settings
+.idea
