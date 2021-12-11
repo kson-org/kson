@@ -23,5 +23,6 @@ tasks {
 }
 
 dependencies {
+    implementation(gradleApi())
     testImplementation(kotlin("test"))
 }

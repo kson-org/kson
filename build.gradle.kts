@@ -14,18 +14,25 @@ repositories {
     mavenCentral()
 }
 
+val generateJsonTestSuiteTask = "generateJsonTestSuite"
+
 tasks {
+    register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
+
     withType<KotlinJvmTest> {
+        dependsOn(generateJsonTestSuiteTask)
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
 
     withType<KotlinJsTest> {
+        dependsOn(generateJsonTestSuiteTask)
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
 
     withType<KotlinNativeTest> {
+        dependsOn(generateJsonTestSuiteTask)
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
