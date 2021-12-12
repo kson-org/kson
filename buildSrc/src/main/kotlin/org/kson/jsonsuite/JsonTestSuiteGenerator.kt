@@ -39,14 +39,15 @@ class JsonTestSuiteGenerator(
             ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded")
 
         generatedTestPath.parent.toFile().mkdirs()
+        val testDataList = testFiles.map {
+            JsonTestData(
+                it.nameWithoutExtension,
+                // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
+                it.readText(Charsets.UTF_8), it.absolutePath
+            )
+        }.sortedBy { it.rawTestName }
         generatedTestPath.toFile()
-            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testFiles.map {
-                JsonTestData(
-                    it.nameWithoutExtension,
-                    // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
-                    it.readText(Charsets.UTF_8), it.absolutePath
-                )
-            }))
+            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
     }
 
     /**
