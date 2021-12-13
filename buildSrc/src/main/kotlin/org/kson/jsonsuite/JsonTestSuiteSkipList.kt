@@ -19,15 +19,6 @@ class JsonTestSuiteSkipList {
 }
 
 private val jsonTestSuiteSkipList = setOf(
-    // TODO: https://github.com/kson-org/kson/issues/22 Enable "y_" tests
-    "y_number_double_close_to_zero.json",
-    "y_number_minus_zero.json",
-    "y_number_negative_int.json",
-    "y_number_negative_one.json",
-    "y_number_negative_zero.json",
-    "y_object_extreme_numbers.json",
-    "y_structure_lonely_negative_real.json",
-
     // TODO: https://github.com/kson-org/kson/issues/21 Enable more tests that require parse failures
     "n_array_1_true_without_comma.json",
     "n_array_a_invalid_utf8.json",

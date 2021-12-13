@@ -237,7 +237,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             }
             else -> {
                 when {
-                    isDigit(char) -> {
+                    char == '-' || isDigit(char) -> {
                         number()
                     }
                     // identifiers start with an alphabetic character or an underscore
