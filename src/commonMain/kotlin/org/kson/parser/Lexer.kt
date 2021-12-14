@@ -177,7 +177,8 @@ data class Location(
         fun merge(startLocation: Location, endLocation: Location): Location {
             if (endLocation != EofLocation &&
                 (startLocation.firstLine > endLocation.firstLine ||
-                        startLocation.firstColumn > endLocation.firstColumn)) {
+                        startLocation.firstColumn > endLocation.firstColumn)
+            ) {
                 throw RuntimeException("`startLocation` must be before `endLocation`")
             }
             return Location(
@@ -396,7 +397,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
              *   matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional slashes
              *   in the output
              */
-            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"),"`$1``")
+            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"), "`$1``")
         } else {
             trimmedEmbedBlockContent
         }
