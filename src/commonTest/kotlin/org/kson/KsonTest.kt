@@ -269,4 +269,11 @@ class KsonTest {
     fun testUnclosedEmbedTicksError() {
         assertParserRejectsSource("```\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
+
+    @Test
+    fun testInvalidTrailingKson() {
+        assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(Message.EOF_NOT_REACHED))
+        assertParserRejectsSource("{ key: value } 4.5", listOf(Message.EOF_NOT_REACHED))
+        assertParserRejectsSource("key: value illegal extra identifiers", listOf(Message.EOF_NOT_REACHED))
+    }
 }

@@ -1,6 +1,7 @@
 package org.kson.parser
 
 import org.kson.ast.*
+import org.kson.parser.messages.Message
 
 /**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
@@ -26,20 +27,33 @@ import org.kson.ast.*
  * See [section 6.2 here](https://craftinginterpreters.com/parsing-expressions.html#recursive-descent-parsing)
  * for guidance on the implementation approach.
  */
-class Parser(tokens: List<Token>) {
+class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
     private val tokenScanner = TokenScanner(tokens)
 
     /**
      * kson -> (objectInternals | value) EOF ;
      */
-    fun parse(): KsonRoot {
+    fun parse(): KsonRoot? {
         val objectInternals = objectInternals()
         if (objectInternals != null) {
-            return KsonRoot(ObjectDefinitionNode(internalsNode = objectInternals))
+            return if (hasUnexpectedTrailingContent()) {
+                null
+            } else {
+                KsonRoot(ObjectDefinitionNode(internalsNode = objectInternals))
+            }
         }
 
-        return KsonRoot(value() ?: TODO("make this a user-friendly parse error"))
-        // parser todo validate we're at EOF to ensure we've parsed everything
+        val value = value()
+        if (value != null) {
+            return if (hasUnexpectedTrailingContent()) {
+                null
+            } else {
+                KsonRoot(value)
+            }
+        }
+
+        // unable to parse
+        return null
     }
 
     /**
@@ -93,10 +107,12 @@ class Parser(tokens: List<Token>) {
                 ""
             }
 
+            // drop the BRACE_L
+            tokenScanner.drop()
+            val objectInternals = objectInternals()
             // parser todo syntax error if no brace/malformed object
             // drop the BRACE_R
             tokenScanner.drop()
-            val objectInternals = objectInternals()
             return ObjectDefinitionNode(objectName, objectInternals)
         } else {
             // not an objectDefinition
@@ -218,6 +234,30 @@ class Parser(tokens: List<Token>) {
             return null
         }
     }
+
+    /**
+     * Returns true if there is still un-parsed content in [tokenScanner], logging a message
+     * to [messageSink] if it finds unexpected content.  Should only be called to validate the state
+     * of [tokenScanner] after a successful parse
+     */
+    private fun hasUnexpectedTrailingContent(): Boolean {
+        if (tokenScanner.peek() == TokenType.EOF) {
+            // all good: every pre-EOF token has been consumed
+            return false
+        } else {
+            // mark the unexpected content
+            val firstBadTokenLocation = tokenScanner.currentLocation()
+            var lastBadTokenLocation = tokenScanner.drop()
+            while (tokenScanner.peek() != TokenType.EOF) {
+                lastBadTokenLocation = tokenScanner.drop()
+            }
+            messageSink.error(
+                Location.merge(firstBadTokenLocation, lastBadTokenLocation),
+                Message.EOF_NOT_REACHED
+            )
+            return true
+        }
+    }
 }
 
 /**
@@ -256,7 +296,7 @@ private class TokenScanner(private val source: List<Token>) {
      * sequence of tokens.  Note that these [Location]s are pure passthroughs to the
      * [Location]s of the underlying tokens.
      */
-    private fun currentLocation(): Location {
+    fun currentLocation(): Location {
         val startTokenLocation = source[selectionStartOffset].lexeme.location
         val endTokenLocation = source[selectionEndOffset].lexeme.location
         return Location(

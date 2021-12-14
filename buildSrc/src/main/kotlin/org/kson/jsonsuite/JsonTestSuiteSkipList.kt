@@ -19,6 +19,13 @@ class JsonTestSuiteSkipList {
 }
 
 private val jsonTestSuiteSkipList = setOf(
+    // TODO: https://github.com/kson-org/kson/issues/22 Enable more tests that require parse failures
+    "y_object.json",
+    "y_object_duplicated_key.json",
+    "y_object_duplicated_key_and_value.json",
+    "y_object_extreme_numbers.json",
+    "y_object_long_strings.json",
+
     // TODO: https://github.com/kson-org/kson/issues/21 Enable more tests that require parse failures
     "n_array_1_true_without_comma.json",
     "n_array_a_invalid_utf8.json",
