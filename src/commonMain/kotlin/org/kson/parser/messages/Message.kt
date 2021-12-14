@@ -64,6 +64,24 @@ enum class Message {
             return "Unexpected trailing content.  The previous content parsed as a complete Kson document."
         }
     },
+    LIST_NO_CLOSE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Unclosed list"
+        }
+    },
+    OBJECT_NO_CLOSE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Unclosed object"
+        }
+    },
     STRING_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return emptyList()

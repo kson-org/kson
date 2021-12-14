@@ -111,12 +111,18 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
                 ""
             }
 
-            // drop the BRACE_L
-            tokenScanner.drop()
+            val objectStartLocation = tokenScanner.drop()
             val objectInternals = objectInternals()
-            // parser todo syntax error if no brace/malformed object
-            // drop the BRACE_R
-            tokenScanner.drop()
+            if (tokenScanner.peek() == TokenType.BRACE_R) {
+                // drop the closing brace
+                tokenScanner.drop()
+            } else {
+                messageSink.error(
+                    Location.merge(objectStartLocation, tokenScanner.currentLocation()),
+                    Message.OBJECT_NO_CLOSE
+                )
+                return null
+            }
             return ObjectDefinitionNode(objectName, objectInternals)
         } else {
             // not an objectDefinition
@@ -130,13 +136,12 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
     private fun list(): ListNode? {
         if (tokenScanner.peek() == TokenType.BRACKET_L) {
             // drop the BRACKET_L
-            tokenScanner.drop()
+            val listStartLocation = tokenScanner.drop()
 
             val values = ArrayList<ValueNode>()
             while (tokenScanner.peek() != TokenType.BRACKET_R) {
                 val value = value()
-                    ?:
-                    if (tokenScanner.peek() == TokenType.COMMA) {
+                    ?: if (tokenScanner.peek() == TokenType.COMMA) {
                         // drop the COMMA
                         tokenScanner.drop()
                         continue
@@ -147,9 +152,16 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
                 values.add(value)
             }
 
-            // parser todo syntax error if no bracket/malformed list
-            // drop the BRACKET_R
-            tokenScanner.drop()
+            if (tokenScanner.peek() == TokenType.BRACKET_R) {
+                // drop the BRACKET_R
+                tokenScanner.drop()
+            } else {
+                messageSink.error(
+                    Location.merge(listStartLocation, tokenScanner.currentLocation()),
+                    Message.LIST_NO_CLOSE
+                )
+                return null
+            }
             return ListNode(values)
         } else {
             // not a list

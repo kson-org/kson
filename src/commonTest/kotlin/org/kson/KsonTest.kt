@@ -304,6 +304,18 @@ class KsonTest {
     }
 
     @Test
+    fun testUnclosedListError() {
+        assertParserRejectsSource("[", listOf(Message.LIST_NO_CLOSE))
+        assertParserRejectsSource("[1,2,", listOf(Message.LIST_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnclosedObjectError() {
+        assertParserRejectsSource("{", listOf(Message.OBJECT_NO_CLOSE))
+        assertParserRejectsSource("{ key: value   ", listOf(Message.OBJECT_NO_CLOSE))
+    }
+
+    @Test
     fun testInvalidTrailingKson() {
         assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(Message.EOF_NOT_REACHED))
         assertParserRejectsSource("{ key: value } 4.5", listOf(Message.EOF_NOT_REACHED))
