@@ -9,7 +9,7 @@ import org.kson.parser.messages.Message
  *
  * ```
  * kson -> (objectInternals | value) EOF ;
- * objectInternals -> ( keyword value )* ;
+ * objectInternals -> ( keyword value ","? )* ;
  * value -> objectDefinition
  *        | list
  *        | literal
@@ -57,8 +57,7 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
     }
 
     /**
-     * objectInternals -> ( keyword value )* ;
-     * parser todo need to support an optional comma here
+     * objectInternals -> ( keyword value ","? )* ;
      */
     private fun objectInternals(): ObjectInternalsNode? {
         val properties = ArrayList<PropertyNode>()
@@ -67,6 +66,11 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
         while (true) {
             val keywordNode = keyword() ?: break
             val valueNode = value() ?: TODO("make this a user-friendly parse error")
+            if (tokenScanner.peek() == TokenType.COMMA) {
+                // drop the optional COMMA
+                tokenScanner.drop()
+            }
+
             properties.add(
                 PropertyNode(
                     keywordNode,

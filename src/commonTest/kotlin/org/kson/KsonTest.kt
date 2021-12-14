@@ -237,6 +237,39 @@ class KsonTest {
     }
 
     @Test
+    fun testObjectSourceOptionalComma() {
+        val expectRootObjectAst = """
+            {
+              key: val
+              "string key": 66.3
+              hello: "y'all"
+            }
+            """.trimIndent()
+
+        assertParsesTo(
+            """
+                {
+                    key: val
+                    "string key": 66.3,
+                    hello: "y'all",
+                }
+            """,
+            expectRootObjectAst,
+            "should parse object ignoring optional commas, even trailing"
+        )
+
+        assertParsesTo(
+            """
+                key: val
+                "string key": 66.3,
+                hello: "y'all"
+            """,
+            expectRootObjectAst,
+            "should parse ignoring optional commas, even in brace-free root objects"
+        )
+    }
+
+    @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
             """
