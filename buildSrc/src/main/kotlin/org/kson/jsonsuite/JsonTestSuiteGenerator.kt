@@ -29,8 +29,10 @@ class JsonTestSuiteGenerator(
     fun generate() {
         // sanity check that we're actually running at the project root
         if (!buildSrcPath.toFile().exists()) {
-            throw RuntimeException("Kson project buildSrc/ directory not found.  " +
-                    "Is parameter `projectRoot` correct?  Current value: $projectRoot")
+            throw RuntimeException(
+                "Kson project buildSrc/ directory not found.  " +
+                        "Is parameter `projectRoot` correct?  Current value: $projectRoot"
+            )
         }
 
         runCommandLineSetup()
@@ -133,7 +135,7 @@ ${
                     """
         |     */
         |""".trimMargin()
-            
+
             val theTest = """
         |    @Test
         |""".trimMargin() +
@@ -143,7 +145,7 @@ ${
                     "            \"\"\"" + it.testSource + "\"\"\"\n" +
                     "        )\n" +
                     "    }"
-            
+
             theComment + if (it.isSkipped) {
                 // comment out our skipped tests
                 theTest.split('\n').joinToString("\n//", "//")
