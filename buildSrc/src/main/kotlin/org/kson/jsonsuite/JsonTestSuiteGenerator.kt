@@ -24,7 +24,8 @@ class JsonTestSuiteGenerator(
     val testSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
     val testDefinitionFilesDir: Path = testSuiteRootDir.resolve("test_parsing")
 
-    val generatedTestPath: Path = sourceRoot.resolve(classPackage.replace('.', '/')).resolve("JsonSuiteTest.kt")
+    val generatedTestPath: Path =
+        projectRoot.resolve(sourceRoot).resolve(classPackage.replace('.', '/')).resolve("JsonSuiteTest.kt")
 
     fun generate() {
         // sanity check that we're actually running at the project root
