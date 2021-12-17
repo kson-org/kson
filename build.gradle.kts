@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
-    kotlin("multiplatform") version "1.5.31"
+    kotlin("multiplatform") version "1.6.0"
 }
 
 group = "org.kson"
@@ -14,7 +14,20 @@ repositories {
     mavenCentral()
 }
 
+val generateJsonTestSuiteTask = "generateJsonTestSuite"
+
 tasks {
+    register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
+
+    @Suppress("RemoveExplicitTypeArguments") // explicitly note we're configuring all `Task`s
+    withType<Task> {
+        // make every task except itself depend on generateJsonTestSuiteTask to
+        // ensure it's always up-to-date before any other build steps
+        if (name != generateJsonTestSuiteTask) {
+            dependsOn(generateJsonTestSuiteTask)
+        }
+    }
+
     withType<KotlinJvmTest> {
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
