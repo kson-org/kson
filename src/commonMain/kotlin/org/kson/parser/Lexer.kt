@@ -39,6 +39,11 @@ private val KEYWORDS =
 private const val EOF: Char = '\u0000'
 
 /**
+ * Use an "impossible" location (all character positions are positive numbers) to denote EOF
+ */
+private val EofLocation = Location(-1, -1, -1, -1)
+
+/**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  *
  * This is similar to [TokenScanner] in design, but distinct enough to stand alone
@@ -163,7 +168,28 @@ data class Location(
      * Column of [lastLine] where this location ends (counting columns starting at 1, not zero)
      */
     val lastColumn: Int
-)
+) {
+    companion object {
+        /**
+         * Merge two locations into a Location which spans from the beginning of [startLocation] to the end of
+         * [endLocation].  [startLocation] must be positioned before [endLocation]
+         */
+        fun merge(startLocation: Location, endLocation: Location): Location {
+            if (endLocation != EofLocation &&
+                (startLocation.firstLine > endLocation.firstLine ||
+                        startLocation.firstColumn > endLocation.firstColumn)
+            ) {
+                throw RuntimeException("`startLocation` must be before `endLocation`")
+            }
+            return Location(
+                startLocation.firstLine,
+                startLocation.firstLine,
+                endLocation.lastLine,
+                endLocation.lastColumn
+            )
+        }
+    }
+}
 
 data class Token(
     /**
@@ -190,7 +216,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             scan()
         }
 
-        tokens.add(Token(TokenType.EOF, Lexeme("", Location(-1, -1, -1, -1)), ""))
+        tokens.add(Token(TokenType.EOF, Lexeme("", EofLocation), ""))
         return tokens.toImmutableList()
     }
 
@@ -237,7 +263,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             }
             else -> {
                 when {
-                    isDigit(char) -> {
+                    char == '-' || isDigit(char) -> {
                         number()
                     }
                     // identifiers start with an alphabetic character or an underscore
@@ -371,7 +397,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
              *   matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional slashes
              *   in the output
              */
-            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"),"`$1``")
+            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"), "`$1``")
         } else {
             trimmedEmbedBlockContent
         }

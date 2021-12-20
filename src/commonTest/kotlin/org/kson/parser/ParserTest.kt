@@ -2,6 +2,7 @@ package org.kson.parser
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 /**
  * NOTE: most Kson parsing tests are done the more holistic level in [org.kson.KsonTest].  If/when we have
@@ -16,6 +17,8 @@ class ParserTest {
     @Test
     fun testSanityCheckParse() {
         val nullTokenStream = listOf(Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4)), "null"))
-        assertEquals(Parser(nullTokenStream).parse().toKsonSource(0), "null")
+        val ksonRoot = Parser(nullTokenStream, MessageSink()).parse()
+        assertNotNull(ksonRoot)
+        assertEquals(ksonRoot.toKsonSource(0), "null")
     }
 }

@@ -162,6 +162,16 @@ class LexerTest {
                 0.42e+2
                 42E+0
                 00042E0
+                -42
+                -42E0
+                -42e0
+                -4.2E1
+                -420E-1
+                -4200e-2
+                -0.42e2
+                -0.42e+2
+                -42E+0
+                -00042E0
             """,
             listOf(
                 Pair(NUMBER, 42.0),
@@ -173,7 +183,17 @@ class LexerTest {
                 Pair(NUMBER, 42.0),
                 Pair(NUMBER, 42.0),
                 Pair(NUMBER, 42.0),
-                Pair(NUMBER, 42.0)
+                Pair(NUMBER, 42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0),
+                Pair(NUMBER, -42.0)
             )
         )
 

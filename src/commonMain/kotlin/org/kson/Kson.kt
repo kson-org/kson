@@ -12,7 +12,7 @@ class Kson {
                 // parsing failed at the lexing stage
                 return ParseResult(null, tokens, messageSink)
             } else {
-                Parser(tokens).parse()
+                Parser(tokens, messageSink).parse()
             }
 
             return ParseResult(ast, tokens, messageSink)

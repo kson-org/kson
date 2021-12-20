@@ -237,6 +237,39 @@ class KsonTest {
     }
 
     @Test
+    fun testObjectSourceOptionalComma() {
+        val expectRootObjectAst = """
+            {
+              key: val
+              "string key": 66.3
+              hello: "y'all"
+            }
+            """.trimIndent()
+
+        assertParsesTo(
+            """
+                {
+                    key: val
+                    "string key": 66.3,
+                    hello: "y'all",
+                }
+            """,
+            expectRootObjectAst,
+            "should parse object ignoring optional commas, even trailing"
+        )
+
+        assertParsesTo(
+            """
+                key: val
+                "string key": 66.3,
+                hello: "y'all"
+            """,
+            expectRootObjectAst,
+            "should parse ignoring optional commas, even in brace-free root objects"
+        )
+    }
+
+    @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
             """
@@ -268,5 +301,24 @@ class KsonTest {
     @Test
     fun testUnclosedEmbedTicksError() {
         assertParserRejectsSource("```\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnclosedListError() {
+        assertParserRejectsSource("[", listOf(Message.LIST_NO_CLOSE))
+        assertParserRejectsSource("[1,2,", listOf(Message.LIST_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnclosedObjectError() {
+        assertParserRejectsSource("{", listOf(Message.OBJECT_NO_CLOSE))
+        assertParserRejectsSource("{ key: value   ", listOf(Message.OBJECT_NO_CLOSE))
+    }
+
+    @Test
+    fun testInvalidTrailingKson() {
+        assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(Message.EOF_NOT_REACHED))
+        assertParserRejectsSource("{ key: value } 4.5", listOf(Message.EOF_NOT_REACHED))
+        assertParserRejectsSource("key: value illegal extra identifiers", listOf(Message.EOF_NOT_REACHED))
     }
 }
