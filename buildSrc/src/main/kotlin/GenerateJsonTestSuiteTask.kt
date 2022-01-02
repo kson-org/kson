@@ -40,6 +40,7 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
         jsonTestSuiteGenerator.generate()
     }
 
+    @Internal
     override fun getDescription(): String? {
         return "Generates src/commonTest/kotlin/org/kson/parser/json/generated/JsonSuiteTest.kt"
     }
