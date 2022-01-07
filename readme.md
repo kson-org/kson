@@ -1,5 +1,7 @@
 # Kson: Kson Structured Object Notion
 
+<img src="assets/logo/kson_logo_blue.svg" alt="drawing" width="150"/>
+
 TODO document the language, remembering to clearly note:
 - string escapes
 - embed block escapes
