@@ -1,7 +1,7 @@
 package org.kson.jetbrains.services
 
 import com.intellij.openapi.project.Project
-import org.kson.jetbrains.MyBundle
+import org.kson.jetbrains.KsonBundle
 
 /**
  * todo jetbrains implement this
@@ -9,6 +9,6 @@ import org.kson.jetbrains.MyBundle
 class MyProjectService(project: Project) {
 
     init {
-        println(MyBundle.message("projectService", project.name))
+        println(KsonBundle.message("projectService", project.name))
     }
 }

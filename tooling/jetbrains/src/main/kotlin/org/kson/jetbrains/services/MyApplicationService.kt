@@ -1,6 +1,6 @@
 package org.kson.jetbrains.services
 
-import org.kson.jetbrains.MyBundle
+import org.kson.jetbrains.KsonBundle
 
 /**
  * todo jetbrains implement this
@@ -8,6 +8,6 @@ import org.kson.jetbrains.MyBundle
 class MyApplicationService {
 
     init {
-        println(MyBundle.message("applicationService"))
+        println(KsonBundle.message("applicationService"))
     }
 }

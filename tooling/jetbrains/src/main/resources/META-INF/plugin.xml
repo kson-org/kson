@@ -19,6 +19,11 @@
     ]]></description>
 
     <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Kson"
+                  implementationClass="org.kson.jetbrains.file.KsonFileType"
+                  fieldName="INSTANCE"
+                  language="org.kson.jetbrains"
+                  extensions="kson"/>
         <applicationService serviceImplementation="org.kson.jetbrains.services.MyApplicationService"/>
         <projectService serviceImplementation="org.kson.jetbrains.services.MyProjectService"/>
     </extensions>
