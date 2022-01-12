@@ -39,11 +39,6 @@ private val KEYWORDS =
 private const val EOF: Char = '\u0000'
 
 /**
- * Use an "impossible" location (all character positions are positive numbers) to denote EOF
- */
-private val EofLocation = Location(-1, -1, -1, -1)
-
-/**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  *
  * This is similar to [TokenScanner] in design, but distinct enough to stand alone
@@ -121,16 +116,14 @@ private class SourceScanner(private val source: String) {
     /**
      * Returns a [Location] object representing this [SourceScanner]'s current selection in [source]
      */
-    private fun currentLocation() =
-        /**
-         * note that we adjust our internal 0-based indexes to adhere to the 1-based
-         * interface of [Location].  See the doc on [Location] for details on this.
-         */
+    fun currentLocation() =
         Location(
-            selectionFirstLine + 1,
-            selectionFirstColumn + 1,
-            selectionEndLine + 1,
-            selectionEndColumn + 1
+            selectionFirstLine,
+            selectionFirstColumn,
+            selectionEndLine,
+            selectionEndColumn,
+            selectionStartOffset,
+            selectionEndOffset
         )
 }
 
@@ -141,33 +134,33 @@ private class SourceScanner(private val source: String) {
 data class Lexeme(val text: String, val location: Location)
 
 /**
- * [Location]s mark the position of a chunk of source inside a given kson source file.
- * These are part of the end-user interface, used to report errors, etc.
- *
- * [Location] objects should be created using base-1 indexes for each position
- * since they are targeted at the end user and so follow [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
- *
- * We currently enforce this 1-based rule simply using doc since these are created once, in this file,
- * as part of Lexing in [SourceScanner.currentLocation].  If/when we hit off-by-1 errors because of
- * this trade-off [Location]s, we'll see if we can better formalize/guardrail this
+ * [Location]s describe the position of a chunk of source inside a given kson source file
  */
 data class Location(
     /**
-     * Line where this location starts (counting lines starting at 1, not zero)
+     * Line where this location starts (counting lines starting at zero)
      */
     val firstLine: Int,
     /**
-     * Column of [firstLine] where this location starts (counting columns starting at 1, not zero)
+     * Column of [firstLine] where this location starts (counting columns starting zero)
      */
     val firstColumn: Int,
     /**
-     * Line where this location ends (counting lines starting at 1, not zero)
+     * Line where this location ends (counting lines starting at zero)
      */
     val lastLine: Int,
     /**
-     * Column of [lastLine] where this location ends (counting columns starting at 1, not zero)
+     * Column of [lastLine] where this location ends (counting columns starting at zero)
      */
-    val lastColumn: Int
+    val lastColumn: Int,
+    /**
+     * The zero-based start offset of this location relative to the whole document
+     */
+    val startOffset: Int,
+    /**
+     * The zero-based end offset of this location relative to the whole document
+     */
+    val endOffset: Int
 ) {
     companion object {
         /**
@@ -175,17 +168,16 @@ data class Location(
          * [endLocation].  [startLocation] must be positioned before [endLocation]
          */
         fun merge(startLocation: Location, endLocation: Location): Location {
-            if (endLocation != EofLocation &&
-                (startLocation.firstLine > endLocation.firstLine ||
-                        startLocation.firstColumn > endLocation.firstColumn)
-            ) {
+            if (startLocation.startOffset > endLocation.endOffset) {
                 throw RuntimeException("`startLocation` must be before `endLocation`")
             }
             return Location(
                 startLocation.firstLine,
                 startLocation.firstLine,
                 endLocation.lastLine,
-                endLocation.lastColumn
+                endLocation.lastColumn,
+                startLocation.startOffset,
+                endLocation.endOffset
             )
         }
     }
@@ -216,7 +208,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             scan()
         }
 
-        tokens.add(Token(TokenType.EOF, Lexeme("", EofLocation), ""))
+        tokens.add(Token(TokenType.EOF, Lexeme("", sourceScanner.currentLocation()), ""))
         return tokens.toImmutableList()
     }
 

@@ -11,18 +11,22 @@ data class LoggedMessage(
 ) {
     companion object {
         /**
-         * Print a user-friendly version of a [List] of [LoggedMessage]
+         * Print a user-friendly version of a [List] of [LoggedMessage].  Note: locations
+         * are output as base-1 indexed firstLine/firstColumn/lastLine/lastColumn numbers
+         * following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+         * for this sort of output
          */
         fun print(messages: List<LoggedMessage>): String {
             return messages.map { message ->
                 val location = message.location
-                "Error:${location.firstLine}.${location.firstColumn}" +
-                        " - ${location.lastLine}.${location.lastColumn}, ${
+                "Error:${location.firstLine + 1}.${location.firstColumn + 1}" +
+                        " - ${location.lastLine + 1}.${location.lastColumn + 1}, ${
                             message.message.format(*message.args)
                         }"
             }.joinToString("\n")
         }
     }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

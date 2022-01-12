@@ -315,11 +315,6 @@ private class TokenScanner(private val source: List<Token>) {
     fun currentLocation(): Location {
         val startTokenLocation = source[selectionStartOffset].lexeme.location
         val endTokenLocation = source[selectionEndOffset].lexeme.location
-        return Location(
-            startTokenLocation.firstLine,
-            startTokenLocation.firstColumn,
-            endTokenLocation.lastLine,
-            endTokenLocation.lastColumn
-        )
+        return Location.merge(startTokenLocation, endTokenLocation)
     }
 }

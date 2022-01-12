@@ -567,30 +567,30 @@ class LexerTest {
             |    key: val
             |    list: [true, false]
             |    embed: ```
-            |      multiline tokens 
-            |      should have correct 
+            |      multiline tokens
+            |      should have correct
             |      Locations too
             |      ```
             |}
             """.trimMargin(),
             listOf(
-                Pair(BRACE_L, Location(1, 1, 1, 2)),
-                Pair(IDENTIFIER, Location(2, 5, 2, 8)),
-                Pair(COLON, Location(2, 8, 2, 9)),
-                Pair(IDENTIFIER, Location(2, 10, 2, 13)),
-                Pair(IDENTIFIER, Location(3, 5, 3, 9)),
-                Pair(COLON, Location(3, 9, 3, 10)),
-                Pair(BRACKET_L, Location(3, 11, 3, 12)),
-                Pair(TRUE, Location(3, 12, 3, 16)),
-                Pair(COMMA, Location(3, 16, 3, 17)),
-                Pair(FALSE, Location(3, 18, 3, 23)),
-                Pair(BRACKET_R, Location(3, 23, 3, 24)),
-                Pair(IDENTIFIER, Location(4, 5, 4, 10)),
-                Pair(COLON, Location(4, 10, 4, 11)),
-                Pair(EMBED_START, Location(4, 12, 4, 15)),
-                Pair(EMBEDDED_BLOCK, Location(5, 1, 8, 7)),
-                Pair(EMBED_END, Location(8, 7, 8, 10)),
-                Pair(BRACE_R, Location(9, 1, 9, 2))
+                Pair(BRACE_L, Location(0, 0, 0, 1, 0, 1)),
+                Pair(IDENTIFIER, Location(1, 4, 1, 7, 6, 9)),
+                Pair(COLON, Location(1, 7, 1, 8, 9, 10)),
+                Pair(IDENTIFIER, Location(1, 9, 1, 12, 11, 14)),
+                Pair(IDENTIFIER, Location(2, 4, 2, 8, 19, 23)),
+                Pair(COLON, Location(2, 8, 2, 9, 23, 24)),
+                Pair(BRACKET_L, Location(2, 10, 2, 11, 25, 26)),
+                Pair(TRUE, Location(2, 11, 2, 15, 26, 30)),
+                Pair(COMMA, Location(2, 15, 2, 16, 30, 31)),
+                Pair(FALSE, Location(2, 17, 2, 22, 32, 37)),
+                Pair(BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
+                Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
+                Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
+                Pair(EMBED_START, Location(3, 11, 3, 14, 50, 53)),
+                Pair(EMBEDDED_BLOCK, Location(4, 0, 7, 6, 54, 129)),
+                Pair(EMBED_END, Location(7, 6, 7, 9, 129, 132)),
+                Pair(BRACE_R, Location(8, 0, 8, 1, 133, 134))
             )
         )
     }
