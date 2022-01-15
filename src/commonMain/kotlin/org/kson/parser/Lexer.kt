@@ -225,11 +225,13 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
 class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boolean = false) {
 
     private val sourceScanner = SourceScanner(source)
-    private val tokens = TokenizedSource(if (gapFree) {
-        emptySet()
-    } else {
-        setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.DOUBLE_QUOTE)
-    })
+    private val tokens = TokenizedSource(
+        if (gapFree) {
+            emptySet()
+        } else {
+            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.DOUBLE_QUOTE)
+        }
+    )
 
     fun tokenize(): ImmutableList<Token> {
         while (sourceScanner.peek() != EOF) {
@@ -245,7 +247,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         if (isWhitespace(char)) {
             // advance through any sequential whitespace
-            while(isWhitespace(sourceScanner.peek()) && sourceScanner.peek() != EOF) {
+            while (isWhitespace(sourceScanner.peek()) && sourceScanner.peek() != EOF) {
                 sourceScanner.advance()
             }
             addLiteralToken(TokenType.WHITESPACE)
@@ -279,7 +281,10 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                         addLiteralToken(TokenType.EMBED_START)
                         embeddedBlock()
                     } else {
-                        messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
+                        messageSink.error(
+                            addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                            Message.EMBED_BLOCK_DANGLING_DOUBLETICK
+                        )
                     }
                 } else {
                     messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_TICK)
@@ -295,7 +300,11 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                         identifier()
                     }
                     else -> {
-                        messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.UNEXPECTED_CHAR, char.toString())
+                        messageSink.error(
+                            addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                            Message.UNEXPECTED_CHAR,
+                            char.toString()
+                        )
                     }
                 }
             }
@@ -308,6 +317,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     private fun isWhitespace(char: Char): Boolean {
         return isInlineWhitespace(char) || char == '\n'
     }
+
     /**
      * Returns true if the given [char] is a non-newline whitespace
      */
@@ -462,9 +472,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     private fun trimMinimumIndent(textBlock: String): String {
         val linesWithNewlines = textBlock.split("\n").map { it + "\n" }
 
-        val minCommonIndent = linesWithNewlines
-            .map { it.indexOfFirst { char -> !isInlineWhitespace(char) } }
-            .minOrNull() ?: 0
+        val minCommonIndent =
+            linesWithNewlines.minOfOrNull { it.indexOfFirst { char -> !isInlineWhitespace(char) } } ?: 0
 
         return textBlock
             .split("\n")
