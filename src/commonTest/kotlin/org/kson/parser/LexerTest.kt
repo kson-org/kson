@@ -19,10 +19,11 @@ class LexerTest {
     private fun assertTokenizesTo(
         source: String,
         expectedTokenTypes: List<TokenType>,
-        message: String? = null
+        message: String? = null,
+        testGapFreeLexing: Boolean = false
     ): List<Token> {
         val messageSink = MessageSink()
-        val actualTokens = Lexer(source, messageSink).tokenize()
+        val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
         val actualTokenTypes = actualTokens.map { it.tokenType }.toMutableList()
 
         // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
@@ -62,9 +63,10 @@ class LexerTest {
      */
     private fun assertTokenizesTo(
         source: String,
-        expectedTokenLocationPairs: List<Pair<TokenType, Location>>
+        expectedTokenLocationPairs: List<Pair<TokenType, Location>>,
+        testGapFreeLexing: Boolean = false
     ) {
-        val tokens = assertTokenizesTo(source, expectedTokenLocationPairs.map { it.first })
+        val tokens = assertTokenizesTo(source, expectedTokenLocationPairs.map { it.first }, null, testGapFreeLexing)
         expectedTokenLocationPairs.forEachIndexed { index, tokenLocationPair ->
             val (tokenType, location) = tokenLocationPair
             assertEquals(
@@ -628,5 +630,35 @@ class LexerTest {
         )
 
         assertEquals("these triple `\\\\\\`` ticks are embedded and multi-escaped", multiEscapeTokens[1].value)
+    }
+
+    @Test
+    fun testGapFreeLexing() {
+        assertTokenizesTo(
+            """
+                key: val
+            """,
+            listOf(WHITESPACE, IDENTIFIER, COLON, WHITESPACE, IDENTIFIER, WHITESPACE),
+            "Should include WHITESPACE tokens when lexing gap-free",
+            true
+        )
+
+        assertTokenizesTo(
+            """
+                |  quoted: "string"
+                |
+            """.trimMargin(),
+            listOf(
+                Pair(WHITESPACE, Location(0, 0, 0, 2, 0, 2)),
+                Pair(IDENTIFIER, Location(0, 2, 0, 8, 2, 8)),
+                Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
+                Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
+                Pair(DOUBLE_QUOTE, Location(0, 10, 0, 11, 10, 11)),
+                Pair(STRING, Location(0, 11, 0, 17, 11, 17)),
+                Pair(DOUBLE_QUOTE, Location(0, 17, 0, 18, 17, 18)),
+                Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
+            ),
+            true
+        )
     }
 }

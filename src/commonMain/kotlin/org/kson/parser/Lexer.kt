@@ -20,10 +20,13 @@ enum class TokenType {
     EOF,
     FALSE,
     IDENTIFIER,
+    ILLEGAL_TOKEN,
     NULL,
     NUMBER,
+    DOUBLE_QUOTE,
     STRING,
-    TRUE
+    TRUE,
+    WHITESPACE
 }
 
 private val KEYWORDS =
@@ -77,16 +80,6 @@ private class SourceScanner(private val source: String) {
             selectionEndColumn = 0
         }
         return currentChar
-    }
-
-    /**
-     * Move the scanner past the currently selected text, completely ignoring it.  Returns the dropped
-     * [Lexeme]'s [Location]---useful for reporting errors, etc., on dropped [Lexeme]s
-     */
-    fun dropLexeme(): Location {
-        val droppedLexemeLocation = currentLocation()
-        startNextSelection()
-        return droppedLexemeLocation
     }
 
     /**
@@ -198,10 +191,45 @@ data class Token(
     val value: Any
 )
 
-class Lexer(source: String, private val messageSink: MessageSink) {
+/**
+ * Holder class for the [Token]s that [Lexer] produces from the input source.  Manages ensuring that tokens we wish
+ * to discard are ignored (tokens whose type is in [ignoreSet])
+ *
+ * @param ignoreSet [TokenType]s to leave out of the constructed [Token] list return by [toList]
+ */
+private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
+    private val tokens = mutableListOf<Token>()
+
+    fun add(token: Token) {
+        if (ignoreSet.contains(token.tokenType)) {
+            return
+        }
+
+        tokens.add(token)
+    }
+
+    fun toList(): ImmutableList<Token> {
+        return tokens.toImmutableList()
+    }
+}
+
+/**
+ * Tokenizes the given `source` into a list of [Token] by calling [tokenize]
+ *
+ * @param source the input Kson source to tokenize
+ * @param messageSink a [MessageSink] to write user-facing messages about the tokenization, for instance errors
+ * @param gapFree whether to ensure _all_ source, including whitespace, quotes and illegal characters, is precisely
+ *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
+ *                IDE-compliant lexer with this official lexer.  Default: false
+ */
+class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boolean = false) {
 
     private val sourceScanner = SourceScanner(source)
-    private val tokens = mutableListOf<Token>()
+    private val tokens = TokenizedSource(if (gapFree) {
+        emptySet()
+    } else {
+        setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.DOUBLE_QUOTE)
+    })
 
     fun tokenize(): ImmutableList<Token> {
         while (sourceScanner.peek() != EOF) {
@@ -209,16 +237,21 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         }
 
         tokens.add(Token(TokenType.EOF, Lexeme("", sourceScanner.currentLocation()), ""))
-        return tokens.toImmutableList()
+        return tokens.toList()
     }
 
     private fun scan() {
         val char = sourceScanner.advance()
-        if (isInlineWhitespace(char) || char == '\n') {
-            // ignore whitespace
-            sourceScanner.dropLexeme()
+
+        if (isWhitespace(char)) {
+            // advance through any sequential whitespace
+            while(isWhitespace(sourceScanner.peek()) && sourceScanner.peek() != EOF) {
+                sourceScanner.advance()
+            }
+            addLiteralToken(TokenType.WHITESPACE)
             return
         }
+
         when (char) {
             '#' -> {
                 // comments extend to end of the line
@@ -235,8 +268,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"' -> {
-                // drop this opening quote---it's not part of the string
-                sourceScanner.dropLexeme()
+                addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
             '`' -> {
@@ -247,10 +279,10 @@ class Lexer(source: String, private val messageSink: MessageSink) {
                         addLiteralToken(TokenType.EMBED_START)
                         embeddedBlock()
                     } else {
-                        messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
+                        messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
                     }
                 } else {
-                    messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_DANGLING_TICK)
+                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_TICK)
                 }
             }
             else -> {
@@ -263,13 +295,19 @@ class Lexer(source: String, private val messageSink: MessageSink) {
                         identifier()
                     }
                     else -> {
-                        messageSink.error(sourceScanner.dropLexeme(), Message.UNEXPECTED_CHAR, char.toString())
+                        messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.UNEXPECTED_CHAR, char.toString())
                     }
                 }
             }
         }
     }
 
+    /**
+     * Returns true if the given [char] is whitespace
+     */
+    private fun isWhitespace(char: Char): Boolean {
+        return isInlineWhitespace(char) || char == '\n'
+    }
     /**
      * Returns true if the given [char] is a non-newline whitespace
      */
@@ -297,12 +335,8 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             }
             sourceScanner.advance()
         }
-        if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.dropLexeme(), Message.STRING_NO_CLOSE)
-            return
-        }
 
-        if (hasEscapedQuotes) {
+        val stringLocation = if (hasEscapedQuotes) {
             val rawStringLexeme = sourceScanner.extractLexeme()
             val escapedString = rawStringLexeme.text.replace("\\\"", "\"")
             addToken(TokenType.STRING, rawStringLexeme, escapedString)
@@ -310,9 +344,14 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             addLiteralToken(TokenType.STRING)
         }
 
+        if (sourceScanner.peek() == EOF) {
+            messageSink.error(stringLocation, Message.STRING_NO_CLOSE)
+            return
+        }
+
         // Eat the closing `"`
         sourceScanner.advance()
-        sourceScanner.dropLexeme()
+        addLiteralToken(TokenType.DOUBLE_QUOTE)
     }
 
     private fun embeddedBlock() {
@@ -329,17 +368,16 @@ class Lexer(source: String, private val messageSink: MessageSink) {
         }
 
         while (isInlineWhitespace(sourceScanner.peek())) {
-            // ignore any inline whitespace between the '```[tag]' and the required newline
+            // advance through any inline whitespace between the '```[tag]' and the required newline
             sourceScanner.advance()
         }
-        sourceScanner.dropLexeme()
 
         if (sourceScanner.peek() == '\n') {
-            // found the required newline---drop it since it's not part of the content
+            // found the required newline---adavnce past it and tokenize it along with any whitespace we advanced past above
             sourceScanner.advance()
-            sourceScanner.dropLexeme()
+            addLiteralToken(TokenType.WHITESPACE)
         } else {
-            messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_BAD_START, embedTag)
+            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag)
         }
 
         // we use this var to track if we need to consume escapes in an embed blcok so we only walk its text
@@ -366,12 +404,12 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             sourceScanner.advance()
         }
 
+        val embedBlockLexeme = sourceScanner.extractLexeme()
+
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.dropLexeme(), Message.EMBED_BLOCK_NO_CLOSE)
+            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE)
             return
         }
-
-        val embedBlockLexeme = sourceScanner.extractLexeme()
 
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
         val embedTokenValue = if (hasEscapedEmbedEnd) {
@@ -455,7 +493,7 @@ class Lexer(source: String, private val messageSink: MessageSink) {
             }
             if (!isDigit(sourceScanner.peek())) {
                 // Double.parseDouble considers a trailing 'E' without an exponent part to be a NumberFormatException
-                messageSink.error(sourceScanner.dropLexeme(), Message.DANGLING_EXP_INDICATOR)
+                messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.DANGLING_EXP_INDICATOR)
                 return
             }
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()
@@ -485,14 +523,23 @@ class Lexer(source: String, private val messageSink: MessageSink) {
     /**
      * Convenience method for adding a [tokenType] [Token] with a "literal" value---i.e. its value is the
      * currently selected text in [sourceScanner]
+     *
+     * @return the location of the added [Token]
      */
-    private fun addLiteralToken(tokenType: TokenType) {
+    private fun addLiteralToken(tokenType: TokenType): Location {
         val lexeme = sourceScanner.extractLexeme()
         addToken(tokenType, lexeme, lexeme.text)
+        return lexeme.location
     }
 
-    private fun addToken(type: TokenType, lexeme: Lexeme, value: Any) {
+    /**
+     * Add a token to [tokens]
+     *
+     * @return the location of the added [Token]
+     */
+    private fun addToken(type: TokenType, lexeme: Lexeme, value: Any): Location {
         tokens.add(Token(type, lexeme, value))
+        return lexeme.location
     }
 
     private fun isDigit(c: Char): Boolean {

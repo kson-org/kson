@@ -12,9 +12,6 @@ import org.kson.parser.Token
 /**
  * [KsonLexer] implements the [com.intellij.lexer.Lexer] interface by delegating to the main
  * Kson [Lexer]
- *
- * jetbrains todo this lexer has unwanted gaps (i.e. the underlying [Lexer] drops some characters like whitespace),
- *                see the green block note here for more info: https://plugins.jetbrains.com/docs/intellij/implementing-lexer.html#b8358822
  */
 class KsonLexer : LexerBase() {
     private var ksonTokens: ImmutableList<Token> = emptyList<Token>().toImmutableList()
@@ -26,7 +23,11 @@ class KsonLexer : LexerBase() {
     override fun start(buffer: CharSequence, startOffset: Int, endOffset: Int, initialState: Int) {
         this.buffer = buffer
         bufferEnd = endOffset
-        ksonTokens = Lexer(buffer.substring(startOffset, endOffset), MessageSink()).tokenize()
+        ksonTokens = Lexer(buffer.substring(startOffset, endOffset),
+            MessageSink(),
+            // note that we demand a gap-free lex here to properly comply with Jetbrains' Lexer interface demands.
+            // see the green "Info" block on this page for details: https://plugins.jetbrains.com/docs/intellij/implementing-lexer.html
+            true).tokenize()
         ksonTokensIndex = initialState
     }
 
