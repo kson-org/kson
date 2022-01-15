@@ -6,11 +6,7 @@ import org.kson.jetbrains.KsonIcons
 import org.kson.jetbrains.KsonLanguage
 import javax.swing.Icon
 
-class KsonFileType : LanguageFileType(KsonLanguage()) {
-    companion object {
-        @Suppress("unused") // used in plugin.xml at `idea-plugin -> extensions -> fileType -> implementationClass`
-        val INSTANCE = KsonFileType()
-    }
+object KsonFileType : LanguageFileType(KsonLanguage) {
 
     override fun getName(): String {
         return "Kson"

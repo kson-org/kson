@@ -24,6 +24,10 @@
                   fieldName="INSTANCE"
                   language="org.kson.jetbrains"
                   extensions="kson"/>
+
+        <lang.parserDefinition language="org.kson.jetbrains"
+                               implementationClass="org.kson.jetbrains.parser.KsonParserDefinition"/>
+
         <applicationService serviceImplementation="org.kson.jetbrains.services.MyApplicationService"/>
         <projectService serviceImplementation="org.kson.jetbrains.services.MyProjectService"/>
     </extensions>
