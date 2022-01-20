@@ -42,6 +42,17 @@ tasks {
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
+
+    /**
+     * Work around Gradle complaining about duplicate readmes in the mpp build.  Related context:
+     * - https://github.com/gradle/gradle/issues/17236
+     * - https://youtrack.jetbrains.com/issue/KT-46978
+     */
+
+    @Suppress("UnstableApiUsage")
+    withType<ProcessResources> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }
 
 kotlin {

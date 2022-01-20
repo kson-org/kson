@@ -1,0 +1,43 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>org.kson.jetbrains</id>
+    <name>Kson</name>
+    <vendor>Kson.org</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html -->
+    <idea-version since-build="213" until-build="213.*"/>
+
+    <description><![CDATA[
+        <p>
+            <a href="https://kson.org">Kson</a> language support
+        </p>
+        <p>
+            For issues, feature requests, and source code, please visit the <a href="https://github.com/kson-org/kson/tree/main/jetbrains">plugin project home</a>
+        </p>
+    ]]></description>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Kson"
+                  implementationClass="org.kson.jetbrains.file.KsonFileType"
+                  fieldName="INSTANCE"
+                  language="org.kson.jetbrains"
+                  extensions="kson"/>
+
+        <lang.parserDefinition language="org.kson.jetbrains"
+                               implementationClass="org.kson.jetbrains.parser.KsonParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="org.kson.jetbrains"
+                                       implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
+
+        <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
+
+        <applicationService serviceImplementation="org.kson.jetbrains.services.MyApplicationService"/>
+        <projectService serviceImplementation="org.kson.jetbrains.services.MyProjectService"/>
+    </extensions>
+
+    <applicationListeners>
+        <listener class="org.kson.jetbrains.listeners.MyProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+</idea-plugin>
