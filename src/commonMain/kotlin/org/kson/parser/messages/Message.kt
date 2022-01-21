@@ -99,6 +99,15 @@ enum class Message {
         override fun doFormat(parsedArgs: Map<String, String?>): String {
             return "Dangling exponent indicator"
         }
+    },
+    DANGLING_DASH {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Dangling minus sign"
+        }
     };
 
     /**
