@@ -1,7 +1,7 @@
 package org.kson.collections
 
 /**
- * From https://stackoverflow.com/a/37936456, which also has a recipe for Maps if/when we need it
+ * Some useful immutable collection extensions from https://stackoverflow.com/a/37936456
  */
 
 class ImmutableList<T> private constructor(private val inner: List<T>) : List<T> by inner {
