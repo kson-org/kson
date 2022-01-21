@@ -217,6 +217,16 @@ class LexerTest {
     }
 
     @Test
+    fun testDanglingMinusSign() {
+        assertTokenizesWithMessages(
+            """
+                -
+            """,
+            listOf(Message.DANGLING_DASH)
+        )
+    }
+
+    @Test
     fun testBooleanLiteralSource() {
         assertTokenizesTo(
             """

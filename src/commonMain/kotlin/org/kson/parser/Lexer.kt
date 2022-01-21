@@ -293,6 +293,16 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             else -> {
                 when {
                     char == '-' || isDigit(char) -> {
+                        if (char == '-' && !isDigit(sourceScanner.peek())) {
+                            /**
+                             * todo we likely want to move the mechanics of number parsing out of the lexer and
+                             *         into the parser if:
+                             *         - we see more edge cases like this, or:
+                             *         - we succeed in adding dash-denoted lists into the grammar
+                             */
+                            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.DANGLING_DASH)
+                            return
+                        }
                         number()
                     }
                     // identifiers start with an alphabetic character or an underscore
