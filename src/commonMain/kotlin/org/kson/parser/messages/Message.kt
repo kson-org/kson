@@ -8,6 +8,15 @@ package org.kson.parser.messages
  * matches on error message content)
  */
 enum class Message {
+    EMBED_BLOCK_DANGLING_HASH {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "Dangling hash. Did you mean \"%%\"?"
+        }
+    },
     EMBED_BLOCK_DANGLING_TICK {
         override fun expectedArgs(): List<String> {
             return emptyList()

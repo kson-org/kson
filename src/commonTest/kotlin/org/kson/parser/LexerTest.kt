@@ -549,6 +549,48 @@ class LexerTest {
     }
 
     @Test
+    fun testHashEmbedBlockDanglingHash() {
+        assertTokenizesWithMessages(
+            """
+            test: %
+            """,
+            listOf(Message.EMBED_BLOCK_DANGLING_HASH)
+        )
+    }
+
+    @Test
+    fun testHashEmbedBlockBadStart() {
+        assertTokenizesWithMessages(
+            """
+            %% this can't be here
+            because content must start on first line after opening hashes
+            %%
+            """,
+            listOf(Message.EMBED_BLOCK_BAD_START)
+        )
+
+        assertTokenizesWithMessages(
+            """
+            %%embedTag this can't be here
+            because content must start on first line after opening hashes+embed tag
+            %%
+            """,
+            listOf(Message.EMBED_BLOCK_BAD_START)
+        )
+    }
+
+    @Test
+    fun testUnclosedHashEmbedBlock() {
+        assertTokenizesWithMessages(
+            """
+            %%
+            This embed block lacks its closing hash
+            """,
+            listOf(Message.EMBED_BLOCK_NO_CLOSE)
+        )
+    }
+
+    @Test
     fun testUnterminatedString() {
         assertTokenizesWithMessages(
             """
