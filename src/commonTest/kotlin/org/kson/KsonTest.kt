@@ -273,34 +273,39 @@ class KsonTest {
     fun testEmbedBlockSource() {
         assertParsesTo(
             """
-                ```
+                %%
                     this is a raw embed
-                ```
+                %%
             """,
             """
-                ```
+                %%
                     this is a raw embed
-                ```
+                %%
             """.trimIndent()
         )
 
         assertParsesTo(
             """
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """,
             """
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """.trimIndent()
         )
     }
 
     @Test
-    fun testUnclosedEmbedTicksError() {
-        assertParserRejectsSource("```\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+    fun testUnclosedEmbedHashError() {
+        assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnclosedEmbedDollarError() {
+        assertParserRejectsSource("$$\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test

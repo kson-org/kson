@@ -345,18 +345,18 @@ class LexerTest {
     fun testEmbedBlockSource() {
         assertTokenizesTo(
             """
-                ```
+                %%
                     this is a raw embed
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
 
         assertTokenizesTo(
             """
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -366,9 +366,9 @@ class LexerTest {
     fun testEmbedBlockIndentTrimming() {
         val oneLineEmbedTokens = assertTokenizesTo(
             """
-                ```
+                %%
                 this is a raw embed
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -377,12 +377,12 @@ class LexerTest {
 
         val mulitLineEmbedTokens = assertTokenizesTo(
             """
-                ```sql
+                %%sql
                     this is a multi-line
                         raw embed
                 who's indent will be determined by
                                 the leftmost line
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -400,13 +400,13 @@ class LexerTest {
 
         val mulitLineIndentedEmbedTokens = assertTokenizesTo(
             """
-                ```sql
+                %%sql
                     this is a multi-line
                         raw embed
                 who's indent will be determined by
                                 the leftmost line,
                 which is the end delimiter in this case
-              ```
+              %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -426,9 +426,9 @@ class LexerTest {
     fun testEmbedBlockTrialingWhitespace() {
         val trailingNewlineTokens = assertTokenizesTo(
             """
-                ```
+                %%
                 this should have a newline at the end
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -437,11 +437,11 @@ class LexerTest {
 
         val trailingSpacesTokens = assertTokenizesTo(
             """
-                ```
+                %%
                 this lovely embed
                     should have four trailing 
                     spaces and a newline at the end    
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -458,9 +458,9 @@ class LexerTest {
 
         val zeroTrailingWhitespaceTokens = assertTokenizesTo(
             """
-                ```
+                %%
                     this on the other hand,
-                    should have spaces but no newline at the end    ```
+                    should have spaces but no newline at the end    %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
@@ -476,9 +476,9 @@ class LexerTest {
         assertTokenizesTo(
             // note the extra whitespace after the opening ```
             """
-                ```   
+                %%   
                     this is a raw embed
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END),
             "should allow trailing whitespace after the opening '```'"
@@ -487,9 +487,9 @@ class LexerTest {
         assertTokenizesTo(
             // note the extra whitespace after the opening ```
             """   
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END),
             "should allow trailing whitespace after the opening '```embedTag'"
@@ -497,22 +497,12 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbedBlockDanglingTick() {
+    fun testEmbedBlockDanglingHash() {
         assertTokenizesWithMessages(
             """
-            test: `
+            test: %
             """,
-            listOf(Message.EMBED_BLOCK_DANGLING_TICK)
-        )
-    }
-
-    @Test
-    fun testEmbedBlockDanglingDoubleTick() {
-        assertTokenizesWithMessages(
-            """
-            test: ``
-            """,
-            listOf(Message.EMBED_BLOCK_DANGLING_DOUBLETICK)
+            listOf(Message.EMBED_BLOCK_DANGLING_HASH)
         )
     }
 
@@ -520,18 +510,18 @@ class LexerTest {
     fun testEmbedBlockBadStart() {
         assertTokenizesWithMessages(
             """
-            ``` this can't be here
+            %% this can't be here
             because content must start on first line after opening ticks
-            ```
+            %%
             """,
             listOf(Message.EMBED_BLOCK_BAD_START)
         )
 
         assertTokenizesWithMessages(
             """
-            ```embedTag this can't be here
+            %%embedTag this can't be here
             because content must start on first line after opening ticks+embed tag
-            ```
+            %%
             """,
             listOf(Message.EMBED_BLOCK_BAD_START)
         )
@@ -541,7 +531,7 @@ class LexerTest {
     fun testUnclosedEmbedBlock() {
         assertTokenizesWithMessages(
             """
-            ```
+            %%
             This embed block lacks its closing ticks
             """,
             listOf(Message.EMBED_BLOCK_NO_CLOSE)
@@ -578,11 +568,11 @@ class LexerTest {
             |{
             |    key: val
             |    list: [true, false]
-            |    embed: ```
+            |    embed: %%
             |      multiline tokens
             |      should have correct
             |      Locations too
-            |      ```
+            |      %%
             |}
             """.trimMargin(),
             listOf(
@@ -599,10 +589,10 @@ class LexerTest {
                 Pair(BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
-                Pair(EMBED_START, Location(3, 11, 3, 14, 50, 53)),
-                Pair(EMBEDDED_BLOCK, Location(4, 0, 7, 6, 54, 129)),
-                Pair(EMBED_END, Location(7, 6, 7, 9, 129, 132)),
-                Pair(BRACE_R, Location(8, 0, 8, 1, 133, 134))
+                Pair(EMBED_START, Location(3, 11, 3, 13, 50, 52)),
+                Pair(EMBEDDED_BLOCK, Location(4, 0, 7, 6, 53, 128)),
+                Pair(EMBED_END, Location(7, 6, 7, 8, 128, 130)),
+                Pair(BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
         )
     }
@@ -620,26 +610,29 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbeddedBlockEscapes() {
+    fun testEmbeddedBlockHashEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
-                ```
-                these triple `\`` ticks are embedded but escaped```
+                %%
+                these double %\% ticks are embedded but escaped%%
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
 
-        assertEquals("these triple ``` ticks are embedded but escaped", singleEscapeTokens[1].value)
+        assertEquals("these double %% ticks are embedded but escaped", singleEscapeTokens[1].value)
+    }
 
-        val multiEscapeTokens = assertTokenizesTo(
+    @Test
+    fun testEmbeddedBlockDollarEscapes() {
+        val singleEscapeTokens = assertTokenizesTo(
             """   
-                ```
-                these triple `\\\\`` ticks are embedded and multi-escaped```
+                $$
+                these double $\$ dollars are embedded but escaped$$
             """,
             listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
         )
 
-        assertEquals("these triple `\\\\\\`` ticks are embedded and multi-escaped", multiEscapeTokens[1].value)
+        assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[1].value)
     }
 
     @Test

@@ -273,21 +273,22 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
-            '`' -> {
-                if (sourceScanner.peek() == '`') {
+            '%' -> {
+                if (sourceScanner.peek() == '%') {
                     sourceScanner.advance()
-                    if (sourceScanner.peek() == '`') {
-                        sourceScanner.advance()
-                        addLiteralToken(TokenType.EMBED_START)
-                        embeddedBlock()
-                    } else {
-                        messageSink.error(
-                            addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                            Message.EMBED_BLOCK_DANGLING_DOUBLETICK
-                        )
-                    }
+                    addLiteralToken(TokenType.EMBED_START)
+                    embeddedBlock('%')
                 } else {
-                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_TICK)
+                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_HASH)
+                }
+            }
+            '$' -> {
+                if (sourceScanner.peek() == '$') {
+                    sourceScanner.advance()
+                    addLiteralToken(TokenType.EMBED_START)
+                    embeddedBlock('$')
+                } else {
+                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_HASH)
                 }
             }
             else -> {
@@ -374,7 +375,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         addLiteralToken(TokenType.DOUBLE_QUOTE)
     }
 
-    private fun embeddedBlock() {
+    private fun embeddedBlock(blockChar: Char) {
         val embedTag = if (isAlphaNumeric(sourceScanner.peek())) {
             while (isAlphaNumeric(sourceScanner.peek())) {
                 sourceScanner.advance()
@@ -388,7 +389,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         while (isInlineWhitespace(sourceScanner.peek())) {
-            // advance through any inline whitespace between the '```[tag]' and the required newline
+            // advance through any inline whitespace between the 'blockChar[tag]' and the required newline
             sourceScanner.advance()
         }
 
@@ -400,24 +401,23 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag)
         }
 
-        // we use this var to track if we need to consume escapes in an embed blcok so we only walk its text
+        // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
         // trying to replace escapes if we know we need to
         var hasEscapedEmbedEnd = false
 
-        // read embedded content until the closing ```
+        // read embedded content until the closing blockChar pair
         while (
-            !(sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`' && sourceScanner.peekNextNext() == '`')
+            !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
             && sourceScanner.peek() != EOF
         ) {
-            if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "``", we're looking at an escaped EMBED_END
+            if (sourceScanner.peek() == blockChar && sourceScanner.peekNext() == '\\') {
+                // if this is all slashes until "blockChar", we're looking at an escaped EMBED_END
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
                 }
-                if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`') {
+                if (sourceScanner.peek() == blockChar) {
                     hasEscapedEmbedEnd = true
-                    sourceScanner.advance()
                     sourceScanner.advance()
                 }
             }
@@ -437,25 +437,29 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
              * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
              * so some here's some clarifying notes:
              *
-             * - an escaped EMBED_END has its second tick escaped: `\`` yields ``` inside of an embed.
-             *   Note that this moves the escaping goalpost since we also need to allow `\`` literally inside
+             * - an escaped EMBED_END has its second hash escaped: %\% yields %% inside of an embed.
+             *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
              *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary \s before the second
-             *   tick, and consume one of them.  Then, `\\`` gives `\`` in the output, `\\\`` gives `\\`` in
+             *   tick, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
              *   the output, etc
              *
-             * - the regex for this ends up looking a bit crazy since \ needs to be double escaped in regex, so
-             *   matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional slashes
-             *   in the output
+             * - the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
+             *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
+             *   slashes in the output, and we also need to escape the blockChar delimiter since it may be a regex
+             *   special character, like '$', that needs special handling.
              */
-            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"), "`$1``")
+            val literal = "$blockChar"
+            val escaped = Regex.escape(literal)
+            val pattern = "$escaped\\\\([\\\\]*)$escaped"
+            val escapedReplacement = Regex.escapeReplacement(literal)
+            trimmedEmbedBlockContent.replace(Regex(pattern), "$escapedReplacement\$1$escapedReplacement")
         } else {
             trimmedEmbedBlockContent
         }
 
         addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, embedTokenValue)
 
-        // process our closing ```
-        sourceScanner.advance()
+        // process our closing blockChar pair
         sourceScanner.advance()
         sourceScanner.advance()
         addLiteralToken(TokenType.EMBED_END)

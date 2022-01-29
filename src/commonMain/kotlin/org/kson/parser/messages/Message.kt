@@ -8,22 +8,13 @@ package org.kson.parser.messages
  * matches on error message content)
  */
 enum class Message {
-    EMBED_BLOCK_DANGLING_TICK {
+    EMBED_BLOCK_DANGLING_HASH {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Dangling backtick.  Did you mean \"```\"?"
-        }
-    },
-    EMBED_BLOCK_DANGLING_DOUBLETICK {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Dangling backticks.  Did you mean \"```\"?"
+            return "Dangling hash.  Did you mean \"%%\"?"
         }
     },
     EMBED_BLOCK_BAD_START {
@@ -33,7 +24,7 @@ enum class Message {
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
             val embedTag = parsedArgs["Embed Tag Name"]
-            return "This Embedded Block's content must start on the line after the opening '```${embedTag ?: ""}'"
+            return "This Embedded Block's content must start on the line after the opening '%%${embedTag ?: ""}"
         }
     },
     EMBED_BLOCK_NO_CLOSE {
@@ -42,7 +33,7 @@ enum class Message {
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Unclosed \"```\""
+            return "Unclosed \"%%\""
         }
     },
     UNEXPECTED_CHAR {
