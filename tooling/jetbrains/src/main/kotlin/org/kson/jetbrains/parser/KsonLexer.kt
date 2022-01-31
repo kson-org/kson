@@ -8,6 +8,7 @@ import org.kson.collections.toImmutableList
 import org.kson.parser.Lexer
 import org.kson.parser.MessageSink
 import org.kson.parser.Token
+import org.kson.parser.TokenType
 
 /**
  * [KsonLexer] implements the [com.intellij.lexer.Lexer] interface by delegating to the main
@@ -40,7 +41,14 @@ class KsonLexer : LexerBase() {
             return null
         }
 
-        return KsonElementType(ksonTokens[ksonTokensIndex].tokenType)
+        val lexedElementType = ksonTokens[ksonTokensIndex].tokenType
+
+        // if we're looking at EOF, we have no more tokens that IDE cares about
+        if (lexedElementType == TokenType.EOF) {
+            return null
+        }
+
+        return elem(lexedElementType)
     }
 
     override fun getTokenStart(): Int {

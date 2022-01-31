@@ -1,0 +1,49 @@
+package org.kson.jetbrains.parser
+
+import com.intellij.testFramework.ParsingTestCase
+import org.junit.Test
+
+/**
+ * These tests are powered by infrastructure provided by [ParsingTestCase]
+ * ([see here for a related tutorial](https://plugins.jetbrains.com/docs/intellij/parsing-test.html#define-a-parsing-test)
+ *
+ * The tests here are all structured as follows:
+ *
+ * ```
+ * @Test
+ * fun testKsonFileName() {
+ *     doTest(true)
+ * }
+ * ```
+ *
+ * By convention based on the test name, this will look for two files inside [testData.parser]:
+ * `ksonFileName.kson` and `ksonFileName.txt`, where `ksonFileName.kson` contains the Kson source to parse, and
+ * `ksonFileName.txt` contains a text representation of the resulting PSI tree.
+ *
+ * NOTES:
+ * - if the `.txt` file does not exist for a test, it will be automatically generated on first run
+ * - the [testData.parser] directory is configured by [getTestDataPath] and the first constructor
+ *   arg to [ParsingTestCase]
+ */
+class KsonParsingTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
+
+    @Test
+    fun testObject() {
+        doTest(true)
+    }
+
+    /**
+     * @return path to test data file directory relative to root of this module
+     */
+    override fun getTestDataPath(): String {
+        return "src/test/resources/testData"
+    }
+
+    override fun skipSpaces(): Boolean {
+        return true
+    }
+
+    override fun includeRanges(): Boolean {
+        return true
+    }
+}

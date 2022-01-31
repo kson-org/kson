@@ -8,7 +8,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonBundle
 import org.kson.jetbrains.highlighter.KsonSyntaxHighlighter.KsonColorTag.*
-import org.kson.jetbrains.parser.KsonElementType
+import org.kson.jetbrains.parser.KsonLexedElementType
 import org.kson.jetbrains.parser.KsonLexer
 import org.kson.parser.TokenType
 
@@ -18,8 +18,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     }
 
     override fun getTokenHighlights(elementType: IElementType): Array<TextAttributesKey> {
-        if (elementType is KsonElementType) {
-            return when (elementType.ksonTokenType) {
+        if (elementType is KsonLexedElementType) {
+            return when (elementType.tokenType) {
                 TokenType.BRACE_L -> getPackedTextAttributes(KSON_BRACE)
                 TokenType.BRACE_R -> getPackedTextAttributes(KSON_BRACE)
                 TokenType.BRACKET_L -> getPackedTextAttributes(KSON_BRACKET)
