@@ -11,7 +11,7 @@ class MessagesTest {
         //
         // (NOTE: this naturally relies on assumption that EMBED_BLOCK_BAD_START's formatted
         //        message will always refer to its embed tag.  Apologies if that changes and this fails)
-        val formattedMessage = Message.EMBED_BLOCK_BAD_START.format("tagNameForTest")
+        val formattedMessage = Message.EMBED_BLOCK_BAD_START.format("tagNameForTest", "%")
         assertContains(formattedMessage, "tagNameForTest")
     }
 }

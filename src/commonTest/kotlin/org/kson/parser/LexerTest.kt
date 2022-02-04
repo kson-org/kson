@@ -2,6 +2,7 @@ package org.kson.parser
 
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.Message
+import org.kson.testSupport.assertMessageFormats
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -108,6 +109,8 @@ class LexerTest {
     private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
         val messageSink = MessageSink()
         Lexer(source, messageSink).tokenize()
+
+        assertMessageFormats(messageSink.loggedMessages())
         assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
     }
 
@@ -497,12 +500,12 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbedBlockDanglingHash() {
+    fun testEmbedBlockDanglingDelim() {
         assertTokenizesWithMessages(
             """
             test: %
             """,
-            listOf(Message.EMBED_BLOCK_DANGLING_HASH)
+            listOf(Message.EMBED_BLOCK_DANGLING_DELIM)
         )
     }
 
@@ -610,7 +613,7 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbeddedBlockHashEscapes() {
+    fun testEmbeddedBlockDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 %%
@@ -623,7 +626,7 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbeddedBlockDollarEscapes() {
+    fun testEmbeddedBlockAltDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 $$

@@ -1,5 +1,7 @@
 package org.kson.ast
 
+import org.kson.parser.EMBED_DELIM_CHAR
+
 interface AstNode {
     /**
      * Serialize the AST subtree rooted at this node to a corresponding kson source code snippet
@@ -103,8 +105,8 @@ class NullNode : ValueNode {
 
 class EmbedBlockNode(private val embedTag: String, private val embedContent: String) : ValueNode {
     override fun toKsonSource(indentLevel: Int, indent: String): String {
-        return indent.repeat(indentLevel) + "%%" + embedTag + "\n" +
+        return indent.repeat(indentLevel) + EMBED_DELIM_CHAR + EMBED_DELIM_CHAR + embedTag + "\n" +
                 embedContent.split("\n").joinToString("\n") { it } +
-                indent.repeat(indentLevel) + "%%"
+                indent.repeat(indentLevel) + EMBED_DELIM_CHAR + EMBED_DELIM_CHAR
     }
 }

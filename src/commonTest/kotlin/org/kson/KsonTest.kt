@@ -3,6 +3,7 @@ package org.kson
 import org.kson.ast.KsonRoot
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.Message
+import org.kson.testSupport.assertMessageFormats
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -55,6 +56,9 @@ class KsonTest {
             parseResult.messages.map { it.message },
             "Should have the expected parse errors."
         )
+
+        assertMessageFormats(parseResult.messages)
+
         assertTrue(
             parseResult.hasErrors(),
             "Should set the hasErrors flag appropriate when there are errors"
@@ -299,12 +303,12 @@ class KsonTest {
     }
 
     @Test
-    fun testUnclosedEmbedHashError() {
+    fun testUnclosedEmbedDelimiterError() {
         assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
-    fun testUnclosedEmbedDollarError() {
+    fun testUnclosedEmbedAlternateDelimiterError() {
         assertParserRejectsSource("$$\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
