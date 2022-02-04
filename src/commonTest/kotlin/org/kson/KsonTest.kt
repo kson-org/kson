@@ -3,6 +3,7 @@ package org.kson
 import org.kson.ast.KsonRoot
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.Message
+import org.kson.testSupport.assertMessageFormats
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -55,6 +56,9 @@ class KsonTest {
             parseResult.messages.map { it.message },
             "Should have the expected parse errors."
         )
+
+        assertMessageFormats(parseResult.messages)
+
         assertTrue(
             parseResult.hasErrors(),
             "Should set the hasErrors flag appropriate when there are errors"
@@ -273,34 +277,39 @@ class KsonTest {
     fun testEmbedBlockSource() {
         assertParsesTo(
             """
-                ```
+                %%
                     this is a raw embed
-                ```
+                %%
             """,
             """
-                ```
+                %%
                     this is a raw embed
-                ```
+                %%
             """.trimIndent()
         )
 
         assertParsesTo(
             """
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """,
             """
-                ```sql
+                %%sql
                     select * from something
-                ```
+                %%
             """.trimIndent()
         )
     }
 
     @Test
-    fun testUnclosedEmbedTicksError() {
-        assertParserRejectsSource("```\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+    fun testUnclosedEmbedDelimiterError() {
+        assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnclosedEmbedAlternateDelimiterError() {
+        assertParserRejectsSource("$$\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test

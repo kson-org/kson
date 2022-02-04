@@ -8,41 +8,35 @@ package org.kson.parser.messages
  * matches on error message content)
  */
 enum class Message {
-    EMBED_BLOCK_DANGLING_TICK {
+    EMBED_BLOCK_DANGLING_DELIM {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Embed delimiter character")
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Dangling backtick.  Did you mean \"```\"?"
-        }
-    },
-    EMBED_BLOCK_DANGLING_DOUBLETICK {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Dangling backticks.  Did you mean \"```\"?"
+            val embedDelimChar = parsedArgs["Embed delimiter character"]
+            return "Dangling embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
         }
     },
     EMBED_BLOCK_BAD_START {
         override fun expectedArgs(): List<String> {
-            return listOf("Embed Tag Name")
+            return listOf("Embed Tag Name", "Embed delimiter character")
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
             val embedTag = parsedArgs["Embed Tag Name"]
-            return "This Embedded Block's content must start on the line after the opening '```${embedTag ?: ""}'"
+            val embedDelimChar = parsedArgs["Embed delimiter character"]
+            return "This Embedded Block's content must start on the line after the opening '$embedDelimChar$embedDelimChar${embedTag ?: ""}"
         }
     },
     EMBED_BLOCK_NO_CLOSE {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Embed delimiter character")
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Unclosed \"```\""
+            val embedDelimChar = parsedArgs["Embed delimiter character"]
+            return "Unclosed \"$embedDelimChar$embedDelimChar\""
         }
     },
     UNEXPECTED_CHAR {

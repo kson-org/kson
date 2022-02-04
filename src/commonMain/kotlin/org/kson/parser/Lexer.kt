@@ -29,6 +29,9 @@ enum class TokenType {
     WHITESPACE
 }
 
+const val EMBED_DELIM_CHAR = '%'
+const val EMBED_DELIM_ALT_CHAR = '$'
+
 private val KEYWORDS =
     mapOf(
         "null" to TokenType.NULL,
@@ -61,10 +64,6 @@ private class SourceScanner(private val source: String) {
 
     fun peekNext(): Char {
         return if (selectionEndOffset + 1 >= source.length) EOF else source[selectionEndOffset + 1]
-    }
-
-    fun peekNextNext(): Char {
-        return if (selectionEndOffset + 2 >= source.length) EOF else source[selectionEndOffset + 2]
     }
 
     /**
@@ -273,21 +272,18 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
-            '`' -> {
-                if (sourceScanner.peek() == '`') {
+            EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
+                // look for the required second embed delim char
+                if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
-                    if (sourceScanner.peek() == '`') {
-                        sourceScanner.advance()
-                        addLiteralToken(TokenType.EMBED_START)
-                        embeddedBlock()
-                    } else {
-                        messageSink.error(
-                            addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                            Message.EMBED_BLOCK_DANGLING_DOUBLETICK
-                        )
-                    }
+                    addLiteralToken(TokenType.EMBED_START)
+                    embeddedBlock(char)
                 } else {
-                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_TICK)
+                    messageSink.error(
+                        addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                        Message.EMBED_BLOCK_DANGLING_DELIM,
+                        char.toString()
+                    )
                 }
             }
             else -> {
@@ -374,7 +370,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         addLiteralToken(TokenType.DOUBLE_QUOTE)
     }
 
-    private fun embeddedBlock() {
+    private fun embeddedBlock(blockChar: Char) {
         val embedTag = if (isAlphaNumeric(sourceScanner.peek())) {
             while (isAlphaNumeric(sourceScanner.peek())) {
                 sourceScanner.advance()
@@ -388,36 +384,35 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         while (isInlineWhitespace(sourceScanner.peek())) {
-            // advance through any inline whitespace between the '```[tag]' and the required newline
+            // advance through any inline whitespace between the 'blockChar[tag]' and the required newline
             sourceScanner.advance()
         }
 
         if (sourceScanner.peek() == '\n') {
-            // found the required newline---adavnce past it and tokenize it along with any whitespace we advanced past above
+            // found the required newline---advance past it and tokenize it along with any whitespace we advanced past above
             sourceScanner.advance()
             addLiteralToken(TokenType.WHITESPACE)
         } else {
-            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag)
+            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag, blockChar.toString())
         }
 
-        // we use this var to track if we need to consume escapes in an embed blcok so we only walk its text
+        // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
         // trying to replace escapes if we know we need to
         var hasEscapedEmbedEnd = false
 
-        // read embedded content until the closing ```
+        // read embedded content until the closing blockChar pair
         while (
-            !(sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`' && sourceScanner.peekNextNext() == '`')
+            !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
             && sourceScanner.peek() != EOF
         ) {
-            if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "``", we're looking at an escaped EMBED_END
+            if (sourceScanner.peek() == blockChar && sourceScanner.peekNext() == '\\') {
+                // if this is all slashes until "blockChar", we're looking at an escaped EMBED_END
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
                 }
-                if (sourceScanner.peek() == '`' && sourceScanner.peekNext() == '`') {
+                if (sourceScanner.peek() == blockChar) {
                     hasEscapedEmbedEnd = true
-                    sourceScanner.advance()
                     sourceScanner.advance()
                 }
             }
@@ -427,7 +422,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE)
+            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE, blockChar.toString())
             return
         }
 
@@ -435,27 +430,32 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val embedTokenValue = if (hasEscapedEmbedEnd) {
             /**
              * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
-             * so some here's some clarifying notes:
+             * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
+             * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_END has its second tick escaped: `\`` yields ``` inside of an embed.
-             *   Note that this moves the escaping goalpost since we also need to allow `\`` literally inside
-             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary \s before the second
-             *   tick, and consume one of them.  Then, `\\`` gives `\`` in the output, `\\\`` gives `\\`` in
+             * - an escaped EMBED_END has its second percent char escaped: %\% yields %% inside of an embed.
+             *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
+             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary `\`s before the second
+             *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
              *   the output, etc
              *
-             * - the regex for this ends up looking a bit crazy since \ needs to be double escaped in regex, so
-             *   matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional slashes
-             *   in the output
+             * - the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
+             *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
+             *   slashes in the output, and we also need to escape the blockChar delimiter since it may be a regex
+             *   special character, like '$' (EMBED_DELIM_ALT_CHAR), that needs special handling.
              */
-            trimmedEmbedBlockContent.replace(Regex("`\\\\([\\\\]*)``"), "`$1``")
+            val literal = "$blockChar"
+            val escaped = Regex.escape(literal)
+            val pattern = "$escaped\\\\([\\\\]*)$escaped"
+            val escapedReplacement = Regex.escapeReplacement(literal)
+            trimmedEmbedBlockContent.replace(Regex(pattern), "$escapedReplacement\$1$escapedReplacement")
         } else {
             trimmedEmbedBlockContent
         }
 
         addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, embedTokenValue)
 
-        // process our closing ```
-        sourceScanner.advance()
+        // process our closing blockChar pair
         sourceScanner.advance()
         sourceScanner.advance()
         addLiteralToken(TokenType.EMBED_END)
