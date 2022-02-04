@@ -29,6 +29,9 @@ enum class TokenType {
     WHITESPACE
 }
 
+const val EMBED_DELIM_CHAR = '%'
+const val EMBED_DELIM_ALT_CHAR = '$'
+
 private val KEYWORDS =
     mapOf(
         "null" to TokenType.NULL,
@@ -269,22 +272,17 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
-            '%' -> {
-                if (sourceScanner.peek() == '%') {
+            EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
+                // look for the required second embed delim char
+                if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
                     addLiteralToken(TokenType.EMBED_START)
-                    embeddedBlock('%')
+                    embeddedBlock(char)
                 } else {
-                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_HASH)
-                }
-            }
-            '$' -> {
-                if (sourceScanner.peek() == '$') {
-                    sourceScanner.advance()
-                    addLiteralToken(TokenType.EMBED_START)
-                    embeddedBlock('$')
-                } else {
-                    messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_DANGLING_HASH)
+                    messageSink.error(
+                        addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                        Message.EMBED_BLOCK_DANGLING_DELIM
+                    )
                 }
             }
             else -> {
@@ -390,11 +388,11 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         if (sourceScanner.peek() == '\n') {
-            // found the required newline---adavnce past it and tokenize it along with any whitespace we advanced past above
+            // found the required newline---advance past it and tokenize it along with any whitespace we advanced past above
             sourceScanner.advance()
             addLiteralToken(TokenType.WHITESPACE)
         } else {
-            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag)
+            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag, blockChar.toString())
         }
 
         // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
@@ -423,7 +421,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE)
+            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE, blockChar.toString())
             return
         }
 
@@ -431,18 +429,19 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val embedTokenValue = if (hasEscapedEmbedEnd) {
             /**
              * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
-             * so some here's some clarifying notes:
+             * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
+             * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_END has its second hash escaped: %\% yields %% inside of an embed.
+             * - an escaped EMBED_END has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
-             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary \s before the second
-             *   tick, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
+             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary `\`s before the second
+             *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
              *   the output, etc
              *
              * - the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
              *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
              *   slashes in the output, and we also need to escape the blockChar delimiter since it may be a regex
-             *   special character, like '$', that needs special handling.
+             *   special character, like '$' (EMBED_DELIM_ALT_CHAR), that needs special handling.
              */
             val literal = "$blockChar"
             val escaped = Regex.escape(literal)

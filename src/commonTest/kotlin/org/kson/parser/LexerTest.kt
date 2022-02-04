@@ -497,12 +497,12 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbedBlockDanglingHash() {
+    fun testEmbedBlockDanglingDelim() {
         assertTokenizesWithMessages(
             """
             test: %
             """,
-            listOf(Message.EMBED_BLOCK_DANGLING_HASH)
+            listOf(Message.EMBED_BLOCK_DANGLING_DELIM)
         )
     }
 
@@ -610,7 +610,7 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbeddedBlockHashEscapes() {
+    fun testEmbeddedBlockDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 %%
@@ -623,7 +623,7 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbeddedBlockDollarEscapes() {
+    fun testEmbeddedBlockAltDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 $$

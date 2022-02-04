@@ -299,12 +299,12 @@ class KsonTest {
     }
 
     @Test
-    fun testUnclosedEmbedHashError() {
+    fun testUnclosedEmbedDelimiterError() {
         assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
-    fun testUnclosedEmbedDollarError() {
+    fun testUnclosedEmbedAlternateDelimiterError() {
         assertParserRejectsSource("$$\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }
 
