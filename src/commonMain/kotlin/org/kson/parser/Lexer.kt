@@ -281,7 +281,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 } else {
                     messageSink.error(
                         addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                        Message.EMBED_BLOCK_DANGLING_DELIM
+                        Message.EMBED_BLOCK_DANGLING_DELIM,
+                        char.toString()
                     )
                 }
             }
