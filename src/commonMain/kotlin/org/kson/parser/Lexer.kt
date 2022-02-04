@@ -63,10 +63,6 @@ private class SourceScanner(private val source: String) {
         return if (selectionEndOffset + 1 >= source.length) EOF else source[selectionEndOffset + 1]
     }
 
-    fun peekNextNext(): Char {
-        return if (selectionEndOffset + 2 >= source.length) EOF else source[selectionEndOffset + 2]
-    }
-
     /**
      * Increase the current text selection by one character, returning that character
      */
