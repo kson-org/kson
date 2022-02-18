@@ -352,7 +352,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertTokenizesTo(
@@ -361,7 +361,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
         )
     }
 
@@ -373,7 +373,7 @@ class LexerTest {
                 this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals("this is a raw embed\n", oneLineEmbedTokens[1].value)
@@ -387,7 +387,7 @@ class LexerTest {
                                 the leftmost line
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals(
@@ -411,7 +411,7 @@ class LexerTest {
                 which is the end delimiter in this case
               %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals(
@@ -433,7 +433,7 @@ class LexerTest {
                 this should have a newline at the end
                 %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals("this should have a newline at the end\n", trailingNewlineTokens[1].value)
@@ -446,7 +446,7 @@ class LexerTest {
                     spaces and a newline at the end    
                 %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals(
@@ -465,7 +465,7 @@ class LexerTest {
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals(
@@ -483,7 +483,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END),
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END),
             "should allow trailing whitespace after the opening '```'"
         )
 
@@ -494,7 +494,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBEDDED_BLOCK, EMBED_END),
+            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END),
             "should allow trailing whitespace after the opening '```embedTag'"
         )
     }
@@ -593,7 +593,7 @@ class LexerTest {
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
                 Pair(EMBED_START, Location(3, 11, 3, 13, 50, 52)),
-                Pair(EMBEDDED_BLOCK, Location(4, 0, 7, 6, 53, 128)),
+                Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
                 Pair(EMBED_END, Location(7, 6, 7, 8, 128, 130)),
                 Pair(BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
@@ -619,7 +619,7 @@ class LexerTest {
                 %%
                 these double %\% ticks are embedded but escaped%%
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals("these double %% ticks are embedded but escaped", singleEscapeTokens[1].value)
@@ -632,7 +632,7 @@ class LexerTest {
                 $$
                 these double $\$ dollars are embedded but escaped$$
             """,
-            listOf(EMBED_START, EMBEDDED_BLOCK, EMBED_END)
+            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
         assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[1].value)

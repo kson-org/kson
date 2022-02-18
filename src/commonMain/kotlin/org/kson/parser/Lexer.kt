@@ -13,10 +13,10 @@ enum class TokenType {
     COLON,
     COMMA,
     COMMENT,
+    EMBED_CONTENT,
     EMBED_END,
     EMBED_START,
     EMBED_TAG,
-    EMBEDDED_BLOCK,
     EOF,
     FALSE,
     IDENTIFIER,
@@ -453,7 +453,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             trimmedEmbedBlockContent
         }
 
-        addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, embedTokenValue)
+        addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
         // process our closing blockChar pair
         sourceScanner.advance()
