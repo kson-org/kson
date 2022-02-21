@@ -16,9 +16,10 @@ import org.junit.Test
  * }
  * ```
  *
- * By convention based on the test name, this will look for two files inside [testData.parser]:
- * `ksonFileName.kson` and `ksonFileName.txt`, where `ksonFileName.kson` contains the Kson source to parse, and
- * `ksonFileName.txt` contains a text representation of the resulting PSI tree.
+ * By convention based on the test name, say `fun testKsonFileName()){...}` this will look for two files
+ * inside [testData.parser]:
+ * - `KsonFileName.kson` containing the Kson source to parse in the test
+ * - `KsonFileName.txt` contains a text representation of the expected PSI tree to be parsed from `KsonFileName.kson`
  *
  * NOTES:
  * - if the `.txt` file does not exist for a test, it will be automatically generated on first run
