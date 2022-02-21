@@ -17,7 +17,7 @@ import org.kson.parser.messages.Message
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
  * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
- * literal -> STRING, NUMBER, "true", "false", "null" ;
+ * literal -> STRING | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
  * ```
  *
@@ -193,7 +193,7 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
     }
 
     /**
-     * literal -> STRING, NUMBER, "true", "false", "null" ;
+     * literal -> STRING | NUMBER | "true" | "false" | "null" ;
      */
     private fun literal(): ValueNode? {
         if (setOf(
