@@ -659,9 +659,7 @@ class LexerTest {
                 Pair(IDENTIFIER, Location(0, 2, 0, 8, 2, 8)),
                 Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
                 Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
-                Pair(DOUBLE_QUOTE, Location(0, 10, 0, 11, 10, 11)),
-                Pair(STRING, Location(0, 11, 0, 17, 11, 17)),
-                Pair(DOUBLE_QUOTE, Location(0, 17, 0, 18, 17, 18)),
+                Pair(STRING, Location(0, 10, 0, 18, 10, 18)),
                 Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
             ),
             true

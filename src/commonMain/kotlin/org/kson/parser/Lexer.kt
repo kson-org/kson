@@ -23,7 +23,6 @@ enum class TokenType {
     ILLEGAL_TOKEN,
     NULL,
     NUMBER,
-    DOUBLE_QUOTE,
     STRING,
     TRUE,
     WHITESPACE
@@ -228,7 +227,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.DOUBLE_QUOTE)
+            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE)
         }
     )
 
@@ -269,7 +268,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"' -> {
-                addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
@@ -352,22 +350,23 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             sourceScanner.advance()
         }
 
-        val stringLocation = if (hasEscapedQuotes) {
-            val rawStringLexeme = sourceScanner.extractLexeme()
-            val escapedString = rawStringLexeme.text.replace("\\\"", "\"")
-            addToken(TokenType.STRING, rawStringLexeme, escapedString)
-        } else {
-            addLiteralToken(TokenType.STRING)
-        }
-
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(stringLocation, Message.STRING_NO_CLOSE)
+            messageSink.error(sourceScanner.currentLocation(), Message.STRING_NO_CLOSE)
             return
         }
 
         // Eat the closing `"`
         sourceScanner.advance()
-        addLiteralToken(TokenType.DOUBLE_QUOTE)
+
+        val rawStringLexeme = sourceScanner.extractLexeme()
+        // clip the quotes from the string to get the actual value
+        val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length - 1)
+        if (hasEscapedQuotes) {
+            val escapedString = stringText.replace("\\\"", "\"")
+            addToken(TokenType.STRING, rawStringLexeme, escapedString)
+        } else {
+            addToken(TokenType.STRING, rawStringLexeme, stringText)
+        }
     }
 
     private fun embeddedBlock(blockChar: Char) {
