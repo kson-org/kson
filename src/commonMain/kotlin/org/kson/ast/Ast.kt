@@ -79,7 +79,16 @@ class IdentifierNode(override val value: String) : ValueNode, KeywordNode {
     }
 }
 
-class NumberNode(private val value: Number) : ValueNode {
+/**
+ * @param stringValue MUST be parseable as a [Double] parser todo this is a lot to ask of callers, can/should we improve?
+ */
+class NumberNode(stringValue: String) : ValueNode {
+    /**
+     * Our parse believes it will never allow an unparseable string to be passed into this constructor,
+     * so we allow the uncaught NumberFormatException to bubble out as a RuntimeException
+     * to loudly error when/if our belief is invalidated
+     */
+    val value = stringValue.toDouble()
     override fun toKsonSource(indentLevel: Int, indent: String): String {
         return indent.repeat(indentLevel) + value.toString()
     }

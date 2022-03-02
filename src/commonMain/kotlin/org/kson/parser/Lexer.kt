@@ -4,6 +4,7 @@ import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
 import org.kson.parser.messages.Message
+import org.kson.ast.NumberNode
 
 enum class TokenType {
     BRACE_L,
@@ -184,9 +185,9 @@ data class Token(
      */
     val lexeme: Lexeme,
     /**
-     * The actual parsed [value] of this token, extracted from [lexeme]
+     * The final lexed [value] of this token, extracted (and possibly transformed) from [lexeme]
      */
-    val value: Any
+    val value: String
 )
 
 /**
@@ -517,25 +518,20 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()
         }
 
-        val numberLexeme = sourceScanner.extractLexeme()
-
-        /* numberLexeme is now made up of three parts:
-         * * one or more digits (required, but may be 0) representing the whole part;
-         * * (optional) a decimal point, which is required to be followed by digits representing the fractional part;
-         * * (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
-         *   representing the exponent part
+        /**
+         * We have now validated that NumberLexeme is made up of three parts:
+         * - one or more digits (required, but may be 0) representing the whole part;
+         * - (optional) a decimal point, which is required to be followed by digits representing the fractional part;
+         * - (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
+         *       representing the exponent part
          *
-         * This all matches both the JSON grammar and the expectations of Java's double parser, so we'll forward parsing
-         * on to that.
+         * This all matches both the JSON grammar and the expectations of [String.toDouble], so we should be all set
+         * to create a [NumberNode] from this lexeme later in the parse
          *
-         * The parseDouble function throws a NumberFormatException which we aren't catching here, allowing it to bubble
-         * out as a RuntimeException to loudly error when/if a new edge case is found.
-         *
-         * See also java.lang.Double.parseDouble and jdk.internal.math.FloatingDecimal.ASCIIToBinaryBuffer.doubleValue
+         * parser todo this prepping our string for [String.toDouble] happens very far away from the actual
+         *   [String.toDouble] in [NumberNode], which could lead to some awkward bug troubleshoots
          */
-        val parsedDouble = numberLexeme.text.toDouble()
-
-        addToken(TokenType.NUMBER, numberLexeme, parsedDouble)
+        addLiteralToken(TokenType.NUMBER)
     }
 
     /**
@@ -555,7 +551,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
      *
      * @return the location of the added [Token]
      */
-    private fun addToken(type: TokenType, lexeme: Lexeme, value: Any): Location {
+    private fun addToken(type: TokenType, lexeme: Lexeme, value: String): Location {
         tokens.add(Token(type, lexeme, value))
         return lexeme.location
     }
