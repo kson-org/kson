@@ -37,11 +37,11 @@ enum class TokenType : ElementType {
  */
 enum class ParsedElementType : ElementType {
     EMBED_BLOCK,
-    KEYWORD,
+    ERROR,
     LIST,
     OBJECT_DEFINITION,
+    OBJECT_INTERNALS,
     OBJECT_NAME,
     PROPERTY,
-    ROOT,
-    VALUE
+    ROOT
 }

@@ -22,25 +22,25 @@ class KsonRoot(private val rootNode: AstNode) : AstNode {
 
 interface ValueNode : AstNode
 
-class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode?) :
+class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode) :
     ValueNode {
     override fun toKsonSource(indentLevel: Int, indent: String): String {
         val renderedName = if (name.isEmpty()) "" else "$name "
-        return if (internalsNode != null) {
-            """
-            |$renderedName{
-            |${internalsNode.toKsonSource(indentLevel + 1, indent)}
-            |}
-            """.trimMargin()
-        } else {
-            "{}"
-        }
+        return "$renderedName${internalsNode.toKsonSource(indentLevel, indent)}"
     }
 }
 
 class ObjectInternalsNode(private val properties: List<PropertyNode>) : ValueNode {
     override fun toKsonSource(indentLevel: Int, indent: String): String {
-        return properties.joinToString("\n") { it.toKsonSource(indentLevel, indent) }
+        return if (properties.isEmpty()) {
+            "{}"
+        } else {
+            """
+                |{
+                |${properties.joinToString("\n") { it.toKsonSource(indentLevel + 1, indent) }}
+                |}
+                """.trimMargin()
+        }
     }
 
 }

@@ -35,7 +35,7 @@ class Parser(val builder: AstBuilder) {
      * kson -> (objectInternals | value) EOF ;
      */
     fun parse() {
-        if (objectInternals() || value()) {
+        if (objectInternals(false) || value()) {
             if (hasUnexpectedTrailingContent()) {
                 // parser todo we likely want to see if we can contiue parsing after adding the error noting
                 //             the unexpected extra content
@@ -46,9 +46,10 @@ class Parser(val builder: AstBuilder) {
     /**
      * objectInternals -> ( keyword value ","? )* ;
      */
-    private fun objectInternals(): Boolean {
+    private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
 
+        val objectInternalsMark = builder.mark()
         while (true) {
             val propertyMark = builder.mark()
             if (keyword() && value()) {
@@ -65,6 +66,12 @@ class Parser(val builder: AstBuilder) {
             }
         }
 
+        if (foundProperties || allowEmpty)  {
+            objectInternalsMark.done(OBJECT_INTERNALS)
+        } else {
+            objectInternalsMark.rollbackTo()
+        }
+
         return foundProperties
     }
 
@@ -75,16 +82,13 @@ class Parser(val builder: AstBuilder) {
      *        | embedBlock ;
      */
     private fun value(): Boolean {
-        val valueMark = builder.mark()
         if (objectDefinition()
             || list()
             || literal()
             || embedBlock()
         ) {
-            valueMark.done(VALUE)
             return true
         } else {
-            valueMark.rollbackTo()
             return false
         }
     }
@@ -96,20 +100,20 @@ class Parser(val builder: AstBuilder) {
         if (builder.getTokenType() == BRACE_L
             || builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == BRACE_L
         ) {
+            val objectDefinitionMark = builder.mark()
             val objectNameMarker = builder.mark()
             if (builder.getTokenType() == IDENTIFIER) {
                 builder.advanceLexer()
-                objectNameMarker.done(OBJECT_NAME)
-            } else {
-                objectNameMarker.rollbackTo()
             }
+            // mark out object name even though it may be empty so the resulting marker tree
+            // is consistent in both cases
+            objectNameMarker.done(OBJECT_NAME)
 
-            val objectDefinitionMark = builder.mark()
             // advance past our BRACE_L
             builder.advanceLexer()
 
             // parse any object internals, empty or otherwise
-            objectInternals()
+            objectInternals(true)
 
             if (builder.getTokenType() == BRACE_R) {
                 // advance past our BRACE_R
@@ -135,13 +139,7 @@ class Parser(val builder: AstBuilder) {
             val listMark = builder.mark()
 
             while (builder.getTokenType() != BRACKET_R) {
-                val valueMark = builder.mark()
-                if (value()) {
-                    valueMark.done(VALUE)
-                } else {
-                    TODO("need a legal value here, make a nice error for this")
-                }
-
+                value()
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
                     builder.advanceLexer()
@@ -171,15 +169,16 @@ class Parser(val builder: AstBuilder) {
      * keyword -> ( IDENTIFIER | STRING ) ":" ;
      */
     private fun keyword(): Boolean {
-        if ((builder.getTokenType() == IDENTIFIER || builder.getTokenType() == STRING)
+        val elementType = builder.getTokenType()
+        if ((elementType == IDENTIFIER || elementType == STRING)
             && builder.lookAhead(1) == COLON
         ) {
             val keywordMark = builder.mark()
             builder.advanceLexer()
+            keywordMark.done(elementType)
 
             // advance past the COLON
             builder.advanceLexer()
-            keywordMark.done(KEYWORD)
             return true
         } else {
             // not a keyword
@@ -191,19 +190,23 @@ class Parser(val builder: AstBuilder) {
      * literal -> STRING | NUMBER | "true" | "false" | "null" ;
      */
     private fun literal(): Boolean {
-        if (setOf(
+        val literalMark = builder.mark()
+        val elementType = builder.getTokenType()
+        if (elementType != null && setOf(
                 STRING,
                 IDENTIFIER,
                 NUMBER,
                 TRUE,
                 FALSE,
                 NULL
-            ).any { it == builder.getTokenType() }
+            ).any { it == elementType }
         ) {
             // consume our literal
             builder.advanceLexer()
+            literalMark.done(elementType)
             return true
         } else {
+            literalMark.rollbackTo()
             return false
         }
     }
@@ -216,16 +219,21 @@ class Parser(val builder: AstBuilder) {
             // advance past the EMBED_START
             builder.advanceLexer()
             val embedBlockMark = builder.mark()
+            val embedTagMark = builder.mark()
             if (builder.getTokenType() == EMBED_TAG) {
-                // advance past our embed optional tag
+                // advance past our optional embed tag
                 builder.advanceLexer()
             }
+            embedTagMark.done(EMBED_TAG)
 
-            if (builder.getTokenType() == EMBED_CONTENT && builder.lookAhead(1) == EMBED_END) {
+            val embedBlockContentMark = builder.mark()
+            if (builder.getTokenType() == EMBED_CONTENT) {
+                // advance past our EMBED_CONTENT
                 builder.advanceLexer()
-                builder.advanceLexer()
-                embedBlockMark.done(EMBED_BLOCK)
-            } else if (builder.getTokenType() == EMBED_END) {
+            }
+            embedBlockContentMark.done(EMBED_CONTENT)
+            embedBlockMark.done(EMBED_BLOCK)
+            if (builder.getTokenType() == EMBED_END) {
                 // empty embed block is also legal
                 builder.advanceLexer()
             } else {

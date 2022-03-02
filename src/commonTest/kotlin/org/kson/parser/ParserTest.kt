@@ -3,6 +3,7 @@ package org.kson.parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * NOTE: most Kson parsing tests are done the more holistic level in [org.kson.KsonTest].  If/when we have
@@ -16,11 +17,16 @@ class ParserTest {
      */
     @Test
     fun testSanityCheckParse() {
-        val nullTokenStream = listOf(Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null"))
+        val nullTokenStream = listOf(
+            Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null"),
+            Token(TokenType.EOF, Lexeme("", Location(0, 4, 0, 4, 4, 4)), "")
+        )
         val builder = KsonBuilder(nullTokenStream)
         Parser(builder).parse()
-        val ksonRoot = builder.buildTree()
+        val messageSink = MessageSink()
+        val ksonRoot = builder.buildTree(messageSink)
         assertNotNull(ksonRoot)
+        assertTrue(messageSink.loggedMessages().isEmpty())
         assertEquals(ksonRoot.toKsonSource(0), "null")
     }
 }

@@ -14,7 +14,7 @@ class Kson {
             } else {
                 val builder = KsonBuilder(tokens)
                 Parser(builder).parse()
-                builder.buildTree()
+                builder.buildTree(messageSink)
             }
 
             return ParseResult(ast, tokens, messageSink)

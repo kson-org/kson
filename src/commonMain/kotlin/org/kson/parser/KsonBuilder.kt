@@ -1,12 +1,40 @@
 package org.kson.parser
 
-import org.kson.ast.KsonRoot
+import org.kson.ast.*
+import org.kson.parser.ParsedElementType.*
+import org.kson.parser.TokenType.*
+import org.kson.parser.messages.Message
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
  */
-class KsonBuilder(private val tokens: List<Token>): AstBuilder {
-    var currentToken = 0
+class KsonBuilder(private val tokens: List<Token>) :
+    AstBuilder,
+    MarkerBuilderContext {
+
+    private var currentToken = 0
+    private var rootMarker = KsonMarker(this, object : MarkerCreator {
+        override fun forgetMe(me: KsonMarker) {
+            throw RuntimeException("The root marker has no creator that needs to forget it")
+        }
+    })
+    var hasErrors = false
+
+    override fun getValue(tokenStartIndex: Int, tokenEndIndex: Int): String {
+        return tokens.subList(tokenStartIndex, tokenEndIndex).joinToString(" ") { it.value }
+    }
+
+    override fun errorEncountered() {
+        hasErrors = true
+    }
+
+    override fun getTokenIndex(): Int {
+        return currentToken
+    }
+
+    override fun setTokenIndex(state: Int) {
+        currentToken = state
+    }
 
     override fun getTokenType(): TokenType? {
         if (currentToken < tokens.size) {
@@ -31,16 +59,293 @@ class KsonBuilder(private val tokens: List<Token>): AstBuilder {
     override fun eof(): Boolean {
         // parser todo nuke the EOF token now? Seems it's not as useful/needed with this new builder-style
         //             of parser, so these two checks are redundant
-        return currentToken == tokens.size - 1 && tokens[currentToken].tokenType == TokenType.EOF
+        return currentToken == tokens.size - 1 && tokens[currentToken].tokenType == EOF
     }
 
     override fun mark(): AstMarker {
-        // parser todo
-        TODO("Must finish implementing marker/builder-style parser")
+        return rootMarker.addMark()
     }
 
-    fun buildTree(): KsonRoot {
-        // parser todo
-        TODO("Must finish implementing marker/builder-style parser")
+    fun buildTree(messageSink: MessageSink): KsonRoot? {
+        rootMarker.done(ROOT)
+
+        return if (hasErrors) {
+            walkForErrors(rootMarker, messageSink)
+            return null
+        } else {
+            unsafeAstCast(toAst(rootMarker))
+        }
+    }
+
+    /**
+     * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any error marks into [messageSink]
+     */
+    private fun walkForErrors(marker: KsonMarker, messageSink: MessageSink) {
+        val error = marker.markedError
+        if (error != null) {
+            val message = error.first
+            val messageArgs = error.second
+            messageSink.error(
+                Location.merge(
+                    tokens[marker.markStartIndex].lexeme.location,
+                    tokens[marker.markEndIndex].lexeme.location
+                ), message, *messageArgs
+            )
+        }
+
+        if (marker.childMarkers.isNotEmpty()) {
+            for (childMarker in marker.childMarkers) {
+                walkForErrors(childMarker, messageSink)
+            }
+        }
+    }
+
+    /**
+     * Transform the given [KsonMarker] tree rooted at [marker] into a full Kson [AstNode] tree.
+     * This should NEVER be called if there are parse errors because:
+     *
+     * WARNING "UNSAFE" CODE: this is the RARE (ideally ONLY???) place where we allow unsafe/loose
+     *  coding practices for simplicity and speed.  This method gets to assume it is given a well-formed [KsonMarker]
+     *  tree (since it makes no sense to generate an AST tree for invalid code), and hence gets to assume things
+     *  about the structure and do check-free array look-ups and casts.  We've encapsulated the unsafe operations
+     *  into [unsafeAstCast] and [unsafeMarkerLookup]---if brittleness related to these operations becomes too common
+     *  and onerous, we should rethink this
+     */
+    private fun toAst(marker: KsonMarker): AstNode {
+        if (!marker.isDone()) {
+            throw RuntimeException("Should have a well-formed, all-done marker tree at this point")
+        }
+
+        return when (marker.element) {
+            is TokenType -> {
+                when (marker.element) {
+                    BRACE_L,
+                    BRACE_R,
+                    BRACKET_L,
+                    BRACKET_R,
+                    COLON,
+                    COMMA,
+                    COMMENT,
+                    EMBED_END,
+                    EMBED_START,
+                    EMBED_TAG,
+                    EMBED_CONTENT,
+                    EOF,
+                    ILLEGAL_TOKEN,
+                    WHITESPACE -> {
+                        throw RuntimeException("These tokens do not generate their own AST nodes")
+                    }
+                    FALSE -> {
+                        FalseNode()
+                    }
+                    IDENTIFIER -> {
+                        IdentifierNode(marker.getValue())
+                    }
+                    NULL -> {
+                        NullNode()
+                    }
+                    NUMBER -> {
+                        NumberNode(marker.getValue())
+                    }
+                    STRING -> {
+                        StringNode(marker.getValue())
+                    }
+                    TRUE -> {
+                        TrueNode()
+                    }
+                    else -> {
+                        // Kotlin seems to having trouble validating that our when is exhaustive here, so we
+                        // add the old-school guardrail here
+                        throw RuntimeException("Unexpected ${TokenType::class.simpleName}, do we need a new case?")
+                    }
+                }
+            }
+            is ParsedElementType -> {
+                val childMarkers = marker.childMarkers
+                when (marker.element) {
+                    EMBED_BLOCK -> {
+                        val embedTag =
+                            unsafeMarkerLookup(childMarkers, 0).getValue()
+                        val embedContent =
+                            unsafeMarkerLookup(childMarkers, 1).getValue()
+                        EmbedBlockNode(embedTag, embedContent)
+                    }
+                    LIST -> {
+                        val valueNodeList = childMarkers.map { unsafeAstCast<ValueNode>(toAst(it)) }
+                        ListNode(valueNodeList)
+                    }
+                    OBJECT_DEFINITION -> {
+                        val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
+                        val objectInternalsNode =
+                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 1)))
+                        ObjectDefinitionNode(objectName, objectInternalsNode)
+                    }
+                    OBJECT_INTERNALS -> {
+                        val propertyNodes = childMarkers.map {
+                            unsafeAstCast<PropertyNode>(toAst(it))
+                        }
+                        ObjectInternalsNode(propertyNodes)
+                    }
+                    PROPERTY -> {
+                        PropertyNode(
+                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
+                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1)))
+                        )
+                    }
+                    ROOT -> {
+                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)))
+                    }
+                    else -> {
+                        // Kotlin seems to having trouble validating that our when is exhaustive here, so we
+                        // add the old-school guardrail here
+                        throw RuntimeException("Unexpected ${ParsedElementType::class.simpleName}, do we need a new case?")
+                    }
+                }
+            }
+            else -> {
+                throw RuntimeException(
+                    "Unexpected ${ElementType::class.simpleName}.  " +
+                            "Should always be one of ${TokenType::class.simpleName} or ${ParsedElementType::class.simpleName}"
+                )
+            }
+        }
+    }
+
+    /**
+     * Helper method to encapsulate the loose casts we're allowing in [KsonBuilder.toAst]
+     * and give us a place to say:
+     *
+     * THIS SHOULD NOT BE EMULATED ELSEWHERE.  See the doc on [KsonBuilder.toAst] for rationale on why it's okay here.
+     */
+    private fun <A : AstNode> unsafeAstCast(nodeToCast: AstNode): A {
+        @Suppress("UNCHECKED_CAST") // see method doc for suppress rationale
+        return nodeToCast as A
+    }
+
+    /**
+     * Helper method to encapsulate the loose array lookups we're allowing in [KsonBuilder.toAst]
+     * and give us a place to say:
+     *
+     * THIS SHOULD NOT BE EMULATED ELSEWHERE.  See the doc on [KsonBuilder.toAst] for rationale on why it's okay here.
+     */
+    private fun unsafeMarkerLookup(markerList: ArrayList<KsonMarker>, index: Int): KsonMarker {
+        return markerList[index]
+    }
+}
+
+/**
+ * [MarkerBuilderContext] defines the contract for how [KsonMarker]s collaborate with the
+ * [KsonBuilder] they are marking up, keeping the extent/complexity of the intentional coupling
+ * of these two classes constrained and well-defined.  We also keep this complexity controlled
+ * with strict encapsulation:
+ *
+ * This interface is private so that all implementation details of [KsonBuilder] (including
+ * the [KsonMarker] implementation) are encapsulated in this file
+ */
+private interface MarkerBuilderContext {
+    /**
+     * Get the parsed [String] value for the range of tokens from [tokenStartIndex] to [tokenEndIndex]
+     */
+    fun getValue(tokenStartIndex: Int, tokenEndIndex: Int): String
+
+    /**
+     * Register that a parsing error has been encountered
+     */
+    fun errorEncountered()
+
+    /**
+     * [KsonMarker]s mark token start and end indexes.  This returns the token index of the [KsonBuilder]
+     * being marked
+     */
+    fun getTokenIndex(): Int
+
+    /**
+     * Reset the current token index of the [KsonBuilder] being marked to the given [state]
+     */
+    fun setTokenIndex(state: Int)
+}
+
+/**
+ * [KsonMarker]s use this as part of [KsonMarker.rollbackTo] to ask their creator (generally a parent [KsonMarker])
+ * to forget all references to them, removing them from the marker tree
+ */
+private interface MarkerCreator {
+    fun forgetMe(me: KsonMarker)
+}
+
+/**
+ * [KsonMarker] is the [AstMarker] implementation designed to collaborate with [KsonBuilder]
+ * (through [MarkerBuilderContext])
+ */
+private class KsonMarker(private val context: MarkerBuilderContext, private val creator: MarkerCreator) : AstMarker,
+    MarkerCreator {
+    val markStartIndex = context.getTokenIndex()
+    var markEndIndex = markStartIndex
+    var markedError: Pair<Message, Array<out String?>>? = null
+    var element: ElementType? = null
+    val childMarkers = ArrayList<KsonMarker>()
+
+    fun isDone(): Boolean {
+        return element != null
+    }
+
+    fun getValue(): String {
+        return context.getValue(this.markStartIndex, this.markEndIndex)
+    }
+
+    /**
+     * Used to eliminate a [KsonMarker] this instance has created from its tree of children
+     */
+    override fun forgetMe(me: KsonMarker) {
+        /**
+         * Our [forgetMe] operation is a basic [removeLast] because [addMark] guarantees the last entry here
+         * is the only unresolved mark created by us.  See [addMark] for details.
+         */
+        val lastChild = childMarkers.removeLast()
+        if (lastChild != me) {
+            throw RuntimeException(
+                "Malformed ${KsonMarker::class.simpleName} rollback call.  " +
+                        "The order of resolving markers should ensure that calls to `forgetMe` are always " +
+                        "on the last added marker"
+            )
+        }
+    }
+
+    /**
+     * Adds a mark (recursively) nested within this mark.  NOTE: this is the linchpin of how the [KsonMarker]
+     * tree is built up.  This will create a new direct descendent of this mark only if the last mark created
+     * by this one has been resolved, otherwise we ask the currently unresolved mark to create the mark.
+     *
+     * This means there is always only ONE unresolved mark for whom _this_ mark is the [MarkerCreator]:
+     * the last entry in [childMarkers] (hence [forgetMe] being implemented as a simple [removeLast])
+     */
+    fun addMark(): KsonMarker {
+        return if (childMarkers.isNotEmpty() && !childMarkers.last().isDone()) {
+            childMarkers.last().addMark()
+        } else {
+            val newMarker = KsonMarker(context, this)
+            childMarkers.add(newMarker)
+            newMarker
+        }
+    }
+
+    override fun done(elementType: ElementType) {
+        markEndIndex = context.getTokenIndex()
+        element = elementType
+    }
+
+    override fun rollbackTo() {
+        context.setTokenIndex(markStartIndex)
+        creator.forgetMe(this)
+    }
+
+    override fun toString(): String {
+        return element.toString()
+    }
+
+    override fun error(message: Message, vararg args: String?) {
+        markedError = Pair(message, args)
+        context.errorEncountered()
+        done(ERROR)
     }
 }
