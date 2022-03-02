@@ -6,29 +6,6 @@ import org.kson.collections.toImmutableMap
 import org.kson.parser.messages.Message
 import org.kson.ast.NumberNode
 
-enum class TokenType {
-    BRACE_L,
-    BRACE_R,
-    BRACKET_L,
-    BRACKET_R,
-    COLON,
-    COMMA,
-    COMMENT,
-    EMBED_CONTENT,
-    EMBED_END,
-    EMBED_START,
-    EMBED_TAG,
-    EOF,
-    FALSE,
-    IDENTIFIER,
-    ILLEGAL_TOKEN,
-    NULL,
-    NUMBER,
-    STRING,
-    TRUE,
-    WHITESPACE
-}
-
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIM_ALT_CHAR = '$'
 
@@ -46,8 +23,6 @@ private const val EOF: Char = '\u0000'
 
 /**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
- *
- * This is similar to [TokenScanner] in design, but distinct enough to stand alone
  */
 private class SourceScanner(private val source: String) {
     private var selectionStartOffset = 0

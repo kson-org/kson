@@ -26,7 +26,15 @@ import org.junit.Test
  * - the [testData.parser] directory is configured by [getTestDataPath] and the first constructor
  *   arg to [ParsingTestCase]
  */
-class KsonParsingTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
+class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
+
+    /**
+     * Sanity check parse of a file containing many Kson constructs
+     */
+    @Test
+    fun testManyConstructs() {
+        doTest(true)
+    }
 
     @Test
     fun testObject() {

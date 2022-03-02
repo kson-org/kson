@@ -1,0 +1,11 @@
+{
+    keyword_for_bool: false
+    "keyword with spaces": "my string value"
+    list_element: [1,3,3]
+    my_embed: %%tag
+        this is some rad arbitrary embedded stuff, y'all
+    %%
+    sub_object: {
+        thing: other
+    }
+}

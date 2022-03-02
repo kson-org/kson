@@ -1,70 +1,77 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.psi.tree.IElementType
+import org.kson.collections.toImmutableMap
 import org.kson.jetbrains.KsonLanguage
+import org.kson.parser.ElementType
 import org.kson.parser.TokenType
-import org.kson.parser.Lexer
+import org.kson.parser.ParsedElementType
 
 /**
- * Get the element type corresponding to a lexed [TokenType] produced by [Lexer].  See also the [elem] override
- * that takes a [ParsedElementType]
+ * Get the [IElementType] instance corresponding to the given [ElementType].
+ *
+ * We need this indirection because the [IElementType]s we create to be used in parsing must _only ever_ be created
+ * once, statically.  This is because [IElementType] uses a "registry" of tokens created
+ * (see [com.intellij.psi.tree.IElementType.ourRegistry]) as an optimization, so two different instances are
+ * ALWAYS considered different by Intellij internals, even if they have well-defined equals and hashcode.  So:
+ *
+ * [IElementType]s for Kson are created once in this file, carefully encapsulated to make it difficult to introduce
+ * bugs by violating this "only-once-instantiated IElementTypes" invariant, and exposed here in [elem] by "name"
  */
-fun elem(lexedElementType: TokenType): IElementType {
-    return LEXED_ELEMENT[lexedElementType]
-        ?: throw RuntimeException("Bug: all " + ParsedElementType::class.simpleName + " items should be defined in this map")
+fun elem(elementType: ElementType): IElementType {
+    if (elementType is TokenType) {
+        return LEXED_ELEMENT[elementType]
+            ?: throw RuntimeException("Bug: all " + TokenType::class.simpleName + " items should be defined in this map")
+    } else if (elementType is ParsedElementType) {
+        return PARSED_ELEMENT[elementType]
+            ?: throw RuntimeException("Bug: all " + ParsedElementType::class.simpleName + " items should be defined in this map")
+    }
+
+    throw RuntimeException("Bug: all " + ElementType::class.simpleName + " instances should be defined in the above maps")
 }
 
 /**
- * Get the element type corresponding to a compound token defined in [KsonParser].  Compare this with the tokens
- * from the [elem] override that takes a [TokenType]
- */
-fun elem(parsedElementType: ParsedElementType): IElementType {
-    return PARSED_ELEMENT[parsedElementType]
-        ?: throw RuntimeException("Bug: all " + ParsedElementType::class.simpleName + " items should be defined in this map")
-}
-
-/**
- * Expose the part of [LexedElementType]'s interface needed externally here so that class can be
- * private (See [LexedElementType] for details)
+ * Expose the part of [IElementTokenType]'s interface needed externally here so [IElementTokenType] can remain private
+ * (See [elem] for details on the careful encapsulation needed in this file)
  */
 interface KsonLexedElementType {
     val tokenType: TokenType
 }
 
 /**
- * Enumerate the types of tokens our [KsonParser] defines
- */
-enum class ParsedElementType {
-    ROOT,
-    PROPERTY,
-    KEYWORD,
-    VALUE
-}
-
-/**
- * We want a set of [IElementType]s defined that directly correspond to our [TokenType]s so that we can
- * easily define them in [KsonLexer.getTokenType]
+ * Our static collection of [IElementTokenType] used in parsing.  See the doc on [elem] for notes on why this
+ * must be private and these must ONLY be created here
  */
 private val LEXED_ELEMENT: Map<TokenType, IElementType> = TokenType.values()
     .associateWith {
-        LexedElementType(it)
-    }
+        IElementTokenType(it)
+    }.toImmutableMap()
 
 /**
- * Our token types that we produce in [KsonParser]
+ * Our static collection of [IElementParserElementType] used in parsing.  See the doc on [elem] for notes on why this
+ * must be private and these must ONLY be created here
  */
 private val PARSED_ELEMENT: Map<ParsedElementType, IElementType> =
-    ParsedElementType.values().associateWith { CompositeElementType(it) }
+    ParsedElementType.values().associateWith { IElementParserElementType(it) }.toImmutableMap()
 
 /**
- * [LexedElementType] is private in this file so that we _only_ ever create these tokens once, statically.  This is
- * needed because [IElementType] uses a "registry" of tokens created (see [com.intellij.psi.tree.IElementType.ourRegistry])
- * as an optimization, so two different instances are ALWAYS considered different by Intellij internals, even if they
- * have well-defined equals and hashcode
+ * The main Kson parser uses the two main implementors of [ElementType]: [TokenType] and [ParsedElementType], but to
+ * adapt the main Kson parson to the plugin demands of the Jetbrains platform, we make "wrapped" versions of
+ * these two types that are adapted to also implement [IElementType]
  */
-private data class LexedElementType(override val tokenType: TokenType) :
+private interface WrappedElementType : ElementType
+
+/**
+ * A class adapting [TokenType] to [IElementType]
+ */
+private data class IElementTokenType(override val tokenType: TokenType) :
+    WrappedElementType,
     KsonLexedElementType,
     IElementType("[Kson-lexed] " + tokenType.name, KsonLanguage)
 
-private class CompositeElementType(parsedElementType: ParsedElementType) :
+/**
+ * A class adapting [ParsedElementType] to [IElementType]
+ */
+private class IElementParserElementType(parsedElementType: ParsedElementType) :
+    WrappedElementType,
     IElementType("[Kson-parsed] " + parsedElementType.name, KsonLanguage)
