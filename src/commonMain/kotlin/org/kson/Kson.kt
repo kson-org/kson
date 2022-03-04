@@ -12,7 +12,9 @@ class Kson {
                 // parsing failed at the lexing stage
                 return ParseResult(null, tokens, messageSink)
             } else {
-                Parser(tokens, messageSink).parse()
+                val builder = KsonBuilder(tokens)
+                Parser(builder).parse()
+                builder.buildTree(messageSink)
             }
 
             return ParseResult(ast, tokens, messageSink)

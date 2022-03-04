@@ -22,25 +22,25 @@ class KsonRoot(private val rootNode: AstNode) : AstNode {
 
 interface ValueNode : AstNode
 
-class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode?) :
+class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode) :
     ValueNode {
     override fun toKsonSource(indentLevel: Int, indent: String): String {
         val renderedName = if (name.isEmpty()) "" else "$name "
-        return if (internalsNode != null) {
-            """
-            |$renderedName{
-            |${internalsNode.toKsonSource(indentLevel + 1, indent)}
-            |}
-            """.trimMargin()
-        } else {
-            "{}"
-        }
+        return "$renderedName${internalsNode.toKsonSource(indentLevel, indent)}"
     }
 }
 
 class ObjectInternalsNode(private val properties: List<PropertyNode>) : ValueNode {
     override fun toKsonSource(indentLevel: Int, indent: String): String {
-        return properties.joinToString("\n") { it.toKsonSource(indentLevel, indent) }
+        return if (properties.isEmpty()) {
+            "{}"
+        } else {
+            """
+                |{
+                |${properties.joinToString("\n") { it.toKsonSource(indentLevel + 1, indent) }}
+                |}
+                """.trimMargin()
+        }
     }
 
 }
@@ -79,7 +79,16 @@ class IdentifierNode(override val value: String) : ValueNode, KeywordNode {
     }
 }
 
-class NumberNode(private val value: Number) : ValueNode {
+/**
+ * @param stringValue MUST be parseable as a [Double] parser todo this is a lot to ask of callers, can/should we improve?
+ */
+class NumberNode(stringValue: String) : ValueNode {
+    /**
+     * Our parse believes it will never allow an unparseable string to be passed into this constructor,
+     * so we allow the uncaught NumberFormatException to bubble out as a RuntimeException
+     * to loudly error when/if our belief is invalidated
+     */
+    val value = stringValue.toDouble()
     override fun toKsonSource(indentLevel: Int, indent: String): String {
         return indent.repeat(indentLevel) + value.toString()
     }

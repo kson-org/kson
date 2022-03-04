@@ -4,30 +4,7 @@ import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
 import org.kson.parser.messages.Message
-
-enum class TokenType {
-    BRACE_L,
-    BRACE_R,
-    BRACKET_L,
-    BRACKET_R,
-    COLON,
-    COMMA,
-    COMMENT,
-    EMBED_END,
-    EMBED_START,
-    EMBED_TAG,
-    EMBEDDED_BLOCK,
-    EOF,
-    FALSE,
-    IDENTIFIER,
-    ILLEGAL_TOKEN,
-    NULL,
-    NUMBER,
-    DOUBLE_QUOTE,
-    STRING,
-    TRUE,
-    WHITESPACE
-}
+import org.kson.ast.NumberNode
 
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIM_ALT_CHAR = '$'
@@ -46,8 +23,6 @@ private const val EOF: Char = '\u0000'
 
 /**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
- *
- * This is similar to [TokenScanner] in design, but distinct enough to stand alone
  */
 private class SourceScanner(private val source: String) {
     private var selectionStartOffset = 0
@@ -185,9 +160,9 @@ data class Token(
      */
     val lexeme: Lexeme,
     /**
-     * The actual parsed [value] of this token, extracted from [lexeme]
+     * The final lexed [value] of this token, extracted (and possibly transformed) from [lexeme]
      */
-    val value: Any
+    val value: String
 )
 
 /**
@@ -228,7 +203,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.DOUBLE_QUOTE)
+            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE)
         }
     )
 
@@ -269,7 +244,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"' -> {
-                addLiteralToken(TokenType.DOUBLE_QUOTE)
                 string()
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
@@ -352,22 +326,23 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             sourceScanner.advance()
         }
 
-        val stringLocation = if (hasEscapedQuotes) {
-            val rawStringLexeme = sourceScanner.extractLexeme()
-            val escapedString = rawStringLexeme.text.replace("\\\"", "\"")
-            addToken(TokenType.STRING, rawStringLexeme, escapedString)
-        } else {
-            addLiteralToken(TokenType.STRING)
-        }
-
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(stringLocation, Message.STRING_NO_CLOSE)
+            messageSink.error(sourceScanner.currentLocation(), Message.STRING_NO_CLOSE)
             return
         }
 
         // Eat the closing `"`
         sourceScanner.advance()
-        addLiteralToken(TokenType.DOUBLE_QUOTE)
+
+        val rawStringLexeme = sourceScanner.extractLexeme()
+        // clip the quotes from the string to get the actual value
+        val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length - 1)
+        if (hasEscapedQuotes) {
+            val escapedString = stringText.replace("\\\"", "\"")
+            addToken(TokenType.STRING, rawStringLexeme, escapedString)
+        } else {
+            addToken(TokenType.STRING, rawStringLexeme, stringText)
+        }
     }
 
     private fun embeddedBlock(blockChar: Char) {
@@ -453,7 +428,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             trimmedEmbedBlockContent
         }
 
-        addToken(TokenType.EMBEDDED_BLOCK, embedBlockLexeme, embedTokenValue)
+        addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
         // process our closing blockChar pair
         sourceScanner.advance()
@@ -518,25 +493,20 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()
         }
 
-        val numberLexeme = sourceScanner.extractLexeme()
-
-        /* numberLexeme is now made up of three parts:
-         * * one or more digits (required, but may be 0) representing the whole part;
-         * * (optional) a decimal point, which is required to be followed by digits representing the fractional part;
-         * * (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
-         *   representing the exponent part
+        /**
+         * We have now validated that NumberLexeme is made up of three parts:
+         * - one or more digits (required, but may be 0) representing the whole part;
+         * - (optional) a decimal point, which is required to be followed by digits representing the fractional part;
+         * - (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
+         *       representing the exponent part
          *
-         * This all matches both the JSON grammar and the expectations of Java's double parser, so we'll forward parsing
-         * on to that.
+         * This all matches both the JSON grammar and the expectations of [String.toDouble], so we should be all set
+         * to create a [NumberNode] from this lexeme later in the parse
          *
-         * The parseDouble function throws a NumberFormatException which we aren't catching here, allowing it to bubble
-         * out as a RuntimeException to loudly error when/if a new edge case is found.
-         *
-         * See also java.lang.Double.parseDouble and jdk.internal.math.FloatingDecimal.ASCIIToBinaryBuffer.doubleValue
+         * parser todo this prepping our string for [String.toDouble] happens very far away from the actual
+         *   [String.toDouble] in [NumberNode], which could lead to some awkward bug troubleshoots
          */
-        val parsedDouble = numberLexeme.text.toDouble()
-
-        addToken(TokenType.NUMBER, numberLexeme, parsedDouble)
+        addLiteralToken(TokenType.NUMBER)
     }
 
     /**
@@ -556,7 +526,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
      *
      * @return the location of the added [Token]
      */
-    private fun addToken(type: TokenType, lexeme: Lexeme, value: Any): Location {
+    private fun addToken(type: TokenType, lexeme: Lexeme, value: String): Location {
         tokens.add(Token(type, lexeme, value))
         return lexeme.location
     }

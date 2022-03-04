@@ -82,42 +82,26 @@ class KsonTest {
 
     @Test
     fun testNumberLiteralSource() {
-        assertParsesTo(
-            """
-                42.1
-            """,
-            "42.1"
-        )
-        assertParsesTo(
-            """
-                42.1E0
-            """,
-            "42.1"
-        )
-        assertParsesTo(
-            """
-                4.21e1
-            """,
-            "42.1"
-        )
-        assertParsesTo(
-            """
-                4.21e+1
-            """,
-            "42.1"
-        )
-        assertParsesTo(
-            """
-                0.0421e3
-            """,
-            "42.1"
-        )
-        assertParsesTo(
-            """
-                4210e-2
-            """,
-            "42.1"
-        )
+        assertParsesTo("42.1", "42.1")
+        assertParsesTo("42.1E0", "42.1")
+        assertParsesTo("42.1e0", "42.1")
+        assertParsesTo("4.21E1", "42.1")
+        assertParsesTo("421E-1", "42.1")
+        assertParsesTo("4210e-2", "42.1")
+        assertParsesTo("0.421e2", "42.1")
+        assertParsesTo("0.421e+2", "42.1")
+        assertParsesTo("42.1E+0", "42.1")
+        assertParsesTo("00042.1E0", "42.1")
+        assertParsesTo("-42.1", "-42.1")
+        assertParsesTo("-42.1E0", "-42.1")
+        assertParsesTo("-42.1e0", "-42.1")
+        assertParsesTo("-4.21E1", "-42.1")
+        assertParsesTo("-421E-1", "-42.1")
+        assertParsesTo("-4210e-2", "-42.1")
+        assertParsesTo("-0.421e2", "-42.1")
+        assertParsesTo("-0.421e+2", "-42.1")
+        assertParsesTo("-42.1E+0", "-42.1")
+        assertParsesTo("-00042.1E0", "-42.1")
     }
 
     @Test

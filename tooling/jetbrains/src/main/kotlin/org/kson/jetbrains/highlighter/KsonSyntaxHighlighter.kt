@@ -8,7 +8,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonBundle
 import org.kson.jetbrains.highlighter.KsonSyntaxHighlighter.KsonColorTag.*
-import org.kson.jetbrains.parser.KsonElementType
+import org.kson.jetbrains.parser.KsonLexedElementType
 import org.kson.jetbrains.parser.KsonLexer
 import org.kson.parser.TokenType
 
@@ -18,8 +18,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     }
 
     override fun getTokenHighlights(elementType: IElementType): Array<TextAttributesKey> {
-        if (elementType is KsonElementType) {
-            return when (elementType.ksonTokenType) {
+        if (elementType is KsonLexedElementType) {
+            return when (elementType.tokenType) {
                 TokenType.BRACE_L -> getPackedTextAttributes(KSON_BRACE)
                 TokenType.BRACE_R -> getPackedTextAttributes(KSON_BRACE)
                 TokenType.BRACKET_L -> getPackedTextAttributes(KSON_BRACKET)
@@ -30,14 +30,13 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.EMBED_END -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_START -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_TAG -> getPackedTextAttributes(KSON_EMBED_TAG)
-                TokenType.EMBEDDED_BLOCK -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.EMBED_CONTENT -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.EOF -> TextAttributesKey.EMPTY_ARRAY
                 TokenType.FALSE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.IDENTIFIER -> getPackedTextAttributes(KSON_IDENTIFIER)
                 TokenType.ILLEGAL_TOKEN -> getPackedTextAttributes(KSON_INVALID)
                 TokenType.NULL -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.NUMBER -> getPackedTextAttributes(KSON_NUMBER)
-                TokenType.DOUBLE_QUOTE -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.TRUE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.WHITESPACE -> TextAttributesKey.EMPTY_ARRAY

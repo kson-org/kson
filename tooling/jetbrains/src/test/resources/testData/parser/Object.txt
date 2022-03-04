@@ -1,0 +1,8 @@
+FILE(0,10)
+  KsonPsiElement([Kson-parsed] OBJECT_INTERNALS)(0,10)
+    KsonPsiElement([Kson-parsed] PROPERTY)(0,10)
+      KsonPsiElement(IElementTokenType(tokenType=IDENTIFIER))(0,3)
+        PsiElement(IElementTokenType(tokenType=IDENTIFIER))('key')(0,3)
+      PsiElement(IElementTokenType(tokenType=COLON))(':')(3,4)
+      KsonPsiElement(IElementTokenType(tokenType=IDENTIFIER))(5,10)
+        PsiElement(IElementTokenType(tokenType=IDENTIFIER))('value')(5,10)

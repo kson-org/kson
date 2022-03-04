@@ -2,6 +2,8 @@ package org.kson.parser
 
 import org.kson.ast.*
 import org.kson.parser.messages.Message
+import org.kson.parser.ParsedElementType.*
+import org.kson.parser.TokenType.*
 
 /**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
@@ -17,7 +19,7 @@ import org.kson.parser.messages.Message
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
  * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
- * literal -> STRING, NUMBER, "true", "false", "null" ;
+ * literal -> STRING | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
  * ```
  *
@@ -25,66 +27,52 @@ import org.kson.parser.messages.Message
  * for details on this grammar notation.
  *
  * See [section 6.2 here](https://craftinginterpreters.com/parsing-expressions.html#recursive-descent-parsing)
- * for guidance on the implementation approach.
+ * for excellent context on a similar style of hand-crafted recursive descent parser.
  */
-class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
-    private val tokenScanner = TokenScanner(tokens)
+class Parser(val builder: AstBuilder) {
 
     /**
      * kson -> (objectInternals | value) EOF ;
      */
-    fun parse(): KsonRoot? {
-        val objectInternals = objectInternals()
-        if (objectInternals != null) {
-            return if (hasUnexpectedTrailingContent()) {
-                null
-            } else {
-                KsonRoot(ObjectDefinitionNode(internalsNode = objectInternals))
+    fun parse() {
+        if (objectInternals(false) || value()) {
+            if (hasUnexpectedTrailingContent()) {
+                // parser todo we likely want to see if we can contiue parsing after adding the error noting
+                //             the unexpected extra content
             }
         }
-
-        val value = value()
-        if (value != null) {
-            return if (hasUnexpectedTrailingContent()) {
-                null
-            } else {
-                KsonRoot(value)
-            }
-        }
-
-        // unable to parse
-        return null
     }
 
     /**
      * objectInternals -> ( keyword value ","? )* ;
      */
-    private fun objectInternals(): ObjectInternalsNode? {
-        val properties = ArrayList<PropertyNode>()
+    private fun objectInternals(allowEmpty: Boolean): Boolean {
+        var foundProperties = false
 
-        // parse
+        val objectInternalsMark = builder.mark()
         while (true) {
-            val keywordNode = keyword() ?: break
-            val valueNode = value() ?: TODO("make this a user-friendly parse error")
-            if (tokenScanner.peek() == TokenType.COMMA) {
-                // drop the optional COMMA
-                tokenScanner.drop()
+            val propertyMark = builder.mark()
+            if (keyword() && value()) {
+                foundProperties = true
+                propertyMark.done(PROPERTY)
+            } else {
+                propertyMark.rollbackTo()
+                break
             }
 
-            properties.add(
-                PropertyNode(
-                    keywordNode,
-                    valueNode
-                )
-            )
+            if (builder.getTokenType() == COMMA) {
+                // advance past the optional COMMA
+                builder.advanceLexer()
+            }
         }
 
-        if (properties.isEmpty()) {
-            // found no properties, not looking at an objectInternals
-            return null
+        if (foundProperties || allowEmpty)  {
+            objectInternalsMark.done(OBJECT_INTERNALS)
+        } else {
+            objectInternalsMark.rollbackTo()
         }
 
-        return ObjectInternalsNode(properties)
+        return foundProperties
     }
 
     /**
@@ -93,228 +81,188 @@ class Parser(tokens: List<Token>, private val messageSink: MessageSink) {
      *        | literal
      *        | embedBlock ;
      */
-    private fun value(): ValueNode? {
-        return objectDefinition() ?: list() ?: literal() ?: embedBlock()
+    private fun value(): Boolean {
+        if (objectDefinition()
+            || list()
+            || literal()
+            || embedBlock()
+        ) {
+            return true
+        } else {
+            return false
+        }
     }
 
     /**
      * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
      */
-    private fun objectDefinition(): ObjectDefinitionNode? {
-        if (tokenScanner.peek() == TokenType.BRACE_L
-            || tokenScanner.peek() == TokenType.IDENTIFIER && tokenScanner.peekNext() == TokenType.BRACE_L
+    private fun objectDefinition(): Boolean {
+        if (builder.getTokenType() == BRACE_L
+            || builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == BRACE_L
         ) {
-            val objectName = if (tokenScanner.peek() == TokenType.IDENTIFIER) {
-                // parser todo shore up our casting
-                tokenScanner.advance().value as String
-            } else {
-                ""
+            val objectDefinitionMark = builder.mark()
+            val objectNameMarker = builder.mark()
+            if (builder.getTokenType() == IDENTIFIER) {
+                builder.advanceLexer()
             }
+            // mark out object name even though it may be empty so the resulting marker tree
+            // is consistent in both cases
+            objectNameMarker.done(OBJECT_NAME)
 
-            val objectStartLocation = tokenScanner.drop()
-            val objectInternals = objectInternals()
-            if (tokenScanner.peek() == TokenType.BRACE_R) {
-                // drop the closing brace
-                tokenScanner.drop()
+            // advance past our BRACE_L
+            builder.advanceLexer()
+
+            // parse any object internals, empty or otherwise
+            objectInternals(true)
+
+            if (builder.getTokenType() == BRACE_R) {
+                // advance past our BRACE_R
+                builder.advanceLexer()
+                objectDefinitionMark.done(OBJECT_DEFINITION)
             } else {
-                messageSink.error(
-                    Location.merge(objectStartLocation, tokenScanner.currentLocation()),
-                    Message.OBJECT_NO_CLOSE
-                )
-                return null
+                objectDefinitionMark.error(Message.OBJECT_NO_CLOSE)
             }
-            return ObjectDefinitionNode(objectName, objectInternals)
+            return true
         } else {
             // not an objectDefinition
-            return null
+            return false
         }
     }
 
     /**
      * list -> "[" (value ",")* value? "]"
      */
-    private fun list(): ListNode? {
-        if (tokenScanner.peek() == TokenType.BRACKET_L) {
-            // drop the BRACKET_L
-            val listStartLocation = tokenScanner.drop()
+    private fun list(): Boolean {
+        if (builder.getTokenType() == BRACKET_L) {
+            // advance past the BRACKET_L
+            builder.advanceLexer()
+            val listMark = builder.mark()
 
-            val values = ArrayList<ValueNode>()
-            while (tokenScanner.peek() != TokenType.BRACKET_R) {
-                val value = value()
-                    ?: if (tokenScanner.peek() == TokenType.COMMA) {
-                        // drop the COMMA
-                        tokenScanner.drop()
-                        continue
-                    } else {
-                        // no more values, list is done
-                        break
-                    }
-                values.add(value)
+            while (builder.getTokenType() != BRACKET_R) {
+                value()
+                if (builder.getTokenType() == COMMA) {
+                    // advance past the COMMA
+                    builder.advanceLexer()
+                    continue
+                } else {
+                    // no more values
+                    break
+                }
             }
 
-            if (tokenScanner.peek() == TokenType.BRACKET_R) {
-                // drop the BRACKET_R
-                tokenScanner.drop()
+            if (builder.getTokenType() == BRACKET_R) {
+                // just closed a well-formed list
+                listMark.done(LIST)
+                // advance past the BRACKET_R
+                builder.advanceLexer()
             } else {
-                messageSink.error(
-                    Location.merge(listStartLocation, tokenScanner.currentLocation()),
-                    Message.LIST_NO_CLOSE
-                )
-                return null
+                listMark.error(Message.LIST_NO_CLOSE)
             }
-            return ListNode(values)
+            return true
         } else {
             // not a list
-            return null
+            return false
         }
     }
 
     /**
      * keyword -> ( IDENTIFIER | STRING ) ":" ;
      */
-    private fun keyword(): KeywordNode? {
-        if ((tokenScanner.peek() == TokenType.IDENTIFIER || tokenScanner.peek() == TokenType.STRING)
-            && tokenScanner.peekNext() == TokenType.COLON
+    private fun keyword(): Boolean {
+        val elementType = builder.getTokenType()
+        if ((elementType == IDENTIFIER || elementType == STRING)
+            && builder.lookAhead(1) == COLON
         ) {
-            val keywordToken = tokenScanner.advance()
-            // parser todo shore up our casting
-            val keywordNode = if (keywordToken.tokenType == TokenType.STRING) {
-                StringNode(keywordToken.value as String)
-            } else {
-                IdentifierNode(keywordToken.value as String)
-            }
-            // drop the COLON
-            tokenScanner.drop()
-            return keywordNode
+            val keywordMark = builder.mark()
+            builder.advanceLexer()
+            keywordMark.done(elementType)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
         } else {
             // not a keyword
-            return null
+            return false
         }
     }
 
     /**
-     * literal -> STRING, NUMBER, "true", "false", "null" ;
+     * literal -> STRING | NUMBER | "true" | "false" | "null" ;
      */
-    private fun literal(): ValueNode? {
-        if (setOf(
-                TokenType.STRING,
-                TokenType.IDENTIFIER,
-                TokenType.NUMBER,
-                TokenType.TRUE,
-                TokenType.FALSE,
-                TokenType.NULL
-            ).any { it == tokenScanner.peek() }
+    private fun literal(): Boolean {
+        val literalMark = builder.mark()
+        val elementType = builder.getTokenType()
+        if (elementType != null && setOf(
+                STRING,
+                IDENTIFIER,
+                NUMBER,
+                TRUE,
+                FALSE,
+                NULL
+            ).any { it == elementType }
         ) {
-            val token = tokenScanner.advance()
-            // parser todo shore up our casting
-            return when (token.tokenType) {
-                TokenType.STRING -> StringNode(token.value as String)
-                TokenType.IDENTIFIER -> IdentifierNode(token.value as String)
-                TokenType.NUMBER -> NumberNode(token.value as Number)
-                TokenType.TRUE -> TrueNode()
-                TokenType.FALSE -> FalseNode()
-                TokenType.NULL -> NullNode()
-                else -> throw RuntimeException("should not get here... we peek()'ed to make sure we had one of these tokens")
-            }
+            // consume our literal
+            builder.advanceLexer()
+            literalMark.done(elementType)
+            return true
         } else {
-            return null
+            literalMark.rollbackTo()
+            return false
         }
     }
 
     /**
      * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
      */
-    private fun embedBlock(): ValueNode? {
-        if (tokenScanner.peek() == TokenType.EMBED_START) {
-            // drop the EMBED_START
-            tokenScanner.drop()
-            val embedTag = if (tokenScanner.peek() == TokenType.EMBED_TAG) {
-                // parser todo shore up our casting
-                tokenScanner.advance().value as String
-            } else {
-                ""
+    private fun embedBlock(): Boolean {
+        if (builder.getTokenType() == EMBED_START) {
+            // advance past the EMBED_START
+            builder.advanceLexer()
+            val embedBlockMark = builder.mark()
+            val embedTagMark = builder.mark()
+            if (builder.getTokenType() == EMBED_TAG) {
+                // advance past our optional embed tag
+                builder.advanceLexer()
             }
+            embedTagMark.done(EMBED_TAG)
 
-            val embedBlockNode = if (tokenScanner.peek() == TokenType.EMBED_END) {
-                EmbedBlockNode(embedTag, "")
-            } else {
-                // parser todo shore up our casting
-                EmbedBlockNode(embedTag, tokenScanner.advance().value as String)
+            val embedBlockContentMark = builder.mark()
+            if (builder.getTokenType() == EMBED_CONTENT) {
+                // advance past our EMBED_CONTENT
+                builder.advanceLexer()
             }
-
-            // drop the EMBED_END
-            tokenScanner.drop()
-            return embedBlockNode
+            embedBlockContentMark.done(EMBED_CONTENT)
+            embedBlockMark.done(EMBED_BLOCK)
+            if (builder.getTokenType() == EMBED_END) {
+                // empty embed block is also legal
+                builder.advanceLexer()
+            } else {
+                throw RuntimeException("Unexpected error: the lexer should have ensured this structue was correct")
+            }
+            return true
         } else {
             // not an embedBlock
-            return null
+            return false
         }
     }
 
     /**
-     * Returns true if there is still un-parsed content in [tokenScanner], logging a message
+     * Returns true if there is still un-parsed content in [builder], logging a message
      * to [messageSink] if it finds unexpected content.  Should only be called to validate the state
-     * of [tokenScanner] after a successful parse
+     * of [builder] after a successful parse
      */
     private fun hasUnexpectedTrailingContent(): Boolean {
-        if (tokenScanner.peek() == TokenType.EOF) {
-            // all good: every pre-EOF token has been consumed
+        if (builder.eof()) {
+            // all good: every token has been consumed
             return false
         } else {
             // mark the unexpected content
-            val firstBadTokenLocation = tokenScanner.currentLocation()
-            var lastBadTokenLocation = tokenScanner.drop()
-            while (tokenScanner.peek() != TokenType.EOF) {
-                lastBadTokenLocation = tokenScanner.drop()
+            val unexpectedContentMark = builder.mark()
+            while (!builder.eof()) {
+                builder.advanceLexer()
             }
-            messageSink.error(
-                Location.merge(firstBadTokenLocation, lastBadTokenLocation),
-                Message.EOF_NOT_REACHED
-            )
+            unexpectedContentMark.error(Message.EOF_NOT_REACHED)
             return true
         }
-    }
-}
-
-/**
- * [TokenScanner] provides a [Token]-by-[Token] scanning interface.
- *
- * This is similar to [SourceScanner] in design, but distinct enough to stand alone
- */
-private class TokenScanner(private val source: List<Token>) {
-    private var selectionStartOffset = 0
-    private var selectionEndOffset = 0
-
-    /**
-     * Note that for convenience this returns the [TokenType] rather than the whole current [Token]
-     */
-    fun peek(): TokenType {
-        return if (selectionEndOffset >= source.size) TokenType.EOF else source[selectionEndOffset].tokenType
-    }
-
-    fun peekNext(): TokenType {
-        return if (selectionEndOffset + 1 >= source.size) TokenType.EOF else source[selectionEndOffset + 1].tokenType
-    }
-
-    fun advance(): Token {
-        return source[selectionEndOffset++]
-    }
-
-    fun drop(): Location {
-        val droppedLexemeLocation = currentLocation()
-        selectionEndOffset++
-        selectionStartOffset = selectionEndOffset
-        return droppedLexemeLocation
-    }
-
-    /**
-     * Return the [Location] in the underlying source file of the currently selected
-     * sequence of tokens.  Note that these [Location]s are pure passthroughs to the
-     * [Location]s of the underlying tokens.
-     */
-    fun currentLocation(): Location {
-        val startTokenLocation = source[selectionStartOffset].lexeme.location
-        val endTokenLocation = source[selectionEndOffset].lexeme.location
-        return Location.merge(startTokenLocation, endTokenLocation)
     }
 }

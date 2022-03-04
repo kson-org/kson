@@ -28,11 +28,15 @@ class KsonParserDefinition : ParserDefinition {
     }
 
     override fun getCommentTokens(): TokenSet {
-        return TokenSet.create(KsonElementType(org.kson.parser.TokenType.COMMENT))
+        return commentTokenSet
+    }
+
+    override fun getWhitespaceTokens(): TokenSet {
+        return whitespaceTokenSet
     }
 
     override fun getStringLiteralElements(): TokenSet {
-        return TokenSet.create(KsonElementType(org.kson.parser.TokenType.STRING))
+        return stringTokenSet
     }
 
     override fun createElement(node: ASTNode): PsiElement {
@@ -41,5 +45,11 @@ class KsonParserDefinition : ParserDefinition {
 
     override fun createFile(viewProvider: FileViewProvider): PsiFile {
         return KsonPsiFile(viewProvider)
+    }
+
+    companion object {
+        private val commentTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.COMMENT))
+        private val whitespaceTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.WHITESPACE))
+        private val stringTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.STRING))
     }
 }
