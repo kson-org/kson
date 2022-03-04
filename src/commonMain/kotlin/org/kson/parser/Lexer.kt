@@ -328,6 +328,10 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         if (sourceScanner.peek() == EOF) {
             messageSink.error(sourceScanner.currentLocation(), Message.STRING_NO_CLOSE)
+            val rawStringLexeme = sourceScanner.extractLexeme()
+            // clip the open quote from the string
+            val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length)
+            addToken(TokenType.STRING, rawStringLexeme, stringText)
             return
         }
 

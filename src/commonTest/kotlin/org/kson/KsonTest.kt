@@ -287,6 +287,11 @@ class KsonTest {
     }
 
     @Test
+    fun testUnclosedStringError() {
+        assertParserRejectsSource("\"unclosed", listOf(Message.STRING_NO_CLOSE))
+    }
+
+    @Test
     fun testUnclosedEmbedDelimiterError() {
         assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
     }

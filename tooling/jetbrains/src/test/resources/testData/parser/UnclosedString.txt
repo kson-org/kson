@@ -1,0 +1,3 @@
+FILE(0,9)
+  KsonPsiElement(IElementTokenType(tokenType=STRING))(0,9)
+    PsiElement(IElementTokenType(tokenType=STRING))('"unclosed')(0,9)

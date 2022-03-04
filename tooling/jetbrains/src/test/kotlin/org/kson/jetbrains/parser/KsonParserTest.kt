@@ -41,6 +41,11 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
         doTest(true)
     }
 
+    @Test
+    fun testUnclosedString() {
+        doTest(true)
+    }
+
     /**
      * @return path to test data file directory relative to root of this module
      */

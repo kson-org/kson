@@ -80,13 +80,16 @@ class LexerTest {
 
     /**
      * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
+     *
+     * Returns the generated tokens for further validation
      */
-    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
+    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>): List<Token> {
         val messageSink = MessageSink()
-        Lexer(source, messageSink).tokenize()
+        val tokens = Lexer(source, messageSink).tokenize()
 
         assertMessageFormats(messageSink.loggedMessages())
         assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
+        return tokens
     }
 
     @Test
@@ -518,12 +521,13 @@ class LexerTest {
 
     @Test
     fun testUnterminatedString() {
-        assertTokenizesWithMessages(
+        val unclosedStringTokens = assertTokenizesWithMessages(
             """
             "this string has no end quote
             """,
             listOf(Message.STRING_NO_CLOSE)
         )
+        assertEquals(listOf(STRING, EOF), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
