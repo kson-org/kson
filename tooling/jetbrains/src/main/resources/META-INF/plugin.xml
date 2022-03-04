@@ -31,13 +31,5 @@
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
 
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
-
-        <applicationService serviceImplementation="org.kson.jetbrains.services.MyApplicationService"/>
-        <projectService serviceImplementation="org.kson.jetbrains.services.MyProjectService"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="org.kson.jetbrains.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
