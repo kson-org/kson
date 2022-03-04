@@ -22,7 +22,7 @@ class KsonParser : PsiParser {
 }
 
 /**
- * Implements a PSI-compatable [AstBuilder] for [Parser] by delegating to the given [psiBuilder]
+ * Implements a PSI-compatible [AstBuilder] for [Parser] by delegating to the given [psiBuilder]
  */
 private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
     override fun getTokenType(): TokenType? {
