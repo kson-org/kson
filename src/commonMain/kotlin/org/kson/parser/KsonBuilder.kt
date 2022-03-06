@@ -20,8 +20,8 @@ class KsonBuilder(private val tokens: List<Token>) :
     })
     var hasErrors = false
 
-    override fun getValue(tokenStartIndex: Int, tokenEndIndex: Int): String {
-        return tokens.subList(tokenStartIndex, tokenEndIndex).joinToString(" ") { it.value }
+    override fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String {
+        return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString(" ") { it.value }
     }
 
     override fun errorEncountered() {
@@ -32,8 +32,8 @@ class KsonBuilder(private val tokens: List<Token>) :
         return currentToken
     }
 
-    override fun setTokenIndex(state: Int) {
-        currentToken = state
+    override fun setTokenIndex(index: Int) {
+        currentToken = index
     }
 
     override fun getTokenType(): TokenType? {
@@ -57,9 +57,7 @@ class KsonBuilder(private val tokens: List<Token>) :
     }
 
     override fun eof(): Boolean {
-        // parser todo nuke the EOF token now? Seems it's not as useful/needed with this new builder-style
-        //             of parser, so these two checks are redundant
-        return currentToken == tokens.size - 1 && tokens[currentToken].tokenType == EOF
+        return currentToken > tokens.size - 1
     }
 
     override fun mark(): AstMarker {
@@ -87,8 +85,8 @@ class KsonBuilder(private val tokens: List<Token>) :
             val messageArgs = error.second
             messageSink.error(
                 Location.merge(
-                    tokens[marker.markStartIndex].lexeme.location,
-                    tokens[marker.markEndIndex].lexeme.location
+                    tokens[marker.firstTokenIndex].lexeme.location,
+                    tokens[marker.lastTokenIndex].lexeme.location
                 ), message, *messageArgs
             )
         }
@@ -130,7 +128,6 @@ class KsonBuilder(private val tokens: List<Token>) :
                     EMBED_START,
                     EMBED_TAG,
                     EMBED_CONTENT,
-                    EOF,
                     ILLEGAL_TOKEN,
                     WHITESPACE -> {
                         throw RuntimeException("These tokens do not generate their own AST nodes")
@@ -244,9 +241,9 @@ class KsonBuilder(private val tokens: List<Token>) :
  */
 private interface MarkerBuilderContext {
     /**
-     * Get the parsed [String] value for the range of tokens from [tokenStartIndex] to [tokenEndIndex]
+     * Get the parsed [String] value for the range of tokens from [firstTokenIndex] to [lastTokenIndex], inclusive
      */
-    fun getValue(tokenStartIndex: Int, tokenEndIndex: Int): String
+    fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String
 
     /**
      * Register that a parsing error has been encountered
@@ -260,9 +257,9 @@ private interface MarkerBuilderContext {
     fun getTokenIndex(): Int
 
     /**
-     * Reset the current token index of the [KsonBuilder] being marked to the given [state]
+     * Reset the current token index of the [KsonBuilder] being marked to the given [index]
      */
-    fun setTokenIndex(state: Int)
+    fun setTokenIndex(index: Int)
 }
 
 /**
@@ -279,8 +276,8 @@ private interface MarkerCreator {
  */
 private class KsonMarker(private val context: MarkerBuilderContext, private val creator: MarkerCreator) : AstMarker,
     MarkerCreator {
-    val markStartIndex = context.getTokenIndex()
-    var markEndIndex = markStartIndex
+    val firstTokenIndex = context.getTokenIndex()
+    var lastTokenIndex = firstTokenIndex
     var markedError: Pair<Message, Array<out String?>>? = null
     var element: ElementType? = null
     val childMarkers = ArrayList<KsonMarker>()
@@ -290,7 +287,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     fun getValue(): String {
-        return context.getValue(this.markStartIndex, this.markEndIndex)
+        return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
     }
 
     /**
@@ -330,12 +327,13 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun done(elementType: ElementType) {
-        markEndIndex = context.getTokenIndex()
+        // the last token we advanced past is our last token
+        lastTokenIndex = context.getTokenIndex() - 1
         element = elementType
     }
 
     override fun rollbackTo() {
-        context.setTokenIndex(markStartIndex)
+        context.setTokenIndex(firstTokenIndex)
         creator.forgetMe(this)
     }
 

@@ -27,18 +27,6 @@ class LexerTest {
         val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
         val actualTokenTypes = actualTokens.map { it.tokenType }.toMutableList()
 
-        // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
-        val eof = actualTokenTypes.removeLast()
-        if (eof != EOF) {
-            throw Exception("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
-        } else {
-            val eofToken = actualTokens.last()
-
-            // ensure EOF renders how we want when we render token lists to strings
-            assertEquals("", eofToken.lexeme.text, "EOF Token's raw text should be empty (can't render an EOF)")
-            assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
-        }
-
         assertFalse(
             messageSink.hasErrors(),
             "Should not have lexing errors, got:\n\n" + LoggedMessage.print(messageSink.loggedMessages())
@@ -527,7 +515,7 @@ class LexerTest {
             """,
             listOf(Message.STRING_NO_CLOSE)
         )
-        assertEquals(listOf(STRING, EOF), unclosedStringTokens.map { it.tokenType })
+        assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
