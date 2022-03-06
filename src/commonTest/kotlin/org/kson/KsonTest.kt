@@ -1,6 +1,8 @@
 package org.kson
 
 import org.kson.ast.KsonRoot
+import org.kson.collections.ImmutableList
+import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.Message
 import org.kson.testSupport.assertMessageFormats
@@ -44,11 +46,12 @@ class KsonTest {
      *
      * @param source is the kson source to parse into a [KsonRoot]
      * @param expectedParseMessages a list of [Message]s produced by parsing [source]
+     * @return the produced messages for further validation
      */
     private fun assertParserRejectsSource(
         source: String,
         expectedParseMessages: List<Message>
-    ) {
+    ): ImmutableList<LoggedMessage> {
         val parseResult = Kson.parse(source)
 
         assertEquals(
@@ -68,6 +71,8 @@ class KsonTest {
             parseResult.ast,
             "Should produce a null AST when there are errors"
         )
+
+        return parseResult.messages
     }
 
     @Test
@@ -303,7 +308,8 @@ class KsonTest {
 
     @Test
     fun testUnclosedListError() {
-        assertParserRejectsSource("[", listOf(Message.LIST_NO_CLOSE))
+        val errorMessages = assertParserRejectsSource("[", listOf(Message.LIST_NO_CLOSE))
+        assertEquals(Location(0, 0, 0, 1, 0, 1), errorMessages[0].location)
         assertParserRejectsSource("[1,2,", listOf(Message.LIST_NO_CLOSE))
     }
 

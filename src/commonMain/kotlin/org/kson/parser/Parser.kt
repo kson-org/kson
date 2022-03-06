@@ -134,9 +134,9 @@ class Parser(val builder: AstBuilder) {
      */
     private fun list(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
+            val listMark = builder.mark()
             // advance past the BRACKET_L
             builder.advanceLexer()
-            val listMark = builder.mark()
 
             while (builder.getTokenType() != BRACKET_R) {
                 value()
@@ -151,10 +151,10 @@ class Parser(val builder: AstBuilder) {
             }
 
             if (builder.getTokenType() == BRACKET_R) {
-                // just closed a well-formed list
-                listMark.done(LIST)
                 // advance past the BRACKET_R
                 builder.advanceLexer()
+                // just closed a well-formed list
+                listMark.done(LIST)
             } else {
                 listMark.error(Message.LIST_NO_CLOSE)
             }
