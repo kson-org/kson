@@ -20,7 +20,7 @@ import org.kson.parser.TokenType.*
  * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
- * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
+ * embeddedBlock -> "%%" (embedTag) NEWLINE CONTENT "%%" ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -212,7 +212,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
+     * embeddedBlock -> "%%" (embedTag) NEWLINE CONTENT "%%" ;
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_START) {

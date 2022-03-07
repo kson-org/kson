@@ -25,9 +25,9 @@ class KsonColorSettingsPage : ColorSettingsPage {
             string: "a string"
             list: [1, 2, 3, true, false]
             invalid: ``
-            embed_block: ```kotlin
+            embed_block: %%kotlin
                 println("Hello y'all")
-            ```
+            %%
             # this is a comment
             nested: {
                 null_keyword: null

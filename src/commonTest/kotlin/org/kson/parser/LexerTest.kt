@@ -443,25 +443,25 @@ class LexerTest {
     @Test
     fun testEmbedBlockTrailingWhitespace() {
         assertTokenizesTo(
-            // note the extra whitespace after the opening ```
+            // note the extra whitespace after the opening `%%`
             """
                 %%   
                     this is a raw embed
                 %%
             """,
             listOf(EMBED_START, EMBED_CONTENT, EMBED_END),
-            "should allow trailing whitespace after the opening '```'"
+            "should allow trailing whitespace after the opening '%%'"
         )
 
         assertTokenizesTo(
-            // note the extra whitespace after the opening ```
+            // note the extra whitespace after the opening `%%`
             """   
                 %%sql
                     select * from something
                 %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END),
-            "should allow trailing whitespace after the opening '```embedTag'"
+            "should allow trailing whitespace after the opening '%%embedTag'"
         )
     }
 
