@@ -1,6 +1,5 @@
 package org.kson.parser
 
-import org.kson.ast.*
 import org.kson.parser.messages.Message
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
@@ -20,7 +19,7 @@ import org.kson.parser.TokenType.*
  * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
- * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
+ * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -134,9 +133,9 @@ class Parser(val builder: AstBuilder) {
      */
     private fun list(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
+            val listMark = builder.mark()
             // advance past the BRACKET_L
             builder.advanceLexer()
-            val listMark = builder.mark()
 
             while (builder.getTokenType() != BRACKET_R) {
                 value()
@@ -151,10 +150,10 @@ class Parser(val builder: AstBuilder) {
             }
 
             if (builder.getTokenType() == BRACKET_R) {
-                // just closed a well-formed list
-                listMark.done(LIST)
                 // advance past the BRACKET_R
                 builder.advanceLexer()
+                // just closed a well-formed list
+                listMark.done(LIST)
             } else {
                 listMark.error(Message.LIST_NO_CLOSE)
             }
@@ -212,7 +211,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * embeddedBlock -> "```" (embedTag) NEWLINE CONTENT "```" ;
+     * embeddedBlock -> "%%" (embedTag) NEWLINE CONTENT "%%" ;
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_START) {
@@ -247,8 +246,8 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * Returns true if there is still un-parsed content in [builder], logging a message
-     * to [messageSink] if it finds unexpected content.  Should only be called to validate the state
+     * Returns true if there is still un-parsed content in [builder], marking an
+     * error if it finds unexpected content.  Should only be called to validate the state
      * of [builder] after a successful parse
      */
     private fun hasUnexpectedTrailingContent(): Boolean {

@@ -21,7 +21,6 @@ enum class TokenType : ElementType {
     EMBED_START,
     EMBED_TAG,
     EMBED_CONTENT,
-    EOF,
     FALSE,
     IDENTIFIER,
     ILLEGAL_TOKEN,

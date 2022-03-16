@@ -64,12 +64,12 @@ class CommandLineInterfaceTest {
 
         assertContains(
             output, """
-                serializedAst: ```
+                serializedAst: %%
                 {
                   key: val
                   another_key: val
                 }
-                ```
+                %%
             """.trimIndent(), false,
             "should get output confirming we've successfully parsed"
         )
@@ -102,12 +102,12 @@ class CommandLineInterfaceTest {
 
         assertContains(
             output, """
-                serializedAst: ```
+                serializedAst: %%
                 {
                   file_key: file_val
                   another_key: val
                 }
-                ```
+                %%
             """.trimIndent(), false,
             "should get output confirming we've successfully parsed the file contents"
         )
@@ -132,7 +132,7 @@ class CommandLineInterfaceTest {
     @Test
     fun testFailedParseExitStatus() {
         testCliRun(emptyArray(),
-            // this unclosed ``` will definitely fail parsing
-            PlatformShimStub("```"), ExpectedExit.FAILURE)
+            // this unclosed %% will definitely fail parsing
+            PlatformShimStub("%%"), ExpectedExit.FAILURE)
     }
 }

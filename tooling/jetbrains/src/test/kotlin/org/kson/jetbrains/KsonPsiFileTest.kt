@@ -12,8 +12,10 @@ class KsonPsiFileTest : BasePlatformTestCase() {
     fun testKsonFile() {
         val psiFile = myFixture.configureByText(KsonFileType, "key: val")
         val ksonFile = assertInstanceOf(psiFile, KsonPsiFile::class.java)
-
-        // jetbrains todo test has errors once errors are implemented
         assertFalse(PsiErrorElementUtil.hasErrors(project, ksonFile.virtualFile))
+
+        val psiFileWithError = myFixture.configureByText(KsonFileType, "[\"unclosed list\", ")
+        val ksonFileWithError = assertInstanceOf(psiFileWithError, KsonPsiFile::class.java)
+        assertTrue(PsiErrorElementUtil.hasErrors(project, ksonFileWithError.virtualFile))
     }
 }

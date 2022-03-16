@@ -62,8 +62,8 @@ private fun formatParseResult(parseResult: ParseResult): String {
         |${parseResult.messages.joinToString(",\n  ", prefix = "  ")}
         |]
         |
-        |serializedAst: ```
+        |serializedAst: %%
         |${parseResult.ast?.toKsonSource()}
-        |```
+        |%%
     """.trimMargin()
 }

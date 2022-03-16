@@ -18,8 +18,7 @@ class ParserTest {
     @Test
     fun testSanityCheckParse() {
         val nullTokenStream = listOf(
-            Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null"),
-            Token(TokenType.EOF, Lexeme("", Location(0, 4, 0, 4, 4, 4)), "")
+            Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null")
         )
         val builder = KsonBuilder(nullTokenStream)
         Parser(builder).parse()

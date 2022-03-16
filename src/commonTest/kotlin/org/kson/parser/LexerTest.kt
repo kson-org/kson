@@ -27,18 +27,6 @@ class LexerTest {
         val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
         val actualTokenTypes = actualTokens.map { it.tokenType }.toMutableList()
 
-        // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
-        val eof = actualTokenTypes.removeLast()
-        if (eof != EOF) {
-            throw Exception("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
-        } else {
-            val eofToken = actualTokens.last()
-
-            // ensure EOF renders how we want when we render token lists to strings
-            assertEquals("", eofToken.lexeme.text, "EOF Token's raw text should be empty (can't render an EOF)")
-            assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
-        }
-
         assertFalse(
             messageSink.hasErrors(),
             "Should not have lexing errors, got:\n\n" + LoggedMessage.print(messageSink.loggedMessages())
@@ -80,13 +68,16 @@ class LexerTest {
 
     /**
      * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
+     *
+     * Returns the generated tokens for further validation
      */
-    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>) {
+    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>): List<Token> {
         val messageSink = MessageSink()
-        Lexer(source, messageSink).tokenize()
+        val tokens = Lexer(source, messageSink).tokenize()
 
         assertMessageFormats(messageSink.loggedMessages())
         assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
+        return tokens
     }
 
     @Test
@@ -452,25 +443,25 @@ class LexerTest {
     @Test
     fun testEmbedBlockTrailingWhitespace() {
         assertTokenizesTo(
-            // note the extra whitespace after the opening ```
+            // note the extra whitespace after the opening `%%`
             """
                 %%   
                     this is a raw embed
                 %%
             """,
             listOf(EMBED_START, EMBED_CONTENT, EMBED_END),
-            "should allow trailing whitespace after the opening '```'"
+            "should allow trailing whitespace after the opening '%%'"
         )
 
         assertTokenizesTo(
-            // note the extra whitespace after the opening ```
+            // note the extra whitespace after the opening `%%`
             """   
                 %%sql
                     select * from something
                 %%
             """,
             listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END),
-            "should allow trailing whitespace after the opening '```embedTag'"
+            "should allow trailing whitespace after the opening '%%embedTag'"
         )
     }
 
@@ -518,12 +509,13 @@ class LexerTest {
 
     @Test
     fun testUnterminatedString() {
-        assertTokenizesWithMessages(
+        val unclosedStringTokens = assertTokenizesWithMessages(
             """
             "this string has no end quote
             """,
             listOf(Message.STRING_NO_CLOSE)
         )
+        assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
