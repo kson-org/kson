@@ -247,8 +247,8 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * Returns true if there is still un-parsed content in [builder], logging a message
-     * to [messageSink] if it finds unexpected content.  Should only be called to validate the state
+     * Returns true if there is still un-parsed content in [builder], marking an
+     * error if it finds unexpected content.  Should only be called to validate the state
      * of [builder] after a successful parse
      */
     private fun hasUnexpectedTrailingContent(): Boolean {
