@@ -20,7 +20,7 @@ import org.kson.parser.TokenType.*
  * list -> "[" (value ",")* value? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
- * embeddedBlock -> "%%" (embedTag) NEWLINE CONTENT "%%" ;
+ * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
