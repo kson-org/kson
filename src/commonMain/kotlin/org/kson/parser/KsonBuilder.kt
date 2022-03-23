@@ -14,8 +14,12 @@ class KsonBuilder(private val tokens: List<Token>) :
 
     private var currentToken = 0
     private var rootMarker = KsonMarker(this, object : MarkerCreator {
-        override fun forgetMe(me: KsonMarker) {
+        override fun forgetMe(me: KsonMarker): KsonMarker {
             throw RuntimeException("The root marker has no creator that needs to forget it")
+        }
+
+        override fun dropMe(me: KsonMarker) {
+            throw RuntimeException("The root marker has no creator that needs to drop it")
         }
     })
     var hasErrors = false
@@ -267,7 +271,16 @@ private interface MarkerBuilderContext {
  * to forget all references to them, removing them from the marker tree
  */
 private interface MarkerCreator {
-    fun forgetMe(me: KsonMarker)
+    /**
+     * Used to eliminate a [KsonMarker] this instance has created from its tree of children
+     */
+    fun forgetMe(me: KsonMarker): KsonMarker
+
+    /**
+     * Used to edit a [KsonMarker] this instance has created out of its tree of children, preserving the dropped
+     * marker's children by stitching them into the tree in its place.
+     */
+    fun dropMe(me: KsonMarker)
 }
 
 /**
@@ -290,10 +303,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
     }
 
-    /**
-     * Used to eliminate a [KsonMarker] this instance has created from its tree of children
-     */
-    override fun forgetMe(me: KsonMarker) {
+    override fun forgetMe(me: KsonMarker): KsonMarker {
         /**
          * Our [forgetMe] operation is a basic [removeLast] because [addMark] guarantees the last entry here
          * is the only unresolved mark created by us.  See [addMark] for details.
@@ -301,11 +311,21 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         val lastChild = childMarkers.removeLast()
         if (lastChild != me) {
             throw RuntimeException(
-                "Malformed ${KsonMarker::class.simpleName} rollback call.  " +
-                        "The order of resolving markers should ensure that calls to `forgetMe` are always " +
+                "Bug: This should be an impossible `forgetMe` call since " +
+                        "the order of resolving markers should ensure that calls to `forgetMe` are always " +
                         "on the last added marker"
             )
         }
+        return lastChild
+    }
+
+    override fun dropMe(me: KsonMarker) {
+        /**
+         * Delegate removing this child from the tree to [forgetMe] so we don't need to duplicate its
+         * carefully doc'ing and validating of the operation
+         */
+        val droppedChild = forgetMe(me)
+        childMarkers.addAll(droppedChild.childMarkers)
     }
 
     /**
@@ -330,6 +350,10 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         // the last token we advanced past is our last token
         lastTokenIndex = context.getTokenIndex() - 1
         element = elementType
+    }
+
+    override fun drop() {
+        creator.dropMe(this)
     }
 
     override fun rollbackTo() {

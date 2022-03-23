@@ -227,6 +227,11 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             return
         }
 
+        if (char == '-' && (isWhitespace(sourceScanner.peek()) || sourceScanner.peek() == EOF)) {
+            addLiteralToken(TokenType.LIST_DASH)
+            return
+        }
+
         when (char) {
             '#' -> {
                 // comments extend to end of the line
@@ -269,7 +274,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                              *         - we see more edge cases like this, or:
                              *         - we succeed in adding dash-denoted lists into the grammar
                              */
-                            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.DANGLING_DASH)
+                            messageSink.error(addLiteralToken(TokenType.LIST_DASH), Message.ILLEGAL_MINUS_SIGN)
                             return
                         }
                         number()

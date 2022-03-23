@@ -147,7 +147,7 @@ class KsonTest {
     }
 
     @Test
-    fun testListSource() {
+    fun testBracketListSource() {
         assertParsesTo(
             """
                 ["a string"]
@@ -185,6 +185,64 @@ class KsonTest {
             """.trimIndent(),
             "should support an optional trailing comma in lists"
         )
+    }
+
+    @Test
+    fun testDashListSource() {
+        assertParsesTo(
+            """
+                - "a string"
+            """,
+            """
+                [
+                  "a string"
+                ]
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                - 42.4
+                - 43.1
+                - 44.7
+            """,
+            """
+                [
+                  42.4,
+                  43.1,
+                  44.7
+                ]
+            """.trimIndent()
+        )
+
+        // note that the indentation isn't significant in kson dash-delimited lists (unlike yaml)
+        assertParsesTo(
+            """
+                - true
+                  - false
+                    - null
+            """,
+            """
+                [
+                  true,
+                  false,
+                  null
+                ]
+            """.trimIndent(),
+            "should support an optional trailing comma in lists"
+        )
+    }
+
+    @Test
+    fun testDanglingListDash() {
+        assertParserRejectsSource("-", listOf(Message.DANGLING_LIST_DASH))
+        assertParserRejectsSource("- ", listOf(Message.DANGLING_LIST_DASH))
+        assertParserRejectsSource("""
+            - 2
+            - 4
+            - 
+            - 8
+        """.trimIndent(), listOf(Message.DANGLING_LIST_DASH))
     }
 
     @Test

@@ -189,9 +189,9 @@ class LexerTest {
     fun testDanglingMinusSign() {
         assertTokenizesWithMessages(
             """
-                -
+                -nope
             """,
-            listOf(Message.DANGLING_DASH)
+            listOf(Message.ILLEGAL_MINUS_SIGN)
         )
     }
 
@@ -233,7 +233,7 @@ class LexerTest {
     }
 
     @Test
-    fun testListSource() {
+    fun testBracketListSource() {
         assertTokenizesTo(
             """
                 ["a string"]
@@ -246,6 +246,64 @@ class LexerTest {
                 [42, 43, 44]
             """,
             listOf(BRACKET_L, NUMBER, COMMA, NUMBER, COMMA, NUMBER, BRACKET_R)
+        )
+    }
+
+    @Test
+    fun testDashListSource() {
+        // ensure we test the boundary when `-` is the first char in the source (not whitespace, for instance)
+        assertTokenizesTo(
+            "- null",
+            listOf(LIST_DASH, NULL)
+        )
+
+        assertTokenizesTo(
+            """
+                - "a string"
+            """,
+            listOf(LIST_DASH, STRING)
+        )
+
+        assertTokenizesTo(
+            """
+                - 42
+                - 43
+                - 44
+            """,
+            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER)
+        )
+
+        // odd but kind of needs to be legal to keep the dash list element semantics straightforward...
+        // a dash-list element is simply: a dash followed by a value
+        assertTokenizesTo(
+            """
+                - 42 - 43 - 44
+            """,
+            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER)
+        )
+    }
+
+    @Test
+    fun testMixedLists() {
+        assertTokenizesTo(
+            """
+                - 42
+                - [2, 4]
+                - 44
+            """,
+            listOf(LIST_DASH, NUMBER, LIST_DASH, BRACKET_L, NUMBER, COMMA, NUMBER, BRACKET_R, LIST_DASH, NUMBER)
+        )
+
+        // this must lex in spite of the fact it will parse with errors on the illegal list nesting
+        assertTokenizesTo(
+            """
+                - 42
+                - 
+                    - "nope, not a sublist because it's ambiguous"
+                    - "indentation is not significant!"
+                - 44
+            """,
+            listOf(LIST_DASH, NUMBER, LIST_DASH, LIST_DASH, STRING, LIST_DASH, STRING, LIST_DASH, NUMBER)
         )
     }
 

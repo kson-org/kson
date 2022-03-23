@@ -94,13 +94,22 @@ enum class Message {
             return "Dangling exponent indicator"
         }
     },
-    DANGLING_DASH {
+    ILLEGAL_MINUS_SIGN {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: Map<String, String?>): String {
-            return "Dangling minus sign"
+            return "A dash `-` must be followed by a space (to make a list element), or a number (to make a negative number)"
+        }
+    },
+    DANGLING_LIST_DASH {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: Map<String, String?>): String {
+            return "A list dash `- ` must be followed by a value"
         }
     };
 

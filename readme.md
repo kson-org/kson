@@ -5,6 +5,7 @@
 TODO document the language, remembering to clearly note:
 - string escapes
 - embed block escapes
+- list semantics
 - ... todo other stuff
 
 ### Development setup
