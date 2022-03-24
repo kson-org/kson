@@ -8,15 +8,18 @@ import org.kson.parser.TokenType.*
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
+ * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
- * kson -> (objectInternals | value) EOF ;
- * objectInternals -> ( keyword value ","? )* ;
+ * kson -> (objectInternals | list | value) <end-of-file> ;
+ * objectInternals -> ( keyword (value | list) ","? )* ;
  * value -> objectDefinition
- *        | list
  *        | literal
  *        | embedBlock ;
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
- * list -> "[" (value ",")* value? "]"
+ * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
+ * dashList -> ( LIST_DASH ( value | bracketList ) )*
+ * # note that either list type may be contained in a bracket list since there is no ambiguity
+ * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
@@ -81,15 +84,10 @@ class Parser(val builder: AstBuilder) {
      *        | embedBlock ;
      */
     private fun value(): Boolean {
-        if (objectDefinition()
-            || list()
-            || literal()
-            || embedBlock()
-        ) {
-            return true
-        } else {
-            return false
-        }
+        return (objectDefinition()
+                || list()
+                || literal()
+                || embedBlock())
     }
 
     /**
@@ -129,16 +127,52 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * list -> "[" (value ",")* value? "]"
+     * list -> dashList | bracketList
      */
     private fun list(): Boolean {
+        return dashList() || bracketList()
+    }
+
+    /**
+     * dashList -> ( LIST_DASH ( value | bracketList ) )*
+     */
+    private fun dashList(): Boolean {
+        if (builder.getTokenType() == LIST_DASH) {
+            val listMark = builder.mark()
+
+            // parse the dash delimited list elements
+            do {
+                val danglingListDashMark = builder.mark()
+                // advance past the LIST_DASH
+                builder.advanceLexer()
+
+                if (builder.getTokenType() == LIST_DASH) {
+                    danglingListDashMark.error(Message.DANGLING_LIST_DASH)
+                } else if (value() || bracketList()) {
+                    // this LIST_DASH is not dangling
+                    danglingListDashMark.drop()
+                } else {
+                    danglingListDashMark.error(Message.DANGLING_LIST_DASH)
+                }
+            } while (builder.getTokenType() == LIST_DASH)
+
+            listMark.done(LIST)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
+     */
+    private fun bracketList(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
             val listMark = builder.mark()
             // advance past the BRACKET_L
             builder.advanceLexer()
 
             while (builder.getTokenType() != BRACKET_R) {
-                value()
+                value() || list()
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
                     builder.advanceLexer()

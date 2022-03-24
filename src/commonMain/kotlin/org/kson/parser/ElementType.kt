@@ -24,6 +24,7 @@ enum class TokenType : ElementType {
     FALSE,
     IDENTIFIER,
     ILLEGAL_TOKEN,
+    LIST_DASH,
     NULL,
     NUMBER,
     STRING,

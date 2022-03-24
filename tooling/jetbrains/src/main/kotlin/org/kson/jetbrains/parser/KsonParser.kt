@@ -57,6 +57,10 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
                 psiMark.done(elem(elementType))
             }
 
+            override fun drop() {
+                psiMark.drop()
+            }
+
             override fun rollbackTo() {
                 psiMark.drop()
             }

@@ -49,8 +49,18 @@ interface AstMarker {
     fun done(elementType: ElementType)
 
     /**
-     * Declare this mark unneeded, winding the [AstBuilder] that produced it back to when this mark was created with
-     * [AstBuilder.mark]
+     * Declare this marker unneeded.  This removes the marker from the marker tree, but unlike [rollbackTo]:
+     * - the [AstBuilder] is not reset to the marker's start
+     * - the marker's children are preserved in the marker tree by stitching them into the tree in the dropped marker's place.
+     *
+     * Used to facilitate markers that do not correspond to AST nodes (for instance, markers used solely to
+     * possibly denote an error), allowing them to be bailed on if not needed
+     */
+    fun drop()
+
+    /**
+     * Declare this mark (and all its children) unneeded, winding the [AstBuilder] that produced it back to when this
+     * mark was created with [AstBuilder.mark]
      */
     fun rollbackTo()
 
