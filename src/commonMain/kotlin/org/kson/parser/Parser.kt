@@ -13,9 +13,11 @@ import org.kson.parser.TokenType.*
  * kson -> (objectInternals | list | value) <end-of-file> ;
  * objectInternals -> ( keyword (value | list) ","? )* ;
  * value -> objectDefinition
+ *        | list
  *        | literal
  *        | embedBlock ;
  * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
+ * list -> dashList | bracketList
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
@@ -34,7 +36,7 @@ import org.kson.parser.TokenType.*
 class Parser(val builder: AstBuilder) {
 
     /**
-     * kson -> (objectInternals | value) EOF ;
+     * kson -> (objectInternals | list | value) <end-of-file> ;
      */
     fun parse() {
         if (objectInternals(false) || value()) {
@@ -46,7 +48,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * objectInternals -> ( keyword value ","? )* ;
+     * objectInternals -> ( keyword (value | list) ","? )* ;
      */
     private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
@@ -245,7 +247,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * embeddedBlock -> "%%" (embedTag) NEWLINE CONTENT "%%" ;
+     * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_START) {
