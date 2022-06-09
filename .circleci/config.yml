@@ -14,12 +14,12 @@ jobs:
     docker:
       # Choose the `-browsers variant` of the openjdk 11 image, see https://circleci.com/developer/images/image/cimg/openjdk#browsers
       # for details
-      - image: circleci/openjdk:11-browsers
+      - image: cimg/openjdk:11.0-browsers
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
+      # - image: cimg/postgres:9.4
 
     working_directory: ~/repo
 
