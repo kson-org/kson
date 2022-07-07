@@ -26,17 +26,6 @@ enum class MessageType {
             return "Dangling embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
         }
     },
-    EMBED_BLOCK_BAD_START {
-        override fun expectedArgs(): List<String> {
-            return listOf("Embed Tag Name", "Embed delimiter character")
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val embedTag = parsedArgs.getArg("Embed Tag Name")
-            val embedDelimChar = parsedArgs.getArg("Embed delimiter character")
-            return "This Embedded Block's content must start on the line after the opening '$embedDelimChar$embedDelimChar${embedTag ?: ""}"
-        }
-    },
     EMBED_BLOCK_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return listOf("Embed delimiter")

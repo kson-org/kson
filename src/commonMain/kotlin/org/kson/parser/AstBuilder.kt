@@ -18,6 +18,11 @@ interface AstBuilder {
     fun getTokenType(): TokenType?
 
     /**
+     * Get the text underlying this token---useful, for instance, in some higher resolution error messages
+     */
+    fun getTokenText(): String
+
+    /**
      * Advance the underlying lexer to the next token
      */
     fun advanceLexer()

@@ -48,6 +48,10 @@ class KsonBuilder(private val tokens: List<Token>) :
         return null
     }
 
+    override fun getTokenText(): String {
+        return tokens[currentToken].lexeme.text
+    }
+
     override fun advanceLexer() {
         currentToken++
     }

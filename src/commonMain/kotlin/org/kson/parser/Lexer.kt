@@ -352,39 +352,46 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     }
 
     private fun embeddedBlock(blockChar: Char) {
-        val embedTag = if (isAlphaNumeric(sourceScanner.peek())) {
-            while (isAlphaNumeric(sourceScanner.peek())) {
+        // consume non-newline whitespace right after the EMBED_START
+        if (isInlineWhitespace(sourceScanner.peek())) {
+            while (isInlineWhitespace(sourceScanner.peek())) {
                 sourceScanner.advance()
             }
-            val embedTagLexeme = sourceScanner.extractLexeme()
-
-            addToken(TokenType.EMBED_TAG, embedTagLexeme, embedTagLexeme.text)
-            embedTagLexeme.text
-        } else {
-            ""
-        }
-
-        while (isInlineWhitespace(sourceScanner.peek())) {
-            // advance through any inline whitespace between the 'blockChar[tag]' and the required newline
-            sourceScanner.advance()
+            addLiteralToken(TokenType.WHITESPACE)
         }
 
         if (sourceScanner.peek() == '\n') {
-            // found the required newline---advance past it and tokenize it along with any whitespace we advanced past above
+            // no embed tag on this block
             sourceScanner.advance()
             addLiteralToken(TokenType.WHITESPACE)
+        } else if (sourceScanner.peek() == EOF) {
+            return
         } else {
-            messageSink.error(
-                addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                EMBED_BLOCK_BAD_START.create(embedTag, blockChar.toString())
+            // we have an embed tag, let's scan it
+            while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) {
+                sourceScanner.advance()
+            }
+
+            // extract our embed tag (note: may be empty, that's supported)
+            val embedTagLexeme = sourceScanner.extractLexeme()
+            addToken(
+                TokenType.EMBED_TAG, embedTagLexeme,
+                // trim any trailing whitespace from the embed tag's value
+                embedTagLexeme.text.trim()
             )
+
+            // consume the newline from after this embed tag
+            if (sourceScanner.peek() == '\n') {
+                sourceScanner.advance()
+                addLiteralToken(TokenType.WHITESPACE)
+            }
         }
 
         // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
         // trying to replace escapes if we know we need to
         var hasEscapedEmbedEnd = false
 
-        // read embedded content until the closing blockChar pair
+        // read embedded content until the closing blockChar pair (or EOF in the case of an unclosed block)
         while (
             !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
             && sourceScanner.peek() != EOF
@@ -404,11 +411,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         val embedBlockLexeme = sourceScanner.extractLexeme()
-
-        if (sourceScanner.peek() == EOF) {
-            messageSink.error(embedBlockLexeme.location, EMBED_BLOCK_NO_CLOSE.create(blockChar.toString()))
-            return
-        }
 
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
         val embedTokenValue = if (hasEscapedEmbedEnd) {
@@ -439,10 +441,16 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
-        // process our closing blockChar pair
-        sourceScanner.advance()
-        sourceScanner.advance()
-        addLiteralToken(TokenType.EMBED_END)
+        // we scanned everything that wasn't an EMBED_END into our embed content,
+        // so we're either at EOF or want to consume that EMBED_END
+        if (sourceScanner.peek() == EOF) {
+            return
+        } else {
+            // process our closing blockChar pair
+            sourceScanner.advance()
+            sourceScanner.advance()
+            addLiteralToken(TokenType.EMBED_END)
+        }
     }
 
     /**
