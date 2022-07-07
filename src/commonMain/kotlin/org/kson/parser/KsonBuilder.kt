@@ -83,15 +83,13 @@ class KsonBuilder(private val tokens: List<Token>) :
      * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any error marks into [messageSink]
      */
     private fun walkForErrors(marker: KsonMarker, messageSink: MessageSink) {
-        val error = marker.markedError
-        if (error != null) {
-            val message = error.first
-            val messageArgs = error.second
+        val errorMessage = marker.markedError
+        if (errorMessage != null) {
             messageSink.error(
                 Location.merge(
                     tokens[marker.firstTokenIndex].lexeme.location,
                     tokens[marker.lastTokenIndex].lexeme.location
-                ), message, *messageArgs
+                ), errorMessage
             )
         }
 
@@ -291,7 +289,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     MarkerCreator {
     val firstTokenIndex = context.getTokenIndex()
     var lastTokenIndex = firstTokenIndex
-    var markedError: Pair<Message, Array<out String?>>? = null
+    var markedError: Message? = null
     var element: ElementType? = null
     val childMarkers = ArrayList<KsonMarker>()
 
@@ -365,8 +363,8 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         return element.toString()
     }
 
-    override fun error(message: Message, vararg args: String?) {
-        markedError = Pair(message, args)
+    override fun error(message: Message) {
+        markedError = message
         context.errorEncountered()
         done(ERROR)
     }

@@ -68,5 +68,5 @@ interface AstMarker {
      * Complete this mark, "tagging" the tokens lexed while this mark was outstanding as being in error as
      * described in [message]
      */
-    fun error(message: Message, vararg args: String?)
+    fun error(message: Message)
 }

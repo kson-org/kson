@@ -1,8 +1,8 @@
 package org.kson.parser
 
-import org.kson.parser.messages.Message
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
+import org.kson.parser.messages.MessageType.*
 
 /**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
@@ -119,7 +119,7 @@ class Parser(val builder: AstBuilder) {
                 builder.advanceLexer()
                 objectDefinitionMark.done(OBJECT_DEFINITION)
             } else {
-                objectDefinitionMark.error(Message.OBJECT_NO_CLOSE)
+                objectDefinitionMark.error(OBJECT_NO_CLOSE.create())
             }
             return true
         } else {
@@ -149,12 +149,12 @@ class Parser(val builder: AstBuilder) {
                 builder.advanceLexer()
 
                 if (builder.getTokenType() == LIST_DASH) {
-                    danglingListDashMark.error(Message.DANGLING_LIST_DASH)
+                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
                 } else if (value() || bracketList()) {
                     // this LIST_DASH is not dangling
                     danglingListDashMark.drop()
                 } else {
-                    danglingListDashMark.error(Message.DANGLING_LIST_DASH)
+                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
                 }
             } while (builder.getTokenType() == LIST_DASH)
 
@@ -191,7 +191,7 @@ class Parser(val builder: AstBuilder) {
                 // just closed a well-formed list
                 listMark.done(LIST)
             } else {
-                listMark.error(Message.LIST_NO_CLOSE)
+                listMark.error(LIST_NO_CLOSE.create())
             }
             return true
         } else {
@@ -296,7 +296,7 @@ class Parser(val builder: AstBuilder) {
             while (!builder.eof()) {
                 builder.advanceLexer()
             }
-            unexpectedContentMark.error(Message.EOF_NOT_REACHED)
+            unexpectedContentMark.error(EOF_NOT_REACHED.create())
             return true
         }
     }
