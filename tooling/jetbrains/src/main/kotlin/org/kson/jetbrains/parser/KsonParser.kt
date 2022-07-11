@@ -65,8 +65,8 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
                 psiMark.drop()
             }
 
-            override fun error(message: Message, vararg args: String?) {
-                psiMark.error(message.format(*args))
+            override fun error(message: Message) {
+                psiMark.error(message.toString())
             }
         }
     }

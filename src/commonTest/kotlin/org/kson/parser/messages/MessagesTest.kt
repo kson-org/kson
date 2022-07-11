@@ -2,6 +2,7 @@ package org.kson.parser.messages
 
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertFailsWith
 
 class MessagesTest {
     @Test
@@ -11,7 +12,14 @@ class MessagesTest {
         //
         // (NOTE: this naturally relies on assumption that EMBED_BLOCK_BAD_START's formatted
         //        message will always refer to its embed tag.  Apologies if that changes and this fails)
-        val formattedMessage = Message.EMBED_BLOCK_BAD_START.format("tagNameForTest", "%")
-        assertContains(formattedMessage, "tagNameForTest")
+        val message = MessageType.EMBED_BLOCK_BAD_START.create("tagNameForTest", "%")
+        assertContains(message.toString(), "tagNameForTest")
+    }
+
+    @Test
+    fun testFormatNullArgs() {
+        assertFailsWith(IllegalArgumentException::class, "should blow up on null argument") {
+            MessageType.EMBED_BLOCK_BAD_START.create(null, "%")
+        }
     }
 }

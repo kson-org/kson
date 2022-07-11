@@ -6,8 +6,7 @@ import org.kson.parser.messages.Message
 
 data class LoggedMessage(
     val location: Location,
-    val message: Message,
-    val args: Array<out String?>
+    val message: Message
 ) {
     companion object {
         /**
@@ -16,35 +15,15 @@ data class LoggedMessage(
          * following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
          * for this sort of output
          */
-        fun print(messages: List<LoggedMessage>): String {
-            return messages.map { message ->
-                val location = message.location
+        fun print(loggedMessages: List<LoggedMessage>): String {
+            return loggedMessages.joinToString("\n") { loggedMessage ->
+                val location = loggedMessage.location
                 "Error:${location.firstLine + 1}.${location.firstColumn + 1}" +
                         " - ${location.lastLine + 1}.${location.lastColumn + 1}, ${
-                            message.message.format(*message.args)
+                            loggedMessage.message
                         }"
-            }.joinToString("\n")
+            }
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as LoggedMessage
-
-        if (location != other.location) return false
-        if (message != other.message) return false
-        if (!args.contentEquals(other.args)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = location.hashCode()
-        result = 31 * result + message.hashCode()
-        result = 31 * result + args.contentHashCode()
-        return result
     }
 }
 
@@ -54,8 +33,8 @@ data class LoggedMessage(
 class MessageSink {
     private val messages = mutableListOf<LoggedMessage>()
 
-    fun error(location: Location, message: Message, vararg args: String?) {
-        messages.add(LoggedMessage(location, message, args))
+    fun error(location: Location, message: Message) {
+        messages.add(LoggedMessage(location, message))
     }
 
     fun hasErrors(): Boolean {

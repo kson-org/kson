@@ -1,8 +1,8 @@
 package org.kson.parser
 
 import org.kson.parser.TokenType.*
-import org.kson.parser.messages.Message
-import org.kson.testSupport.assertMessageFormats
+import org.kson.parser.messages.MessageType
+import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -67,16 +67,15 @@ class LexerTest {
     }
 
     /**
-     * Assertion helper for testing that tokenizing [source] generates [expectedMessages].
+     * Assertion helper for testing that tokenizing [source] generates [expectedMessageTypes].
      *
      * Returns the generated tokens for further validation
      */
-    private fun assertTokenizesWithMessages(source: String, expectedMessages: List<Message>): List<Token> {
+    private fun assertTokenizesWithMessages(source: String, expectedMessageTypes: List<MessageType>): List<Token> {
         val messageSink = MessageSink()
         val tokens = Lexer(source, messageSink).tokenize()
 
-        assertMessageFormats(messageSink.loggedMessages())
-        assertEquals(expectedMessages, messageSink.loggedMessages().map { it.message })
+        assertEquals(expectedMessageTypes, messageSink.loggedMessages().map { it.message.type })
         return tokens
     }
 
@@ -173,7 +172,7 @@ class LexerTest {
             """
                 420E
             """,
-            listOf(Message.DANGLING_EXP_INDICATOR)
+            listOf(DANGLING_EXP_INDICATOR)
         )
 
         // error case
@@ -181,7 +180,7 @@ class LexerTest {
             """
                 420E-
             """,
-            listOf(Message.DANGLING_EXP_INDICATOR)
+            listOf(DANGLING_EXP_INDICATOR)
         )
     }
 
@@ -191,7 +190,7 @@ class LexerTest {
             """
                 -nope
             """,
-            listOf(Message.ILLEGAL_MINUS_SIGN)
+            listOf(ILLEGAL_MINUS_SIGN)
         )
     }
 
@@ -529,7 +528,7 @@ class LexerTest {
             """
             test: %
             """,
-            listOf(Message.EMBED_BLOCK_DANGLING_DELIM)
+            listOf(EMBED_BLOCK_DANGLING_DELIM)
         )
     }
 
@@ -541,7 +540,7 @@ class LexerTest {
             because content must start on first line after opening ticks
             %%
             """,
-            listOf(Message.EMBED_BLOCK_BAD_START)
+            listOf(EMBED_BLOCK_BAD_START)
         )
 
         assertTokenizesWithMessages(
@@ -550,7 +549,7 @@ class LexerTest {
             because content must start on first line after opening ticks+embed tag
             %%
             """,
-            listOf(Message.EMBED_BLOCK_BAD_START)
+            listOf(EMBED_BLOCK_BAD_START)
         )
     }
 
@@ -561,7 +560,7 @@ class LexerTest {
             %%
             This embed block lacks its closing ticks
             """,
-            listOf(Message.EMBED_BLOCK_NO_CLOSE)
+            listOf(EMBED_BLOCK_NO_CLOSE)
         )
     }
 
@@ -571,7 +570,7 @@ class LexerTest {
             """
             "this string has no end quote
             """,
-            listOf(Message.STRING_NO_CLOSE)
+            listOf(STRING_NO_CLOSE)
         )
         assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
     }

@@ -3,8 +3,8 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
-import org.kson.parser.messages.Message
 import org.kson.ast.NumberNode
+import org.kson.parser.messages.MessageType.*
 
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIM_ALT_CHAR = '$'
@@ -259,8 +259,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 } else {
                     messageSink.error(
                         addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                        Message.EMBED_BLOCK_DANGLING_DELIM,
-                        char.toString()
+                        EMBED_BLOCK_DANGLING_DELIM.create(char.toString())
                     )
                 }
             }
@@ -274,7 +273,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                              *         - we see more edge cases like this, or:
                              *         - we succeed in adding dash-denoted lists into the grammar
                              */
-                            messageSink.error(addLiteralToken(TokenType.LIST_DASH), Message.ILLEGAL_MINUS_SIGN)
+                            messageSink.error(addLiteralToken(TokenType.LIST_DASH), ILLEGAL_MINUS_SIGN.create())
                             return
                         }
                         number()
@@ -286,8 +285,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                     else -> {
                         messageSink.error(
                             addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                            Message.UNEXPECTED_CHAR,
-                            char.toString()
+                            UNEXPECTED_CHAR.create(char.toString())
                         )
                     }
                 }
@@ -331,7 +329,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.currentLocation(), Message.STRING_NO_CLOSE)
+            messageSink.error(sourceScanner.currentLocation(), STRING_NO_CLOSE.create())
             val rawStringLexeme = sourceScanner.extractLexeme()
             // clip the open quote from the string
             val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length)
@@ -363,7 +361,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             addToken(TokenType.EMBED_TAG, embedTagLexeme, embedTagLexeme.text)
             embedTagLexeme.text
         } else {
-            null
+            ""
         }
 
         while (isInlineWhitespace(sourceScanner.peek())) {
@@ -376,7 +374,10 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             sourceScanner.advance()
             addLiteralToken(TokenType.WHITESPACE)
         } else {
-            messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.EMBED_BLOCK_BAD_START, embedTag, blockChar.toString())
+            messageSink.error(
+                addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                EMBED_BLOCK_BAD_START.create(embedTag, blockChar.toString())
+            )
         }
 
         // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
@@ -405,7 +406,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(embedBlockLexeme.location, Message.EMBED_BLOCK_NO_CLOSE, blockChar.toString())
+            messageSink.error(embedBlockLexeme.location, EMBED_BLOCK_NO_CLOSE.create(blockChar.toString()))
             return
         }
 
@@ -495,7 +496,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             }
             if (!isDigit(sourceScanner.peek())) {
                 // Double.parseDouble considers a trailing 'E' without an exponent part to be a NumberFormatException
-                messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), Message.DANGLING_EXP_INDICATOR)
+                messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), DANGLING_EXP_INDICATOR.create())
                 return
             }
             while (isDigit(sourceScanner.peek())) sourceScanner.advance()

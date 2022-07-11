@@ -4,8 +4,8 @@ import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
-import org.kson.parser.messages.Message
-import org.kson.testSupport.assertMessageFormats
+import org.kson.parser.messages.MessageType
+import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -42,25 +42,23 @@ class KsonTest {
 
     /**
      * Assertion helper for testing that [source] is rejected by the parser with the messages listed in
-     * [expectedParseMessages]
+     * [expectedParseMessageTypes]
      *
      * @param source is the kson source to parse into a [KsonRoot]
-     * @param expectedParseMessages a list of [Message]s produced by parsing [source]
+     * @param expectedParseMessageTypes a list of [MessageType]s produced by parsing [source]
      * @return the produced messages for further validation
      */
     private fun assertParserRejectsSource(
         source: String,
-        expectedParseMessages: List<Message>
+        expectedParseMessageTypes: List<MessageType>
     ): ImmutableList<LoggedMessage> {
         val parseResult = Kson.parse(source)
 
         assertEquals(
-            expectedParseMessages,
-            parseResult.messages.map { it.message },
+            expectedParseMessageTypes,
+            parseResult.messages.map { it.message.type },
             "Should have the expected parse errors."
         )
-
-        assertMessageFormats(parseResult.messages)
 
         assertTrue(
             parseResult.hasErrors(),
@@ -235,14 +233,14 @@ class KsonTest {
 
     @Test
     fun testDanglingListDash() {
-        assertParserRejectsSource("-", listOf(Message.DANGLING_LIST_DASH))
-        assertParserRejectsSource("- ", listOf(Message.DANGLING_LIST_DASH))
+        assertParserRejectsSource("-", listOf(DANGLING_LIST_DASH))
+        assertParserRejectsSource("- ", listOf(DANGLING_LIST_DASH))
         assertParserRejectsSource("""
             - 2
             - 4
             - 
             - 8
-        """.trimIndent(), listOf(Message.DANGLING_LIST_DASH))
+        """.trimIndent(), listOf(DANGLING_LIST_DASH))
     }
 
     @Test
@@ -351,36 +349,36 @@ class KsonTest {
 
     @Test
     fun testUnclosedStringError() {
-        assertParserRejectsSource("\"unclosed", listOf(Message.STRING_NO_CLOSE))
+        assertParserRejectsSource("\"unclosed", listOf(STRING_NO_CLOSE))
     }
 
     @Test
     fun testUnclosedEmbedDelimiterError() {
-        assertParserRejectsSource("%%\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+        assertParserRejectsSource("%%\n", listOf(EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
     fun testUnclosedEmbedAlternateDelimiterError() {
-        assertParserRejectsSource("$$\n", listOf(Message.EMBED_BLOCK_NO_CLOSE))
+        assertParserRejectsSource("$$\n", listOf(EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
     fun testUnclosedListError() {
-        val errorMessages = assertParserRejectsSource("[", listOf(Message.LIST_NO_CLOSE))
+        val errorMessages = assertParserRejectsSource("[", listOf(LIST_NO_CLOSE))
         assertEquals(Location(0, 0, 0, 1, 0, 1), errorMessages[0].location)
-        assertParserRejectsSource("[1,2,", listOf(Message.LIST_NO_CLOSE))
+        assertParserRejectsSource("[1,2,", listOf(LIST_NO_CLOSE))
     }
 
     @Test
     fun testUnclosedObjectError() {
-        assertParserRejectsSource("{", listOf(Message.OBJECT_NO_CLOSE))
-        assertParserRejectsSource("{ key: value   ", listOf(Message.OBJECT_NO_CLOSE))
+        assertParserRejectsSource("{", listOf(OBJECT_NO_CLOSE))
+        assertParserRejectsSource("{ key: value   ", listOf(OBJECT_NO_CLOSE))
     }
 
     @Test
     fun testInvalidTrailingKson() {
-        assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(Message.EOF_NOT_REACHED))
-        assertParserRejectsSource("{ key: value } 4.5", listOf(Message.EOF_NOT_REACHED))
-        assertParserRejectsSource("key: value illegal extra identifiers", listOf(Message.EOF_NOT_REACHED))
+        assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(EOF_NOT_REACHED))
+        assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
+        assertParserRejectsSource("key: value illegal extra identifiers", listOf(EOF_NOT_REACHED))
     }
 }
