@@ -533,34 +533,25 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbedBlockBadStart() {
-        assertTokenizesWithMessages(
+    fun testComplexEmbedTagWithWhitespace() {
+        assertTokenizesTo(
             """
-            %% this can't be here
-            because content must start on first line after opening ticks
+            %%   this tag has spaces and funky characters ~!@#$%^&*()_+
+            some sweet content
             %%
             """,
-            listOf(EMBED_BLOCK_BAD_START)
-        )
-
-        assertTokenizesWithMessages(
-            """
-            %%embedTag this can't be here
-            because content must start on first line after opening ticks+embed tag
-            %%
-            """,
-            listOf(EMBED_BLOCK_BAD_START)
+            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
         )
     }
 
     @Test
     fun testUnclosedEmbedBlock() {
-        assertTokenizesWithMessages(
+        assertTokenizesTo(
             """
             %%
-            This embed block lacks its closing ticks
+            This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE)
+            listOf(EMBED_START, EMBED_CONTENT)
         )
     }
 
@@ -641,12 +632,12 @@ class LexerTest {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 %%
-                these double %\% ticks are embedded but escaped%%
+                these double %\% percents are embedded but escaped%%
             """,
             listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
-        assertEquals("these double %% ticks are embedded but escaped", singleEscapeTokens[1].value)
+        assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[1].value)
     }
 
     @Test

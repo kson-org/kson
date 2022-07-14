@@ -70,7 +70,7 @@ class Parser(val builder: AstBuilder) {
             }
         }
 
-        if (foundProperties || allowEmpty)  {
+        if (foundProperties || allowEmpty) {
             objectInternalsMark.done(OBJECT_INTERNALS)
         } else {
             objectInternalsMark.rollbackTo()
@@ -251,9 +251,10 @@ class Parser(val builder: AstBuilder) {
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_START) {
+            val embedBlockMark = builder.mark()
+            val embedStartDelimiter = builder.getTokenText()
             // advance past the EMBED_START
             builder.advanceLexer()
-            val embedBlockMark = builder.mark()
             val embedTagMark = builder.mark()
             if (builder.getTokenType() == EMBED_TAG) {
                 // advance past our optional embed tag
@@ -265,15 +266,19 @@ class Parser(val builder: AstBuilder) {
             if (builder.getTokenType() == EMBED_CONTENT) {
                 // advance past our EMBED_CONTENT
                 builder.advanceLexer()
-            }
-            embedBlockContentMark.done(EMBED_CONTENT)
-            embedBlockMark.done(EMBED_BLOCK)
-            if (builder.getTokenType() == EMBED_END) {
-                // empty embed block is also legal
-                builder.advanceLexer()
+                embedBlockContentMark.done(EMBED_CONTENT)
             } else {
-                throw RuntimeException("Unexpected error: the lexer should have ensured this structue was correct")
+                // empty embed blocks are legal
+                embedBlockContentMark.drop()
             }
+
+            if (builder.getTokenType() == EMBED_END) {
+                builder.advanceLexer()
+                embedBlockMark.done(EMBED_BLOCK)
+            } else if (builder.eof()) {
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
+            }
+
             return true
         } else {
             // not an embedBlock

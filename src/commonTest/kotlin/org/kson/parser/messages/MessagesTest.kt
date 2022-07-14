@@ -10,16 +10,16 @@ class MessagesTest {
         // sanity check formatting is hooked up correctly by verifying we can find our
         // "tagNameForTest" embedded in the formatted string
         //
-        // (NOTE: this naturally relies on assumption that EMBED_BLOCK_BAD_START's formatted
+        // (NOTE: this naturally relies on assumption that EMBED_BLOCK_NO_CLOSE's formatted
         //        message will always refer to its embed tag.  Apologies if that changes and this fails)
-        val message = MessageType.EMBED_BLOCK_BAD_START.create("tagNameForTest", "%")
-        assertContains(message.toString(), "tagNameForTest")
+        val message = MessageType.EMBED_BLOCK_NO_CLOSE.create("embedDelimiter")
+        assertContains(message.toString(), "embedDelimiter")
     }
 
     @Test
     fun testFormatNullArgs() {
         assertFailsWith(IllegalArgumentException::class, "should blow up on null argument") {
-            MessageType.EMBED_BLOCK_BAD_START.create(null, "%")
+            MessageType.EMBED_BLOCK_NO_CLOSE.create(null)
         }
     }
 }

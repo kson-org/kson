@@ -33,6 +33,10 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
         }
     }
 
+    override fun getTokenText(): String {
+        return psiBuilder.tokenText ?: ""
+    }
+
     override fun advanceLexer() {
         psiBuilder.advanceLexer()
     }

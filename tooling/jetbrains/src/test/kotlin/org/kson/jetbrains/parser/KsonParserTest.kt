@@ -42,6 +42,11 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     }
 
     @Test
+    fun testUnclosedEmbedBlock() {
+        doTest(true)
+    }
+
+    @Test
     fun testUnclosedString() {
         doTest(true)
     }
