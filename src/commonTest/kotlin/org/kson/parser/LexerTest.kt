@@ -632,12 +632,12 @@ class LexerTest {
         val singleEscapeTokens = assertTokenizesTo(
             """   
                 %%
-                these double %\% ticks are embedded but escaped%%
+                these double %\% percents are embedded but escaped%%
             """,
             listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
         )
 
-        assertEquals("these double %% ticks are embedded but escaped", singleEscapeTokens[1].value)
+        assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[1].value)
     }
 
     @Test
