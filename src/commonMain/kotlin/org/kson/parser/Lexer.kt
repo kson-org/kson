@@ -247,8 +247,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             ']' -> addLiteralToken(TokenType.BRACKET_R)
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
-            '"' -> {
-                string()
+            '"', '\'' -> {
+                string(char)
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
                 // look for the required second embed delim char
@@ -315,12 +315,12 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         addToken(type, lexeme, lexeme.text)
     }
 
-    private fun string() {
+    private fun string(delimiter: Char) {
         // we use this var to track if we need to consume escapes in a string so we only walk its text
         // trying to replace escapes if we know we need to
         var hasEscapedQuotes = false
-        while (sourceScanner.peek() != '"' && sourceScanner.peek() != EOF) {
-            if (sourceScanner.peek() == '\\' && sourceScanner.peekNext() == '"') {
+        while (sourceScanner.peek() != delimiter && sourceScanner.peek() != EOF) {
+            if (sourceScanner.peek() == '\\' && sourceScanner.peekNext() == delimiter) {
                 hasEscapedQuotes = true
                 // ensure we advance past it so it's part of the string
                 sourceScanner.advance()
@@ -344,7 +344,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         // clip the quotes from the string to get the actual value
         val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length - 1)
         if (hasEscapedQuotes) {
-            val escapedString = stringText.replace("\\\"", "\"")
+            val escapedString = stringText.replace("\\" + delimiter, delimiter.toString())
             addToken(TokenType.STRING, rawStringLexeme, escapedString)
         } else {
             addToken(TokenType.STRING, rawStringLexeme, stringText)
