@@ -1,17 +1,21 @@
 package org.kson.jsonsuite
 
 /**
- * This class/file manages the list [JSONTestSuite](https://github.com/nst/JSONTestSuite)
+ * This class own the list of [JSONTestSuite](https://github.com/nst/JSONTestSuite)
  * tests that we currently skip/exclude when generating [org.kson.parser.json.generated.JsonSuiteTest]
  *
  * Part of completing the Kson parser implementation is removing entries from this, enhancing the parser
  * to satisfy/pass the test, rinse, repeat.
  *
- * Note: we wrap [jsonTestSuiteSkipList] in this class so that we can link to it with
- *   [JsonTestSuiteSkipList]-style doc links where appropriate
+ * Note: we wrap [jsonTestSuiteSkipList] in this class because we want to be able to link to this list
+ *   from other places in the source (particularly the generated tests this affects), and Kotlin doc
+ *   seems to only link properly from there using a class reference: [JsonTestSuiteSkipList]
  */
 class JsonTestSuiteSkipList {
     companion object {
+        fun all(): Set<String> {
+            return jsonTestSuiteSkipList
+        }
         fun contains(testName: String): Boolean {
             return jsonTestSuiteSkipList.contains(testName)
         }
@@ -84,6 +88,10 @@ private val jsonTestSuiteSkipList = setOf(
     "n_structure_no_data.json",
     "n_structure_object_unclosed_no_value.json",
     "n_structure_open_array_object.json",
+
+    "n_object_key_with_single_quotes.json", // skip because we accept single quotes
+    "n_object_single_quote.json", // skip because we accept single quotes
+    "n_string_single_quote.json", // skip because we accept single quotes
 
     // TODO: https://github.com/kson-org/kson/issues/23 Enable "i_" tests
     "i_number_neg_int_huge_exp.json",
