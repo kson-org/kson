@@ -567,6 +567,17 @@ class LexerTest {
     }
 
     @Test
+    fun testUnterminatedAltString() {
+        val unclosedStringTokens = assertTokenizesWithMessages(
+            """
+            'this string has no end quote
+            """,
+            listOf(STRING_NO_CLOSE)
+        )
+        assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
+    }
+
+    @Test
     fun testIdentifierLexemeContent() {
         val tokens = assertTokenizesTo(
             """   
@@ -619,12 +630,24 @@ class LexerTest {
     fun testStringEscapes() {
         val tokens = assertTokenizesTo(
             """   
-                "string with \"embedded\" quotes"
+                "string with 'unescaped' and \"embedded\" quotes"
             """,
             listOf(STRING)
         )
 
-        assertEquals("string with \"embedded\" quotes", tokens[0].value)
+        assertEquals("string with 'unescaped' and \"embedded\" quotes", tokens[0].value)
+    }
+
+    @Test
+    fun testAltStringEscapes() {
+        val tokens = assertTokenizesTo(
+            """
+                'string with "unescaped" and \'embedded\' quotes'
+            """,
+            listOf(STRING)
+        )
+
+        assertEquals("string with \"unescaped\" and \'embedded\' quotes", tokens[0].value)
     }
 
     @Test

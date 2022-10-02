@@ -1,6 +1,7 @@
 package org.kson.jsonsuite
 
 import java.io.BufferedReader
+import java.io.File
 import java.nio.file.Path
 
 /**
@@ -8,6 +9,8 @@ import java.nio.file.Path
  * project.  By generating the tests into pure Kotlin test methods, we not only have the ergonomics of having
  * an actual test method per JSON Suite test, we also get the benefit of being able to run them across all platforms
  * without wrangling cross-platform file reads
+ *
+ * See [JsonTestSuiteSkipList] for info on the JSONTestSuite tests we choose to ignore
  *
  * @param projectRoot The absolute path on disk to the root of the Kson project
  * @param sourceRoot The source root of the project to place the generated test in, relative to [projectRoot]
@@ -38,19 +41,8 @@ class JsonTestSuiteGenerator(
 
         runCommandLineSetup()
 
-        val testFiles = testDefinitionFilesDir.toFile().listFiles()
-            ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded")
-
         generatedTestPath.parent.toFile().mkdirs()
-        val testDataList = testFiles.map {
-            JsonTestData(
-                it.nameWithoutExtension,
-                // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
-                it.readText(Charsets.UTF_8),
-                it.absolutePath.replace("$projectRoot/", ""),
-                JsonTestSuiteSkipList.contains(it.name)
-            )
-        }.sortedBy { it.rawTestName }
+        val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
         generatedTestPath.toFile()
             .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
     }
@@ -197,4 +189,44 @@ private fun assertParseResult(
 }
 
 """
+}
+
+/**
+ * This class manages loading and transforming the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
+ * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
+ *
+ * Property [jsonTestSuiteSkipList] contains the list of tests we currently skip (todo: remove or document all skips)
+ *
+ * @param testDefinitionFilesDir the [Path] on disk to the [JSONTestSuite](https://github.com/nst/JSONTestSuite) test files
+ * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
+ *                      machine-independent file paths relative to the project root
+ */
+private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
+    private val testFiles: List<File> = (testDefinitionFilesDir.toFile().listFiles()
+        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded")).asList()
+
+    init {
+        val testDefinitionFileNames = testFiles.map { it.name }.toSet()
+
+        // ensure all the test names in jsonTestSuiteSkipList are valid
+        for (testFileName in JsonTestSuiteSkipList.all()) {
+            if (!testDefinitionFileNames.contains(testFileName)) {
+                throw RuntimeException("Invalid JSONTestSuite test file name \"$testFileName\".\n" +
+                        "File not found amongst test files in ${testFiles.first().parentFile}:\n" +
+                        testFiles.joinToString(",\n") { it.name })
+            }
+        }
+    }
+
+    fun loadTestData(): List<JsonTestData> {
+        return testFiles.map {
+            JsonTestData(
+                it.nameWithoutExtension,
+                // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
+                it.readText(Charsets.UTF_8),
+                it.absolutePath.replace("$projectRoot/", ""),
+                JsonTestSuiteSkipList.contains(it.name)
+            )
+        }.sortedBy { it.rawTestName }
+    }
 }
