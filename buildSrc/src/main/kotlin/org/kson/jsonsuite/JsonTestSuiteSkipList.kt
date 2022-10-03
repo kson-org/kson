@@ -7,7 +7,7 @@ package org.kson.jsonsuite
  * Part of completing the Kson parser implementation is removing entries from this, enhancing the parser
  * to satisfy/pass the test, rinse, repeat.
  *
- * Note: we wrap [jsonTestSuiteSkipList] in this class because we want to be able to link to this list
+ * Note: we wrap the raw [jsonTestSuiteSkipList] val in this class because we want to be able to link to this list
  *   from other places in the source (particularly the generated tests this affects), and Kotlin doc
  *   seems to only link properly from there using a class reference: [JsonTestSuiteSkipList]
  */

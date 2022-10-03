@@ -1,7 +1,6 @@
 package org.kson.jsonsuite
 
 import java.io.BufferedReader
-import java.io.File
 import java.nio.file.Path
 
 /**
@@ -121,7 +120,7 @@ ${
                     if (it.isSkipped) {
                         "     *\n" +
                                 "     * To uncomment and include this test in the running suite, remove it from\n" +
-                                "     * [org.kson.jsonsuite.JsonTestSuiteSkipList] and regenerate this file\n"
+                                "     * [${JsonTestSuiteSkipList::class.qualifiedName}] and regenerate this file\n"
                     } else {
                         ""
                     } +
@@ -202,8 +201,8 @@ private fun assertParseResult(
  *                      machine-independent file paths relative to the project root
  */
 private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
-    private val testFiles: List<File> = (testDefinitionFilesDir.toFile().listFiles()
-        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded")).asList()
+    private val testFiles = (testDefinitionFilesDir.toFile().listFiles()
+        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded"))
 
     init {
         val testDefinitionFileNames = testFiles.map { it.name }.toSet()
