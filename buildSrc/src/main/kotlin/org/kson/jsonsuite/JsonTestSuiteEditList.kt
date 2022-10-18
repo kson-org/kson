@@ -1,0 +1,126 @@
+package org.kson.jsonsuite
+
+/**
+ * This class owns the list of modifications to the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
+ * tests that we want to incorporate for Kson when generating [org.kson.parser.json.generated.JsonSuiteTest]
+ *
+ * Note: we wrap the raw [jsonTestSuiteEditList] val in this class because we want to be able to link to this list
+ *   from other places in the source (particularly the generated tests this affects, and Kotlin doc
+ *   seems to only link properly from there using a class reference: [JsonTestSuiteEditList]
+ */
+class JsonTestSuiteEditList {
+    companion object {
+        fun all(): Set<String> {
+            return jsonTestSuiteEditList.keys
+        }
+        fun get(testName: String): JsonTestEditType {
+            return jsonTestSuiteEditList[testName] ?: JsonTestEditType.NONE
+        }
+    }
+}
+
+/**
+ * The types of "edits" we make when generating our native Kotlin version of these tests
+ */
+enum class JsonTestEditType {
+    /**
+     * Assert that a "No"/"n_" test for Json should pass in Kson due to it being a superset of JSON
+     */
+    ACCEPT_N_FOR_SUPERSET,
+
+    /**
+     * Comment out this test in our generated file until we've had a chance to review how it should behave
+     * TODO investigate all these test and delete this entry
+     */
+    SKIP_NEEDS_INVESTIGATION,
+
+    /**
+     * Use the test as is, without "edits"
+     */
+    NONE
+}
+
+/**
+ * Map of [JSONTestSuite](https://github.com/nst/JSONTestSuite) test file names to the [JsonTestEditType] that
+ * we want applied to that test in [JsonTestSuiteGenerator]
+ */
+private val jsonTestSuiteEditList = mapOf(
+    // TODO: https://github.com/kson-org/kson/issues/21 Enable more tests that require parse failures
+    "n_array_1_true_without_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_comma_and_number.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_double_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_double_extra_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_extra_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_inner_array_no_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_just_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_just_minus.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_missing_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_number_and_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_number_and_several_commas.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_incomplete_false.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_incomplete_null.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_incomplete_true.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_multidigit_number_then_00.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_-01.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_1_000.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_hex_1_digit.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_hex_2_digits.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_infinity.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_Inf.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_invalid-negative-real.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_minus_infinity.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_minus_sign_with_trailing_garbage.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_minus_space_1.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_-NaN.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_NaN.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_neg_int_starting_with_zero.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_neg_real_without_int_part.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_neg_with_garbage_at_end.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_with_alpha_char.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_with_alpha.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_number_with_leading_zero.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_bad_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_double_colon.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_lone_continuation_byte_in_key_and_trailing_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_missing_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_non_string_key_but_huge_number_instead.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_trailing_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_unquoted_key.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_single_space.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_1_surrogate_then_escape_u1.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_1_surrogate_then_escape_u1x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_1_surrogate_then_escape_u.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_escaped_ctrl_char_tab.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_escaped_emoji.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_escape_x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_incomplete_escaped_character.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_incomplete_surrogate_escape_invalid.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_incomplete_surrogate.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_invalid_backslash_esc.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_invalid_unicode_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_invalid_utf8_after_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_invalid-utf-8-in-escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_single_string_no_double_quotes.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_unescaped_newline.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_unescaped_tab.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_string_unicode_CapitalU.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_100000_opening_arrays.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_capitalized_True.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_end_array.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_no_data.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_object_unclosed_no_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_open_array_object.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+
+    "n_object_key_with_single_quotes.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_object_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_string_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+
+    // TODO: https://github.com/kson-org/kson/issues/23 Enable "i_" tests
+    "i_number_neg_int_huge_exp.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_number_real_neg_overflow.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_number_too_big_neg_int.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_number_very_big_negative_int.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_string_utf16BE_no_BOM.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_string_UTF-16LE_with_BOM.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "i_structure_UTF-8_BOM_empty_object.json" to JsonTestEditType.SKIP_NEEDS_INVESTIGATION
+)
