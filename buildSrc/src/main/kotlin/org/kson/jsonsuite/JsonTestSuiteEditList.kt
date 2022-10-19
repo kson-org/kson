@@ -30,12 +30,12 @@ enum class JsonTestEditType {
 
     /**
      * Comment out this test in our generated file until we've had a chance to review how it should behave
-     * TODO investigate all these test and delete this entry
+     * TODO investigate all these tests and delete this entry
      */
     SKIP_NEEDS_INVESTIGATION,
 
     /**
-     * Use the test as is, without "edits"
+     * Default used for all tests not listed in [jsonTestSuiteEditList]: use the test as is, without "edits"
      */
     NONE
 }
