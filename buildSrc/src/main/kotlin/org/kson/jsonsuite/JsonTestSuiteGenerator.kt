@@ -72,11 +72,23 @@ class JsonTestSuiteGenerator(
     }
 }
 
+/**
+ * The properties used to generate the expected results enum in [generateJsonSuiteTestClass]
+ */
+private class ResultEnumData {
+    companion object {
+        const val className = "JsonParseResult"
+        const val acceptEntry = "ACCEPT"
+        const val rejectEntry = "REJECT"
+        const val unspecifiedEntry = "UNSPECIFIED"
+    }
+}
+
 private class JsonTestData(
     val rawTestName: String,
     val testSource: String,
     val filePathFromProjectRoot: String,
-    private val testEditType: JsonTestEditType
+    val testEditType: JsonTestEditType
 ) {
     val isSkipped = testEditType == JsonTestEditType.SKIP_NEEDS_INVESTIGATION
 
@@ -91,13 +103,13 @@ private class JsonTestData(
                 if (!rawTestName.startsWith("n_")) {
                     throw RuntimeException("Invalid use of ${JsonTestEditType.ACCEPT_N_FOR_SUPERSET::class.simpleName}: this edit only applies to overriding `n_`-type rejection tests")
                 }
-                "ACCEPT"
+                return ResultEnumData.acceptEntry
             }
             JsonTestEditType.SKIP_NEEDS_INVESTIGATION, JsonTestEditType.NONE -> {
                 when {
-                    rawTestName.startsWith("i_") -> "UNSPECIFIED"
-                    rawTestName.startsWith("y_") -> "ACCEPT"
-                    rawTestName.startsWith("n_") -> "REJECT"
+                    rawTestName.startsWith("i_") -> ResultEnumData.unspecifiedEntry
+                    rawTestName.startsWith("y_") -> ResultEnumData.acceptEntry
+                    rawTestName.startsWith("n_") -> ResultEnumData.rejectEntry
                     else -> throw RuntimeException("Unexpected test prefix---should only have i/y/n tests")
                 }
             }
@@ -146,7 +158,7 @@ ${
         |""".trimMargin() +
                     "    fun ${it.testName}() {\n" +
                     "        assertParseResult(\n" + "            " +
-                    "JsonParseResult.${it.parsingRequirement()},\n" +
+                    "${ResultEnumData.className}.${it.parsingRequirement()},\n" +
                     "            \"\"\"" + it.testSource + "\"\"\"\n" +
                     "        )\n" +
                     "    }"
@@ -161,22 +173,22 @@ ${
     }
 }
 
-private enum class JsonParseResult {
+private enum class ${ResultEnumData.className} {
     /**
      * Parser must accept the given source as valid JSON
      */
-    ACCEPT,
+    ${ResultEnumData.acceptEntry},
 
     /**
      * Parser must reject the given source as invalid JSON
      */
-    REJECT,
+    ${ResultEnumData.rejectEntry},
 
     /**
      * The JSON spec does not define a correct response to the given source.
      * i.e. A spec-compliant JSON parser is free accept or reject the given source
      */
-    UNSPECIFIED
+    ${ResultEnumData.unspecifiedEntry}
 }
 
 private fun assertParseResult(
