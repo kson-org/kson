@@ -1,7 +1,6 @@
 package org.kson.jsonsuite
 
 import java.io.BufferedReader
-import java.io.File
 import java.nio.file.Path
 
 /**
@@ -10,7 +9,8 @@ import java.nio.file.Path
  * an actual test method per JSON Suite test, we also get the benefit of being able to run them across all platforms
  * without wrangling cross-platform file reads
  *
- * See [JsonTestSuiteSkipList] for info on the JSONTestSuite tests we choose to ignore
+ * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
+ * superset of JSON
  *
  * @param projectRoot The absolute path on disk to the root of the Kson project
  * @param sourceRoot The source root of the project to place the generated test in, relative to [projectRoot]
@@ -72,23 +72,47 @@ class JsonTestSuiteGenerator(
     }
 }
 
+/**
+ * The properties used to generate the expected results enum in [generateJsonSuiteTestClass]
+ */
+private class ResultEnumData {
+    companion object {
+        const val className = "JsonParseResult"
+        const val acceptEntry = "ACCEPT"
+        const val rejectEntry = "REJECT"
+        const val unspecifiedEntry = "UNSPECIFIED"
+    }
+}
+
 private class JsonTestData(
     val rawTestName: String,
     val testSource: String,
     val filePathFromProjectRoot: String,
-    val isSkipped: Boolean
+    val testEditType: JsonTestEditType
 ) {
+    val isSkipped = testEditType == JsonTestEditType.SKIP_NEEDS_INVESTIGATION
+
     /**
      * Create a legal MPP Kotlin test name out of the raw test name by replacing problematic characters
      */
     val testName = rawTestName.replace("-", "DASH").replace(".", "DOT").replace("+", "PLUS").replace("#", "HASH")
 
     fun parsingRequirement(): String {
-        return when {
-            rawTestName.startsWith("i_") -> "UNSPECIFIED"
-            rawTestName.startsWith("y_") -> "ACCEPT"
-            rawTestName.startsWith("n_") -> "REJECT"
-            else -> throw RuntimeException("Unexpected test prefix---should only have i/y/n tests")
+        return when (testEditType) {
+            JsonTestEditType.ACCEPT_N_FOR_SUPERSET -> {
+                if (!rawTestName.startsWith("n_")) {
+                    throw RuntimeException("Invalid use of ${JsonTestEditType.ACCEPT_N_FOR_SUPERSET::class.simpleName}: this edit only applies to overriding `n_`-type rejection tests")
+                }
+                return ResultEnumData.acceptEntry
+            }
+            JsonTestEditType.SKIP_NEEDS_INVESTIGATION, JsonTestEditType.NONE -> {
+                when {
+                    rawTestName.startsWith("i_") -> ResultEnumData.unspecifiedEntry
+                    rawTestName.startsWith("y_") -> ResultEnumData.acceptEntry
+                    rawTestName.startsWith("n_") -> ResultEnumData.rejectEntry
+                    else -> throw RuntimeException("Unexpected test prefix---should only have i/y/n tests")
+                }
+            }
         }
     }
 }
@@ -121,7 +145,7 @@ ${
                     if (it.isSkipped) {
                         "     *\n" +
                                 "     * To uncomment and include this test in the running suite, remove it from\n" +
-                                "     * [org.kson.jsonsuite.JsonTestSuiteSkipList] and regenerate this file\n"
+                                "     * [${JsonTestSuiteEditList::class.qualifiedName}] and regenerate this file\n"
                     } else {
                         ""
                     } +
@@ -134,7 +158,7 @@ ${
         |""".trimMargin() +
                     "    fun ${it.testName}() {\n" +
                     "        assertParseResult(\n" + "            " +
-                    "JsonParseResult.${it.parsingRequirement()},\n" +
+                    "${ResultEnumData.className}.${it.parsingRequirement()},\n" +
                     "            \"\"\"" + it.testSource + "\"\"\"\n" +
                     "        )\n" +
                     "    }"
@@ -149,22 +173,22 @@ ${
     }
 }
 
-private enum class JsonParseResult {
+private enum class ${ResultEnumData.className} {
     /**
      * Parser must accept the given source as valid JSON
      */
-    ACCEPT,
+    ${ResultEnumData.acceptEntry},
 
     /**
      * Parser must reject the given source as invalid JSON
      */
-    REJECT,
+    ${ResultEnumData.rejectEntry},
 
     /**
      * The JSON spec does not define a correct response to the given source.
      * i.e. A spec-compliant JSON parser is free accept or reject the given source
      */
-    UNSPECIFIED
+    ${ResultEnumData.unspecifiedEntry}
 }
 
 private fun assertParseResult(
@@ -195,21 +219,21 @@ private fun assertParseResult(
  * This class manages loading and transforming the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
  * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
  *
- * Property [jsonTestSuiteSkipList] contains the list of tests we currently skip (todo: remove or document all skips)
+ * Property [jsonTestSuiteEditList] contains the list of tests we currently skip (todo: remove or document all skips)
  *
  * @param testDefinitionFilesDir the [Path] on disk to the [JSONTestSuite](https://github.com/nst/JSONTestSuite) test files
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
  *                      machine-independent file paths relative to the project root
  */
 private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
-    private val testFiles: List<File> = (testDefinitionFilesDir.toFile().listFiles()
-        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded")).asList()
+    private val testFiles = (testDefinitionFilesDir.toFile().listFiles()
+        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded"))
 
     init {
         val testDefinitionFileNames = testFiles.map { it.name }.toSet()
 
         // ensure all the test names in jsonTestSuiteSkipList are valid
-        for (testFileName in JsonTestSuiteSkipList.all()) {
+        for (testFileName in JsonTestSuiteEditList.all()) {
             if (!testDefinitionFileNames.contains(testFileName)) {
                 throw RuntimeException("Invalid JSONTestSuite test file name \"$testFileName\".\n" +
                         "File not found amongst test files in ${testFiles.first().parentFile}:\n" +
@@ -225,7 +249,7 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
                 // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
                 it.readText(Charsets.UTF_8),
                 it.absolutePath.replace("$projectRoot/", ""),
-                JsonTestSuiteSkipList.contains(it.name)
+                JsonTestSuiteEditList.get(it.name)
             )
         }.sortedBy { it.rawTestName }
     }
