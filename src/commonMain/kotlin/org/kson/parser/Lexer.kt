@@ -192,7 +192,7 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  *
  * @param source the input Kson source to tokenize
  * @param messageSink a [MessageSink] to write user-facing messages about the tokenization, for instance errors
- * @param gapFree whether to ensure _all_ source, including whitespace, quotes and illegal characters, is precisely
+ * @param gapFree whether to ensure _all_ source, including comments, whitespace, quotes and illegal chars, is precisely
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
  */
@@ -203,7 +203,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE)
+            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.COMMENT)
         }
     )
 

@@ -86,6 +86,7 @@ private val jsonTestSuiteEditList = mapOf(
     "n_object_non_string_key_but_huge_number_instead.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_object_trailing_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_object_unquoted_key.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_object_with_trailing_garbage.json" to JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_single_space.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_1_surrogate_then_escape_u1.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_1_surrogate_then_escape_u1x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
@@ -110,6 +111,7 @@ private val jsonTestSuiteEditList = mapOf(
     "n_structure_no_data.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_structure_object_unclosed_no_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_structure_open_array_object.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_structure_trailing_#.json" to JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
 
     "n_object_key_with_single_quotes.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_object_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,

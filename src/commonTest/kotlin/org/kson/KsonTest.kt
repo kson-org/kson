@@ -381,4 +381,15 @@ class KsonTest {
         assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
         assertParserRejectsSource("key: value illegal extra identifiers", listOf(EOF_NOT_REACHED))
     }
+
+    @Test
+    fun testSourceWithComment() {
+        assertParsesTo("""
+            # this is a comment
+            "string"
+        """,
+        """
+            "string"
+        """.trimIndent())
+    }
 }

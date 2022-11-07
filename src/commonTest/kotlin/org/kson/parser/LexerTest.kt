@@ -351,12 +351,9 @@ class LexerTest {
                 hello: "y'all"
             """,
             listOf(
-                COMMENT,
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
-                COMMENT,
-                COMMENT,
                 STRING,
                 COLON,
                 NUMBER,
@@ -680,9 +677,10 @@ class LexerTest {
     fun testGapFreeLexing() {
         assertTokenizesTo(
             """
+                # comment!
                 key: val
             """,
-            listOf(WHITESPACE, IDENTIFIER, COLON, WHITESPACE, IDENTIFIER, WHITESPACE),
+            listOf(WHITESPACE, COMMENT, WHITESPACE, IDENTIFIER, COLON, WHITESPACE, IDENTIFIER, WHITESPACE),
             "Should include WHITESPACE tokens when lexing gap-free",
             true
         )
