@@ -200,11 +200,11 @@ private fun assertParseResult(
     when (expectedParseResult) {
         JsonParseResult.ACCEPT -> assertFalse(
             parseResult.hasErrors(),
-            "Should have accepted test source, got:\n\n" + LoggedMessage.print(parseResult.messages)
+            "Should have accepted test source, but rejected as invalid.  Errors produced:\n\n" + LoggedMessage.print(parseResult.messages)
         )
         JsonParseResult.REJECT -> assertTrue(
             parseResult.hasErrors(),
-            "Should have rejected test source, got:\n\n" + LoggedMessage.print(parseResult.messages)
+            "Should have rejected test source, but accepted as valid Kson.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
         )
         JsonParseResult.UNSPECIFIED -> {
             // no-op: doesn't matter if we accept or reject as long as we didn't blow up
