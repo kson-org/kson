@@ -79,6 +79,7 @@ private class ResultEnumData {
     companion object {
         const val className = "JsonParseResult"
         const val acceptEntry = "ACCEPT"
+        const val acceptEntryForKson = "ACCEPT_FOR_KSON"
         const val rejectEntry = "REJECT"
         const val unspecifiedEntry = "UNSPECIFIED"
     }
@@ -103,7 +104,7 @@ private class JsonTestData(
                 if (!rawTestName.startsWith("n_")) {
                     throw RuntimeException("Invalid use of ${JsonTestEditType.ACCEPT_N_FOR_SUPERSET::class.simpleName}: this edit only applies to overriding `n_`-type rejection tests")
                 }
-                return ResultEnumData.acceptEntry
+                return ResultEnumData.acceptEntryForKson
             }
             JsonTestEditType.SKIP_NEEDS_INVESTIGATION, JsonTestEditType.NONE -> {
                 when {
@@ -178,6 +179,11 @@ private enum class ${ResultEnumData.className} {
      * Parser must accept the given source as valid JSON
      */
     ${ResultEnumData.acceptEntry},
+    
+    /**
+     * Parser must accept this invalid JSON because it is valid KSON (part of KSON being a superset of JSON)
+     */
+     ${ResultEnumData.acceptEntryForKson},
 
     /**
      * Parser must reject the given source as invalid JSON
@@ -198,15 +204,15 @@ private fun assertParseResult(
     val parseResult = Kson.parse(source)
 
     when (expectedParseResult) {
-        JsonParseResult.ACCEPT -> assertFalse(
+        ${ResultEnumData.className}.${ResultEnumData.acceptEntry}, ${ResultEnumData.className}.${ResultEnumData.acceptEntryForKson} -> assertFalse(
             parseResult.hasErrors(),
             "Should have accepted test source, but rejected as invalid.  Errors produced:\n\n" + LoggedMessage.print(parseResult.messages)
         )
-        JsonParseResult.REJECT -> assertTrue(
+        ${ResultEnumData.className}.${ResultEnumData.rejectEntry} -> assertTrue(
             parseResult.hasErrors(),
             "Should have rejected test source, but accepted as valid Kson.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
         )
-        JsonParseResult.UNSPECIFIED -> {
+        ${ResultEnumData.className}.${ResultEnumData.unspecifiedEntry} -> {
             // no-op: doesn't matter if we accept or reject as long as we didn't blow up
         }
     }
