@@ -39,6 +39,7 @@ enum class ParsedElementType : ElementType {
     EMBED_BLOCK,
     ERROR,
     LIST,
+    LIST_ELEMENT,
     OBJECT_DEFINITION,
     OBJECT_INTERNALS,
     OBJECT_NAME,

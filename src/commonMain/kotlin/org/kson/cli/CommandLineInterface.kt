@@ -2,6 +2,7 @@ package org.kson.cli
 
 import org.kson.Kson
 import org.kson.ParseResult
+import org.kson.ast.AstNode
 import org.kson.mpp.PlatformShim
 
 /**
@@ -63,7 +64,7 @@ private fun formatParseResult(parseResult: ParseResult): String {
         |]
         |
         |serializedAst: %%
-        |${parseResult.ast?.toKsonSource()}
+        |${parseResult.ast?.toKsonSource(AstNode.Indent())}
         |%%
     """.trimMargin()
 }

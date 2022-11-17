@@ -162,7 +162,11 @@ data class Token(
     /**
      * The final lexed [value] of this token, extracted (and possibly transformed) from [lexeme]
      */
-    val value: String
+    val value: String,
+    /**
+     * The comments that the scanner found before this token
+     */
+    val comments: List<String> = emptyList()
 )
 
 /**
@@ -207,6 +211,12 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
     )
 
+    /**
+     * We collect scanned comments into this collection, then drain them on the appropriate
+     * [Token] in [commentsForToken] as we lex the source
+     */
+    private var currentComments = ArrayList<String>()
+
     fun tokenize(): ImmutableList<Token> {
         while (sourceScanner.peek() != EOF) {
             scan()
@@ -239,7 +249,9 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
                 // we retain comments rather than ignore them in the hopes of preserving them in
                 // various serialization use cases (such as YAML serialization)
-                addLiteralToken(TokenType.COMMENT)
+                val commentLexeme = sourceScanner.extractLexeme()
+                currentComments.add(commentLexeme.text)
+                addToken(TokenType.COMMENT, commentLexeme, commentLexeme.text)
             }
             '{' -> addLiteralToken(TokenType.BRACE_L)
             '}' -> addLiteralToken(TokenType.BRACE_R)
@@ -544,8 +556,22 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
      * @return the location of the added [Token]
      */
     private fun addToken(type: TokenType, lexeme: Lexeme, value: String): Location {
-        tokens.add(Token(type, lexeme, value))
+        tokens.add(Token(type, lexeme, value, commentsForToken(type)))
         return lexeme.location
+    }
+
+    /**
+     * Returns any comments preceding the current token, provided it is a comment-able [type] (we do not associate
+     * comments with [TokenType.COMMENT] or [TokenType.WHITESPACE] tokens)
+     */
+    private fun commentsForToken(type: TokenType): List<String> {
+        // comments don't get associated with these types
+        if (type == TokenType.COMMENT || type == TokenType.WHITESPACE) {
+            return emptyList()
+        }
+        val commentsForToken = currentComments
+        currentComments = ArrayList()
+        return commentsForToken
     }
 
     private fun isDigit(c: Char): Boolean {

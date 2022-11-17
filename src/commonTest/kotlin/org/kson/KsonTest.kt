@@ -1,5 +1,6 @@
 package org.kson
 
+import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.Location
@@ -19,7 +20,7 @@ class KsonTest {
      * AST parsing is correct)
      *
      * @param source is the kson source to parse into a [KsonRoot]
-     * @param expectedSourceFromAst the expected [KsonRoot.toKsonSource] output for the parsed [source]
+     * @param expectedSourceFromAst the expected [KsonRoot.toKsonSourceInternal] output for the parsed [source]
      * @param message optionally pass a custom failure message for this assertion
      */
     private fun assertParsesTo(
@@ -35,7 +36,7 @@ class KsonTest {
         )
         assertEquals(
             expectedSourceFromAst,
-            parseResult.ast?.toKsonSource(0),
+            parseResult.ast?.toKsonSource(AstNode.Indent()),
             message
         )
     }
@@ -383,13 +384,219 @@ class KsonTest {
     }
 
     @Test
+    fun testNestedListAndObjectFormatting() {
+        assertParsesTo("""
+            {
+              nested_obj: {
+                key: value
+              }
+              nested_list: [
+                1.1,
+                2.1
+              ]
+            }
+        """,
+        """
+            {
+              nested_obj: {
+                key: value
+              }
+              nested_list: [
+                1.1,
+                2.1
+              ]
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun testSourceWithComment() {
         assertParsesTo("""
             # this is a comment
             "string"
         """,
         """
+            # this is a comment
             "string"
         """.trimIndent())
+    }
+
+    @Test
+    fun testCommentPreservationOnConstants() {
+
+        assertParsesTo(
+            """
+                # comment on a number
+                4.5
+            """,
+            """
+                # comment on a number
+                4.5
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                # comment on a boolean
+                false
+            """,
+            """
+                # comment on a boolean
+                false
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                # comment on an identifier
+                id
+            """,
+            """
+                # comment on an identifier
+                id
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                # comment on a string
+                "a string"
+            """,
+            """
+                # comment on a string
+                "a string"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testCommentPreservationOnObjects() {
+        assertParsesTo(
+            """
+                # a comment
+                key
+                
+                :
+                    # should this be legal?
+                    val 
+                # another comment
+                key2: val2
+            """,
+            """
+               {
+                 # a comment
+                 key: # should this be legal?
+                 val
+                 # another comment
+                 key2: val2
+               }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testCommentPreservationOnLists() {
+        assertParsesTo(
+            """
+                # comment on list
+                [ 
+                # comment on first_element
+                first_element,
+                # comment on second_element
+                second_element ]
+            """,
+            """
+                # comment on list
+                [
+                  # comment on first_element
+                  first_element,
+                  # comment on second_element
+                  second_element
+                ]
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                # comment on first_element
+                - first_element
+                # comment on second_element
+                - second_element
+            """,
+            """
+                [
+                  # comment on first_element
+                  first_element,
+                  # comment on second_element
+                  second_element
+                ]
+            """.trimIndent(),
+            "should always anchor dash-delimited list comments to the elements " +
+                    "since there's no syntactic way to identify a comment on the whole list"
+        )
+
+        assertParsesTo(
+            """
+                # a list of lists
+                [
+                  [1.2,
+                    # a nested list element
+                    2.2, 3.2],
+                  # a nested dash-delimited list
+                  - [10.2]
+                  - # a further nested braced list
+                    [4.2,
+                    # a further nested braced list element
+                    5.2]
+                  - [9.2,8.2]
+                ]
+            """,
+            """
+              # a list of lists
+              [
+                [
+                  1.2,
+                  # a nested list element
+                  2.2,
+                  3.2
+                ],
+                [
+                  # a nested dash-delimited list
+                  [
+                    10.2
+                  ],
+                  # a further nested braced list
+                  [
+                    4.2,
+                    # a further nested braced list element
+                    5.2
+                  ],
+                  [
+                    9.2,
+                    8.2
+                  ]
+                ]
+              ]
+            """.trimIndent(),
+            "should preserve comments in nested lists"
+        )
+    }
+
+    @Test
+    fun testCommentPreservationOnEmbedBlocks() {
+        assertParsesTo(
+            """
+                # a comment on an embed block
+                %%
+                embedded stuff
+                %%
+            """,
+            """
+               # a comment on an embed block
+               %%
+               embedded stuff
+               %%
+            """.trimIndent()
+        )
     }
 }

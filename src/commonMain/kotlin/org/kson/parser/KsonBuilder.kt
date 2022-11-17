@@ -28,6 +28,10 @@ class KsonBuilder(private val tokens: List<Token>) :
         return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString(" ") { it.value }
     }
 
+    override fun getComments(tokenIndex: Int): List<String> {
+        return tokens[tokenIndex].comments
+    }
+
     override fun errorEncountered() {
         hasErrors = true
     }
@@ -120,6 +124,8 @@ class KsonBuilder(private val tokens: List<Token>) :
             throw RuntimeException("Should have a well-formed, all-done marker tree at this point")
         }
 
+        val comments = marker.getComments()
+
         return when (marker.element) {
             is TokenType -> {
                 when (marker.element) {
@@ -139,22 +145,22 @@ class KsonBuilder(private val tokens: List<Token>) :
                         throw RuntimeException("These tokens do not generate their own AST nodes")
                     }
                     FALSE -> {
-                        FalseNode()
+                        FalseNode(comments)
                     }
                     IDENTIFIER -> {
-                        IdentifierNode(marker.getValue())
+                        IdentifierNode(marker.getValue(), comments)
                     }
                     NULL -> {
-                        NullNode()
+                        NullNode(comments)
                     }
                     NUMBER -> {
-                        NumberNode(marker.getValue())
+                        NumberNode(marker.getValue(), comments)
                     }
                     STRING -> {
-                        StringNode(marker.getValue())
+                        StringNode(marker.getValue(), comments)
                     }
                     TRUE -> {
-                        TrueNode()
+                        TrueNode(comments)
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -171,32 +177,36 @@ class KsonBuilder(private val tokens: List<Token>) :
                             unsafeMarkerLookup(childMarkers, 0).getValue()
                         val embedContent =
                             unsafeMarkerLookup(childMarkers, 1).getValue()
-                        EmbedBlockNode(embedTag, embedContent)
+                        EmbedBlockNode(embedTag, embedContent, comments)
                     }
                     LIST -> {
-                        val valueNodeList = childMarkers.map { unsafeAstCast<ValueNode>(toAst(it)) }
-                        ListNode(valueNodeList)
+                        val listElementNodes = childMarkers.map { unsafeAstCast<ListElementNode>(toAst(it)) }
+                        ListNode(listElementNodes, comments)
+                    }
+                    LIST_ELEMENT -> {
+                        ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
                     OBJECT_DEFINITION -> {
                         val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
                         val objectInternalsNode =
                             unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 1)))
-                        ObjectDefinitionNode(objectName, objectInternalsNode)
+                        ObjectDefinitionNode(objectName, objectInternalsNode, comments)
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {
                             unsafeAstCast<PropertyNode>(toAst(it))
                         }
-                        ObjectInternalsNode(propertyNodes)
+                        ObjectInternalsNode(propertyNodes, comments)
                     }
                     PROPERTY -> {
                         PropertyNode(
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
-                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1)))
+                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1))),
+                            comments
                         )
                     }
                     ROOT -> {
-                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)))
+                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), emptyList())
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -252,6 +262,11 @@ private interface MarkerBuilderContext {
     fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String
 
     /**
+     * Get any comments associated with the token at [tokenIndex]
+     */
+    fun getComments(tokenIndex: Int): List<String>
+
+    /**
      * Register that a parsing error has been encountered
      */
     fun errorEncountered()
@@ -303,6 +318,27 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
 
     fun getValue(): String {
         return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
+    }
+
+    fun getComments(): List<String> {
+        /**
+         * Choosing which [KsonMarker] to anchor a token's comments to is a bit tricky, so over-documenting a bit:
+         * We anchor comments to the most nested marker that starts with the commented token so that they will be
+         * on the most nested AST node when this [KsonMarker] is converted to an [AstNode]
+         *
+         * To do that, we check...
+         */
+        if (// ... if this marker has no children ...
+            this.childMarkers.isEmpty()
+            // ... OR its first child does not also mark its first token ...
+            || this.firstTokenIndex != this.childMarkers[0].firstTokenIndex
+        ) {
+            // ... then this marker owns the comments from its first token
+            return context.getComments(this.firstTokenIndex)
+        }
+
+        // otherwise this marker has no comments
+        return emptyList()
     }
 
     override fun forgetMe(me: KsonMarker): KsonMarker {

@@ -1,5 +1,6 @@
 package org.kson.parser
 
+import org.kson.ast.AstNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -26,6 +27,6 @@ class ParserTest {
         val ksonRoot = builder.buildTree(messageSink)
         assertNotNull(ksonRoot)
         assertTrue(messageSink.loggedMessages().isEmpty())
-        assertEquals(ksonRoot.toKsonSource(0), "null")
+        assertEquals(ksonRoot.toKsonSource(AstNode.Indent()), "null")
     }
 }

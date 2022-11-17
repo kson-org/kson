@@ -701,4 +701,32 @@ class LexerTest {
             true
         )
     }
+
+    @Test
+    fun testCommentPreservation() {
+        val tokenList = assertTokenizesTo(
+            """
+               # a comment
+               # another comment
+               - 1
+               
+               # yet another comment
+               - 2
+            """,
+            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER)
+        )
+
+        val firstListDashToken = tokenList[0]
+        assertEquals(
+            2,
+            firstListDashToken.comments.size,
+            "should have both the comments on this list entry saved with this token"
+        )
+        assertEquals("# a comment", firstListDashToken.comments[0])
+        assertEquals("# another comment", firstListDashToken.comments[1])
+
+        val secondListDashToken = tokenList[2]
+        assertEquals(1, secondListDashToken.comments.size)
+        assertEquals("# yet another comment", secondListDashToken.comments[0])
+    }
 }

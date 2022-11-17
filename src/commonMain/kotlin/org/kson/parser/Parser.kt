@@ -144,17 +144,17 @@ class Parser(val builder: AstBuilder) {
 
             // parse the dash delimited list elements
             do {
-                val danglingListDashMark = builder.mark()
+                val listElementMark = builder.mark()
                 // advance past the LIST_DASH
                 builder.advanceLexer()
 
                 if (builder.getTokenType() == LIST_DASH) {
-                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
+                    listElementMark.error(DANGLING_LIST_DASH.create())
                 } else if (value() || bracketList()) {
                     // this LIST_DASH is not dangling
-                    danglingListDashMark.drop()
+                    listElementMark.done(LIST_ELEMENT)
                 } else {
-                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
+                    listElementMark.error(DANGLING_LIST_DASH.create())
                 }
             } while (builder.getTokenType() == LIST_DASH)
 
@@ -174,7 +174,9 @@ class Parser(val builder: AstBuilder) {
             builder.advanceLexer()
 
             while (builder.getTokenType() != BRACKET_R) {
+                val listElementMark = builder.mark()
                 value() || list()
+                listElementMark.done(LIST_ELEMENT)
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
                     builder.advanceLexer()
