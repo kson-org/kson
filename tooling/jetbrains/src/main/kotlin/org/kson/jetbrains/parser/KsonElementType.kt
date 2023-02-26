@@ -55,23 +55,16 @@ private val PARSED_ELEMENT: Map<ParsedElementType, IElementType> =
     ParsedElementType.values().associateWith { IElementParserElementType(it) }.toImmutableMap()
 
 /**
- * The main Kson parser uses the two main implementors of [ElementType]: [TokenType] and [ParsedElementType], but to
- * adapt the main Kson parson to the plugin demands of the Jetbrains platform, we make "wrapped" versions of
- * these two types that are adapted to also implement [IElementType]
- */
-private interface WrappedElementType : ElementType
-
-/**
- * A class adapting [TokenType] to [IElementType]
+ * A class adapting [TokenType] to [IElementType] for our plugin
  */
 private data class IElementTokenType(override val tokenType: TokenType) :
-    WrappedElementType,
+    ElementType by tokenType,
     KsonLexedElementType,
     IElementType("[Kson-lexed] " + tokenType.name, KsonLanguage)
 
 /**
- * A class adapting [ParsedElementType] to [IElementType]
+ * A class adapting [ParsedElementType] to [IElementType] for our plugin
  */
 private class IElementParserElementType(parsedElementType: ParsedElementType) :
-    WrappedElementType,
+    ElementType by parsedElementType,
     IElementType("[Kson-parsed] " + parsedElementType.name, KsonLanguage)
