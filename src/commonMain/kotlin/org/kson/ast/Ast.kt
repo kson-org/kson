@@ -63,7 +63,7 @@ abstract class AstNode(private val comments: List<String>) {
     fun toKsonSource(indent: Indent): String {
         return if (comments.isNotEmpty()) {
             // if we have comments, write them followed by the node content on the next line with an appropriate indent
-            indent.firstLineIndent() + comments.joinToString("\n") +
+            indent.firstLineIndent() + comments.joinToString("\n${indent.firstLineIndent()}") +
                     "\n" + toKsonSourceInternal(indent.clone(false))
         } else {
             // otherwise, just pass through to the node content

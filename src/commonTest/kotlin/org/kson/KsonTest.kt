@@ -422,6 +422,29 @@ class KsonTest {
     }
 
     @Test
+    fun testMultipleCommentsOnNestedElement() {
+        assertParsesTo(
+            """
+              [
+                # first comment
+                # second comment
+                # third comment
+                one,
+                two
+              ]
+            """,
+            """
+              [
+                # first comment
+                # second comment
+                # third comment
+                one,
+                two
+              ]
+            """.trimIndent())
+    }
+
+    @Test
     fun testCommentPreservationOnConstants() {
 
         assertParsesTo(
