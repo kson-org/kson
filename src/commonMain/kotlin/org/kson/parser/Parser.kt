@@ -10,8 +10,8 @@ import org.kson.parser.messages.MessageType.*
  *
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
- * kson -> (objectInternals | list | value) <end-of-file> ;
- * objectInternals -> ( keyword (value | list) ","? )* ;
+ * kson -> (objectInternals | value) <end-of-file> ;
+ * objectInternals -> ( keyword (value) ","? )* ;
  * value -> objectDefinition
  *        | list
  *        | literal
@@ -21,7 +21,7 @@ import org.kson.parser.messages.MessageType.*
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
- * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
+ * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
@@ -36,7 +36,7 @@ import org.kson.parser.messages.MessageType.*
 class Parser(val builder: AstBuilder) {
 
     /**
-     * kson -> (objectInternals | list | value) <end-of-file> ;
+     * kson -> (objectInternals | value) <end-of-file> ;
      */
     fun parse() {
         if (objectInternals(false) || value()) {
@@ -48,7 +48,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * objectInternals -> ( keyword (value | list) ","? )* ;
+     * objectInternals -> ( keyword (value) ","? )* ;
      */
     private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
@@ -165,7 +165,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
+     * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
      */
     private fun bracketList(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
@@ -175,7 +175,7 @@ class Parser(val builder: AstBuilder) {
 
             while (builder.getTokenType() != BRACKET_R) {
                 val listElementMark = builder.mark()
-                value() || list()
+                value()
                 listElementMark.done(LIST_ELEMENT)
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
