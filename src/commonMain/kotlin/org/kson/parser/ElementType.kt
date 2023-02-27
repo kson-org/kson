@@ -43,6 +43,6 @@ enum class ParsedElementType : ElementType {
     OBJECT_DEFINITION,
     OBJECT_INTERNALS,
     OBJECT_NAME,
-    PROPERTY,
+    OBJECT_PROPERTY,
     ROOT
 }

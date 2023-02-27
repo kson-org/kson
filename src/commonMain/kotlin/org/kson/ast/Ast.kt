@@ -102,7 +102,7 @@ class ObjectDefinitionNode(
     }
 }
 
-class ObjectInternalsNode(private val properties: List<PropertyNode>, comments: List<String>) : ValueNode(comments) {
+class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>, comments: List<String>) : ValueNode(comments) {
     override fun toKsonSourceInternal(indent: Indent): String {
         return if (properties.isEmpty()) {
             "${indent.firstLineIndent()}{}"
@@ -117,7 +117,7 @@ class ObjectInternalsNode(private val properties: List<PropertyNode>, comments: 
 
 }
 
-class PropertyNode(private val name: KeywordNode, private val value: ValueNode, comments: List<String>) :
+class ObjectPropertyNode(private val name: KeywordNode, private val value: ValueNode, comments: List<String>) :
     AstNode(comments) {
     override fun toKsonSourceInternal(indent: Indent): String {
         return "${name.toKsonSource(indent)}: ${value.toKsonSource(indent.clone(true))}"

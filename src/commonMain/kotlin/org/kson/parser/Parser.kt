@@ -58,7 +58,7 @@ class Parser(val builder: AstBuilder) {
             val propertyMark = builder.mark()
             if (keyword() && value()) {
                 foundProperties = true
-                propertyMark.done(PROPERTY)
+                propertyMark.done(OBJECT_PROPERTY)
             } else {
                 propertyMark.rollbackTo()
                 break

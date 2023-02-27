@@ -194,12 +194,12 @@ class KsonBuilder(private val tokens: List<Token>) :
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {
-                            unsafeAstCast<PropertyNode>(toAst(it))
+                            unsafeAstCast<ObjectPropertyNode>(toAst(it))
                         }
                         ObjectInternalsNode(propertyNodes, comments)
                     }
-                    PROPERTY -> {
-                        PropertyNode(
+                    OBJECT_PROPERTY -> {
+                        ObjectPropertyNode(
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1))),
                             comments
