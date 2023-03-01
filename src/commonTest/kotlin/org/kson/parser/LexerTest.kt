@@ -729,4 +729,34 @@ class LexerTest {
         assertEquals(1, secondListDashToken.comments.size)
         assertEquals("# yet another comment", secondListDashToken.comments[0])
     }
+
+    @Test
+    fun testTrailingCommentPreservationOnConstants() {
+        val tokenList = assertTokenizesTo(
+            """
+                "stuff" # comment about stuff
+            """,
+            listOf(STRING)
+        )
+
+        val stringToken = tokenList[0]
+        assertEquals("# comment about stuff", stringToken.comments[0])
+    }
+
+    @Test
+    fun testTrailingCommentOnLists() {
+        val tokenList = assertTokenizesTo(
+            """
+                [1, # trailing list comma
+                2] # trailing list brace
+            """,
+            listOf(BRACKET_L, NUMBER, COMMA, NUMBER, BRACKET_R)
+        )
+
+        val commaToken = tokenList[2]
+        assertEquals("# trailing list comma", commaToken.comments[0])
+
+        val rightBracketToken = tokenList[4]
+        assertEquals("# trailing list brace", rightBracketToken.comments[0])
+    }
 }

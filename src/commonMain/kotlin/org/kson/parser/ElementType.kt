@@ -36,8 +36,9 @@ enum class TokenType : ElementType {
  * [ElementType]s for the elements marked by [Parser]
  */
 enum class ParsedElementType : ElementType {
-    EMBED_BLOCK,
+    INCOMPLETE,
     ERROR,
+    EMBED_BLOCK,
     LIST,
     LIST_ELEMENT,
     OBJECT_DEFINITION,

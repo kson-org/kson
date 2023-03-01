@@ -58,15 +58,14 @@ class Parser(val builder: AstBuilder) {
             val propertyMark = builder.mark()
             if (keyword() && value()) {
                 foundProperties = true
+                if (builder.getTokenType() == COMMA) {
+                    // advance past the optional COMMA
+                    builder.advanceLexer()
+                }
                 propertyMark.done(OBJECT_PROPERTY)
             } else {
                 propertyMark.rollbackTo()
                 break
-            }
-
-            if (builder.getTokenType() == COMMA) {
-                // advance past the optional COMMA
-                builder.advanceLexer()
             }
         }
 
@@ -176,12 +175,13 @@ class Parser(val builder: AstBuilder) {
             while (builder.getTokenType() != BRACKET_R) {
                 val listElementMark = builder.mark()
                 value()
-                listElementMark.done(LIST_ELEMENT)
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
                     builder.advanceLexer()
+                    listElementMark.done(LIST_ELEMENT)
                     continue
                 } else {
+                    listElementMark.done(LIST_ELEMENT)
                     // no more values
                     break
                 }

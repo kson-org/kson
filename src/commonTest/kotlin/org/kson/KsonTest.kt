@@ -493,6 +493,50 @@ class KsonTest {
     }
 
     @Test
+    fun testTrailingCommentPreservationOnConstants() {
+
+        assertParsesTo(
+            """
+                4.5 # trailing comment
+            """,
+            """
+                # trailing comment
+                4.5
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                false # trailing comment
+            """,
+            """
+                # trailing comment
+                false
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                id # trailing comment
+            """,
+            """
+                # trailing comment
+                id
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                "a string" # trailing comment
+            """,
+            """
+                # trailing comment
+                "a string"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testCommentPreservationOnObjects() {
         assertParsesTo(
             """
@@ -500,7 +544,7 @@ class KsonTest {
                 key
                 
                 :
-                    # should this be legal?
+                    # an odd but legal comment on this val
                     val 
                 # another comment
                 key2: val2
@@ -508,11 +552,33 @@ class KsonTest {
             """
                {
                  # a comment
-                 key: # should this be legal?
-                 val
+                 # an odd but legal comment on this val
+                 key: val
                  # another comment
                  key2: val2
                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testCommentsPreservationOnCommas() {
+        assertParsesTo(
+            """
+                key1:val1
+                # this comment should be preserved on this property
+                ,
+                key2:val2
+                # as should this one
+                ,
+            """,
+            """
+                {
+                  # this comment should be preserved on this property
+                  key1: val1
+                  # as should this one
+                  key2: val2
+                }
             """.trimIndent()
         )
     }
@@ -522,7 +588,7 @@ class KsonTest {
         assertParsesTo(
             """
                 # comment on list
-                [ 
+                [
                 # comment on first_element
                 first_element,
                 # comment on second_element
@@ -562,7 +628,7 @@ class KsonTest {
             """
                 # a list of lists
                 [
-                  [1.2,
+                  [1.2, # trailing comment on constant element
                     # a nested list element
                     2.2, 3.2],
                   # a nested dash-delimited list
@@ -570,7 +636,7 @@ class KsonTest {
                   - # a further nested braced list
                     [4.2,
                     # a further nested braced list element
-                    5.2]
+                    5.2] # trailing comment on nested list
                   - [9.2,8.2]
                 ]
             """,
@@ -578,6 +644,7 @@ class KsonTest {
               # a list of lists
               [
                 [
+                  # trailing comment on constant element
                   1.2,
                   # a nested list element
                   2.2,
@@ -589,6 +656,7 @@ class KsonTest {
                     10.2
                   ],
                   # a further nested braced list
+                  # trailing comment on nested list
                   [
                     4.2,
                     # a further nested braced list element
@@ -619,6 +687,78 @@ class KsonTest {
                %%
                embedded stuff
                %%
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testTrailingCommentOnList() {
+        assertParsesTo(
+            """
+                # leading
+                [one, # trailing "one"
+                two # trailing "two"
+                ] # trailing list brace
+            """,
+            """
+                # leading
+                # trailing list brace
+                [
+                  # trailing "one"
+                  one,
+                  # trailing "two"
+                  two
+                ]
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testTrailingCommentsInObjects() {
+        assertParsesTo(
+            """
+                # leading
+                {
+                  keyword:value # trailing
+                }
+            """,
+            """
+                # leading
+                {
+                  # trailing
+                  keyword: value
+                }
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                {
+                # leading
+                keyword:value # trailing
+                }
+            """,
+            """
+                {
+                  # leading
+                  # trailing
+                  keyword: value
+                }
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                obj_name # trailing name
+                {
+                  key: value
+                }
+            """,
+            """
+                # trailing name
+                obj_name {
+                  key: value
+                }
             """.trimIndent()
         )
     }

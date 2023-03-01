@@ -124,8 +124,6 @@ class KsonBuilder(private val tokens: List<Token>) :
             throw RuntimeException("Should have a well-formed, all-done marker tree at this point")
         }
 
-        val comments = marker.getComments()
-
         return when (marker.element) {
             is TokenType -> {
                 when (marker.element) {
@@ -145,22 +143,22 @@ class KsonBuilder(private val tokens: List<Token>) :
                         throw RuntimeException("These tokens do not generate their own AST nodes")
                     }
                     FALSE -> {
-                        FalseNode(comments)
+                        FalseNode()
                     }
                     IDENTIFIER -> {
-                        IdentifierNode(marker.getValue(), comments)
+                        IdentifierNode(marker.getValue())
                     }
                     NULL -> {
-                        NullNode(comments)
+                        NullNode()
                     }
                     NUMBER -> {
-                        NumberNode(marker.getValue(), comments)
+                        NumberNode(marker.getValue())
                     }
                     STRING -> {
-                        StringNode(marker.getValue(), comments)
+                        StringNode(marker.getValue())
                     }
                     TRUE -> {
-                        TrueNode(comments)
+                        TrueNode()
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -177,28 +175,30 @@ class KsonBuilder(private val tokens: List<Token>) :
                             unsafeMarkerLookup(childMarkers, 0).getValue()
                         val embedContent =
                             unsafeMarkerLookup(childMarkers, 1).getValue()
-                        EmbedBlockNode(embedTag, embedContent, comments)
+                        EmbedBlockNode(embedTag, embedContent)
                     }
                     LIST -> {
                         val listElementNodes = childMarkers.map { unsafeAstCast<ListElementNode>(toAst(it)) }
-                        ListNode(listElementNodes, comments)
+                        ListNode(listElementNodes)
                     }
                     LIST_ELEMENT -> {
+                        val comments = marker.getComments()
                         ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
                     OBJECT_DEFINITION -> {
                         val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
                         val objectInternalsNode =
                             unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 1)))
-                        ObjectDefinitionNode(objectName, objectInternalsNode, comments)
+                        ObjectDefinitionNode(objectName, objectInternalsNode)
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {
                             unsafeAstCast<ObjectPropertyNode>(toAst(it))
                         }
-                        ObjectInternalsNode(propertyNodes, comments)
+                        ObjectInternalsNode(propertyNodes)
                     }
                     OBJECT_PROPERTY -> {
+                        val comments = marker.getComments()
                         ObjectPropertyNode(
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1))),
@@ -206,7 +206,8 @@ class KsonBuilder(private val tokens: List<Token>) :
                         )
                     }
                     ROOT -> {
-                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), emptyList())
+                        val comments = marker.getComments()
+                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), comments)
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -309,36 +310,77 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     val firstTokenIndex = context.getTokenIndex()
     var lastTokenIndex = firstTokenIndex
     var markedError: Message? = null
-    var element: ElementType? = null
+    var element: ElementType = INCOMPLETE
     val childMarkers = ArrayList<KsonMarker>()
 
     fun isDone(): Boolean {
-        return element != null
+        return element != INCOMPLETE
     }
 
     fun getValue(): String {
         return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
     }
 
-    fun getComments(): List<String> {
+    /**
+     * Returns true if this [KsonMarker] denotes an entity that it makes sense to comment/document
+     */
+    private fun commentable(): Boolean {
+        return when (element) {
+            /**
+             * These are the [ElementType]s that correspond to the [Documented] [AstNode] types,
+             * and hence are the target for comments we find on tokens marked by this [TokenType]
+             */
+            ROOT, OBJECT_PROPERTY, LIST_ELEMENT -> true
+            else -> false
+        }
+    }
+
+    /**
+     * Comments found in the tokens marked by a [KsonMarker] are either
+     * [claimed] by the AstNode we will produce from this [KsonMarker],
+     * or unclaimed (`[claimed] = false`), meaning they should be owned by some [commentable]
+     * parent marker.
+     */
+    fun getComments(claimed: Boolean = true): List<String> {
         /**
-         * Choosing which [KsonMarker] to anchor a token's comments to is a bit tricky, so over-documenting a bit:
-         * We anchor comments to the most nested marker that starts with the commented token so that they will be
-         * on the most nested AST node when this [KsonMarker] is converted to an [AstNode]
-         *
-         * To do that, we check...
+         * We may claim comments if and only if we are [commentable]
          */
-        if (// ... if this marker has no children ...
-            this.childMarkers.isEmpty()
-            // ... OR its first child does not also mark its first token ...
-            || this.firstTokenIndex != this.childMarkers[0].firstTokenIndex
-        ) {
-            // ... then this marker owns the comments from its first token
-            return context.getComments(this.firstTokenIndex)
+        if (claimed != commentable()) {
+            return emptyList()
         }
 
-        // otherwise this marker has no comments
-        return emptyList()
+        val comments = ArrayList<String>()
+
+        var tokenIndex = firstTokenIndex
+        var childMarkerIndex = 0
+
+        /**
+         * This token's comments are all the comments from its tokens NOT wrapped
+         * in a child marker, and all "unclaimed" comments from its child markers
+         */
+        while (tokenIndex <= lastTokenIndex) {
+            while (childMarkerIndex < childMarkers.size) {
+                // grab any comments from tokens preceding this child (i.e. not wrapped in a child)
+                while (tokenIndex < childMarkers[childMarkerIndex].firstTokenIndex) {
+                    comments.addAll(context.getComments(tokenIndex))
+                    tokenIndex++
+                }
+
+                // add all unclaimed comments from this child marker
+                comments.addAll(childMarkers[childMarkerIndex].getComments(false))
+
+                tokenIndex = childMarkers[childMarkerIndex].lastTokenIndex + 1
+                childMarkerIndex++
+            }
+
+            // grab any remaining comments unwrapped by a child marker
+            if (tokenIndex <= lastTokenIndex) {
+                comments.addAll(context.getComments(tokenIndex))
+                tokenIndex++
+            }
+        }
+
+        return comments
     }
 
     override fun forgetMe(me: KsonMarker): KsonMarker {

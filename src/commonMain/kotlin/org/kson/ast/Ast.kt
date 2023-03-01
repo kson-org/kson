@@ -2,8 +2,7 @@ package org.kson.ast
 
 import org.kson.parser.EMBED_DELIM_CHAR
 
-abstract class AstNode(private val comments: List<String>) {
-
+abstract class AstNode {
     /**
      * Abstract representation of the indentation to apply when serializing an AST as source code
      */
@@ -61,7 +60,7 @@ abstract class AstNode(private val comments: List<String>) {
      * (or an entire kson source file when called on a [KsonRoot])
      */
     fun toKsonSource(indent: Indent): String {
-        return if (comments.isNotEmpty()) {
+        return if (this is Documented && comments.isNotEmpty()) {
             // if we have comments, write them followed by the node content on the next line with an appropriate indent
             indent.firstLineIndent() + comments.joinToString("\n${indent.firstLineIndent()}") +
                     "\n" + toKsonSourceInternal(indent.clone(false))
@@ -79,7 +78,17 @@ abstract class AstNode(private val comments: List<String>) {
     protected abstract fun toKsonSourceInternal(indent: Indent): String
 }
 
-class KsonRoot(private val rootNode: AstNode, comments: List<String>) : AstNode(comments) {
+/**
+ * Any kson entity is ether the [KsonRoot] of the document, an [ObjectPropertyNode]
+ * on an object, or a [ListElementNode] in a list, and so semantically, those are the things
+ * that make sense to document, so in our comment preservation strategy, these are the
+ * [AstNode]s which accept comments.  This interface ties them together.
+ */
+interface Documented {
+    val comments: List<String>
+}
+
+class KsonRoot(private val rootNode: AstNode, override val comments: List<String>) : AstNode(), Documented {
 
     /**
      * Produces valid kson source corresponding to the AST rooted at this [KsonRoot]
@@ -89,20 +98,17 @@ class KsonRoot(private val rootNode: AstNode, comments: List<String>) : AstNode(
     }
 }
 
-abstract class ValueNode(comments: List<String>) : AstNode(comments)
+abstract class ValueNode : AstNode()
 
-class ObjectDefinitionNode(
-    private val name: String = "", private val internalsNode: ObjectInternalsNode,
-    comments: List<String>
-) :
-    ValueNode(comments) {
+class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode) :
+    ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         val renderedName = if (name.isEmpty()) "" else "$name "
         return "$renderedName${internalsNode.toKsonSource(indent)}"
     }
 }
 
-class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>, comments: List<String>) : ValueNode(comments) {
+class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return if (properties.isEmpty()) {
             "${indent.firstLineIndent()}{}"
@@ -117,14 +123,14 @@ class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>, comm
 
 }
 
-class ObjectPropertyNode(private val name: KeywordNode, private val value: ValueNode, comments: List<String>) :
-    AstNode(comments) {
+class ObjectPropertyNode(private val name: KeywordNode, private val value: ValueNode, override val comments: List<String>) :
+    AstNode(), Documented {
     override fun toKsonSourceInternal(indent: Indent): String {
         return "${name.toKsonSource(indent)}: ${value.toKsonSource(indent.clone(true))}"
     }
 }
 
-class ListNode(private val elements: List<ListElementNode>, comments: List<String>) : ValueNode(comments) {
+class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = if (elements.isEmpty()) "" else "\n"
@@ -136,23 +142,23 @@ class ListNode(private val elements: List<ListElementNode>, comments: List<Strin
     }
 }
 
-class ListElementNode(val value: ValueNode, comments: List<String>) : AstNode(comments) {
+class ListElementNode(val value: ValueNode, override val comments: List<String>) : AstNode(), Documented {
     override fun toKsonSourceInternal(indent: Indent): String {
         return value.toKsonSource(indent)
     }
 }
 
-abstract class KeywordNode(comments: List<String>) : ValueNode(comments) {
+abstract class KeywordNode : ValueNode() {
     abstract val keyword: String
 }
 
-open class StringNode(override val keyword: String, comments: List<String>) : KeywordNode(comments) {
+open class StringNode(override val keyword: String) : KeywordNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + "\"" + keyword + "\""
     }
 }
 
-class IdentifierNode(override val keyword: String, comments: List<String>) : KeywordNode(comments) {
+class IdentifierNode(override val keyword: String) : KeywordNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + keyword
     }
@@ -161,7 +167,7 @@ class IdentifierNode(override val keyword: String, comments: List<String>) : Key
 /**
  * @param stringValue MUST be parseable as a [Double] parser todo this is a lot to ask of callers, can/should we improve?
  */
-class NumberNode(stringValue: String, comments: List<String>) : ValueNode(comments) {
+class NumberNode(stringValue: String) : ValueNode() {
     /**
      * Our parse believes it will never allow an unparseable string to be passed into this constructor,
      * so we allow the uncaught NumberFormatException to bubble out as a RuntimeException
@@ -173,26 +179,26 @@ class NumberNode(stringValue: String, comments: List<String>) : ValueNode(commen
     }
 }
 
-class TrueNode(comments: List<String>) : ValueNode(comments) {
+class TrueNode : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + "true"
     }
 }
 
-class FalseNode(comments: List<String>) : ValueNode(comments) {
+class FalseNode : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + "false"
     }
 }
 
-class NullNode(comments: List<String>) : ValueNode(comments) {
+class NullNode : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + "null"
     }
 }
 
-class EmbedBlockNode(private val embedTag: String, private val embedContent: String, comments: List<String>) :
-    ValueNode(comments) {
+class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
+    ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         return indent.firstLineIndent() + EMBED_DELIM_CHAR + EMBED_DELIM_CHAR + embedTag + "\n" +
                 indent.bodyLinesIndent() + embedContent.split("\n")
