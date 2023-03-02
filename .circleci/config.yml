@@ -45,6 +45,7 @@ jobs:
             - v1-dependencies-
 
       # installed needed native dependency on Linux
+      - run: sudo apt update
       - run: sudo apt install libncurses5
       - run: ./gradlew dependencies
 
