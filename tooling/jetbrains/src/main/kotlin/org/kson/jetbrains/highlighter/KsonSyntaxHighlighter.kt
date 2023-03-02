@@ -40,6 +40,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.TRUE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.WHITESPACE -> TextAttributesKey.EMPTY_ARRAY
+                TokenType.EOF -> TextAttributesKey.EMPTY_ARRAY
             }
         } else {
             return TextAttributesKey.EMPTY_ARRAY

@@ -762,4 +762,28 @@ class KsonTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testDocumentEndComments() {
+        assertParsesTo(
+            """
+                null
+                
+                
+                
+                # these are some trailing
+                # comments that would like 
+                # to be preserved at the end
+                # of the file
+            """,
+            """
+                null
+                
+                # these are some trailing
+                # comments that would like 
+                # to be preserved at the end
+                # of the file
+            """.trimIndent()
+        )
+    }
 }

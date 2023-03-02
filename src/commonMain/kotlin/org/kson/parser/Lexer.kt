@@ -230,6 +230,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             scan()
         }
 
+        addToken(TokenType.EOF, Lexeme("", sourceScanner.currentLocation()), "")
+
         return tokens.toList()
     }
 

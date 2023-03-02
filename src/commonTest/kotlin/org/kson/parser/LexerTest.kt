@@ -15,7 +15,7 @@ class LexerTest {
      * @param expectedTokenTypes is the list of expected types for the resulting tokens
      * @param message optionally pass a custom failure message for this assertion
      *
-     * Returns the list of whole [Token]s for further validation
+     * Returns the list of whole [Token]s (with the [EOF] clipped off) for further validation
      */
     private fun assertTokenizesTo(
         source: String,
@@ -25,7 +25,10 @@ class LexerTest {
     ): List<Token> {
         val messageSink = MessageSink()
         val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
-        val actualTokenTypes = actualTokens.map { it.tokenType }.toMutableList()
+
+        val eofStrippedActualTokens = verifyAndClipEof(actualTokens)
+
+        val actualTokenTypes = eofStrippedActualTokens.map { it.tokenType }.toMutableList()
 
         assertFalse(
             messageSink.hasErrors(),
@@ -37,7 +40,7 @@ class LexerTest {
             message
         )
 
-        return actualTokens
+        return eofStrippedActualTokens
     }
 
     /**
@@ -75,8 +78,30 @@ class LexerTest {
         val messageSink = MessageSink()
         val tokens = Lexer(source, messageSink).tokenize()
 
+        val eofStrippedTokens = verifyAndClipEof(tokens)
+
         assertEquals(expectedMessageTypes, messageSink.loggedMessages().map { it.message.type })
-        return tokens
+        return eofStrippedTokens
+    }
+
+    /**
+     * Runs some assertions validating the [EOF] in the given [Token] list, and returns the same [Token] list
+     * with the [EOF] clipped off to streamline further assertions on the [Token]s
+     */
+    private fun verifyAndClipEof(
+        tokens: List<Token>
+    ): List<Token> {
+        // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
+        val eofToken = tokens.last()
+        if (eofToken.tokenType != EOF) {
+            throw Exception("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
+        }
+
+        // assert EOF renders how we want when we render token lists to strings
+        assertEquals("", eofToken.lexeme.text, "EOF Token's raw text should be empty (can't render an EOF)")
+        assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
+
+        return tokens.subList(0, tokens.size - 1)
     }
 
     @Test

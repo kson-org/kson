@@ -69,7 +69,7 @@ class KsonBuilder(private val tokens: List<Token>) :
     }
 
     override fun eof(): Boolean {
-        return currentToken > tokens.size - 1
+        return currentToken >= tokens.size || tokens[currentToken].tokenType == EOF
     }
 
     override fun mark(): AstMarker {
@@ -207,7 +207,18 @@ class KsonBuilder(private val tokens: List<Token>) :
                     }
                     ROOT -> {
                         val comments = marker.getComments()
-                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), comments)
+
+                        /**
+                         * grab the EOF token so we can capture any document end comments that may have been
+                         * anchored to it in the [Lexer]
+                         */
+                        val eofToken = tokens.last()
+                        // sanity check this is the expected EOF token
+                        if (eofToken.tokenType != EOF) {
+                            throw RuntimeException("Token list must end in EOF")
+                        }
+
+                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), comments, eofToken.comments)
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we

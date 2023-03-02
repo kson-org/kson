@@ -29,7 +29,8 @@ enum class TokenType : ElementType {
     NUMBER,
     STRING,
     TRUE,
-    WHITESPACE
+    WHITESPACE,
+    EOF
 }
 
 /**

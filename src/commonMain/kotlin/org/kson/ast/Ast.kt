@@ -88,13 +88,18 @@ interface Documented {
     val comments: List<String>
 }
 
-class KsonRoot(private val rootNode: AstNode, override val comments: List<String>) : AstNode(), Documented {
+class KsonRoot(private val rootNode: AstNode, override val comments: List<String>, val documentEndComments: List<String>) : AstNode(), Documented {
 
     /**
      * Produces valid kson source corresponding to the AST rooted at this [KsonRoot]
      */
     override fun toKsonSourceInternal(indent: Indent): String {
-        return rootNode.toKsonSource(indent)
+        return rootNode.toKsonSource(indent) +
+                if (documentEndComments.isNotEmpty()) {
+                    "\n\n" + documentEndComments.joinToString("\n")
+                } else {
+                    ""
+                }
     }
 }
 
