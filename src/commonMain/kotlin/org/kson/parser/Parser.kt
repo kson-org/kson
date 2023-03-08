@@ -10,8 +10,8 @@ import org.kson.parser.messages.MessageType.*
  *
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
- * kson -> (objectInternals | list | value) <end-of-file> ;
- * objectInternals -> ( keyword (value | list) ","? )* ;
+ * kson -> (objectInternals | value) <end-of-file> ;
+ * objectInternals -> ( keyword (value) ","? )* ;
  * value -> objectDefinition
  *        | list
  *        | literal
@@ -21,7 +21,7 @@ import org.kson.parser.messages.MessageType.*
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
- * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
+ * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
  * literal -> STRING | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
@@ -36,7 +36,7 @@ import org.kson.parser.messages.MessageType.*
 class Parser(val builder: AstBuilder) {
 
     /**
-     * kson -> (objectInternals | list | value) <end-of-file> ;
+     * kson -> (objectInternals | value) <end-of-file> ;
      */
     fun parse() {
         if (objectInternals(false) || value()) {
@@ -48,7 +48,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * objectInternals -> ( keyword (value | list) ","? )* ;
+     * objectInternals -> ( keyword (value) ","? )* ;
      */
     private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
@@ -58,15 +58,14 @@ class Parser(val builder: AstBuilder) {
             val propertyMark = builder.mark()
             if (keyword() && value()) {
                 foundProperties = true
-                propertyMark.done(PROPERTY)
+                if (builder.getTokenType() == COMMA) {
+                    // advance past the optional COMMA
+                    builder.advanceLexer()
+                }
+                propertyMark.done(OBJECT_PROPERTY)
             } else {
                 propertyMark.rollbackTo()
                 break
-            }
-
-            if (builder.getTokenType() == COMMA) {
-                // advance past the optional COMMA
-                builder.advanceLexer()
             }
         }
 
@@ -144,17 +143,17 @@ class Parser(val builder: AstBuilder) {
 
             // parse the dash delimited list elements
             do {
-                val danglingListDashMark = builder.mark()
+                val listElementMark = builder.mark()
                 // advance past the LIST_DASH
                 builder.advanceLexer()
 
                 if (builder.getTokenType() == LIST_DASH) {
-                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
+                    listElementMark.error(DANGLING_LIST_DASH.create())
                 } else if (value() || bracketList()) {
                     // this LIST_DASH is not dangling
-                    danglingListDashMark.drop()
+                    listElementMark.done(LIST_ELEMENT)
                 } else {
-                    danglingListDashMark.error(DANGLING_LIST_DASH.create())
+                    listElementMark.error(DANGLING_LIST_DASH.create())
                 }
             } while (builder.getTokenType() == LIST_DASH)
 
@@ -165,7 +164,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * bracketList -> "[" ( ( value | list ) "," )* ( value | list )? "]"
+     * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
      */
     private fun bracketList(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
@@ -174,12 +173,15 @@ class Parser(val builder: AstBuilder) {
             builder.advanceLexer()
 
             while (builder.getTokenType() != BRACKET_R) {
-                value() || list()
+                val listElementMark = builder.mark()
+                value()
                 if (builder.getTokenType() == COMMA) {
                     // advance past the COMMA
                     builder.advanceLexer()
+                    listElementMark.done(LIST_ELEMENT)
                     continue
                 } else {
+                    listElementMark.done(LIST_ELEMENT)
                     // no more values
                     break
                 }

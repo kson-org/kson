@@ -28,6 +28,10 @@ class KsonBuilder(private val tokens: List<Token>) :
         return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString(" ") { it.value }
     }
 
+    override fun getComments(tokenIndex: Int): List<String> {
+        return tokens[tokenIndex].comments
+    }
+
     override fun errorEncountered() {
         hasErrors = true
     }
@@ -65,7 +69,7 @@ class KsonBuilder(private val tokens: List<Token>) :
     }
 
     override fun eof(): Boolean {
-        return currentToken > tokens.size - 1
+        return currentToken >= tokens.size || tokens[currentToken].tokenType == EOF
     }
 
     override fun mark(): AstMarker {
@@ -174,8 +178,12 @@ class KsonBuilder(private val tokens: List<Token>) :
                         EmbedBlockNode(embedTag, embedContent)
                     }
                     LIST -> {
-                        val valueNodeList = childMarkers.map { unsafeAstCast<ValueNode>(toAst(it)) }
-                        ListNode(valueNodeList)
+                        val listElementNodes = childMarkers.map { unsafeAstCast<ListElementNode>(toAst(it)) }
+                        ListNode(listElementNodes)
+                    }
+                    LIST_ELEMENT -> {
+                        val comments = marker.getComments()
+                        ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
                     OBJECT_DEFINITION -> {
                         val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
@@ -185,18 +193,32 @@ class KsonBuilder(private val tokens: List<Token>) :
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {
-                            unsafeAstCast<PropertyNode>(toAst(it))
+                            unsafeAstCast<ObjectPropertyNode>(toAst(it))
                         }
                         ObjectInternalsNode(propertyNodes)
                     }
-                    PROPERTY -> {
-                        PropertyNode(
+                    OBJECT_PROPERTY -> {
+                        val comments = marker.getComments()
+                        ObjectPropertyNode(
                             unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
-                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1)))
+                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1))),
+                            comments
                         )
                     }
                     ROOT -> {
-                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)))
+                        val comments = marker.getComments()
+
+                        /**
+                         * grab the EOF token so we can capture any document end comments that may have been
+                         * anchored to it in the [Lexer]
+                         */
+                        val eofToken = tokens.last()
+                        // sanity check this is the expected EOF token
+                        if (eofToken.tokenType != EOF) {
+                            throw RuntimeException("Token list must end in EOF")
+                        }
+
+                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), comments, eofToken.comments)
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -252,6 +274,11 @@ private interface MarkerBuilderContext {
     fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String
 
     /**
+     * Get any comments associated with the token at [tokenIndex]
+     */
+    fun getComments(tokenIndex: Int): List<String>
+
+    /**
      * Register that a parsing error has been encountered
      */
     fun errorEncountered()
@@ -294,15 +321,77 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     val firstTokenIndex = context.getTokenIndex()
     var lastTokenIndex = firstTokenIndex
     var markedError: Message? = null
-    var element: ElementType? = null
+    var element: ElementType = INCOMPLETE
     val childMarkers = ArrayList<KsonMarker>()
 
     fun isDone(): Boolean {
-        return element != null
+        return element != INCOMPLETE
     }
 
     fun getValue(): String {
         return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
+    }
+
+    /**
+     * Returns true if this [KsonMarker] denotes an entity that it makes sense to comment/document
+     */
+    private fun commentable(): Boolean {
+        return when (element) {
+            /**
+             * These are the [ElementType]s that correspond to the [Documented] [AstNode] types,
+             * and hence are the target for comments we find on tokens marked by this [TokenType]
+             */
+            ROOT, OBJECT_PROPERTY, LIST_ELEMENT -> true
+            else -> false
+        }
+    }
+
+    /**
+     * Comments found in the tokens marked by a [KsonMarker] are either
+     * [claimed] by the AstNode we will produce from this [KsonMarker],
+     * or unclaimed (`[claimed] = false`), meaning they should be owned by some [commentable]
+     * parent marker.
+     */
+    fun getComments(claimed: Boolean = true): List<String> {
+        /**
+         * We may claim comments if and only if we are [commentable]
+         */
+        if (claimed != commentable()) {
+            return emptyList()
+        }
+
+        val comments = ArrayList<String>()
+
+        var tokenIndex = firstTokenIndex
+        var childMarkerIndex = 0
+
+        /**
+         * This token's comments are all the comments from its tokens NOT wrapped
+         * in a child marker, and all "unclaimed" comments from its child markers
+         */
+        while (tokenIndex <= lastTokenIndex) {
+            while (childMarkerIndex < childMarkers.size) {
+                // grab any comments from tokens preceding this child (i.e. not wrapped in a child)
+                while (tokenIndex < childMarkers[childMarkerIndex].firstTokenIndex) {
+                    comments.addAll(context.getComments(tokenIndex))
+                    tokenIndex++
+                }
+
+                // add all unclaimed comments from this child marker
+                comments.addAll(childMarkers[childMarkerIndex].getComments(false))
+
+                tokenIndex = childMarkers[childMarkerIndex].lastTokenIndex + 1
+                childMarkerIndex++
+            }
+
+            // grab any remaining comments unwrapped by a child marker
+            if (tokenIndex <= lastTokenIndex) {
+                comments.addAll(context.getComments(tokenIndex))
+                tokenIndex++
+            }
+        }
+
+        return comments
     }
 
     override fun forgetMe(me: KsonMarker): KsonMarker {

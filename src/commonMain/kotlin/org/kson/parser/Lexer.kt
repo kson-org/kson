@@ -162,7 +162,19 @@ data class Token(
     /**
      * The final lexed [value] of this token, extracted (and possibly transformed) from [lexeme]
      */
-    val value: String
+    val value: String,
+    /**
+     * The comments that the scanner found for this token.
+     *
+     * NOTE: if we find a "trailing" comment for this token (i.e. `key: value # trailing comment`), we consider
+     *  that to be the "last" line comment for this token.  Since at this point the comments are being translated
+     *  from raw source to metadata on this token, the metadata is much nicer being consistent like this.
+     *
+     *  This also means that if/when this metadata is re-serialized out to source, these "originally" trailing comments
+     *  will be rendered as preceding line comments.  This is okay, and aligns well with all the good reasons that
+     *  line comments are somewhat discouraged ([here is a good summary from Code Complete](https://stackoverflow.com/a/14385596))
+     */
+    val comments: List<String> = emptyList()
 )
 
 /**
@@ -192,7 +204,7 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  *
  * @param source the input Kson source to tokenize
  * @param messageSink a [MessageSink] to write user-facing messages about the tokenization, for instance errors
- * @param gapFree whether to ensure _all_ source, including whitespace, quotes and illegal characters, is precisely
+ * @param gapFree whether to ensure _all_ source, including comments, whitespace, quotes and illegal chars, is precisely
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
  */
@@ -203,14 +215,22 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE)
+            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.COMMENT)
         }
     )
+
+    /**
+     * We collect scanned comments into this collection, then drain them on the appropriate
+     * [Token] in [commentMetadataForCurrentToken] as we lex the source
+     */
+    private var currentCommentLines = ArrayList<String>()
 
     fun tokenize(): ImmutableList<Token> {
         while (sourceScanner.peek() != EOF) {
             scan()
         }
+
+        addToken(TokenType.EOF, Lexeme("", sourceScanner.currentLocation()), "")
 
         return tokens.toList()
     }
@@ -234,12 +254,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         when (char) {
             '#' -> {
-                // comments extend to end of the line
-                while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) sourceScanner.advance()
-
-                // we retain comments rather than ignore them in the hopes of preserving them in
-                // various serialization use cases (such as YAML serialization)
-                addLiteralToken(TokenType.COMMENT)
+                val commentText = comment()
+                currentCommentLines.add(commentText)
             }
             '{' -> addLiteralToken(TokenType.BRACE_L)
             '}' -> addLiteralToken(TokenType.BRACE_R)
@@ -291,6 +307,23 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 }
             }
         }
+    }
+
+    private fun comment(): String {
+        val commentToken = extractCommentToken()
+        tokens.add(commentToken)
+        return commentToken.value
+    }
+
+    /**
+     * Extracts a comment token from [sourceScanner] without adding it to [tokens]
+     */
+    private fun extractCommentToken(): Token {
+        // comments extend to end of the line
+        while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) sourceScanner.advance()
+
+        val commentLexeme = sourceScanner.extractLexeme()
+        return Token(TokenType.COMMENT, commentLexeme, commentLexeme.text, emptyList())
     }
 
     /**
@@ -544,8 +577,55 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
      * @return the location of the added [Token]
      */
     private fun addToken(type: TokenType, lexeme: Lexeme, value: String): Location {
-        tokens.add(Token(type, lexeme, value))
+
+        val commentMetadata = commentMetadataForCurrentToken(type)
+
+        tokens.add(Token(type, lexeme, value, commentMetadata.comments))
+
+        for (commentLookaheadTokens in commentMetadata.lookaheadTokens) {
+            tokens.add(commentLookaheadTokens)
+        }
         return lexeme.location
+    }
+
+    /**
+     * A [List] of comments for the [Token] currently being lexed, along with any [lookaheadTokens] extracted
+     * in collecting those comments (for instance when collecting trailing comments) that should be added after
+     * the [Token] currently being lexed
+     */
+    private data class CommentMetadata(val comments: List<String>, val lookaheadTokens: List<Token>)
+    private fun commentMetadataForCurrentToken(currentTokenType: TokenType): CommentMetadata {
+        // comments don't get associated with these types
+        if (currentTokenType == TokenType.COMMENT || currentTokenType == TokenType.WHITESPACE) {
+            return CommentMetadata(emptyList(), emptyList())
+        }
+
+        val commentsForToken = currentCommentLines
+        // reset our collection of seen comments to prepare to collect comments for the next token
+        currentCommentLines = ArrayList()
+
+        // lex ahead a bit looking for any trailing comments
+        val trailingCommentTokens = ArrayList<Token>()
+        // consume non-newline whitespace right after this token
+        if (isInlineWhitespace(sourceScanner.peek())) {
+            while (isInlineWhitespace(sourceScanner.peek())) {
+                sourceScanner.advance()
+            }
+            val whitespaceLexeme = sourceScanner.extractLexeme()
+            trailingCommentTokens.add(Token(TokenType.WHITESPACE, whitespaceLexeme, whitespaceLexeme.text, emptyList()))
+        }
+        val trailingComment = if (sourceScanner.peek() == '#') {
+            val commentToken = extractCommentToken()
+            trailingCommentTokens.add(commentToken)
+            commentToken.value
+        } else {
+            ""
+        }
+
+        if (trailingComment.isNotBlank()) {
+            commentsForToken.add(trailingComment)
+        }
+        return CommentMetadata(commentsForToken, trailingCommentTokens)
     }
 
     private fun isDigit(c: Char): Boolean {

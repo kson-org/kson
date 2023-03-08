@@ -1,5 +1,6 @@
 package org.kson.parser
 
+import org.kson.ast.AstNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -18,7 +19,8 @@ class ParserTest {
     @Test
     fun testSanityCheckParse() {
         val nullTokenStream = listOf(
-            Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null")
+            Token(TokenType.NULL, Lexeme("null", Location(0, 0, 0, 4, 0, 4)), "null"),
+            Token(TokenType.EOF, Lexeme("", Location(0, 4, 0, 4, 4, 4)), "")
         )
         val builder = KsonBuilder(nullTokenStream)
         Parser(builder).parse()
@@ -26,6 +28,6 @@ class ParserTest {
         val ksonRoot = builder.buildTree(messageSink)
         assertNotNull(ksonRoot)
         assertTrue(messageSink.loggedMessages().isEmpty())
-        assertEquals(ksonRoot.toKsonSource(0), "null")
+        assertEquals(ksonRoot.toKsonSource(AstNode.Indent()), "null")
     }
 }
