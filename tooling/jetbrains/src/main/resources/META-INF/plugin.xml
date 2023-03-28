@@ -29,6 +29,7 @@
                                implementationClass="org.kson.jetbrains.parser.KsonParserDefinition"/>
         <lang.syntaxHighlighterFactory language="org.kson.jetbrains"
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
+        <lang.commenter language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
 
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
     </extensions>
