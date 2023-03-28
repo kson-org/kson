@@ -30,6 +30,7 @@
         <lang.syntaxHighlighterFactory language="org.kson.jetbrains"
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
         <lang.commenter language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
+        <lang.braceMatcher language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
 
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
     </extensions>

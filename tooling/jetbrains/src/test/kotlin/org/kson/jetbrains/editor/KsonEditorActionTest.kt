@@ -3,6 +3,8 @@ package org.kson.jetbrains.editor
 import com.intellij.codeInsight.generation.actions.CommentByLineCommentAction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.CommandProcessor
+import com.intellij.openapi.editor.actionSystem.TypedAction
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.kson.jetbrains.file.KsonFileType
@@ -25,6 +27,19 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
             CommentByLineCommentAction().actionPerformedImpl(
                 myFixture.project, myFixture.editor
             )
+        }
+    }
+
+    /**
+     * Call this method to test behavior when the given [charToType] is typed at the &lt;caret&gt;.
+     * See class documentation for more info: [KsonEditorActionTest]
+     */
+    fun doCharTest(before: String, charToType: Char, expected: String) {
+        val typedAction = TypedAction.getInstance()
+        doExecuteActionTest(
+            before, expected
+        ) {
+            typedAction.actionPerformed(myFixture.editor, charToType, (myFixture.editor as EditorEx).dataContext)
         }
     }
 
