@@ -1,6 +1,5 @@
 package org.kson.jsonsuite
 
-import java.io.BufferedReader
 import java.nio.file.Path
 
 /**
@@ -23,7 +22,6 @@ class JsonTestSuiteGenerator(
 ) {
     private val buildSrcPath: Path = projectRoot.resolve("buildSrc")
 
-    val testSuiteSetupScript: Path = buildSrcPath.resolve("support/jsonsuite/ensure_suite.sh")
     val testSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
     val testDefinitionFilesDir: Path = testSuiteRootDir.resolve("test_parsing")
 
@@ -39,36 +37,10 @@ class JsonTestSuiteGenerator(
             )
         }
 
-        runCommandLineSetup()
-
         generatedTestPath.parent.toFile().mkdirs()
         val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
         generatedTestPath.toFile()
             .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
-    }
-
-    /**
-     * This method clones [JSONTestSuite](https://github.com/nst/JSONTestSuite) and ensures that [testDefinitionFilesDir]
-     * contains the desired test source files is managed by the command line script defined in [testSuiteSetupScript]
-     */
-    private fun runCommandLineSetup() {
-        val processBuilder = ProcessBuilder(testSuiteSetupScript.toAbsolutePath().toString())
-        processBuilder.redirectErrorStream(true)
-        val process = processBuilder.start()
-
-        val output = process.inputStream.bufferedReader().use(BufferedReader::readText)
-        process.waitFor()
-
-        val formattedOutput = output.split("\n").joinToString("\n\t", "\t") + "\n"
-        if (process.exitValue() == 0) {
-            println(
-                "INFO: `$testSuiteSetupScript` ran successfully with output:\n$formattedOutput"
-            )
-        } else {
-            throw RuntimeException(
-                "ERROR: `$testSuiteSetupScript` failed with output:\n" + formattedOutput + "Troubleshooting tip: `$testSuiteSetupScript` may be run directly from the command line\n"
-            )
-        }
     }
 }
 

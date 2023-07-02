@@ -7,8 +7,8 @@ import java.nio.file.Paths
 /**
  * This task exposes [JsonTestSuiteGenerator] to our Gradle build, ensuring the task's
  * [inputs and outputs](https://docs.gradle.org/current/userguide/more_about_tasks.html#sec:task_inputs_outputs)
- * are properly defined so that we support incremental builds (and so that, for instance, the task re-runs
- * if/when [getTestSuiteSetupScript] is edited, or the test at [getGeneratedTestPath] is deleted)
+ * are properly defined so that we support incremental builds (and so that, for instance,
+ * the test at [getGeneratedTestPath] is deleted)
  */
 open class GenerateJsonTestSuiteTask : DefaultTask() {
     private val jsonTestSuiteGenerator =
@@ -19,15 +19,6 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
             // ensure we're out of date when/if the repo of test source files is deleted
             jsonTestSuiteGenerator.testSuiteRootDir.toFile().exists()
         }
-    }
-
-    /**
-     * Register [JsonTestSuiteGenerator.testSuiteSetupScript] as an input to this script so that it is marked
-     * "out of date" whenever the script changes and re-runs
-     */
-    @InputFile
-    fun getTestSuiteSetupScript(): File {
-        return jsonTestSuiteGenerator.testSuiteSetupScript.toFile()
     }
 
     @OutputFiles
