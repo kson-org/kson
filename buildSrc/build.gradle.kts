@@ -22,7 +22,7 @@ repositories {
 
 
 val cloneJsonTestSuiteProjectTask = "cloneJsonTestSuitProject"
-val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
+val jsonTestSuiteRepoUrl = "git@github.com:nst/JSONTestSuite.git"
 val jsonTestSuiteSHA = "d64aefb55228d9584d3e5b2433f720ea8fd00c82"
 val cloneDir = file("${rootDir}/support/jsonsuite/JSONTestSuite")
 
