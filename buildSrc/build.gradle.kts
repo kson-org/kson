@@ -1,7 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.internal.impldep.com.jcraft.jsch.Session
+import org.gradle.internal.impldep.org.eclipse.jgit.api.Git
+import org.gradle.internal.impldep.org.eclipse.jgit.transport.JschConfigSessionFactory
+import org.gradle.internal.impldep.org.eclipse.jgit.transport.OpenSshConfig
+import org.gradle.internal.impldep.org.eclipse.jgit.transport.SshSessionFactory
+import org.gradle.internal.impldep.org.eclipse.jgit.transport.SshTransport
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.errors.GitAPIException
 
 plugins {
     kotlin("jvm") version "1.6.21"
@@ -22,14 +26,16 @@ repositories {
 
 
 val cloneJsonTestSuiteProjectTask = "cloneJsonTestSuitProject"
-val jsonTestSuiteRepoUrl = "ssh://git@github.com:nst/JSONTestSuite.git"
+val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
 val jsonTestSuiteSHA = "d64aefb55228d9584d3e5b2433f720ea8fd00c82"
 val cloneDir = file("${rootDir}/support/jsonsuite/JSONTestSuite")
 
 tasks {
-    register(cloneJsonTestSuiteProjectTask) {
+    register<JavaExec>(cloneJsonTestSuiteProjectTask) {
         // This makes us re-clone if the SHA changes
         inputs.property("sha", jsonTestSuiteSHA)
+
+        environment("GIT_SSH_COMMAND", "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
 
         doLast {
             if (cloneDir.exists()) {
@@ -61,10 +67,25 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
+
 fun cloneRepository(url: String, dir: File) {
+    val sessionFactory = object : JschConfigSessionFactory() {
+        override fun configure(hc: OpenSshConfig.Host, session: Session) {
+            session.setConfig("StrictHostKeyChecking", "no")
+        }
+    }
+
+    val sshSessionFactory: SshSessionFactory = sessionFactory
+
+    SshSessionFactory.setInstance(sshSessionFactory)
+
     Git.cloneRepository()
         .setURI(url)
         .setDirectory(dir)
+        .setTransportConfigCallback { transport ->
+            val sshTransport = transport as SshTransport
+            sshTransport.sshSessionFactory = sshSessionFactory
+        }
         .call()
 }
 
