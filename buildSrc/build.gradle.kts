@@ -62,14 +62,10 @@ dependencies {
 }
 
 fun cloneRepository(url: String, dir: File) {
-    try {
-        Git.cloneRepository()
-            .setURI(url)
-            .setDirectory(dir)
-            .call()
-    } catch (e: GitAPIException) {
-        e.printStackTrace()
-    }
+    Git.cloneRepository()
+        .setURI(url)
+        .setDirectory(dir)
+        .call()
 }
 
 fun checkoutCommit(dir: File, commit: String) {
