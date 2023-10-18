@@ -287,6 +287,22 @@ class KsonTest {
     }
 
     @Test
+    fun testObjectSourceWithImmediateTrailingComment() {
+        assertParsesTo(
+            """
+                {a:b}#comment
+            """,
+            """
+                #comment
+                {
+                  a: b
+                }
+            """.trimIndent(),
+            "should parse as a root object when optional root parens are provided"
+        )
+    }
+
+    @Test
     fun testObjectSourceOptionalComma() {
         val expectRootObjectAst = """
             {
