@@ -229,10 +229,29 @@ class Parser(val builder: AstBuilder) {
     private fun literal(): Boolean {
         val literalMark = builder.mark()
         val elementType = builder.getTokenType()
+
+        if (elementType == NUMBER) {
+            val numberCandidate = builder.getTokenText()
+
+            // consume this number candidate
+            builder.advanceLexer()
+
+            /**
+             * delegate the details of number parsing to [NumberParser]
+             */
+            val numberParseResult = NumberParser(numberCandidate).parse()
+
+            if (numberParseResult.error != null) {
+                literalMark.error(numberParseResult.error)
+            } else {
+                literalMark.done(NUMBER)
+            }
+            return true
+        }
+
         if (elementType != null && setOf(
                 STRING,
                 IDENTIFIER,
-                NUMBER,
                 TRUE,
                 FALSE,
                 NULL

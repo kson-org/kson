@@ -82,13 +82,24 @@ enum class MessageType {
             return "Unterminated string"
         }
     },
-    DANGLING_EXP_INDICATOR {
+    INVALID_DIGITS {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Unexpected Character")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Dangling exponent indicator"
+            val unexpectedCharacter = parsedArgs.getArg("Unexpected Character")
+            return "Invalid character `$unexpectedCharacter` found in this number"
+        }
+    },
+    DANGLING_EXP_INDICATOR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Exponent character: E or e")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val exponentCharacter = parsedArgs.getArg("Exponent character: E or e")
+            return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent"
         }
     },
     ILLEGAL_MINUS_SIGN {
@@ -98,6 +109,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "A dash `-` must be followed by a space (to make a list element), or a number (to make a negative number)"
+        }
+    },
+    DANGLING_DECIMAL {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "A decimal must be followed by digits"
         }
     },
     DANGLING_LIST_DASH {
