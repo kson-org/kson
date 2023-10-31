@@ -42,12 +42,27 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     }
 
     @Test
+    fun testNumber() {
+        doTest(true)
+    }
+
+    @Test
     fun testUnclosedEmbedBlock() {
         doTest(true)
     }
 
     @Test
     fun testUnclosedString() {
+        doTest(true)
+    }
+
+    @Test
+    fun testNumberError() {
+        doTest(true)
+    }
+
+    @Test
+    fun testNumberDanglingExponentError() {
         doTest(true)
     }
 

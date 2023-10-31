@@ -84,6 +84,9 @@ class KsonTest {
         )
     }
 
+    /**
+     * See also [org.kson.parser.NumberParserTest] for more targeted number parsing tests
+     */
     @Test
     fun testNumberLiteralSource() {
         assertParsesTo("42.1", "42.1")
@@ -106,6 +109,33 @@ class KsonTest {
         assertParsesTo("-0.421e+2", "-42.1")
         assertParsesTo("-42.1E+0", "-42.1")
         assertParsesTo("-00042.1E0", "-42.1")
+    }
+
+    @Test
+    fun testDanglingExponentError() {
+        assertParserRejectsSource(
+            """
+                420E
+            """,
+            listOf(DANGLING_EXP_INDICATOR)
+        )
+
+        assertParserRejectsSource(
+            """
+                420E-
+            """,
+            listOf(DANGLING_EXP_INDICATOR)
+        )
+    }
+
+    @Test
+    fun testIllegalMinusSignError() {
+        assertParserRejectsSource(
+            """
+                -nope
+            """.trimIndent(),
+            listOf(ILLEGAL_MINUS_SIGN)
+        )
     }
 
     @Test
@@ -283,6 +313,22 @@ class KsonTest {
                 hello: "y'all"
             """,
             expectRootObjectAst
+        )
+    }
+
+    @Test
+    fun testObjectSourceWithImmediateTrailingComment() {
+        assertParsesTo(
+            """
+                {a:b}#comment
+            """,
+            """
+                #comment
+                {
+                  a: b
+                }
+            """.trimIndent(),
+            "should parse as a root object when optional root parens are provided"
         )
     }
 

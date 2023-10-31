@@ -192,30 +192,17 @@ class LexerTest {
             )
         )
 
-        // error case
-        assertTokenizesWithMessages(
+        // test malformed numbers also lex correctly (it's the parser's responsibility to report that they are malformed)
+        assertTokenizesTo(
             """
                 420E
-            """,
-            listOf(DANGLING_EXP_INDICATOR)
-        )
-
-        // error case
-        assertTokenizesWithMessages(
-            """
                 420E-
-            """,
-            listOf(DANGLING_EXP_INDICATOR)
-        )
-    }
-
-    @Test
-    fun testDanglingMinusSign() {
-        assertTokenizesWithMessages(
-            """
                 -nope
+                -10bb6.8
+                9geee8.0e-f2
+                9geee8.0ef-2
             """,
-            listOf(ILLEGAL_MINUS_SIGN)
+            listOf(NUMBER, NUMBER, NUMBER, NUMBER, NUMBER, NUMBER)
         )
     }
 

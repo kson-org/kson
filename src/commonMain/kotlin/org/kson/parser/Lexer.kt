@@ -3,7 +3,6 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
-import org.kson.ast.NumberNode
 import org.kson.parser.messages.MessageType.*
 
 const val EMBED_DELIM_CHAR = '%'
@@ -247,6 +246,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             return
         }
 
+        // a "minus sign" followed by whitespace is actually a list dash
         if (char == '-' && (isWhitespace(sourceScanner.peek()) || sourceScanner.peek() == EOF)) {
             addLiteralToken(TokenType.LIST_DASH)
             return
@@ -281,17 +281,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             }
             else -> {
                 when {
+                    // a minus or a digit starts a number
                     char == '-' || isDigit(char) -> {
-                        if (char == '-' && !isDigit(sourceScanner.peek())) {
-                            /**
-                             * todo we likely want to move the mechanics of number parsing out of the lexer and
-                             *         into the parser if:
-                             *         - we see more edge cases like this, or:
-                             *         - we succeed in adding dash-denoted lists into the grammar
-                             */
-                            messageSink.error(addLiteralToken(TokenType.LIST_DASH), ILLEGAL_MINUS_SIGN.create())
-                            return
-                        }
                         number()
                     }
                     // identifiers start with an alphabetic character or an underscore
@@ -516,46 +507,13 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     }
 
     private fun number() {
-        // Consume the whole part of the decimal-formatted number
-        // NOTE: numbers with leading 0's are still treated as decimal (not octal)
-        while (isDigit(sourceScanner.peek())) sourceScanner.advance()
-
-        // Consume an optional fractional part (following a decimal point)
-        if (sourceScanner.peek() == '.' && isDigit(sourceScanner.peekNext())) {
-            // Consume the decimal point
-            sourceScanner.advance()
-            while (isDigit(sourceScanner.peek())) sourceScanner.advance()
-        }
-
-        // Consume optional exponent part (ex: 1.74e22, 2.801E12, 4.11e-12, 1e16)
-        if (sourceScanner.peek() == 'E' || sourceScanner.peek() == 'e') {
-            // Consume the 'E' or 'e'
-            sourceScanner.advance()
-            if (sourceScanner.peek() == '-' || sourceScanner.peek() == '+') {
-                // Consume the optional exponent sign
-                sourceScanner.advance()
-            }
-            if (!isDigit(sourceScanner.peek())) {
-                // Double.parseDouble considers a trailing 'E' without an exponent part to be a NumberFormatException
-                messageSink.error(addLiteralToken(TokenType.ILLEGAL_TOKEN), DANGLING_EXP_INDICATOR.create())
-                return
-            }
-            while (isDigit(sourceScanner.peek())) sourceScanner.advance()
-        }
-
-        /**
-         * We have now validated that NumberLexeme is made up of three parts:
-         * - one or more digits (required, but may be 0) representing the whole part;
-         * - (optional) a decimal point, which is required to be followed by digits representing the fractional part;
-         * - (optional) an 'E' or 'e' which is in turn followed by an optional sign and one or more required digits
-         *       representing the exponent part
-         *
-         * This all matches both the JSON grammar and the expectations of [String.toDouble], so we should be all set
-         * to create a [NumberNode] from this lexeme later in the parse
-         *
-         * parser todo this prepping our string for [String.toDouble] happens very far away from the actual
-         *   [String.toDouble] in [NumberNode], which could lead to some awkward bug troubleshoots
-         */
+        // since we're here, we know a number has been started with a minus sign or digit,
+        // so lex the following chars generously (i.e. include alpha stuff if it's attached to this number)
+        // as part of that number and look for problems in the number's structure later in the parser
+        while (isAlphaNumeric(sourceScanner.peek())
+            || sourceScanner.peek() == '+'
+            || sourceScanner.peek() == '-'
+            || sourceScanner.peek() == '.') sourceScanner.advance()
         addLiteralToken(TokenType.NUMBER)
     }
 

@@ -23,7 +23,7 @@ import org.kson.parser.messages.MessageType.*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
  * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
  * keyword -> ( IDENTIFIER | STRING ) ":" ;
- * literal -> STRING | NUMBER | "true" | "false" | "null" ;
+ * literal -> STRING | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
  * ```
  *
@@ -224,15 +224,34 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * literal -> STRING | NUMBER | "true" | "false" | "null" ;
+     * literal -> STRING | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
      */
     private fun literal(): Boolean {
         val literalMark = builder.mark()
         val elementType = builder.getTokenType()
+
+        if (elementType == NUMBER) {
+            val numberCandidate = builder.getTokenText()
+
+            // consume this number candidate
+            builder.advanceLexer()
+
+            /**
+             * delegate the details of number parsing to [NumberParser]
+             */
+            val numberParseResult = NumberParser(numberCandidate).parse()
+
+            if (numberParseResult.error != null) {
+                literalMark.error(numberParseResult.error)
+            } else {
+                literalMark.done(NUMBER)
+            }
+            return true
+        }
+
         if (elementType != null && setOf(
                 STRING,
                 IDENTIFIER,
-                NUMBER,
                 TRUE,
                 FALSE,
                 NULL
