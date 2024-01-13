@@ -33,14 +33,6 @@ class JsonTestSuiteGeneratorTest {
             "test suite directory should exist and be a directory"
         )
 
-        assertTrue(
-            jsonTestSuiteGenerator.testSuiteSetupScript.toFile().readText()
-                    // sanity check this is the script we expect by verifying it contains a reference to the
-                    // git url that we expect it to clone as part of its setup
-                .contains("git@github.com:nst/JSONTestSuite.git"),
-            "test suite setup script should exist"
-        )
-
         val generatedTestContents = jsonTestSuiteGenerator.generatedTestPath.toFile().readText()
 
         assertTrue(

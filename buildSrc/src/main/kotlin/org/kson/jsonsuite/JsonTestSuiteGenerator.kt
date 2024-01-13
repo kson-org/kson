@@ -1,6 +1,7 @@
 package org.kson.jsonsuite
 
-import java.io.BufferedReader
+import org.eclipse.jgit.api.Git
+import java.io.File
 import java.nio.file.Path
 
 /**
@@ -23,9 +24,10 @@ class JsonTestSuiteGenerator(
 ) {
     private val buildSrcPath: Path = projectRoot.resolve("buildSrc")
 
-    val testSuiteSetupScript: Path = buildSrcPath.resolve("support/jsonsuite/ensure_suite.sh")
     val testSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
     val testDefinitionFilesDir: Path = testSuiteRootDir.resolve("test_parsing")
+    private val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
+    val jsonTestSuiteSHA = "d64aefb55228d9584d3e5b2433f720ea8fd00c82"
 
     val generatedTestPath: Path =
         projectRoot.resolve(sourceRoot).resolve(classPackage.replace('.', '/')).resolve("JsonSuiteTest.kt")
@@ -39,8 +41,9 @@ class JsonTestSuiteGenerator(
             )
         }
 
-        runCommandLineSetup()
+        cloneJsonTestSuite()
 
+        //ensure that [testDefinitionFilesDir] contains the desired test source files
         generatedTestPath.parent.toFile().mkdirs()
         val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
         generatedTestPath.toFile()
@@ -48,27 +51,28 @@ class JsonTestSuiteGenerator(
     }
 
     /**
-     * This method clones [JSONTestSuite](https://github.com/nst/JSONTestSuite) and ensures that [testDefinitionFilesDir]
-     * contains the desired test source files is managed by the command line script defined in [testSuiteSetupScript]
+     * This method clones [JSONTestSuite](https://github.com/nst/JSONTestSuite)
      */
-    private fun runCommandLineSetup() {
-        val processBuilder = ProcessBuilder(testSuiteSetupScript.toAbsolutePath().toString())
-        processBuilder.redirectErrorStream(true)
-        val process = processBuilder.start()
-
-        val output = process.inputStream.bufferedReader().use(BufferedReader::readText)
-        process.waitFor()
-
-        val formattedOutput = output.split("\n").joinToString("\n\t", "\t") + "\n"
-        if (process.exitValue() == 0) {
-            println(
-                "INFO: `$testSuiteSetupScript` ran successfully with output:\n$formattedOutput"
-            )
-        } else {
-            throw RuntimeException(
-                "ERROR: `$testSuiteSetupScript` failed with output:\n" + formattedOutput + "Troubleshooting tip: `$testSuiteSetupScript` may be run directly from the command line\n"
-            )
+    private fun cloneJsonTestSuite() {
+        val cloneDir = testSuiteRootDir.toFile()
+        if (cloneDir.exists()) {
+            cloneDir.deleteRecursively()
         }
+        cloneRepository(jsonTestSuiteRepoUrl, cloneDir)
+        checkoutCommit(cloneDir, jsonTestSuiteSHA)
+    }
+
+    @Suppress("SameParameterValue")
+    private fun cloneRepository(url: String, dir: File) {
+        Git.cloneRepository()
+            .setURI(url)
+            .setDirectory(dir)
+            .call()
+    }
+    @Suppress("SameParameterValue")
+    private fun checkoutCommit(dir: File, commit: String) {
+        val git = Git.open(dir)
+        git.checkout().setName(commit).call()
     }
 }
 

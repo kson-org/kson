@@ -47,6 +47,10 @@ jobs:
       # installed needed native dependency on Linux
       - run: sudo apt update
       - run: sudo apt install libncurses5
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+              rm -rf ~/.gitconfig
       - run: ./gradlew dependencies
 
       - save_cache:
