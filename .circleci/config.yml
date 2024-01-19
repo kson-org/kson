@@ -15,7 +15,6 @@ jobs:
       # Choose the `-browsers variant` of the openjdk 11 image, see https://circleci.com/developer/images/image/cimg/openjdk#browsers
       # for details
       - image: cimg/openjdk:11.0-browsers
-
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -50,7 +49,7 @@ jobs:
       - run:
           name: Get rid of erroneous git config
           command: |
-              rm -rf ~/.gitconfig
+            rm -rf ~/.gitconfig
       - run: ./gradlew dependencies
 
       - save_cache:
@@ -60,3 +59,5 @@ jobs:
 
       # run tests!
       - run: ./gradlew check
+    # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
+    resource_class: large
