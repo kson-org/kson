@@ -13,11 +13,14 @@ import java.nio.file.Path
  * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
  * superset of JSON
  *
- * @param projectRoot The absolute path on disk to the root of the Kson project
+ * @param jsonTestSuiteSHA The SHA version of the tests to generate from
+ * @param projectRoot The absolute path on disk to the root of the project to generate JSONTestSuite tests into
  * @param sourceRoot The source root of the project to place the generated test in, relative to [projectRoot]
- * @param classPackage The package ("org.kson.parser.json") for instance.  NOTES: the caller is responsible for
+ * @param classPackage The package ("org.kson.parser.json") for instance.  NOTES: the caller is responsible for setting
+ *                      this correctly
  */
 class JsonTestSuiteGenerator(
+    val jsonTestSuiteSHA: String,
     private val projectRoot: Path,
     private val sourceRoot: Path,
     private val classPackage: String
@@ -27,7 +30,6 @@ class JsonTestSuiteGenerator(
     val testSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
     val testDefinitionFilesDir: Path = testSuiteRootDir.resolve("test_parsing")
     private val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
-    val jsonTestSuiteSHA = "d64aefb55228d9584d3e5b2433f720ea8fd00c82"
 
     val generatedTestPath: Path =
         projectRoot.resolve(sourceRoot).resolve(classPackage.replace('.', '/')).resolve("JsonSuiteTest.kt")
@@ -263,4 +265,55 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
             )
         }.sortedBy { it.rawTestName }
     }
+}
+
+class DirtyRepoException(msg: String) : RuntimeException(msg)
+
+/**
+ * Ensures there is a checkout of [repoUrl] in [destinationDir] at SHA [checkoutSHA]
+ * Note: will clone if does not exist, will error if not clean
+ */
+fun ensureCleanGitCheckout(repoUrl: String, checkoutSHA: String, destinationDir: Path) {
+    val checkoutDir = destinationDir.toFile()
+
+    if (!checkoutDir.exists()) {
+        cloneRepository(repoUrl, checkoutDir)
+    }
+
+    val git = Git.init().setDirectory(checkoutDir).call()
+    if(!git.status().call().isClean) {
+        // throw if we're not clean... don't want to build because the source files might be incorrect,
+        // but also don't want to immediately blow it away since someone may have made changes on purpose
+        // for reasons we're not guessing, and quietly nuking those changes as a side-effect of the build
+        // could do them a real disservice
+        throw DirtyRepoException(
+            "ERROR: Dirty git status in $destinationDir.  Please ensure the git status is clean " +
+                    "or delete the directory and re-run this script")
+    }
+
+    checkoutCommit(checkoutDir, checkoutSHA)
+}
+
+/**
+ * Clone the given [uri] into [dir]
+ *
+ * @param uri will be passed to [org.eclipse.jgit.api.CloneCommand.setURI] to be parsed as a [org.eclipse.jgit.transport.URIish])
+ * @param dir the directory to clone the repo at [uri] into
+ */
+private fun cloneRepository(uri: String, dir: File) {
+    Git.cloneRepository()
+        .setURI(uri)
+        .setDirectory(dir)
+        .call()
+}
+
+/**
+ * Checks out the given [commit] of the repo found in [dir]
+ *
+ * @param dir a directory containing a git repo
+ * @param commit the commit of the repo in [dir] to be checked out
+ */
+private fun checkoutCommit(dir: File, commit: String) {
+    val git = Git.open(dir)
+    git.checkout().setName(commit).call()
 }
