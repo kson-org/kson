@@ -19,7 +19,6 @@ val generateJsonTestSuiteTask = "generateJsonTestSuite"
 tasks {
     register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
 
-    @Suppress("RemoveExplicitTypeArguments") // explicitly note we're configuring all `Task`s
     withType<Task> {
         // make every task except itself depend on generateJsonTestSuiteTask to
         // ensure it's always up-to-date before any other build steps
