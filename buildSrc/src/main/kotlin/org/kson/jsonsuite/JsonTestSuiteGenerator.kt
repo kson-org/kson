@@ -242,6 +242,7 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
     }
 }
 
+class NoRepoException(msg: String) : RuntimeException(msg)
 class DirtyRepoException(msg: String) : RuntimeException(msg)
 
 /**
@@ -253,6 +254,10 @@ fun ensureCleanGitCheckout(repoUrl: String, checkoutSHA: String, destinationDir:
 
     if (!checkoutDir.exists()) {
         cloneRepository(repoUrl, checkoutDir)
+    } else if (!File(checkoutDir, ".git").exists()) {
+        throw NoRepoException(
+            "ERROR: $checkoutDir should contain a checkout of https://github.com/nst/JSONTestSuite," +
+                    "but it does not appear to be a git repo")
     }
 
     val git = Git.init().setDirectory(checkoutDir).call()
