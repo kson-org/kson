@@ -43,38 +43,13 @@ class JsonTestSuiteGenerator(
             )
         }
 
-        cloneJsonTestSuite()
+        ensureCleanGitCheckout(jsonTestSuiteRepoUrl, jsonTestSuiteSHA, testSuiteRootDir)
 
         //ensure that [testDefinitionFilesDir] contains the desired test source files
         generatedTestPath.parent.toFile().mkdirs()
         val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
         generatedTestPath.toFile()
             .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
-    }
-
-    /**
-     * This method clones [JSONTestSuite](https://github.com/nst/JSONTestSuite)
-     */
-    private fun cloneJsonTestSuite() {
-        val cloneDir = testSuiteRootDir.toFile()
-        if (cloneDir.exists()) {
-            cloneDir.deleteRecursively()
-        }
-        cloneRepository(jsonTestSuiteRepoUrl, cloneDir)
-        checkoutCommit(cloneDir, jsonTestSuiteSHA)
-    }
-
-    @Suppress("SameParameterValue")
-    private fun cloneRepository(url: String, dir: File) {
-        Git.cloneRepository()
-            .setURI(url)
-            .setDirectory(dir)
-            .call()
-    }
-    @Suppress("SameParameterValue")
-    private fun checkoutCommit(dir: File, commit: String) {
-        val git = Git.open(dir)
-        git.checkout().setName(commit).call()
     }
 }
 
@@ -267,6 +242,7 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
     }
 }
 
+class NoRepoException(msg: String) : RuntimeException(msg)
 class DirtyRepoException(msg: String) : RuntimeException(msg)
 
 /**
@@ -278,6 +254,10 @@ fun ensureCleanGitCheckout(repoUrl: String, checkoutSHA: String, destinationDir:
 
     if (!checkoutDir.exists()) {
         cloneRepository(repoUrl, checkoutDir)
+    } else if (!File(checkoutDir, ".git").exists()) {
+        throw NoRepoException(
+            "ERROR: $checkoutDir should contain a checkout of https://github.com/nst/JSONTestSuite," +
+                    "but it does not appear to be a git repo")
     }
 
     val git = Git.init().setDirectory(checkoutDir).call()
