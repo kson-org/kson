@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 
 plugins {
-    kotlin("multiplatform") version "1.6.21"
+    kotlin("multiplatform") version "1.9.22"
 }
 
 group = "org.kson"
@@ -19,7 +19,6 @@ val generateJsonTestSuiteTask = "generateJsonTestSuite"
 tasks {
     register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
 
-    @Suppress("RemoveExplicitTypeArguments") // explicitly note we're configuring all `Task`s
     withType<Task> {
         // make every task except itself depend on generateJsonTestSuiteTask to
         // ensure it's always up-to-date before any other build steps
@@ -64,19 +63,18 @@ kotlin {
             useJUnit()
         }
     }
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {
                     useChromeHeadless()
-                    webpackConfig.cssSupport.enabled = true
                 }
             }
         }
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
+    when {
         hostOs == "Mac OS X" -> macosX64("native")
         hostOs == "Linux" -> linuxX64("native")
         isMingwX64 -> mingwX64("native")

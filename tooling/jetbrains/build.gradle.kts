@@ -61,4 +61,12 @@ tasks {
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
+
+    /**
+     * Work around a "class is a duplicate but no duplicate handling strategy has been set" error that
+     * started popping up when we upgraded to Kotlin 1.8
+     */
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }
