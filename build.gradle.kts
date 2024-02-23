@@ -16,6 +16,15 @@ repositories {
 
 val generateJsonTestSuiteTask = "generateJsonTestSuite"
 
+// declare Java version and specify our project JDK
+val javaVersion = JavaLanguageVersion.of(11)
+java {
+    toolchain {
+        languageVersion.set(javaVersion)
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
+}
+
 tasks {
     register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
 
@@ -57,7 +66,7 @@ tasks {
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = javaVersion.toString()
         }
         testRuns["test"].executionTask.configure {
             useJUnit()
