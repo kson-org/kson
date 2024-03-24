@@ -2,9 +2,28 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import java.util.*
+
+val sharedProps = Properties().apply {
+    project.file("jdk.properties").inputStream().use { load(it) }
+}
 
 plugins {
     kotlin("multiplatform") version "1.9.22"
+
+    // configured by `jvmWrapper` block below
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+}
+
+// NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
+jvmWrapper {
+    unixJvmInstallDir = sharedProps.getProperty("unixJvmInstallDir")
+    winJvmInstallDir = sharedProps.getProperty("winJvmInstallDir")
+    macAarch64JvmUrl = sharedProps.getProperty("macAarch64JvmUrl")
+    macX64JvmUrl = sharedProps.getProperty("macX64JvmUrl")
+    linuxAarch64JvmUrl = sharedProps.getProperty("linuxAarch64JvmUrl")
+    linuxX64JvmUrl = sharedProps.getProperty("linuxX64JvmUrl")
+    windowsX64JvmUrl = sharedProps.getProperty("windowsX64JvmUrl")
 }
 
 group = "org.kson"
@@ -56,9 +75,6 @@ tasks {
 
 kotlin {
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
         testRuns["test"].executionTask.configure {
             useJUnit()
         }

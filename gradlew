@@ -55,7 +55,7 @@
 #       Darwin, MinGW, and NonStop.
 #
 #   (3) This script is generated from the Groovy template
-#       https://github.com/gradle/gradle/blob/master/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       https://github.com/gradle/gradle/blob/HEAD/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
 #       within the Gradle project.
 #
 #       You can find Gradle at https://github.com/gradle/gradle/.
@@ -80,13 +80,11 @@ do
     esac
 done
 
-APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
-
-APP_NAME="Gradle"
+# This is normally unused
+# shellcheck disable=SC2034
 APP_BASE_NAME=${0##*/}
-
-# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd "${APP_HOME:-./}" > /dev/null && pwd -P ) || exit
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD=maximum
@@ -117,6 +115,97 @@ esac
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
+# GRADLE JVM WRAPPER START MARKER
+BUILD_DIR="$APP_HOME/gradle/jdk"
+JVM_ARCH=$(uname -m)
+JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
+if [ "$darwin" = "true" ]; then
+    case $JVM_ARCH in
+    x86_64)
+        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jre_x64_mac_hotspot_11.0.22_7.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jre_x64_mac_hotspot_11.0.22_7-8bb5d4
+        ;;
+    arm64)
+        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7.1/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.22_7.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.22_7-a4c882
+        ;;
+    *) 
+        die "Unknown architecture $JVM_ARCH"
+        ;;
+    esac
+elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
+    JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7.zip
+    JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7-92b309
+else
+    JVM_ARCH=$(linux$(getconf LONG_BIT) uname -m)
+     case $JVM_ARCH in
+        x86_64)
+            JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7-7c72a7
+            ;;
+        aarch64)
+            JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7-58ee01
+            ;;
+        *) 
+            die "Unknown architecture $JVM_ARCH"
+            ;;
+        esac
+fi
+
+set -e
+
+if [ -e "$JVM_TARGET_DIR/.flag" ] && [ -n "$(ls "$JVM_TARGET_DIR")" ] && [ "x$(cat "$JVM_TARGET_DIR/.flag")" = "x${JVM_URL}" ]; then
+    # Everything is up-to-date in $JVM_TARGET_DIR, do nothing
+    true
+else
+  echo "Downloading $JVM_URL to $JVM_TEMP_FILE"
+
+  rm -f "$JVM_TEMP_FILE"
+  mkdir -p "$BUILD_DIR"
+  if command -v curl >/dev/null 2>&1; then
+      if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--silent --show-error"; fi
+      # shellcheck disable=SC2086
+      curl $CURL_PROGRESS -L --output "${JVM_TEMP_FILE}" "$JVM_URL" 2>&1
+  elif command -v wget >/dev/null 2>&1; then
+      if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
+      wget $WGET_PROGRESS -O "${JVM_TEMP_FILE}" "$JVM_URL" 2>&1
+  else
+      die "ERROR: Please install wget or curl"
+  fi
+
+  echo "Extracting $JVM_TEMP_FILE to $JVM_TARGET_DIR"
+  rm -rf "$JVM_TARGET_DIR"
+  mkdir -p "$JVM_TARGET_DIR"
+
+  case "$JVM_URL" in
+    *".zip") unzip "$JVM_TEMP_FILE" -d "$JVM_TARGET_DIR" ;;
+    *) tar -x -f "$JVM_TEMP_FILE" -C "$JVM_TARGET_DIR" ;;
+  esac
+  
+  rm -f "$JVM_TEMP_FILE"
+
+  echo "$JVM_URL" >"$JVM_TARGET_DIR/.flag"
+fi
+
+JAVA_HOME=
+for d in "$JVM_TARGET_DIR" "$JVM_TARGET_DIR"/* "$JVM_TARGET_DIR"/Contents/Home "$JVM_TARGET_DIR"/*/Contents/Home; do
+  if [ -e "$d/bin/java" ]; then
+    JAVA_HOME="$d"
+  fi
+done
+
+if [ '!' -e "$JAVA_HOME/bin/java" ]; then
+  die "Unable to find bin/java under $JVM_TARGET_DIR"
+fi
+
+# Make it available for child processes
+export JAVA_HOME
+
+set +e
+
+# GRADLE JVM WRAPPER END MARKER
+
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
@@ -133,22 +222,29 @@ location of your Java installation."
     fi
 else
     JAVACMD=java
-    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 
 Please set the JAVA_HOME variable in your environment to match the
 location of your Java installation."
+    fi
 fi
 
 # Increase the maximum file descriptors if we can.
 if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     case $MAX_FD in #(
       max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
         MAX_FD=$( ulimit -H -n ) ||
             warn "Could not query maximum file descriptor limit"
     esac
     case $MAX_FD in  #(
       '' | soft) :;; #(
       *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
         ulimit -n "$MAX_FD" ||
             warn "Could not set maximum file descriptor limit to $MAX_FD"
     esac
@@ -193,17 +289,27 @@ if "$cygwin" || "$msys" ; then
     done
 fi
 
-# Collect all arguments for the java command;
-#   * $DEFAULT_JVM_OPTS, $JAVA_OPTS, and $GRADLE_OPTS can contain fragments of
-#     shell script including quotes and variable substitutions, so put them in
-#     double quotes to make sure that they get re-expanded; and
-#   * put everything else in single quotes, so that it's not re-expanded.
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
 
 set -- \
         "-Dorg.gradle.appname=$APP_BASE_NAME" \
         -classpath "$CLASSPATH" \
         org.gradle.wrapper.GradleWrapperMain \
         "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
 
 # Use "xargs" to parse quoted args.
 #
