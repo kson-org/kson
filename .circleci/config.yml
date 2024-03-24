@@ -57,7 +57,15 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle.kts" }}
 
-      # run tests!
-      - run: ./gradlew check
+      - run:
+          name: Verify `buildSrc/` project
+          command: |
+            cd buildSrc
+            ./gradlew check
+
+      - run:
+          name: Verify Kson project
+          command: ./gradlew check
+
     # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
     resource_class: large
