@@ -28,5 +28,6 @@ target
 build
 # gradlew generated files
 .gradle
+gradle/jdk
 # intellij settings
 .idea
