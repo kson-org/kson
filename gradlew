@@ -122,8 +122,8 @@ JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
     case $JVM_ARCH in
     x86_64)
-        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jre_x64_mac_hotspot_11.0.22_7.tar.gz
-        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jre_x64_mac_hotspot_11.0.22_7-8bb5d4
+        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_mac_hotspot_11.0.22_7.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_mac_hotspot_11.0.22_7-864a90
         ;;
     arm64)
         JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7.1/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.22_7.tar.gz
