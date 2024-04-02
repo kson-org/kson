@@ -92,8 +92,6 @@ tasks {
      * - https://github.com/gradle/gradle/issues/17236
      * - https://youtrack.jetbrains.com/issue/KT-46978
      */
-
-    @Suppress("UnstableApiUsage")
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
