@@ -1,10 +1,30 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import java.util.*
+
+val sharedProps = Properties().apply {
+    project.file("jdk.properties").inputStream().use { load(it) }
+}
 
 plugins {
     kotlin("multiplatform") version "1.9.22"
+
+    // configured by `jvmWrapper` block below
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+}
+
+// NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
+jvmWrapper {
+    unixJvmInstallDir = sharedProps.getProperty("unixJvmInstallDir")
+    winJvmInstallDir = sharedProps.getProperty("winJvmInstallDir")
+    macAarch64JvmUrl = sharedProps.getProperty("macAarch64JvmUrl")
+    macX64JvmUrl = sharedProps.getProperty("macX64JvmUrl")
+    linuxAarch64JvmUrl = sharedProps.getProperty("linuxAarch64JvmUrl")
+    linuxX64JvmUrl = sharedProps.getProperty("linuxX64JvmUrl")
+    windowsX64JvmUrl = sharedProps.getProperty("windowsX64JvmUrl")
 }
 
 group = "org.kson"
@@ -24,6 +44,31 @@ tasks {
         // ensure it's always up-to-date before any other build steps
         if (name != generateJsonTestSuiteTask) {
             dependsOn(generateJsonTestSuiteTask)
+        }
+    }
+
+    named<Wrapper>("wrapper") {
+        // always run when invoked
+        outputs.upToDateWhen { false }
+
+        // ensure DistributionType.ALL so we pull in the source code
+        distributionType = Wrapper.DistributionType.ALL
+
+        // ensure buildSrc/ regenerates its wrapper whenever we do
+        doLast {
+            project.file("buildSrc").let { buildSrcDir ->
+                GradleConnector.newConnector().apply {
+                    useInstallation(gradle.gradleHomeDir)
+                    forProjectDirectory(buildSrcDir)
+                }.connect().use { connection ->
+                    connection.newBuild()
+                        .forTasks("wrapper")
+                        .setStandardOutput(System.out)
+                        .setStandardError(System.err)
+                        .run()
+                }
+            }
+            println("Generated Gradle wrapper for both root and buildSrc")
         }
     }
 
@@ -47,8 +92,6 @@ tasks {
      * - https://github.com/gradle/gradle/issues/17236
      * - https://youtrack.jetbrains.com/issue/KT-46978
      */
-
-    @Suppress("UnstableApiUsage")
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
@@ -56,9 +99,6 @@ tasks {
 
 kotlin {
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
         testRuns["test"].executionTask.configure {
             useJUnit()
         }

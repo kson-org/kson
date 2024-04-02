@@ -11,9 +11,14 @@ TODO document the language, remembering to clearly note:
 ### Development setup
 
 * Clone this repo, then run `./gradlew check` in its root dir to validate everything builds and runs correctly.
+  * There should be no other dependencies needed (even [the JDK is defined and managed by the build](jdk.properties)). See [Troubleshooting setup](#troubleshooting-setup) below if you run into any issues
   * Note that the build depends on the [embedded `buildSrc/` project](buildSrc/readme.md), which is [built](buildSrc/build.gradle.kts) and [tested](buildSrc/src/test) as a prerequisite for this build
 
-* **IntelliJ setup:** ensure you have the Kotlin and Gradle plugins installed in Intellij (default in recent versions), then simply open the root [`build.gradle.kts`](build.gradle.kts) file "as a Project". Tests can be run by right-clicking the org.kson package in `commonTest` folder and selecting "Run tests in 'org.kson'".
+* **IntelliJ setup:** 
+  * Ensure you have the Kotlin and Gradle plugins installed
+  * Open the root [`build.gradle.kts`](build.gradle.kts) file directly and select "Open as Project" when prompted
+  * In Settings, under `Build, Execution, Deployment -> Build Tools -> Gradle`, for `Gradle JVM`:
+    * choose "Add JDK..." and select the `Contents/Home` folder of the JDK under `gradle/jdk` (this JDK is installed the first time you run `./gradlew check` from the command line)
 
 
 #### Some useful gradle commands:
