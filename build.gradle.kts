@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
@@ -43,6 +44,31 @@ tasks {
         // ensure it's always up-to-date before any other build steps
         if (name != generateJsonTestSuiteTask) {
             dependsOn(generateJsonTestSuiteTask)
+        }
+    }
+
+    named<Wrapper>("wrapper") {
+        // always run when invoked
+        outputs.upToDateWhen { false }
+
+        // ensure DistributionType.ALL so we pull in the source code
+        distributionType = Wrapper.DistributionType.ALL
+
+        // ensure buildSrc/ regenerates its wrapper whenever we do
+        doLast {
+            project.file("buildSrc").let { buildSrcDir ->
+                GradleConnector.newConnector().apply {
+                    useInstallation(gradle.gradleHomeDir)
+                    forProjectDirectory(buildSrcDir)
+                }.connect().use { connection ->
+                    connection.newBuild()
+                        .forTasks("wrapper")
+                        .setStandardOutput(System.out)
+                        .setStandardError(System.err)
+                        .run()
+                }
+            }
+            println("Generated Gradle wrapper for both root and buildSrc")
         }
     }
 

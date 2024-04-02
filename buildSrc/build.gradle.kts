@@ -39,6 +39,24 @@ repositories {
 }
 
 tasks {
+    named<Wrapper>("wrapper") {
+        // always run when invoked
+        outputs.upToDateWhen { false }
+
+        doFirst {
+            val wrapperProperties = Properties().apply {
+                project.file("../gradle/wrapper/gradle-wrapper.properties").inputStream().use { load(it) }
+            }
+
+            // ensure our Gradle version/distro is kept in sync with our parent project
+            distributionUrl = wrapperProperties.getProperty("distributionUrl")
+        }
+
+        doLast {
+            println(":buildSrc:wrapper -> Generated buildSrc/ wrapper using root project distributionUrl")
+        }
+    }
+
     withType<Test> {
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
