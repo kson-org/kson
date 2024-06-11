@@ -31,7 +31,7 @@
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
         <lang.commenter language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
         <lang.braceMatcher language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
-
+        <lang.quoteHandler language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonQuoteHandler"/>
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
     </extensions>
 </idea-plugin>

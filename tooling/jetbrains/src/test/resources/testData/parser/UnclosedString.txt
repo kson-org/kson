@@ -1,3 +1,4 @@
 FILE(0,9)
-  KsonPsiElement(IElementTokenType(tokenType=STRING))(0,9)
-    PsiElement(IElementTokenType(tokenType=STRING))('"unclosed')(0,9)
+  PsiElement(IElementTokenType(tokenType=STRING_QUOTE))('"')(0,1)
+  KsonPsiElement(IElementTokenType(tokenType=STRING))(1,9)
+    PsiElement(IElementTokenType(tokenType=STRING))('unclosed')(1,9)

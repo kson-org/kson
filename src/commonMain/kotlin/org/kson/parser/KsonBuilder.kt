@@ -163,7 +163,7 @@ class KsonBuilder(private val tokens: List<Token>) :
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
                         // add the old-school guardrail here
-                        throw RuntimeException("Unexpected ${TokenType::class.simpleName}, do we need a new case?")
+                        throw RuntimeException("Missing case for ${TokenType::class.simpleName}.${marker.element}")
                     }
                 }
             }
@@ -176,6 +176,14 @@ class KsonBuilder(private val tokens: List<Token>) :
                         val embedContent =
                             unsafeMarkerLookup(childMarkers, 1).getValue()
                         EmbedBlockNode(embedTag, embedContent)
+                    }
+                    KEYWORD -> {
+                        val keywordContentMark = unsafeMarkerLookup(childMarkers, 0)
+                        if (keywordContentMark.element == IDENTIFIER) {
+                            IdentifierNode(keywordContentMark.getValue())
+                        } else {
+                            StringNode(keywordContentMark.getValue())
+                        }
                     }
                     LIST -> {
                         val listElementNodes = childMarkers.map { unsafeAstCast<ListElementNode>(toAst(it)) }
@@ -223,7 +231,7 @@ class KsonBuilder(private val tokens: List<Token>) :
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
                         // add the old-school guardrail here
-                        throw RuntimeException("Unexpected ${ParsedElementType::class.simpleName}, do we need a new case?")
+                        throw RuntimeException("Missing case for ${ParsedElementType::class.simpleName}.${marker.element}")
                     }
                 }
             }

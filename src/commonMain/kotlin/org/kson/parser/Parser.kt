@@ -22,8 +22,9 @@ import org.kson.parser.messages.MessageType.*
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
  * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
- * keyword -> ( IDENTIFIER | STRING ) ":" ;
- * literal -> STRING | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
+ * keyword -> ( IDENTIFIER | string ) ":" ;
+ * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
+ * string -> STRING_QUOTE STRING STRING_QUOTE
  * embeddedBlock -> EMBED_START (embedTag) NEWLINE CONTENT EMBED_END ;
  * ```
  *
@@ -203,34 +204,50 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * keyword -> ( IDENTIFIER | STRING ) ":" ;
+     * keyword -> ( IDENTIFIER | string ) ":" ;
      */
     private fun keyword(): Boolean {
-        val elementType = builder.getTokenType()
-        if ((elementType == IDENTIFIER || elementType == STRING)
-            && builder.lookAhead(1) == COLON
-        ) {
+        // try to parse a keyword in the style of "IDENTIFIER followed by :"
+        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
             val keywordMark = builder.mark()
+            val identifierMark = builder.mark()
             builder.advanceLexer()
-            keywordMark.done(elementType)
+            identifierMark.done(IDENTIFIER)
+            keywordMark.done(KEYWORD)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        }
+
+        // try to parse a keyword in the style of "string followed by :"
+        val keywordMark = builder.mark()
+        if (string() && builder.getTokenType() == COLON) {
+            keywordMark.done(KEYWORD)
 
             // advance past the COLON
             builder.advanceLexer()
             return true
         } else {
-            // not a keyword
-            return false
+            keywordMark.rollbackTo()
         }
+
+        // not a keyword
+        return false
     }
 
     /**
-     * literal -> STRING | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
+     * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
      */
     private fun literal(): Boolean {
-        val literalMark = builder.mark()
+        if (string()) {
+            return true
+        }
+
         val elementType = builder.getTokenType()
 
         if (elementType == NUMBER) {
+            val numberMark = builder.mark()
             val numberCandidate = builder.getTokenText()
 
             // consume this number candidate
@@ -242,15 +259,15 @@ class Parser(val builder: AstBuilder) {
             val numberParseResult = NumberParser(numberCandidate).parse()
 
             if (numberParseResult.error != null) {
-                literalMark.error(numberParseResult.error)
+                numberMark.error(numberParseResult.error)
             } else {
-                literalMark.done(NUMBER)
+                numberMark.done(NUMBER)
             }
             return true
         }
 
+        val terminalElementMark = builder.mark()
         if (elementType != null && setOf(
-                STRING,
                 IDENTIFIER,
                 TRUE,
                 FALSE,
@@ -259,12 +276,34 @@ class Parser(val builder: AstBuilder) {
         ) {
             // consume our literal
             builder.advanceLexer()
-            literalMark.done(elementType)
+            terminalElementMark.done(elementType)
             return true
         } else {
-            literalMark.rollbackTo()
+            terminalElementMark.rollbackTo()
             return false
         }
+    }
+
+    /**
+     * string -> STRING_QUOTE STRING STRING_QUOTE
+     */
+    private fun string(): Boolean {
+        if (builder.getTokenType() != STRING_QUOTE) {
+            // not a string
+            return false
+        }
+
+        // consume our open quote
+        builder.advanceLexer()
+
+        val stringMark = builder.mark()
+        // consume our string
+        builder.advanceLexer()
+        stringMark.done(STRING)
+
+        // consume our close quote
+        builder.advanceLexer()
+        return true
     }
 
     /**
