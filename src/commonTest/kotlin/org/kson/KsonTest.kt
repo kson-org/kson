@@ -430,6 +430,11 @@ class KsonTest {
     }
 
     @Test
+    fun testTwoConsecutiveStrings() {
+        assertParserRejectsSource("'a string''an illegal second string'", listOf(EOF_NOT_REACHED))
+    }
+
+    @Test
     fun testNestedListAndObjectFormatting() {
         assertParsesTo("""
             {

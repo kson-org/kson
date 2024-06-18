@@ -66,7 +66,7 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
             }
 
             override fun rollbackTo() {
-                psiMark.drop()
+                psiMark.rollbackTo()
             }
 
             override fun error(message: Message) {
