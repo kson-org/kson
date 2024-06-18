@@ -139,7 +139,7 @@ class LexerTest {
             """
                 "This is a string"
             """,
-            listOf(STRING)
+            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
         )
     }
 
@@ -249,7 +249,7 @@ class LexerTest {
             """
                 ["a string"]
             """,
-            listOf(BRACKET_L, STRING, BRACKET_R)
+            listOf(BRACKET_L, STRING_QUOTE, STRING, STRING_QUOTE, BRACKET_R)
         )
 
         assertTokenizesTo(
@@ -272,7 +272,7 @@ class LexerTest {
             """
                 - "a string"
             """,
-            listOf(LIST_DASH, STRING)
+            listOf(LIST_DASH, STRING_QUOTE, STRING, STRING_QUOTE)
         )
 
         assertTokenizesTo(
@@ -314,7 +314,21 @@ class LexerTest {
                     - "indentation is not significant!"
                 - 44
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, LIST_DASH, STRING, LIST_DASH, STRING, LIST_DASH, NUMBER)
+            listOf(
+                LIST_DASH,
+                NUMBER,
+                LIST_DASH,
+                LIST_DASH,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE,
+                LIST_DASH,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE,
+                LIST_DASH,
+                NUMBER
+            )
         )
     }
 
@@ -338,7 +352,23 @@ class LexerTest {
                     hello: "y'all"
                 }
             """,
-            listOf(BRACE_L, IDENTIFIER, COLON, IDENTIFIER, STRING, COLON, NUMBER, IDENTIFIER, COLON, STRING, BRACE_R)
+            listOf(
+                BRACE_L,
+                IDENTIFIER,
+                COLON,
+                IDENTIFIER,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE,
+                COLON,
+                NUMBER,
+                IDENTIFIER,
+                COLON,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE,
+                BRACE_R
+            )
         )
 
         assertTokenizesTo(
@@ -347,7 +377,21 @@ class LexerTest {
                 "string key": 66
                 hello: "y'all"
             """,
-            listOf(IDENTIFIER, COLON, IDENTIFIER, STRING, COLON, NUMBER, IDENTIFIER, COLON, STRING)
+            listOf(
+                IDENTIFIER,
+                COLON,
+                IDENTIFIER,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE,
+                COLON,
+                NUMBER,
+                IDENTIFIER,
+                COLON,
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE
+            )
         )
     }
 
@@ -366,12 +410,16 @@ class LexerTest {
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
+                STRING_QUOTE,
                 STRING,
+                STRING_QUOTE,
                 COLON,
                 NUMBER,
                 IDENTIFIER,
                 COLON,
-                STRING
+                STRING_QUOTE,
+                STRING,
+                STRING_QUOTE
             )
         )
     }
@@ -572,7 +620,7 @@ class LexerTest {
             """,
             listOf(STRING_NO_CLOSE)
         )
-        assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
+        assertEquals(listOf(STRING_QUOTE, STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
@@ -583,7 +631,7 @@ class LexerTest {
             """,
             listOf(STRING_NO_CLOSE)
         )
-        assertEquals(listOf(STRING), unclosedStringTokens.map { it.tokenType })
+        assertEquals(listOf(STRING_QUOTE, STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
@@ -592,11 +640,12 @@ class LexerTest {
             """   
                 a_key: "a_value"
             """,
-            listOf(IDENTIFIER, COLON, STRING)
+            listOf(IDENTIFIER, COLON, STRING_QUOTE, STRING, STRING_QUOTE)
         )
 
         assertEquals("a_key", tokens[0].value)
-        assertEquals("a_value", tokens[2].value)
+        assertEquals("\"", tokens[2].value)
+        assertEquals("a_value", tokens[3].value)
     }
 
     @Test
@@ -641,10 +690,10 @@ class LexerTest {
             """   
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING)
+            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
         )
 
-        assertEquals("string with 'unescaped' and \"embedded\" quotes", tokens[0].value)
+        assertEquals("string with 'unescaped' and \"embedded\" quotes", tokens[1].value)
     }
 
     @Test
@@ -653,10 +702,10 @@ class LexerTest {
             """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING)
+            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
         )
 
-        assertEquals("string with \"unescaped\" and \'embedded\' quotes", tokens[0].value)
+        assertEquals("string with \"unescaped\" and \'embedded\' quotes", tokens[1].value)
     }
 
     @Test
@@ -707,7 +756,9 @@ class LexerTest {
                 Pair(IDENTIFIER, Location(0, 2, 0, 8, 2, 8)),
                 Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
                 Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
-                Pair(STRING, Location(0, 10, 0, 18, 10, 18)),
+                Pair(STRING_QUOTE, Location(0, 10, 0, 11, 10, 11)),
+                Pair(STRING, Location(0, 11, 0, 17, 11, 17)),
+                Pair(STRING_QUOTE, Location(0, 17, 0, 18, 17, 18)),
                 Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
             ),
             true
@@ -748,11 +799,11 @@ class LexerTest {
             """
                 "stuff" # comment about stuff
             """,
-            listOf(STRING)
+            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
         )
 
-        val stringToken = tokenList[0]
-        assertEquals("# comment about stuff", stringToken.comments[0])
+        val endQuoteToken = tokenList[2]
+        assertEquals("# comment about stuff", endQuoteToken.comments[0])
     }
 
     @Test

@@ -264,6 +264,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"', '\'' -> {
+                addLiteralToken(TokenType.STRING_QUOTE)
                 string(char)
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
@@ -352,26 +353,22 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             sourceScanner.advance()
         }
 
-        if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.currentLocation(), STRING_NO_CLOSE.create())
-            val rawStringLexeme = sourceScanner.extractLexeme()
-            // clip the open quote from the string
-            val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length)
-            addToken(TokenType.STRING, rawStringLexeme, stringText)
-            return
+        val rawStringLexeme = sourceScanner.extractLexeme()
+        val escapedString = if (hasEscapedQuotes) {
+            rawStringLexeme.text.replace("\\" + delimiter, delimiter.toString())
+        } else {
+            rawStringLexeme.text
         }
 
-        // Eat the closing `"`
-        sourceScanner.advance()
+        addToken(TokenType.STRING, rawStringLexeme, escapedString)
 
-        val rawStringLexeme = sourceScanner.extractLexeme()
-        // clip the quotes from the string to get the actual value
-        val stringText = rawStringLexeme.text.substring(1, rawStringLexeme.text.length - 1)
-        if (hasEscapedQuotes) {
-            val escapedString = stringText.replace("\\" + delimiter, delimiter.toString())
-            addToken(TokenType.STRING, rawStringLexeme, escapedString)
+        if (sourceScanner.peek() == EOF) {
+            messageSink.error(sourceScanner.currentLocation(), STRING_NO_CLOSE.create())
+            return
         } else {
-            addToken(TokenType.STRING, rawStringLexeme, stringText)
+            // not at EOF, so we must be looking at the quote that ends this string
+            sourceScanner.advance()
+            addLiteralToken(TokenType.STRING_QUOTE)
         }
     }
 
