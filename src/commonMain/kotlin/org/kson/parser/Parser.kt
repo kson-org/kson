@@ -293,6 +293,7 @@ class Parser(val builder: AstBuilder) {
             return false
         }
 
+        val possiblyUnclosedString = builder.mark()
         // consume our open quote
         builder.advanceLexer()
 
@@ -301,9 +302,16 @@ class Parser(val builder: AstBuilder) {
         builder.advanceLexer()
         stringMark.done(STRING)
 
-        // consume our close quote
-        builder.advanceLexer()
-        return true
+        if (builder.eof()) {
+            possiblyUnclosedString.error(STRING_NO_CLOSE.create())
+            return true
+        } else {
+            // string is closed, don't need this marker
+            possiblyUnclosedString.drop()
+            // consume our close quote
+            builder.advanceLexer()
+            return true
+        }
     }
 
     /**

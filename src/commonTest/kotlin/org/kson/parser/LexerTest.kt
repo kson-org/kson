@@ -614,24 +614,24 @@ class LexerTest {
 
     @Test
     fun testUnterminatedString() {
-        val unclosedStringTokens = assertTokenizesWithMessages(
+        assertTokenizesTo(
             """
             "this string has no end quote
             """,
-            listOf(STRING_NO_CLOSE)
+            listOf(STRING_QUOTE, STRING),
+            "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
-        assertEquals(listOf(STRING_QUOTE, STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
     fun testUnterminatedAltString() {
-        val unclosedStringTokens = assertTokenizesWithMessages(
+        assertTokenizesTo(
             """
             'this string has no end quote
             """,
-            listOf(STRING_NO_CLOSE)
+            listOf(STRING_QUOTE, STRING),
+            "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
-        assertEquals(listOf(STRING_QUOTE, STRING), unclosedStringTokens.map { it.tokenType })
     }
 
     @Test
