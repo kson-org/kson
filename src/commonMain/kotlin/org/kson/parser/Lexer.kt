@@ -363,7 +363,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         addToken(TokenType.STRING, rawStringLexeme, escapedString)
 
         if (sourceScanner.peek() == EOF) {
-            messageSink.error(sourceScanner.currentLocation(), STRING_NO_CLOSE.create())
             return
         } else {
             // not at EOF, so we must be looking at the quote that ends this string

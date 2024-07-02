@@ -11,7 +11,7 @@ import org.kson.parser.messages.MessageType.*
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
  * kson -> (objectInternals | value) <end-of-file> ;
- * objectInternals -> ( keyword (value) ","? )* ;
+ * objectInternals -> ( keyword value ","? )* ;
  * value -> objectDefinition
  *        | list
  *        | literal
@@ -21,7 +21,7 @@ import org.kson.parser.messages.MessageType.*
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
- * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
+ * bracketList -> "[" ( value "," )* value? "]"
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * string -> STRING_QUOTE STRING STRING_QUOTE
@@ -49,7 +49,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * objectInternals -> ( keyword (value) ","? )* ;
+     * objectInternals -> ( keyword value ","? )* ;
      */
     private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
@@ -165,7 +165,7 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * bracketList -> "[" ( ( value ) "," )* ( value )? "]"
+     * bracketList -> "[" ( value "," )* value? "]"
      */
     private fun bracketList(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
@@ -293,6 +293,7 @@ class Parser(val builder: AstBuilder) {
             return false
         }
 
+        val possiblyUnclosedString = builder.mark()
         // consume our open quote
         builder.advanceLexer()
 
@@ -301,9 +302,16 @@ class Parser(val builder: AstBuilder) {
         builder.advanceLexer()
         stringMark.done(STRING)
 
-        // consume our close quote
-        builder.advanceLexer()
-        return true
+        if (builder.eof()) {
+            possiblyUnclosedString.error(STRING_NO_CLOSE.create())
+            return true
+        } else {
+            // string is closed, don't need this marker
+            possiblyUnclosedString.drop()
+            // consume our close quote
+            builder.advanceLexer()
+            return true
+        }
     }
 
     /**
