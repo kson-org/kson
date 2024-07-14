@@ -263,6 +263,52 @@ class KsonTest {
     }
 
     @Test
+    fun testCommaFreeList() {
+        assertParsesTo("""
+            [
+                null true [sublist] 
+                - another 
+                - sublist
+            ]
+        """,
+        """
+            [
+              null,
+              true,
+              [
+                sublist
+              ],
+              [
+                another,
+                sublist
+              ]
+            ]
+        """.trimIndent())
+    }
+
+    @Test
+    fun testEmptyCommas() {
+        assertParserRejectsSource("[,]", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("{,}", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource(",", listOf(EMPTY_COMMAS))
+
+        assertParserRejectsSource("[,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
+        assertParserRejectsSource("{,,}", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
+        assertParserRejectsSource(",,", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
+
+        assertParserRejectsSource("[1,,3]", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("{one: 1 ,, three: 3}", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("one: 1 ,, three: 3", listOf(EMPTY_COMMAS))
+
+        assertParserRejectsSource("[1,2,3,,,,,,]", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("{one: 1, two: 2, three: 3,,,,,,}", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("one: 1 ,two: 2, three: 3,,,,,,", listOf(EMPTY_COMMAS))
+
+        assertParserRejectsSource("[,,,, x ,, y ,,,,,,, z ,,,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
+        assertParserRejectsSource(",,,, x:1 ,, y:2 ,,,,,,, z:3 ,,,,", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
+    }
+
+    @Test
     fun testDanglingListDash() {
         assertParserRejectsSource("-", listOf(DANGLING_LIST_DASH))
         assertParserRejectsSource("- ", listOf(DANGLING_LIST_DASH))
@@ -414,6 +460,23 @@ class KsonTest {
         val errorMessages = assertParserRejectsSource("[", listOf(LIST_NO_CLOSE))
         assertEquals(Location(0, 0, 0, 1, 0, 1), errorMessages[0].location)
         assertParserRejectsSource("[1,2,", listOf(LIST_NO_CLOSE))
+    }
+
+    @Test
+    fun testInvalidColonInList() {
+        assertParserRejectsSource("[key: 1]", listOf(LIST_STRAY_COLON))
+    }
+
+    @Test
+    fun testInvalidListElementError() {
+        assertParserRejectsSource("[} 1]", listOf(LIST_INVALID_ELEM))
+    }
+
+    @Test
+    fun testKeywordWithoutValue() {
+        assertParserRejectsSource("key:", listOf(OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("key: key_with_val: 10 another_key:", listOf(OBJECT_KEY_NO_VALUE, OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("[{key:} 1]", listOf(OBJECT_KEY_NO_VALUE))
     }
 
     @Test

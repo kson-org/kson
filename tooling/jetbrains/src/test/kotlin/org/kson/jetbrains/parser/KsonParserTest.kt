@@ -62,6 +62,10 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
         doTest(true)
     }
 
+    fun testEmptyCommaError() {
+        doTest(true)
+    }
+
     /**
      * @return path to test data file directory relative to root of this module
      */
