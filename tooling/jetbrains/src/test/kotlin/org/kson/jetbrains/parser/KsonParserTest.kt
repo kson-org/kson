@@ -1,7 +1,6 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.testFramework.ParsingTestCase
-import org.junit.Test
 
 /**
  * These tests are powered by infrastructure provided by [ParsingTestCase]
@@ -31,42 +30,34 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     /**
      * Sanity check parse of a file containing many Kson constructs
      */
-    @Test
     fun testManyConstructs() {
         doTest(true)
     }
 
-    @Test
     fun testObject() {
         doTest(true)
     }
 
-    @Test
     fun testNumber() {
         doTest(true)
     }
 
-    @Test
     fun testUnclosedEmbedBlock() {
         doTest(true)
     }
 
-    @Test
     fun testUnclosedString() {
         doTest(true)
     }
 
-    @Test
     fun testNumberError() {
         doTest(true)
     }
 
-    @Test
     fun testNumberDanglingExponentError() {
         doTest(true)
     }
 
-    @Test
     fun testTwoConsecutiveStrings() {
         doTest(true)
     }
