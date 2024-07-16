@@ -64,6 +64,24 @@ enum class MessageType {
             return "Unclosed list"
         }
     },
+    LIST_INVALID_ELEM {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unable to parse this list element as a legal Kson value"
+        }
+    },
+    LIST_STRAY_COLON {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Colons may only be used inside an object to denote a keyword.  This is a list."
+        }
+    },
     OBJECT_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -71,6 +89,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Unclosed object"
+        }
+    },
+    OBJECT_KEY_NO_VALUE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This object key must be followed by a value"
         }
     },
     STRING_NO_CLOSE {
@@ -127,6 +154,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "A list dash `- ` must be followed by a value"
+        }
+    },
+    EMPTY_COMMAS {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Redundant comma found. A comma must delimit a value, one comma per value"
         }
     };
 

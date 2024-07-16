@@ -11,7 +11,9 @@ import org.kson.parser.messages.MessageType.*
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
  * kson -> (objectInternals | value) <end-of-file> ;
- * objectInternals -> ( keyword value ","? )* ;
+ * objectInternals -> "," ( keyword value ","? )+
+ *              | ( ","? keyword value )*
+ *              | ( keyword value ","? )*
  * value -> objectDefinition
  *        | list
  *        | literal
@@ -21,7 +23,9 @@ import org.kson.parser.messages.MessageType.*
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
- * bracketList -> "[" ( value "," )* value? "]"
+ * bracketList -> "[" "," ( value ","? )+ "]"
+ *              | "[" ( ","? value )* "]"
+ *              | "[" ( value ","? )* "]"
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * string -> STRING_QUOTE STRING STRING_QUOTE
@@ -34,7 +38,7 @@ import org.kson.parser.messages.MessageType.*
  * See [section 6.2 here](https://craftinginterpreters.com/parsing-expressions.html#recursive-descent-parsing)
  * for excellent context on a similar style of hand-crafted recursive descent parser.
  */
-class Parser(val builder: AstBuilder) {
+class Parser(private val builder: AstBuilder) {
 
     /**
      * kson -> (objectInternals | value) <end-of-file> ;
@@ -42,29 +46,59 @@ class Parser(val builder: AstBuilder) {
     fun parse() {
         if (objectInternals(false) || value()) {
             if (hasUnexpectedTrailingContent()) {
-                // parser todo we likely want to see if we can contiue parsing after adding the error noting
+                // parser todo we likely want to see if we can continue parsing after adding the error noting
                 //             the unexpected extra content
             }
         }
     }
 
     /**
-     * objectInternals -> ( keyword value ","? )* ;
+     * objectInternals -> "," ( keyword value ","? )+
+     *              | ( ","? keyword value )*
+     *              | ( keyword value ","? )*
      */
     private fun objectInternals(allowEmpty: Boolean): Boolean {
         var foundProperties = false
 
         val objectInternalsMark = builder.mark()
+
+        // parse the optional leading comma
+        if (builder.getTokenType() == COMMA) {
+            val leadingCommaMark = builder.mark()
+            processComma(builder)
+
+            // prohibit the empty-ISH objects internals containing just commas
+            if (builder.getTokenType() == BRACE_R || builder.eof()) {
+                leadingCommaMark.error(EMPTY_COMMAS.create())
+                objectInternalsMark.done(OBJECT_INTERNALS)
+                return true
+            } else {
+                leadingCommaMark.drop()
+            }
+        }
+
         while (true) {
             val propertyMark = builder.mark()
-            if (keyword() && value()) {
+            val keywordMark = builder.mark()
+            if (keyword()) {
+                val valueMark = builder.mark()
+
+                // if we're followed by another keyword or we don't have a value, we're malformed
+                if (keyword() || !value()) {
+                    valueMark.rollbackTo()
+                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                } else {
+                    // otherwise we've a well-behaved key:value property
+                    valueMark.drop()
+                    keywordMark.drop()
+                }
                 foundProperties = true
                 if (builder.getTokenType() == COMMA) {
-                    // advance past the optional COMMA
-                    builder.advanceLexer()
+                    processComma(builder)
                 }
                 propertyMark.done(OBJECT_PROPERTY)
             } else {
+                keywordMark.drop()
                 propertyMark.rollbackTo()
                 break
             }
@@ -77,6 +111,22 @@ class Parser(val builder: AstBuilder) {
         }
 
         return foundProperties
+    }
+
+    private fun processComma(builder: AstBuilder) {
+        val commaMark = builder.mark()
+        // advance past the optional COMMA
+        builder.advanceLexer()
+
+        // look for extra "empty" commas
+        if (builder.getTokenType() == COMMA) {
+            while (builder.getTokenType() == COMMA) {
+                builder.advanceLexer()
+            }
+            commaMark.error(EMPTY_COMMAS.create())
+        } else {
+            commaMark.drop()
+        }
     }
 
     /**
@@ -165,7 +215,9 @@ class Parser(val builder: AstBuilder) {
     }
 
     /**
-     * bracketList -> "[" ( value "," )* value? "]"
+     * bracketList -> "[" "," ( value ","? )+ "]"
+     *              | "[" ( ","? value )* "]"
+     *              | "[" ( value ","? )* "]"
      */
     private fun bracketList(): Boolean {
         if (builder.getTokenType() == BRACKET_L) {
@@ -173,18 +225,50 @@ class Parser(val builder: AstBuilder) {
             // advance past the BRACKET_L
             builder.advanceLexer()
 
-            while (builder.getTokenType() != BRACKET_R) {
-                val listElementMark = builder.mark()
-                value()
-                if (builder.getTokenType() == COMMA) {
-                    // advance past the COMMA
+            // parse the optional leading comma
+            if (builder.getTokenType() == COMMA) {
+                val leadingCommaMark = builder.mark()
+                processComma(builder)
+
+                // prohibit the empty-ISH list "[,]"
+                if (builder.getTokenType() == BRACKET_R) {
+                    // advance past the BRACKET_R
                     builder.advanceLexer()
+                    leadingCommaMark.error(EMPTY_COMMAS.create())
+                    listMark.done(LIST)
+                    return true
+                } else {
+                    leadingCommaMark.drop()
+                }
+            }
+
+            while (builder.getTokenType() != BRACKET_R && !builder.eof()) {
+                val listElementMark = builder.mark()
+
+                if (!value()) {
+                    val invalidElementMark = builder.mark()
+
+                    // give a more precise/helpful error if it looks the user is accidentally sticking object notation in a list
+                    if (builder.getTokenType() == COLON) {
+                        builder.advanceLexer()
+                        invalidElementMark.error(LIST_STRAY_COLON.create())
+                    } else {
+                        // while we're not obviously another element or at the end of the list, mark this non-value as an error
+                        while(builder.getTokenType() != BRACKET_R
+                            && builder.getTokenType() != COMMA
+                            && !builder.eof()) {
+                            builder.advanceLexer()
+                        }
+                        invalidElementMark.error(LIST_INVALID_ELEM.create())
+                    }
+                }
+                if (builder.getTokenType() == COMMA) {
+                    processComma(builder)
+
                     listElementMark.done(LIST_ELEMENT)
                     continue
                 } else {
                     listElementMark.done(LIST_ELEMENT)
-                    // no more values
-                    break
                 }
             }
 

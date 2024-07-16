@@ -5,7 +5,8 @@
 TODO document the language, remembering to clearly note:
 - string escapes
 - embed block escapes
-- list semantics
+- list semantics: list may be bracketed or dash-delimited.  A sub-list in a dash-delimited list must be a bracketed list to avoid ambiguity, but otherwise these may be used interchangeably
+- commas are optional between elements in objects and lists and may be leading or trailing.  The formatter is likely to encourage leading commas for bracket lists and no commas for objects (so we'll always have either a comma or a list dash or a keyword starting/denoting an entry in these compound elements, so each has a leading indicator of what type of element it is)
 - ... todo other stuff
 
 ### Development setup

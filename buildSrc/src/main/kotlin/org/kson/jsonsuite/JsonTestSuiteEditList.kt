@@ -46,17 +46,12 @@ enum class JsonTestEditType {
  */
 private val jsonTestSuiteEditList = mapOf(
     // TODO: https://github.com/kson-org/kson/issues/21 Enable more tests that require parse failures
-    "n_array_1_true_without_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_comma_and_number.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_double_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_double_extra_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_extra_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_inner_array_no_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_just_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_just_minus.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_missing_value.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_number_and_comma.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_array_number_and_several_commas.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
+    "n_array_1_true_without_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_comma_and_number.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_extra_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_inner_array_no_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_missing_value.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_number_and_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_incomplete_false.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_incomplete_null.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_incomplete_true.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
