@@ -382,8 +382,27 @@ class Parser(private val builder: AstBuilder) {
         builder.advanceLexer()
 
         val stringMark = builder.mark()
-        // consume our string
-        builder.advanceLexer()
+
+        while (builder.getTokenType() != STRING_QUOTE && !builder.eof()) {
+            if (builder.getTokenType() != STRING && builder.getTokenType() != STRING_ILLEGAL_CONTROL_CHARACTER) {
+                throw Exception("Expected anything in STRING_QUOTEs to be Lexed as a STRING or STRING_ILLEGAL_CONTROL_CHARACTER")
+            }
+
+            if (builder.getTokenType() == STRING) {
+                // consume the string
+                builder.advanceLexer()
+            }
+
+            val controlCharacterMark = builder.mark()
+            if (builder.getTokenType() == STRING_ILLEGAL_CONTROL_CHARACTER) {
+                val badControlChar = builder.getTokenText()
+                builder.advanceLexer()
+                controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
+            } else {
+                controlCharacterMark.drop()
+            }
+        }
+
         stringMark.done(STRING)
 
         if (builder.eof()) {

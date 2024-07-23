@@ -16,11 +16,6 @@ private val KEYWORDS =
     ).toImmutableMap()
 
 /**
- * Use the null byte to represent EOF
- */
-private const val EOF: Char = '\u0000'
-
-/**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  */
 private class SourceScanner(private val source: String) {
@@ -32,12 +27,34 @@ private class SourceScanner(private val source: String) {
     private var selectionEndLine = 0
     private var selectionEndColumn = 0
 
-    fun peek(): Char {
-        return if (selectionEndOffset >= source.length) EOF else source[selectionEndOffset]
+    fun eof(): Boolean {
+        return eofIn(0)
     }
 
-    fun peekNext(): Char {
-        return if (selectionEndOffset + 1 >= source.length) EOF else source[selectionEndOffset + 1]
+    private fun eofIn(numCharsToEof: Int): Boolean {
+        return selectionEndOffset + numCharsToEof >= source.length
+    }
+
+    /**
+     * Return the next character in this [SourceScanner]
+     *   or `null` if there is no next character
+     */
+    fun peek(): Char? {
+        if (eof()) {
+            return null
+        }
+        return source[selectionEndOffset]
+    }
+
+    /**
+     * Return the character after next in this [SourceScanner]
+     *   or null if there is character after next
+     */
+    fun peekNext(): Char? {
+        if (eofIn(1)) {
+            return null
+        }
+        return source[selectionEndOffset + 1]
     }
 
     /**
@@ -225,7 +242,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     private var currentCommentLines = ArrayList<String>()
 
     fun tokenize(): ImmutableList<Token> {
-        while (sourceScanner.peek() != EOF) {
+        while (!sourceScanner.eof()) {
             scan()
         }
 
@@ -239,7 +256,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         if (isWhitespace(char)) {
             // advance through any sequential whitespace
-            while (isWhitespace(sourceScanner.peek()) && sourceScanner.peek() != EOF) {
+            while (isWhitespace(sourceScanner.peek()) && !sourceScanner.eof()) {
                 sourceScanner.advance()
             }
             addLiteralToken(TokenType.WHITESPACE)
@@ -247,7 +264,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         // a "minus sign" followed by whitespace is actually a list dash
-        if (char == '-' && (isWhitespace(sourceScanner.peek()) || sourceScanner.peek() == EOF)) {
+        if (char == '-' && (isWhitespace(sourceScanner.peek()) || sourceScanner.eof())) {
             addLiteralToken(TokenType.LIST_DASH)
             return
         }
@@ -312,7 +329,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
      */
     private fun extractCommentToken(): Token {
         // comments extend to end of the line
-        while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) sourceScanner.advance()
+        while (sourceScanner.peek() != '\n' && !sourceScanner.eof()) sourceScanner.advance()
 
         val commentLexeme = sourceScanner.extractLexeme()
         return Token(TokenType.COMMENT, commentLexeme, commentLexeme.text, emptyList())
@@ -321,14 +338,14 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     /**
      * Returns true if the given [char] is whitespace
      */
-    private fun isWhitespace(char: Char): Boolean {
+    private fun isWhitespace(char: Char?): Boolean {
         return isInlineWhitespace(char) || char == '\n'
     }
 
     /**
      * Returns true if the given [char] is a non-newline whitespace
      */
-    private fun isInlineWhitespace(char: Char): Boolean {
+    private fun isInlineWhitespace(char: Char?): Boolean {
         return char == ' ' || char == '\r' || char == '\t'
     }
 
@@ -344,15 +361,50 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         // we use this var to track if we need to consume escapes in a string so we only walk its text
         // trying to replace escapes if we know we need to
         var hasEscapedQuotes = false
-        while (sourceScanner.peek() != delimiter && sourceScanner.peek() != EOF) {
-            if (sourceScanner.peek() == '\\' && sourceScanner.peekNext() == delimiter) {
-                hasEscapedQuotes = true
-                // ensure we advance past it so it's part of the string
+        var hasLegalChars = false
+        while (sourceScanner.peek() != delimiter) {
+            val nextStringChar = sourceScanner.peek() ?: break
+
+            // check for illegal control characters
+            if (nextStringChar.code in 0x00..0x1F
+                // unlike JSON, we allow all whitespace control characters
+                && !isWhitespace(nextStringChar)
+            ) {
+                if (hasLegalChars) {
+                    // mark the legal string we've lexed up to now
+                    extractStringToken(hasEscapedQuotes, delimiter)
+                    hasEscapedQuotes = false
+                    hasLegalChars = false
+                }
+                // advance past the illegal char and tokenize it
                 sourceScanner.advance()
+                addLiteralToken(TokenType.STRING_ILLEGAL_CONTROL_CHARACTER)
+            } else {
+                if (nextStringChar == '\\' && sourceScanner.peekNext() == delimiter) {
+                    hasEscapedQuotes = true
+                    // ensure we advance past it so it's part of the string
+                    sourceScanner.advance()
+                }
+
+                sourceScanner.advance()
+                hasLegalChars = true
             }
-            sourceScanner.advance()
         }
 
+        if (hasLegalChars) {
+            extractStringToken(hasEscapedQuotes, delimiter)
+        }
+
+        if (sourceScanner.eof()) {
+            return
+        } else {
+            // not at EOF, so we must be looking at the quote that ends this string
+            sourceScanner.advance()
+            addLiteralToken(TokenType.STRING_QUOTE)
+        }
+    }
+
+    private fun extractStringToken(hasEscapedQuotes: Boolean, delimiter: Char?) {
         val rawStringLexeme = sourceScanner.extractLexeme()
         val escapedString = if (hasEscapedQuotes) {
             rawStringLexeme.text.replace("\\" + delimiter, delimiter.toString())
@@ -361,14 +413,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
 
         addToken(TokenType.STRING, rawStringLexeme, escapedString)
-
-        if (sourceScanner.peek() == EOF) {
-            return
-        } else {
-            // not at EOF, so we must be looking at the quote that ends this string
-            sourceScanner.advance()
-            addLiteralToken(TokenType.STRING_QUOTE)
-        }
     }
 
     private fun embeddedBlock(blockChar: Char) {
@@ -384,11 +428,11 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             // no embed tag on this block
             sourceScanner.advance()
             addLiteralToken(TokenType.WHITESPACE)
-        } else if (sourceScanner.peek() == EOF) {
+        } else if (sourceScanner.eof()) {
             return
         } else {
             // we have an embed tag, let's scan it
-            while (sourceScanner.peek() != '\n' && sourceScanner.peek() != EOF) {
+            while (!sourceScanner.eof() && sourceScanner.peek() != '\n') {
                 sourceScanner.advance()
             }
 
@@ -413,8 +457,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         // read embedded content until the closing blockChar pair (or EOF in the case of an unclosed block)
         while (
-            !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
-            && sourceScanner.peek() != EOF
+            !sourceScanner.eof()
+            && !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
         ) {
             if (sourceScanner.peek() == blockChar && sourceScanner.peekNext() == '\\') {
                 // if this is all slashes until "blockChar", we're looking at an escaped EMBED_END
@@ -463,7 +507,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         // we scanned everything that wasn't an EMBED_END into our embed content,
         // so we're either at EOF or want to consume that EMBED_END
-        if (sourceScanner.peek() == EOF) {
+        if (sourceScanner.eof()) {
             return
         } else {
             // process our closing blockChar pair
@@ -582,16 +626,16 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         return CommentMetadata(commentsForToken, trailingCommentTokens)
     }
 
-    private fun isDigit(c: Char): Boolean {
+    private fun isDigit(c: Char?): Boolean {
         return c in '0'..'9'
     }
 
-    private fun isAlphaOrUnderscore(c: Char): Boolean {
+    private fun isAlphaOrUnderscore(c: Char?): Boolean {
         return c in 'a'..'z' ||
                 c in 'A'..'Z' || c == '_'
     }
 
-    private fun isAlphaNumeric(c: Char): Boolean {
+    private fun isAlphaNumeric(c: Char?): Boolean {
         return isAlphaOrUnderscore(c) || isDigit(c)
     }
 }

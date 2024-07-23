@@ -109,6 +109,22 @@ enum class MessageType {
             return "Unterminated string"
         }
     },
+    STRING_CONTROL_CHARACTER {
+        override fun expectedArgs(): List<String> {
+            return listOf("Control Character")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badControlCharArg = parsedArgs.getArg("Control Character")
+            if (badControlCharArg?.length != 1) {
+                throw RuntimeException("Expected arg to be a single control character")
+            }
+            val badControlChar = badControlCharArg[0]
+
+            return "Non-whitespace control characters must not be embedded directly in strings. " +
+                    "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
+        }
+    },
     INVALID_DIGITS {
         override fun expectedArgs(): List<String> {
             return listOf("Unexpected Character")

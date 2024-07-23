@@ -84,6 +84,11 @@ class KsonTest {
         )
     }
 
+    @Test
+    fun testEmptyString() {
+        assertParsesTo("''", "\"\"")
+    }
+
     /**
      * See also [org.kson.parser.NumberParserTest] for more targeted number parsing tests
      */
@@ -495,6 +500,11 @@ class KsonTest {
     @Test
     fun testTwoConsecutiveStrings() {
         assertParserRejectsSource("'a string''an illegal second string'", listOf(EOF_NOT_REACHED))
+    }
+
+    @Test
+    fun testStringWithNullByte() {
+        assertParserRejectsSource("my_bad_string: 'a a' ", listOf(STRING_CONTROL_CHARACTER))
     }
 
     @Test

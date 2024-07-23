@@ -89,7 +89,6 @@ private val jsonTestSuiteEditList = mapOf(
     "n_string_invalid_unicode_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_invalid_utf8_after_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_invalid-utf-8-in-escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_multidigit_number_then_00.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_object_double_colon.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_single_space.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_unescaped_tab.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
