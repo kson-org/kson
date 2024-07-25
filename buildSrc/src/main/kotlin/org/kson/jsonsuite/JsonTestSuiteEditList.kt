@@ -75,6 +75,7 @@ private val jsonTestSuiteEditList = mapOf(
     "n_object_key_with_single_quotes.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_object_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_string_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_string_unescaped_tab.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
 
     "n_string_1_surrogate_then_escape_u1.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_1_surrogate_then_escape_u1x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
@@ -91,7 +92,6 @@ private val jsonTestSuiteEditList = mapOf(
     "n_string_invalid-utf-8-in-escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_object_double_colon.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_single_space.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_unescaped_tab.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_unicode_CapitalU.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_structure_end_array.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_structure_no_data.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
