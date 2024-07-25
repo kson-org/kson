@@ -16,6 +16,15 @@ interface Message {
  * matches on error message content)
  */
 enum class MessageType {
+    BLANK_SOURCE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unable to parse a blank file.  A Kson document must describe a value."
+        }
+    },
     EMBED_BLOCK_DANGLING_DELIM {
         override fun expectedArgs(): List<String> {
             return listOf("Embed delimiter character")

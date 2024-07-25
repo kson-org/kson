@@ -81,6 +81,13 @@ class KsonTest {
     }
 
     @Test
+    fun testBlankKsonSource() {
+        assertParserRejectsSource("", listOf(BLANK_SOURCE))
+        assertParserRejectsSource("  ", listOf(BLANK_SOURCE))
+        assertParserRejectsSource("\t", listOf(BLANK_SOURCE))
+    }
+
+    @Test
     fun testStringLiteralSource() {
         assertParsesTo(
             """

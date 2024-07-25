@@ -62,6 +62,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * kson -> (objectInternals | value) <end-of-file> ;
      */
     fun parse() {
+        if (builder.eof()) {
+            // empty file, nothing to do
+            return
+        }
+
         val rootMarker = builder.mark()
         try {
             if (objectInternals(false) || value()) {

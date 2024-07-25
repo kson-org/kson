@@ -91,10 +91,8 @@ private val jsonTestSuiteEditList = mapOf(
     "n_string_invalid_utf8_after_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_invalid-utf-8-in-escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_object_double_colon.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_single_space.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_string_unicode_CapitalU.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
     "n_structure_end_array.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_structure_no_data.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
 
     // TODO: https://github.com/kson-org/kson/issues/23 Enable "i_" tests
     "i_number_neg_int_huge_exp.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
