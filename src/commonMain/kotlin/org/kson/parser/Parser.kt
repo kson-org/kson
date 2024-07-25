@@ -5,6 +5,19 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
 
 /**
+ * Default maximum nesting of objects and lists to allow in parsing.  This protects against
+ * excessive nesting crashing the parser.  This default was chosen somewhat arbitraily,
+ * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
+ * as needed (note that this may also be configured in calls to [Parser.parse])
+ */
+const val DEFAULT_MAX_NESTING_LEVEL = 255
+
+/**
+ * Used to bail out of parsing when when excessive nesting is detected
+ */
+class ExcessiveNestingException: RuntimeException()
+
+/**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
@@ -36,20 +49,39 @@ import org.kson.parser.messages.MessageType.*
  * for details on this grammar notation.
  *
  * See [section 6.2 here](https://craftinginterpreters.com/parsing-expressions.html#recursive-descent-parsing)
- * for excellent context on a similar style of hand-crafted recursive descent parser.
+ * for excellent context on a similar style of hand-crafted recursive descent parser
+ *
+ * @param builder the [AstBuilder] to run this parser on, see [AstBuilder] for more details
+ * @param maxNestingLevel the maximum nesting level of objects and lists to allow in parsing
+ *   TODO make maxNestingLevel part of a more holistic approach to configuring the parser
+ *     if/when we have more dials we want to expose to the user
  */
-class Parser(private val builder: AstBuilder) {
+class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL) {
 
     /**
      * kson -> (objectInternals | value) <end-of-file> ;
      */
     fun parse() {
-        if (objectInternals(false) || value()) {
-            if (hasUnexpectedTrailingContent()) {
-                // parser todo we likely want to see if we can continue parsing after adding the error noting
-                //             the unexpected extra content
+        val rootMarker = builder.mark()
+        try {
+            if (objectInternals(false) || value()) {
+                if (hasUnexpectedTrailingContent()) {
+                    // parser todo we likely want to see if we can continue parsing after adding the error noting
+                    //             the unexpected extra content
+                }
             }
+        } catch (nestingException: ExcessiveNestingException) {
+            // the value described by this kson document is too deeply nested, so we
+            // reset all parsing and mark the whole document with our nesting error
+            rootMarker.rollbackTo()
+            val nestedExpressionMark = builder.mark()
+            while(!builder.eof()) {
+                builder.advanceLexer()
+            }
+            nestedExpressionMark.error(MAX_NESTING_LEVEL_EXCEEDED.create(maxNestingLevel.toString()))
+            return
         }
+        rootMarker.drop()
     }
 
     /**
@@ -57,7 +89,7 @@ class Parser(private val builder: AstBuilder) {
      *              | ( ","? keyword value )*
      *              | ( keyword value ","? )*
      */
-    private fun objectInternals(allowEmpty: Boolean): Boolean {
+    private fun objectInternals(allowEmpty: Boolean): Boolean = nestingTracker.nest {
         var foundProperties = false
 
         val objectInternalsMark = builder.mark()
@@ -71,7 +103,7 @@ class Parser(private val builder: AstBuilder) {
             if (builder.getTokenType() == BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
                 objectInternalsMark.done(OBJECT_INTERNALS)
-                return true
+                return@nest true
             } else {
                 leadingCommaMark.drop()
             }
@@ -110,7 +142,7 @@ class Parser(private val builder: AstBuilder) {
             objectInternalsMark.rollbackTo()
         }
 
-        return foundProperties
+        return@nest foundProperties
     }
 
     private fun processComma(builder: AstBuilder) {
@@ -188,7 +220,7 @@ class Parser(private val builder: AstBuilder) {
     /**
      * dashList -> ( LIST_DASH ( value | bracketList ) )*
      */
-    private fun dashList(): Boolean {
+    private fun dashList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == LIST_DASH) {
             val listMark = builder.mark()
 
@@ -209,9 +241,9 @@ class Parser(private val builder: AstBuilder) {
             } while (builder.getTokenType() == LIST_DASH)
 
             listMark.done(LIST)
-            return true
+            return@nest true
         }
-        return false
+        return@nest false
     }
 
     /**
@@ -219,7 +251,7 @@ class Parser(private val builder: AstBuilder) {
      *              | "[" ( ","? value )* "]"
      *              | "[" ( value ","? )* "]"
      */
-    private fun bracketList(): Boolean {
+    private fun bracketList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == BRACKET_L) {
             val listMark = builder.mark()
             // advance past the BRACKET_L
@@ -236,7 +268,7 @@ class Parser(private val builder: AstBuilder) {
                     builder.advanceLexer()
                     leadingCommaMark.error(EMPTY_COMMAS.create())
                     listMark.done(LIST)
-                    return true
+                    return@nest true
                 } else {
                     leadingCommaMark.drop()
                 }
@@ -280,10 +312,10 @@ class Parser(private val builder: AstBuilder) {
             } else {
                 listMark.error(LIST_NO_CLOSE.create())
             }
-            return true
+            return@nest true
         } else {
             // not a list
-            return false
+            return@nest false
         }
     }
 
@@ -474,6 +506,24 @@ class Parser(private val builder: AstBuilder) {
             }
             unexpectedContentMark.error(EOF_NOT_REACHED.create())
             return true
+        }
+    }
+
+    private var nestingTracker = object {
+        private var nestingLevel = 0
+
+        /**
+         * "Aspect"-style function to wrap the list and object functions in [Parser] which may recursively nest
+         * so we can clearly/consistently track nesting and detect excessive nesting
+         */
+        fun nest(nestingParserFunction: () -> Boolean): Boolean {
+            nestingLevel++
+            if (nestingLevel > maxNestingLevel) {
+                throw ExcessiveNestingException()
+            }
+            val parseResult = nestingParserFunction()
+            nestingLevel--
+            return parseResult
         }
     }
 }

@@ -47,13 +47,19 @@ class KsonTest {
      *
      * @param source is the kson source to parse into a [KsonRoot]
      * @param expectedParseMessageTypes a list of [MessageType]s produced by parsing [source]
+     * @param maxNestingLevel the maximum allowable nested lists and objects to configure the parser to accept
      * @return the produced messages for further validation
      */
     private fun assertParserRejectsSource(
         source: String,
-        expectedParseMessageTypes: List<MessageType>
+        expectedParseMessageTypes: List<MessageType>,
+        maxNestingLevel: Int? = null
     ): ImmutableList<LoggedMessage> {
-        val parseResult = Kson.parse(source)
+        val parseResult = if (maxNestingLevel != null) {
+            Kson.parse(source, maxNestingLevel)
+        } else {
+            Kson.parse(source)
+        }
 
         assertEquals(
             expectedParseMessageTypes,
@@ -909,5 +915,54 @@ class KsonTest {
                 # of the file
             """.trimIndent()
         )
+    }
+
+    @Test
+    fun testIllegalObjectNesting() {
+        assertParserRejectsSource("""
+            {'1':{'2':{'3':{'4':{'5':{'6':{'7':{'8':0}}}}}}}}
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 8)
+    }
+
+    @Test
+    fun testIllegalListNesting() {
+        // test six nested lists with a nesting limit of 5
+        assertParserRejectsSource("[[[[[[]]]]]]", listOf(MAX_NESTING_LEVEL_EXCEEDED), 5)
+
+        // 50 open brackets per line plus 7 makes one too many to parse with a limit of 256
+        // Note that we don't both collecting unclosed list errors in this case:
+        //   we simply bail out of the parse with the important error
+        assertParserRejectsSource("""
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+
+        // same test as above, but with dashed sub-lists sprinkled in
+        assertParserRejectsSource("""
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ - [
+            [[[[[[[[[ - 1 - 2 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[ - 3 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+    }
+
+    @Test
+    fun testIllegalMixedListAndObjectNesting() {
+        // test nesting a mix of objects, bracket lists, and dashed lists
+        assertParserRejectsSource("""
+            [
+              { 
+                 a: - { 
+                        b: [ { c: - [] } ]
+                      }
+              }
+            ]
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 7)
     }
 }

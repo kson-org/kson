@@ -33,7 +33,7 @@ interface AstBuilder {
     fun lookAhead(numTokens: Int): TokenType?
 
     /**
-     * Return true if lexing is complete
+     * Returns true if all the tokens in this builder's underlying lexer have been advanced over by [advanceLexer]
      */
     fun eof(): Boolean
 

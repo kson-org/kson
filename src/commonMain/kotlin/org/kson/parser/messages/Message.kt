@@ -180,6 +180,17 @@ enum class MessageType {
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Redundant comma found. A comma must delimit a value, one comma per value"
         }
+    },
+    MAX_NESTING_LEVEL_EXCEEDED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Max Nesting Level")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maxNestingLevel = parsedArgs.getArg("Max Nesting Level")
+            return "The nesting of objects and/or lists in this Kson " +
+                    "exceeds the configured maximum supported nesting level of $maxNestingLevel"
+        }
     };
 
     /**

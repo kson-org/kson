@@ -5,7 +5,7 @@ import org.kson.parser.*
 
 class Kson {
     companion object {
-        fun parse(source: String): ParseResult {
+        fun parse(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
             val messageSink = MessageSink()
             val tokens = Lexer(source, messageSink).tokenize()
             val ast =  if (messageSink.hasErrors()) {
@@ -13,7 +13,7 @@ class Kson {
                 return ParseResult(null, tokens, messageSink)
             } else {
                 val builder = KsonBuilder(tokens)
-                Parser(builder).parse()
+                Parser(builder, maxNestingLevel).parse()
                 builder.buildTree(messageSink)
             }
 
