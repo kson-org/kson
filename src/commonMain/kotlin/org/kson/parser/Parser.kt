@@ -74,6 +74,18 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                     // parser todo we likely want to see if we can continue parsing after adding the error noting
                     //             the unexpected extra content
                 }
+                rootMarker.drop()
+            } else {
+                /**
+                 * If we did not consume tokens all they way up to EOF, then we have a bug in how we handle this case
+                 * (and how we report helpful errors on it).  Fail loudly so it gets fixed.  We want to fully flesh
+                 * out the parser so this can never be hit.
+                 */
+                if(!builder.eof()) {
+                    throw RuntimeException("Bug: this parser must consume all tokens in all cases, but failed in this case.")
+                } else {
+                    rootMarker.drop()
+                }
             }
         } catch (nestingException: ExcessiveNestingException) {
             // the value described by this kson document is too deeply nested, so we
@@ -84,9 +96,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 builder.advanceLexer()
             }
             nestedExpressionMark.error(MAX_NESTING_LEVEL_EXCEEDED.create(maxNestingLevel.toString()))
-            return
         }
-        rootMarker.drop()
     }
 
     /**
@@ -118,6 +128,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val propertyMark = builder.mark()
             val keywordMark = builder.mark()
             if (keyword()) {
+                if (builder.getTokenType() == BRACE_R) {
+                    // object got closed before giving this keyword a value
+                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                    propertyMark.done(OBJECT_PROPERTY)
+                    break
+                }
+
                 val valueMark = builder.mark()
 
                 // if we're followed by another keyword or we don't have a value, we're malformed
@@ -173,6 +190,20 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *        | embedBlock ;
      */
     private fun value(): Boolean {
+        if (builder.getTokenType() == BRACE_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(OBJECT_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
         return (objectDefinition()
                 || list()
                 || literal()

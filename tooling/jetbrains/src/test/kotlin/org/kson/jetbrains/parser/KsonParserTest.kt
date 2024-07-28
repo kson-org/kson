@@ -51,6 +51,10 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
         doTest(true)
     }
 
+    fun testUnopenedList() {
+        doTest(true)
+    }
+
     fun testNumberError() {
         doTest(true)
     }

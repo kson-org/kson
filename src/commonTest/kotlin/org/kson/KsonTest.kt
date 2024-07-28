@@ -481,13 +481,19 @@ class KsonTest {
     }
 
     @Test
+    fun testUnopenedListError() {
+        assertParserRejectsSource("]", listOf(LIST_NO_OPEN))
+        assertParserRejectsSource("key: ]", listOf(LIST_NO_OPEN))
+    }
+
+    @Test
     fun testInvalidColonInList() {
         assertParserRejectsSource("[key: 1]", listOf(LIST_STRAY_COLON))
     }
 
     @Test
     fun testInvalidListElementError() {
-        assertParserRejectsSource("[} 1]", listOf(LIST_INVALID_ELEM))
+        assertParserRejectsSource("[} 1]", listOf(OBJECT_NO_OPEN))
     }
 
     @Test
@@ -501,6 +507,12 @@ class KsonTest {
     fun testUnclosedObjectError() {
         assertParserRejectsSource("{", listOf(OBJECT_NO_CLOSE))
         assertParserRejectsSource("{ key: value   ", listOf(OBJECT_NO_CLOSE))
+    }
+
+    @Test
+    fun testUnopenedObjectError() {
+        assertParserRejectsSource("}", listOf(OBJECT_NO_OPEN))
+        assertParserRejectsSource("[1, 2, }]", listOf(OBJECT_NO_OPEN))
     }
 
     @Test

@@ -73,6 +73,15 @@ enum class MessageType {
             return "Unclosed list"
         }
     },
+    LIST_NO_OPEN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This must close a list, but this is not a list"
+        }
+    },
     LIST_INVALID_ELEM {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -98,6 +107,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Unclosed object"
+        }
+    },
+    OBJECT_NO_OPEN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This must close an object, but this is not an object"
         }
     },
     OBJECT_KEY_NO_VALUE {
