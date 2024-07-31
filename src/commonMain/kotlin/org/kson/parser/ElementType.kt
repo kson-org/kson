@@ -30,6 +30,8 @@ enum class TokenType : ElementType {
     STRING_QUOTE,
     STRING,
     STRING_ILLEGAL_CONTROL_CHARACTER,
+    STRING_UNICODE_ESCAPE,
+    STRING_ESCAPE,
     TRUE,
     WHITESPACE,
     EOF

@@ -102,6 +102,25 @@ class KsonTest {
         assertParsesTo("''", "\"\"")
     }
 
+    @Test
+    fun testBadStringEscape() {
+        assertParserRejectsSource("'this has \\x which is an illegal escape'", listOf(STRING_BAD_ESCAPE))
+    }
+
+    @Test
+    fun testBadUnicodeEscape() {
+        assertParserRejectsSource("'\\u12'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u12x9'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u", listOf(STRING_NO_CLOSE, STRING_BAD_UNICODE_ESCAPE))
+    }
+
+    @Test
+    fun testDanglingEscapes() {
+        assertParserRejectsSource("'\\'", listOf(STRING_NO_CLOSE))
+        assertParserRejectsSource("'\\", listOf(STRING_NO_CLOSE, STRING_BAD_ESCAPE))
+    }
+
     /**
      * See also [org.kson.parser.NumberParserTest] for more targeted number parsing tests
      */

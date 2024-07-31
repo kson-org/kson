@@ -690,10 +690,13 @@ class LexerTest {
             """   
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE)
         )
 
-        assertEquals("string with 'unescaped' and \"embedded\" quotes", tokens[1].value)
+        // sanity check the tokens are lexing to what we expect
+        assertEquals("string with 'unescaped' and ", tokens[1].value)
+        assertEquals("\\\"", tokens[2].value)
+        assertEquals("embedded", tokens[3].value)
     }
 
     @Test
@@ -702,10 +705,13 @@ class LexerTest {
             """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE)
         )
 
-        assertEquals("string with \"unescaped\" and \'embedded\' quotes", tokens[1].value)
+        // sanity check the tokens are lexing to what we expect
+        assertEquals("string with \"unescaped\" and ", tokens[1].value)
+        assertEquals("\\'", tokens[2].value)
+        assertEquals("embedded", tokens[3].value)
     }
 
     @Test

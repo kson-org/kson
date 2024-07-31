@@ -18,6 +18,14 @@ const val DEFAULT_MAX_NESTING_LEVEL = 255
 class ExcessiveNestingException: RuntimeException()
 
 /**
+ * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
+ * but is validated separately against [validHexChars]
+ */
+private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
+private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
+
+/**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
@@ -452,22 +460,35 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         val stringMark = builder.mark()
 
         while (builder.getTokenType() != STRING_QUOTE && !builder.eof()) {
-            if (builder.getTokenType() != STRING && builder.getTokenType() != STRING_ILLEGAL_CONTROL_CHARACTER) {
-                throw Exception("Expected anything in STRING_QUOTEs to be Lexed as a STRING or STRING_ILLEGAL_CONTROL_CHARACTER")
-            }
-
-            if (builder.getTokenType() == STRING) {
-                // consume the string
-                builder.advanceLexer()
-            }
-
-            val controlCharacterMark = builder.mark()
-            if (builder.getTokenType() == STRING_ILLEGAL_CONTROL_CHARACTER) {
-                val badControlChar = builder.getTokenText()
-                builder.advanceLexer()
-                controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
-            } else {
-                controlCharacterMark.drop()
+            when (builder.getTokenType()) {
+                STRING -> builder.advanceLexer()
+                STRING_UNICODE_ESCAPE -> {
+                    val unicodeEscapeMark = builder.mark()
+                    val unicodeEscapeText = builder.getTokenText()
+                    builder.advanceLexer()
+                    if (isValidUnicodeEscape(unicodeEscapeText)) {
+                        unicodeEscapeMark.drop()
+                    } else {
+                        unicodeEscapeMark.error(STRING_BAD_UNICODE_ESCAPE.create(unicodeEscapeText))
+                    }
+                }
+                STRING_ESCAPE -> {
+                    val stringEscapeMark = builder.mark()
+                    val stringEscapeText = builder.getTokenText()
+                    builder.advanceLexer()
+                    if (isValidStringEscape(stringEscapeText)) {
+                        stringEscapeMark.drop()
+                    } else {
+                        stringEscapeMark.error(STRING_BAD_ESCAPE.create(stringEscapeText))
+                    }
+                }
+                STRING_ILLEGAL_CONTROL_CHARACTER -> {
+                    val controlCharacterMark = builder.mark()
+                    val badControlChar = builder.getTokenText()
+                    builder.advanceLexer()
+                    controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
+                }
+                else -> throw RuntimeException("Unexpected String token: ${builder.getTokenType()}.  Do we need an new case here?")
             }
         }
 
@@ -483,6 +504,42 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             builder.advanceLexer()
             return true
         }
+    }
+
+    private fun isValidStringEscape(stringEscapeText: String): Boolean {
+        if (!stringEscapeText.startsWith('\\') || stringEscapeText.length > 2) {
+            throw RuntimeException("Should only be asked to validate one-char string escapes, but was passed: $stringEscapeText")
+        }
+
+        // detect incomplete escapes (perhaps this escape bumped up against EOF)
+        if (stringEscapeText.length == 1) {
+            return false
+        }
+
+        val escapedChar = stringEscapeText[1]
+        return validStringEscapes.contains(escapedChar)
+    }
+
+    private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
+        if (!unicodeEscapeText.startsWith("\\u")) {
+            throw RuntimeException("Should only be asked to validate unicode escapes")
+        }
+
+        // clip off the `\u` to make this code point easier to inspect
+        val unicodeCodePoint = unicodeEscapeText.replaceFirst("\\u", "")
+
+        if (unicodeCodePoint.length != 4) {
+            // must have four chars
+            return false
+        }
+
+        for (codePointChar in unicodeCodePoint) {
+            if (!validHexChars.contains(codePointChar)) {
+                return false
+            }
+        }
+
+        return true
     }
 
     /**

@@ -358,10 +358,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     }
 
     private fun string(delimiter: Char) {
-        // we use this var to track if we need to consume escapes in a string so we only walk its text
-        // trying to replace escapes if we know we need to
-        var hasEscapedQuotes = false
-        var hasLegalChars = false
+        var hasUntokenizedStringCharacters = false
         while (sourceScanner.peek() != delimiter) {
             val nextStringChar = sourceScanner.peek() ?: break
 
@@ -370,29 +367,49 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 // unlike JSON, we allow all whitespace control characters
                 && !isWhitespace(nextStringChar)
             ) {
-                if (hasLegalChars) {
-                    // mark the legal string we've lexed up to now
-                    extractStringToken(hasEscapedQuotes, delimiter)
-                    hasEscapedQuotes = false
-                    hasLegalChars = false
+                if (hasUntokenizedStringCharacters) {
+                    addLiteralToken(TokenType.STRING)
+                    hasUntokenizedStringCharacters = false
                 }
                 // advance past the illegal char and tokenize it
                 sourceScanner.advance()
                 addLiteralToken(TokenType.STRING_ILLEGAL_CONTROL_CHARACTER)
-            } else {
-                if (nextStringChar == '\\' && sourceScanner.peekNext() == delimiter) {
-                    hasEscapedQuotes = true
-                    // ensure we advance past it so it's part of the string
-                    sourceScanner.advance()
+            } else if (nextStringChar == '\\') {
+                if (hasUntokenizedStringCharacters) {
+                    addLiteralToken(TokenType.STRING)
+                    hasUntokenizedStringCharacters = false
                 }
 
+                // advance past the backslash
                 sourceScanner.advance()
-                hasLegalChars = true
+
+                if (sourceScanner.peek() == 'u') {
+                    sourceScanner.advance()
+
+                    // a '\u' unicode escape must be 4 chars long
+                    for (c in 1..4) {
+                        if (sourceScanner.peek() == delimiter || sourceScanner.eof()) {
+                            break
+                        }
+                        sourceScanner.advance()
+                    }
+                    addLiteralToken(TokenType.STRING_UNICODE_ESCAPE)
+                } else {
+                    // otherwise, this must be a one-char string escape, provided we're
+                    // not up against EOF
+                    if (!sourceScanner.eof()) {
+                        sourceScanner.advance()
+                    }
+                    addLiteralToken(TokenType.STRING_ESCAPE)
+                }
+            } else {
+                sourceScanner.advance()
+                hasUntokenizedStringCharacters = true
             }
         }
 
-        if (hasLegalChars) {
-            extractStringToken(hasEscapedQuotes, delimiter)
+        if (hasUntokenizedStringCharacters) {
+            addLiteralToken(TokenType.STRING)
         }
 
         if (sourceScanner.eof()) {
@@ -402,17 +419,6 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             sourceScanner.advance()
             addLiteralToken(TokenType.STRING_QUOTE)
         }
-    }
-
-    private fun extractStringToken(hasEscapedQuotes: Boolean, delimiter: Char?) {
-        val rawStringLexeme = sourceScanner.extractLexeme()
-        val escapedString = if (hasEscapedQuotes) {
-            rawStringLexeme.text.replace("\\" + delimiter, delimiter.toString())
-        } else {
-            rawStringLexeme.text
-        }
-
-        addToken(TokenType.STRING, rawStringLexeme, escapedString)
     }
 
     private fun embeddedBlock(blockChar: Char) {

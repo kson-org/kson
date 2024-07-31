@@ -152,6 +152,26 @@ enum class MessageType {
                     "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
         }
     },
+    STRING_BAD_UNICODE_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Unicode `\\uXXXX` Escape")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badUnicodeEscape = parsedArgs.getArg("Unicode `\\uXXXX` Escape")
+            return "Invalid Unicode code point: $badUnicodeEscape.  Must be a 4 digit hex number"
+        }
+    },
+    STRING_BAD_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("\\-prefixed String Escape")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badStringEscape = parsedArgs.getArg("\\-prefixed String Escape")
+            return "Invalid string escape: $badStringEscape"
+        }
+    },
     INVALID_DIGITS {
         override fun expectedArgs(): List<String> {
             return listOf("Unexpected Character")

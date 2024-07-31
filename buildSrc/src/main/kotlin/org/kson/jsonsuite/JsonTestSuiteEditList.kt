@@ -45,7 +45,6 @@ enum class JsonTestEditType {
  * we want applied to that test in [JsonTestSuiteGenerator]
  */
 private val jsonTestSuiteEditList = mapOf(
-    // TODO: https://github.com/kson-org/kson/issues/21 Enable more tests that require parse failures
     "n_array_1_true_without_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_array_comma_and_number.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_array_extra_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
@@ -76,22 +75,6 @@ private val jsonTestSuiteEditList = mapOf(
     "n_object_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_string_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_string_unescaped_tab.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
-
-    "n_string_1_surrogate_then_escape_u1.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_1_surrogate_then_escape_u1x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_1_surrogate_then_escape_u.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_escaped_ctrl_char_tab.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_escaped_emoji.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_escape_x.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_incomplete_escaped_character.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_incomplete_surrogate_escape_invalid.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_incomplete_surrogate.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_invalid_backslash_esc.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_invalid_unicode_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_invalid_utf8_after_escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_invalid-utf-8-in-escape.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_object_double_colon.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "n_string_unicode_CapitalU.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
 
     // TODO: https://github.com/kson-org/kson/issues/23 Enable "i_" tests
     "i_string_utf16BE_no_BOM.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
