@@ -86,8 +86,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             } else {
                 /**
                  * If we did not consume tokens all they way up to EOF, then we have a bug in how we handle this case
-                 * (and how we report helpful errors on it).  Fail loudly so it gets fixed.  We want to fully flesh
-                 * out the parser so this can never be hit.
+                 * (and how we report helpful errors for it).  Fail loudly so it gets fixed.
                  */
                 if(!builder.eof()) {
                     throw RuntimeException("Bug: this parser must consume all tokens in all cases, but failed in this case.")
@@ -210,6 +209,18 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             builder.advanceLexer()
             badCloseBrace.error(LIST_NO_OPEN.create())
             return true
+        }
+
+        if (builder.getTokenType() == ILLEGAL_CHAR) {
+            val illegalCharMark = builder.mark()
+            val illegalChars = ArrayList<String>()
+            while (builder.getTokenType() == ILLEGAL_CHAR) {
+                illegalChars.add(builder.getTokenText())
+                builder.advanceLexer()
+            }
+            illegalCharMark.error(ILLEGAL_CHARACTERS.create(illegalChars.joinToString()))
+            // note that we allow parsing to continue — we'll act like these illegal chars aren't here in the hopes
+            // of making sense of everything else
         }
 
         return (objectDefinition()

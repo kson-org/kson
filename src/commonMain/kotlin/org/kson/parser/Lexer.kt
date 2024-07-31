@@ -231,7 +231,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.ILLEGAL_TOKEN, TokenType.WHITESPACE, TokenType.COMMENT)
+            setOf(TokenType.WHITESPACE, TokenType.COMMENT)
         }
     )
 
@@ -292,7 +292,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                     embeddedBlock(char)
                 } else {
                     messageSink.error(
-                        addLiteralToken(TokenType.ILLEGAL_TOKEN),
+                        addLiteralToken(TokenType.ILLEGAL_CHAR),
                         EMBED_BLOCK_DANGLING_DELIM.create(char.toString())
                     )
                 }
@@ -308,10 +308,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                         identifier()
                     }
                     else -> {
-                        messageSink.error(
-                            addLiteralToken(TokenType.ILLEGAL_TOKEN),
-                            UNEXPECTED_CHAR.create(char.toString())
-                        )
+                        addLiteralToken(TokenType.ILLEGAL_CHAR)
                     }
                 }
             }

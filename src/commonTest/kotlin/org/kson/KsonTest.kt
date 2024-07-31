@@ -166,6 +166,11 @@ class KsonTest {
     }
 
     @Test
+    fun testIllegalCharacterError() {
+        assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
+    }
+
+    @Test
     fun testIllegalMinusSignError() {
         assertParserRejectsSource(
             """

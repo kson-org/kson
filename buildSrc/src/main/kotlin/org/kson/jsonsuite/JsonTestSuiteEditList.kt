@@ -30,7 +30,11 @@ enum class JsonTestEditType {
 
     /**
      * Comment out this test in our generated file until we've had a chance to review how it should behave
-     * TODO investigate all these tests and delete this entry
+     *
+     * TODO: currently not used in [JsonTestSuiteEditList] as no tests need investigation!  Keep this around for now
+     *   as it is an important part of the test infrastructure here, but note that unless a bunch of new
+     *   tests are added that need deferred investigation, this is strictly speaking dead code and should be deleted
+     *   if/when it causes even a single headache
      */
     SKIP_NEEDS_INVESTIGATION,
 
@@ -74,10 +78,5 @@ private val jsonTestSuiteEditList = mapOf(
     "n_object_key_with_single_quotes.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_object_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_string_single_quote.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
-    "n_string_unescaped_tab.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
-
-    // TODO: https://github.com/kson-org/kson/issues/23 Enable "i_" tests
-    "i_string_utf16BE_no_BOM.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "i_string_UTF-16LE_with_BOM.json" to  JsonTestEditType.SKIP_NEEDS_INVESTIGATION,
-    "i_structure_UTF-8_BOM_empty_object.json" to JsonTestEditType.SKIP_NEEDS_INVESTIGATION
+    "n_string_unescaped_tab.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET
 )

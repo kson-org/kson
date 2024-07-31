@@ -45,16 +45,6 @@ enum class MessageType {
             return "Unclosed \"$embedDelimiter\""
         }
     },
-    UNEXPECTED_CHAR {
-        override fun expectedArgs(): List<String> {
-            return listOf("Unexpected Character")
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val unexpectedCharacter = parsedArgs.getArg("Unexpected Character")
-            return "Unexpected character: $unexpectedCharacter"
-        }
-    },
     EOF_NOT_REACHED {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -191,6 +181,22 @@ enum class MessageType {
             val exponentCharacter = parsedArgs.getArg("Exponent character: E or e")
             return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent"
         }
+    },
+
+    /**
+     * Catch-all for characters we don't recognize as legal Kson that don't (yet?) have a more specific and
+     * helpful error such as [OBJECT_NO_OPEN] or [DANGLING_LIST_DASH]
+     */
+    ILLEGAL_CHARACTERS {
+        override fun expectedArgs(): List<String> {
+            return listOf("The Illegal Characters")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val illegalCharacter = parsedArgs.getArg("The Illegal Characters")
+            return "Kson does not allow \"$illegalCharacter\" here"
+        }
+
     },
     ILLEGAL_MINUS_SIGN {
         override fun expectedArgs(): List<String> {

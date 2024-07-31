@@ -23,7 +23,7 @@ enum class TokenType : ElementType {
     EMBED_CONTENT,
     FALSE,
     IDENTIFIER,
-    ILLEGAL_TOKEN,
+    ILLEGAL_CHAR,
     LIST_DASH,
     NULL,
     NUMBER,
