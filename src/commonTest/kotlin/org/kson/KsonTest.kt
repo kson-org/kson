@@ -47,13 +47,19 @@ class KsonTest {
      *
      * @param source is the kson source to parse into a [KsonRoot]
      * @param expectedParseMessageTypes a list of [MessageType]s produced by parsing [source]
+     * @param maxNestingLevel the maximum allowable nested lists and objects to configure the parser to accept
      * @return the produced messages for further validation
      */
     private fun assertParserRejectsSource(
         source: String,
-        expectedParseMessageTypes: List<MessageType>
+        expectedParseMessageTypes: List<MessageType>,
+        maxNestingLevel: Int? = null
     ): ImmutableList<LoggedMessage> {
-        val parseResult = Kson.parse(source)
+        val parseResult = if (maxNestingLevel != null) {
+            Kson.parse(source, maxNestingLevel)
+        } else {
+            Kson.parse(source)
+        }
 
         assertEquals(
             expectedParseMessageTypes,
@@ -75,6 +81,13 @@ class KsonTest {
     }
 
     @Test
+    fun testBlankKsonSource() {
+        assertParserRejectsSource("", listOf(BLANK_SOURCE))
+        assertParserRejectsSource("  ", listOf(BLANK_SOURCE))
+        assertParserRejectsSource("\t", listOf(BLANK_SOURCE))
+    }
+
+    @Test
     fun testStringLiteralSource() {
         assertParsesTo(
             """
@@ -82,6 +95,30 @@ class KsonTest {
             """,
             "\"This is a string\""
         )
+    }
+
+    @Test
+    fun testEmptyString() {
+        assertParsesTo("''", "\"\"")
+    }
+
+    @Test
+    fun testBadStringEscape() {
+        assertParserRejectsSource("'this has \\x which is an illegal escape'", listOf(STRING_BAD_ESCAPE))
+    }
+
+    @Test
+    fun testBadUnicodeEscape() {
+        assertParserRejectsSource("'\\u12'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u12x9'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u'", listOf(STRING_BAD_UNICODE_ESCAPE))
+        assertParserRejectsSource("'\\u", listOf(STRING_NO_CLOSE, STRING_BAD_UNICODE_ESCAPE))
+    }
+
+    @Test
+    fun testDanglingEscapes() {
+        assertParserRejectsSource("'\\'", listOf(STRING_NO_CLOSE))
+        assertParserRejectsSource("'\\", listOf(STRING_NO_CLOSE, STRING_BAD_ESCAPE))
     }
 
     /**
@@ -126,6 +163,11 @@ class KsonTest {
             """,
             listOf(DANGLING_EXP_INDICATOR)
         )
+    }
+
+    @Test
+    fun testIllegalCharacterError() {
+        assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
     }
 
     @Test
@@ -463,13 +505,19 @@ class KsonTest {
     }
 
     @Test
+    fun testUnopenedListError() {
+        assertParserRejectsSource("]", listOf(LIST_NO_OPEN))
+        assertParserRejectsSource("key: ]", listOf(LIST_NO_OPEN))
+    }
+
+    @Test
     fun testInvalidColonInList() {
         assertParserRejectsSource("[key: 1]", listOf(LIST_STRAY_COLON))
     }
 
     @Test
     fun testInvalidListElementError() {
-        assertParserRejectsSource("[} 1]", listOf(LIST_INVALID_ELEM))
+        assertParserRejectsSource("[} 1]", listOf(OBJECT_NO_OPEN))
     }
 
     @Test
@@ -486,6 +534,12 @@ class KsonTest {
     }
 
     @Test
+    fun testUnopenedObjectError() {
+        assertParserRejectsSource("}", listOf(OBJECT_NO_OPEN))
+        assertParserRejectsSource("[1, 2, }]", listOf(OBJECT_NO_OPEN))
+    }
+
+    @Test
     fun testInvalidTrailingKson() {
         assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(EOF_NOT_REACHED))
         assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
@@ -495,6 +549,11 @@ class KsonTest {
     @Test
     fun testTwoConsecutiveStrings() {
         assertParserRejectsSource("'a string''an illegal second string'", listOf(EOF_NOT_REACHED))
+    }
+
+    @Test
+    fun testStringWithNullByte() {
+        assertParserRejectsSource("my_bad_string: 'a a' ", listOf(STRING_CONTROL_CHARACTER))
     }
 
     @Test
@@ -899,5 +958,54 @@ class KsonTest {
                 # of the file
             """.trimIndent()
         )
+    }
+
+    @Test
+    fun testIllegalObjectNesting() {
+        assertParserRejectsSource("""
+            {'1':{'2':{'3':{'4':{'5':{'6':{'7':{'8':0}}}}}}}}
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 8)
+    }
+
+    @Test
+    fun testIllegalListNesting() {
+        // test six nested lists with a nesting limit of 5
+        assertParserRejectsSource("[[[[[[]]]]]]", listOf(MAX_NESTING_LEVEL_EXCEEDED), 5)
+
+        // 50 open brackets per line plus 7 makes one too many to parse with a limit of 256
+        // Note that we don't both collecting unclosed list errors in this case:
+        //   we simply bail out of the parse with the important error
+        assertParserRejectsSource("""
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+
+        // same test as above, but with dashed sub-lists sprinkled in
+        assertParserRejectsSource("""
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ - [
+            [[[[[[[[[ - 1 - 2 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[ - 3 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+            [[[[[[[
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+    }
+
+    @Test
+    fun testIllegalMixedListAndObjectNesting() {
+        // test nesting a mix of objects, bracket lists, and dashed lists
+        assertParserRejectsSource("""
+            [
+              { 
+                 a: - { 
+                        b: [ { c: - [] } ]
+                      }
+              }
+            ]
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 7)
     }
 }

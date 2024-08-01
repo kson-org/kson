@@ -5,6 +5,27 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
 
 /**
+ * Default maximum nesting of objects and lists to allow in parsing.  This protects against
+ * excessive nesting crashing the parser.  This default was chosen somewhat arbitraily,
+ * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
+ * as needed (note that this may also be configured in calls to [Parser.parse])
+ */
+const val DEFAULT_MAX_NESTING_LEVEL = 255
+
+/**
+ * Used to bail out of parsing when when excessive nesting is detected
+ */
+class ExcessiveNestingException: RuntimeException()
+
+/**
+ * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
+ * but is validated separately against [validHexChars]
+ */
+private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
+private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
+
+/**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
@@ -36,19 +57,52 @@ import org.kson.parser.messages.MessageType.*
  * for details on this grammar notation.
  *
  * See [section 6.2 here](https://craftinginterpreters.com/parsing-expressions.html#recursive-descent-parsing)
- * for excellent context on a similar style of hand-crafted recursive descent parser.
+ * for excellent context on a similar style of hand-crafted recursive descent parser
+ *
+ * @param builder the [AstBuilder] to run this parser on, see [AstBuilder] for more details
+ * @param maxNestingLevel the maximum nesting level of objects and lists to allow in parsing
+ *   TODO make maxNestingLevel part of a more holistic approach to configuring the parser
+ *     if/when we have more dials we want to expose to the user
  */
-class Parser(private val builder: AstBuilder) {
+class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL) {
 
     /**
      * kson -> (objectInternals | value) <end-of-file> ;
      */
     fun parse() {
-        if (objectInternals(false) || value()) {
-            if (hasUnexpectedTrailingContent()) {
-                // parser todo we likely want to see if we can continue parsing after adding the error noting
-                //             the unexpected extra content
+        if (builder.eof()) {
+            // empty file, nothing to do
+            return
+        }
+
+        val rootMarker = builder.mark()
+        try {
+            if (objectInternals(false) || value()) {
+                if (hasUnexpectedTrailingContent()) {
+                    // parser todo we likely want to see if we can continue parsing after adding the error noting
+                    //             the unexpected extra content
+                }
+                rootMarker.drop()
+            } else {
+                /**
+                 * If we did not consume tokens all they way up to EOF, then we have a bug in how we handle this case
+                 * (and how we report helpful errors for it).  Fail loudly so it gets fixed.
+                 */
+                if(!builder.eof()) {
+                    throw RuntimeException("Bug: this parser must consume all tokens in all cases, but failed in this case.")
+                } else {
+                    rootMarker.drop()
+                }
             }
+        } catch (nestingException: ExcessiveNestingException) {
+            // the value described by this kson document is too deeply nested, so we
+            // reset all parsing and mark the whole document with our nesting error
+            rootMarker.rollbackTo()
+            val nestedExpressionMark = builder.mark()
+            while(!builder.eof()) {
+                builder.advanceLexer()
+            }
+            nestedExpressionMark.error(MAX_NESTING_LEVEL_EXCEEDED.create(maxNestingLevel.toString()))
         }
     }
 
@@ -57,7 +111,7 @@ class Parser(private val builder: AstBuilder) {
      *              | ( ","? keyword value )*
      *              | ( keyword value ","? )*
      */
-    private fun objectInternals(allowEmpty: Boolean): Boolean {
+    private fun objectInternals(allowEmpty: Boolean): Boolean = nestingTracker.nest {
         var foundProperties = false
 
         val objectInternalsMark = builder.mark()
@@ -71,7 +125,7 @@ class Parser(private val builder: AstBuilder) {
             if (builder.getTokenType() == BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
                 objectInternalsMark.done(OBJECT_INTERNALS)
-                return true
+                return@nest true
             } else {
                 leadingCommaMark.drop()
             }
@@ -81,6 +135,13 @@ class Parser(private val builder: AstBuilder) {
             val propertyMark = builder.mark()
             val keywordMark = builder.mark()
             if (keyword()) {
+                if (builder.getTokenType() == BRACE_R) {
+                    // object got closed before giving this keyword a value
+                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                    propertyMark.done(OBJECT_PROPERTY)
+                    break
+                }
+
                 val valueMark = builder.mark()
 
                 // if we're followed by another keyword or we don't have a value, we're malformed
@@ -110,7 +171,7 @@ class Parser(private val builder: AstBuilder) {
             objectInternalsMark.rollbackTo()
         }
 
-        return foundProperties
+        return@nest foundProperties
     }
 
     private fun processComma(builder: AstBuilder) {
@@ -136,6 +197,32 @@ class Parser(private val builder: AstBuilder) {
      *        | embedBlock ;
      */
     private fun value(): Boolean {
+        if (builder.getTokenType() == BRACE_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(OBJECT_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == ILLEGAL_CHAR) {
+            val illegalCharMark = builder.mark()
+            val illegalChars = ArrayList<String>()
+            while (builder.getTokenType() == ILLEGAL_CHAR) {
+                illegalChars.add(builder.getTokenText())
+                builder.advanceLexer()
+            }
+            illegalCharMark.error(ILLEGAL_CHARACTERS.create(illegalChars.joinToString()))
+            // note that we allow parsing to continue — we'll act like these illegal chars aren't here in the hopes
+            // of making sense of everything else
+        }
+
         return (objectDefinition()
                 || list()
                 || literal()
@@ -188,7 +275,7 @@ class Parser(private val builder: AstBuilder) {
     /**
      * dashList -> ( LIST_DASH ( value | bracketList ) )*
      */
-    private fun dashList(): Boolean {
+    private fun dashList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == LIST_DASH) {
             val listMark = builder.mark()
 
@@ -209,9 +296,9 @@ class Parser(private val builder: AstBuilder) {
             } while (builder.getTokenType() == LIST_DASH)
 
             listMark.done(LIST)
-            return true
+            return@nest true
         }
-        return false
+        return@nest false
     }
 
     /**
@@ -219,7 +306,7 @@ class Parser(private val builder: AstBuilder) {
      *              | "[" ( ","? value )* "]"
      *              | "[" ( value ","? )* "]"
      */
-    private fun bracketList(): Boolean {
+    private fun bracketList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == BRACKET_L) {
             val listMark = builder.mark()
             // advance past the BRACKET_L
@@ -236,7 +323,7 @@ class Parser(private val builder: AstBuilder) {
                     builder.advanceLexer()
                     leadingCommaMark.error(EMPTY_COMMAS.create())
                     listMark.done(LIST)
-                    return true
+                    return@nest true
                 } else {
                     leadingCommaMark.drop()
                 }
@@ -280,10 +367,10 @@ class Parser(private val builder: AstBuilder) {
             } else {
                 listMark.error(LIST_NO_CLOSE.create())
             }
-            return true
+            return@nest true
         } else {
             // not a list
-            return false
+            return@nest false
         }
     }
 
@@ -382,8 +469,40 @@ class Parser(private val builder: AstBuilder) {
         builder.advanceLexer()
 
         val stringMark = builder.mark()
-        // consume our string
-        builder.advanceLexer()
+
+        while (builder.getTokenType() != STRING_QUOTE && !builder.eof()) {
+            when (builder.getTokenType()) {
+                STRING -> builder.advanceLexer()
+                STRING_UNICODE_ESCAPE -> {
+                    val unicodeEscapeMark = builder.mark()
+                    val unicodeEscapeText = builder.getTokenText()
+                    builder.advanceLexer()
+                    if (isValidUnicodeEscape(unicodeEscapeText)) {
+                        unicodeEscapeMark.drop()
+                    } else {
+                        unicodeEscapeMark.error(STRING_BAD_UNICODE_ESCAPE.create(unicodeEscapeText))
+                    }
+                }
+                STRING_ESCAPE -> {
+                    val stringEscapeMark = builder.mark()
+                    val stringEscapeText = builder.getTokenText()
+                    builder.advanceLexer()
+                    if (isValidStringEscape(stringEscapeText)) {
+                        stringEscapeMark.drop()
+                    } else {
+                        stringEscapeMark.error(STRING_BAD_ESCAPE.create(stringEscapeText))
+                    }
+                }
+                STRING_ILLEGAL_CONTROL_CHARACTER -> {
+                    val controlCharacterMark = builder.mark()
+                    val badControlChar = builder.getTokenText()
+                    builder.advanceLexer()
+                    controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
+                }
+                else -> throw RuntimeException("Unexpected String token: ${builder.getTokenType()}.  Do we need an new case here?")
+            }
+        }
+
         stringMark.done(STRING)
 
         if (builder.eof()) {
@@ -396,6 +515,42 @@ class Parser(private val builder: AstBuilder) {
             builder.advanceLexer()
             return true
         }
+    }
+
+    private fun isValidStringEscape(stringEscapeText: String): Boolean {
+        if (!stringEscapeText.startsWith('\\') || stringEscapeText.length > 2) {
+            throw RuntimeException("Should only be asked to validate one-char string escapes, but was passed: $stringEscapeText")
+        }
+
+        // detect incomplete escapes (perhaps this escape bumped up against EOF)
+        if (stringEscapeText.length == 1) {
+            return false
+        }
+
+        val escapedChar = stringEscapeText[1]
+        return validStringEscapes.contains(escapedChar)
+    }
+
+    private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
+        if (!unicodeEscapeText.startsWith("\\u")) {
+            throw RuntimeException("Should only be asked to validate unicode escapes")
+        }
+
+        // clip off the `\u` to make this code point easier to inspect
+        val unicodeCodePoint = unicodeEscapeText.replaceFirst("\\u", "")
+
+        if (unicodeCodePoint.length != 4) {
+            // must have four chars
+            return false
+        }
+
+        for (codePointChar in unicodeCodePoint) {
+            if (!validHexChars.contains(codePointChar)) {
+                return false
+            }
+        }
+
+        return true
     }
 
     /**
@@ -455,6 +610,24 @@ class Parser(private val builder: AstBuilder) {
             }
             unexpectedContentMark.error(EOF_NOT_REACHED.create())
             return true
+        }
+    }
+
+    private var nestingTracker = object {
+        private var nestingLevel = 0
+
+        /**
+         * "Aspect"-style function to wrap the list and object functions in [Parser] which may recursively nest
+         * so we can clearly/consistently track nesting and detect excessive nesting
+         */
+        fun nest(nestingParserFunction: () -> Boolean): Boolean {
+            nestingLevel++
+            if (nestingLevel > maxNestingLevel) {
+                throw ExcessiveNestingException()
+            }
+            val parseResult = nestingParserFunction()
+            nestingLevel--
+            return parseResult
         }
     }
 }

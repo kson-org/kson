@@ -61,16 +61,15 @@ class NumberParser(private val numberCandidate: String) {
      * A [Char] by [Char] [source] [Scanner]
      */
     private class Scanner(private val source: String) {
-        /**
-         * Use the null byte to represent EOF
-         */
-        private val EOF: Char = '\u0000'
-
         private var currentSourceIndex = 0
 
-        fun getCurrentChar(): Char {
+        /**
+         * Returns the next [Char] in this [Scanner],
+         *   or `null` if there is no next character
+         */
+        fun peek(): Char? {
             if (eof()) {
-                return EOF
+                return null
             }
             return source[currentSourceIndex]
         }
@@ -91,7 +90,7 @@ class NumberParser(private val numberCandidate: String) {
         if (integer() && fraction() && exponent()) {
             if (!scanner.eof()) {
                 // we have unparsed trailing content: must be invalid characters
-                error = MessageType.INVALID_DIGITS.create(scanner.getCurrentChar().toString())
+                error = MessageType.INVALID_DIGITS.create(scanner.peek().toString())
                 return false
             }
             return true
@@ -109,7 +108,7 @@ class NumberParser(private val numberCandidate: String) {
             return true
         }
 
-        if (scanner.getCurrentChar() == '-') {
+        if (scanner.peek() == '-') {
             scanner.advanceScanner()
             return if (digits()) {
                 true
@@ -119,7 +118,7 @@ class NumberParser(private val numberCandidate: String) {
             }
         }
 
-        error = MessageType.INVALID_DIGITS.create(scanner.getCurrentChar().toString())
+        error = MessageType.INVALID_DIGITS.create(scanner.peek().toString())
         return false
     }
 
@@ -141,7 +140,7 @@ class NumberParser(private val numberCandidate: String) {
      * digit -> "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
      */
     private fun digit(): Boolean {
-        return zeroToNine.contains(scanner.getCurrentChar())
+        return zeroToNine.contains(scanner.peek())
     }
 
     private val zeroToNine = setOf(
@@ -162,7 +161,7 @@ class NumberParser(private val numberCandidate: String) {
      *           | "." digits
      */
     private fun fraction(): Boolean {
-        if (scanner.getCurrentChar() == '.') {
+        if (scanner.peek() == '.') {
             scanner.advanceScanner()
             return if (digits()) {
                 true
@@ -182,7 +181,7 @@ class NumberParser(private val numberCandidate: String) {
      *           | "e" sign digits
      */
     private fun exponent(): Boolean {
-        val exponentChar = scanner.getCurrentChar()
+        val exponentChar = scanner.peek()
         if (exponentChar == 'E' || exponentChar == 'e') {
             scanner.advanceScanner()
             // parse optional sign
@@ -191,7 +190,7 @@ class NumberParser(private val numberCandidate: String) {
                 error = MessageType.DANGLING_EXP_INDICATOR.create(exponentChar.toString())
                 return false
             } else if (!digits()) {
-                error = MessageType.INVALID_DIGITS.create(scanner.getCurrentChar().toString())
+                error = MessageType.INVALID_DIGITS.create(scanner.peek().toString())
                 return false
             }
         }
@@ -204,7 +203,7 @@ class NumberParser(private val numberCandidate: String) {
      * sign -> "" | "+" | "-"
      */
     private fun sign(): Boolean {
-        if (scanner.getCurrentChar() == '+' || scanner.getCurrentChar() == '-') {
+        if (scanner.peek() == '+' || scanner.peek() == '-') {
             scanner.advanceScanner()
         }
 

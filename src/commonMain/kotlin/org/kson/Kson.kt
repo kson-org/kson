@@ -2,18 +2,23 @@ package org.kson
 
 import org.kson.ast.KsonRoot
 import org.kson.parser.*
+import org.kson.parser.messages.MessageType
 
 class Kson {
     companion object {
-        fun parse(source: String): ParseResult {
+        fun parse(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
             val messageSink = MessageSink()
             val tokens = Lexer(source, messageSink).tokenize()
+            if (tokens[0].tokenType == TokenType.EOF) {
+                messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
+                return ParseResult(null, tokens, messageSink)
+            }
             val ast =  if (messageSink.hasErrors()) {
                 // parsing failed at the lexing stage
                 return ParseResult(null, tokens, messageSink)
             } else {
                 val builder = KsonBuilder(tokens)
-                Parser(builder).parse()
+                Parser(builder, maxNestingLevel).parse()
                 builder.buildTree(messageSink)
             }
 

@@ -8,7 +8,7 @@ import java.nio.file.Paths
  * The Git SHA in the [JSONTestSuite](https://github.com/nst/JSONTestSuite) we currently test against.
  * This can be updated if/when we want to pull in newer tests from that project.
  */
-private const val testSuiteSHA = "d64aefb55228d9584d3e5b2433f720ea8fd00c82"
+private const val testSuiteSHA = "984defc2deaa653cb73cd29f4144a720ec9efe7c"
 
 /**
  * This task exposes [JsonTestSuiteGenerator] to our Gradle build, ensuring the task's

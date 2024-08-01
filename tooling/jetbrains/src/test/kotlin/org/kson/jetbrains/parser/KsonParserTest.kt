@@ -1,6 +1,7 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.testFramework.ParsingTestCase
+import org.kson.parser.messages.MessageType.BLANK_SOURCE
 
 /**
  * These tests are powered by infrastructure provided by [ParsingTestCase]
@@ -50,6 +51,10 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
         doTest(true)
     }
 
+    fun testUnopenedList() {
+        doTest(true)
+    }
+
     fun testNumberError() {
         doTest(true)
     }
@@ -63,6 +68,14 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     }
 
     fun testEmptyCommaError() {
+        doTest(true)
+    }
+
+    /**
+     * Sanity check we do not error on a blank file: strictly speaking, an empty Kson file should produce
+     * a [BLANK_SOURCE] error, but in an editor, it makes no sense to be so strict
+     */
+    fun testBlankFile() {
         doTest(true)
     }
 

@@ -138,7 +138,7 @@ class KsonBuilder(private val tokens: List<Token>) :
                     EMBED_START,
                     EMBED_TAG,
                     EMBED_CONTENT,
-                    ILLEGAL_TOKEN,
+                    ILLEGAL_CHAR,
                     WHITESPACE -> {
                         throw RuntimeException("These tokens do not generate their own AST nodes")
                     }

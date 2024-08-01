@@ -16,6 +16,15 @@ interface Message {
  * matches on error message content)
  */
 enum class MessageType {
+    BLANK_SOURCE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unable to parse a blank file.  A Kson document must describe a value."
+        }
+    },
     EMBED_BLOCK_DANGLING_DELIM {
         override fun expectedArgs(): List<String> {
             return listOf("Embed delimiter character")
@@ -36,16 +45,6 @@ enum class MessageType {
             return "Unclosed \"$embedDelimiter\""
         }
     },
-    UNEXPECTED_CHAR {
-        override fun expectedArgs(): List<String> {
-            return listOf("Unexpected Character")
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val unexpectedCharacter = parsedArgs.getArg("Unexpected Character")
-            return "Unexpected character: $unexpectedCharacter"
-        }
-    },
     EOF_NOT_REACHED {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -62,6 +61,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Unclosed list"
+        }
+    },
+    LIST_NO_OPEN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This must close a list, but this is not a list"
         }
     },
     LIST_INVALID_ELEM {
@@ -91,6 +99,15 @@ enum class MessageType {
             return "Unclosed object"
         }
     },
+    OBJECT_NO_OPEN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This must close an object, but this is not an object"
+        }
+    },
     OBJECT_KEY_NO_VALUE {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -107,6 +124,42 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Unterminated string"
+        }
+    },
+    STRING_CONTROL_CHARACTER {
+        override fun expectedArgs(): List<String> {
+            return listOf("Control Character")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badControlCharArg = parsedArgs.getArg("Control Character")
+            if (badControlCharArg?.length != 1) {
+                throw RuntimeException("Expected arg to be a single control character")
+            }
+            val badControlChar = badControlCharArg[0]
+
+            return "Non-whitespace control characters must not be embedded directly in strings. " +
+                    "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
+        }
+    },
+    STRING_BAD_UNICODE_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Unicode `\\uXXXX` Escape")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badUnicodeEscape = parsedArgs.getArg("Unicode `\\uXXXX` Escape")
+            return "Invalid Unicode code point: $badUnicodeEscape.  Must be a 4 digit hex number"
+        }
+    },
+    STRING_BAD_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("\\-prefixed String Escape")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badStringEscape = parsedArgs.getArg("\\-prefixed String Escape")
+            return "Invalid string escape: $badStringEscape"
         }
     },
     INVALID_DIGITS {
@@ -128,6 +181,22 @@ enum class MessageType {
             val exponentCharacter = parsedArgs.getArg("Exponent character: E or e")
             return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent"
         }
+    },
+
+    /**
+     * Catch-all for characters we don't recognize as legal Kson that don't (yet?) have a more specific and
+     * helpful error such as [OBJECT_NO_OPEN] or [DANGLING_LIST_DASH]
+     */
+    ILLEGAL_CHARACTERS {
+        override fun expectedArgs(): List<String> {
+            return listOf("The Illegal Characters")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val illegalCharacter = parsedArgs.getArg("The Illegal Characters")
+            return "Kson does not allow \"$illegalCharacter\" here"
+        }
+
     },
     ILLEGAL_MINUS_SIGN {
         override fun expectedArgs(): List<String> {
@@ -163,6 +232,17 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Redundant comma found. A comma must delimit a value, one comma per value"
+        }
+    },
+    MAX_NESTING_LEVEL_EXCEEDED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Max Nesting Level")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maxNestingLevel = parsedArgs.getArg("Max Nesting Level")
+            return "The nesting of objects and/or lists in this Kson " +
+                    "exceeds the configured maximum supported nesting level of $maxNestingLevel"
         }
     };
 

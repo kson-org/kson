@@ -187,11 +187,11 @@ private fun assertParseResult(
     when (expectedParseResult) {
         ${ResultEnumData.className}.${ResultEnumData.acceptEntry}, ${ResultEnumData.className}.${ResultEnumData.acceptEntryForKson} -> assertFalse(
             parseResult.hasErrors(),
-            "Should have accepted test source, but rejected as invalid.  Errors produced:\n\n" + LoggedMessage.print(parseResult.messages)
+            "Should have accepted `" + source + "`, but rejected as invalid.  Errors produced:\n\n" + LoggedMessage.print(parseResult.messages)
         )
         ${ResultEnumData.className}.${ResultEnumData.rejectEntry} -> assertTrue(
             parseResult.hasErrors(),
-            "Should have rejected test source, but accepted as valid Kson.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
+            "Should have rejected `" + source + "`, but accepted as valid Kson.  Do we a new entry in ${JsonTestSuiteEditList::class.simpleName}?"
         )
         ${ResultEnumData.className}.${ResultEnumData.unspecifiedEntry} -> {
             // no-op: doesn't matter if we accept or reject as long as we didn't blow up
