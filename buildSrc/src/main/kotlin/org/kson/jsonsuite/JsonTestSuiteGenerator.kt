@@ -233,7 +233,7 @@ private fun assertParseResult(
  * This class manages loading and transforming the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
  * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
  *
- * Property [jsonTestSuiteEditList] contains the list of tests we currently skip (todo: remove or document all skips)
+ * Property [jsonTestSuiteEditList] contains the list of tests we currently skip
  *
  * @param testDefinitionFilesDir the [Path] on disk to the [JSONTestSuite](https://github.com/nst/JSONTestSuite) test files
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
