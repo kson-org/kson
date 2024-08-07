@@ -23,7 +23,7 @@ plugins {
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
 }
 
-// NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
+// NOTE: `./gradlew wrapper` must be run for edits to this config to take effect
 jvmWrapper {
     unixJvmInstallDir = jdkProperties.getProperty("unixJvmInstallDir")
     winJvmInstallDir = jdkProperties.getProperty("winJvmInstallDir")
