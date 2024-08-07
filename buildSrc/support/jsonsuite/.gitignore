@@ -1,2 +1,2 @@
-# this gets checked out on the fly in `ensure_suite.sh`
+# this gets checked out on the fly as part of our build
 /JSONTestSuite/
