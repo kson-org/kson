@@ -194,10 +194,9 @@ class KsonBuilder(private val tokens: List<Token>) :
                         ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
                     OBJECT_DEFINITION -> {
-                        val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
                         val objectInternalsNode =
-                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 1)))
-                        ObjectDefinitionNode(objectName, objectInternalsNode)
+                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 0)))
+                        ObjectDefinitionNode(objectInternalsNode)
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {

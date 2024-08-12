@@ -1,7 +1,5 @@
 FILE(0,231)
   KsonPsiElement([Kson-parsed] OBJECT_DEFINITION)(0,231)
-    KsonPsiElement([Kson-parsed] OBJECT_NAME)(0,0)
-      <empty list>
     PsiElement(IElementTokenType(tokenType=BRACE_L))('{')(0,1)
     KsonPsiElement([Kson-parsed] OBJECT_INTERNALS)(6,229)
       KsonPsiElement([Kson-parsed] OBJECT_PROPERTY)(6,29)
@@ -59,8 +57,6 @@ FILE(0,231)
             PsiElement(IElementTokenType(tokenType=IDENTIFIER))('sub_object')(189,199)
         PsiElement(IElementTokenType(tokenType=COLON))(':')(199,200)
         KsonPsiElement([Kson-parsed] OBJECT_DEFINITION)(201,229)
-          KsonPsiElement([Kson-parsed] OBJECT_NAME)(201,201)
-            <empty list>
           PsiElement(IElementTokenType(tokenType=BRACE_L))('{')(201,202)
           KsonPsiElement([Kson-parsed] OBJECT_INTERNALS)(211,223)
             KsonPsiElement([Kson-parsed] OBJECT_PROPERTY)(211,223)

@@ -105,11 +105,10 @@ class KsonRoot(private val rootNode: AstNode, override val comments: List<String
 
 abstract class ValueNode : AstNode()
 
-class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode) :
+class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
     ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
-        val renderedName = if (name.isEmpty()) "" else "$name "
-        return "$renderedName${internalsNode.toKsonSource(indent)}"
+        return internalsNode.toKsonSource(indent)
     }
 }
 

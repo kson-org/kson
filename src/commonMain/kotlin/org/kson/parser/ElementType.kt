@@ -49,7 +49,6 @@ enum class ParsedElementType : ElementType {
     LIST_ELEMENT,
     OBJECT_DEFINITION,
     OBJECT_INTERNALS,
-    OBJECT_NAME,
     OBJECT_PROPERTY,
     ROOT
 }

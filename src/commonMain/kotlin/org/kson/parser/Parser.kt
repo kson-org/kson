@@ -39,7 +39,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  *        | list
  *        | literal
  *        | embedBlock ;
- * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
+ * objectDefinition -> "{" objectInternals "}" ;
  * list -> dashList | bracketList
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
  * dashList -> ( LIST_DASH ( value | bracketList ) )*
@@ -230,20 +230,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * objectDefinition -> ( objectName | "" ) "{" objectInternals "}" ;
+     * objectDefinition -> "{" objectInternals "}" ;
      */
     private fun objectDefinition(): Boolean {
-        if (builder.getTokenType() == BRACE_L
-            || builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == BRACE_L
-        ) {
+        if (builder.getTokenType() == BRACE_L) {
             val objectDefinitionMark = builder.mark()
-            val objectNameMarker = builder.mark()
-            if (builder.getTokenType() == IDENTIFIER) {
-                builder.advanceLexer()
-            }
-            // mark out object name even though it may be empty so the resulting marker tree
-            // is consistent in both cases
-            objectNameMarker.done(OBJECT_NAME)
 
             // advance past our BRACE_L
             builder.advanceLexer()

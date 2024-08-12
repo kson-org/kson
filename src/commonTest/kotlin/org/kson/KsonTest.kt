@@ -919,21 +919,6 @@ class KsonTest {
                 }
             """.trimIndent()
         )
-
-        assertParsesTo(
-            """
-                obj_name # trailing name
-                {
-                  key: value
-                }
-            """,
-            """
-                # trailing name
-                obj_name {
-                  key: value
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
