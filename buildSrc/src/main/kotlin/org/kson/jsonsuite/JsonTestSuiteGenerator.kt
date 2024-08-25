@@ -1,6 +1,5 @@
 package org.kson.jsonsuite
 
-import org.kson.GitOps.Companion.ensureCleanGitCheckout
 import java.nio.file.Path
 
 /**
@@ -14,51 +13,32 @@ import java.nio.file.Path
  * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
  * superset of JSON
  *
- * @param jsonTestSuiteSHA The SHA version of the tests to generate from
- * @param projectRoot The absolute path on disk to the root of the project to generate JSONTestSuite tests into
- * @param sourceRoot The source root of the project to place the generated test in, relative to [projectRoot]
- * @param classPackage The package ("org.kson.parser.json") for instance.  NOTES: the caller is responsible for setting
- *                      this correctly
+ * @param jsonSuiteGitCheckout an instance of [JsonSuiteGitCheckout]
+ * @param schemaSuiteGitCheckout an instance of [SchemaSuiteGitCheckout]
+ * @param sourceRootDir The directory to consider the src root - [classPackage] will be used to determine which
+ *   sub-folder relative to [sourceRootDir] to place generated tests into
+ * @param classPackage The package to place the generated tests into
  */
 class JsonTestSuiteGenerator(
-    val jsonTestSuiteSHA: String,
-    val schemaTestSuiteSHA: String,
+    private val jsonSuiteGitCheckout: JsonSuiteGitCheckout,
+    private val schemaSuiteGitCheckout: SchemaSuiteGitCheckout,
     private val projectRoot: Path,
-    private val sourceRoot: Path,
+    private val sourceRootDir: Path,
     private val classPackage: String
 ) {
-    private val buildSrcPath: Path = projectRoot.resolve("buildSrc")
+    val testDefinitionFilesDir: Path = jsonSuiteGitCheckout.checkoutDir.toPath().resolve("test_parsing")
 
-    val jsonTestSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
-    private val testDefinitionFilesDir: Path = jsonTestSuiteRootDir.resolve("test_parsing")
-    private val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
-
-    val schemaTestSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSON-Schema-Test-Suite")
-    private val schemaTestSuiteRepoUrl = "https://github.com/json-schema-org/JSON-Schema-Test-Suite.git"
-
-    private val testClassPackageDir = projectRoot.resolve(sourceRoot).resolve(classPackage.replace('.', '/'))
+    private val testClassPackageDir = sourceRootDir.resolve(classPackage.replace('.', '/'))
     val generatedJsonSuiteTestPath: Path =
         testClassPackageDir.resolve("JsonSuiteTest.kt")
     val generatedSchemaSuiteTestPath: Path =
         testClassPackageDir.resolve("JsonSchemaSuiteTest.kt")
 
     fun generate() {
-        // sanity check that we're actually running at the project root
-        if (!buildSrcPath.toFile().exists()) {
-            throw RuntimeException(
-                "Kson project buildSrc/ directory not found.  " +
-                        "Is parameter `projectRoot` correct?  Current value: $projectRoot"
-            )
-        }
-
-        ensureCleanGitCheckout(jsonTestSuiteRepoUrl, jsonTestSuiteSHA, jsonTestSuiteRootDir)
-        ensureCleanGitCheckout(schemaTestSuiteRepoUrl, schemaTestSuiteSHA, schemaTestSuiteRootDir)
-
-        //ensure that [testDefinitionFilesDir] contains the desired test source files
         testClassPackageDir.toFile().mkdirs()
-        val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
+        val jsonTestDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
         generatedJsonSuiteTestPath.toFile()
-            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
+            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, jsonTestDataList))
 
         generatedSchemaSuiteTestPath.toFile()
             .writeText("""

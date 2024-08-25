@@ -1,8 +1,8 @@
 package org.kson.jsonsuite
 
 import org.eclipse.jgit.api.Git
+import org.kson.CleanGitCheckout
 import org.kson.DirtyRepoException
-import org.kson.GitOps.Companion.ensureCleanGitCheckout
 import org.kson.NoRepoException
 import java.io.File
 import java.nio.file.Files.createTempDirectory
@@ -37,20 +37,21 @@ private val gitTestFixturePath = run {
     File(tmpDir, "GitTestFixture").absolutePath
 }
 
-class GitOpsTest {
+class CleanGitCheckoutTest {
 
     @Test
-    fun testEnsureCleanGitCheckoutOnNonExistentDir() {
-        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString(), "JSONTestSuite")
+    fun testCheckoutOnNonExistentDir() {
+        val testDestinationDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
         val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
 
-        ensureCleanGitCheckout(
+        val cleanGitCheckout = CleanGitCheckout(
             gitTestFixturePath,
             desiredCheckoutSHA,
-            testCheckoutDir
+            testDestinationDir,
+            "GitFixture"
         )
 
-        val repository = Git.open(testCheckoutDir.toFile()).repository
+        val repository = Git.open(cleanGitCheckout.checkoutDir).repository
         val actualCheckoutSHA = repository.refDatabase.firstExactRef("HEAD").objectId.name
 
         assertEquals(desiredCheckoutSHA, actualCheckoutSHA, "should have made new dir and checked out the desired SHA")
@@ -58,51 +59,70 @@ class GitOpsTest {
 
     @Test
     fun testEnsureCleanGitCheckoutOnEmptyDir() {
-        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString(), "JSONTestSuite")
-
-        // create the leaf directory we just defined above to ensure it exists, but is empty (and so not a git repo)
-        testCheckoutDir.toFile().mkdir()
+        val testDestinationDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
 
         val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
 
+        // perform a checkout
+        val cleanGitCheckout = CleanGitCheckout(
+            gitTestFixturePath,
+            desiredCheckoutSHA,
+            testDestinationDir,
+            "GitFixture"
+        )
+
+        // clean out the files behind the checkout we just made
+        cleanGitCheckout.checkoutDir.deleteRecursively()
+        cleanGitCheckout.checkoutDir.mkdir()
+
+        // and try to check it out again...
         assertFailsWith<NoRepoException>("should error on non-git dir") {
-            ensureCleanGitCheckout(
+            CleanGitCheckout(
                 gitTestFixturePath,
                 desiredCheckoutSHA,
-                testCheckoutDir
+                testDestinationDir,
+                "GitFixture"
             )
         }
     }
 
     @Test
     fun testEnsureCleanGitCheckoutOnCleanDir() {
-        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString(), "JSONTestSuite")
+        val testDestinationDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
         val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
 
-        /**
-         * pre-clone the git repo so we can run [ensureCleanGitCheckout] on it
-         */
-        Git.cloneRepository()
-            .setURI(gitTestFixturePath)
-            .setDirectory(testCheckoutDir.toFile())
-            .call()
+        val cleanGitCheckout = CleanGitCheckout(
+            gitTestFixturePath,
+            desiredCheckoutSHA,
+            testDestinationDir,
+            "GitFixture"
+        )
 
-        val repository = Git.open(testCheckoutDir.toFile()).repository
+        // reach into the checkout we just created and point it another SHA
+        val repository = Git.open(cleanGitCheckout.checkoutDir).repository
+        val git = Git(repository)
+        git.checkout().setName("296892b3392df3adeb7fb14e6b74140a311a1695").call()
         val currentRepoSHA = repository.refDatabase.firstExactRef("HEAD").objectId.name
 
         assertNotEquals(
             currentRepoSHA,
             desiredCheckoutSHA,
-            "should not currently be pointed to our desired SHA," +
-                    "because this test verifies we're able to check out our desired SHA"
+            "should not currently be pointed to our desired SHA, " +
+                    "because this test is trying verify we're able to check out our desired SHA from a " +
+                    "clean git repo pointed to another SHA"
         )
 
-        ensureCleanGitCheckout(
+        /**
+         * create a new [CleanGitCheckout] in the same directory demanding our `desiredCheckoutSHA`
+         */
+        CleanGitCheckout(
             gitTestFixturePath,
             desiredCheckoutSHA,
-            testCheckoutDir
+            testDestinationDir,
+            "GitFixture"
         )
 
+        // this incantation gets us the currently checked out SHA
         val actualCheckoutSHA = repository.refDatabase.firstExactRef("HEAD").objectId.name
 
         assertEquals(
@@ -113,24 +133,25 @@ class GitOpsTest {
 
     @Test
     fun testEnsureCleanGitCheckoutOnDirtyDir() {
-        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString(), "JSONTestSuite")
+        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
         val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
 
-        /**
-         * pre-clone the git repo so we can dirty it before running [ensureCleanGitCheckout]
-         */
-        Git.cloneRepository()
-            .setURI(gitTestFixturePath)
-            .setDirectory(testCheckoutDir.toFile())
-            .call()
+        val cleanGitCheckout = CleanGitCheckout(
+            gitTestFixturePath,
+            desiredCheckoutSHA,
+            testCheckoutDir,
+            "GitFixture"
+        )
 
-        Paths.get(testCheckoutDir.toString(), "dirty.txt").toFile().createNewFile()
+        // reach into the checkout we just ensured and dirty it up
+        Paths.get(cleanGitCheckout.checkoutDir.toString(), "dirty.txt").toFile().createNewFile()
 
         assertFailsWith<DirtyRepoException>("should error on a dirty git dir") {
-            ensureCleanGitCheckout(
+            CleanGitCheckout(
                 gitTestFixturePath,
                 desiredCheckoutSHA,
-                testCheckoutDir
+                testCheckoutDir,
+                "GitFixture"
             )
         }
     }
