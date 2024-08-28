@@ -3,7 +3,7 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
-import org.kson.parser.messages.MessageType.*
+import org.kson.parser.messages.MessageType.EMBED_BLOCK_DANGLING_DELIM
 
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIM_ALT_CHAR = '$'
@@ -274,10 +274,10 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 val commentText = comment()
                 currentCommentLines.add(commentText)
             }
-            '{' -> addLiteralToken(TokenType.BRACE_L)
-            '}' -> addLiteralToken(TokenType.BRACE_R)
-            '[' -> addLiteralToken(TokenType.BRACKET_L)
-            ']' -> addLiteralToken(TokenType.BRACKET_R)
+            '{' -> addLiteralToken(TokenType.CURLY_BRACE_L)
+            '}' -> addLiteralToken(TokenType.CURLY_BRACE_R)
+            '[' -> addLiteralToken(TokenType.SQUARE_BRACKET_L)
+            ']' -> addLiteralToken(TokenType.SQUARE_BRACKET_R)
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"', '\'' -> {

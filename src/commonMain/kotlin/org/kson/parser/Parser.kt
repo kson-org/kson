@@ -40,11 +40,11 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  *        | literal
  *        | embedBlock ;
  * objectDefinition -> "{" objectInternals "}" ;
- * list -> dashList | bracketList
+ * list -> dashList | commaList
  * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
- * dashList -> ( LIST_DASH ( value | bracketList ) )*
+ * dashList -> ( LIST_DASH ( value | commaList ) )*
  * # note that either list type may be contained in a bracket list since there is no ambiguity
- * bracketList -> "[" "," ( value ","? )+ "]"
+ * commaList -> "[" "," ( value ","? )+ "]"
  *              | "[" ( ","? value )* "]"
  *              | "[" ( value ","? )* "]"
  * keyword -> ( IDENTIFIER | string ) ":" ;
@@ -122,7 +122,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             processComma(builder)
 
             // prohibit the empty-ISH objects internals containing just commas
-            if (builder.getTokenType() == BRACE_R || builder.eof()) {
+            if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
                 objectInternalsMark.done(OBJECT_INTERNALS)
                 return@nest true
@@ -135,7 +135,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val propertyMark = builder.mark()
             val keywordMark = builder.mark()
             if (keyword()) {
-                if (builder.getTokenType() == BRACE_R) {
+                if (builder.getTokenType() == CURLY_BRACE_R) {
                     // object got closed before giving this keyword a value
                     keywordMark.error(OBJECT_KEY_NO_VALUE.create())
                     propertyMark.done(OBJECT_PROPERTY)
@@ -197,14 +197,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *        | embedBlock ;
      */
     private fun value(): Boolean {
-        if (builder.getTokenType() == BRACE_R) {
+        if (builder.getTokenType() == CURLY_BRACE_R) {
             val badCloseBrace = builder.mark()
             builder.advanceLexer()
             badCloseBrace.error(OBJECT_NO_OPEN.create())
             return true
         }
 
-        if (builder.getTokenType() == BRACKET_R) {
+        if (builder.getTokenType() == SQUARE_BRACKET_R) {
             val badCloseBrace = builder.mark()
             builder.advanceLexer()
             badCloseBrace.error(LIST_NO_OPEN.create())
@@ -233,17 +233,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * objectDefinition -> "{" objectInternals "}" ;
      */
     private fun objectDefinition(): Boolean {
-        if (builder.getTokenType() == BRACE_L) {
+        if (builder.getTokenType() == CURLY_BRACE_L) {
             val objectDefinitionMark = builder.mark()
 
-            // advance past our BRACE_L
+            // advance past our CURLY_BRACE_L
             builder.advanceLexer()
 
             // parse any object internals, empty or otherwise
             objectInternals(true)
 
-            if (builder.getTokenType() == BRACE_R) {
-                // advance past our BRACE_R
+            if (builder.getTokenType() == CURLY_BRACE_R) {
+                // advance past our CURLY_BRACE_R
                 builder.advanceLexer()
                 objectDefinitionMark.done(OBJECT_DEFINITION)
             } else {
@@ -257,14 +257,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * list -> dashList | bracketList
+     * list -> dashList | commaList
      */
     private fun list(): Boolean {
-        return dashList() || bracketList()
+        return dashList() || commaList()
     }
 
     /**
-     * dashList -> ( LIST_DASH ( value | bracketList ) )*
+     * dashList -> ( LIST_DASH ( value | commaList ) )*
      */
     private fun dashList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == LIST_DASH) {
@@ -278,7 +278,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
                 if (builder.getTokenType() == LIST_DASH) {
                     listElementMark.error(DANGLING_LIST_DASH.create())
-                } else if (value() || bracketList()) {
+                } else if (value() || commaList()) {
                     // this LIST_DASH is not dangling
                     listElementMark.done(LIST_ELEMENT)
                 } else {
@@ -293,14 +293,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * bracketList -> "[" "," ( value ","? )+ "]"
+     * commaList -> "[" "," ( value ","? )+ "]"
      *              | "[" ( ","? value )* "]"
      *              | "[" ( value ","? )* "]"
      */
-    private fun bracketList(): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() == BRACKET_L) {
+    private fun commaList(): Boolean = nestingTracker.nest {
+        if (builder.getTokenType() == SQUARE_BRACKET_L) {
             val listMark = builder.mark()
-            // advance past the BRACKET_L
+            // advance past the SQUARE_BRACKET_L
             builder.advanceLexer()
 
             // parse the optional leading comma
@@ -309,8 +309,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 processComma(builder)
 
                 // prohibit the empty-ISH list "[,]"
-                if (builder.getTokenType() == BRACKET_R) {
-                    // advance past the BRACKET_R
+                if (builder.getTokenType() == SQUARE_BRACKET_R) {
+                    // advance past the SQUARE_BRACKET_R
                     builder.advanceLexer()
                     leadingCommaMark.error(EMPTY_COMMAS.create())
                     listMark.done(LIST)
@@ -320,7 +320,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
             }
 
-            while (builder.getTokenType() != BRACKET_R && !builder.eof()) {
+            while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
                 val listElementMark = builder.mark()
 
                 if (!value()) {
@@ -332,7 +332,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                         invalidElementMark.error(LIST_STRAY_COLON.create())
                     } else {
                         // while we're not obviously another element or at the end of the list, mark this non-value as an error
-                        while(builder.getTokenType() != BRACKET_R
+                        while(builder.getTokenType() != SQUARE_BRACKET_R
                             && builder.getTokenType() != COMMA
                             && !builder.eof()) {
                             builder.advanceLexer()
@@ -350,8 +350,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
             }
 
-            if (builder.getTokenType() == BRACKET_R) {
-                // advance past the BRACKET_R
+            if (builder.getTokenType() == SQUARE_BRACKET_R) {
+                // advance past the SQUARE_BRACKET_R
                 builder.advanceLexer()
                 // just closed a well-formed list
                 listMark.done(LIST)

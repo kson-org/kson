@@ -127,10 +127,10 @@ class KsonBuilder(private val tokens: List<Token>) :
         return when (marker.element) {
             is TokenType -> {
                 when (marker.element) {
-                    BRACE_L,
-                    BRACE_R,
-                    BRACKET_L,
-                    BRACKET_R,
+                    CURLY_BRACE_L,
+                    CURLY_BRACE_R,
+                    SQUARE_BRACKET_L,
+                    SQUARE_BRACKET_R,
                     COLON,
                     COMMA,
                     COMMENT,

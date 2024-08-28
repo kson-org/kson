@@ -9,13 +9,13 @@ import org.kson.parser.TokenType
 
 private val bracePairs = arrayOf(
     BracePair(
-        elem(TokenType.BRACE_L),
-        elem(TokenType.BRACE_R),
+        elem(TokenType.CURLY_BRACE_L),
+        elem(TokenType.CURLY_BRACE_R),
         true
     ),
     BracePair(
-        elem(TokenType.BRACKET_L),
-        elem(TokenType.BRACKET_R),
+        elem(TokenType.SQUARE_BRACKET_L),
+        elem(TokenType.SQUARE_BRACKET_R),
         true
     )
 )

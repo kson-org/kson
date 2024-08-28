@@ -218,7 +218,7 @@ class KsonTest {
     }
 
     @Test
-    fun testBracketListSource() {
+    fun testSquareBracketListSource() {
         assertParsesTo(
             """
                 ["a string"]
