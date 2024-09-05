@@ -243,6 +243,28 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // parse any object internals, empty or otherwise
             objectInternals(true)
 
+            // annotate anything unparsable within this object definition with an error
+            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                val malformedInternals = builder.mark()
+
+                while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                    builder.advanceLexer()
+                    val keywordMark = builder.mark()
+                    if (keyword()) {
+                        keywordMark.rollbackTo()
+                        break
+                    } else {
+                        keywordMark.drop()
+                    }
+                }
+
+                malformedInternals.error(OBJECT_BAD_INTERNALS.create())
+
+                // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
+                // on internals that are actually bad
+                objectInternals(false)
+            }
+
             if (builder.getTokenType() == CURLY_BRACE_R) {
                 // advance past our CURLY_BRACE_R
                 builder.advanceLexer()
@@ -491,7 +513,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                     builder.advanceLexer()
                     controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
                 }
-                else -> throw RuntimeException("Unexpected String token: ${builder.getTokenType()}.  Do we need an new case here?")
+                else -> {
+                    stringMark.rollbackTo()
+                    return false
+                }
             }
         }
 

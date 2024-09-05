@@ -90,6 +90,15 @@ enum class MessageType {
             return "Colons may only be used inside an object to denote a keyword.  This is a list."
         }
     },
+    OBJECT_BAD_INTERNALS {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Object properties must be `key: value` pairs"
+        }
+    },
     OBJECT_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return emptyList()

@@ -405,6 +405,20 @@ class KsonTest {
     }
 
     @Test
+    fun testObjectSourceWithInvalidInternals() {
+        assertParserRejectsSource("""
+            {
+                key: value
+                [1,2,3]
+                key2: value2
+                "not a property"
+                key4: value4
+                key5: value5
+                test:
+        """.trimIndent(), listOf(OBJECT_NO_CLOSE, OBJECT_BAD_INTERNALS, OBJECT_BAD_INTERNALS, OBJECT_KEY_NO_VALUE))
+    }
+
+    @Test
     fun testObjectSourceWithImmediateTrailingComment() {
         assertParsesTo(
             """
