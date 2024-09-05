@@ -278,6 +278,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             '}' -> addLiteralToken(TokenType.CURLY_BRACE_R)
             '[' -> addLiteralToken(TokenType.SQUARE_BRACKET_L)
             ']' -> addLiteralToken(TokenType.SQUARE_BRACKET_R)
+            '<' -> addLiteralToken(TokenType.ANGLE_BRACKET_L)
+            '>' -> addLiteralToken(TokenType.ANGLE_BRACKET_R)
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"', '\'' -> {

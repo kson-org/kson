@@ -24,6 +24,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.CURLY_BRACE_R -> getPackedTextAttributes(KSON_CURLY_BRACE)
                 TokenType.SQUARE_BRACKET_L -> getPackedTextAttributes(KSON_SQUARE_BRACKET)
                 TokenType.SQUARE_BRACKET_R -> getPackedTextAttributes(KSON_SQUARE_BRACKET)
+                TokenType.ANGLE_BRACKET_L -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
+                TokenType.ANGLE_BRACKET_R -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.COLON -> getPackedTextAttributes(KSON_COLON)
                 TokenType.COMMA -> getPackedTextAttributes(KSON_COMMA)
                 TokenType.COMMENT -> getPackedTextAttributes(KSON_COMMENT)
@@ -54,6 +56,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     enum class KsonColorTag(val displayName: String) {
         KSON_CURLY_BRACE(KsonBundle.message("kson.syntaxHighlighter.curly_brace")),
         KSON_SQUARE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.square_bracket")),
+        KSON_ANGLE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.angle_bracket")),
         KSON_COLON(KsonBundle.message("kson.syntaxHighlighter.colon")),
         KSON_COMMA(KsonBundle.message("kson.syntaxHighlighter.comma")),
         KSON_COMMENT(KsonBundle.message("kson.syntaxHighlighter.comment")),
@@ -70,10 +73,11 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         private val keyToColorMap = mapOf(
             KSON_CURLY_BRACE to DefaultLanguageHighlighterColors.BRACES,
             KSON_SQUARE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
+            KSON_ANGLE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
             KSON_COLON to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_COMMA to DefaultLanguageHighlighterColors.PARENTHESES,
             KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
-            KSON_DELIMITER to DefaultLanguageHighlighterColors.STRING,
+            KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
             KSON_IDENTIFIER to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
             KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,

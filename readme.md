@@ -5,7 +5,7 @@
 TODO document the language, remembering to clearly note:
 - string parsing: we base our string parsing closely on [Json's rules for strings](https://www.rfc-editor.org/rfc/rfc8259.html#section-7), except we allow whitespace control characters to be embedded in our strings
 - embed block escapes
-- list semantics: list may be bracketed or dash-delimited.  A sub-list in a dash-delimited list must be a bracketed list to avoid ambiguity, but otherwise these may be used interchangeably
+- list semantics: list may be written in either bracket or dash style.  Dash-style lists nested in within dash lists must be wrapped in `<>`, but otherwise the angle brackets may be omitted
 - commas are optional between elements in objects and lists and may be leading or trailing.  The formatter is likely to encourage leading commas for bracket lists and no commas for objects (so we'll always have either a comma or a list dash or a keyword starting/denoting an entry in these compound elements, so each has a leading indicator of what type of element it is)
 - ... todo other stuff
 

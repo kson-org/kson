@@ -138,11 +138,12 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = if (elements.isEmpty()) "" else "\n"
+        val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
         return indent.firstLineIndent() + "[" + bracketPadding +
                 elements.joinToString(",\n") {
                     it.toKsonSource(indent.next(false))
                 } +
-                bracketPadding + indent.bodyLinesIndent() + "]"
+                bracketPadding + endBraceIndent + "]"
     }
 }
 

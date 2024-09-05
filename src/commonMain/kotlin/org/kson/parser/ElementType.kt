@@ -14,6 +14,8 @@ enum class TokenType : ElementType {
     CURLY_BRACE_R,
     SQUARE_BRACKET_L,
     SQUARE_BRACKET_R,
+    ANGLE_BRACKET_L,
+    ANGLE_BRACKET_R,
     COLON,
     COMMA,
     COMMENT,

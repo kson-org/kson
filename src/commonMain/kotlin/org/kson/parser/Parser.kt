@@ -35,15 +35,16 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  * objectInternals -> "," ( keyword value ","? )+
  *              | ( ","? keyword value )*
  *              | ( keyword value ","? )*
- * value -> objectDefinition
- *        | list
- *        | literal
- *        | embedBlock ;
+ * value -> dashList
+ *        | delimitedValue
+ * delimitedValue -> delimitedDashList
+ *                 | commaList
+ *                 | objectDefinition
+ *                 | literal
+ *                 | embedBlock ;
  * objectDefinition -> "{" objectInternals "}" ;
- * list -> dashList | commaList
- * # NOTE: dashList may not be (directly) contained in a dashList to avoid ambiguity
- * dashList -> ( LIST_DASH ( value | commaList ) )*
- * # note that either list type may be contained in a bracket list since there is no ambiguity
+ * delimitedDashList -> "<" dashList ">"
+ * dashList -> ( LIST_DASH delimitedValue )*
  * commaList -> "[" "," ( value ","? )+ "]"
  *              | "[" ( ","? value )* "]"
  *              | "[" ( value ","? )* "]"
@@ -192,12 +193,21 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * value -> objectDefinition
-     *        | list
-     *        | literal
-     *        | embedBlock ;
+     * value -> dashList
+     *        | delimitedValue
      */
     private fun value(): Boolean {
+        return dashList() || delimitedValue()
+    }
+
+    /**
+     * delimitedValue -> delimitedDashList
+     *                 | commaList
+     *                 | objectDefinition
+     *                 | literal
+     *                 | embedBlock ;
+     */
+    private fun delimitedValue(): Boolean {
         if (builder.getTokenType() == CURLY_BRACE_R) {
             val badCloseBrace = builder.mark()
             builder.advanceLexer()
@@ -224,8 +234,9 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // of making sense of everything else
         }
 
-        return (objectDefinition()
-                || list()
+        return (delimitedDashList()
+                || commaList()
+                || objectDefinition()
                 || literal()
                 || embedBlock())
     }
@@ -280,14 +291,39 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * list -> dashList | commaList
+     * delimitedDashList -> "<" dashList ">"
      */
-    private fun list(): Boolean {
-        return dashList() || commaList()
+    private fun delimitedDashList(): Boolean {
+        if (builder.getTokenType() != ANGLE_BRACKET_L) {
+            return false
+        }
+
+        val listMark = builder.mark()
+
+        // consume our ANGLE_BRACKET_L
+        builder.advanceLexer()
+
+        val emptyList = !dashList()
+
+        if (builder.getTokenType() == ANGLE_BRACKET_R) {
+            builder.advanceLexer()
+            /**
+             * if this list is empty, then [dashList] didn't mark it, so we need to
+             */
+            if (emptyList) {
+                listMark.done(LIST)
+            } else {
+                listMark.drop()
+            }
+        } else {
+            listMark.error(LIST_NO_CLOSE.create())
+        }
+
+        return true
     }
 
     /**
-     * dashList -> ( LIST_DASH ( value | commaList ) )*
+     * dashList -> ( LIST_DASH delimitedValue )*
      */
     private fun dashList(): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == LIST_DASH) {
@@ -301,7 +337,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
                 if (builder.getTokenType() == LIST_DASH) {
                     listElementMark.error(DANGLING_LIST_DASH.create())
-                } else if (value() || commaList()) {
+                } else if (delimitedValue()) {
                     // this LIST_DASH is not dangling
                     listElementMark.done(LIST_ELEMENT)
                 } else {
@@ -311,8 +347,9 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
             listMark.done(LIST)
             return@nest true
+        } else {
+            return@nest false
         }
-        return@nest false
     }
 
     /**
