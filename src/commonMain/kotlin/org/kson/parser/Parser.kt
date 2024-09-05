@@ -167,11 +167,12 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         if (foundProperties || allowEmpty) {
             objectInternalsMark.done(OBJECT_INTERNALS)
+            return@nest true
         } else {
+            // otherwise we're not a valid object internals
             objectInternalsMark.rollbackTo()
+            return@nest false
         }
-
-        return@nest foundProperties
     }
 
     private fun processComma(builder: AstBuilder) {
