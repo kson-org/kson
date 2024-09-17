@@ -6,7 +6,6 @@ import com.intellij.psi.tree.IElementType
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.parser.Lexer
-import org.kson.parser.MessageSink
 import org.kson.parser.Token
 import org.kson.parser.TokenType
 
@@ -25,7 +24,6 @@ class KsonLexer : LexerBase() {
         this.buffer = buffer
         bufferEnd = endOffset
         ksonTokens = Lexer(buffer.substring(startOffset, endOffset),
-            MessageSink(),
             // note that we demand a gap-free lex here to properly comply with Jetbrains' Lexer interface demands.
             // see the green "Info" block on this page for details: https://plugins.jetbrains.com/docs/intellij/implementing-lexer.html
             true).tokenize()

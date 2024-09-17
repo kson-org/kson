@@ -619,6 +619,32 @@ class KsonTest {
     }
 
     @Test
+    fun testEmbedBlockPartialDelim() {
+        assertParserRejectsSource(
+            """
+                %
+            """,
+            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
+        )
+
+        assertParserRejectsSource(
+            """
+                $
+            """,
+            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
+        )
+
+        assertParserRejectsSource(
+            """
+                test: %myTag
+                    Some embedBlockContent
+                %%
+            """,
+            listOf(EMBED_BLOCK_DANGLING_DELIM)
+        )
+    }
+
+    @Test
     fun testUnclosedListError() {
         val errorMessages = assertParserRejectsSource("[", listOf(LIST_NO_CLOSE))
         assertEquals(Location(0, 0, 0, 1, 0, 1), errorMessages[0].location)

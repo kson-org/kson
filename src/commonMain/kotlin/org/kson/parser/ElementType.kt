@@ -20,6 +20,7 @@ enum class TokenType : ElementType {
     COMMA,
     COMMENT,
     EMBED_DELIM,
+    EMBED_DELIM_PARTIAL,
     EMBED_TAG,
     EMBED_CONTENT,
     FALSE,

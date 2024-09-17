@@ -1,11 +1,8 @@
 package org.kson.parser
 
 import org.kson.parser.TokenType.*
-import org.kson.parser.messages.MessageType
-import org.kson.parser.messages.MessageType.EMBED_BLOCK_DANGLING_DELIM
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class LexerTest {
     /**
@@ -23,17 +20,12 @@ class LexerTest {
         message: String? = null,
         testGapFreeLexing: Boolean = false
     ): List<Token> {
-        val messageSink = MessageSink()
-        val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
+        val actualTokens = Lexer(source, testGapFreeLexing).tokenize()
 
         val eofStrippedActualTokens = verifyAndClipEof(actualTokens)
 
         val actualTokenTypes = eofStrippedActualTokens.map { it.tokenType }.toMutableList()
 
-        assertFalse(
-            messageSink.hasErrors(),
-            "Should not have lexing errors, got:\n\n" + LoggedMessage.print(messageSink.loggedMessages())
-        )
         assertEquals(
             expectedTokenTypes,
             actualTokenTypes,
@@ -67,21 +59,6 @@ class LexerTest {
                 "Incorrect location for token of type $tokenType at index $index of the lexed tokens\n"
             )
         }
-    }
-
-    /**
-     * Assertion helper for testing that tokenizing [source] generates [expectedMessageTypes].
-     *
-     * Returns the generated tokens for further validation
-     */
-    private fun assertTokenizesWithMessages(source: String, expectedMessageTypes: List<MessageType>): List<Token> {
-        val messageSink = MessageSink()
-        val tokens = Lexer(source, messageSink).tokenize()
-
-        val eofStrippedTokens = verifyAndClipEof(tokens)
-
-        assertEquals(expectedMessageTypes, messageSink.loggedMessages().map { it.message.type })
-        return eofStrippedTokens
     }
 
     /**
@@ -581,11 +558,11 @@ class LexerTest {
 
     @Test
     fun testEmbedBlockDanglingDelim() {
-        assertTokenizesWithMessages(
+        assertTokenizesTo(
             """
             test: %
             """,
-            listOf(EMBED_BLOCK_DANGLING_DELIM)
+            listOf(IDENTIFIER, COLON, EMBED_DELIM_PARTIAL, EMBED_CONTENT)
         )
     }
 
