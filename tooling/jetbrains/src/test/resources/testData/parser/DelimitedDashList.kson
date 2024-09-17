@@ -1,0 +1,9 @@
+<
+  - "one"
+  - "two"
+  - <
+      - "sublist one"
+      - "sublist two"
+    >
+  - "three"
+>

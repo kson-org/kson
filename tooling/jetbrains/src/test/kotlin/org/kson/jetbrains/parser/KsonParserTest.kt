@@ -71,6 +71,10 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
         doTest(true)
     }
 
+    fun testDelimitedDashList() {
+        doTest(true)
+    }
+
     /**
      * Sanity check we do not error on a blank file: strictly speaking, an empty Kson file should produce
      * a [BLANK_SOURCE] error, but in an editor, it makes no sense to be so strict

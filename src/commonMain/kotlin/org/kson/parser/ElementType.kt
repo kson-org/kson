@@ -10,10 +10,12 @@ interface ElementType
  * [ElementType]s for the tokens produced by [Lexer]
  */
 enum class TokenType : ElementType {
-    BRACE_L,
-    BRACE_R,
-    BRACKET_L,
-    BRACKET_R,
+    CURLY_BRACE_L,
+    CURLY_BRACE_R,
+    SQUARE_BRACKET_L,
+    SQUARE_BRACKET_R,
+    ANGLE_BRACKET_L,
+    ANGLE_BRACKET_R,
     COLON,
     COMMA,
     COMMENT,
@@ -49,7 +51,6 @@ enum class ParsedElementType : ElementType {
     LIST_ELEMENT,
     OBJECT_DEFINITION,
     OBJECT_INTERNALS,
-    OBJECT_NAME,
     OBJECT_PROPERTY,
     ROOT
 }

@@ -127,10 +127,10 @@ class KsonBuilder(private val tokens: List<Token>) :
         return when (marker.element) {
             is TokenType -> {
                 when (marker.element) {
-                    BRACE_L,
-                    BRACE_R,
-                    BRACKET_L,
-                    BRACKET_R,
+                    CURLY_BRACE_L,
+                    CURLY_BRACE_R,
+                    SQUARE_BRACKET_L,
+                    SQUARE_BRACKET_R,
                     COLON,
                     COMMA,
                     COMMENT,
@@ -194,10 +194,9 @@ class KsonBuilder(private val tokens: List<Token>) :
                         ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
                     OBJECT_DEFINITION -> {
-                        val objectName = unsafeMarkerLookup(childMarkers, 0).getValue()
                         val objectInternalsNode =
-                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 1)))
-                        ObjectDefinitionNode(objectName, objectInternalsNode)
+                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 0)))
+                        ObjectDefinitionNode(objectInternalsNode)
                     }
                     OBJECT_INTERNALS -> {
                         val propertyNodes = childMarkers.map {

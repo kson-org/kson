@@ -20,10 +20,12 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getTokenHighlights(elementType: IElementType): Array<TextAttributesKey> {
         if (elementType is KsonLexedElementType) {
             return when (elementType.tokenType) {
-                TokenType.BRACE_L -> getPackedTextAttributes(KSON_BRACE)
-                TokenType.BRACE_R -> getPackedTextAttributes(KSON_BRACE)
-                TokenType.BRACKET_L -> getPackedTextAttributes(KSON_BRACKET)
-                TokenType.BRACKET_R -> getPackedTextAttributes(KSON_BRACKET)
+                TokenType.CURLY_BRACE_L -> getPackedTextAttributes(KSON_CURLY_BRACE)
+                TokenType.CURLY_BRACE_R -> getPackedTextAttributes(KSON_CURLY_BRACE)
+                TokenType.SQUARE_BRACKET_L -> getPackedTextAttributes(KSON_SQUARE_BRACKET)
+                TokenType.SQUARE_BRACKET_R -> getPackedTextAttributes(KSON_SQUARE_BRACKET)
+                TokenType.ANGLE_BRACKET_L -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
+                TokenType.ANGLE_BRACKET_R -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.COLON -> getPackedTextAttributes(KSON_COLON)
                 TokenType.COMMA -> getPackedTextAttributes(KSON_COMMA)
                 TokenType.COMMENT -> getPackedTextAttributes(KSON_COMMENT)
@@ -34,7 +36,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.FALSE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.IDENTIFIER -> getPackedTextAttributes(KSON_IDENTIFIER)
                 TokenType.ILLEGAL_CHAR -> getPackedTextAttributes(KSON_INVALID)
-                TokenType.LIST_DASH -> getPackedTextAttributes(KSON_BRACKET)
+                TokenType.LIST_DASH -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.NULL -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.NUMBER -> getPackedTextAttributes(KSON_NUMBER)
                 TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
@@ -52,8 +54,9 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     }
 
     enum class KsonColorTag(val displayName: String) {
-        KSON_BRACE(KsonBundle.message("kson.syntaxHighlighter.brace")),
-        KSON_BRACKET(KsonBundle.message("kson.syntaxHighlighter.bracket")),
+        KSON_CURLY_BRACE(KsonBundle.message("kson.syntaxHighlighter.curly_brace")),
+        KSON_SQUARE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.square_bracket")),
+        KSON_ANGLE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.angle_bracket")),
         KSON_COLON(KsonBundle.message("kson.syntaxHighlighter.colon")),
         KSON_COMMA(KsonBundle.message("kson.syntaxHighlighter.comma")),
         KSON_COMMENT(KsonBundle.message("kson.syntaxHighlighter.comment")),
@@ -68,12 +71,13 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
 
     companion object {
         private val keyToColorMap = mapOf(
-            KSON_BRACE to DefaultLanguageHighlighterColors.BRACES,
-            KSON_BRACKET to DefaultLanguageHighlighterColors.BRACES,
+            KSON_CURLY_BRACE to DefaultLanguageHighlighterColors.BRACES,
+            KSON_SQUARE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
+            KSON_ANGLE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
             KSON_COLON to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_COMMA to DefaultLanguageHighlighterColors.PARENTHESES,
             KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
-            KSON_DELIMITER to DefaultLanguageHighlighterColors.STRING,
+            KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
             KSON_IDENTIFIER to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
             KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,

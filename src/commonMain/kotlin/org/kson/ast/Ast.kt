@@ -105,11 +105,10 @@ class KsonRoot(private val rootNode: AstNode, override val comments: List<String
 
 abstract class ValueNode : AstNode()
 
-class ObjectDefinitionNode(private val name: String = "", private val internalsNode: ObjectInternalsNode) :
+class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
     ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
-        val renderedName = if (name.isEmpty()) "" else "$name "
-        return "$renderedName${internalsNode.toKsonSource(indent)}"
+        return internalsNode.toKsonSource(indent)
     }
 }
 
@@ -139,11 +138,12 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = if (elements.isEmpty()) "" else "\n"
+        val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
         return indent.firstLineIndent() + "[" + bracketPadding +
                 elements.joinToString(",\n") {
                     it.toKsonSource(indent.next(false))
                 } +
-                bracketPadding + indent.bodyLinesIndent() + "]"
+                bracketPadding + endBraceIndent + "]"
     }
 }
 

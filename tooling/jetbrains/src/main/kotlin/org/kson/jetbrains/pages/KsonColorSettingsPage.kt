@@ -23,6 +23,13 @@ class KsonColorSettingsPage : ColorSettingsPage {
         return """
             key: value
             string: "a string"
+            dashList:
+                - "list element"
+                - <
+                    - "element of delimited sub-list"
+                    - "another sub-list element"
+                  >
+                - "another list element"
             list: [1, 2, 3, true, false]
             invalid: ``
             embed_block: %%kotlin

@@ -2,7 +2,7 @@ package org.kson.parser
 
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType
-import org.kson.parser.messages.MessageType.*
+import org.kson.parser.messages.MessageType.EMBED_BLOCK_DANGLING_DELIM
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -239,24 +239,24 @@ class LexerTest {
             """
                 []
             """,
-            listOf(BRACKET_L, BRACKET_R)
+            listOf(SQUARE_BRACKET_L, SQUARE_BRACKET_R)
         )
     }
 
     @Test
-    fun testBracketListSource() {
+    fun testSquareBracketListSource() {
         assertTokenizesTo(
             """
                 ["a string"]
             """,
-            listOf(BRACKET_L, STRING_QUOTE, STRING, STRING_QUOTE, BRACKET_R)
+            listOf(SQUARE_BRACKET_L, STRING_QUOTE, STRING, STRING_QUOTE, SQUARE_BRACKET_R)
         )
 
         assertTokenizesTo(
             """
                 [42, 43, 44]
             """,
-            listOf(BRACKET_L, NUMBER, COMMA, NUMBER, COMMA, NUMBER, BRACKET_R)
+            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R)
         )
     }
 
@@ -302,7 +302,7 @@ class LexerTest {
                 - [2, 4]
                 - 44
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, BRACKET_L, NUMBER, COMMA, NUMBER, BRACKET_R, LIST_DASH, NUMBER)
+            listOf(LIST_DASH, NUMBER, LIST_DASH, SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R, LIST_DASH, NUMBER)
         )
 
         // this must lex in spite of the fact it will parse with errors on the illegal list nesting
@@ -338,7 +338,7 @@ class LexerTest {
             """
                 {}
             """,
-            listOf(BRACE_L, BRACE_R)
+            listOf(CURLY_BRACE_L, CURLY_BRACE_R)
         )
     }
 
@@ -353,7 +353,7 @@ class LexerTest {
                 }
             """,
             listOf(
-                BRACE_L,
+                CURLY_BRACE_L,
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
@@ -367,7 +367,7 @@ class LexerTest {
                 STRING_QUOTE,
                 STRING,
                 STRING_QUOTE,
-                BRACE_R
+                CURLY_BRACE_R
             )
         )
 
@@ -663,23 +663,23 @@ class LexerTest {
             |}
             """.trimMargin(),
             listOf(
-                Pair(BRACE_L, Location(0, 0, 0, 1, 0, 1)),
+                Pair(CURLY_BRACE_L, Location(0, 0, 0, 1, 0, 1)),
                 Pair(IDENTIFIER, Location(1, 4, 1, 7, 6, 9)),
                 Pair(COLON, Location(1, 7, 1, 8, 9, 10)),
                 Pair(IDENTIFIER, Location(1, 9, 1, 12, 11, 14)),
                 Pair(IDENTIFIER, Location(2, 4, 2, 8, 19, 23)),
                 Pair(COLON, Location(2, 8, 2, 9, 23, 24)),
-                Pair(BRACKET_L, Location(2, 10, 2, 11, 25, 26)),
+                Pair(SQUARE_BRACKET_L, Location(2, 10, 2, 11, 25, 26)),
                 Pair(TRUE, Location(2, 11, 2, 15, 26, 30)),
                 Pair(COMMA, Location(2, 15, 2, 16, 30, 31)),
                 Pair(FALSE, Location(2, 17, 2, 22, 32, 37)),
-                Pair(BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
+                Pair(SQUARE_BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
                 Pair(EMBED_START, Location(3, 11, 3, 13, 50, 52)),
                 Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
                 Pair(EMBED_END, Location(7, 6, 7, 8, 128, 130)),
-                Pair(BRACE_R, Location(8, 0, 8, 1, 131, 132))
+                Pair(CURLY_BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
         )
     }
@@ -819,7 +819,7 @@ class LexerTest {
                 [1, # trailing list comma
                 2] # trailing list brace
             """,
-            listOf(BRACKET_L, NUMBER, COMMA, NUMBER, BRACKET_R)
+            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R)
         )
 
         val commaToken = tokenList[2]

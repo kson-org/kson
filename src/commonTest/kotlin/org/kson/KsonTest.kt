@@ -218,7 +218,7 @@ class KsonTest {
     }
 
     @Test
-    fun testBracketListSource() {
+    fun testSquareBracketListSource() {
         assertParsesTo(
             """
                 ["a string"]
@@ -302,6 +302,113 @@ class KsonTest {
             """.trimIndent(),
             "should support an optional trailing comma in lists"
         )
+    }
+
+    @Test
+    fun testDelimitedDashList() {
+        assertParsesTo("""
+                <>
+            """.trimIndent(),
+            """
+                []
+            """.trimIndent())
+
+        assertParsesTo("""
+                < - a - b - c >
+            """.trimIndent(),
+            """
+                [
+                  a,
+                  b,
+                  c
+                ]
+            """.trimIndent())
+
+        assertParsesTo("""
+                < 
+                  - a 
+                  - b 
+                  - c 
+                >
+            """.trimIndent(),
+            """
+                [
+                  a,
+                  b,
+                  c
+                ]
+            """.trimIndent())
+    }
+
+    @Test
+    fun testUnclosedDelimitedDashList() {
+        assertParserRejectsSource("<", listOf(LIST_NO_CLOSE))
+    }
+
+    @Test
+    fun testDashListNestedWithCommaList() {
+        assertParsesTo("""
+            [- []]
+        """.trimIndent(),
+            """
+               [
+                 [
+                   []
+                 ]
+               ]
+            """.trimIndent())
+    }
+
+    @Test
+    fun testDashListNestedWithObject() {
+        assertParsesTo("""
+            - { 
+                nestedDashList: - a
+                                - b
+                                - c
+              }
+        """.trimIndent(),
+            """
+                [
+                  {
+                    nestedDashList: [
+                      a,
+                      b,
+                      c
+                    ]
+                  }
+                ]
+            """.trimIndent())
+    }
+
+    @Test
+    fun testDashListNestedWithDashList() {
+        assertParsesTo("""
+            - <
+                - a
+                - b
+                - <
+                    - a1
+                    - b1
+                    - c1
+                  >
+                - c
+              >
+        """.trimIndent(),
+            """
+                [
+                  [
+                    a,
+                    b,
+                    [
+                      a1,
+                      b1,
+                      c1
+                    ],
+                    c
+                  ]
+                ]
+            """.trimIndent())
     }
 
     @Test
@@ -402,6 +509,20 @@ class KsonTest {
             """,
             expectRootObjectAst
         )
+    }
+
+    @Test
+    fun testObjectSourceWithInvalidInternals() {
+        assertParserRejectsSource("""
+            {
+                key: value
+                [1,2,3]
+                key2: value2
+                "not a property"
+                key4: value4
+                key5: value5
+                test:
+        """.trimIndent(), listOf(OBJECT_NO_CLOSE, OBJECT_BAD_INTERNALS, OBJECT_BAD_INTERNALS, OBJECT_KEY_NO_VALUE))
     }
 
     @Test
@@ -919,21 +1040,6 @@ class KsonTest {
                 }
             """.trimIndent()
         )
-
-        assertParsesTo(
-            """
-                obj_name # trailing name
-                {
-                  key: value
-                }
-            """,
-            """
-                # trailing name
-                obj_name {
-                  key: value
-                }
-            """.trimIndent()
-        )
     }
 
     @Test
@@ -972,9 +1078,7 @@ class KsonTest {
         // test six nested lists with a nesting limit of 5
         assertParserRejectsSource("[[[[[[]]]]]]", listOf(MAX_NESTING_LEVEL_EXCEEDED), 5)
 
-        // 50 open brackets per line plus 7 makes one too many to parse with a limit of 256
-        // Note that we don't both collecting unclosed list errors in this case:
-        //   we simply bail out of the parse with the important error
+        // same test as above, but with dashed sub-lists sprinkled in
         assertParserRejectsSource("""
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
