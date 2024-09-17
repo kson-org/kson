@@ -290,7 +290,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 // look for the required second embed delim char
                 if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
-                    addLiteralToken(TokenType.EMBED_START)
+                    addLiteralToken(TokenType.EMBED_DELIM)
                     embeddedBlock(char)
                 } else {
                     messageSink.error(
@@ -421,7 +421,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
     }
 
     private fun embeddedBlock(blockChar: Char) {
-        // consume non-newline whitespace right after the EMBED_START
+        // consume non-newline whitespace right after the EMBED_DELIM
         if (isInlineWhitespace(sourceScanner.peek())) {
             while (isInlineWhitespace(sourceScanner.peek())) {
                 sourceScanner.advance()
@@ -466,7 +466,7 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
             && !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
         ) {
             if (sourceScanner.peek() == blockChar && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "blockChar", we're looking at an escaped EMBED_END
+                // if this is all slashes until "blockChar", we're looking at an escaped EMBED_DELIM
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
@@ -484,13 +484,13 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
         val embedTokenValue = if (hasEscapedEmbedEnd) {
             /**
-             * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
+             * Here we trim the escaping slash from escaped EMBED_DELIMs.  This is slightly novel/intricate,
              * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
              * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_END has its second percent char escaped: %\% yields %% inside of an embed.
+             * - an escaped EMBED_DELIM has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
-             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary `\`s before the second
+             *   of embeds.  So: when evaluating escaped EMBED_DELIMs, we allow arbitrary `\`s before the second
              *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
              *   the output, etc
              *
@@ -510,15 +510,15 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
-        // we scanned everything that wasn't an EMBED_END into our embed content,
-        // so we're either at EOF or want to consume that EMBED_END
+        // we scanned everything that wasn't an EMBED_DELIM into our embed content,
+        // so we're either at EOF or want to consume that EMBED_DELIM
         if (sourceScanner.eof()) {
             return
         } else {
             // process our closing blockChar pair
             sourceScanner.advance()
             sourceScanner.advance()
-            addLiteralToken(TokenType.EMBED_END)
+            addLiteralToken(TokenType.EMBED_DELIM)
         }
     }
 
