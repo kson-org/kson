@@ -3,7 +3,6 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
-import org.kson.parser.messages.MessageType.EMBED_BLOCK_DANGLING_DELIM
 
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIM_ALT_CHAR = '$'
@@ -219,12 +218,11 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  * Tokenizes the given `source` into a list of [Token] by calling [tokenize]
  *
  * @param source the input Kson source to tokenize
- * @param messageSink a [MessageSink] to write user-facing messages about the tokenization, for instance errors
  * @param gapFree whether to ensure _all_ source, including comments, whitespace, quotes and illegal chars, is precisely
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
  */
-class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boolean = false) {
+class Lexer(source: String, gapFree: Boolean = false) {
 
     private val sourceScanner = SourceScanner(source)
     private val tokens = TokenizedSource(
@@ -290,14 +288,11 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
                 // look for the required second embed delim char
                 if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
-                    addLiteralToken(TokenType.EMBED_START)
-                    embeddedBlock(char)
+                    addLiteralToken(TokenType.EMBED_DELIM)
                 } else {
-                    messageSink.error(
-                        addLiteralToken(TokenType.ILLEGAL_CHAR),
-                        EMBED_BLOCK_DANGLING_DELIM.create(char.toString())
-                    )
+                    addLiteralToken(TokenType.EMBED_DELIM_PARTIAL)
                 }
+                embeddedBlock(char)
             }
             else -> {
                 when {
@@ -420,8 +415,8 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         }
     }
 
-    private fun embeddedBlock(blockChar: Char) {
-        // consume non-newline whitespace right after the EMBED_START
+    private fun embeddedBlock(delimChar: Char) {
+        // consume non-newline whitespace right after the EMBED_DELIM
         if (isInlineWhitespace(sourceScanner.peek())) {
             while (isInlineWhitespace(sourceScanner.peek())) {
                 sourceScanner.advance()
@@ -460,18 +455,18 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         // trying to replace escapes if we know we need to
         var hasEscapedEmbedEnd = false
 
-        // read embedded content until the closing blockChar pair (or EOF in the case of an unclosed block)
+        // read embedded content until the closing delimChar pair (or EOF in the case of an unclosed block)
         while (
             !sourceScanner.eof()
-            && !(sourceScanner.peek() == blockChar && sourceScanner.peekNext() == blockChar)
+            && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
         ) {
-            if (sourceScanner.peek() == blockChar && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "blockChar", we're looking at an escaped EMBED_END
+            if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == '\\') {
+                // if this is all slashes until "delimChar", we're looking at an escaped EMBED_DELIM
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
                 }
-                if (sourceScanner.peek() == blockChar) {
+                if (sourceScanner.peek() == delimChar) {
                     hasEscapedEmbedEnd = true
                     sourceScanner.advance()
                 }
@@ -484,22 +479,22 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
         val embedTokenValue = if (hasEscapedEmbedEnd) {
             /**
-             * Here we trim the escaping slash from escaped EMBED_ENDs.  This is slightly novel/intricate,
+             * Here we trim the escaping slash from escaped EMBED_DELIMs.  This is slightly novel/intricate,
              * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
              * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_END has its second percent char escaped: %\% yields %% inside of an embed.
+             * - an escaped EMBED_DELIM has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
-             *   of embeds.  So: when evaluating escaped EMBED_ENDs, we allow arbitrary `\`s before the second
+             *   of embeds.  So: when evaluating escaped EMBED_DELIMs, we allow arbitrary `\`s before the second
              *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
              *   the output, etc
              *
              * - the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
              *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
-             *   slashes in the output, and we also need to escape the blockChar delimiter since it may be a regex
+             *   slashes in the output, and we also need to escape the delimChar delimiter since it may be a regex
              *   special character, like '$' (EMBED_DELIM_ALT_CHAR), that needs special handling.
              */
-            val literal = "$blockChar"
+            val literal = "$delimChar"
             val escaped = Regex.escape(literal)
             val pattern = "$escaped\\\\([\\\\]*)$escaped"
             val escapedReplacement = Regex.escapeReplacement(literal)
@@ -510,15 +505,15 @@ class Lexer(source: String, private val messageSink: MessageSink, gapFree: Boole
 
         addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
-        // we scanned everything that wasn't an EMBED_END into our embed content,
-        // so we're either at EOF or want to consume that EMBED_END
+        // we scanned everything that wasn't an EMBED_DELIM into our embed content,
+        // so we're either at EOF or want to consume that EMBED_DELIM
         if (sourceScanner.eof()) {
             return
         } else {
-            // process our closing blockChar pair
+            // process our closing delimChar pair
             sourceScanner.advance()
             sourceScanner.advance()
-            addLiteralToken(TokenType.EMBED_END)
+            addLiteralToken(TokenType.EMBED_DELIM)
         }
     }
 

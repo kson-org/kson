@@ -8,7 +8,7 @@ class Kson {
     companion object {
         fun parse(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
             val messageSink = MessageSink()
-            val tokens = Lexer(source, messageSink).tokenize()
+            val tokens = Lexer(source).tokenize()
             if (tokens[0].tokenType == TokenType.EOF) {
                 messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
                 return ParseResult(null, tokens, messageSink)

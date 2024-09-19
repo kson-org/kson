@@ -32,7 +32,7 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val embedDelimChar = parsedArgs.getArg("Embed delimiter character")
-            return "Dangling embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
+            return "Incomplete embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
         }
     },
     EMBED_BLOCK_NO_CLOSE {

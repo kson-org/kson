@@ -51,7 +51,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * string -> STRING_QUOTE STRING STRING_QUOTE
- * embeddedBlock -> EMBED_START (EMBED_TAG) NEWLINE CONTENT EMBED_END ;
+ * embeddedBlock -> EMBED_DELIM (EMBED_TAG) NEWLINE CONTENT EMBED_DELIM ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -608,14 +608,25 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embeddedBlock -> EMBED_START (EMBED_TAG) NEWLINE CONTENT EMBED_END ;
+     * embeddedBlock -> EMBED_DELIM (EMBED_TAG) NEWLINE CONTENT EMBED_DELIM ;
      */
     private fun embedBlock(): Boolean {
-        if (builder.getTokenType() == EMBED_START) {
+        if (builder.getTokenType() == EMBED_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
             val embedBlockMark = builder.mark()
-            val embedStartDelimiter = builder.getTokenText()
-            // advance past the EMBED_START
-            builder.advanceLexer()
+            val embedBlockStartDelimMark = builder.mark()
+
+            val embedStartDelimiter = if (builder.getTokenType() == EMBED_DELIM_PARTIAL) {
+                val delimChar = builder.getTokenText()
+                builder.advanceLexer()
+                embedBlockStartDelimMark.error(EMBED_BLOCK_DANGLING_DELIM.create(delimChar))
+                "$delimChar$delimChar"
+            } else {
+                val delimText = builder.getTokenText()
+                embedBlockStartDelimMark.drop()
+                builder.advanceLexer()
+                delimText
+            }
+
             val embedTagMark = builder.mark()
             if (builder.getTokenType() == EMBED_TAG) {
                 // advance past our optional embed tag
@@ -633,7 +644,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 embedBlockContentMark.drop()
             }
 
-            if (builder.getTokenType() == EMBED_END) {
+            if (builder.getTokenType() == EMBED_DELIM) {
                 builder.advanceLexer()
                 embedBlockMark.done(EMBED_BLOCK)
             } else if (builder.eof()) {

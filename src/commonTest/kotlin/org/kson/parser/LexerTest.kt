@@ -1,11 +1,8 @@
 package org.kson.parser
 
 import org.kson.parser.TokenType.*
-import org.kson.parser.messages.MessageType
-import org.kson.parser.messages.MessageType.EMBED_BLOCK_DANGLING_DELIM
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class LexerTest {
     /**
@@ -23,17 +20,12 @@ class LexerTest {
         message: String? = null,
         testGapFreeLexing: Boolean = false
     ): List<Token> {
-        val messageSink = MessageSink()
-        val actualTokens = Lexer(source, messageSink, testGapFreeLexing).tokenize()
+        val actualTokens = Lexer(source, testGapFreeLexing).tokenize()
 
         val eofStrippedActualTokens = verifyAndClipEof(actualTokens)
 
         val actualTokenTypes = eofStrippedActualTokens.map { it.tokenType }.toMutableList()
 
-        assertFalse(
-            messageSink.hasErrors(),
-            "Should not have lexing errors, got:\n\n" + LoggedMessage.print(messageSink.loggedMessages())
-        )
         assertEquals(
             expectedTokenTypes,
             actualTokenTypes,
@@ -67,21 +59,6 @@ class LexerTest {
                 "Incorrect location for token of type $tokenType at index $index of the lexed tokens\n"
             )
         }
-    }
-
-    /**
-     * Assertion helper for testing that tokenizing [source] generates [expectedMessageTypes].
-     *
-     * Returns the generated tokens for further validation
-     */
-    private fun assertTokenizesWithMessages(source: String, expectedMessageTypes: List<MessageType>): List<Token> {
-        val messageSink = MessageSink()
-        val tokens = Lexer(source, messageSink).tokenize()
-
-        val eofStrippedTokens = verifyAndClipEof(tokens)
-
-        assertEquals(expectedMessageTypes, messageSink.loggedMessages().map { it.message.type })
-        return eofStrippedTokens
     }
 
     /**
@@ -432,7 +409,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertTokenizesTo(
@@ -441,7 +418,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
         )
     }
 
@@ -453,7 +430,7 @@ class LexerTest {
                 this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals("this is a raw embed\n", oneLineEmbedTokens[1].value)
@@ -467,7 +444,7 @@ class LexerTest {
                                 the leftmost line
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -491,7 +468,7 @@ class LexerTest {
                 which is the end delimiter in this case
               %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -513,7 +490,7 @@ class LexerTest {
                 this should have a newline at the end
                 %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals("this should have a newline at the end\n", trailingNewlineTokens[1].value)
@@ -526,7 +503,7 @@ class LexerTest {
                     spaces and a newline at the end    
                 %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -545,7 +522,7 @@ class LexerTest {
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -563,7 +540,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END),
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM),
             "should allow trailing whitespace after the opening '%%'"
         )
 
@@ -574,18 +551,18 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END),
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM),
             "should allow trailing whitespace after the opening '%%embedTag'"
         )
     }
 
     @Test
     fun testEmbedBlockDanglingDelim() {
-        assertTokenizesWithMessages(
+        assertTokenizesTo(
             """
             test: %
             """,
-            listOf(EMBED_BLOCK_DANGLING_DELIM)
+            listOf(IDENTIFIER, COLON, EMBED_DELIM_PARTIAL, EMBED_CONTENT)
         )
     }
 
@@ -597,7 +574,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_START, EMBED_TAG, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
         )
     }
 
@@ -608,7 +585,7 @@ class LexerTest {
             %%
             This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_START, EMBED_CONTENT)
+            listOf(EMBED_DELIM, EMBED_CONTENT)
         )
     }
 
@@ -676,9 +653,9 @@ class LexerTest {
                 Pair(SQUARE_BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
-                Pair(EMBED_START, Location(3, 11, 3, 13, 50, 52)),
+                Pair(EMBED_DELIM, Location(3, 11, 3, 13, 50, 52)),
                 Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
-                Pair(EMBED_END, Location(7, 6, 7, 8, 128, 130)),
+                Pair(EMBED_DELIM, Location(7, 6, 7, 8, 128, 130)),
                 Pair(CURLY_BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
         )
@@ -721,7 +698,7 @@ class LexerTest {
                 %%
                 these double %\% percents are embedded but escaped%%
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[1].value)
@@ -734,7 +711,7 @@ class LexerTest {
                 $$
                 these double $\$ dollars are embedded but escaped$$
             """,
-            listOf(EMBED_START, EMBED_CONTENT, EMBED_END)
+            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[1].value)
