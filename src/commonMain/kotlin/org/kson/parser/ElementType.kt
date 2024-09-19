@@ -7,35 +7,96 @@ package org.kson.parser
 interface ElementType
 
 /**
- * [ElementType]s for the tokens produced by [Lexer]
+ * [ElementType]s for the tokens produced by [Lexer].
+ *
+ * Note: these generally correspond to the terminals in the Kson grammar documented on the [Parser] class, though
+ *   some are produced by [Lexer] for the purpose of helping the parser produce more effective help/errors for
+ *   the end user
  */
 enum class TokenType : ElementType {
+    // {
     CURLY_BRACE_L,
+    // }
     CURLY_BRACE_R,
+    // [
     SQUARE_BRACKET_L,
+    // ]
     SQUARE_BRACKET_R,
+    // <
     ANGLE_BRACKET_L,
+    // >
     ANGLE_BRACKET_R,
+    // :
     COLON,
+    // ,
     COMMA,
+    // lines starting with `#`
     COMMENT,
+    /**
+     * Either `%%` or `$%$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
+     */
     EMBED_DELIM,
+    /**
+     * A single `%` or `$` where an [EMBED_DELIM] should be. Used to give helpful errors to the user.
+     */
     EMBED_DELIM_PARTIAL,
+    /**
+     * The line of text starting at an embed block's opening [EMBED_DELIM], "tagging" that embedded content
+     */
     EMBED_TAG,
+    /**
+     * The content of an [EMBED_DELIM] delimited embed block
+     */
     EMBED_CONTENT,
+    // false
     FALSE,
+    /**
+     * An unquoted alpha-numeric-with-underscores string (must not start with a number)
+     */
     IDENTIFIER,
+    /**
+     * A char completely outside the Kson grammar. Used to give helpful errors to the user.
+     */
     ILLEGAL_CHAR,
+    /**
+     * The `-` denoting a dashed list element
+     */
     LIST_DASH,
+    // null
     NULL,
+    /**
+     * A number, to be parsed by [NumberParser]
+     */
     NUMBER,
+    // " or '
     STRING_QUOTE,
+    /**
+     * A [STRING_QUOTE] delimited chunk of text, i.e. "This is a string"
+     */
     STRING,
+    /**
+     * Control character prohibited from appearing in a Kson [String]
+     */
     STRING_ILLEGAL_CONTROL_CHARACTER,
+    /**
+     * A unicode escape sequence embedded in a [STRING] as "\uXXXX", where "X" is a hex digit.
+     * Used to give helpful errors to the user when their escape sequence is incorrect.
+     */
     STRING_UNICODE_ESCAPE,
+    /**
+     * A "\x" escape embedded in a [STRING], where "x" is a legal escape (see [validStringEscapes])
+     * Used to give helpful errors to the user when their escape is incorrect.
+     */
     STRING_ESCAPE,
+    // true
     TRUE,
+    /**
+     * Any whitespace such as spaces, newlines and tabs
+     */
     WHITESPACE,
+    /**
+     * A special token to denote the end of a "file" or token stream
+     */
     EOF
 }
 
