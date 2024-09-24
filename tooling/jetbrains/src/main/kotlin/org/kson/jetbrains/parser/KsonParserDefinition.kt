@@ -13,6 +13,7 @@ import com.intellij.psi.tree.TokenSet
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.psi.KsonPsiElement
 import org.kson.jetbrains.psi.KsonPsiFile
+import org.kson.parser.TokenType
 
 class KsonParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer {
@@ -47,9 +48,8 @@ class KsonParserDefinition : ParserDefinition {
         return KsonPsiFile(viewProvider)
     }
 
-    companion object {
-        private val commentTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.COMMENT))
-        private val whitespaceTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.WHITESPACE))
-        private val stringTokenSet = TokenSet.create(elem(org.kson.parser.TokenType.STRING))
-    }
 }
+
+private val commentTokenSet = TokenSet.create(elem(TokenType.COMMENT))
+private val whitespaceTokenSet = TokenSet.create(elem(TokenType.WHITESPACE))
+private val stringTokenSet = TokenSet.create(elem(TokenType.STRING))
