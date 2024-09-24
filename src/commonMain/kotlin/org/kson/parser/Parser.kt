@@ -51,7 +51,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * string -> STRING_QUOTE STRING STRING_QUOTE
- * embeddedBlock -> EMBED_DELIM (EMBED_TAG) NEWLINE CONTENT EMBED_DELIM ;
+ * embeddedBlock -> EMBED_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_DELIM ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -608,7 +608,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embeddedBlock -> EMBED_DELIM (EMBED_TAG) NEWLINE CONTENT EMBED_DELIM ;
+     * embeddedBlock -> EMBED_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_DELIM ;
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
@@ -633,6 +633,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 builder.advanceLexer()
             }
             embedTagMark.done(EMBED_TAG)
+
+            if (builder.eof()) {
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
+                return true
+            } else if (builder.getTokenType() != EMBED_PREAMBLE_NEWLINE) {
+                throw RuntimeException("Lexer should have ensured an EMBED_PREAMBLE_NEWLINE here, perhaps there's a bug?")
+            }
+
+            // advance past our EMBED_PREAMBLE_NEWLINE
+            builder.advanceLexer()
 
             val embedBlockContentMark = builder.mark()
             if (builder.getTokenType() == EMBED_CONTENT) {

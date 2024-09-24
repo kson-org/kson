@@ -427,7 +427,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         if (sourceScanner.peek() == '\n') {
             // no embed tag on this block
             sourceScanner.advance()
-            addLiteralToken(TokenType.WHITESPACE)
+            addLiteralToken(TokenType.EMBED_PREAMBLE_NEWLINE)
         } else if (sourceScanner.eof()) {
             return
         } else {
@@ -447,7 +447,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             // consume the newline from after this embed tag
             if (sourceScanner.peek() == '\n') {
                 sourceScanner.advance()
-                addLiteralToken(TokenType.WHITESPACE)
+                addLiteralToken(TokenType.EMBED_PREAMBLE_NEWLINE)
             }
         }
 
@@ -594,7 +594,9 @@ class Lexer(source: String, gapFree: Boolean = false) {
     private data class CommentMetadata(val comments: List<String>, val lookaheadTokens: List<Token>)
     private fun commentMetadataForCurrentToken(currentTokenType: TokenType): CommentMetadata {
         // comments don't get associated with these types
-        if (currentTokenType == TokenType.COMMENT || currentTokenType == TokenType.WHITESPACE) {
+        if (currentTokenType == TokenType.COMMENT
+            || currentTokenType == TokenType.WHITESPACE
+            || currentTokenType == TokenType.EMBED_PREAMBLE_NEWLINE) {
             return CommentMetadata(emptyList(), emptyList())
         }
 
