@@ -33,7 +33,7 @@ enum class TokenType : ElementType {
     // lines starting with `#`
     COMMENT,
     /**
-     * Either `%%` or `$%$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
+     * Either `%%` or `$$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
      */
     EMBED_DELIM,
     /**
