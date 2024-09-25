@@ -409,7 +409,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertTokenizesTo(
@@ -418,7 +418,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
     }
 
@@ -430,10 +430,10 @@ class LexerTest {
                 this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
-        assertEquals("this is a raw embed\n", oneLineEmbedTokens[1].value)
+        assertEquals("this is a raw embed\n", oneLineEmbedTokens[2].value)
 
         val mulitLineEmbedTokens = assertTokenizesTo(
             """
@@ -444,7 +444,7 @@ class LexerTest {
                                 the leftmost line
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -455,7 +455,7 @@ class LexerTest {
                             the leftmost line
             
             """.trimIndent(),
-            mulitLineEmbedTokens[2].value
+            mulitLineEmbedTokens[3].value
         )
 
         val mulitLineIndentedEmbedTokens = assertTokenizesTo(
@@ -468,7 +468,7 @@ class LexerTest {
                 which is the end delimiter in this case
               %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -478,7 +478,7 @@ class LexerTest {
                   the leftmost line,
   which is the end delimiter in this case
 """,
-            mulitLineIndentedEmbedTokens[2].value
+            mulitLineIndentedEmbedTokens[3].value
         )
     }
 
@@ -490,10 +490,10 @@ class LexerTest {
                 this should have a newline at the end
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
-        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[1].value)
+        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].value)
 
         val trailingSpacesTokens = assertTokenizesTo(
             """
@@ -503,7 +503,7 @@ class LexerTest {
                     spaces and a newline at the end    
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
@@ -513,7 +513,7 @@ class LexerTest {
                 spaces and a newline at the end    
 
             """.trimIndent(),
-            trailingSpacesTokens[1].value
+            trailingSpacesTokens[2].value
         )
 
         val zeroTrailingWhitespaceTokens = assertTokenizesTo(
@@ -522,12 +522,12 @@ class LexerTest {
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
         assertEquals(
             "this on the other hand,\nshould have spaces but no newline at the end    ",
-            zeroTrailingWhitespaceTokens[1].value
+            zeroTrailingWhitespaceTokens[2].value
         )
     }
 
@@ -540,7 +540,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM),
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM),
             "should allow trailing whitespace after the opening '%%'"
         )
 
@@ -551,7 +551,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM),
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM),
             "should allow trailing whitespace after the opening '%%embedTag'"
         )
     }
@@ -562,7 +562,7 @@ class LexerTest {
             """
             test: %
             """,
-            listOf(IDENTIFIER, COLON, EMBED_DELIM_PARTIAL, EMBED_CONTENT)
+            listOf(IDENTIFIER, COLON, EMBED_DELIM_PARTIAL, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -574,7 +574,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
     }
 
@@ -585,7 +585,7 @@ class LexerTest {
             %%
             This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -654,6 +654,7 @@ class LexerTest {
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
                 Pair(EMBED_DELIM, Location(3, 11, 3, 13, 50, 52)),
+                Pair(EMBED_PREAMBLE_NEWLINE, Location(3, 13, 4, 0, 52, 53)),
                 Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
                 Pair(EMBED_DELIM, Location(7, 6, 7, 8, 128, 130)),
                 Pair(CURLY_BRACE_R, Location(8, 0, 8, 1, 131, 132))
@@ -698,10 +699,10 @@ class LexerTest {
                 %%
                 these double %\% percents are embedded but escaped%%
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
-        assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[1].value)
+        assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[2].value)
     }
 
     @Test
@@ -711,10 +712,10 @@ class LexerTest {
                 $$
                 these double $\$ dollars are embedded but escaped$$
             """,
-            listOf(EMBED_DELIM, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
         )
 
-        assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[1].value)
+        assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[2].value)
     }
 
     @Test
