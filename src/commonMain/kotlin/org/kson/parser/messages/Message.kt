@@ -132,7 +132,7 @@ enum class MessageType {
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unterminated string"
+            return "Unclosed string"
         }
     },
     STRING_CONTROL_CHARACTER {
