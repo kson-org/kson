@@ -20,6 +20,12 @@ class KsonQuoteMatcherTest : KsonEditorActionTest() {
 
     fun testManualClose() {
         doCharTest(
+            "\"<caret>",
+            '"',
+            "\"\"<caret>"
+        )
+
+        doCharTest(
             "key: \"unclosed<caret>",
             '"',
             "key: \"unclosed\"<caret>"

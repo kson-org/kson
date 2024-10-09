@@ -28,7 +28,7 @@ class KsonQuoteHandler : SimpleTokenSetQuoteHandler(elem(TokenType.STRING_QUOTE)
         val previousTokenType = iterator.tokenType
         iterator.advance()
 
-        // if the token before this is not a STRING, this is an opening quote
-        return previousTokenType != elem(TokenType.STRING)
+        // if the token before this is not a STRING or a QUOTE, this is an opening quote
+        return previousTokenType != elem(TokenType.STRING) && previousTokenType != elem(TokenType.STRING_QUOTE)
     }
 }
