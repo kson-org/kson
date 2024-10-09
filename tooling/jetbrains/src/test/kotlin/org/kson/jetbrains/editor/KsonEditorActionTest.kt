@@ -43,6 +43,21 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
         }
     }
 
+    /**
+     * Call this method to test behavior when the given [com.intellij.openapi.actionSystem.IdeActions] is performed
+     * at &lt;caret&gt;. See class documentation for more info: [KsonEditorActionTest]
+     *
+     * @param before the file contents before the action is executed
+     * @param ideActionId one of the ideActionIds enumerated in [com.intellij.openapi.actionSystem.IdeActions]
+     * @param expected the expected file contents after the actions is executed
+     */
+    fun doIdeActionTest(before: String, ideActionId: String, expected: String) {
+        validateTestStrings(before, expected)
+        myFixture.configureByText(KsonFileType, before)
+        myFixture.performEditorAction(ideActionId)
+        myFixture.checkResult(expected)
+    }
+
     private fun doExecuteActionTest(
         before: String, expected: String, action: Runnable
     ) {

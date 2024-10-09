@@ -29,6 +29,7 @@
                                implementationClass="org.kson.jetbrains.parser.KsonParserDefinition"/>
         <lang.syntaxHighlighterFactory language="org.kson.jetbrains"
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
+        <backspaceHandlerDelegate implementation="org.kson.jetbrains.editor.KsonBackspaceHandlerDelegate"/>
         <lang.commenter language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
         <lang.braceMatcher language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
         <lang.quoteHandler language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonQuoteHandler"/>
