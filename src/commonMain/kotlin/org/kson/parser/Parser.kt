@@ -222,6 +222,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
+        if (builder.getTokenType() == ANGLE_BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
         if (builder.getTokenType() == ILLEGAL_CHAR) {
             val illegalCharMark = builder.mark()
             val illegalChars = ArrayList<String>()

@@ -687,6 +687,11 @@ class KsonTest {
     }
 
     @Test
+    fun testUnopenedDashListError() {
+        assertParserRejectsSource(">", listOf(LIST_NO_OPEN))
+    }
+
+    @Test
     fun testInvalidTrailingKson() {
         assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(EOF_NOT_REACHED))
         assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
