@@ -1,5 +1,6 @@
 package org.kson.jetbrains.editor
 
+import com.intellij.codeInsight.CodeInsightSettings
 import com.intellij.codeInsight.generation.actions.CommentByLineCommentAction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.CommandProcessor
@@ -7,6 +8,7 @@ import com.intellij.openapi.editor.actionSystem.TypedAction
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.Project
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.runInEdtAndWait
 import org.kson.jetbrains.file.KsonFileType
 
 /**
@@ -18,6 +20,55 @@ import org.kson.jetbrains.file.KsonFileType
  * Both "before" and "expected" text must include substring "&lt;caret&gt;" to indicate the caret position in the text.<br/>
  */
 abstract class KsonEditorActionTest : BasePlatformTestCase() {
+    /**
+     * [CodeInsightSettings.getInstance] is globally mutable in the tests, and so must be treated careful and always
+     * restored to its previous state after changes in a particular test.  This class, together with [withConfigSetting]
+     * try to make that easy to get right.
+     *
+     * More config settings can/should be added here as they are needed for testing.
+     *
+     * @param getValue a function which returns the current value the config property
+     * @param setValue a function which sets the value of the config property
+     */
+    enum class ConfigProperty(private val getValue: () -> Boolean, private val setValue: (Boolean) -> Unit) {
+        AUTOINSERT_PAIR_QUOTE(
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE },
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE = it }),
+        AUTOINSERT_PAIR_BRACKET(
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET },
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET = it });
+
+        /**
+         * Set the [ConfigProperty] to the given [Boolean], returning its previous/original value after the set
+         * (to facilitate restoring that previous value, as in [withConfigSetting])
+         *
+         * @return the original value before setting to the given [value].  Useful for restoring the previous setting later.
+         */
+        fun set(value: Boolean): Boolean {
+            val originalValue = getValue()
+            runInEdtAndWait {
+                ApplicationManager.getApplication().runWriteAction {
+                    setValue(value)
+                }
+            }
+            return originalValue
+        }
+    }
+
+    /**
+     * Aspect-style helper for temporarily setting a [ConfigProperty] setting in a test.  This method ensures
+     * the original setting is restored when it exits.
+     *
+     * @param configProperty the property to set
+     * @param valueForTestLambda the value to set for [configProperty] in preparation for executing [testLambda]
+     * @param testLambda the test code to execute with [configProperty] set to [valueForTestLambda]
+     */
+    fun withConfigSetting(configProperty: ConfigProperty, valueForTestLambda: Boolean, testLambda: () -> Unit) {
+        val originalValue = configProperty.set(valueForTestLambda)
+        testLambda()
+        configProperty.set(originalValue)
+    }
+
     /**
      * Call this method to test behavior when the "Comment with Line Comment" action is executed.
      * See class documentation for more info: [KsonEditorActionTest]

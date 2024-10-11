@@ -1,5 +1,6 @@
 package org.kson.jetbrains.editor
 
+import com.intellij.codeInsight.CodeInsightSettings
 import com.intellij.codeInsight.editorActions.BackspaceHandlerDelegate
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiFile
@@ -9,8 +10,9 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
         val caretOffset = editor.caretModel.offset
         val text = editor.document.text
 
-        // handle deleting delimiter pairs
-        if (caretOffset > 0 && text.length > caretOffset) {
+        // handle deleting quote pairs
+        if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE
+            && caretOffset > 0 && text.length > caretOffset) {
             if (text[caretOffset - 1] == '"' && text[caretOffset] == '"'
                 || text[caretOffset - 1] == '\'' && text[caretOffset] == '\'') {
                 editor.document.deleteString(caretOffset, caretOffset + 1)

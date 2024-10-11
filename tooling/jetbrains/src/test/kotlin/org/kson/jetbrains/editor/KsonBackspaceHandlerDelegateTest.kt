@@ -8,16 +8,32 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [org.kson.jetbrains.editor.KsonQuoteHandlerTest.testAutoInsert]
      */
     fun testDeleteEmptyQuotePairs() {
-        doIdeActionTest(
-            "\"<caret>\"",
-            IdeActions.ACTION_EDITOR_BACKSPACE,
-            "<caret>"
-        )
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE, true) {
+            doIdeActionTest(
+                "\"<caret>\"",
+                IdeActions.ACTION_EDITOR_BACKSPACE,
+                "<caret>"
+            )
 
-        doIdeActionTest(
-            "\'<caret>\'",
-            IdeActions.ACTION_EDITOR_BACKSPACE,
-            "<caret>"
-        )
+            doIdeActionTest(
+                "\'<caret>\'",
+                IdeActions.ACTION_EDITOR_BACKSPACE,
+                "<caret>"
+            )
+        }
+
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE, false) {
+            doIdeActionTest(
+                "\"<caret>\"",
+                IdeActions.ACTION_EDITOR_BACKSPACE,
+                "<caret>\""
+            )
+
+            doIdeActionTest(
+                "\'<caret>\'",
+                IdeActions.ACTION_EDITOR_BACKSPACE,
+                "<caret>\'"
+            )
+        }
     }
 }
