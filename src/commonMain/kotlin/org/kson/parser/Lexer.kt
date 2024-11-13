@@ -432,7 +432,9 @@ class Lexer(source: String, gapFree: Boolean = false) {
             return
         } else {
             // we have an embed tag, let's scan it
-            while (!sourceScanner.eof() && sourceScanner.peek() != '\n') {
+            while (!sourceScanner.eof()
+                && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
+                && sourceScanner.peek() != '\n') {
                 sourceScanner.advance()
             }
 
@@ -444,10 +446,20 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 embedTagLexeme.text.trim()
             )
 
+            // lex this premature embed end
+            if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
+                sourceScanner.advance()
+                sourceScanner.advance()
+                addLiteralToken(TokenType.EMBED_DELIM)
+                return
+            }
+
             // consume the newline from after this embed tag
             if (sourceScanner.peek() == '\n') {
                 sourceScanner.advance()
                 addLiteralToken(TokenType.EMBED_PREAMBLE_NEWLINE)
+            } else if (sourceScanner.eof()) {
+                return
             }
         }
 

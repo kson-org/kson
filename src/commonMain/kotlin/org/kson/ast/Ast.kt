@@ -201,6 +201,10 @@ class NullNode : ValueNode() {
     }
 }
 
+/**
+ * TODO [embedTag] and [embedContent] may contain escaped embed delimiters.  These will need to be processed once
+ *   we implement compile targets other than re-serializing out to Kson
+ */
 class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
     ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
