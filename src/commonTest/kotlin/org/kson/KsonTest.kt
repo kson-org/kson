@@ -603,6 +603,22 @@ class KsonTest {
         )
     }
 
+    /**
+     * Regression test for a parsing problem we had at the boundary:
+     * this was blowing up with an index out of bounds rather than
+     * parsing with an [EMBED_BLOCK_NO_CLOSE] error as it should
+     */
+    @Test
+    fun testUnclosedEmbedWithEscape() {
+        assertParserRejectsSource(
+            """
+                %%
+                %\%
+            """.trimIndent(),
+            listOf(EMBED_BLOCK_NO_CLOSE)
+        )
+    }
+
     @Test
     fun testUnclosedStringError() {
         assertParserRejectsSource("\"unclosed", listOf(STRING_NO_CLOSE))

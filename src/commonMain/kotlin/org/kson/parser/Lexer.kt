@@ -482,8 +482,9 @@ class Lexer(source: String, gapFree: Boolean = false) {
                     hasEscapedEmbedEnd = true
                     sourceScanner.advance()
                 }
+            } else {
+                sourceScanner.advance()
             }
-            sourceScanner.advance()
         }
 
         val embedBlockLexeme = sourceScanner.extractLexeme()
