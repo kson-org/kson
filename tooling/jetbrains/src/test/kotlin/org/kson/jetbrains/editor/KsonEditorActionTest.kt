@@ -67,8 +67,11 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      */
     fun withConfigSetting(configProperty: ConfigProperty, valueForTestLambda: Boolean, testLambda: () -> Unit) {
         val originalValue = configProperty.set(valueForTestLambda)
-        testLambda()
-        configProperty.set(originalValue)
+        try {
+            testLambda()
+        } finally {
+            configProperty.set(originalValue)
+        }
     }
 
     /**
