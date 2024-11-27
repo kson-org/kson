@@ -5,7 +5,11 @@ import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
 
 const val EMBED_DELIM_CHAR = '%'
+const val EMBED_DELIMITER = "$EMBED_DELIM_CHAR$EMBED_DELIM_CHAR"
 const val EMBED_DELIM_ALT_CHAR = '$'
+const val EMBED_DELIMITER_ALT = "$EMBED_DELIM_ALT_CHAR$EMBED_DELIM_ALT_CHAR"
+// pre-construct a set of both our embed delimiter chars for convenience in code that handles both
+val embedDelimChars = setOf(EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR)
 
 private val KEYWORDS =
     mapOf(
