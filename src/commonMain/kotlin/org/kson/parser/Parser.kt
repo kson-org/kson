@@ -222,6 +222,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
+        if (builder.getTokenType() == ANGLE_BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
         if (builder.getTokenType() == ILLEGAL_CHAR) {
             val illegalCharMark = builder.mark()
             val illegalChars = ArrayList<String>()
@@ -628,17 +635,35 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
 
             val embedTagMark = builder.mark()
-            if (builder.getTokenType() == EMBED_TAG) {
+            val embedTagText = if (builder.getTokenType() == EMBED_TAG) {
+                val tagText = builder.getTokenText()
                 // advance past our optional embed tag
                 builder.advanceLexer()
+                tagText
+            } else {
+                // no embed tag
+                ""
             }
             embedTagMark.done(EMBED_TAG)
+
+            val prematureEndMark = builder.mark()
+            if (builder.getTokenType() == EMBED_DELIM) {
+                builder.advanceLexer()
+                // we are seeing a closing EMBED_DELIM before we encountered an EMBED_PREAMBLE_NEWLINE, so give an error
+                // to help the user fix this construct
+                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
+                embedBlockMark.done(EMBED_BLOCK)
+                return true
+            } else {
+                prematureEndMark.drop()
+            }
 
             if (builder.eof()) {
                 embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
                 return true
             } else if (builder.getTokenType() != EMBED_PREAMBLE_NEWLINE) {
-                throw RuntimeException("Lexer should have ensured an EMBED_PREAMBLE_NEWLINE here, perhaps there's a bug?")
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
+                return true
             }
 
             // advance past our EMBED_PREAMBLE_NEWLINE

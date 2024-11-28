@@ -45,6 +45,19 @@ enum class MessageType {
             return "Unclosed \"$embedDelimiter\""
         }
     },
+    EMBED_BLOCK_NO_NEWLINE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Embed delimiter", "Embed tag")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val embedDelimiter = parsedArgs.getArg("Embed delimiter")
+            val embedTag = parsedArgs.getArg("Embed tag")
+            return "Embedded content starts on the first line after the \"$embedDelimiter<embed tag>\" " +
+                    "construct, so this \"$embedDelimiter\" cannot be on be on the same line as the opening " +
+                    "\"$embedDelimiter$embedTag\""
+        }
+    },
     EOF_NOT_REACHED {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -132,7 +145,7 @@ enum class MessageType {
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unterminated string"
+            return "Unclosed string"
         }
     },
     STRING_CONTROL_CHARACTER {

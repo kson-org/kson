@@ -1,6 +1,6 @@
 package org.kson.ast
 
-import org.kson.parser.EMBED_DELIM_CHAR
+import org.kson.parser.EMBED_DELIMITER
 
 abstract class AstNode {
     /**
@@ -201,12 +201,16 @@ class NullNode : ValueNode() {
     }
 }
 
+/**
+ * TODO [embedTag] and [embedContent] may contain escaped embed delimiters.  These will need to be processed once
+ *   we implement compile targets other than re-serializing out to Kson
+ */
 class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
     ValueNode() {
     override fun toKsonSourceInternal(indent: Indent): String {
-        return indent.firstLineIndent() + EMBED_DELIM_CHAR + EMBED_DELIM_CHAR + embedTag + "\n" +
+        return indent.firstLineIndent() + EMBED_DELIMITER + embedTag + "\n" +
                 indent.bodyLinesIndent() + embedContent.split("\n")
             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                indent.bodyLinesIndent() + EMBED_DELIM_CHAR + EMBED_DELIM_CHAR
+                indent.bodyLinesIndent() + EMBED_DELIMITER
     }
 }
