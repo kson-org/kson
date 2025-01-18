@@ -4,9 +4,20 @@ import org.kson.ast.KsonRoot
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 
+/**
+ * A Json document specifying just `true` is the "trivial" schema that matches everything,
+ * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
+ * for more detail
+ */
+private const val NO_SCHEMA = "true"
+
 class Kson {
     companion object {
         fun parse(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
+            return parse(source, NO_SCHEMA, maxNestingLevel)
+        }
+
+        fun parse(source: String, schemaJson: String = NO_SCHEMA, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
             val messageSink = MessageSink()
             val tokens = Lexer(source, messageSink).tokenize()
             if (tokens[0].tokenType == TokenType.EOF) {
@@ -22,7 +33,11 @@ class Kson {
                 builder.buildTree(messageSink)
             }
 
-            return ParseResult(ast, tokens, messageSink)
+            if (schemaJson == NO_SCHEMA) {
+                return ParseResult(ast, tokens, messageSink)
+            } else {
+                TODO("Json Schema support for Kson not yet implemented")
+            }
         }
     }
 }

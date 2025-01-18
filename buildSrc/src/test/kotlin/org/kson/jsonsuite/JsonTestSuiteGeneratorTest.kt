@@ -1,9 +1,11 @@
 package org.kson.jsonsuite
 
 import jsonTestSuiteSHA
-import kotlin.test.*
 import schemaTestSuiteSHA
 import kotlin.io.path.createTempDirectory
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class JsonTestSuiteGeneratorTest {
 
@@ -31,7 +33,7 @@ class JsonTestSuiteGeneratorTest {
         jsonTestSuiteGenerator.generate()
 
         assertTrue(
-            jsonTestSuiteGenerator.testDefinitionFilesDir.toFile().isDirectory,
+            jsonTestSuiteGenerator.jsonTestSourceFilesDir.toFile().isDirectory,
             "test suite directory should exist and be a directory"
         )
 
