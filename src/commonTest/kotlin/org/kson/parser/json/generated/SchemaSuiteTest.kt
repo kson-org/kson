@@ -1947,12 +1947,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__numberIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__numberIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 1
@@ -1970,12 +1964,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__stringIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__stringIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1993,12 +1981,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__booleanTrueIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__booleanTrueIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 true
@@ -2016,12 +1998,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__booleanFalseIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__booleanFalseIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 false
@@ -2039,12 +2015,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__nullIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__nullIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 null
@@ -2062,12 +2032,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__objectIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__objectIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -2085,12 +2049,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__emptyObjectIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__emptyObjectIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 {}
@@ -2108,12 +2066,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__arrayIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__arrayIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -2131,12 +2083,6 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__emptyArrayIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "boolean_schema_booleanSchema_true__emptyArrayIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         assertKsonEnforcesSchema(
             """
                 []
