@@ -18,12 +18,13 @@ if (jdkVersion != System.getProperty("java.version")) {
 
 plugins {
     kotlin("jvm") version "1.9.22"
+    kotlin("plugin.serialization") version "1.9.22"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
 }
 
-// NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
+// NOTE: `./gradlew wrapper` must be run for edits to this config to take effect
 jvmWrapper {
     unixJvmInstallDir = jdkProperties.getProperty("unixJvmInstallDir")
     winJvmInstallDir = jdkProperties.getProperty("winJvmInstallDir")
@@ -67,4 +68,5 @@ dependencies {
     implementation(gradleApi())
     testImplementation(kotlin("test"))
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
 }

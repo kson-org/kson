@@ -1,55 +1,53 @@
 package org.kson.jsonsuite
 
-import org.eclipse.jgit.api.Git
-import java.io.File
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import java.nio.file.Path
 
 /**
- * [JsonTestSuiteGenerator] generates a class file of tests based on the tests defined in the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
- * project.  By generating the tests into pure Kotlin test methods, we not only have the ergonomics of having
- * an actual test method per JSON Suite test, we also get the benefit of being able to run them across all platforms
- * without wrangling cross-platform file reads
+ * [JsonTestSuiteGenerator] generates native Kotlin tests based on the tests defined in
+ * [JSONTestSuite](https://github.com/nst/JSONTestSuite) and [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+ *
+ * By generating the tests into pure Kotlin test methods, we not only have the ergonomics of having
+ * an actual test method per test from these suites, we also get the benefit of being able to run them across all
+ * platforms without wrangling cross-platform file reads
  *
  * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
  * superset of JSON
  *
- * @param jsonTestSuiteSHA The SHA version of the tests to generate from
- * @param projectRoot The absolute path on disk to the root of the project to generate JSONTestSuite tests into
- * @param sourceRoot The source root of the project to place the generated test in, relative to [projectRoot]
- * @param classPackage The package ("org.kson.parser.json") for instance.  NOTES: the caller is responsible for setting
- *                      this correctly
+ * @param jsonSuiteGitCheckout an instance of [JsonSuiteGitCheckout]
+ * @param schemaSuiteGitCheckout an instance of [SchemaSuiteGitCheckout]
+ * @param sourceRootDir The directory to consider the src root - [classPackage] will be used to determine which
+ *   sub-folder relative to [sourceRootDir] to place generated tests into
+ * @param classPackage The package to place the generated tests into
  */
 class JsonTestSuiteGenerator(
-    val jsonTestSuiteSHA: String,
+    private val jsonSuiteGitCheckout: JsonSuiteGitCheckout,
+    private val schemaSuiteGitCheckout: SchemaSuiteGitCheckout,
     private val projectRoot: Path,
-    private val sourceRoot: Path,
+    private val sourceRootDir: Path,
     private val classPackage: String
 ) {
-    private val buildSrcPath: Path = projectRoot.resolve("buildSrc")
-
-    val testSuiteRootDir: Path = buildSrcPath.resolve("support/jsonsuite/JSONTestSuite")
-    val testDefinitionFilesDir: Path = testSuiteRootDir.resolve("test_parsing")
-    private val jsonTestSuiteRepoUrl = "https://github.com/nst/JSONTestSuite.git"
-
-    val generatedTestPath: Path =
-        projectRoot.resolve(sourceRoot).resolve(classPackage.replace('.', '/')).resolve("JsonSuiteTest.kt")
+    val jsonTestSourceFilesDir: Path = jsonSuiteGitCheckout.checkoutDir.toPath().resolve("test_parsing")
+    private val testClassPackageDir = sourceRootDir.resolve(classPackage.replace('.', '/'))
+    val generatedJsonSuiteTestPath: Path =
+        testClassPackageDir.resolve("JsonSuiteTest.kt")
+    val generatedSchemaSuiteTestPath: Path =
+        testClassPackageDir.resolve("SchemaSuiteTest.kt")
 
     fun generate() {
-        // sanity check that we're actually running at the project root
-        if (!buildSrcPath.toFile().exists()) {
-            throw RuntimeException(
-                "Kson project buildSrc/ directory not found.  " +
-                        "Is parameter `projectRoot` correct?  Current value: $projectRoot"
-            )
-        }
+        testClassPackageDir.toFile().mkdirs()
 
-        ensureCleanGitCheckout(jsonTestSuiteRepoUrl, jsonTestSuiteSHA, testSuiteRootDir)
+        val jsonTestDataList = JsonTestDataLoader(jsonTestSourceFilesDir, projectRoot).loadTestData()
+        generatedJsonSuiteTestPath.toFile()
+            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, jsonTestDataList))
 
-        //ensure that [testDefinitionFilesDir] contains the desired test source files
-        generatedTestPath.parent.toFile().mkdirs()
-        val testDataList = JsonTestDataLoader(testDefinitionFilesDir, projectRoot).loadTestData()
-        generatedTestPath.toFile()
-            .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, testDataList))
+        val schemaTestSourceFilesDir: Path = schemaSuiteGitCheckout.checkoutDir.toPath().resolve("tests")
+        val schemaTestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, projectRoot).loadTestData()
+
+        generatedSchemaSuiteTestPath.toFile()
+            .writeText(generateSchemaSuiteTestClasses(this.javaClass.name, classPackage, schemaTestDataList))
     }
 }
 
@@ -98,6 +96,28 @@ private class JsonTestData(
         }
     }
 }
+
+/**
+ * The [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) tests are organized
+ * into groups where [schema] provides a Json Schema, and the list of [SchemaTestSpec] specify Json data
+ * to apply that schema to and whether that data should be considered valid or not
+ */
+@Serializable
+private data class SchemaTestGroup(val description: String,
+                                   val comment: String? = null,
+                                   val schema: JsonElement,
+                                   val tests: List<SchemaTestSpec>)
+@Serializable
+private data class SchemaTestSpec(val description: String, val data: JsonElement, val valid: Boolean)
+
+/**
+ * The test data we parse out of the test files provided by [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+ */
+private class SchemaTestData(
+    val testFileName: String,
+    val filePathFromProjectRoot: String,
+    val schemaTestGroups: List<SchemaTestGroup>
+)
 
 private fun generateJsonSuiteTestClass(
     generatorClassName: String,
@@ -202,11 +222,92 @@ private fun assertParseResult(
 """
 }
 
+private fun generateSchemaSuiteTestClasses(
+    generatorClassName: String,
+    testClassPackage: String,
+    tests: List<SchemaTestData>
+): String {
+    return """package $testClassPackage
+
+import org.kson.Kson
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+/**
+ * DO NOT MANUALLY EDIT.  This class is GENERATED by `./gradlew generateJsonTestSuite` task 
+ * which calls [$generatorClassName]---see that class for more info.
+ *
+ * TODO expand the testing here as we implement Json Schema support by 
+ *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
+ */
+class SchemaSuiteTest {
+
+${    tests.joinToString("\n") {
+        val theTests = ArrayList<String>()
+        for (schema in it.schemaTestGroups) {
+            val schemaComment = if (schema.comment != null) "// " + schema.comment + "\n" else ""
+            for (test in schema.tests) {
+                // construct a legal and unique name for this test
+                val schemaTestName = "${formatForTestName(it.testFileName)}_${formatForTestName(schema.description)}_${formatForTestName(test.description)}"
+                val testCode = """
+                    |    /**
+                    |     * Test generated by [$generatorClassName] based on `${it.filePathFromProjectRoot}`:
+                    |     *     "${schema.description} -> ${test.description}"
+                    |     */
+                    |    @Test
+                    |    fun $schemaTestName() {${
+                        if (schemaTestSuiteExclusions().contains(schemaTestName)) {
+                            """
+                    |
+                    |       /**
+                    |        * TODO implement the schema functionality under test here and remove this exclusion from
+                    |        * "$schemaTestName" from 
+                    |        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+                    |        */
+                    |        return""".trimMargin()
+                        }
+                    else {
+                            ""
+                        }}
+                    |        assertKsonEnforcesSchema(
+                    |            ${"\"\"\""}
+                    |                ${formatForTest(test.data)}
+                    |            ${"\"\"\""},
+                    |            ${"\"\"\""}
+                    |                ${schemaComment}${formatForTest(schema.schema)}
+                    |            ${"\"\"\""},
+                    |            ${test.valid},
+                    |            ${"\"\"\""}${formatForTest(schema.description)} -> ${formatForTest(test.description)}${"\"\"\""})
+                    |    }
+                    """.trimMargin()
+                theTests.add(testCode)
+            }
+        }
+        theTests.joinToString("\n\n")
+    }}
+    
+    private fun assertKsonEnforcesSchema(ksonSource: String,
+                                         schemaJson: String,
+                                         shouldAcceptAsValid: Boolean,
+                                         description: String) {
+        // accepted as valid if and only if we parsed without error
+        val acceptedAsValid = !Kson.parse(ksonSource.trimIndent(), schemaJson.trimIndent())
+            .hasErrors()
+        
+        assertEquals(
+            shouldAcceptAsValid,
+            acceptedAsValid,
+            description)
+    }
+}
+"""
+}
+
 /**
  * This class manages loading and transforming the [JSONTestSuite](https://github.com/nst/JSONTestSuite)
  * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
  *
- * Property [jsonTestSuiteEditList] contains the list of tests we currently skip (todo: remove or document all skips)
+ * Property [jsonTestSuiteEditList] contains the list of tests we currently skip
  *
  * @param testDefinitionFilesDir the [Path] on disk to the [JSONTestSuite](https://github.com/nst/JSONTestSuite) test files
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
@@ -214,7 +315,7 @@ private fun assertParseResult(
  */
 private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
     private val testFiles = (testDefinitionFilesDir.toFile().listFiles()
-        ?: throw RuntimeException("Should be able to list the files since runCommandLineSetup succeeded"))
+        ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
 
     init {
         val testDefinitionFileNames = testFiles.map { it.name }.toSet()
@@ -242,58 +343,56 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
     }
 }
 
-class NoRepoException(msg: String) : RuntimeException(msg)
-class DirtyRepoException(msg: String) : RuntimeException(msg)
-
 /**
- * Ensures there is a checkout of [repoUrl] in [destinationDir] at SHA [checkoutSHA]
- * Note: will clone if does not exist, will error if not clean
+ * This class manages loading and transforming the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+ * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
+ *
+ * NOTE: we currently only support Draft7 version of Json Schema. TODO expand support to other version.
+ *
+ * @param testDefinitionFilesDir the [Path] on disk to the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+ *        test files
+ *
+ * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
+ *                      machine-independent file paths relative to the project root
  */
-fun ensureCleanGitCheckout(repoUrl: String, checkoutSHA: String, destinationDir: Path) {
-    val checkoutDir = destinationDir.toFile()
+private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
+    private val draftSevenTestSourceFiles = (testDefinitionFilesDir.resolve("draft7").toFile().listFiles()
+        ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
 
-    if (!checkoutDir.exists()) {
-        cloneRepository(repoUrl, checkoutDir)
-    } else if (!File(checkoutDir, ".git").exists()) {
-        throw NoRepoException(
-            "ERROR: $checkoutDir should contain a checkout of https://github.com/nst/JSONTestSuite," +
-                    "but it does not appear to be a git repo")
+    fun loadTestData(): List<SchemaTestData> {
+        return draftSevenTestSourceFiles
+            .filter { !it.isDirectory }
+            .map {
+                val contents = it.readText(Charsets.UTF_8)
+                val schemaTestGroups: List<SchemaTestGroup> = prettyPrintingJson.decodeFromString(contents)
+                SchemaTestData(
+                    it.nameWithoutExtension,
+                    it.absolutePath.replace("$projectRoot/", ""),
+                    schemaTestGroups,
+                )
+            }.sortedBy { it.filePathFromProjectRoot }
     }
-
-    val git = Git.init().setDirectory(checkoutDir).call()
-    if(!git.status().call().isClean) {
-        // throw if we're not clean... don't want to build because the source files might be incorrect,
-        // but also don't want to immediately blow it away since someone may have made changes on purpose
-        // for reasons we're not guessing, and quietly nuking those changes as a side-effect of the build
-        // could do them a real disservice
-        throw DirtyRepoException(
-            "ERROR: Dirty git status in $destinationDir.  Please ensure the git status is clean " +
-                    "or delete the directory and re-run this script")
-    }
-
-    checkoutCommit(checkoutDir, checkoutSHA)
 }
 
-/**
- * Clone the given [uri] into [dir]
- *
- * @param uri will be passed to [org.eclipse.jgit.api.CloneCommand.setURI] to be parsed as a [org.eclipse.jgit.transport.URIish])
- * @param dir the directory to clone the repo at [uri] into
- */
-private fun cloneRepository(uri: String, dir: File) {
-    Git.cloneRepository()
-        .setURI(uri)
-        .setDirectory(dir)
-        .call()
+private val prettyPrintingJson = Json { prettyPrint = true }
+
+private fun formatForTest(jsonElement: JsonElement): String {
+    return formatForTest(jsonElement.toString())
 }
 
-/**
- * Checks out the given [commit] of the repo found in [dir]
- *
- * @param dir a directory containing a git repo
- * @param commit the commit of the repo in [dir] to be checked out
- */
-private fun checkoutCommit(dir: File, commit: String) {
-    val git = Git.open(dir)
-    git.checkout().setName(commit).call()
+private fun formatForTest(string: String): String {
+    return string.replace("$", "\${'$'}")
+}
+
+private fun formatForTestName(string: String): String {
+    return formatForTest(string)
+        .replace(Regex("[.,()+\\-:'\\[\\]{}\"$/*=]"), "_")
+        .split(" ")
+        .mapIndexed { index, s ->
+            if (index > 0) {
+                s.replaceFirstChar { it.uppercase() }
+            } else {
+                s.replaceFirstChar { it.lowercase() }
+            }
+        }.joinToString("")
 }

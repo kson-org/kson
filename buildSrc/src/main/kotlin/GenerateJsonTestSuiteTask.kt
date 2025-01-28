@@ -1,14 +1,18 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
+import org.kson.jsonsuite.JsonSuiteGitCheckout
 import org.kson.jsonsuite.JsonTestSuiteGenerator
+import org.kson.jsonsuite.SchemaSuiteGitCheckout
 import java.io.File
-import java.nio.file.Paths
 
 /**
- * The Git SHA in the [JSONTestSuite](https://github.com/nst/JSONTestSuite) we currently test against.
- * This can be updated if/when we want to pull in newer tests from that project.
+ * The Git SHAs in [JSONTestSuite](https://github.com/nst/JSONTestSuite) and [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+ * that we currently test against.
+ *
+ * These can be updated if/when we want to pull in newer tests from those projects.
  */
-private const val testSuiteSHA = "984defc2deaa653cb73cd29f4144a720ec9efe7c"
+const val jsonTestSuiteSHA = "984defc2deaa653cb73cd29f4144a720ec9efe7c"
+const val schemaTestSuiteSHA = "9fc880bfb6d8ccd093bc82431f17d13681ffae8e"
 
 /**
  * This task exposes [JsonTestSuiteGenerator] to our Gradle build, ensuring the task's
@@ -17,33 +21,36 @@ private const val testSuiteSHA = "984defc2deaa653cb73cd29f4144a720ec9efe7c"
  * if/when the test at [getGeneratedTestPath] is deleted)
  */
 open class GenerateJsonTestSuiteTask : DefaultTask() {
-    private val jsonTestSuiteGenerator =
-        JsonTestSuiteGenerator(
-            testSuiteSHA,
-            project.projectDir.toPath(),
-            Paths.get("src/commonTest/kotlin/"),
+    private val jsonTestSuiteGenerator: JsonTestSuiteGenerator
+
+    init {
+        val projectRoot = project.projectDir.toPath()
+        val destinationDir = projectRoot.resolve("buildSrc").resolve("support/jsonsuite")
+
+        val sourceRoot = projectRoot.resolve("src/commonTest/kotlin/")
+
+        val jsonSuiteGitCheckout = JsonSuiteGitCheckout(jsonTestSuiteSHA, destinationDir)
+        val schemaSuiteGitCheckout = SchemaSuiteGitCheckout(schemaTestSuiteSHA, destinationDir)
+
+        jsonTestSuiteGenerator = JsonTestSuiteGenerator(
+            jsonSuiteGitCheckout,
+            schemaSuiteGitCheckout,
+            projectRoot,
+            sourceRoot,
             "org.kson.parser.json.generated"
         )
 
-    init {
         // ensure we're out of date when/if the repo of test source files is deleted
         outputs.upToDateWhen {
-            jsonTestSuiteGenerator.testSuiteRootDir.toFile().exists()
+            jsonSuiteGitCheckout.checkoutDir.exists()
+                    && schemaSuiteGitCheckout.checkoutDir.exists()
         }
-    }
-
-    /**
-     * Register [JsonTestSuiteGenerator.jsonTestSuiteSHA] as an input to this script so that it is marked
-     * "out of date" whenever the script changes and re-runs
-     */
-    @Input
-    fun getTestSuiteSHA(): String {
-        return jsonTestSuiteGenerator.jsonTestSuiteSHA
     }
 
     @OutputFiles
     fun getGeneratedTestPath(): List<File> {
-        return listOf(jsonTestSuiteGenerator.generatedTestPath.toFile())
+        return listOf(jsonTestSuiteGenerator.generatedJsonSuiteTestPath.toFile(),
+            jsonTestSuiteGenerator.generatedSchemaSuiteTestPath.toFile())
     }
 
     @TaskAction
@@ -53,6 +60,7 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
 
     @Internal
     override fun getDescription(): String? {
-        return "Generates src/commonTest/kotlin/org/kson/parser/json/generated/JsonSuiteTest.kt"
+        return "Generates ${jsonTestSuiteGenerator.generatedJsonSuiteTestPath} and " +
+                "${jsonTestSuiteGenerator.generatedSchemaSuiteTestPath}"
     }
 }
