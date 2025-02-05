@@ -1,9 +1,11 @@
 package org.kson.testSupport
 
+import org.kson.cli.CommandLineInterface
 import org.kson.mpp.PlatformShim
 
 /**
- * Customizable stub implementation of [PlatformShim].  Customize by overriding methods in a subclass.
+ * Customizable stub implementation of [PlatformShim].  Customize through the constructor,
+ * and optionally overriding [PlatformShimStub.readFile] to return stubbed file contents for test.
  *
  * @param interactiveInput the input to provide line-by-line from [readLine]
  */
@@ -24,15 +26,19 @@ open class PlatformShimStub(interactiveInput: String? = null) : PlatformShim {
         return linesToRead.removeFirst()
     }
 
+    /**
+     * Override this to return stub file contents for tests which are exercising the [CommandLineInterface]'s
+     * file reading mode
+     */
     override fun readFile(ksonFilename: String): String {
         throw RuntimeException("Override to return the file contents desired for this test")
     }
 
-    override fun exitSuccess(): Nothing {
+    final override fun exitSuccess(): Nothing {
         throw SimulatedSuccessExit()
     }
 
-    override fun exitFailure(): Nothing {
+    final override fun exitFailure(): Nothing {
         throw SimulatedFailureExit()
     }
 

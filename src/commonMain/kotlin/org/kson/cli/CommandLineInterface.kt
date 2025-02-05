@@ -19,7 +19,8 @@ class CommandLineInterface(private val platformShim: PlatformShim, private val o
             val ksonSourceFileContents = try {
                 platformShim.readFile(ksonFilePath)
             } catch (e: Exception) {
-                out("Failed to read file at path: $ksonFilePath")
+                out("Failed to read file at path: $ksonFilePath. Error:")
+                out(e.stackTraceToString())
                 platformShim.exitFailure()
             }
             ksonSourceFileContents
