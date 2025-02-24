@@ -1,7 +1,8 @@
+
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.gradle.tooling.GradleConnector
-import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
+import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import java.util.*
 
@@ -10,7 +11,7 @@ val sharedProps = Properties().apply {
 }
 
 plugins {
-    kotlin("multiplatform") version "1.9.22"
+    kotlin("multiplatform") version "2.1.10"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -146,13 +147,3 @@ kotlin {
     }
 }
 
-/**
- * The default node version being used by Kotlin (14.17.0) is not compatible with Apple silicon,
- * so we manually set our node version to the recent Apple silicon-compatible LTS release as described here:
- * https://youtrack.jetbrains.com/issue/KT-49109#focus=Comments-27-5259190.0-0
- */
-rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
-    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().apply {
-        nodeVersion = "16.14.2"
-    }
-}
