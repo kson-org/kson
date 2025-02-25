@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
+@Suppress("UNREACHABLE_CODE") // unreachable code is okay here until we complete the above TODO
 class SchemaSuiteTest {
 
     /**
