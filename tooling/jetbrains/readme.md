@@ -22,7 +22,9 @@ Some useful Gradle commands for this subproject:
 ./gradlew :tooling:jetbrains:runPluginVerifier
 ```
 
-This (sub)project is built from a stripped-down version of the [Intellij Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template), so the documentation related to that provides valuable context.
+### Intellij Platform Upgrades and Maintenance
+
+This (sub)project is built from a stripped-down version of the [Intellij Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template), so when upgrading to integrate with newer versions of the Intellij Platform, we should consult that project for updates and documentation on the latest plugin integration/API guidance
 
 ### Running and Debugging
 

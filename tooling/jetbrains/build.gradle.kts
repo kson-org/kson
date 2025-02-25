@@ -6,7 +6,7 @@ fun properties(key: String) = project.findProperty(key).toString()
 plugins {
     kotlin("jvm")
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.17.1"
+    id("org.jetbrains.intellij") version "1.17.2"
 }
 
 group = properties("pluginGroup")
@@ -22,7 +22,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
+// Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     pluginName.set(properties("pluginName"))
     version.set(properties("platformVersion"))
@@ -64,10 +64,13 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
-        // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
+        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+    }
+
+    patchPluginXml {
+        sinceBuild.set(properties("pluginSinceBuild"))
+        untilBuild.set(properties("pluginUntilBuild"))
     }
 
     /**
@@ -76,5 +79,10 @@ tasks {
      */
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    verifyPlugin {
+        ignoreWarnings.set(false)
+        ignoreUnacceptableWarnings.set(false)
     }
 }
