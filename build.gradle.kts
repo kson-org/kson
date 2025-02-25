@@ -4,6 +4,7 @@ import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -46,6 +47,16 @@ tasks {
         if (name != generateJsonTestSuiteTask) {
             dependsOn(generateJsonTestSuiteTask)
         }
+    }
+
+    val javaVersion = "11"
+    withType<JavaCompile> {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = javaVersion
     }
 
     named<Wrapper>("wrapper") {

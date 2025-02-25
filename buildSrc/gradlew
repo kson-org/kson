@@ -122,30 +122,30 @@ JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
     case $JVM_ARCH in
     x86_64)
-        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_mac_hotspot_11.0.22_7.tar.gz
-        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_mac_hotspot_11.0.22_7-864a90
+        JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_mac_hotspot_17.0.14_7.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_mac_hotspot_17.0.14_7-80286c
         ;;
     arm64)
-        JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7.1/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.22_7.tar.gz
-        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.22_7-a4c882
+        JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.14_7.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.14_7-9e2ecf
         ;;
     *) 
         die "Unknown architecture $JVM_ARCH"
         ;;
     esac
 elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
-    JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7.zip
-    JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7-92b309
+    JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7.zip
+    JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7-c15042
 else
     JVM_ARCH=$(linux$(getconf LONG_BIT) uname -m)
      case $JVM_ARCH in
         x86_64)
-            JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7.tar.gz
-            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_x64_linux_hotspot_11.0.22_7-7c72a7
+            JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.14_7.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_linux_hotspot_17.0.14_7-a3ebc3
             ;;
         aarch64)
-            JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%2B7/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7.tar.gz
-            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK11U-jdk_aarch64_linux_hotspot_11.0.22_7-58ee01
+            JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.14_7.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.14_7-bd719f
             ;;
         *) 
             die "Unknown architecture $JVM_ARCH"

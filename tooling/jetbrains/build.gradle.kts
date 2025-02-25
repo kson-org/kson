@@ -34,6 +34,11 @@ intellij {
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
+        withType<JavaCompile> {
+            sourceCompatibility = it
+            targetCompatibility = it
+        }
+
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = it
         }

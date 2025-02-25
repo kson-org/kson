@@ -40,9 +40,9 @@ set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 setlocal
 set BUILD_DIR=%APP_HOME%\gradle\jdk
-set JVM_TARGET_DIR=%BUILD_DIR%\OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7-92b309\
+set JVM_TARGET_DIR=%BUILD_DIR%\OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7-c15042\
 
-set JVM_URL=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.22%%2B7/OpenJDK11U-jdk_x64_windows_hotspot_11.0.22_7.zip
+set JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7.zip
 
 set IS_TAR_GZ=0
 set JVM_TEMP_FILE=gradle-jvm.zip
