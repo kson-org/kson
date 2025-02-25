@@ -1,6 +1,7 @@
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.gradle.tooling.GradleConnector
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
@@ -56,7 +57,9 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = javaVersion
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+        }
     }
 
     named<Wrapper>("wrapper") {

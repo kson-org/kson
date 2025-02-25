@@ -1,4 +1,6 @@
+
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
@@ -61,7 +63,9 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = javaVersion
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+        }
     }
 
     named<Wrapper>("wrapper") {
