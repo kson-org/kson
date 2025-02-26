@@ -24,14 +24,10 @@ class Kson {
                 messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
                 return ParseResult(null, tokens, messageSink)
             }
-            val ast =  if (messageSink.hasErrors()) {
-                // parsing failed at the lexing stage
-                return ParseResult(null, tokens, messageSink)
-            } else {
-                val builder = KsonBuilder(tokens)
-                Parser(builder, maxNestingLevel).parse()
-                builder.buildTree(messageSink)
-            }
+
+            val builder = KsonBuilder(tokens)
+            Parser(builder, maxNestingLevel).parse()
+            val ast = builder.buildTree(messageSink)
 
             if (schemaJson == NO_SCHEMA) {
                 return ParseResult(ast, tokens, messageSink)
