@@ -44,14 +44,15 @@ class KsonTest {
             message
         )
 
-        val compiledYaml = parseResult.ast?.toYamlSource(AstNode.Indent())
+        // now validate the Yaml produced for this source
+        val yamlResult = Kson.parseToYaml(source)
 
         // sanity check the Yaml we are verifying is valid Yaml
-        compiledYaml?.let { validateYaml(it) }
+        yamlResult.yaml?.let { validateYaml(it) }
 
         assertEquals(
             expectedYaml,
-            compiledYaml,
+            yamlResult.yaml,
             message
         )
     }
