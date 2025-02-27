@@ -290,11 +290,12 @@ class IdentifierNode(override val keyword: String) : KeywordNode() {
  * @param stringDouble MUST be parseable as a [Double]
  */
 class NumberNode(private val stringDouble: String) : ValueNode() {
-    /**
-     * This throws a [NumberFormatException] if the given [stringDouble]
-     * violates the pre-condition that it must be parseable as [Double]
-     */
-    val value = stringDouble.toDouble()
+    val value = try {
+        stringDouble.toDouble()
+    } catch (e: NumberFormatException) {
+        throw RuntimeException("This class must only be instantiated with numeric strings, " +
+                "but \"$stringDouble\" is not parseable as a double", e)
+    }
 
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
