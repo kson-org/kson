@@ -263,24 +263,24 @@ class ListElementNode(val value: ValueNode, override val comments: List<String>)
 }
 
 abstract class KeywordNode : ValueNode() {
-    abstract val keyword: String
+    abstract val stringContent: String
 }
 
-open class StringNode(override val keyword: String) : KeywordNode() {
+open class StringNode(override val stringContent: String) : KeywordNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             KSON, YAML -> {
-                indent.firstLineIndent() + "\"" + keyword + "\""
+                indent.firstLineIndent() + "\"" + stringContent + "\""
             }
         }
     }
 }
 
-class IdentifierNode(override val keyword: String) : KeywordNode() {
+class IdentifierNode(override val stringContent: String) : KeywordNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             KSON, YAML -> {
-                indent.firstLineIndent() + keyword
+                indent.firstLineIndent() + stringContent
             }
         }
     }
