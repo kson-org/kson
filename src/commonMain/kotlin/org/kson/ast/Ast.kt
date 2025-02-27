@@ -357,7 +357,7 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
                 
                 // Find minimum leading whitespace across non-empty lines
                 val contentIndentSize = embedContent.split("\n")
-                    .filter { it.isNotBlank() }
+                    .filter { it.isNotEmpty() }
                     .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
 
                 // The user's embedded content has an indent we must maintain, so we must tell Yaml how much indent

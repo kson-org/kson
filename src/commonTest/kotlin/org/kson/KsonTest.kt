@@ -1556,22 +1556,23 @@ class KsonTest {
     }
 
     @Test
-    fun testEmbedBlockWithOnlyWhitespace() {
+    fun testEmbedBlockWhitespacePreservation() {
+        // all this whitespace must be preserved faithfully, including the leading indent
         assertParsesTo(
             "%%\n" +
-            "\n" +
-            "   \n" +
-            "      \n" +
-            "%%",
-            "%%\n" +
-            "\n" +
-            "   \n" +
-            "      \n" +
-            "%%",
-            "|\n" +
             "  \n" +
             "     \n" +
             "        \n" +
+            "%%",
+            "%%\n" +
+            "  \n" +
+            "     \n" +
+            "        \n" +
+            "%%",
+            "|2\n" +
+            "    \n" +
+            "       \n" +
+            "          \n" +
             "  "
         )
     }
