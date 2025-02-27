@@ -359,8 +359,8 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
                     .filter { it.isNotBlank() }
                     .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
 
-                // Use content has an indent we must maintain, we must tell Yaml how much indent is real indent
-                // so that it does not eat up the content's indent too
+                // The user's embedded content has an indent we must maintain, so we must tell Yaml how much indent
+                // is just for Yaml to ensure it does not eat up the content's indent too
                 val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
 
                 val nextIndent = indent.next(false).bodyLinesIndent()
