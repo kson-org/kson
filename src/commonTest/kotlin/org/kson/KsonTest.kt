@@ -1,6 +1,7 @@
 package org.kson
 
 import org.kson.ast.AstNode
+import org.kson.ast.CompileTarget
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.Location
@@ -21,15 +22,17 @@ class KsonTest {
      * AST parsing is correct)
      *
      * @param source is the kson source to parse into a [KsonRoot]
-     * @param expectedKsonFromAst the expected [KsonRoot.toKsonSource] output for the parsed [source]
-     * @param expectedYaml the expected [KsonRoot.toYamlSource] output for the parsed [source]
+     * @param expectedKsonFromAst the expected [CompileTarget.Kson] compiler output for the parsed [source]
+     * @param expectedYaml the expected [CompileTarget.Yaml] compiler output for the parsed [source]
+     * @param retainEmbedTagsForYaml the value to use for [CompileTarget.Yaml.retainEmbedTags]
      * @param message optionally pass a custom failure message for this assertion
      */
     private fun assertParsesTo(
         source: String,
         expectedKsonFromAst: String,
         expectedYaml: String,
-        message: String? = null
+        message: String? = null,
+        retainEmbedTagsForYaml: Boolean = false,
     ) {
         try {
             validateYaml(expectedYaml)
@@ -49,12 +52,12 @@ class KsonTest {
 
         assertEquals(
             expectedKsonFromAst,
-            parseResult.ast?.toKsonSource(AstNode.Indent()),
+            parseResult.ast?.toCommentedSource(AstNode.Indent(), CompileTarget.Kson),
             message
         )
 
         // now validate the Yaml produced for this source
-        val yamlResult = Kson.parseToYaml(source)
+        val yamlResult = Kson.parseToYaml(source, retainEmbedTagsForYaml)
         assertEquals(
             expectedYaml,
             yamlResult.yaml,
@@ -632,6 +635,32 @@ class KsonTest {
             """,
             expectKsonRootObjectAst,
             expectedYamlRootObject
+        )
+    }
+
+    @Test
+    fun testObjectSourceMixedWithStringContainingRawNewlines() {
+        assertParsesTo(
+            """
+                first: "value"
+                second: "this is a string with a
+                raw newline in it and at its end
+                "
+            """.trimIndent(),
+            """
+                {
+                  first: "value"
+                  second: "this is a string with a
+                raw newline in it and at its end
+                "
+                }
+            """.trimIndent(),
+            """
+                first: "value"
+                second: "this is a string with a
+                raw newline in it and at its end
+                "
+            """.trimIndent()
         )
     }
 
@@ -1601,6 +1630,83 @@ class KsonTest {
                     mixed line
                   
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockWithRetainedTags() {
+        assertParsesTo(
+            """
+                %%sql
+                select * from my_table
+                %%
+            """.trimIndent(),
+            """
+                %%sql
+                select * from my_table
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "sql"
+                embedContent: |
+                  select * from my_table
+                  
+            """.trimIndent(),
+            retainEmbedTagsForYaml = true
+        )
+
+        assertParsesTo(
+            """
+                %%python
+                def hello():
+                    print("Hello world!")
+                    
+                hello()
+                %%
+            """.trimIndent(),
+            """
+                %%python
+                def hello():
+                    print("Hello world!")
+                    
+                hello()
+                %%
+            """.trimIndent(),
+            """
+                embedTag: "python"
+                embedContent: |
+                  def hello():
+                      print("Hello world!")
+                      
+                  hello()
+                  
+            """.trimIndent(),
+            retainEmbedTagsForYaml = true
+        )
+
+        assertParsesTo(
+            """
+                %%
+                This is an embed block
+                with no tag
+                %%
+            """.trimIndent(),
+            """
+                %%
+                This is an embed block
+                with no tag
+                %%
+            """.trimIndent(),
+            // we render empty tags too because this metadata distinguishes between an empty embed block and
+            // a multi-line string
+            """
+                embedTag: ""
+                embedContent: |
+                  This is an embed block
+                  with no tag
+                  
+            """.trimIndent(),
+            retainEmbedTagsForYaml = true
         )
     }
 }

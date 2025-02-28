@@ -1,6 +1,7 @@
 package org.kson
 
 import org.kson.ast.AstNode
+import org.kson.ast.CompileTarget
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.*
@@ -42,11 +43,17 @@ class Kson {
          * Parse the given Kson [source] and compile it to Yaml
          *
          * @param source The Kson source to parse
+         * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content.
+         *                          Default: false, which means embed blocks are compiled to multi-line strings of the
+         *                          block's content
          * @param maxNestingLevel Maximum object/list nesting parser must support in the given Kson
          * @return A [YamlParseResult]
          */
-        fun parseToYaml(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): YamlParseResult {
-            return YamlParseResult(parse(source, maxNestingLevel))
+        fun parseToYaml(source: String,
+            retainEmbedTags: Boolean = false,
+            maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
+        ): YamlParseResult {
+            return YamlParseResult(parse(source, maxNestingLevel), retainEmbedTags)
         }
     }
 }
@@ -93,11 +100,12 @@ data class AstParseResult(
 }
 
 class YamlParseResult(
-    val parseResult: ParseResult
+    val parseResult: ParseResult,
+    retainEmbedTags: Boolean = false
 ) : ParseResult by parseResult {
     /**
      * The Yaml compiled from some Kson source, or null if there were errors trying to parse
      * (consult [parseResult] for information on any errors)
      */
-    val yaml: String? = parseResult.ast?.toYamlSource(AstNode.Indent())
+    val yaml: String? = parseResult.ast?.toCommentedSource(AstNode.Indent(), CompileTarget.Yaml(retainEmbedTags))
 }

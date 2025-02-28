@@ -1,15 +1,31 @@
 package org.kson.ast
 
-import org.kson.ast.AstNode.CompileTarget.KSON
-import org.kson.ast.AstNode.CompileTarget.YAML
+import org.kson.ast.AstNode.Indent
+import org.kson.ast.CompileTarget.Kson
+import org.kson.ast.CompileTarget.Yaml
 import org.kson.parser.EMBED_DELIMITER
 
-abstract class AstNode {
-    enum class CompileTarget {
-        KSON,
-        YAML
-    }
+/**
+ * Configuration for different compilation targets
+ */
+sealed class CompileTarget {
 
+    /**
+     * Compile target for serializing a Kson AST out to Kson source
+     */
+    data object Kson : CompileTarget()
+
+    /**
+     * Compile target for Yaml transpilation
+     *
+     * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
+     */
+    data class Yaml(
+        val retainEmbedTags: Boolean = false
+    ) : CompileTarget()
+}
+
+abstract class AstNode {
     /**
      * Abstract representation of the indentation to apply when serializing an AST as source code
      */
@@ -62,35 +78,6 @@ abstract class AstNode {
     }
 
     /**
-     * Serialize the AST subtree rooted at this [AstNode] to a corresponding kson source code snippet,
-     * including comments
-     *
-     * Produces complete Kson source when invoked on a [KsonRoot]
-     */
-    fun toKsonSource(indent: Indent): String {
-        return toCommentedSource(indent, KSON)
-    }
-
-    /**
-     * Yaml transpilation entry point: serializes the AST subtree rooted at this [AstNode] to a corresponding
-     * Yaml source code snippet, including comments
-     *
-     * NOTE: this compiles embed blocks to Yaml multiline strings
-     *    TODO add an option to have embed blocks compile to an object which retains the tag, something like:
-     *      ```
-     *       embedTag: "the embed tag"
-     *       content: |
-     *         the embed block content
-     *      ```
-     *
-     *
-     * Produces complete Yaml source when invoked on a [KsonRoot]
-     */
-    fun toYamlSource(indent: Indent): String {
-        return toCommentedSource(indent, YAML)
-    }
-
-    /**
      * Transpiles this [AstNode] to the given [compileTarget], preserving comments from the originally parsed Kson
      */
     fun toCommentedSource(indent: Indent, compileTarget: CompileTarget): String {
@@ -136,7 +123,7 @@ class KsonRoot(
      */
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 rootNode.toCommentedSource(indent, compileTarget) +
                         if (documentEndComments.isNotEmpty()) {
                             "\n\n" + documentEndComments.joinToString("\n")
@@ -154,7 +141,7 @@ class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
     ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 internalsNode.toCommentedSource(indent, compileTarget)
             }
         }
@@ -164,7 +151,7 @@ class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
 class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON -> {
+            is Kson -> {
                 if (properties.isEmpty()) {
                     "${indent.firstLineIndent()}{}"
                 } else {
@@ -176,7 +163,7 @@ class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : Va
                 }
             }
 
-            YAML -> {
+            is Yaml -> {
                 if (properties.isEmpty()) {
                     indent.firstLineIndent() + "{}"
                 } else {
@@ -197,7 +184,7 @@ class ObjectPropertyNode(
     AstNode(), Documented {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON -> {
+            is Kson -> {
                 "${name.toCommentedSource(indent, compileTarget)}: ${
                     value.toCommentedSource(
                         indent.clone(true),
@@ -205,7 +192,7 @@ class ObjectPropertyNode(
                     )
                 }"
             }
-            YAML -> {
+            is Yaml -> {
                 if (value is ListNode || value is ObjectDefinitionNode) {
                     // For lists and objects, put the value on the next line
                     name.toCommentedSource(indent, compileTarget) + ":\n" +
@@ -221,23 +208,23 @@ class ObjectPropertyNode(
 class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON -> {
+            is Kson -> {
                 // We pad our list bracket with newlines if our list is non-empty
                 val bracketPadding = if (elements.isEmpty()) "" else "\n"
                 val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
                 indent.firstLineIndent() + "[" + bracketPadding +
                         elements.joinToString(",\n") {
-                            it.toKsonSource(indent.next(false))
+                            it.toCommentedSource(indent.next(false), compileTarget)
                         } +
                         bracketPadding + endBraceIndent + "]"
             }
 
-            YAML -> {
+            is Yaml -> {
                 if (elements.isEmpty()) {
                     indent.firstLineIndent() + "[]"
                 } else {
                     elements.joinToString("\n") {
-                        it.toYamlSource(indent.clone(false))
+                        it.toCommentedSource(indent.clone(false), compileTarget)
                     }
                 }
             }
@@ -248,14 +235,14 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
 class ListElementNode(val value: ValueNode, override val comments: List<String>) : AstNode(), Documented {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON -> {
+            is Kson -> {
                 value.toCommentedSource(indent, compileTarget)
             }
-            YAML -> {
+            is Yaml -> {
                 if (value is ListNode) {
-                    indent.firstLineIndent() + "- \n" + value.toYamlSource(indent.next(false))
+                    indent.firstLineIndent() + "- \n" + value.toCommentedSource(indent.next(false), compileTarget)
                 } else {
-                    indent.firstLineIndent() + "- " + value.toYamlSource(indent.clone(true))
+                    indent.firstLineIndent() + "- " + value.toCommentedSource(indent.clone(true), compileTarget)
                 }
             }
         }
@@ -269,7 +256,7 @@ abstract class KeywordNode : ValueNode() {
 open class StringNode(override val stringContent: String) : KeywordNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "\"" + stringContent + "\""
             }
         }
@@ -279,7 +266,7 @@ open class StringNode(override val stringContent: String) : KeywordNode() {
 class IdentifierNode(override val stringContent: String) : KeywordNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + stringContent
             }
         }
@@ -299,7 +286,7 @@ class NumberNode(private val stringDouble: String) : ValueNode() {
 
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + value.toString()
             }
         }
@@ -309,7 +296,7 @@ class NumberNode(private val stringDouble: String) : ValueNode() {
 class TrueNode : ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "true"
             }
         }
@@ -319,7 +306,7 @@ class TrueNode : ValueNode() {
 class FalseNode : ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "false"
             }
         }
@@ -329,13 +316,12 @@ class FalseNode : ValueNode() {
 class NullNode : ValueNode() {
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON, YAML -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "null"
             }
         }
     }
 }
-
 
 /**
  * TODO [embedTag] and [embedContent] may contain escaped embed delimiters.  These will need to be processed once
@@ -343,34 +329,64 @@ class NullNode : ValueNode() {
  */
 class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
     ValueNode() {
+
+    companion object {
+        /**
+         * If we are asked to compile with [CompileTarget.Yaml.retainEmbedTags], we compile
+         * embed blocks to a Yaml object with these two properties: one for the tag string,
+         * and one for the content multiline string
+         */
+        const val EMBED_TAG_KEYWORD = "embedTag"
+        const val EMBED_CONTENT_KEYWORD = "embedContent"
+    }
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            KSON -> {
+            is Kson -> {
                 indent.firstLineIndent() + EMBED_DELIMITER + embedTag + "\n" +
                         indent.bodyLinesIndent() + embedContent.split("\n")
                             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                         indent.bodyLinesIndent() + EMBED_DELIMITER
             }
 
-            YAML -> {
-                val indentSize = indent.next(false).bodyLinesIndent().length
-                
-                // Find minimum leading whitespace across non-empty lines
-                val contentIndentSize = embedContent.split("\n")
-                    .filter { it.isNotEmpty() }
-                    .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
-
-                // The user's embedded content has an indent we must maintain, so we must tell Yaml how much indent
-                // is just for Yaml to ensure it does not eat up the content's indent too
-                val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
-
-                val nextIndent = indent.next(false).bodyLinesIndent()
-                indent.firstLineIndent() + multilineLineIndicator + "\n" +
-                        embedContent.split("\n")
-                            .joinToString("\n") { line ->
-                                nextIndent + line
-                            }
+            is Yaml -> {
+                if (!compileTarget.retainEmbedTags) {
+                    renderMultilineYamlString(embedContent, indent, indent.next(false))
+                } else {
+                    indent.firstLineIndent() + "$EMBED_TAG_KEYWORD: \"" + embedTag + "\"\n" +
+                    indent.bodyLinesIndent() + "$EMBED_CONTENT_KEYWORD: " +
+                    renderMultilineYamlString(embedContent, indent, indent.next(false))
+                }
             }
         }
     }
+}
+
+/**
+ * Formats a string as a Yaml multiline string, preserving indentation
+ *
+ * @param content The string content to format
+ * @param indent The base indentation level
+ * @param contentIndent Additional indentation to apply to the content
+ * @return a Yaml-formatted multiline string with any needed indentation markers
+ */
+private fun renderMultilineYamlString(
+    content: String,
+    indent: Indent,
+    contentIndent: Indent
+): String {
+    // Find minimum leading whitespace across non-empty lines
+    val contentIndentSize = content.split("\n")
+        .filter { it.isNotEmpty() }
+        .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
+
+    // The user's content has an indent we must maintain, so we must tell Yaml how much indent
+    // we are giving it on our multiline string to ensure it does not eat up the content's indent too
+    val indentSize = contentIndent.bodyLinesIndent().length
+    val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
+
+    return indent.firstLineIndent() + multilineLineIndicator + "\n" +
+            content.split("\n")
+                .joinToString("\n") { line ->
+                    contentIndent.bodyLinesIndent() + line
+                }
 }
