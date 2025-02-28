@@ -1,24 +1,22 @@
+
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 // the path on disk of the main project which this buildSrc project supports
 val mainProjectRoot = rootDir.parent!!
 
+val jdkPropertiesFile = project.file("../jdk.properties")
 val jdkProperties = Properties().apply {
-    project.file("../jdk.properties").inputStream().use { load(it) }
+    jdkPropertiesFile.inputStream().use { load(it) }
 }
 
 val jdkVersion = jdkProperties.getProperty("JDK_VERSION")!!
-val badJdkVersionError = jdkProperties.getProperty("BAD_JDK_VERSION_ERROR")!!
-if (jdkVersion != System.getProperty("java.version")) {
-    throw RuntimeException("$badJdkVersionError: ${System.getProperty("java.version")}. Expected: $jdkVersion")
-} else {
-    println("Project JDK: v$jdkVersion loaded from ${System.getProperty("java.home")}")
-}
 
 plugins {
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -40,6 +38,36 @@ repositories {
 }
 
 tasks {
+    configureEach {
+        // unless we are running a wrapper task which may be trying change our JDK,
+        // ensure we're running the expected version
+        if (name != "wrapper" && gradle.parent?.startParameter?.taskNames != listOf("wrapper")) {
+            doFirst {
+                if (jdkVersion != System.getProperty("java.version")) {
+                    throw RuntimeException("ERROR: incorrect JVM version detected: ${System.getProperty("java.version")}. Expected: $jdkVersion.  " +
+                            "Troubleshooting suggestions:\n" +
+                            "  - Did `${jdkPropertiesFile.absolutePath}` change?\n    If yes, you likely need to invoke `./gradlew wrapper`\n" +
+                            "  - If this error is in your IDE, consult the \"Development setup / IntelliJ setup\"\n" +
+                            "    section of readme.md")
+                } else {
+                    println("Project JDK: v$jdkVersion loaded from ${System.getProperty("java.home")}")
+                }
+            }
+        }
+    }
+
+    val javaVersion = "11"
+    withType<JavaCompile> {
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+    }
+
+    withType<KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+        }
+    }
+
     named<Wrapper>("wrapper") {
         // always run when invoked
         outputs.upToDateWhen { false }
@@ -61,6 +89,15 @@ tasks {
     withType<Test> {
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
+
+        /**
+         * The `ProjectBuilder.builder().build()` used in [GenerateJsonTestSuiteTaskTest.sanityCheckTask]
+         * triggered this issue: https://github.com/gradle/gradle/issues/18647.  This is the workaround
+         * described in the thread there: https://github.com/gradle/gradle/issues/18647#issuecomment-1189222029
+         */
+        jvmArgs = listOf(
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        )
     }
 }
 

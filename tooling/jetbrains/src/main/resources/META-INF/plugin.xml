@@ -6,9 +6,6 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <!-- See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html -->
-    <idea-version since-build="214" until-build="214.*"/>
-
     <description><![CDATA[
         <p>
             <a href="https://kson.org">Kson</a> language support
