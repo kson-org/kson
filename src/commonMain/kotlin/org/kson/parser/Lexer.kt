@@ -191,7 +191,7 @@ data class Token(
      *
      *  This also means that if/when this metadata is re-serialized out to source, these "originally" trailing comments
      *  will be rendered as preceding line comments.  This is okay, and aligns well with all the good reasons that
-     *  line comments are somewhat discouraged ([here is a good summary from Code Complete](https://stackoverflow.com/a/14385596))
+     *  trailing comments are somewhat discouraged ([here is a good summary from Code Complete](https://stackoverflow.com/a/14385596))
      */
     val comments: List<String> = emptyList()
 )
