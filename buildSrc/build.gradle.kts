@@ -89,6 +89,15 @@ tasks {
     withType<Test> {
         testLogging.showStandardStreams = true
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
+
+        /**
+         * The `ProjectBuilder.builder().build()` used in [GenerateJsonTestSuiteTaskTest.sanityCheckTask]
+         * triggered this issue: https://github.com/gradle/gradle/issues/18647.  This is the workaround
+         * described in the thread there: https://github.com/gradle/gradle/issues/18647#issuecomment-1189222029
+         */
+        jvmArgs = listOf(
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        )
     }
 }
 
