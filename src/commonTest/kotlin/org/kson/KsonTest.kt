@@ -31,6 +31,15 @@ class KsonTest {
         expectedYaml: String,
         message: String? = null
     ) {
+        try {
+            validateYaml(expectedYaml)
+        } catch (e: Exception) {
+            throw IllegalArgumentException(
+                "ERROR: The expected YAML in this test is invalid. Please fix the test's expectations.\n" +
+                "YAML parsing error:\n${e.message}", e
+            )
+        }
+
         val parseResult = Kson.parse(source)
 
         assertFalse(
@@ -46,10 +55,6 @@ class KsonTest {
 
         // now validate the Yaml produced for this source
         val yamlResult = Kson.parseToYaml(source)
-
-        // sanity check the Yaml we are verifying is valid Yaml
-        yamlResult.yaml?.let { validateYaml(it) }
-
         assertEquals(
             expectedYaml,
             yamlResult.yaml,
