@@ -7,6 +7,7 @@ import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
+import org.kson.testSupport.validateYaml
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -45,7 +46,8 @@ class KsonTest {
 
         val compiledYaml = parseResult.ast?.toYamlSource(AstNode.Indent())
 
-        // TODO validate that the compiledYaml Yaml parses using an known YAML parser
+        // sanity check the Yaml we are verifying is valid Yaml
+        compiledYaml?.let { validateYaml(it) }
 
         assertEquals(
             expectedYaml,

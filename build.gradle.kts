@@ -1,4 +1,3 @@
-
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -148,6 +147,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
+                implementation("org.yaml:snakeyaml:2.2")
             }
         }
         val jsMain by getting
