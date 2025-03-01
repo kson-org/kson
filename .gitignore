@@ -31,3 +31,5 @@ build
 gradle/jdk
 # intellij settings
 .idea
+# kotlin metadata
+.kotlin
