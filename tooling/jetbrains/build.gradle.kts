@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
+    kotlin("jvm")
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.17.2"
 }
@@ -18,6 +19,7 @@ repositories {
 
 dependencies {
     implementation(project(":"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
