@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
     implementation(project(":"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
