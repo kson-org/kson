@@ -4,6 +4,8 @@ import org.kson.ast.AstNode.Indent
 import org.kson.ast.CompileTarget.Kson
 import org.kson.ast.CompileTarget.Yaml
 import org.kson.parser.EMBED_DELIMITER
+import org.kson.parser.NumberParser
+import org.kson.parser.NumberParser.ParsedNumber
 
 /**
  * Configuration for different compilation targets
@@ -274,20 +276,19 @@ class IdentifierNode(override val stringContent: String) : KeywordNode() {
 }
 
 /**
- * @param stringDouble MUST be parseable as a [Double]
+ * Callers are in charge of ensuring that `stringValue` is parseable by [NumberParser]
  */
-class NumberNode(private val stringDouble: String) : ValueNode() {
-    val value = try {
-        stringDouble.toDouble()
-    } catch (e: NumberFormatException) {
-        throw RuntimeException("This class must only be instantiated with numeric strings, " +
-                "but \"$stringDouble\" is not parseable as a double", e)
+class NumberNode(stringValue: String) : ValueNode() {
+    val value: ParsedNumber by lazy {
+        val parsedNumber = NumberParser(stringValue).parse()
+        parsedNumber.number ?: throw RuntimeException("Hitting this indicates a parser bug: unparseable " +
+                "strings should be passed here but we got: " + stringValue)
     }
 
     override fun toCompileTargetSource(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                indent.firstLineIndent() + value.toString()
+                indent.firstLineIndent() + value.asString
             }
         }
     }
