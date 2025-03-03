@@ -266,6 +266,16 @@ enum class MessageType {
             return "The nesting of objects and/or lists in this Kson " +
                     "exceeds the configured maximum supported nesting level of $maxNestingLevel"
         }
+    },
+    INTEGER_OVERFLOW {
+        override fun expectedArgs(): List<String> {
+            return listOf("Overflow Number")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val overflowNumber = parsedArgs.getArg("Overflow Number")
+            return "The integer \"$overflowNumber\" is too large and cannot be represented."
+        }
     };
 
     /**
