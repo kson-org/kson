@@ -11,7 +11,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonQuoteMatcherTest.testAutoInsert]
      */
     fun testDeleteEmptyQuotePairs() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE(), true) {
             doIdeActionTest(
                 "\"<caret>\"",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
@@ -25,7 +25,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE, false) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE(), false) {
             doIdeActionTest(
                 "\"<caret>\"",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
@@ -45,7 +45,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonTypedHandlerDelegateTest.testAngleBracketAutoInsert]
      */
     fun testDeleteEmptyAngleBracketPairs() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
@@ -53,7 +53,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, false) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
@@ -66,7 +66,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-delete closing angle brackets in non-Kson files
      */
     fun testNonKsonAngleBracketAutoDelete() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
@@ -90,7 +90,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 EMBED_DELIMITER
             }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
                 doIdeActionTest(
                     """
                     $fullDelim<caret>
@@ -212,7 +212,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 )
             }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, false) {
+            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
                 doIdeActionTest(
                     """
                     $fullDelim<caret>
@@ -232,7 +232,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-delete closing embed delimiters in non-Kson files
      */
     fun testNonKsonEmbedDelimAutoDelete() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doIdeActionTest(
                 """
                 %%<caret>
@@ -267,7 +267,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Ensure the lookbehinds in [KsonBackspaceHandlerDelegate] don't trip at the boundary
      */
     fun testBackspaceAtTheBoundary() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doIdeActionTest(
                 "x<caret>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,

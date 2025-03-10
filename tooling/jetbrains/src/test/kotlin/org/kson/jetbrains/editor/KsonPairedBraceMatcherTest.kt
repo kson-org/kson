@@ -5,7 +5,7 @@ class KsonPairedBraceMatcherTest : KsonEditorActionTest() {
      * Sanity check that [KsonPairedBraceMatcher] is correctly hooked up
      */
     fun testAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doCharTest(
                 "<caret>",
                 '{',
@@ -19,7 +19,7 @@ class KsonPairedBraceMatcherTest : KsonEditorActionTest() {
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, false) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
             doCharTest(
                 "<caret>",
                 '{',

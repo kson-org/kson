@@ -11,7 +11,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonBackspaceHandlerDelegateTest.testDeleteEmptyAngleBracketPairs]
      */
     fun testAngleBracketAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doCharTest(
                 "<caret>",
                 '<',
@@ -19,7 +19,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, false) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
             doCharTest(
                 "<caret>",
                 '<',
@@ -32,7 +32,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-insert closing angle brackets in non-Kson files `>`
      */
     fun testNonKsonAngleBracketAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doCharTest(
                 "<caret>",
                 '<',
@@ -56,7 +56,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 EMBED_DELIMITER
             }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
                 doCharTest(
                     "$halfDelim<caret>",
                     halfDelim,
@@ -138,7 +138,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 )
             }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, false) {
+            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
                 doCharTest(
                     "$halfDelim<caret>",
                     halfDelim,
@@ -152,7 +152,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-insert closing embed delimiters in non-Kson files
      */
     fun testNonKsonEmbedDelimiterAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET, true) {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doCharTest(
                 "%<caret>",
                 '%',
