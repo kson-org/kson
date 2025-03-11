@@ -8,6 +8,7 @@ import org.kson.Kson
 import org.kson.KsonFormatterConfig
 import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
+import org.kson.tools.IndentType
 
 class KsonExternalFormatter : AsyncDocumentFormattingService() {
     override fun canFormat(file: PsiFile): Boolean {
@@ -29,7 +30,7 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
         return object : FormattingTask {
             override fun run() {
                 val source = file.readText()
-                val formatted = Kson.format(source, KsonFormatterConfig(indentSize))
+                val formatted = Kson.format(source, KsonFormatterConfig(IndentType.Space(indentSize)))
                 request.onTextReady(formatted)
             }
 
@@ -38,4 +39,4 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
             override fun isRunUnderProgress(): Boolean = true
         }
     }
-} 
+}

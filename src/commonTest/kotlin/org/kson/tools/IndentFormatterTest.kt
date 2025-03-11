@@ -4,10 +4,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class IndentFormatterTest {
-    private fun assertFormatting(source: String, expected: String, indentSize: Int = 2) {
+    private fun assertFormatting(
+        source: String, 
+        expected: String, 
+        indentType: IndentType = IndentType.Space(2)
+    ) {
         assertEquals(
             expected,
-            indentSource(source, indentSize)
+            IndentFormatter(indentType).indent(source)
         )
     }
 
@@ -65,6 +69,48 @@ class IndentFormatterTest {
               }
             }
             """.trimIndent()
+        )
+
+        // Test with tabs
+        assertFormatting(
+            """
+            {
+            outer: {
+            inner: value
+            }
+            }
+            """.trimIndent(),
+            """
+            {
+            ${"\t"}outer: {
+            ${"\t"}${"\t"}inner: value
+            ${"\t"}}
+            }
+            """.trimIndent(),
+            IndentType.Tab()
+        )
+    }
+
+    @Test
+    fun testDifferentSpaceIndents() {
+        assertFormatting(
+            """
+            {
+            key1: value1,
+            nested: {
+            inner: value2
+            }
+            }
+            """.trimIndent(),
+            """
+            {
+                key1: value1,
+                nested: {
+                    inner: value2
+                }
+            }
+            """.trimIndent(),
+            IndentType.Space(4)
         )
     }
 
@@ -603,7 +649,106 @@ class IndentFormatterTest {
                 ]
             }
             """.trimIndent(),
-            indentSize
+            IndentType.Space(indentSize)
+        )
+    }
+
+    /**
+     * Sanity check tab indents: the code paths are all shared with space indents, so we don't need to over-test
+     * the tab case
+     */
+    @Test
+    fun testTabIndentation() {
+        assertFormatting(
+            """
+            {
+            key: value
+            }
+            """.trimIndent(),
+            """
+            {
+            ${"\t"}key: value
+            }
+            """.trimIndent(),
+            IndentType.Tab()
+        )
+
+        assertFormatting(
+            """
+            {
+            outer: {
+            inner: value
+            }
+            }
+            """.trimIndent(),
+            """
+            {
+            ${"\t"}outer: {
+            ${"\t"}${"\t"}inner: value
+            ${"\t"}}
+            }
+            """.trimIndent(),
+            IndentType.Tab()
+        )
+    }
+
+    @Test
+    fun testTabIndentWithEmbedBlock() {
+        assertFormatting(
+            """
+            {
+            code: %%sql
+            SELECT * 
+              FROM table
+                WHERE x = 1
+            %%
+            }
+            """.trimIndent(),
+            """
+            {
+            ${"\t"}code: %%sql
+            ${"\t"}${"\t"}SELECT * 
+            ${"\t"}${"\t"}  FROM table
+            ${"\t"}${"\t"}    WHERE x = 1
+            ${"\t"}${"\t"}%%
+            }
+            """.trimIndent(),
+            IndentType.Tab()
+        )
+    }
+
+    @Test
+    fun testTabIndentWithMixedStructures() {
+        assertFormatting(
+            """
+            {
+            list: <
+            - item1
+            - {
+            nested: value
+            }
+            - [
+            1,
+            2
+            ]
+            >
+            }
+            """.trimIndent(),
+            """
+            {
+            ${"\t"}list: <
+            ${"\t"}${"\t"}- item1
+            ${"\t"}${"\t"}- {
+            ${"\t"}${"\t"}${"\t"}nested: value
+            ${"\t"}${"\t"}}
+            ${"\t"}${"\t"}- [
+            ${"\t"}${"\t"}${"\t"}1,
+            ${"\t"}${"\t"}${"\t"}2
+            ${"\t"}${"\t"}]
+            ${"\t"}>
+            }
+            """.trimIndent(),
+            IndentType.Tab()
         )
     }
 }
