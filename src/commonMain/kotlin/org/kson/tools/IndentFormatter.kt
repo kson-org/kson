@@ -3,7 +3,7 @@ package org.kson.tools
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
-import org.kson.parser.TokenType.EMBED_CONTENT
+import org.kson.parser.TokenType.*
 
 /**
  * Fast and flexible [Token]-based indentation for Kson.  Note that the given Kson does not need to be valid
@@ -28,10 +28,15 @@ fun indentSource(source: String, indentSize: Int): String {
     val result = StringBuilder()
     var nextNestingLevel = 0
     var nestingLevel = 0
-    
+
+    val nesting = ArrayDeque<TokenType>()
+    val nestUntil = mutableSetOf<Int>()
+
     for (line in tokenLines) {
         val lineContent = mutableListOf<String>()
         var tokenIndex = 0
+        // true until we process the first non-whitespace token
+        var isLeadingToken = true
         while (tokenIndex < line.size) {
             val token = line[tokenIndex]
             when (token.tokenType) {
@@ -55,10 +60,19 @@ fun indentSource(source: String, indentSize: Int): String {
                     lineContent.clear()
                     break
                 }
+                LIST_DASH -> {
+                    if (isLeadingToken && nesting.isEmpty() || nesting.last() != ANGLE_BRACKET_L) {
+                        nextNestingLevel++
+                        nestUntil.add(nextNestingLevel)
+                        nestingLevel = nextNestingLevel
+                    }
+                    lineContent.add(token.lexeme.text)
+                }
                 in OPENING_DELIMITERS -> {
                     // register the indent from this opening delim
                     nextNestingLevel++
                     lineContent.add(token.lexeme.text)
+                    nesting.addLast(token.tokenType)
                 }
                 in CLOSING_DELIMITERS -> {
                     // register the unindent from this closing delim
@@ -68,12 +82,23 @@ fun indentSource(source: String, indentSize: Int): String {
                         nestingLevel = (nestingLevel - (tokenIndex + 1)).coerceAtLeast(0)
                     }
                     lineContent.add(token.lexeme.text)
+                    nesting.removeLast()
                 }
                 else -> {
                     lineContent.add(token.lexeme.text)
                 }
             }
+
+            if (token.tokenType != WHITESPACE) {
+                // any tokens after this one are not leading tokens
+                isLeadingToken = false
+            }
             tokenIndex++
+        }
+
+        if (nestUntil.contains(nextNestingLevel)) {
+            nestUntil.remove(nextNestingLevel)
+            nextNestingLevel--
         }
 
         if (lineContent.isNotEmpty()) {
@@ -103,12 +128,12 @@ private fun splitTokenLines(tokens: List<Token>): MutableList<List<Token>> {
     
     // Skip any leading whitespace tokens
     var startIndex = 0
-    while (startIndex < tokens.size && tokens[startIndex].tokenType == TokenType.WHITESPACE) {
+    while (startIndex < tokens.size && tokens[startIndex].tokenType == WHITESPACE) {
         startIndex++
     }
     
     for (token in tokens.subList(startIndex, tokens.size)) {
-        if (token.tokenType == TokenType.WHITESPACE && token.lexeme.text.contains('\n')) {
+        if (token.tokenType == WHITESPACE && token.lexeme.text.contains('\n')) {
             currentLine.add(token.copy(lexeme = token.lexeme.copy(text = "\n")))
             lines.add(currentLine)
 
@@ -145,13 +170,13 @@ private fun indentEmbedContent(
 }
 
 private val OPENING_DELIMITERS = setOf(
-    TokenType.CURLY_BRACE_L,
-    TokenType.SQUARE_BRACKET_L,
-    TokenType.ANGLE_BRACKET_L
+    CURLY_BRACE_L,
+    SQUARE_BRACKET_L,
+    ANGLE_BRACKET_L
 )
 
 private val CLOSING_DELIMITERS = setOf(
-    TokenType.CURLY_BRACE_R,
-    TokenType.SQUARE_BRACKET_R,
-    TokenType.ANGLE_BRACKET_R
+    CURLY_BRACE_R,
+    SQUARE_BRACKET_R,
+    ANGLE_BRACKET_R
 )

@@ -177,9 +177,27 @@ class IndentFormatterTest {
                      -    three
             """.trimIndent(),
             """
-            - one
-            -   two
-            -    three
+            |  - one
+            |  -   two
+            |  -    three
+            """.trimMargin()
+        )
+    }
+
+    @Test
+    fun testDashListNesting() {
+        assertFormatting(
+            """
+              key:
+                - {
+            a: b
+                            }
+            """.trimIndent(),
+            """
+            key:
+              - {
+                a: b
+              }
             """.trimIndent()
         )
     }
@@ -421,6 +439,37 @@ class IndentFormatterTest {
             >
             """.trimIndent()
         )
+
+        assertFormatting(
+            """
+            - <
+            - {
+            key:
+            - 1
+            - 2
+            - <
+            - [
+            - x
+            ]
+            >
+            }
+            >
+            """.trimIndent(),
+            """
+            |  - <
+            |    - {
+            |      key:
+            |        - 1
+            |        - 2
+            |        - <
+            |          - [
+            |              - x
+            |          ]
+            |        >
+            |    }
+            |  >
+            """.trimMargin()
+        )
     }
 
     @Test
@@ -448,8 +497,8 @@ class IndentFormatterTest {
             """
             {
               arrays: [
-                - first
-                - second
+                  - first
+                  - second
               ],
               angles: <
                 - third
@@ -503,10 +552,9 @@ class IndentFormatterTest {
             {
             key1: value1,
             key2: {
-            key2_1: <
+            key2_1:
             - x
             - y
-            >,
             key2_2: {
             key2_2_1: value2_2_1
             }
@@ -521,10 +569,9 @@ class IndentFormatterTest {
             {
                 key1: value1,
                 key2: {
-                    key2_1: <
+                    key2_1:
                         - x
                         - y
-                    >,
                     key2_2: {
                         key2_2_1: value2_2_1
                     }
