@@ -476,6 +476,27 @@ class IndentFormatterTest {
     fun testMixedBracketTypes() {
         assertFormatting(
             """
+              mixed: <
+              - [1,2]
+              - {x:y}
+              - <
+              - nested
+              >
+              >
+            """.trimIndent(),
+            """
+              mixed: <
+                - [1,2]
+                - {x:y}
+                - <
+                  - nested
+                >
+              >
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
             {
             arrays: [
             - first

@@ -26,11 +26,21 @@ fun indentSource(source: String, indentSize: Int): String {
     val tokenLines = splitTokenLines(tokens)
 
     val result = StringBuilder()
-    var nextNestingLevel = 0
-    var nestingLevel = 0
 
+    /**
+     * A stack to track our construct nesting by remembering the [TokenType] that caused the nest
+     */
     val nesting = ArrayDeque<TokenType>()
-    val nestUntil = mutableSetOf<Int>()
+
+    /**
+     * The list of [TokenType]s that require nesting starting on the next line
+     */
+    val nextNests = mutableListOf<TokenType>()
+
+    /**
+     * The count of how many [CLOSING_DELIMITERS] we saw that reduce the next line's level of nesting
+     */
+    var toBeClosedNestCount = 0
 
     for (line in tokenLines) {
         val lineContent = mutableListOf<String>()
@@ -46,9 +56,9 @@ fun indentSource(source: String, indentSize: Int): String {
                  */
                 EMBED_CONTENT -> {
                     // write out anything we've read before this embed block
-                    result.append(prefixWithIndent(lineContent.joinToString(""), nestingLevel, indentSize))
+                    result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size, indentSize))
                     // write out the lines of the embed content, indenting the whole block appropriately
-                    result.append(indentEmbedContent(token, nestingLevel, indentSize))
+                    result.append(indentEmbedContent(token, nesting.size, indentSize))
                     tokenIndex++
                     // write the rest of the trailing content from this line
                     while (tokenIndex < line.size) {
@@ -61,28 +71,31 @@ fun indentSource(source: String, indentSize: Int): String {
                     break
                 }
                 LIST_DASH -> {
-                    if (isLeadingToken && nesting.isEmpty() || nesting.last() != ANGLE_BRACKET_L) {
-                        nextNestingLevel++
-                        nestUntil.add(nextNestingLevel)
-                        nestingLevel = nextNestingLevel
+                    if (isLeadingToken && (nesting.isEmpty() || nesting.last() != ANGLE_BRACKET_L)) {
+                        // we're not nested in an explicitly delimited dash list, so each dash list element
+                        // must provide its own indent
+                        nesting.addLast(LIST_DASH)
                     }
                     lineContent.add(token.lexeme.text)
                 }
                 in OPENING_DELIMITERS -> {
                     // register the indent from this opening delim
-                    nextNestingLevel++
+                    nextNests.add(token.tokenType)
                     lineContent.add(token.lexeme.text)
-                    nesting.addLast(token.tokenType)
                 }
                 in CLOSING_DELIMITERS -> {
-                    // register the unindent from this closing delim
-                    nextNestingLevel = (nextNestingLevel - 1).coerceAtLeast(0)
-                    if (line.subList(0,tokenIndex + 1).all { CLOSING_DELIMITERS.contains(it.tokenType) }) {
-                        // also immediately apply the unindent from closing delimiters at the beginning of a line
-                        nestingLevel = (nestingLevel - (tokenIndex + 1)).coerceAtLeast(0)
+                    if (line.subList(0,tokenIndex + 1).all {
+                        CLOSING_DELIMITERS.contains(it.tokenType)
+                                || it.tokenType == WHITESPACE
+                    }) {
+                        // immediately apply the unindent from this close delimiter if it's part of a line
+                        // of leading close delimiters
+                        nesting.removeLastOrNull()
+                    } else {
+                        // else note we need to close some nests after this line is processed
+                        toBeClosedNestCount++
                     }
                     lineContent.add(token.lexeme.text)
-                    nesting.removeLast()
                 }
                 else -> {
                     lineContent.add(token.lexeme.text)
@@ -96,16 +109,25 @@ fun indentSource(source: String, indentSize: Int): String {
             tokenIndex++
         }
 
-        if (nestUntil.contains(nextNestingLevel)) {
-            nestUntil.remove(nextNestingLevel)
-            nextNestingLevel--
-        }
-
         if (lineContent.isNotEmpty()) {
-            result.append(prefixWithIndent(lineContent.joinToString(""), nestingLevel, indentSize))
+            result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size, indentSize))
         }
 
-        nestingLevel = nextNestingLevel
+        for (i in 1..toBeClosedNestCount) {
+            if (nextNests.isNotEmpty()) {
+                nextNests.removeLast()
+            } else if (nesting.isNotEmpty()) {
+                nesting.removeLast()
+            }
+        }
+        toBeClosedNestCount = 0
+
+        nesting.addAll(nextNests)
+        nextNests.clear()
+
+        if (nesting.lastOrNull() == LIST_DASH) {
+            nesting.removeLast()
+        }
     }
 
     return result.toString()
