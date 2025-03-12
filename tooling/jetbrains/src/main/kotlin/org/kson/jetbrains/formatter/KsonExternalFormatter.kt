@@ -23,14 +23,18 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
         val formattingContext = request.context
         val file = request.ioFile ?: return null
 
-        val indentSize = formattingContext.codeStyleSettings
+        val indentOptions = formattingContext.codeStyleSettings
             .getIndentOptions(formattingContext.containingFile.fileType)
-            .INDENT_SIZE
+        val indentType = if (indentOptions.USE_TAB_CHARACTER) {
+            IndentType.Tab()
+        } else {
+            IndentType.Space(indentOptions.INDENT_SIZE)
+        }
             
         return object : FormattingTask {
             override fun run() {
                 val source = file.readText()
-                val formatted = Kson.format(source, KsonFormatterConfig(IndentType.Space(indentSize)))
+                val formatted = Kson.format(source, KsonFormatterConfig(indentType))
                 request.onTextReady(formatted)
             }
 
