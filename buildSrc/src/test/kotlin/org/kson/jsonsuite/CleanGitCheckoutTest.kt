@@ -143,10 +143,11 @@ class CleanGitCheckoutTest {
             "GitFixture"
         )
 
+        val dirtyFileName = "dirty.txt"
         // reach into the checkout we just ensured and dirty it up
-        Paths.get(cleanGitCheckout.checkoutDir.toString(), "dirty.txt").toFile().createNewFile()
+        Paths.get(cleanGitCheckout.checkoutDir.toString(), dirtyFileName).toFile().createNewFile()
 
-        assertFailsWith<DirtyRepoException>("should error on a dirty git dir") {
+        val exception = assertFailsWith<DirtyRepoException>("should error on a dirty git dir") {
             CleanGitCheckout(
                 gitTestFixturePath,
                 desiredCheckoutSHA,
@@ -154,5 +155,49 @@ class CleanGitCheckoutTest {
                 "GitFixture"
             )
         }
+
+        assertTrue(
+            exception.message!!.contains(cleanGitCheckout.checkoutDir.absolutePath),
+            "Exception message should contain the absolute path of the dirty directory"
+        )
+
+        assertTrue(
+            exception.message!!.contains(dirtyFileName),
+            "Exception message should name any file dirtying up the directory"
+        )
+    }
+
+    @Test
+    fun testEnsureCleanGitCheckoutIgnoresDSStore() {
+        val testCheckoutDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
+        val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
+
+        val cleanGitCheckout = CleanGitCheckout(
+            gitTestFixturePath,
+            desiredCheckoutSHA,
+            testCheckoutDir,
+            "GitFixture"
+        )
+
+        // Create a .DS_Store file in the checkout directory
+        Paths.get(cleanGitCheckout.checkoutDir.toString(), ".DS_Store").toFile().createNewFile()
+
+        // This should NOT throw an exception, since .DS_Store should be ignored
+        CleanGitCheckout(
+            gitTestFixturePath,
+            desiredCheckoutSHA,
+            testCheckoutDir,
+            "GitFixture"
+        )
+
+        // Verify we're still at the correct SHA
+        val repository = Git.open(cleanGitCheckout.checkoutDir).repository
+        val actualCheckoutSHA = repository.refDatabase.firstExactRef("HEAD").objectId.name
+
+        assertEquals(
+            desiredCheckoutSHA,
+            actualCheckoutSHA,
+            "Should maintain desired behavior even with .DS_Store present"
+        )
     }
 }
