@@ -147,12 +147,14 @@ class CleanGitCheckoutTest {
         // reach into the checkout we just ensured and dirty it up
         Paths.get(cleanGitCheckout.checkoutDir.toString(), dirtyFileName).toFile().createNewFile()
 
+        val dirtyMessage = "this message should be included in our exception"
         val exception = assertFailsWith<DirtyRepoException>("should error on a dirty git dir") {
             CleanGitCheckout(
                 gitTestFixturePath,
                 desiredCheckoutSHA,
                 testCheckoutDir,
-                "GitFixture"
+                "GitFixture",
+                dirtyMessage
             )
         }
 
@@ -164,6 +166,11 @@ class CleanGitCheckoutTest {
         assertTrue(
             exception.message!!.contains(dirtyFileName),
             "Exception message should name any file dirtying up the directory"
+        )
+
+        assertTrue(
+            exception.message!!.contains(dirtyMessage),
+            "Exception message should contain the given additional message"
         )
     }
 

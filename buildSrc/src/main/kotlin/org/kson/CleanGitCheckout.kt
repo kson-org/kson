@@ -16,12 +16,17 @@ class DirtyRepoException(msg: String) : RuntimeException(msg)
  * @param checkoutSHA the SHA of the desired clean checkout of the repo found at [repoUri]
  * @param cloneParentDir the directory to place our cloned [repoUri] into
  * @param cloneName the name of the directory in [cloneParentDir] to clone [repoUri] into
+ * @param dirtyMessage optionally provide a short sentence explaining why this directory must be clean.  Will be added
+ *                     to the [DirtyRepoException] message thrown on a dirty repo
  */
 open class CleanGitCheckout(private val repoUri: String,
                             private val checkoutSHA: String,
                             private val cloneParentDir: Path,
-                            cloneName: String) {
+                            cloneName: String,
+                            private val dirtyMessage: String? = null
+    ) {
     val checkoutDir: File = File(cloneParentDir.toFile(), cloneName)
+
     init {
         ensureCleanGitCheckout()
     }
@@ -32,8 +37,8 @@ open class CleanGitCheckout(private val repoUri: String,
             cloneRepository(repoUri, checkoutDir)
         } else if (!File(checkoutDir, ".git").exists()) {
             throw NoRepoException(
-                "ERROR: $checkoutDir should contain a checkout of https://github.com/nst/JSONTestSuite," +
-                        "but it does not appear to be a git repo")
+                "ERROR: cannot create a ${CleanGitCheckout::class.simpleName} because `$checkoutDir` " +
+                        "does not appear to be a git repo")
         }
 
         val git = Git.init().setDirectory(checkoutDir).call()
@@ -57,6 +62,8 @@ open class CleanGitCheckout(private val repoUri: String,
                 if (status.conflicting.isNotEmpty()) appendLine("Conflicting files: ${status.conflicting}")
             }
 
+            val customDirtyMessage = if (dirtyMessage != null) { dirtyMessage + "\n" } else { "" }
+
             /**
              * Error if we're not clean other than [acceptableUntrackedFiles], since we cannot create a [CleanGitCheckout],
              * emphasis on _Clean_.  We also can't automatically blow away any changes since someone may have made
@@ -64,7 +71,7 @@ open class CleanGitCheckout(private val repoUri: String,
              * side-effect of the trying to verify a clean checkout could do them a real disservice
              */
             throw DirtyRepoException(
-                "ERROR: Dirty git status in `$checkoutDir`.\nThis needs to be clean since we generate files from this repo.\n" +
+                "ERROR: Dirty git status in `$checkoutDir`.\n$customDirtyMessage" +
                 "Suggested fixes:\n" +
                         "- either clean up the git status in `$checkoutDir`\n" +
                         "- or, delete `$checkoutDir`\n" +
