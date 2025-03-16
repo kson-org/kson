@@ -34,5 +34,6 @@
         <langCodeStyleSettingsProvider implementation="org.kson.jetbrains.config.KsonLanguageCodeStyleSettingsProvider"/>
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
         <formattingService implementation="org.kson.jetbrains.formatter.KsonExternalFormatter"/>
+        <enterHandlerDelegate implementation="org.kson.jetbrains.editor.KsonEnterHandlerDelegate"/>
     </extensions>
 </idea-plugin>
