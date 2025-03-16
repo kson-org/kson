@@ -16,12 +16,17 @@ class DirtyRepoException(msg: String) : RuntimeException(msg)
  * @param checkoutSHA the SHA of the desired clean checkout of the repo found at [repoUri]
  * @param cloneParentDir the directory to place our cloned [repoUri] into
  * @param cloneName the name of the directory in [cloneParentDir] to clone [repoUri] into
+ * @param dirtyMessage optionally provide a short sentence explaining why this directory must be clean.  Will be added
+ *                     to the [DirtyRepoException] message thrown on a dirty repo
  */
 open class CleanGitCheckout(private val repoUri: String,
                             private val checkoutSHA: String,
                             private val cloneParentDir: Path,
-                            cloneName: String) {
+                            cloneName: String,
+                            private val dirtyMessage: String? = null
+    ) {
     val checkoutDir: File = File(cloneParentDir.toFile(), cloneName)
+
     init {
         ensureCleanGitCheckout()
     }
@@ -32,19 +37,46 @@ open class CleanGitCheckout(private val repoUri: String,
             cloneRepository(repoUri, checkoutDir)
         } else if (!File(checkoutDir, ".git").exists()) {
             throw NoRepoException(
-                "ERROR: $checkoutDir should contain a checkout of https://github.com/nst/JSONTestSuite," +
-                        "but it does not appear to be a git repo")
+                "ERROR: cannot create a ${CleanGitCheckout::class.simpleName} because `$checkoutDir` " +
+                        "does not appear to be a git repo")
         }
 
         val git = Git.init().setDirectory(checkoutDir).call()
-        if(!git.status().call().isClean) {
-            // throw if we're not clean... don't want to build because the source files might be incorrect,
-            // but also don't want to immediately blow it away since someone may have made changes on purpose
-            // for reasons we're not guessing, and quietly nuking those changes as a side-effect of the build
-            // could do them a real disservice
+        val status = git.status().call()
+
+        /**
+         * We are dirty in the presence of any uncommitted changes or any untracked files other than the ones enumerated
+         * in [acceptableUntrackedFiles]
+         */
+        val isDirty =
+            status.uncommittedChanges.isNotEmpty() || status.untracked.minus(acceptableUntrackedFiles).isNotEmpty()
+
+        if(isDirty) {
+            val statusReport = buildString {
+                if (status.added.isNotEmpty()) appendLine("Added files: ${status.added}")
+                if (status.changed.isNotEmpty()) appendLine("Modified files: ${status.changed}")
+                if (status.removed.isNotEmpty()) appendLine("Removed files: ${status.removed}")
+                if (status.untracked.isNotEmpty()) appendLine("Untracked files: ${status.untracked.minus(acceptableUntrackedFiles)}")
+                if (status.modified.isNotEmpty()) appendLine("Modified files (not staged): ${status.modified}")
+                if (status.missing.isNotEmpty()) appendLine("Missing files: ${status.missing}")
+                if (status.conflicting.isNotEmpty()) appendLine("Conflicting files: ${status.conflicting}")
+            }
+
+            val customDirtyMessage = if (dirtyMessage != null) { dirtyMessage + "\n" } else { "" }
+
+            /**
+             * Error if we're not clean other than [acceptableUntrackedFiles], since we cannot create a [CleanGitCheckout],
+             * emphasis on _Clean_.  We also can't automatically blow away any changes since someone may have made
+             * those changes on purpose for reasons we're not guessing, and quietly nuking those changes as a
+             * side-effect of the trying to verify a clean checkout could do them a real disservice
+             */
             throw DirtyRepoException(
-                "ERROR: Dirty git status in $cloneParentDir.  Please ensure the git status is clean " +
-                        "or delete the directory and re-run this script")
+                "ERROR: Dirty git status in `$checkoutDir`.\n$customDirtyMessage" +
+                "Suggested fixes:\n" +
+                        "- either clean up the git status in `$checkoutDir`\n" +
+                        "- or, delete `$checkoutDir`\n" +
+                        "  so it is re-cloned on the next build" +
+                        "\n\n# Dirty Git Status in `$checkoutDir`:\n$statusReport")
         }
 
         checkoutCommit(checkoutDir, checkoutSHA)
@@ -74,3 +106,9 @@ open class CleanGitCheckout(private val repoUri: String,
         git.checkout().setName(commit).call()
     }
 }
+
+/**
+ * We still consider a directory clean if it contains any of these untracked files (we do not control the
+ * underlying git repos .gitignore, else we would deal with these there)
+ */
+private val acceptableUntrackedFiles = setOf(".DS_Store", "Thumbs.db")
