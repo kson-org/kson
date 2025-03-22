@@ -22,12 +22,14 @@ class IndentFormatter(
      * Indent the given source.  Uses the [indentType] this class was initialized with
      *
      * @param source The KSON source code to indent according to its nesting structures.  Note:
-     *          Does not need to be valid kson.  Open and close delimiters will still be used to
-     *          determine indentation
+     *   Does not need to be valid kson.  Open and close delimiters will still be used to
+     *   determine indentation
+     * @param snippetNestingLevel This param indicates that [source] is a snippet that we are indenting, and that we
+     *   should assume the snippet itself is already indented nested to a level of [snippetNestingLevel].
      * @return The indented KSON source code
      */
-    fun indent(source: String): String {
-        if (source.isBlank()) return ""
+    fun indent(source: String, snippetNestingLevel: Int? = null): String {
+        if (source.isBlank() && snippetNestingLevel == null) return ""
         val tokens = Lexer(source, gapFree = true).tokenize()
         val tokenLines = splitTokenLines(tokens)
 
@@ -37,6 +39,15 @@ class IndentFormatter(
          * A stack to track our construct nesting by remembering the [TokenType] that caused the nest
          */
         val nesting = ArrayDeque<TokenType>()
+        if (snippetNestingLevel != null) {
+            for (i in 1..snippetNestingLevel) {
+                /**
+                 * We'll denote our snippet nests with the [WHITESPACE] token since they
+                 * are "synthetic" nests represent indents to preserve in the input
+                 */
+                nesting.add(WHITESPACE)
+            }
+        }
 
         /**
          * The list of [TokenType]s that require nesting starting on the next line
@@ -89,7 +100,7 @@ class IndentFormatter(
                     COLON -> {
                         // if we're currently nested in a COLON, consider that nest closed on this line
                         // since we're starting a new object property
-                        if (nesting.lastOrNull() == COLON) {
+                        if (nextNests.isEmpty() && nesting.lastOrNull() == COLON) {
                             nesting.removeLastOrNull()
                         }
 
@@ -106,6 +117,10 @@ class IndentFormatter(
                         lineContent.add(token.lexeme.text)
                     }
                     in CLOSING_DELIMITERS -> {
+                        /**
+                         * [CLOSING_DELIMITERS] that are part of a leading line of leading close delimiters
+                         * on a line may trigger an immediate un-nest
+                         */
                         if (line.subList(0, tokenIndex + 1).all {
                             CLOSING_DELIMITERS.contains(it.tokenType)
                                     || it.tokenType == WHITESPACE
@@ -117,9 +132,10 @@ class IndentFormatter(
                                  */
                                 nesting.removeLast()
                             }
-                            // immediately apply the unindent from this close delimiter if it's part of a line
-                            // of leading close delimiters
-                            nesting.removeLastOrNull()
+                            // unnest this leading close delimiter immediately if it matches the current open nest
+                            if (nesting.lastOrNull() == CLOSE_TO_OPEN_MAP[token.tokenType]) {
+                                nesting.removeLastOrNull()
+                            }
                         } else {
                             // else note we need to close some nests after this line is processed
                             toBeClosedNestCount++
@@ -152,6 +168,33 @@ class IndentFormatter(
         }
 
         return result.toString()
+    }
+
+    fun getCurrentLineIndentLevel(prevLine: String, currentLine: String = ""): Int {
+        if (prevLine.isEmpty()) return 0
+
+        val sourceLines = prevLine.split('\n')
+        val lastLineIndentLevel = if (sourceLines.isNotEmpty()) {
+            val lastLine = sourceLines.last()
+            countIndentLevels(lastLine)
+        } else 0
+
+        val indentedResult = indent(prevLine + "\n" + currentLine, lastLineIndentLevel)
+        val resultLines = indentedResult.split('\n')
+        return countIndentLevels(resultLines.last())
+    }
+
+    /**
+     * Counts how many indent levels are at the start of the given line
+     */
+    private fun countIndentLevels(line: String): Int {
+        val indentSize = indentType.indentString.length
+        var leadingWhitespace = 0
+        for (char in line) {
+            if (!char.isWhitespace()) break
+            leadingWhitespace++
+        }
+        return leadingWhitespace / indentSize
     }
 
     /**
@@ -234,4 +277,10 @@ private val CLOSING_DELIMITERS = setOf(
     CURLY_BRACE_R,
     SQUARE_BRACKET_R,
     ANGLE_BRACKET_R
+)
+
+private val CLOSE_TO_OPEN_MAP = mapOf(
+    CURLY_BRACE_R to CURLY_BRACE_L,
+    SQUARE_BRACKET_R to SQUARE_BRACKET_L,
+    ANGLE_BRACKET_R to ANGLE_BRACKET_L
 )
