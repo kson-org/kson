@@ -314,6 +314,145 @@ class IndentFormatterTest {
     }
 
     @Test
+    fun testCommentAfterKeywordWithHangingValue() {
+        assertFormatting(
+            """
+            key:
+            # a value
+            value
+              
+              # a property
+              key2: value
+            """.trimIndent(),
+            """
+            key:
+              # a value
+              value
+              
+            # a property
+            key2: value
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+            key:
+              - 1 # a value
+              - 2
+            """.trimIndent(),
+            """
+            key:
+              - 1 # a value
+              - 2
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+            key:
+              - 1 
+              # a value
+              - 2
+            """.trimIndent(),
+            """
+            key:
+              - 1 
+              # a value
+              - 2
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+            key:
+                 # a value
+                 # a value
+                 # a value
+                 value
+              
+                      # a property
+              # a property
+                   # a property
+                 key2: value
+            """.trimIndent(),
+            """
+            key:
+              # a value
+              # a value
+              # a value
+              value
+              
+            # a property
+            # a property
+            # a property
+            key2: value
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testCommentsWithNewlines() {
+        assertFormatting(
+            """
+            x: {
+            # comment
+            
+            # comment
+            y: 12
+            }
+            """.trimIndent(),
+            """
+            x: {
+              # comment
+              
+              # comment
+              y: 12
+            }
+            """.trimIndent())
+    }
+
+    @Test
+    fun testCommentsOnNestedObjects() {
+        assertFormatting(
+            """
+            key:
+            # a value
+            # a value
+            value
+              
+            key2: {
+            nested:
+            # a value
+            value
+                
+            # a property
+            # a property
+            nested2:
+            value
+            }
+            """.trimIndent(),
+            """
+            key:
+              # a value
+              # a value
+              value
+              
+            key2: {
+              nested:
+                # a value
+                value
+                
+              # a property
+              # a property
+              nested2:
+                value
+            }
+            """.trimIndent()
+        )
+
+    }
+
+    @Test
     fun testEmbedBlocksAtDifferentNestingLevels() {
         assertFormatting(
             """
