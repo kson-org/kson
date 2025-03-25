@@ -85,7 +85,7 @@ class IndentFormatter(
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
                         // write out the lines of the embed content, indenting the whole block appropriately
-                        result.append(indentEmbedContent(token, embedContentIndent))
+                        result.append(prefixWithIndent(token.value, embedContentIndent, true))
                         tokenIndex++
                         // write the rest of the trailing content from this line
                         while (tokenIndex < line.size) {
@@ -200,16 +200,16 @@ class IndentFormatter(
     /**
      * Prefixes the given [content] with an indent computed from [nestingLevel]
      */
-    private fun prefixWithIndent(content: String, nestingLevel: Int): String {
+    private fun prefixWithIndent(content: String, nestingLevel: Int, keepTrailingIndent: Boolean = false): String {
         val indent = indentType.indentString.repeat(nestingLevel)
         val lines = content.split('\n')
 
         return lines.mapIndexed { index, line ->
-            if (index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
-                /**
-                 * If [content] ends in a newline, the next line does not belong to it,
-                 * so don't indent it
-                 */
+            /**
+             * If [content] ends in a newline, the next line does not belong to it,
+             * so don't indent it unless our caller demands it
+             */
+            if (!keepTrailingIndent && index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
                 line
             } else {
                 indent + line
@@ -219,7 +219,7 @@ class IndentFormatter(
 
     /**
      * Split the given [tokens] into lines of tokens corresponding to the lines of the original source that was tokenized.
-     * Note: trims leading whitespace tokens/lines, and may gather multplie lines of underlying source in one logical
+     * Note: trims leading whitespace tokens/lines, and may gather multiple lines of underlying source in one logical
      *   "token line" when appropriate
      */
     private fun splitTokenLines(tokens: List<Token>): MutableList<List<Token>> {
@@ -278,21 +278,6 @@ class IndentFormatter(
         tokenLines.add(currentLine)
 
         return tokenLines
-    }
-
-    /**
-     * Prepend an appropriate indent to the lines in an [EMBED_CONTENT] token
-     */
-    private fun indentEmbedContent(
-        token: Token,
-        nestingLevel: Int
-    ): String {
-        val indent = indentType.indentString.repeat(nestingLevel)
-        val lines = token.value.split('\n')
-
-        return lines.joinToString("\n") { line ->
-            indent + line
-        }
     }
 }
 
