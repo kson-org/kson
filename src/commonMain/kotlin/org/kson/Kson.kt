@@ -9,12 +9,8 @@ import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 
 /**
- * A Json document specifying just `true` is the "trivial" schema that matches everything,
- * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
- * for more detail
+ * Public interface to the [Kson] compiler
  */
-private const val NO_SCHEMA = "true"
-
 class Kson {
     companion object {
         /**
@@ -175,3 +171,10 @@ data class CoreCompileConfig(
      */
     val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
 )
+
+/**
+ * A Json document specifying just `true` is the "trivial" schema that matches everything,
+ * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
+ * for more detail
+ */
+private const val NO_SCHEMA = "true"
