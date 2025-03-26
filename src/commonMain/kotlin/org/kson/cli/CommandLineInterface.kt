@@ -1,9 +1,9 @@
 package org.kson.cli
 
+import org.kson.CompileTarget
 import org.kson.Kson
 import org.kson.ParseResult
 import org.kson.ast.AstNode
-import org.kson.ast.CompileTarget
 import org.kson.mpp.PlatformShim
 
 /**
@@ -42,7 +42,7 @@ class CommandLineInterface(private val platformShim: PlatformShim, private val o
             inputBuilder.toString()
         }
 
-        val parseResult = Kson.parse(ksonSource)
+        val parseResult = Kson.parseToAst(ksonSource)
         out(formatParseResult(parseResult))
 
         if (parseResult.hasErrors()) {
@@ -66,7 +66,7 @@ private fun formatParseResult(parseResult: ParseResult): String {
         |]
         |
         |serializedAst: %%
-        |${parseResult.ast?.toCommentedSource(AstNode.Indent(), CompileTarget.Kson)}
+        |${parseResult.ast?.toSource(AstNode.Indent(), CompileTarget.Kson())}
         |%%
     """.trimMargin()
 }

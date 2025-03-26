@@ -1,31 +1,12 @@
 package org.kson.ast
 
+import org.kson.CompileTarget
+import org.kson.CompileTarget.Kson
+import org.kson.CompileTarget.Yaml
 import org.kson.ast.AstNode.Indent
-import org.kson.ast.CompileTarget.Kson
-import org.kson.ast.CompileTarget.Yaml
 import org.kson.parser.EMBED_DELIMITER
 import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
-
-/**
- * Configuration for different compilation targets
- */
-sealed class CompileTarget {
-
-    /**
-     * Compile target for serializing a Kson AST out to Kson source
-     */
-    data object Kson : CompileTarget()
-
-    /**
-     * Compile target for Yaml transpilation
-     *
-     * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
-     */
-    data class Yaml(
-        val retainEmbedTags: Boolean = false
-    ) : CompileTarget()
-}
 
 abstract class AstNode {
     /**
@@ -80,10 +61,11 @@ abstract class AstNode {
     }
 
     /**
-     * Transpiles this [AstNode] to the given [compileTarget], preserving comments from the originally parsed Kson
+     * Transpiles this [AstNode] to the given [compileTarget] source, respecting the configuration in the given
+     * [CompileTarget]
      */
-    fun toCommentedSource(indent: Indent, compileTarget: CompileTarget): String {
-        return if (this is Documented && comments.isNotEmpty()) {
+    fun toSource(indent: Indent, compileTarget: CompileTarget): String {
+        return if (compileTarget.coreConfig.preserveComments && this is Documented && comments.isNotEmpty()) {
             // if we have comments, write them followed by the node content on the next line with an appropriate indent
             indent.firstLineIndent() + comments.joinToString("\n${indent.bodyLinesIndent()}") +
                     "\n" + toSourceInternal(indent.clone(false), compileTarget)
@@ -96,12 +78,12 @@ abstract class AstNode {
     /**
      * Subclasses must implement serialization of the AST subtree rooted at their node to a corresponding
      * source code snippet for [compileTarget], EXCLUDING comments (comment writing is handled "higher" up
-     * in [toCommentedSource]).
+     * in [toSource]).
      *
-     * This method is protected since it should never be called outside of [toCommentedSource], which handles ensuring
+     * This method is protected since it should never be called outside of [toSource], which handles ensuring
      * comments are properly serialized for all nodes when appropriate.  So:
      *
-     * DO NOT call this method---call [toCommentedSource] instead.
+     * DO NOT call this method---call [toSource] instead.
      */
     protected abstract fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String
 }
@@ -128,8 +110,8 @@ class KsonRoot(
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                rootNode.toCommentedSource(indent, compileTarget) +
-                        if (documentEndComments.isNotEmpty()) {
+                rootNode.toSource(indent, compileTarget) +
+                        if (compileTarget.coreConfig.preserveComments && documentEndComments.isNotEmpty()) {
                             "\n\n" + documentEndComments.joinToString("\n")
                         } else {
                             ""
@@ -146,7 +128,7 @@ class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                internalsNode.toCommentedSource(indent, compileTarget)
+                internalsNode.toSource(indent, compileTarget)
             }
         }
     }
@@ -161,7 +143,7 @@ class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : Va
                 } else {
                     """
                     |${indent.firstLineIndent()}{
-                    |${properties.joinToString("\n") { it.toCommentedSource(indent.next(false), compileTarget) }}
+                    |${properties.joinToString("\n") { it.toSource(indent.next(false), compileTarget) }}
                     |${indent.bodyLinesIndent()}}
                     """.trimMargin()
                 }
@@ -172,7 +154,7 @@ class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : Va
                     indent.firstLineIndent() + "{}"
                 } else {
                     properties.joinToString("\n") { 
-                        it.toCommentedSource(indent, compileTarget) 
+                        it.toSource(indent, compileTarget)
                     }
                 }
             }
@@ -189,8 +171,8 @@ class ObjectPropertyNode(
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                "${name.toCommentedSource(indent, compileTarget)}: ${
-                    value.toCommentedSource(
+                "${name.toSource(indent, compileTarget)}: ${
+                    value.toSource(
                         indent.clone(true),
                         compileTarget
                     )
@@ -199,10 +181,10 @@ class ObjectPropertyNode(
             is Yaml -> {
                 if (value is ListNode || value is ObjectDefinitionNode) {
                     // For lists and objects, put the value on the next line
-                    name.toCommentedSource(indent, compileTarget) + ":\n" +
-                            value.toCommentedSource(indent.next(false), compileTarget)
+                    name.toSource(indent, compileTarget) + ":\n" +
+                            value.toSource(indent.next(false), compileTarget)
                 } else {
-                    name.toCommentedSource(indent, compileTarget) + ": " + value.toCommentedSource(indent.clone(true), compileTarget)
+                    name.toSource(indent, compileTarget) + ": " + value.toSource(indent.clone(true), compileTarget)
                 }
             }
         }
@@ -218,7 +200,7 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
                 val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
                 indent.firstLineIndent() + "[" + bracketPadding +
                         elements.joinToString(",\n") {
-                            it.toCommentedSource(indent.next(false), compileTarget)
+                            it.toSource(indent.next(false), compileTarget)
                         } +
                         bracketPadding + endBraceIndent + "]"
             }
@@ -228,7 +210,7 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
                     indent.firstLineIndent() + "[]"
                 } else {
                     elements.joinToString("\n") {
-                        it.toCommentedSource(indent.clone(false), compileTarget)
+                        it.toSource(indent.clone(false), compileTarget)
                     }
                 }
             }
@@ -240,13 +222,13 @@ class ListElementNode(val value: ValueNode, override val comments: List<String>)
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                value.toCommentedSource(indent, compileTarget)
+                value.toSource(indent, compileTarget)
             }
             is Yaml -> {
                 if (value is ListNode) {
-                    indent.firstLineIndent() + "- \n" + value.toCommentedSource(indent.next(false), compileTarget)
+                    indent.firstLineIndent() + "- \n" + value.toSource(indent.next(false), compileTarget)
                 } else {
-                    indent.firstLineIndent() + "- " + value.toCommentedSource(indent.clone(true), compileTarget)
+                    indent.firstLineIndent() + "- " + value.toSource(indent.clone(true), compileTarget)
                 }
             }
         }

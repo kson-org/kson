@@ -1,7 +1,8 @@
 package org.kson
 
+import org.kson.CompileTarget.Kson
+import org.kson.CompileTarget.Yaml
 import org.kson.ast.AstNode
-import org.kson.ast.CompileTarget
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.*
@@ -16,11 +17,15 @@ private const val NO_SCHEMA = "true"
 
 class Kson {
     companion object {
-        fun parse(source: String, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
-            return parse(source, NO_SCHEMA, maxNestingLevel)
-        }
-
-        fun parse(source: String, schemaJson: String = NO_SCHEMA, maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL): ParseResult {
+        /**
+         * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
+         * we support, and may be used as a standalone parse to validate a [Kson] document
+         *
+         * @param source The Kson source to parse
+         * @param coreCompileConfig the [CoreCompileConfig] for this parse
+         * @return An [AstParseResult]
+         */
+        fun parseToAst(source: String, coreCompileConfig: CoreCompileConfig = CoreCompileConfig()): AstParseResult {
             val messageSink = MessageSink()
             val tokens = Lexer(source).tokenize()
             if (tokens[0].tokenType == TokenType.EOF) {
@@ -29,10 +34,10 @@ class Kson {
             }
 
             val builder = KsonBuilder(tokens)
-            Parser(builder, maxNestingLevel).parse()
+            Parser(builder, coreCompileConfig.maxNestingLevel).parse()
             val ast = builder.buildTree(messageSink)
 
-            if (schemaJson == NO_SCHEMA) {
+            if (coreCompileConfig.schemaJson == NO_SCHEMA) {
                 return AstParseResult(ast, tokens, messageSink)
             } else {
                 TODO("Json Schema support for Kson not yet implemented")
@@ -43,17 +48,24 @@ class Kson {
          * Parse the given Kson [source] and compile it to Yaml
          *
          * @param source The Kson source to parse
-         * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content.
-         *                          Default: false, which means embed blocks are compiled to multi-line strings of the
-         *                          block's content
-         * @param maxNestingLevel Maximum object/list nesting parser must support in the given Kson
+         * @param compileConfig a [CompileTarget.Yaml] object with this compilation's config
          * @return A [YamlParseResult]
          */
-        fun parseToYaml(source: String,
-            retainEmbedTags: Boolean = false,
-            maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
-        ): YamlParseResult {
-            return YamlParseResult(parse(source, maxNestingLevel), retainEmbedTags)
+        fun parseToYaml(source: String, compileConfig: Yaml = Yaml()): YamlParseResult {
+            return YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+        }
+
+        /**
+         * Parse the given Kson [source] and re-compile it out to Kson.  Useful for testing and transformations
+         * like re-writing Json into Kson (the Json is itself Kson since Kson is a superset of Json, whereas the
+         * compiled Kson output is in more canonical Kson syntax)
+         *
+         * @param source The Kson source to parse
+         * @param compileConfig a [CompileTarget.Kson] object with this compilation's config
+         * @return A [KsonParseResult]
+         */
+        fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
+            return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
         }
     }
 }
@@ -99,13 +111,67 @@ data class AstParseResult(
     }
 }
 
+class KsonParseResult(
+    private val astParseResult: AstParseResult,
+    compileConfig: Kson
+) : ParseResult by astParseResult {
+    /**
+     * The Kson compiled from some Kson source, or null if there were errors trying to parse
+     * (consult [astParseResult] for information on any errors)
+     */
+    val kson: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
+}
+
 class YamlParseResult(
-    val parseResult: ParseResult,
-    retainEmbedTags: Boolean = false
-) : ParseResult by parseResult {
+    private val astParseResult: AstParseResult,
+    compileConfig: Yaml
+) : ParseResult by astParseResult {
     /**
      * The Yaml compiled from some Kson source, or null if there were errors trying to parse
-     * (consult [parseResult] for information on any errors)
+     * (consult [astParseResult] for information on any errors)
      */
-    val yaml: String? = parseResult.ast?.toCommentedSource(AstNode.Indent(), CompileTarget.Yaml(retainEmbedTags))
+    val yaml: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
 }
+
+/**
+ * Type to denote a support Kson complication target and hold the compilation's configuration
+ */
+sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
+    /**
+     * Compile target for serializing a Kson AST out to Kson source
+     *
+     * @param coreCompileConfig the [CoreCompileConfig] for this compile
+     */
+    class Kson(
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+    ) : CompileTarget(coreCompileConfig)
+
+    /**
+     * Compile target for Yaml transpilation
+     *
+     * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
+     * @param coreCompileConfig the [CoreCompileConfig] for this compile
+     */
+    class Yaml(
+        val retainEmbedTags: Boolean = false,
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+    ) : CompileTarget(coreCompileConfig)
+}
+
+/**
+ * Configuration applicable to all compile targets
+ */
+data class CoreCompileConfig(
+    /**
+     * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
+     */
+    val preserveComments: Boolean = true,
+    /**
+     * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
+     */
+    val schemaJson: String = NO_SCHEMA,
+    /**
+     * The deep object/list nesting to allow in the parsed document.  See [DEFAULT_MAX_NESTING_LEVEL] for more details.
+     */
+    val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
+)

@@ -1,5 +1,6 @@
 package org.kson.parser.json.generated
 
+import org.kson.CoreCompileConfig
 import org.kson.Kson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20781,7 +20782,9 @@ class SchemaSuiteTest {
                                          shouldAcceptAsValid: Boolean,
                                          description: String) {
         // accepted as valid if and only if we parsed without error
-        val acceptedAsValid = !Kson.parse(ksonSource.trimIndent(), schemaJson.trimIndent())
+        val acceptedAsValid = !Kson.parseToAst(
+            ksonSource.trimIndent(),
+            coreCompileConfig = CoreCompileConfig(schemaJson = schemaJson.trimIndent()))
             .hasErrors()
         
         assertEquals(
