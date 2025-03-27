@@ -130,7 +130,7 @@ class YamlParseResult(
 }
 
 /**
- * Type to denote a support Kson complication target and hold the compilation's configuration
+ * Type to denote a supported Kson compilation target and hold the compilation's configuration
  */
 sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     /**
