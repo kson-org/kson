@@ -6,7 +6,7 @@ import org.kson.parser.messages.MessageType.*
 
 /**
  * Default maximum nesting of objects and lists to allow in parsing.  This protects against
- * excessive nesting crashing the parser.  This default was chosen somewhat arbitraily,
+ * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
  * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
  * as needed (note that this may also be configured in calls to [Parser.parse])
  */

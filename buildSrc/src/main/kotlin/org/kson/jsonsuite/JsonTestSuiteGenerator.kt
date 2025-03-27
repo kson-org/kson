@@ -202,7 +202,7 @@ private fun assertParseResult(
     expectedParseResult: JsonParseResult,
     source: String
 ) {
-    val parseResult = Kson.parse(source)
+    val parseResult = Kson.parseToAst(source)
 
     when (expectedParseResult) {
         ${ResultEnumData.className}.${ResultEnumData.acceptEntry}, ${ResultEnumData.className}.${ResultEnumData.acceptEntryForKson} -> assertFalse(
@@ -229,6 +229,7 @@ private fun generateSchemaSuiteTestClasses(
 ): String {
     return """package $testClassPackage
 
+import org.kson.CoreCompileConfig
 import org.kson.Kson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -292,7 +293,9 @@ ${    tests.joinToString("\n") {
                                          shouldAcceptAsValid: Boolean,
                                          description: String) {
         // accepted as valid if and only if we parsed without error
-        val acceptedAsValid = !Kson.parse(ksonSource.trimIndent(), schemaJson.trimIndent())
+        val acceptedAsValid = !Kson.parseToAst(
+            ksonSource.trimIndent(),
+            coreCompileConfig = CoreCompileConfig(schemaJson = schemaJson.trimIndent()))
             .hasErrors()
         
         assertEquals(

@@ -1,7 +1,6 @@
 package org.kson
 
-import org.kson.ast.AstNode
-import org.kson.ast.CompileTarget
+import org.kson.CompileTarget.*
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.Location
@@ -16,6 +15,15 @@ import kotlin.test.assertTrue
 
 class KsonTest {
     /**
+     * Holder for compilation settings used in test.  For most tests, these should be good defaults,
+     * and custom [CompileSettings] may be constructed as needed
+     */
+    data class CompileSettings(
+        val ksonSettings: CompileTarget.Kson = CompileTarget.Kson(),
+        val yamlSettings: Yaml = Yaml()
+    )
+
+    /**
      * Assertion helper for testing that [source] parses without error and produces the AST described by
      * [expectedKsonFromAst] (this often looks like a truism, ie. `key: val` parses to `key: val`, but it's
      * an easy/quick/clear way to quickly produce platform- and implementation-agnostic tests that ensure
@@ -24,15 +32,15 @@ class KsonTest {
      * @param source is the kson source to parse into a [KsonRoot]
      * @param expectedKsonFromAst the expected [CompileTarget.Kson] compiler output for the parsed [source]
      * @param expectedYaml the expected [CompileTarget.Yaml] compiler output for the parsed [source]
-     * @param retainEmbedTagsForYaml the value to use for [CompileTarget.Yaml.retainEmbedTags]
      * @param message optionally pass a custom failure message for this assertion
+     * @param compileSettings optionally customize the [CompileSettings] for this test
      */
     private fun assertParsesTo(
         source: String,
         expectedKsonFromAst: String,
         expectedYaml: String,
         message: String? = null,
-        retainEmbedTagsForYaml: Boolean = false,
+        compileSettings: CompileSettings = CompileSettings(),
     ) {
         try {
             validateYaml(expectedYaml)
@@ -43,21 +51,21 @@ class KsonTest {
             )
         }
 
-        val parseResult = Kson.parse(source)
+        val ksonParseResult = Kson.parseToKson(source, compileSettings.ksonSettings)
 
         assertFalse(
-            parseResult.hasErrors(),
-            "Should not have parsing errors, got:\n\n" + LoggedMessage.print(parseResult.messages)
+            ksonParseResult.hasErrors(),
+            "Should not have parsing errors, got:\n\n" + LoggedMessage.print(ksonParseResult.messages)
         )
 
         assertEquals(
             expectedKsonFromAst,
-            parseResult.ast?.toCommentedSource(AstNode.Indent(), CompileTarget.Kson),
+            ksonParseResult.kson,
             message
         )
 
         // now validate the Yaml produced for this source
-        val yamlResult = Kson.parseToYaml(source, retainEmbedTagsForYaml)
+        val yamlResult = Kson.parseToYaml(source, compileSettings.yamlSettings)
         assertEquals(
             expectedYaml,
             yamlResult.yaml,
@@ -80,9 +88,9 @@ class KsonTest {
         maxNestingLevel: Int? = null
     ): ImmutableList<LoggedMessage> {
         val parseResult = if (maxNestingLevel != null) {
-            Kson.parse(source, maxNestingLevel)
+            Kson.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
         } else {
-            Kson.parse(source)
+            Kson.parseToAst(source)
         }
 
         assertEquals(
@@ -1655,7 +1663,7 @@ class KsonTest {
                   select * from my_table
                   
             """.trimIndent(),
-            retainEmbedTagsForYaml = true
+            compileSettings = CompileSettings(yamlSettings = Yaml(retainEmbedTags = true))
         )
 
         assertParsesTo(
@@ -1684,7 +1692,7 @@ class KsonTest {
                   hello()
                   
             """.trimIndent(),
-            retainEmbedTagsForYaml = true
+            compileSettings = CompileSettings(yamlSettings = Yaml(retainEmbedTags = true))
         )
 
         assertParsesTo(
@@ -1709,7 +1717,36 @@ class KsonTest {
                   with no tag
                   
             """.trimIndent(),
-            retainEmbedTagsForYaml = true
+            compileSettings = CompileSettings(yamlSettings = Yaml(retainEmbedTags = true))
+        )
+    }
+
+    @Test
+    fun testSanityCheckCommentFreeCompiles() {
+        val noCommentsConfig = CoreCompileConfig(preserveComments = false)
+        assertParsesTo("""
+            # a comment
+            key: {
+              # nested comment
+              value: 42
+            }
+            # document end comment
+        """.trimIndent(),
+        """
+            {
+              key: {
+                value: 42
+              }
+            }
+        """.trimIndent(),
+        """
+            key:
+              value: 42
+        """.trimIndent(),
+            compileSettings = CompileSettings(
+                Kson(coreCompileConfig = noCommentsConfig),
+                Yaml(coreCompileConfig = noCommentsConfig)
+            )
         )
     }
 }
