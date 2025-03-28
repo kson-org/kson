@@ -693,6 +693,42 @@ class LexerTest {
     }
 
     @Test
+    fun testStringWhitespaceAfterEscape() {
+        assertTokenizesTo(
+            """'string with \' whitespace after an escape'""",
+            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            """
+                'string with \' whitespace after an escape'
+            """,
+            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE, WHITESPACE),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            """
+                'string with all whitespace after escape: \'     '
+            """,
+            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE, WHITESPACE),
+            testGapFreeLexing = true
+        )
+    }
+
+    @Test
+    fun testStringWhitespaceAfterIllegalControlCharacter() {
+        assertTokenizesTo(
+            """
+                'string with   whitespace after an illegal escape char'
+            """,
+            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ILLEGAL_CONTROL_CHARACTER, STRING, STRING_QUOTE, WHITESPACE),
+            testGapFreeLexing = true
+        )
+    }
+
+    @Test
     fun testEmbeddedBlockDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   

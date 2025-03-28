@@ -613,7 +613,11 @@ class Lexer(source: String, gapFree: Boolean = false) {
         // comments don't get associated with these types
         if (currentTokenType == TokenType.COMMENT
             || currentTokenType == TokenType.WHITESPACE
-            || currentTokenType == TokenType.EMBED_PREAMBLE_NEWLINE) {
+            || currentTokenType == TokenType.EMBED_PREAMBLE_NEWLINE
+            || currentTokenType == TokenType.STRING
+            || currentTokenType == TokenType.STRING_ESCAPE
+            || currentTokenType == TokenType.STRING_UNICODE_ESCAPE
+            || currentTokenType == TokenType.STRING_ILLEGAL_CONTROL_CHARACTER) {
             return CommentMetadata(emptyList(), emptyList())
         }
 

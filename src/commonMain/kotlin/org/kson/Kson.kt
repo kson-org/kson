@@ -7,6 +7,7 @@ import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
+import org.kson.tools.indentSource
 
 /**
  * Public interface to the [Kson] compiler
@@ -62,6 +63,13 @@ class Kson {
          */
         fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
             return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+        }
+
+        /**
+         * Format the given [Kson] source
+         */
+        fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
+            return indentSource(ksonSource, formatterConfig.indentSize)
         }
     }
 }
@@ -129,6 +137,7 @@ class YamlParseResult(
     val yaml: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
 }
 
+
 /**
  * Type to denote a supported Kson compilation target and hold the compilation's configuration
  */
@@ -171,6 +180,8 @@ data class CoreCompileConfig(
      */
     val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
 )
+
+data class KsonFormatterConfig(val indentSize: Int = 2)
 
 /**
  * A Json document specifying just `true` is the "trivial" schema that matches everything,
