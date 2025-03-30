@@ -274,6 +274,26 @@ class IndentFormatterTest {
     }
 
     @Test
+    fun testAlreadyIndentedEmbedBlock() {
+        assertFormatting(
+            """
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent(),
+            """
+              code: %%sql
+                SELECT * 
+                  FROM table
+                    WHERE x = 1
+                %%
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testPreservesCommentFormatting() {
         assertFormatting(
             """

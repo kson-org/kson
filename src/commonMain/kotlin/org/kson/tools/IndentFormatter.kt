@@ -189,7 +189,7 @@ class IndentFormatter(
         nestingLevel: Int
     ): String {
         val indent = indentType.indentString.repeat(nestingLevel + 1)
-        val lines = token.lexeme.text.split('\n')
+        val lines = token.value.split('\n')
 
         return lines.joinToString("\n") { line ->
             indent + line
