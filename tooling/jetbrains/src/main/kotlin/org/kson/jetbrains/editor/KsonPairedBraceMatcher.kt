@@ -17,6 +17,11 @@ private val bracePairs = arrayOf(
         elem(TokenType.SQUARE_BRACKET_L),
         elem(TokenType.SQUARE_BRACKET_R),
         true
+    ),
+    BracePair(
+        elem(TokenType.ANGLE_BRACKET_L),
+        elem(TokenType.ANGLE_BRACKET_R),
+        true
     )
 )
 
