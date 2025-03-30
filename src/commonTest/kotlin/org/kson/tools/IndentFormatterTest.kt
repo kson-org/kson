@@ -223,10 +223,10 @@ class IndentFormatterTest {
                      -    three
             """.trimIndent(),
             """
-            |  - one
-            |  -   two
-            |  -    three
-            """.trimMargin()
+            - one
+            -   two
+            -    three
+            """.trimIndent()
         )
     }
 
@@ -269,6 +269,26 @@ class IndentFormatterTest {
                     WHERE x = 1
                 %%
             }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testAlreadyIndentedEmbedBlock() {
+        assertFormatting(
+            """
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent(),
+            """
+              code: %%sql
+                SELECT * 
+                  FROM table
+                    WHERE x = 1
+                %%
             """.trimIndent()
         )
     }
@@ -502,19 +522,19 @@ class IndentFormatterTest {
             >
             """.trimIndent(),
             """
-            |  - <
-            |    - {
-            |      key:
-            |        - 1
-            |        - 2
-            |        - <
-            |          - [
-            |              - x
-            |          ]
-            |        >
-            |    }
-            |  >
-            """.trimMargin()
+            - <
+              - {
+                key:
+                  - 1
+                  - 2
+                  - <
+                    - [
+                      - x
+                    ]
+                  >
+              }
+            >
+            """.trimIndent()
         )
     }
 
@@ -564,8 +584,8 @@ class IndentFormatterTest {
             """
             {
               arrays: [
-                  - first
-                  - second
+                - first
+                - second
               ],
               angles: <
                 - third
@@ -749,6 +769,140 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             IndentType.Tab()
+        )
+    }
+
+    @Test
+    fun testKeyNewlineIndentation() {
+        assertFormatting(
+            """
+            {
+            key1:
+            {
+            key2:
+            {
+            key3: 
+            value
+            }
+            }
+            }
+            """.trimIndent(),
+            """
+            {
+              key1:
+                {
+                  key2:
+                    {
+                      key3: 
+                        value
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        assertFormatting(
+            """
+            {
+            key1:
+            "string value"
+            key2:
+            123
+            key3:
+            [1, 2, 3]
+            key4:
+            {
+            nested:
+            value
+            }
+            key5:
+            - item1
+            - item2
+            key6:
+            <
+            - item1
+            - item2
+            >
+            }
+            """.trimIndent(),
+            """
+            {
+              key1:
+                "string value"
+              key2:
+                123
+              key3:
+                [1, 2, 3]
+              key4:
+                {
+                  nested:
+                    value
+                }
+              key5:
+                - item1
+                - item2
+              key6:
+                <
+                  - item1
+                  - item2
+                >
+            }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedKeyNewlineIndentation() {
+        assertFormatting(
+            """
+            {
+            outer: {
+            inner1:
+            [1, 2]
+            inner2:
+            {
+            deepKey:
+            "deep value"
+            }
+            }
+            }
+            """.trimIndent(),
+            """
+            {
+              outer: {
+                inner1:
+                  [1, 2]
+                inner2:
+                  {
+                    deepKey:
+                      "deep value"
+                  }
+              }
+            }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testKeyNewlineWithEmbedBlock() {
+        assertFormatting(
+            """
+            {
+            code:
+            %%sql
+            SELECT *
+              FROM table
+            %%
+            }
+            """.trimIndent(),
+            """
+            {
+              code:
+                %%sql
+                SELECT *
+                  FROM table
+                %%
+            }
+            """.trimIndent()
         )
     }
 }

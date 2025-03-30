@@ -51,8 +51,6 @@ class IndentFormatter(
         for (line in tokenLines) {
             val lineContent = mutableListOf<String>()
             var tokenIndex = 0
-            // true until we process the first non-whitespace token
-            var isLeadingToken = true
             while (tokenIndex < line.size) {
                 val token = line[tokenIndex]
                 when (token.tokenType) {
@@ -61,10 +59,22 @@ class IndentFormatter(
                      * carefully preserved
                      */
                     EMBED_CONTENT -> {
+                        val embedContentIndent = if (line.subList(0,tokenIndex + 1).any {
+                                it.tokenType == COLON
+                            }) {
+                            /**
+                             * if our embed preamble is on the same line as an object key, we'll indent the embed
+                             * content on the next line
+                             */
+                            nesting.size + 1
+                        } else {
+                            nesting.size
+                        }
+
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
                         // write out the lines of the embed content, indenting the whole block appropriately
-                        result.append(indentEmbedContent(token, nesting.size))
+                        result.append(indentEmbedContent(token, embedContentIndent))
                         tokenIndex++
                         // write the rest of the trailing content from this line
                         while (tokenIndex < line.size) {
@@ -76,11 +86,17 @@ class IndentFormatter(
                         lineContent.clear()
                         break
                     }
-                    LIST_DASH -> {
-                        if (isLeadingToken && (nesting.isEmpty() || nesting.last() != ANGLE_BRACKET_L)) {
-                            // we're not nested in an explicitly delimited dash list, so each dash list element
-                            // must provide its own indent
-                            nesting.addLast(LIST_DASH)
+                    COLON -> {
+                        // if we're currently nested in a COLON, consider that nest closed on this line
+                        // since we're starting a new object property
+                        if (nesting.lastOrNull() == COLON) {
+                            nesting.removeLastOrNull()
+                        }
+
+                        // if everything after this object colon is whitespace, we want to nest the value
+                        // that starts on the next line
+                        if (line.subList(tokenIndex + 1, line.lastIndex).all { it.tokenType == WHITESPACE }) {
+                            nextNests.add(COLON)
                         }
                         lineContent.add(token.lexeme.text)
                     }
@@ -94,6 +110,13 @@ class IndentFormatter(
                             CLOSING_DELIMITERS.contains(it.tokenType)
                                     || it.tokenType == WHITESPACE
                         }) {
+                            if (nesting.lastOrNull() == COLON) {
+                                /**
+                                 * If we spot a [COLON] nest as we're closing things, that must be closed too:
+                                 * a [COLON] nest is only valid as long as it has a sub-nest
+                                 */
+                                nesting.removeLast()
+                            }
                             // immediately apply the unindent from this close delimiter if it's part of a line
                             // of leading close delimiters
                             nesting.removeLastOrNull()
@@ -108,10 +131,6 @@ class IndentFormatter(
                     }
                 }
 
-                if (token.tokenType != WHITESPACE) {
-                    // any tokens after this one are not leading tokens
-                    isLeadingToken = false
-                }
                 tokenIndex++
             }
 
@@ -130,10 +149,6 @@ class IndentFormatter(
 
             nesting.addAll(nextNests)
             nextNests.clear()
-
-            if (nesting.lastOrNull() == LIST_DASH) {
-                nesting.removeLast()
-            }
         }
 
         return result.toString()
@@ -188,8 +203,8 @@ class IndentFormatter(
         token: Token,
         nestingLevel: Int
     ): String {
-        val indent = indentType.indentString.repeat(nestingLevel + 1)
-        val lines = token.lexeme.text.split('\n')
+        val indent = indentType.indentString.repeat(nestingLevel)
+        val lines = token.value.split('\n')
 
         return lines.joinToString("\n") { line ->
             indent + line

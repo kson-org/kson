@@ -15,7 +15,7 @@ Some useful Gradle commands for this subproject:
 ./gradlew :tooling:jetbrains:runIde
 
 # Run the plugin tests
-./gradew :tooling:jetbrains:test
+./gradlew :tooling:jetbrains:test
 
 # Verify plugin compatibility
 # (https://plugins.jetbrains.com/docs/intellij/api-changes-list.html#verifying-compatibility)
