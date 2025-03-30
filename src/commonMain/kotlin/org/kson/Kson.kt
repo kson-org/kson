@@ -145,11 +145,17 @@ class YamlParseResult(
  */
 sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     /**
+     * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
+     */
+    abstract val preserveComments: Boolean
+
+    /**
      * Compile target for serializing a Kson AST out to Kson source
      *
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Kson(
+        override val preserveComments: Boolean = true,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
 
@@ -160,6 +166,7 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Yaml(
+        override val preserveComments: Boolean = true,
         val retainEmbedTags: Boolean = false,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
@@ -169,10 +176,6 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
  * Configuration applicable to all compile targets
  */
 data class CoreCompileConfig(
-    /**
-     * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
-     */
-    val preserveComments: Boolean = true,
     /**
      * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
      */

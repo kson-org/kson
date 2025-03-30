@@ -65,7 +65,7 @@ abstract class AstNode {
      * [CompileTarget]
      */
     fun toSource(indent: Indent, compileTarget: CompileTarget): String {
-        return if (compileTarget.coreConfig.preserveComments && this is Documented && comments.isNotEmpty()) {
+        return if (compileTarget.preserveComments && this is Documented && comments.isNotEmpty()) {
             // if we have comments, write them followed by the node content on the next line with an appropriate indent
             indent.firstLineIndent() + comments.joinToString("\n${indent.bodyLinesIndent()}") +
                     "\n" + toSourceInternal(indent.clone(false), compileTarget)
@@ -111,7 +111,7 @@ class KsonRoot(
         return when (compileTarget) {
             is Kson, is Yaml -> {
                 rootNode.toSource(indent, compileTarget) +
-                        if (compileTarget.coreConfig.preserveComments && documentEndComments.isNotEmpty()) {
+                        if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
                             "\n\n" + documentEndComments.joinToString("\n")
                         } else {
                             ""

@@ -1723,7 +1723,6 @@ class KsonTest {
 
     @Test
     fun testSanityCheckCommentFreeCompiles() {
-        val noCommentsConfig = CoreCompileConfig(preserveComments = false)
         assertParsesTo("""
             # a comment
             key: {
@@ -1744,8 +1743,8 @@ class KsonTest {
               value: 42
         """.trimIndent(),
             compileSettings = CompileSettings(
-                Kson(coreCompileConfig = noCommentsConfig),
-                Yaml(coreCompileConfig = noCommentsConfig)
+                Kson(preserveComments = false),
+                Yaml(preserveComments = false),
             )
         )
     }
