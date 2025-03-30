@@ -32,13 +32,14 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param getValue a function which returns the current value the config property
      * @param setValue a function which sets the value of the config property
      */
-    enum class ConfigProperty(private val getValue: () -> Boolean, private val setValue: (Boolean) -> Unit) {
-        AUTOINSERT_PAIR_QUOTE(
+    sealed class ConfigProperty<T>(private val getValue: () -> T, private val setValue: (T) -> Unit) {
+        class AUTOINSERT_PAIR_QUOTE: ConfigProperty<Boolean>(
             { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE },
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE = it }),
-        AUTOINSERT_PAIR_BRACKET(
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE = it })
+
+        class AUTOINSERT_PAIR_BRACKET: ConfigProperty<Boolean>(
             { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET },
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET = it });
+            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET = it })
 
         /**
          * Set the [ConfigProperty] to the given [Boolean], returning its previous/original value after the set
@@ -46,7 +47,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
          *
          * @return the original value before setting to the given [value].  Useful for restoring the previous setting later.
          */
-        fun set(value: Boolean): Boolean {
+        fun set(value: T): T {
             val originalValue = getValue()
             runInEdtAndWait {
                 ApplicationManager.getApplication().runWriteAction {
@@ -65,7 +66,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param valueForTestLambda the value to set for [configProperty] in preparation for executing [testLambda]
      * @param testLambda the test code to execute with [configProperty] set to [valueForTestLambda]
      */
-    fun withConfigSetting(configProperty: ConfigProperty, valueForTestLambda: Boolean, testLambda: () -> Unit) {
+    fun <T> withConfigSetting(configProperty: ConfigProperty<T>, valueForTestLambda: T, testLambda: () -> Unit) {
         val originalValue = configProperty.set(valueForTestLambda)
         try {
             testLambda()

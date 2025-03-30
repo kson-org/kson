@@ -9,7 +9,7 @@ import javax.swing.Icon
 object KsonFileType : LanguageFileType(KsonLanguage) {
 
     override fun getName(): String {
-        return "Kson"
+        return KsonLanguage.NAME
     }
 
     override fun getDescription(): String {
