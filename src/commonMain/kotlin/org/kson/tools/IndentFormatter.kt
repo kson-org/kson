@@ -85,7 +85,7 @@ class IndentFormatter(
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
                         // write out the lines of the embed content, indenting the whole block appropriately
-                        result.append(indentEmbedContent(token, embedContentIndent))
+                        result.append(prefixWithIndent(token.value, embedContentIndent, true))
                         tokenIndex++
                         // write the rest of the trailing content from this line
                         while (tokenIndex < line.size) {
@@ -200,16 +200,30 @@ class IndentFormatter(
     /**
      * Prefixes the given [content] with an indent computed from [nestingLevel]
      */
-    private fun prefixWithIndent(content: String, nestingLevel: Int): String {
-        return indentType.indentString.repeat(nestingLevel) + content
+    private fun prefixWithIndent(content: String, nestingLevel: Int, keepTrailingIndent: Boolean = false): String {
+        val indent = indentType.indentString.repeat(nestingLevel)
+        val lines = content.split('\n')
+
+        return lines.mapIndexed { index, line ->
+            /**
+             * If [content] ends in a newline, the next line does not belong to it,
+             * so don't indent it unless our caller demands it
+             */
+            if (!keepTrailingIndent && index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
+                line
+            } else {
+                indent + line
+            }
+        }.joinToString("\n")
     }
 
     /**
      * Split the given [tokens] into lines of tokens corresponding to the lines of the original source that was tokenized.
-     * Note: trims leading whitespace tokens/lines
+     * Note: trims leading whitespace tokens/lines, and may gather multiple lines of underlying source in one logical
+     *   "token line" when appropriate
      */
     private fun splitTokenLines(tokens: List<Token>): MutableList<List<Token>> {
-        val lines = mutableListOf<List<Token>>()
+        val tokenLines = mutableListOf<List<Token>>()
         var currentLine = mutableListOf<Token>()
 
         // Skip any leading whitespace tokens
@@ -217,41 +231,53 @@ class IndentFormatter(
         while (startIndex < tokens.size && tokens[startIndex].tokenType == WHITESPACE) {
             startIndex++
         }
+        
+        var index = startIndex
+        while (index < tokens.size) {
+            val token = tokens[index]
 
-        for (token in tokens.subList(startIndex, tokens.size)) {
             if (token.tokenType == WHITESPACE && token.lexeme.text.contains('\n')) {
                 currentLine.add(token.copy(lexeme = token.lexeme.copy(text = "\n")))
-                lines.add(currentLine)
+                tokenLines.add(currentLine)
 
                 var numAdditionalNewLines = token.lexeme.text.count { it == '\n' } - 1
                 while (numAdditionalNewLines > 0) {
-                    lines.add(mutableListOf(token.copy(lexeme = token.lexeme.copy(text = "\n"))))
+                    tokenLines.add(mutableListOf(token.copy(lexeme = token.lexeme.copy(text = "\n"))))
                     numAdditionalNewLines--
                 }
                 currentLine = mutableListOf()
+
+                /**
+                 * If we see a comment starting a newline, we gather all its lines and prefix the next
+                 * "tokenLine" with it so it gets consistently indented with the content it precedes/comments
+                 */
+                val nextToken = tokens.getOrNull(index + 1)
+                if (nextToken?.tokenType == COMMENT) {
+                    var commentToken: Token = nextToken
+                    while(commentToken.tokenType == COMMENT
+                        || (commentToken.tokenType == WHITESPACE && commentToken.lexeme.text.contains('\n'))) {
+                        index++
+                        if (commentToken.tokenType == WHITESPACE) {
+                            val numNewlines = commentToken.lexeme.text.count { it == '\n' }
+                            repeat (numNewlines) {
+                                currentLine.add(commentToken.copy(lexeme = commentToken.lexeme.copy(text = "\n")))
+                            }
+                        } else {
+                            currentLine.add(commentToken)
+                        }
+                        commentToken = tokens.getOrNull(index + 1) ?: break
+                    }
+                }
             } else {
                 currentLine.add(token)
             }
+
+            index++
         }
 
-        lines.add(currentLine)
+        tokenLines.add(currentLine)
 
-        return lines
-    }
-
-    /**
-     * Prepend an appropriate indent to the lines in an [EMBED_CONTENT] token
-     */
-    private fun indentEmbedContent(
-        token: Token,
-        nestingLevel: Int
-    ): String {
-        val indent = indentType.indentString.repeat(nestingLevel)
-        val lines = token.value.split('\n')
-
-        return lines.joinToString("\n") { line ->
-            indent + line
-        }
+        return tokenLines
     }
 }
 
