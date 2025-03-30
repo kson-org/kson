@@ -3,6 +3,7 @@ package org.kson.ast
 import org.kson.CompileTarget
 import org.kson.CompileTarget.Kson
 import org.kson.CompileTarget.Yaml
+import org.kson.CompileTarget.Json
 import org.kson.ast.AstNode.Indent
 import org.kson.parser.EMBED_DELIMITER
 import org.kson.parser.NumberParser
@@ -109,7 +110,7 @@ class KsonRoot(
      */
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json -> {
                 rootNode.toSource(indent, compileTarget) +
                         if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
                             "\n\n" + documentEndComments.joinToString("\n")
@@ -127,7 +128,7 @@ class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
     ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json -> {
                 internalsNode.toSource(indent, compileTarget)
             }
         }
@@ -148,12 +149,24 @@ class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : Va
                     """.trimMargin()
                 }
             }
+            
+            is Json -> {
+                if (properties.isEmpty()) {
+                    "${indent.firstLineIndent()}{}"
+                } else {
+                    """
+                    |${indent.firstLineIndent()}{
+                    |${properties.joinToString(",\n") { it.toSource(indent.next(false), compileTarget) }}
+                    |${indent.bodyLinesIndent()}}
+                    """.trimMargin()
+                }
+            }
 
             is Yaml -> {
                 if (properties.isEmpty()) {
                     indent.firstLineIndent() + "{}"
                 } else {
-                    properties.joinToString("\n") { 
+                    properties.joinToString("\n") {
                         it.toSource(indent, compileTarget)
                     }
                 }
@@ -170,7 +183,7 @@ class ObjectPropertyNode(
     AstNode(), Documented {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson -> {
+            is Kson, is Json -> {
                 "${name.toSource(indent, compileTarget)}: ${
                     value.toSource(
                         indent.clone(true),
@@ -194,7 +207,7 @@ class ObjectPropertyNode(
 class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson -> {
+            is Kson, is Json -> {
                 // We pad our list bracket with newlines if our list is non-empty
                 val bracketPadding = if (elements.isEmpty()) "" else "\n"
                 val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
@@ -221,7 +234,7 @@ class ListNode(private val elements: List<ListElementNode>) : ValueNode() {
 class ListElementNode(val value: ValueNode, override val comments: List<String>) : AstNode(), Documented {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson -> {
+            is Kson, is Json -> {
                 value.toSource(indent, compileTarget)
             }
             is Yaml -> {
@@ -245,6 +258,10 @@ open class StringNode(override val stringContent: String) : KeywordNode() {
             is Kson, is Yaml -> {
                 indent.firstLineIndent() + "\"" + stringContent + "\""
             }
+
+            is Json -> {
+                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
+            }
         }
     }
 }
@@ -254,6 +271,10 @@ class IdentifierNode(override val stringContent: String) : KeywordNode() {
         return when (compileTarget) {
             is Kson, is Yaml -> {
                 indent.firstLineIndent() + stringContent
+            }
+
+            is Json -> {
+                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
             }
         }
     }
@@ -271,7 +292,7 @@ class NumberNode(stringValue: String) : ValueNode() {
 
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json-> {
                 indent.firstLineIndent() + value.asString
             }
         }
@@ -281,7 +302,7 @@ class NumberNode(stringValue: String) : ValueNode() {
 class TrueNode : ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json -> {
                 indent.firstLineIndent() + "true"
             }
         }
@@ -291,7 +312,7 @@ class TrueNode : ValueNode() {
 class FalseNode : ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json-> {
                 indent.firstLineIndent() + "false"
             }
         }
@@ -301,7 +322,7 @@ class FalseNode : ValueNode() {
 class NullNode : ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson, is Yaml, is Json -> {
                 indent.firstLineIndent() + "null"
             }
         }
@@ -342,6 +363,20 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
                     renderMultilineYamlString(embedContent, indent, indent.next(false))
                 }
             }
+
+            is Json -> {
+                if (!compileTarget.retainEmbedTags) {
+                    indent.firstLineIndent() + "\"${escapeStringLiterals(embedContent)}\""
+                } else {
+                    val nextIndent = indent.next(false)
+                    """
+                    |${indent.firstLineIndent()}{
+                    |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
+                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${escapeStringLiterals(embedContent)}"
+                    |}
+                    """.trimMargin()
+                }
+            }
         }
     }
 }
@@ -374,4 +409,20 @@ private fun renderMultilineYamlString(
                 .joinToString("\n") { line ->
                     contentIndent.bodyLinesIndent() + line
                 }
+}
+
+/**
+ * Escapes quotes and whitespace characters (newlines, carriage returns and tabs) in a string, 
+ * useful for instance when serializing a Kson-escaped string (which allows raw whitespace) 
+ * to a JSON-escaped string (which does not).
+ *
+ * @param str The string to escape
+ * @return The string with quotes and whitespace characters (newlines, carriage returns, tabs) escaped with backslashes
+ */
+private fun escapeStringLiterals(str: String): String {
+    return str
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
 }
