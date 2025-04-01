@@ -842,4 +842,34 @@ class LexerTest {
         val rightBracketToken = tokenList[4]
         assertEquals("# trailing list brace", rightBracketToken.comments[0])
     }
+
+    @Test
+    fun testHashInString() {
+        assertTokenizesTo(
+            "'# not a comment' # yes a coment",
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, WHITESPACE, COMMENT),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            "'also # not a comment'# yes a comment",
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, COMMENT),
+            testGapFreeLexing = true
+        )
+    }
+
+    @Test
+    fun testHashInEmbedTag() {
+        assertTokenizesTo(
+            "%%# should not be a comment",
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            "%%also # should not be a comment",
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG),
+            testGapFreeLexing = true
+        )
+    }
 }

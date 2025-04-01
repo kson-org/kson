@@ -629,26 +629,39 @@ class Lexer(source: String, gapFree: Boolean = false) {
         // reset our collection of seen comments to prepare to collect comments for the next token
         currentCommentLines = ArrayList()
 
-        // lex ahead a bit looking for any trailing comments
-        val trailingCommentTokens = ArrayList<Token>()
-        // consume non-newline whitespace right after this token
-        if (isInlineWhitespace(sourceScanner.peek())) {
-            while (isInlineWhitespace(sourceScanner.peek())) {
-                sourceScanner.advance()
-            }
-            val whitespaceLexeme = sourceScanner.extractLexeme()
-            trailingCommentTokens.add(Token(WHITESPACE, whitespaceLexeme, whitespaceLexeme.text, emptyList()))
-        }
-        val trailingComment = if (sourceScanner.peek() == '#') {
-            val commentToken = extractCommentToken()
-            trailingCommentTokens.add(commentToken)
-            commentToken.value
-        } else {
-            ""
-        }
+        // these tokens open comment free constructs, so they cannot have trailing comments
+        val acceptsTrailingComments = currentTokenType != STRING_OPEN_QUOTE
+                && currentTokenType != EMBED_OPEN_DELIM
 
-        if (trailingComment.isNotBlank()) {
-            commentsForToken.add(trailingComment)
+        // when appropriate, we lex ahead a bit looking for any trailing comments
+        val trailingCommentTokens = ArrayList<Token>()
+        if (acceptsTrailingComments) {
+            // consume non-newline whitespace right after this token
+            if (isInlineWhitespace(sourceScanner.peek())) {
+                while (isInlineWhitespace(sourceScanner.peek())) {
+                    sourceScanner.advance()
+                }
+                val whitespaceLexeme = sourceScanner.extractLexeme()
+                trailingCommentTokens.add(
+                    Token(
+                        WHITESPACE,
+                        whitespaceLexeme,
+                        whitespaceLexeme.text,
+                        emptyList()
+                    )
+                )
+            }
+            val trailingComment = if (sourceScanner.peek() == '#') {
+                val commentToken = extractCommentToken()
+                trailingCommentTokens.add(commentToken)
+                commentToken.value
+            } else {
+                ""
+            }
+
+            if (trailingComment.isNotBlank()) {
+                commentsForToken.add(trailingComment)
+            }
         }
         return CommentMetadata(commentsForToken, trailingCommentTokens)
     }
