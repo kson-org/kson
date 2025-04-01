@@ -292,7 +292,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 // look for the required second embed delim char
                 if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
-                    addLiteralToken(TokenType.EMBED_DELIM)
+                    addLiteralToken(TokenType.EMBED_OPEN_DELIM)
                 } else {
                     addLiteralToken(TokenType.EMBED_DELIM_PARTIAL)
                 }
@@ -420,7 +420,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun embeddedBlock(delimChar: Char) {
-        // consume non-newline whitespace right after the EMBED_DELIM
+        // consume non-newline whitespace right after our opening delimiter
         if (isInlineWhitespace(sourceScanner.peek())) {
             while (isInlineWhitespace(sourceScanner.peek())) {
                 sourceScanner.advance()
@@ -454,7 +454,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
                 sourceScanner.advance()
                 sourceScanner.advance()
-                addLiteralToken(TokenType.EMBED_DELIM)
+                addLiteralToken(TokenType.EMBED_CLOSE_DELIM)
                 return
             }
 
@@ -477,7 +477,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
         ) {
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "delimChar", we're looking at an escaped EMBED_DELIM
+                // if this is all slashes until "delimChar", we're looking at an escaped embed delimiter
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
@@ -500,7 +500,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
              * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
              * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_DELIM has its second percent char escaped: %\% yields %% inside of an embed.
+             * - an escaped [TokenType.EMBED_CLOSE_DELIM] has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
              *   of embeds.  So: when evaluating escaped EMBED_DELIMs, we allow arbitrary `\`s before the second
              *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
@@ -522,15 +522,17 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
         addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
-        // we scanned everything that wasn't an EMBED_DELIM into our embed content,
-        // so we're either at EOF or want to consume that EMBED_DELIM
+        /**
+         * We scanned everything that wasn't an [TokenType.EMBED_CLOSE_DELIM] into our embed content,
+         * so we're either at EOF or want to consume that [TokenType.EMBED_CLOSE_DELIM]
+         */
         if (sourceScanner.eof()) {
             return
         } else {
             // process our closing delimChar pair
             sourceScanner.advance()
             sourceScanner.advance()
-            addLiteralToken(TokenType.EMBED_DELIM)
+            addLiteralToken(TokenType.EMBED_CLOSE_DELIM)
         }
     }
 

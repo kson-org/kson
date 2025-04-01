@@ -51,7 +51,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
  * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
- * embeddedBlock -> EMBED_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_DELIM ;
+ * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM ;
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -615,10 +615,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embeddedBlock -> EMBED_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_DELIM ;
+     * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM ;
      */
     private fun embedBlock(): Boolean {
-        if (builder.getTokenType() == EMBED_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
+        if (builder.getTokenType() == EMBED_OPEN_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
             val embedBlockMark = builder.mark()
             val embedBlockStartDelimMark = builder.mark()
 
@@ -647,10 +647,12 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             embedTagMark.done(EMBED_TAG)
 
             val prematureEndMark = builder.mark()
-            if (builder.getTokenType() == EMBED_DELIM) {
+            if (builder.getTokenType() == EMBED_CLOSE_DELIM) {
                 builder.advanceLexer()
-                // we are seeing a closing EMBED_DELIM before we encountered an EMBED_PREAMBLE_NEWLINE, so give an error
-                // to help the user fix this construct
+                /**
+                 * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
+                 * so give an error to help the user fix this construct
+                 */
                 prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
                 embedBlockMark.done(EMBED_BLOCK)
                 return true
@@ -679,7 +681,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 embedBlockContentMark.drop()
             }
 
-            if (builder.getTokenType() == EMBED_DELIM) {
+            if (builder.getTokenType() == EMBED_CLOSE_DELIM) {
                 builder.advanceLexer()
                 embedBlockMark.done(EMBED_BLOCK)
             } else if (builder.eof()) {
