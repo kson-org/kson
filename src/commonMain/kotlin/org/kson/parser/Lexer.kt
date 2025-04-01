@@ -285,7 +285,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             ':' -> addLiteralToken(TokenType.COLON)
             ',' -> addLiteralToken(TokenType.COMMA)
             '"', '\'' -> {
-                addLiteralToken(TokenType.STRING_QUOTE)
+                addLiteralToken(TokenType.STRING_OPEN_QUOTE)
                 string(char)
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
@@ -415,7 +415,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         } else {
             // not at EOF, so we must be looking at the quote that ends this string
             sourceScanner.advance()
-            addLiteralToken(TokenType.STRING_QUOTE)
+            addLiteralToken(TokenType.STRING_CLOSE_QUOTE)
         }
     }
 

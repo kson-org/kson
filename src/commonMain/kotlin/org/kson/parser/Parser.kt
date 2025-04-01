@@ -50,7 +50,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  *              | "[" ( value ","? )* "]"
  * keyword -> ( IDENTIFIER | string ) ":" ;
  * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
- * string -> STRING_QUOTE STRING STRING_QUOTE
+ * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
  * embeddedBlock -> EMBED_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_DELIM ;
  * ```
  *
@@ -517,7 +517,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * string -> STRING_QUOTE STRING STRING_QUOTE
      */
     private fun string(): Boolean {
-        if (builder.getTokenType() != STRING_QUOTE) {
+        if (builder.getTokenType() != STRING_OPEN_QUOTE) {
             // not a string
             return false
         }
@@ -528,7 +528,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val stringMark = builder.mark()
 
-        while (builder.getTokenType() != STRING_QUOTE && !builder.eof()) {
+        while (builder.getTokenType() != STRING_CLOSE_QUOTE && !builder.eof()) {
             when (builder.getTokenType()) {
                 STRING -> builder.advanceLexer()
                 STRING_UNICODE_ESCAPE -> {

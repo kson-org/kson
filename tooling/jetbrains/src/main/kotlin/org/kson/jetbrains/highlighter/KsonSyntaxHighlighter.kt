@@ -43,7 +43,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_UNICODE_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
-                TokenType.STRING_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.STRING_OPEN_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.STRING_CLOSE_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_ILLEGAL_CONTROL_CHARACTER -> getPackedTextAttributes(KSON_INVALID)
                 TokenType.TRUE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.WHITESPACE -> TextAttributesKey.EMPTY_ARRAY

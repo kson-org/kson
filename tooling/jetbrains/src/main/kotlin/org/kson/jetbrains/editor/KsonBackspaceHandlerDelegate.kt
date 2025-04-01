@@ -29,7 +29,7 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
 
         if (caretOffset > 0 && text.length > caretOffset) {
             /**
-             * handle deleting [STRING_QUOTE] pairs
+             * handle deleting [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] pairs
              */
             if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE
                 && (text[caretOffset - 1] == '"' && text[caretOffset] == '"'

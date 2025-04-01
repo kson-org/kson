@@ -73,10 +73,12 @@ enum class TokenType : ElementType {
      * A number, to be parsed by [NumberParser]
      */
     NUMBER,
-    // " or '
-    STRING_QUOTE,
+    // " or ' opening a string
+    STRING_OPEN_QUOTE,
+    // " or ' closing a string
+    STRING_CLOSE_QUOTE,
     /**
-     * A [STRING_QUOTE] delimited chunk of text, i.e. "This is a string"
+     * A [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] delimited chunk of text, i.e. "This is a string"
      */
     STRING,
     /**
