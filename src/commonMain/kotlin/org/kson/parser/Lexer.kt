@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.collections.ImmutableList
 import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
+import org.kson.parser.TokenType.*
 
 const val EMBED_DELIM_CHAR = '%'
 const val EMBED_DELIMITER = "$EMBED_DELIM_CHAR$EMBED_DELIM_CHAR"
@@ -13,9 +14,9 @@ val embedDelimChars = setOf(EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR)
 
 private val KEYWORDS =
     mapOf(
-        "null" to TokenType.NULL,
-        "true" to TokenType.TRUE,
-        "false" to TokenType.FALSE
+        "null" to NULL,
+        "true" to TRUE,
+        "false" to FALSE
     ).toImmutableMap()
 
 /**
@@ -233,7 +234,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         if (gapFree) {
             emptySet()
         } else {
-            setOf(TokenType.WHITESPACE, TokenType.COMMENT)
+            setOf(WHITESPACE, COMMENT)
         }
     )
 
@@ -248,7 +249,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             scan()
         }
 
-        addToken(TokenType.EOF, Lexeme("", sourceScanner.currentLocation()), "")
+        addToken(EOF, Lexeme("", sourceScanner.currentLocation()), "")
 
         return tokens.toList()
     }
@@ -261,13 +262,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
             while (isWhitespace(sourceScanner.peek()) && !sourceScanner.eof()) {
                 sourceScanner.advance()
             }
-            addLiteralToken(TokenType.WHITESPACE)
+            addLiteralToken(WHITESPACE)
             return
         }
 
         // a "minus sign" followed by whitespace is actually a list dash
         if (char == '-' && (isWhitespace(sourceScanner.peek()) || sourceScanner.eof())) {
-            addLiteralToken(TokenType.LIST_DASH)
+            addLiteralToken(LIST_DASH)
             return
         }
 
@@ -276,25 +277,25 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 val commentText = comment()
                 currentCommentLines.add(commentText)
             }
-            '{' -> addLiteralToken(TokenType.CURLY_BRACE_L)
-            '}' -> addLiteralToken(TokenType.CURLY_BRACE_R)
-            '[' -> addLiteralToken(TokenType.SQUARE_BRACKET_L)
-            ']' -> addLiteralToken(TokenType.SQUARE_BRACKET_R)
-            '<' -> addLiteralToken(TokenType.ANGLE_BRACKET_L)
-            '>' -> addLiteralToken(TokenType.ANGLE_BRACKET_R)
-            ':' -> addLiteralToken(TokenType.COLON)
-            ',' -> addLiteralToken(TokenType.COMMA)
+            '{' -> addLiteralToken(CURLY_BRACE_L)
+            '}' -> addLiteralToken(CURLY_BRACE_R)
+            '[' -> addLiteralToken(SQUARE_BRACKET_L)
+            ']' -> addLiteralToken(SQUARE_BRACKET_R)
+            '<' -> addLiteralToken(ANGLE_BRACKET_L)
+            '>' -> addLiteralToken(ANGLE_BRACKET_R)
+            ':' -> addLiteralToken(COLON)
+            ',' -> addLiteralToken(COMMA)
             '"', '\'' -> {
-                addLiteralToken(TokenType.STRING_QUOTE)
+                addLiteralToken(STRING_OPEN_QUOTE)
                 string(char)
             }
             EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
                 // look for the required second embed delim char
                 if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
-                    addLiteralToken(TokenType.EMBED_DELIM)
+                    addLiteralToken(EMBED_OPEN_DELIM)
                 } else {
-                    addLiteralToken(TokenType.EMBED_DELIM_PARTIAL)
+                    addLiteralToken(EMBED_DELIM_PARTIAL)
                 }
                 embeddedBlock(char)
             }
@@ -309,7 +310,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                         identifier()
                     }
                     else -> {
-                        addLiteralToken(TokenType.ILLEGAL_CHAR)
+                        addLiteralToken(ILLEGAL_CHAR)
                     }
                 }
             }
@@ -330,7 +331,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         while (sourceScanner.peek() != '\n' && !sourceScanner.eof()) sourceScanner.advance()
 
         val commentLexeme = sourceScanner.extractLexeme()
-        return Token(TokenType.COMMENT, commentLexeme, commentLexeme.text, emptyList())
+        return Token(COMMENT, commentLexeme, commentLexeme.text, emptyList())
     }
 
     /**
@@ -351,7 +352,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         while (isAlphaNumeric(sourceScanner.peek())) sourceScanner.advance()
 
         val lexeme = sourceScanner.extractLexeme()
-        val type: TokenType = KEYWORDS[lexeme.text] ?: TokenType.IDENTIFIER
+        val type: TokenType = KEYWORDS[lexeme.text] ?: IDENTIFIER
         addToken(type, lexeme, lexeme.text)
     }
 
@@ -366,15 +367,15 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 && !isWhitespace(nextStringChar)
             ) {
                 if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(TokenType.STRING)
+                    addLiteralToken(STRING)
                     hasUntokenizedStringCharacters = false
                 }
                 // advance past the illegal char and tokenize it
                 sourceScanner.advance()
-                addLiteralToken(TokenType.STRING_ILLEGAL_CONTROL_CHARACTER)
+                addLiteralToken(STRING_ILLEGAL_CONTROL_CHARACTER)
             } else if (nextStringChar == '\\') {
                 if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(TokenType.STRING)
+                    addLiteralToken(STRING)
                     hasUntokenizedStringCharacters = false
                 }
 
@@ -391,14 +392,14 @@ class Lexer(source: String, gapFree: Boolean = false) {
                         }
                         sourceScanner.advance()
                     }
-                    addLiteralToken(TokenType.STRING_UNICODE_ESCAPE)
+                    addLiteralToken(STRING_UNICODE_ESCAPE)
                 } else {
                     // otherwise, this must be a one-char string escape, provided we're
                     // not up against EOF
                     if (!sourceScanner.eof()) {
                         sourceScanner.advance()
                     }
-                    addLiteralToken(TokenType.STRING_ESCAPE)
+                    addLiteralToken(STRING_ESCAPE)
                 }
             } else {
                 sourceScanner.advance()
@@ -407,7 +408,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         }
 
         if (hasUntokenizedStringCharacters) {
-            addLiteralToken(TokenType.STRING)
+            addLiteralToken(STRING)
         }
 
         if (sourceScanner.eof()) {
@@ -415,23 +416,23 @@ class Lexer(source: String, gapFree: Boolean = false) {
         } else {
             // not at EOF, so we must be looking at the quote that ends this string
             sourceScanner.advance()
-            addLiteralToken(TokenType.STRING_QUOTE)
+            addLiteralToken(STRING_CLOSE_QUOTE)
         }
     }
 
     private fun embeddedBlock(delimChar: Char) {
-        // consume non-newline whitespace right after the EMBED_DELIM
+        // consume non-newline whitespace right after our opening delimiter
         if (isInlineWhitespace(sourceScanner.peek())) {
             while (isInlineWhitespace(sourceScanner.peek())) {
                 sourceScanner.advance()
             }
-            addLiteralToken(TokenType.WHITESPACE)
+            addLiteralToken(WHITESPACE)
         }
 
         if (sourceScanner.peek() == '\n') {
             // no embed tag on this block
             sourceScanner.advance()
-            addLiteralToken(TokenType.EMBED_PREAMBLE_NEWLINE)
+            addLiteralToken(EMBED_PREAMBLE_NEWLINE)
         } else if (sourceScanner.eof()) {
             return
         } else {
@@ -445,7 +446,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             // extract our embed tag (note: may be empty, that's supported)
             val embedTagLexeme = sourceScanner.extractLexeme()
             addToken(
-                TokenType.EMBED_TAG, embedTagLexeme,
+                EMBED_TAG, embedTagLexeme,
                 // trim any trailing whitespace from the embed tag's value
                 embedTagLexeme.text.trim()
             )
@@ -454,14 +455,14 @@ class Lexer(source: String, gapFree: Boolean = false) {
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
                 sourceScanner.advance()
                 sourceScanner.advance()
-                addLiteralToken(TokenType.EMBED_DELIM)
+                addLiteralToken(EMBED_CLOSE_DELIM)
                 return
             }
 
             // consume the newline from after this embed tag
             if (sourceScanner.peek() == '\n') {
                 sourceScanner.advance()
-                addLiteralToken(TokenType.EMBED_PREAMBLE_NEWLINE)
+                addLiteralToken(EMBED_PREAMBLE_NEWLINE)
             } else if (sourceScanner.eof()) {
                 return
             }
@@ -477,7 +478,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
         ) {
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "delimChar", we're looking at an escaped EMBED_DELIM
+                // if this is all slashes until "delimChar", we're looking at an escaped embed delimiter
                 sourceScanner.advance()
                 while (sourceScanner.peek() == '\\') {
                     sourceScanner.advance()
@@ -500,7 +501,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
              * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
              * [EMBED_DELIM_ALT_CHAR] naturally works the same):
              *
-             * - an escaped EMBED_DELIM has its second percent char escaped: %\% yields %% inside of an embed.
+             * - an escaped [TokenType.EMBED_CLOSE_DELIM] has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
              *   of embeds.  So: when evaluating escaped EMBED_DELIMs, we allow arbitrary `\`s before the second
              *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
@@ -520,17 +521,19 @@ class Lexer(source: String, gapFree: Boolean = false) {
             trimmedEmbedBlockContent
         }
 
-        addToken(TokenType.EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
+        addToken(EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
 
-        // we scanned everything that wasn't an EMBED_DELIM into our embed content,
-        // so we're either at EOF or want to consume that EMBED_DELIM
+        /**
+         * We scanned everything that wasn't an [TokenType.EMBED_CLOSE_DELIM] into our embed content,
+         * so we're either at EOF or want to consume that [TokenType.EMBED_CLOSE_DELIM]
+         */
         if (sourceScanner.eof()) {
             return
         } else {
             // process our closing delimChar pair
             sourceScanner.advance()
             sourceScanner.advance()
-            addLiteralToken(TokenType.EMBED_DELIM)
+            addLiteralToken(EMBED_CLOSE_DELIM)
         }
     }
 
@@ -571,7 +574,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             || sourceScanner.peek() == '+'
             || sourceScanner.peek() == '-'
             || sourceScanner.peek() == '.') sourceScanner.advance()
-        addLiteralToken(TokenType.NUMBER)
+        addLiteralToken(NUMBER)
     }
 
     /**
@@ -611,13 +614,14 @@ class Lexer(source: String, gapFree: Boolean = false) {
     private data class CommentMetadata(val comments: List<String>, val lookaheadTokens: List<Token>)
     private fun commentMetadataForCurrentToken(currentTokenType: TokenType): CommentMetadata {
         // comments don't get associated with these types
-        if (currentTokenType == TokenType.COMMENT
-            || currentTokenType == TokenType.WHITESPACE
-            || currentTokenType == TokenType.EMBED_PREAMBLE_NEWLINE
-            || currentTokenType == TokenType.STRING
-            || currentTokenType == TokenType.STRING_ESCAPE
-            || currentTokenType == TokenType.STRING_UNICODE_ESCAPE
-            || currentTokenType == TokenType.STRING_ILLEGAL_CONTROL_CHARACTER) {
+        if (currentTokenType == COMMENT
+            || currentTokenType == WHITESPACE
+            || currentTokenType == EMBED_PREAMBLE_NEWLINE
+            || currentTokenType == STRING
+            || currentTokenType == STRING_ESCAPE
+            || currentTokenType == STRING_UNICODE_ESCAPE
+            || currentTokenType == STRING_ILLEGAL_CONTROL_CHARACTER
+        ) {
             return CommentMetadata(emptyList(), emptyList())
         }
 
@@ -625,26 +629,39 @@ class Lexer(source: String, gapFree: Boolean = false) {
         // reset our collection of seen comments to prepare to collect comments for the next token
         currentCommentLines = ArrayList()
 
-        // lex ahead a bit looking for any trailing comments
-        val trailingCommentTokens = ArrayList<Token>()
-        // consume non-newline whitespace right after this token
-        if (isInlineWhitespace(sourceScanner.peek())) {
-            while (isInlineWhitespace(sourceScanner.peek())) {
-                sourceScanner.advance()
-            }
-            val whitespaceLexeme = sourceScanner.extractLexeme()
-            trailingCommentTokens.add(Token(TokenType.WHITESPACE, whitespaceLexeme, whitespaceLexeme.text, emptyList()))
-        }
-        val trailingComment = if (sourceScanner.peek() == '#') {
-            val commentToken = extractCommentToken()
-            trailingCommentTokens.add(commentToken)
-            commentToken.value
-        } else {
-            ""
-        }
+        // these tokens open comment free constructs, so they cannot have trailing comments
+        val acceptsTrailingComments = currentTokenType != STRING_OPEN_QUOTE
+                && currentTokenType != EMBED_OPEN_DELIM
 
-        if (trailingComment.isNotBlank()) {
-            commentsForToken.add(trailingComment)
+        // when appropriate, we lex ahead a bit looking for any trailing comments
+        val trailingCommentTokens = ArrayList<Token>()
+        if (acceptsTrailingComments) {
+            // consume non-newline whitespace right after this token
+            if (isInlineWhitespace(sourceScanner.peek())) {
+                while (isInlineWhitespace(sourceScanner.peek())) {
+                    sourceScanner.advance()
+                }
+                val whitespaceLexeme = sourceScanner.extractLexeme()
+                trailingCommentTokens.add(
+                    Token(
+                        WHITESPACE,
+                        whitespaceLexeme,
+                        whitespaceLexeme.text,
+                        emptyList()
+                    )
+                )
+            }
+            val trailingComment = if (sourceScanner.peek() == '#') {
+                val commentToken = extractCommentToken()
+                trailingCommentTokens.add(commentToken)
+                commentToken.value
+            } else {
+                ""
+            }
+
+            if (trailingComment.isNotBlank()) {
+                commentsForToken.add(trailingComment)
+            }
         }
         return CommentMetadata(commentsForToken, trailingCommentTokens)
     }

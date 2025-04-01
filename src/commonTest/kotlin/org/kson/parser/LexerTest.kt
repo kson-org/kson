@@ -116,7 +116,7 @@ class LexerTest {
             """
                 "This is a string"
             """,
-            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
         )
     }
 
@@ -226,7 +226,7 @@ class LexerTest {
             """
                 ["a string"]
             """,
-            listOf(SQUARE_BRACKET_L, STRING_QUOTE, STRING, STRING_QUOTE, SQUARE_BRACKET_R)
+            listOf(SQUARE_BRACKET_L, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, SQUARE_BRACKET_R)
         )
 
         assertTokenizesTo(
@@ -249,7 +249,7 @@ class LexerTest {
             """
                 - "a string"
             """,
-            listOf(LIST_DASH, STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(LIST_DASH, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
         )
 
         assertTokenizesTo(
@@ -296,13 +296,13 @@ class LexerTest {
                 NUMBER,
                 LIST_DASH,
                 LIST_DASH,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 LIST_DASH,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 LIST_DASH,
                 NUMBER
             )
@@ -334,16 +334,16 @@ class LexerTest {
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
                 IDENTIFIER,
                 COLON,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 CURLY_BRACE_R
             )
         )
@@ -358,16 +358,16 @@ class LexerTest {
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
                 IDENTIFIER,
                 COLON,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE
+                STRING_CLOSE_QUOTE
             )
         )
     }
@@ -387,16 +387,16 @@ class LexerTest {
                 IDENTIFIER,
                 COLON,
                 IDENTIFIER,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE,
+                STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
                 IDENTIFIER,
                 COLON,
-                STRING_QUOTE,
+                STRING_OPEN_QUOTE,
                 STRING,
-                STRING_QUOTE
+                STRING_CLOSE_QUOTE
             )
         )
     }
@@ -409,7 +409,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertTokenizesTo(
@@ -418,7 +418,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
     }
 
@@ -430,7 +430,7 @@ class LexerTest {
                 this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals("this is a raw embed\n", oneLineEmbedTokens[2].value)
@@ -444,7 +444,7 @@ class LexerTest {
                                 the leftmost line
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
@@ -468,7 +468,7 @@ class LexerTest {
                 which is the end delimiter in this case
               %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
@@ -490,7 +490,7 @@ class LexerTest {
                 this should have a newline at the end
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].value)
@@ -503,7 +503,7 @@ class LexerTest {
                     spaces and a newline at the end    
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
@@ -522,7 +522,7 @@ class LexerTest {
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
@@ -540,7 +540,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM),
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
             "should allow trailing whitespace after the opening '%%'"
         )
 
@@ -551,7 +551,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM),
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
             "should allow trailing whitespace after the opening '%%embedTag'"
         )
     }
@@ -574,7 +574,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
     }
 
@@ -585,7 +585,7 @@ class LexerTest {
             %%
             This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -595,7 +595,7 @@ class LexerTest {
             """
             "this string has no end quote
             """,
-            listOf(STRING_QUOTE, STRING),
+            listOf(STRING_OPEN_QUOTE, STRING),
             "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
     }
@@ -606,7 +606,7 @@ class LexerTest {
             """
             'this string has no end quote
             """,
-            listOf(STRING_QUOTE, STRING),
+            listOf(STRING_OPEN_QUOTE, STRING),
             "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
     }
@@ -617,7 +617,7 @@ class LexerTest {
             """   
                 a_key: "a_value"
             """,
-            listOf(IDENTIFIER, COLON, STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(IDENTIFIER, COLON, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
         )
 
         assertEquals("a_key", tokens[0].value)
@@ -653,10 +653,10 @@ class LexerTest {
                 Pair(SQUARE_BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
                 Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
-                Pair(EMBED_DELIM, Location(3, 11, 3, 13, 50, 52)),
+                Pair(EMBED_OPEN_DELIM, Location(3, 11, 3, 13, 50, 52)),
                 Pair(EMBED_PREAMBLE_NEWLINE, Location(3, 13, 4, 0, 52, 53)),
                 Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
-                Pair(EMBED_DELIM, Location(7, 6, 7, 8, 128, 130)),
+                Pair(EMBED_CLOSE_DELIM, Location(7, 6, 7, 8, 128, 130)),
                 Pair(CURLY_BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
         )
@@ -668,7 +668,7 @@ class LexerTest {
             """   
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE)
         )
 
         // sanity check the tokens are lexing to what we expect
@@ -683,7 +683,7 @@ class LexerTest {
             """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE)
         )
 
         // sanity check the tokens are lexing to what we expect
@@ -696,7 +696,7 @@ class LexerTest {
     fun testStringWhitespaceAfterEscape() {
         assertTokenizesTo(
             """'string with \' whitespace after an escape'""",
-            listOf(STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE),
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE),
             testGapFreeLexing = true
         )
 
@@ -704,7 +704,7 @@ class LexerTest {
             """
                 'string with \' whitespace after an escape'
             """,
-            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
 
@@ -712,7 +712,7 @@ class LexerTest {
             """
                 'string with all whitespace after escape: \'     '
             """,
-            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }
@@ -723,7 +723,7 @@ class LexerTest {
             """
                 'string with   whitespace after an illegal escape char'
             """,
-            listOf(WHITESPACE, STRING_QUOTE, STRING, STRING_ILLEGAL_CONTROL_CHARACTER, STRING, STRING_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ILLEGAL_CONTROL_CHARACTER, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }
@@ -735,7 +735,7 @@ class LexerTest {
                 %%
                 these double %\% percents are embedded but escaped%%
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[2].value)
@@ -748,7 +748,7 @@ class LexerTest {
                 $$
                 these double $\$ dollars are embedded but escaped$$
             """,
-            listOf(EMBED_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[2].value)
@@ -776,9 +776,9 @@ class LexerTest {
                 Pair(IDENTIFIER, Location(0, 2, 0, 8, 2, 8)),
                 Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
                 Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
-                Pair(STRING_QUOTE, Location(0, 10, 0, 11, 10, 11)),
+                Pair(STRING_OPEN_QUOTE, Location(0, 10, 0, 11, 10, 11)),
                 Pair(STRING, Location(0, 11, 0, 17, 11, 17)),
-                Pair(STRING_QUOTE, Location(0, 17, 0, 18, 17, 18)),
+                Pair(STRING_CLOSE_QUOTE, Location(0, 17, 0, 18, 17, 18)),
                 Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
             ),
             true
@@ -819,7 +819,7 @@ class LexerTest {
             """
                 "stuff" # comment about stuff
             """,
-            listOf(STRING_QUOTE, STRING, STRING_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
         )
 
         val endQuoteToken = tokenList[2]
@@ -841,5 +841,35 @@ class LexerTest {
 
         val rightBracketToken = tokenList[4]
         assertEquals("# trailing list brace", rightBracketToken.comments[0])
+    }
+
+    @Test
+    fun testHashInString() {
+        assertTokenizesTo(
+            "'# not a comment' # yes a coment",
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, WHITESPACE, COMMENT),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            "'also # not a comment'# yes a comment",
+            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, COMMENT),
+            testGapFreeLexing = true
+        )
+    }
+
+    @Test
+    fun testHashInEmbedTag() {
+        assertTokenizesTo(
+            "%%# should not be a comment",
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG),
+            testGapFreeLexing = true
+        )
+
+        assertTokenizesTo(
+            "%%also # should not be a comment",
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG),
+            testGapFreeLexing = true
+        )
     }
 }

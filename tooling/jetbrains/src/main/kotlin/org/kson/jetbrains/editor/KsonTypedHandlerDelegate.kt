@@ -36,7 +36,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
             }
 
             /**
-             * Handle auto-inserts of [EMBED_DELIM] pairs
+             * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
              */
             if (text.length > 1 && caretOffset > 1) {
                 for (embedDelimChar in embedDelimChars) {
@@ -68,6 +68,6 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 }
 
 /**
- * The [IElementType]s within which we do NOT want to perform [EMBED_DELIM] auto-competes
+ * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] auto-competes
  */
 private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT), elem(STRING))

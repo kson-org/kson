@@ -29,7 +29,7 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
 
         if (caretOffset > 0 && text.length > caretOffset) {
             /**
-             * handle deleting [STRING_QUOTE] pairs
+             * handle deleting [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] pairs
              */
             if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE
                 && (text[caretOffset - 1] == '"' && text[caretOffset] == '"'
@@ -48,7 +48,7 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
                 }
 
                 /**
-                 * handle deleting [EMBED_DELIM] pairs
+                 * handle deleting [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
                  */
                 for (embedDelimChar in embedDelimChars) {
                     if (caretOffset > 1 && text[caretOffset - 2] == embedDelimChar && text[caretOffset - 1] == embedDelimChar) {
@@ -99,6 +99,6 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
 }
 
 /**
- * The [IElementType]s within which we do NOT want to perform [EMBED_DELIM] delimiter auto-deletes
+ * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] delimiter auto-deletes
  */
 private val embedDeleteProhibitedElems = setOf(elem(EMBED_CONTENT), elem(STRING))

@@ -33,24 +33,28 @@ enum class TokenType : ElementType {
     // lines starting with `#`
     COMMENT,
     /**
-     * Either `%%` or `$$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
+     * Opening delimiter for an embed block, either `%%` or `$$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
      */
-    EMBED_DELIM,
+    EMBED_OPEN_DELIM,
     /**
-     * A single `%` or `$` where an [EMBED_DELIM] should be. Used to give helpful errors to the user.
+     * Closing delimiter for an embed block, matches the [EMBED_OPEN_DELIM] for the block it closes
+     */
+    EMBED_CLOSE_DELIM,
+    /**
+     * A single `%` or `$` where an [EMBED_OPEN_DELIM] should be. Used to give helpful errors to the user.
      */
     EMBED_DELIM_PARTIAL,
     /**
-     * The line of text starting at an embed block's opening [EMBED_DELIM], "tagging" that embedded content
+     * The line of text starting at an embed block's [EMBED_OPEN_DELIM], "tagging" that embedded content
      */
     EMBED_TAG,
     /**
-     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_DELIM] and possibly an [EMBED_TAG])
+     * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
     EMBED_PREAMBLE_NEWLINE,
     /**
-     * The content of an [EMBED_DELIM] delimited embed block
+     * The content of an [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] delimited embed block
      */
     EMBED_CONTENT,
     // false
@@ -73,10 +77,12 @@ enum class TokenType : ElementType {
      * A number, to be parsed by [NumberParser]
      */
     NUMBER,
-    // " or '
-    STRING_QUOTE,
+    // " or ' opening a string
+    STRING_OPEN_QUOTE,
+    // " or ' closing a string
+    STRING_CLOSE_QUOTE,
     /**
-     * A [STRING_QUOTE] delimited chunk of text, i.e. "This is a string"
+     * A [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] delimited chunk of text, i.e. "This is a string"
      */
     STRING,
     /**

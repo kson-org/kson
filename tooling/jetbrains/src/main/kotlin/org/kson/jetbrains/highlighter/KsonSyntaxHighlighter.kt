@@ -29,7 +29,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.COLON -> getPackedTextAttributes(KSON_COLON)
                 TokenType.COMMA -> getPackedTextAttributes(KSON_COMMA)
                 TokenType.COMMENT -> getPackedTextAttributes(KSON_COMMENT)
-                TokenType.EMBED_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
+                TokenType.EMBED_OPEN_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
+                TokenType.EMBED_CLOSE_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_DELIM_PARTIAL -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_TAG -> getPackedTextAttributes(KSON_EMBED_TAG)
                 TokenType.EMBED_PREAMBLE_NEWLINE -> TextAttributesKey.EMPTY_ARRAY
@@ -43,7 +44,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_UNICODE_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
-                TokenType.STRING_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.STRING_OPEN_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.STRING_CLOSE_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_ILLEGAL_CONTROL_CHARACTER -> getPackedTextAttributes(KSON_INVALID)
                 TokenType.TRUE -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.WHITESPACE -> TextAttributesKey.EMPTY_ARRAY
