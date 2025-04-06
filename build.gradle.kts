@@ -13,6 +13,7 @@ val sharedProps = Properties().apply {
 
 plugins {
     kotlin("multiplatform") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -141,6 +142,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
             }
         }
         val jvmMain by getting
@@ -160,4 +162,3 @@ kotlin {
         val nativeKsonTest by getting
     }
 }
-

@@ -1,7 +1,7 @@
 package org.kson
 
+import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
-import org.kson.CompileTarget.Yaml
 import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
@@ -51,6 +51,17 @@ class Kson {
          */
         fun parseToYaml(source: String, compileConfig: Yaml = Yaml()): YamlParseResult {
             return YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+        }
+
+        /**
+         * Parse the given Kson [source] and compile it to Json
+         *
+         * @param source The Kson source to parse
+         * @param compileConfig a [CompileTarget.Json] object with this compilation's config
+         * @return A [JsonParseResult]
+         */
+        fun parseToJson(source: String, compileConfig: Json = Json()): JsonParseResult {
+            return JsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
         }
 
         /**
@@ -139,17 +150,35 @@ class YamlParseResult(
     val yaml: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
 }
 
+class JsonParseResult(
+    private val astParseResult: AstParseResult,
+    compileConfig: Json
+) : ParseResult by astParseResult {
+    /**
+     * The Json compiled from some Kson source, or null if there were errors trying to parse
+     * (consult [astParseResult] for information on any errors)
+     */
+    val json: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
+}
+
+
 
 /**
  * Type to denote a supported Kson compilation target and hold the compilation's configuration
  */
 sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     /**
+     * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
+     */
+    abstract val preserveComments: Boolean
+
+    /**
      * Compile target for serializing a Kson AST out to Kson source
      *
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Kson(
+        override val preserveComments: Boolean = true,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
 
@@ -160,19 +189,30 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Yaml(
+        override val preserveComments: Boolean = true,
         val retainEmbedTags: Boolean = false,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
+
+    /**
+     * Compile target for Json transpilation
+     *
+     * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
+     * @param coreCompileConfig the [CoreCompileConfig] for this compile
+     */
+    class Json(
+        val retainEmbedTags: Boolean = false,
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+    ) : CompileTarget(coreCompileConfig) {
+        // Json does not support comments
+        override val preserveComments: Boolean = false
+    }
 }
 
 /**
  * Configuration applicable to all compile targets
  */
 data class CoreCompileConfig(
-    /**
-     * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
-     */
-    val preserveComments: Boolean = true,
     /**
      * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
      */
