@@ -1,8 +1,7 @@
 package org.kson
 
+import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
-import org.kson.CompileTarget.Yaml
-import org.kson.CompileTarget.Json
 import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
 import org.kson.collections.ImmutableList
@@ -202,10 +201,12 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Json(
-        override val preserveComments: Boolean = false,
         val retainEmbedTags: Boolean = false,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
-    ) : CompileTarget(coreCompileConfig)
+    ) : CompileTarget(coreCompileConfig) {
+        // Json does not support comments
+        override val preserveComments: Boolean = false
+    }
 }
 
 /**
