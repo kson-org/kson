@@ -142,6 +142,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
             }
         }
         val jvmMain by getting
@@ -149,7 +150,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("org.yaml:snakeyaml:2.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
             }
         }
         val jsMain by getting
@@ -162,4 +162,3 @@ kotlin {
         val nativeKsonTest by getting
     }
 }
-
