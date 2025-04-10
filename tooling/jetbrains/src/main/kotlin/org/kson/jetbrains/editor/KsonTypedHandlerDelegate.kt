@@ -10,9 +10,9 @@ import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getLinePosition
 import org.kson.jetbrains.util.hasElementAtOffset
+import org.kson.parser.EmbedDelim
 import org.kson.parser.ParsedElementType.EMBED_BLOCK
 import org.kson.parser.TokenType.*
-import org.kson.parser.embedDelimChars
 
 class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
     override fun charTyped(char: Char, project: Project, editor: Editor, file: PsiFile): Result {
@@ -39,7 +39,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
              * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
              */
             if (text.length > 1 && caretOffset > 1) {
-                for (embedDelimChar in embedDelimChars) {
+                for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
                     if (char == embedDelimChar && text[caretOffset - 2] == embedDelimChar) {
                         // let's be very conservative with this insert: if we are not at the end of a line,
                         //     or followed by a comma (which is end of line-ish), don't do it

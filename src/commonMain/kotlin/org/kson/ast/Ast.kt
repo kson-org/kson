@@ -1,11 +1,9 @@
 package org.kson.ast
 
 import org.kson.CompileTarget
-import org.kson.CompileTarget.Kson
-import org.kson.CompileTarget.Yaml
-import org.kson.CompileTarget.Json
+import org.kson.CompileTarget.*
 import org.kson.ast.AstNode.Indent
-import org.kson.parser.EMBED_DELIMITER
+import org.kson.parser.EmbedDelim
 import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
 
@@ -348,10 +346,10 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                indent.firstLineIndent() + EMBED_DELIMITER + embedTag + "\n" +
+                indent.firstLineIndent() + EmbedDelim.Percent.delimiter + embedTag + "\n" +
                         indent.bodyLinesIndent() + embedContent.split("\n")
                             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                        indent.bodyLinesIndent() + EMBED_DELIMITER
+                        indent.bodyLinesIndent() + EmbedDelim.Percent.delimiter
             }
 
             is Yaml -> {

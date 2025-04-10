@@ -5,12 +5,19 @@ import org.kson.collections.toImmutableList
 import org.kson.collections.toImmutableMap
 import org.kson.parser.TokenType.*
 
-const val EMBED_DELIM_CHAR = '%'
-const val EMBED_DELIMITER = "$EMBED_DELIM_CHAR$EMBED_DELIM_CHAR"
-const val EMBED_DELIM_ALT_CHAR = '$'
-const val EMBED_DELIMITER_ALT = "$EMBED_DELIM_ALT_CHAR$EMBED_DELIM_ALT_CHAR"
-// pre-construct a set of both our embed delimiter chars for convenience in code that handles both
-val embedDelimChars = setOf(EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR)
+/**
+ * Represents an embed delimiter in KSON, which can be either %% or $$
+ */
+sealed class EmbedDelim(val char: Char) {
+    /** The full delimiter string (either "%%" or "$$") */
+    val delimiter: String = "$char$char"
+
+    /** Percent-style delimiter (%%), our "primary" delimiter */
+    data object Percent : EmbedDelim('%')
+
+    /** Dollar-style delimiter ($$), our "alternate" delimiter */
+    data object Dollar : EmbedDelim('$')
+}
 
 private val KEYWORDS =
     mapOf(
@@ -289,7 +296,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 addLiteralToken(STRING_OPEN_QUOTE)
                 string(char)
             }
-            EMBED_DELIM_CHAR, EMBED_DELIM_ALT_CHAR -> {
+            EmbedDelim.Percent.char, EmbedDelim.Dollar.char -> {
                 // look for the required second embed delim char
                 if (sourceScanner.peek() == char) {
                     sourceScanner.advance()
@@ -498,8 +505,8 @@ class Lexer(source: String, gapFree: Boolean = false) {
         val embedTokenValue = if (hasEscapedEmbedEnd) {
             /**
              * Here we trim the escaping slash from escaped EMBED_DELIMs.  This is slightly novel/intricate,
-             * so some here's some clarifying notes (explained in terms of `%%`, the default [EMBED_DELIM_CHAR].
-             * [EMBED_DELIM_ALT_CHAR] naturally works the same):
+             * so some here's some clarifying notes (explained in terms of `%%`, i.e. [EmbedDelim.Percent]
+             * the default [EmbedDelim]. [EmbedDelim.Dollar] naturally works the same):
              *
              * - an escaped [TokenType.EMBED_CLOSE_DELIM] has its second percent char escaped: %\% yields %% inside of an embed.
              *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside

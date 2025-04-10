@@ -12,8 +12,8 @@ import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getLinePosition
 import org.kson.jetbrains.util.hasElementAtOffset
+import org.kson.parser.EmbedDelim
 import org.kson.parser.TokenType.*
-import org.kson.parser.embedDelimChars
 
 class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
     override fun beforeCharDeleted(c: Char, file: PsiFile, editor: Editor) {
@@ -50,7 +50,7 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
                 /**
                  * handle deleting [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
                  */
-                for (embedDelimChar in embedDelimChars) {
+                for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
                     if (caretOffset > 1 && text[caretOffset - 2] == embedDelimChar && text[caretOffset - 1] == embedDelimChar) {
                         if (text[caretOffset] != '\n') {
                              // if we're not at the end of the line, then we're definitely not part of an auto-inserted
