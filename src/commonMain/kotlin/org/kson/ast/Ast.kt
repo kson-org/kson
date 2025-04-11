@@ -327,10 +327,6 @@ class NullNode : ValueNode() {
     }
 }
 
-/**
- * TODO [embedTag] and [embedContent] may contain escaped embed delimiters.  These will need to be processed once
- *   we implement compile targets other than re-serializing out to Kson
- */
 class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
     ValueNode() {
 
@@ -343,13 +339,43 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
         const val EMBED_TAG_KEYWORD = "embedTag"
         const val EMBED_CONTENT_KEYWORD = "embedContent"
     }
+
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                indent.firstLineIndent() + EmbedDelim.Percent.delimiter + embedTag + "\n" +
-                        indent.bodyLinesIndent() + embedContent.split("\n")
-                            .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                        indent.bodyLinesIndent() + EmbedDelim.Percent.delimiter
+                val defaultDelimCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
+                if (defaultDelimCount == 0) {
+                    // The primary delimiter is not in the content, so we can use the default delimiter
+                    // without any escaping needed
+                    indent.firstLineIndent() + EmbedDelim.Percent + embedTag + "\n" +
+                            indent.bodyLinesIndent() + embedContent.split("\n")
+                                .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                            indent.bodyLinesIndent() + EmbedDelim.Percent
+                } else {
+                    // Otherwise, check if we can use the alternate delimiter without escaping
+                    val altDelimCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
+                    if (altDelimCount == 0) {
+                        // We can use the alternate delimiter, but must handle default delimiter escapes
+                        val escapedContent = EmbedDelim.Dollar.escapeEmbedContent(embedContent)
+                        indent.firstLineIndent() + EmbedDelim.Dollar + embedTag + "\n" +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                indent.bodyLinesIndent() + EmbedDelim.Dollar
+                    } else {
+                        // We'll choose the delimiter that requires less escaping
+                        val chosenDelimiter = if (altDelimCount < defaultDelimCount) {
+                            EmbedDelim.Dollar
+                        } else {
+                            EmbedDelim.Percent
+                        }
+
+                        val escapedContent = chosenDelimiter.escapeEmbedContent(embedContent)
+                        indent.firstLineIndent() + chosenDelimiter + embedTag + "\n" +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                indent.bodyLinesIndent() + chosenDelimiter
+                    }
+                }
             }
 
             is Yaml -> {
@@ -410,15 +436,19 @@ private fun renderMultilineYamlString(
 }
 
 /**
- * Escapes quotes and whitespace characters (newlines, carriage returns and tabs) in a string, 
- * useful for instance when serializing a Kson-escaped string (which allows raw whitespace) 
+ * Escapes quotes and whitespace characters (newlines, carriage returns and tabs) in a string,
+ * useful for instance when serializing a Kson-escaped string (which allows raw whitespace)
  * to a JSON-escaped string (which does not).
+ *
+ * TODO this is very likely not sufficient for JSON escaping and should be inspected and improved
  *
  * @param str The string to escape
  * @return The string with quotes and whitespace characters (newlines, carriage returns, tabs) escaped with backslashes
  */
 private fun escapeStringLiterals(str: String): String {
     return str
+        // escape backslashes that aren't part of escape's we're detecting here
+        .replace("""(?<!\\)\\(?!["\\nrt])""".toRegex(), """\\\\""")
         .replace("\"", "\\\"")
         .replace("\n", "\\n")
         .replace("\r", "\\r")
