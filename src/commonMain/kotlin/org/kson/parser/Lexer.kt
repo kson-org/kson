@@ -7,6 +7,17 @@ import org.kson.parser.TokenType.*
 
 /**
  * Represents an embed delimiter in KSON, which can be either %% or $$
+ *
+ * Embed blocks are designed to allow other tools to confidently extract their contents as simply as possible,
+ * so a naive regex looking for the closing delimiter of either %% or $$ will always be correct.  But of course,
+ * we also need to accomodate escaping embedded delimiters, so to accomplish both these goals, escaping an
+ * embed delimiter within an embed is slightly novel/intricate.  So (explained in terms of `%%`, `$$` naturally works
+ * the same), here's how they work:
+ *
+ * Escaping: an escaped [TokenType.EMBED_CLOSE_DELIM] has its second percent char escaped: "%\%" yields a literal
+ *   "%%" inside of an embed. Note that this moves the escaping goalpost since we also need to allow %\% literally
+ *   inside of embeds.  So: when evaluating escaped `%%`s, we allow arbitrary `\`s before the second
+ *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in the output, etc
  */
 sealed class EmbedDelim(val char: Char) {
     /** The full delimiter string (either "%%" or "$$") */
@@ -17,6 +28,23 @@ sealed class EmbedDelim(val char: Char) {
 
     /** Dollar-style delimiter ($$), our "alternate" delimiter */
     data object Dollar : EmbedDelim('$')
+
+    /**
+     * Process escapes in embed content delimiter by this [EmbedDelim].  See the doc on [EmbedDelim] more for details on
+     * the escaping rules at work here.
+     *
+     * NOTE: the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
+     *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
+     *   slashes in the output, and we also need to escape the delimChar delimiter since it may be a regex
+     *   special character, like '$' (EMBED_DELIM_ALT_CHAR), that needs special handling.
+     */
+    fun unescapeEmbedContent(content: String): String {
+        val literal = "$char"
+        val escaped = Regex.escape(literal)
+        val pattern = "$escaped\\\\([\\\\]*)$escaped"
+        val escapedReplacement = Regex.escapeReplacement(literal)
+        return content.replace(Regex(pattern), "$escapedReplacement\$1$escapedReplacement")
+    }
 }
 
 private val KEYWORDS =
@@ -503,27 +531,11 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
         val embedTokenValue = if (hasEscapedEmbedEnd) {
-            /**
-             * Here we trim the escaping slash from escaped EMBED_DELIMs.  This is slightly novel/intricate,
-             * so some here's some clarifying notes (explained in terms of `%%`, i.e. [EmbedDelim.Percent]
-             * the default [EmbedDelim]. [EmbedDelim.Dollar] naturally works the same):
-             *
-             * - an escaped [TokenType.EMBED_CLOSE_DELIM] has its second percent char escaped: %\% yields %% inside of an embed.
-             *   Note that this moves the escaping goalpost since we also need to allow %\% literally inside
-             *   of embeds.  So: when evaluating escaped EMBED_DELIMs, we allow arbitrary `\`s before the second
-             *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in
-             *   the output, etc
-             *
-             * - the regex for this ends up looking a bit crazy for a few reasons: \ needs to be double escaped in
-             *   regex, so matching \ requires saying "\\\\".  Then we use the [\\\\]* to reinsert any additional
-             *   slashes in the output, and we also need to escape the delimChar delimiter since it may be a regex
-             *   special character, like '$' (EMBED_DELIM_ALT_CHAR), that needs special handling.
-             */
-            val literal = "$delimChar"
-            val escaped = Regex.escape(literal)
-            val pattern = "$escaped\\\\([\\\\]*)$escaped"
-            val escapedReplacement = Regex.escapeReplacement(literal)
-            trimmedEmbedBlockContent.replace(Regex(pattern), "$escapedReplacement\$1$escapedReplacement")
+            when (delimChar) {
+                EmbedDelim.Percent.char -> EmbedDelim.Percent.unescapeEmbedContent(trimmedEmbedBlockContent)
+                EmbedDelim.Dollar.char -> EmbedDelim.Dollar.unescapeEmbedContent(trimmedEmbedBlockContent)
+                else -> throw IllegalStateException("Unknown embed delimiter char: $delimChar")
+            }
         } else {
             trimmedEmbedBlockContent
         }
