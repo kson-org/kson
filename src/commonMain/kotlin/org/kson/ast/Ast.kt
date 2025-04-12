@@ -258,7 +258,7 @@ open class StringNode(override val stringContent: String) : KeywordNode() {
             }
 
             is Json -> {
-                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
+                indent.firstLineIndent() + "\"${renderForJsonString(stringContent)}\""
             }
         }
     }
@@ -272,7 +272,7 @@ class IdentifierNode(override val stringContent: String) : KeywordNode() {
             }
 
             is Json -> {
-                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
+                indent.firstLineIndent() + "\"${renderForJsonString(stringContent)}\""
             }
         }
     }
@@ -390,13 +390,13 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
 
             is Json -> {
                 if (!compileTarget.retainEmbedTags) {
-                    indent.firstLineIndent() + "\"${escapeStringLiterals(embedContent)}\""
+                    indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
                 } else {
                     val nextIndent = indent.next(false)
                     """
                     |${indent.firstLineIndent()}{
                     |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${escapeStringLiterals(embedContent)}"
+                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
                     |}
                     """.trimMargin()
                 }
@@ -433,24 +433,4 @@ private fun renderMultilineYamlString(
                 .joinToString("\n") { line ->
                     contentIndent.bodyLinesIndent() + line
                 }
-}
-
-/**
- * Escapes quotes and whitespace characters (newlines, carriage returns and tabs) in a string,
- * useful for instance when serializing a Kson-escaped string (which allows raw whitespace)
- * to a JSON-escaped string (which does not).
- *
- * TODO this is very likely not sufficient for JSON escaping and should be inspected and improved
- *
- * @param str The string to escape
- * @return The string with quotes and whitespace characters (newlines, carriage returns, tabs) escaped with backslashes
- */
-private fun escapeStringLiterals(str: String): String {
-    return str
-        // escape backslashes that aren't part of escape's we're detecting here
-        .replace("""(?<!\\)\\(?!["\\nrt])""".toRegex(), """\\\\""")
-        .replace("\"", "\\\"")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t")
 }

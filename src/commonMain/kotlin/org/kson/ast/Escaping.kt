@@ -1,0 +1,72 @@
+package org.kson.ast
+
+/**
+ * Render the given string for inclusion in a JSON string literal.
+ * This handles JSON-required escape sequences according to the [JSON RFC 8259 specification](https://datatracker.ietf.org/doc/html/rfc8259)
+ *
+ * @param content The string to escape
+ * @return The given [content], prepared for inclusion in Json as a string
+ */
+fun renderForJsonString(content: String): String {
+    val sb = StringBuilder(content.length + 2)
+    
+    var i = 0
+    while (i < content.length) {
+        val char = content[i]
+        when {
+            char == '"' -> sb.append("\\\"")
+            char == '\\' -> sb.append("\\\\")
+            char == '/' -> sb.append("\\/")  // Optional but included for maximum compatibility
+            char == '\b' -> sb.append("\\b")
+            char == '\u000C' -> sb.append("\\f")
+            char == '\n' -> sb.append("\\n")
+            char == '\r' -> sb.append("\\r")
+            char == '\t' -> sb.append("\\t")
+            char.isHighSurrogate() && i + 1 < content.length && content[i + 1].isLowSurrogate() -> {
+                // Calculate code point from surrogate pair
+                val high = char.code
+                val low = content[++i].code
+                val codePoint = 0x10000 + ((high - 0xD800) shl 10) + (low - 0xDC00)
+                appendSurrogatePair(sb, codePoint)
+            }
+            char.code < 0x20 -> appendUnicodeEscape(sb, char.code)
+            char == '\u2028' || char == '\u2029' -> appendUnicodeEscape(sb, char.code)
+            else -> sb.append(char)
+        }
+        i++
+    }
+    
+    return sb.toString()
+}
+
+/**
+ * Appends a Unicode escape sequence (\uXXXX) for the given code point.
+ * JSON requires certain characters to be escaped as Unicode sequences:
+ * - Control characters (U+0000 to U+001F)
+ * - Unicode line/paragraph separators (U+2028, U+2029)
+ *
+ * @param sb The StringBuilder to append to
+ * @param codePoint The Unicode code point to escape
+ */
+private fun appendUnicodeEscape(sb: StringBuilder, codePoint: Int) {
+    sb.append("\\u")
+    sb.append(codePoint.toString(16).uppercase().padStart(4, '0'))
+}
+
+/**
+ * Appends a surrogate pair as two Unicode escape sequences for characters outside the BMP (Basic Multilingual Plane).
+ * JSON requires characters beyond U+FFFF to be represented as surrogate pairs (see the paragraph starting
+ * with "To escape an extended character that is not in the Basic Multilingual Plane..." in
+ * [Section 7 of RFC 8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7)
+ *
+ * This converts a supplementary code point to high and low surrogates and formats them as \uXXXX\uXXXX.
+ *
+ * @param sb The StringBuilder to append to
+ * @param codePoint The Unicode code point to convert to a surrogate pair
+ */
+private fun appendSurrogatePair(sb: StringBuilder, codePoint: Int) {
+    val high = (0xD800 or ((codePoint - 0x10000) shr 10))
+    val low = (0xDC00 or ((codePoint - 0x10000) and 0x3FF))
+    appendUnicodeEscape(sb, high)
+    appendUnicodeEscape(sb, low)
+}
