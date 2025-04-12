@@ -8,8 +8,14 @@ import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import junit.framework.TestCase
+import org.kson.Kson
 import org.kson.jetbrains.KsonLanguage
 
+/**
+ * Note that since [KsonExternalFormatter] delegates to [Kson.format], the testing here
+ * is mostly sanity checking that things are hooked up correctly and that IDE-specific
+ * functionality is working, such as IDE configuration
+ */
 class KsonExternalFormatterTest : BasePlatformTestCase() {
     private lateinit var settings: CodeStyleSettings
     

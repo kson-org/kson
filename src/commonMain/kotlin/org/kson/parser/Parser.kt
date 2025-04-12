@@ -629,8 +629,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 "$delimChar$delimChar"
             } else {
                 val delimText = builder.getTokenText()
-                embedBlockStartDelimMark.drop()
                 builder.advanceLexer()
+                embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
                 delimText
             }
 

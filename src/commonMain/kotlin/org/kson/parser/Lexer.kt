@@ -88,6 +88,16 @@ sealed class EmbedDelim(val char: Char) {
     override fun toString(): String {
         return delimiter
     }
+
+    companion object {
+        fun fromString(delimString: String): EmbedDelim {
+            return when (delimString) {
+                "%%" -> Percent
+                "$$" -> Dollar
+                else -> throw RuntimeException("Unknown embed delimiter string: $delimString")
+            }
+        }
+    }
 }
 
 private val KEYWORDS =
@@ -546,10 +556,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
             }
         }
 
-        // we use this var to track if we need to consume escapes in an embed block so that we only walk its text
-        // trying to replace escapes if we know we need to
-        var hasEscapedEmbedEnd = false
-
         // read embedded content until the closing delimChar pair (or EOF in the case of an unclosed block)
         while (
             !sourceScanner.eof()
@@ -562,7 +568,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
                     sourceScanner.advance()
                 }
                 if (sourceScanner.peek() == delimChar) {
-                    hasEscapedEmbedEnd = true
                     sourceScanner.advance()
                 }
             } else {
@@ -573,17 +578,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
         val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
-        val embedTokenValue = if (hasEscapedEmbedEnd) {
-            when (delimChar) {
-                EmbedDelim.Percent.char -> EmbedDelim.Percent.unescapeEmbedContent(trimmedEmbedBlockContent)
-                EmbedDelim.Dollar.char -> EmbedDelim.Dollar.unescapeEmbedContent(trimmedEmbedBlockContent)
-                else -> throw IllegalStateException("Unknown embed delimiter char: $delimChar")
-            }
-        } else {
-            trimmedEmbedBlockContent
-        }
-
-        addToken(EMBED_CONTENT, embedBlockLexeme, embedTokenValue)
+        addToken(EMBED_CONTENT, embedBlockLexeme, trimmedEmbedBlockContent)
 
         /**
          * We scanned everything that wasn't an [TokenType.EMBED_CLOSE_DELIM] into our embed content,

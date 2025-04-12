@@ -327,8 +327,10 @@ class NullNode : ValueNode() {
     }
 }
 
-class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
+class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDelim: EmbedDelim) :
     ValueNode() {
+
+    private val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
 
     companion object {
         /**

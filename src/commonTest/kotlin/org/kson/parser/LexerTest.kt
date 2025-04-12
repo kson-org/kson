@@ -738,7 +738,7 @@ class LexerTest {
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double %% percents are embedded but escaped", singleEscapeTokens[2].value)
+        assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[2].value)
     }
 
     @Test
@@ -751,7 +751,7 @@ class LexerTest {
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double $$ dollars are embedded but escaped", singleEscapeTokens[2].value)
+        assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[2].value)
     }
 
     @Test
