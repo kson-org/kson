@@ -2,8 +2,7 @@ package org.kson.jetbrains.editor
 
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
-import org.kson.parser.EMBED_DELIMITER
-import org.kson.parser.EMBED_DELIMITER_ALT
+import org.kson.parser.EmbedDelim
 
 class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
     /**
@@ -82,12 +81,13 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonTypedHandlerDelegateTest.testEmbedDelimiterAutoInsert]
      */
     fun testDeleteEmptyEmbedDelimitersPairs() {
-        for (halfDelim in listOf(org.kson.parser.EMBED_DELIM_CHAR, org.kson.parser.EMBED_DELIM_ALT_CHAR)) {
-            val fullDelim = "$halfDelim$halfDelim"
-            val altFullDelim = if (fullDelim == EMBED_DELIMITER) {
-                EMBED_DELIMITER_ALT
+        for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {
+            val halfDelim = delimiter.char
+            val fullDelim = delimiter.delimiter
+            val altFullDelim = if (delimiter == EmbedDelim.Percent) {
+                EmbedDelim.Dollar.delimiter
             } else {
-                EMBED_DELIMITER
+                EmbedDelim.Percent.delimiter
             }
 
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {

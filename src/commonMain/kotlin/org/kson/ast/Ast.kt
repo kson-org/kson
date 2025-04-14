@@ -1,11 +1,9 @@
 package org.kson.ast
 
 import org.kson.CompileTarget
-import org.kson.CompileTarget.Kson
-import org.kson.CompileTarget.Yaml
-import org.kson.CompileTarget.Json
+import org.kson.CompileTarget.*
 import org.kson.ast.AstNode.Indent
-import org.kson.parser.EMBED_DELIMITER
+import org.kson.parser.EmbedDelim
 import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
 
@@ -260,7 +258,7 @@ open class StringNode(override val stringContent: String) : KeywordNode() {
             }
 
             is Json -> {
-                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
+                indent.firstLineIndent() + "\"${renderForJsonString(stringContent)}\""
             }
         }
     }
@@ -274,7 +272,7 @@ class IdentifierNode(override val stringContent: String) : KeywordNode() {
             }
 
             is Json -> {
-                indent.firstLineIndent() + "\"${escapeStringLiterals(stringContent)}\""
+                indent.firstLineIndent() + "\"${renderForJsonString(stringContent)}\""
             }
         }
     }
@@ -329,12 +327,10 @@ class NullNode : ValueNode() {
     }
 }
 
-/**
- * TODO [embedTag] and [embedContent] may contain escaped embed delimiters.  These will need to be processed once
- *   we implement compile targets other than re-serializing out to Kson
- */
-class EmbedBlockNode(private val embedTag: String, private val embedContent: String) :
+class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDelim: EmbedDelim) :
     ValueNode() {
+
+    private val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
 
     companion object {
         /**
@@ -345,13 +341,43 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
         const val EMBED_TAG_KEYWORD = "embedTag"
         const val EMBED_CONTENT_KEYWORD = "embedContent"
     }
+
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                indent.firstLineIndent() + EMBED_DELIMITER + embedTag + "\n" +
-                        indent.bodyLinesIndent() + embedContent.split("\n")
-                            .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                        indent.bodyLinesIndent() + EMBED_DELIMITER
+                val defaultDelimCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
+                if (defaultDelimCount == 0) {
+                    // The primary delimiter is not in the content, so we can use the default delimiter
+                    // without any escaping needed
+                    indent.firstLineIndent() + EmbedDelim.Percent + embedTag + "\n" +
+                            indent.bodyLinesIndent() + embedContent.split("\n")
+                                .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                            indent.bodyLinesIndent() + EmbedDelim.Percent
+                } else {
+                    // Otherwise, check if we can use the alternate delimiter without escaping
+                    val altDelimCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
+                    if (altDelimCount == 0) {
+                        // We can use the alternate delimiter, but must handle default delimiter escapes
+                        val escapedContent = EmbedDelim.Dollar.escapeEmbedContent(embedContent)
+                        indent.firstLineIndent() + EmbedDelim.Dollar + embedTag + "\n" +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                indent.bodyLinesIndent() + EmbedDelim.Dollar
+                    } else {
+                        // We'll choose the delimiter that requires less escaping
+                        val chosenDelimiter = if (altDelimCount < defaultDelimCount) {
+                            EmbedDelim.Dollar
+                        } else {
+                            EmbedDelim.Percent
+                        }
+
+                        val escapedContent = chosenDelimiter.escapeEmbedContent(embedContent)
+                        indent.firstLineIndent() + chosenDelimiter + embedTag + "\n" +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                indent.bodyLinesIndent() + chosenDelimiter
+                    }
+                }
             }
 
             is Yaml -> {
@@ -366,13 +392,13 @@ class EmbedBlockNode(private val embedTag: String, private val embedContent: Str
 
             is Json -> {
                 if (!compileTarget.retainEmbedTags) {
-                    indent.firstLineIndent() + "\"${escapeStringLiterals(embedContent)}\""
+                    indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
                 } else {
                     val nextIndent = indent.next(false)
                     """
                     |${indent.firstLineIndent()}{
                     |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${escapeStringLiterals(embedContent)}"
+                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
                     |}
                     """.trimMargin()
                 }
@@ -409,20 +435,4 @@ private fun renderMultilineYamlString(
                 .joinToString("\n") { line ->
                     contentIndent.bodyLinesIndent() + line
                 }
-}
-
-/**
- * Escapes quotes and whitespace characters (newlines, carriage returns and tabs) in a string, 
- * useful for instance when serializing a Kson-escaped string (which allows raw whitespace) 
- * to a JSON-escaped string (which does not).
- *
- * @param str The string to escape
- * @return The string with quotes and whitespace characters (newlines, carriage returns, tabs) escaped with backslashes
- */
-private fun escapeStringLiterals(str: String): String {
-    return str
-        .replace("\"", "\\\"")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t")
 }

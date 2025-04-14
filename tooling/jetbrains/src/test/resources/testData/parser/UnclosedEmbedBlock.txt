@@ -1,6 +1,7 @@
 FILE(0,36)
   PsiErrorElement:Unclosed "%%"(0,36)
-    PsiElement(IElementTokenType(tokenType=EMBED_OPEN_DELIM))('%%')(0,2)
+    KsonPsiElement(IElementTokenType(tokenType=EMBED_OPEN_DELIM))(0,2)
+      PsiElement(IElementTokenType(tokenType=EMBED_OPEN_DELIM))('%%')(0,2)
     KsonPsiElement(IElementTokenType(tokenType=EMBED_TAG))(2,2)
       <empty list>
     PsiElement(IElementTokenType(tokenType=EMBED_PREAMBLE_NEWLINE))('\n')(2,3)

@@ -33,7 +33,7 @@ enum class TokenType : ElementType {
     // lines starting with `#`
     COMMENT,
     /**
-     * Opening delimiter for an embed block, either `%%` or `$$`, see [EMBED_DELIM_CHAR] and [EMBED_DELIM_ALT_CHAR]
+     * Opening delimiter for an embed block, either `%%` or `$$`, see [EmbedDelim.Percent] and [EmbedDelim.Dollar]
      */
     EMBED_OPEN_DELIM,
     /**

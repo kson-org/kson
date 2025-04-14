@@ -171,11 +171,13 @@ class KsonBuilder(private val tokens: List<Token>) :
                 val childMarkers = marker.childMarkers
                 when (marker.element) {
                     EMBED_BLOCK -> {
-                        val embedTag =
+                        val embedDelim =
                             unsafeMarkerLookup(childMarkers, 0).getValue()
-                        val embedContent =
+                        val embedTag =
                             unsafeMarkerLookup(childMarkers, 1).getValue()
-                        EmbedBlockNode(embedTag, embedContent)
+                        val embedContent =
+                            unsafeMarkerLookup(childMarkers, 2).getValue()
+                        EmbedBlockNode(embedTag, embedContent, EmbedDelim.fromString(embedDelim))
                     }
                     KEYWORD -> {
                         val keywordContentMark = unsafeMarkerLookup(childMarkers, 0)
