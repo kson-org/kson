@@ -27,6 +27,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.ANGLE_BRACKET_L -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.ANGLE_BRACKET_R -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.COLON -> getPackedTextAttributes(KSON_COLON)
+                TokenType.SEMICOLON -> getPackedTextAttributes(KSON_COLON)
                 TokenType.COMMA -> getPackedTextAttributes(KSON_COMMA)
                 TokenType.COMMENT -> getPackedTextAttributes(KSON_COMMENT)
                 TokenType.EMBED_OPEN_DELIM -> getPackedTextAttributes(KSON_DELIMITER)

@@ -736,7 +736,6 @@ class KsonTest {
             - 2
             - 4
             - 
-            - 8
         """.trimIndent(), listOf(DANGLING_LIST_DASH))
     }
 
@@ -1047,7 +1046,7 @@ class KsonTest {
 
     @Test
     fun testInvalidColonInList() {
-        assertParserRejectsSource("[key: 1]", listOf(LIST_STRAY_COLON))
+        assertParserRejectsSource("[key: 1, :]", listOf(LIST_INVALID_ELEM))
     }
 
     @Test
@@ -1058,7 +1057,7 @@ class KsonTest {
     @Test
     fun testKeywordWithoutValue() {
         assertParserRejectsSource("key:", listOf(OBJECT_KEY_NO_VALUE))
-        assertParserRejectsSource("key: key_with_val: 10 another_key:", listOf(OBJECT_KEY_NO_VALUE, OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("key: key_with_val: 10 another_key:", listOf(OBJECT_KEY_NO_VALUE))
         assertParserRejectsSource("[{key:} 1]", listOf(OBJECT_KEY_NO_VALUE))
     }
 
@@ -2196,6 +2195,103 @@ class KsonTest {
             """
             "these double $$ dollars are %%%% embedded but escaped\n"
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedNonDelimitedObjects() {
+        assertParsesTo(
+            """
+                key:
+                  nested_key: 10
+                  another_nest_key: 3;
+                unnested_key: 44
+            """.trimIndent(),
+            """
+                {
+                  key: {
+                    nested_key: 10
+                    another_nest_key: 3
+                  }
+                  unnested_key: 44
+                }
+            """.trimIndent(),
+            """
+                key:
+                  nested_key: 10
+                  another_nest_key: 3
+                unnested_key: 44
+            """.trimIndent(),
+            """
+                {
+                  "key": {
+                    "nested_key": 10,
+                    "another_nest_key": 3
+                  },
+                  "unnested_key": 44
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedNonDelimitedDashLists() {
+        assertParsesTo(
+            """
+                - 
+                  - "sub-list elem 1"
+                  - "sub-list elem 2";
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+                [
+                  [
+                    "sub-list elem 1",
+                    "sub-list elem 2"
+                  ],
+                  "outer list elem 1"
+                ]
+            """.trimIndent(),
+            """
+                - 
+                  - "sub-list elem 1"
+                  - "sub-list elem 2"
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+                [
+                  [
+                    "sub-list elem 1",
+                    "sub-list elem 2"
+                  ],
+                  "outer list elem 1"
+                ]
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testIgnoredSemiColonError() {
+        assertParserRejectsSource("""
+            <
+              - "sub-list elem 1"
+              - "sub-list elem 2";
+              - "sub-list elem 3";
+              - "sub-list elem 4"
+            >
+            """.trimIndent(),
+            listOf(IGNORED_DASH_LIST_SEMICOLON, IGNORED_DASH_LIST_SEMICOLON)
+        )
+
+        assertParserRejectsSource("""
+            {
+              key1: "val 1"
+              key2: "val 2";
+              key3: "val 3";
+              key4: "val 4"
+            }
+            """.trimIndent(),
+            listOf(IGNORED_OBJECT_SEMICOLON, IGNORED_OBJECT_SEMICOLON)
         )
     }
 }

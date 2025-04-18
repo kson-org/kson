@@ -94,15 +94,6 @@ enum class MessageType {
             return "Unable to parse this list element as a legal Kson value"
         }
     },
-    LIST_STRAY_COLON {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Colons may only be used inside an object to denote a keyword.  This is a list."
-        }
-    },
     OBJECT_BAD_INTERNALS {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -137,6 +128,26 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This object key must be followed by a value"
+        }
+    },
+    IGNORED_OBJECT_SEMICOLON {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This semicolon is ignored because this object is `{}`-delimited. " +
+                    "Semicolons only effect non-delimited objects"
+        }
+    },
+    IGNORED_DASH_LIST_SEMICOLON {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "This semicolon is ignored because this list is `<>`-delimited. " +
+                    "Semicolons only effect non-delimited dashed lists"
         }
     },
     STRING_NO_CLOSE {
