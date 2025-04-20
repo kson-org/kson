@@ -32,7 +32,13 @@
         <lang.commenter language="kson" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
         <lang.braceMatcher language="kson" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
         <lang.quoteHandler language="kson" implementationClass="org.kson.jetbrains.editor.KsonQuoteHandler"/>
-        <langCodeStyleSettingsProvider implementation="org.kson.jetbrains.config.KsonLanguageCodeStyleSettingsProvider"/>
+        <completion.contributor language="kson"
+                                implementationClass="org.kson.jetbrains.editor.KsonCompletionContributor"/>
+        <multiHostInjector implementation="org.kson.jetbrains.inject.EmbedContentInjector"/>
+        <langCodeStyleSettingsProvider
+                implementation="org.kson.jetbrains.config.KsonLanguageCodeStyleSettingsProvider"/>
+        <lang.elementManipulator forClass="org.kson.jetbrains.psi.KsonEmbedContent"
+                           implementationClass="org.kson.jetbrains.psi.KsonEmbedContent$Manipulator"/>
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
         <formattingService implementation="org.kson.jetbrains.formatter.KsonExternalFormatter"/>
         <enterHandlerDelegate implementation="org.kson.jetbrains.editor.KsonEnterHandlerDelegate"/>
