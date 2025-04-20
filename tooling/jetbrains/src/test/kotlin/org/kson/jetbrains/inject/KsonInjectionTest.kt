@@ -115,4 +115,14 @@ class KsonInjectionTest : AbstractKsonInjectionTest() {
             )
         }
     }
+
+    fun testLanguageListCompletion() {
+        val fileContent = """
+            key: %%<caret>
+            %%
+        """.trimIndent()
+
+        assertLanguageListCompletionAvailable(fileContent, "j", "json")
+        assertLanguageListCompletionAvailable(fileContent, "h", "html")
+    }
 }
