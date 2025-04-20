@@ -127,6 +127,33 @@ class KsonInjectionTest : BasePlatformTestCase() {
         myFixture.checkResult(after.trimIndent())
     }
 
+    /**
+     * Tests that language completion is available and contains expected languages.
+     *
+     * @param text The KSON text to test with
+     * @param inputTag: Tag that will be typed in the editor
+     * @param expectedLanguageId A language ID that must be present in completion results
+     */
+    private fun hasLanguageListCompletionAvailable(
+        @Language("kson") text: String,
+        inputTag: String,
+        expectedLanguageId: String
+    ) {
+        myFixture.configureByText(KsonFileType, text.trimIndent())
+
+        myFixture.type(inputTag)
+        myFixture.complete(CompletionType.BASIC)
+        val lookupElements = myFixture.lookupElements
+
+        assertNotNull("Should have completion variants available", lookupElements)
+
+        val completionTexts = lookupElements!!.map { it.lookupString }
+        assertTrue(
+            "should contain '$expectedLanguageId', but not found in completion list: $completionTexts",
+            completionTexts.contains(expectedLanguageId)
+        )
+    }
+
     fun testAutomaticLanguageInjection() {
         val language = XMLLanguage.INSTANCE
         val injectedContent =
@@ -271,5 +298,15 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 |  %%
                 """.trimMargin()
         )
+    }
+
+    fun testLanguageListCompletion() {
+        val fileContent = """
+            key: %%<caret>
+            %%
+        """.trimIndent()
+
+        hasLanguageListCompletionAvailable(fileContent, "j", "json")
+        hasLanguageListCompletionAvailable(fileContent, "h", "html")
     }
 }
