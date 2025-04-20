@@ -60,6 +60,17 @@ sealed class EmbedDelim(val char: Char) {
     }
 
     /**
+     * Returns a list of indices where delimiters are escaped in the content.
+     * For each escaped delimiter like %\%, returns the index of the first character.
+     */
+    fun findEscapedDelimiterIndices(content: String): List<Int> {
+        return needsEscapesPattern.findAll(content)
+            .map { it.range.first }
+            .toList()
+    }
+
+
+    /**
      * Perform any needed escapes on this embed content
      */
     fun escapeEmbedContent(content: String): String {

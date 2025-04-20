@@ -37,6 +37,8 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return preprocessEnter(file, editor, offset)
     }
 
+
+    @Suppress("SameReturnValue") // Only need to return `Continue` right now.
     private fun preprocessEnter(
         file: PsiFile,
         editor: Editor,
@@ -84,7 +86,11 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
              */
             if ((before == '{' && after == '}') ||
                 (before == '[' && after == ']') ||
-                (before == '<' && after == '>')
+                (before == '<' && after == '>') ||
+                // TODO this is to help indenting tags in injected xml-like languages, which should not be our
+                //   responsibility, but it seems Kotlin has the same workaround [https://github.com/JetBrains/intellij-community/blob/4d2499e460bd6ab6425de24517d0050b65a78f99/plugins/kotlin/base/code-insight/minimal/src/org/jetbrains/kotlin/idea/editor/KotlinMultilineStringEnterHandler.kt#L82].
+                //   Can we figure out how to delegate to the injected language?
+                (before == '>' && after == '<')
             ) {
                 // Remove any whitespace we found between the delimiters
                 if (afterIndex > offset) {
@@ -110,6 +116,7 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return postProcessEnter(hostPosition.file, hostPosition.editor)
     }
 
+    @Suppress("SameReturnValue") // Only need to return `Continue` right now.
     private fun postProcessEnter(file: PsiFile, editor: Editor): Result {
         if (!file.language.isKindOf(KsonLanguage)) {
             return EnterHandlerDelegate.Result.Continue
