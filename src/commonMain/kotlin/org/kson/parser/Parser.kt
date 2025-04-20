@@ -32,29 +32,29 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
  * root -> ksonValue <end-of-file>
- * plainObject -> objectInternals ";"+
- * objectInternals -> ("," ( keyword ksonValue ","? )+
- *                 | ( ","? keyword ksonValue )*
- *                 | ( keyword ksonValue ","? )*)
  * ksonValue -> plainObject
- *           | dashList
- *           | delimitedValue
- * delimitedValue -> delimitedDashList
+ *            | dashList
+ *            | delimitedValue
+ * plainObject -> objectInternals ";"+
+ * objectInternals -> "," ( keyword ksonValue ","? )+
+ *                  | ( ","? keyword ksonValue )*
+ *                  | ( keyword ksonValue ","? )*
+ * dashList -> dashListInternals ";"+
+ * dashListInternals -> ( LIST_DASH ksonValue )*
+ * delimitedValue -> delimitedObject
+ *                 | delimitedDashList
  *                 | bracketList
- *                 | delimitedObject
  *                 | literal
  *                 | embedBlock
  * delimitedObject -> "{" objectInternals "}"
  * delimitedDashList -> "<" dashListInternals ">"
- * dashList -> dashListInternals ";"+
- * dashListInternals -> ( LIST_DASH ksonValue )*
  * bracketList -> "[" "," ( ksonValue ","? )+ "]"
  *              | "[" ( ","? ksonValue )* "]"
  *              | "[" ( ksonValue ","? )* "]"
+ * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
  * keyword -> ( IDENTIFIER | string ) ":"
- * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null"
  * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
- * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
+ * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -111,10 +111,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
+     * ksonValue -> plainObject
+     *           | dashList
+     *           | delimitedValue
+     */
+    private fun ksonValue(): Boolean = plainObject(false) || dashList() || delimitedValue()
+
+    /**
      * plainObject -> objectInternals ";"+
-     * objectInternals -> ("," ( keyword ksonValue ","? )+
-     *                 | ( ","? keyword ksonValue )*
-     *                 | ( keyword ksonValue ","? )*)
+     * objectInternals -> "," ( keyword ksonValue ","? )+
+     *                  | ( ","? keyword ksonValue )*
+     *                  | ( keyword ksonValue ","? )*
      *
      * Note: as in [dashList], we combine these two grammar rules here so it's clean/easy to implement
      *   make a more friendly parse for users by giving warnings when semicolons are used in a delimited list
@@ -203,158 +210,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * ksonValue -> plainObject
-     *           | dashList
-     *           | delimitedValue
-     */
-    private fun ksonValue(): Boolean = plainObject(false) || dashList() || delimitedValue()
-
-    private fun processComma(builder: AstBuilder) {
-        val commaMark = builder.mark()
-        // advance past the optional COMMA
-        builder.advanceLexer()
-
-        // look for extra "empty" commas
-        if (builder.getTokenType() == COMMA) {
-            while (builder.getTokenType() == COMMA) {
-                builder.advanceLexer()
-            }
-            commaMark.error(EMPTY_COMMAS.create())
-        } else {
-            commaMark.drop()
-        }
-    }
-
-    /**
-     * delimitedValue -> delimitedDashList
-     *                 | bracketList
-     *                 | delimitedObject
-     *                 | literal
-     *                 | embedBlock
-     */
-    private fun delimitedValue(): Boolean {
-        if (builder.getTokenType() == CURLY_BRACE_R) {
-            val badCloseBrace = builder.mark()
-            builder.advanceLexer()
-            badCloseBrace.error(OBJECT_NO_OPEN.create())
-            return true
-        }
-
-        if (builder.getTokenType() == SQUARE_BRACKET_R) {
-            val badCloseBrace = builder.mark()
-            builder.advanceLexer()
-            badCloseBrace.error(LIST_NO_OPEN.create())
-            return true
-        }
-
-        if (builder.getTokenType() == ANGLE_BRACKET_R) {
-            val badCloseBrace = builder.mark()
-            builder.advanceLexer()
-            badCloseBrace.error(LIST_NO_OPEN.create())
-            return true
-        }
-
-        if (builder.getTokenType() == ILLEGAL_CHAR) {
-            val illegalCharMark = builder.mark()
-            val illegalChars = ArrayList<String>()
-            while (builder.getTokenType() == ILLEGAL_CHAR) {
-                illegalChars.add(builder.getTokenText())
-                builder.advanceLexer()
-            }
-            illegalCharMark.error(ILLEGAL_CHARACTERS.create(illegalChars.joinToString()))
-            // note that we allow parsing to continue — we'll act like these illegal chars aren't here in the hopes
-            // of making sense of everything else
-        }
-
-        return (delimitedDashList()
-                || bracketList()
-                || delimitedObject()
-                || literal()
-                || embedBlock())
-    }
-
-    /**
-     * delimitedObject -> "{" objectInternals "}"
-     */
-    private fun delimitedObject(): Boolean {
-        if (builder.getTokenType() == CURLY_BRACE_L) {
-            val delimitedObjectMark = builder.mark()
-
-            // advance past our CURLY_BRACE_L
-            builder.advanceLexer()
-
-            // parse any object internals, empty or otherwise
-            plainObject(allowEmpty = true, isDelimited = true)
-
-            // annotate anything unparsable within this object definition with an error
-            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-                val malformedInternals = builder.mark()
-
-                while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-                    builder.advanceLexer()
-                    val keywordMark = builder.mark()
-                    if (keyword()) {
-                        keywordMark.rollbackTo()
-                        break
-                    } else {
-                        keywordMark.drop()
-                    }
-                }
-
-                malformedInternals.error(OBJECT_BAD_INTERNALS.create())
-
-                // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
-                // on internals that are actually bad
-                plainObject(allowEmpty = false, isDelimited = true)
-            }
-
-            if (builder.getTokenType() == CURLY_BRACE_R) {
-                // advance past our CURLY_BRACE_R
-                builder.advanceLexer()
-                delimitedObjectMark.done(OBJECT_DEFINITION)
-            } else {
-                delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
-            }
-            return true
-        } else {
-            // not a delimitedObject
-            return false
-        }
-    }
-
-    /**
-     * delimitedDashList -> "<" dashListInternals ">"
-     */
-    private fun delimitedDashList(): Boolean {
-        if (builder.getTokenType() != ANGLE_BRACKET_L) {
-            return false
-        }
-
-        val listMark = builder.mark()
-
-        // consume our ANGLE_BRACKET_L
-        builder.advanceLexer()
-
-        val emptyList = !dashList(true)
-
-        if (builder.getTokenType() == ANGLE_BRACKET_R) {
-            builder.advanceLexer()
-            /**
-             * if this list is empty, then [dashList] didn't mark it, so we need to
-             */
-            if (emptyList) {
-                listMark.done(LIST)
-            } else {
-                listMark.drop()
-            }
-        } else {
-            listMark.error(LIST_NO_CLOSE.create())
-        }
-
-        return true
-    }
-
-    /**
      * dashList -> dashListInternals ";"+
      * dashListInternals -> ( LIST_DASH ksonValue )*
      *
@@ -397,13 +252,162 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
     }
 
+    private fun processComma(builder: AstBuilder) {
+        val commaMark = builder.mark()
+        // advance past the optional COMMA
+        builder.advanceLexer()
+
+        // look for extra "empty" commas
+        if (builder.getTokenType() == COMMA) {
+            while (builder.getTokenType() == COMMA) {
+                builder.advanceLexer()
+            }
+            commaMark.error(EMPTY_COMMAS.create())
+        } else {
+            commaMark.drop()
+        }
+    }
+
+    /**
+     * delimitedValue -> delimitedObject
+     *                 | delimitedDashList
+     *                 | bracketList
+     *                 | literal
+     *                 | embedBlock
+     */
+    private fun delimitedValue(): Boolean {
+        if (builder.getTokenType() == CURLY_BRACE_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(OBJECT_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == SQUARE_BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == ANGLE_BRACKET_R) {
+            val badCloseBrace = builder.mark()
+            builder.advanceLexer()
+            badCloseBrace.error(LIST_NO_OPEN.create())
+            return true
+        }
+
+        if (builder.getTokenType() == ILLEGAL_CHAR) {
+            val illegalCharMark = builder.mark()
+            val illegalChars = ArrayList<String>()
+            while (builder.getTokenType() == ILLEGAL_CHAR) {
+                illegalChars.add(builder.getTokenText())
+                builder.advanceLexer()
+            }
+            illegalCharMark.error(ILLEGAL_CHARACTERS.create(illegalChars.joinToString()))
+            // note that we allow parsing to continue — we'll act like these illegal chars aren't here in the hopes
+            // of making sense of everything else
+        }
+
+        return (delimitedObject()
+                || delimitedDashList()
+                || bracketList()
+                || literal()
+                || embedBlock())
+    }
+
+    /**
+     * delimitedObject -> "{" objectInternals "}"
+     */
+    private fun delimitedObject(): Boolean {
+        if (builder.getTokenType() != CURLY_BRACE_L) {
+            // no open curly brace, so not a delimitedObject
+            return false
+        }
+
+        val delimitedObjectMark = builder.mark()
+
+        // advance past our CURLY_BRACE_L
+        builder.advanceLexer()
+
+        // parse any object internals, empty or otherwise
+        plainObject(allowEmpty = true, isDelimited = true)
+
+        // annotate anything unparsable within this object definition with an error
+        while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+            val malformedInternals = builder.mark()
+
+            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                builder.advanceLexer()
+                val keywordMark = builder.mark()
+                if (keyword()) {
+                    keywordMark.rollbackTo()
+                    break
+                } else {
+                    keywordMark.drop()
+                }
+            }
+
+            malformedInternals.error(OBJECT_BAD_INTERNALS.create())
+
+            // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
+            // on internals that are actually bad
+            plainObject(allowEmpty = false, isDelimited = true)
+        }
+
+        if (builder.getTokenType() == CURLY_BRACE_R) {
+            // advance past our CURLY_BRACE_R
+            builder.advanceLexer()
+            delimitedObjectMark.done(OBJECT_DEFINITION)
+        } else {
+            delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
+        }
+        return true
+    }
+
+    /**
+     * delimitedDashList -> "<" dashListInternals ">"
+     */
+    private fun delimitedDashList(): Boolean {
+        if (builder.getTokenType() != ANGLE_BRACKET_L) {
+            // no open angle bracket, so not a delimitedDashList
+            return false
+        }
+
+        val listMark = builder.mark()
+
+        // consume our ANGLE_BRACKET_L
+        builder.advanceLexer()
+
+        val emptyList = !dashList(true)
+
+        if (builder.getTokenType() == ANGLE_BRACKET_R) {
+            builder.advanceLexer()
+            /**
+             * if this list is empty, then [dashList] didn't mark it, so we need to
+             */
+            if (emptyList) {
+                listMark.done(LIST)
+            } else {
+                listMark.drop()
+            }
+        } else {
+            listMark.error(LIST_NO_CLOSE.create())
+        }
+
+        return true
+    }
+
     /**
      * bracketList -> "[" "," ( ksonValue ","? )+ "]"
      *              | "[" ( ","? ksonValue )* "]"
      *              | "[" ( ksonValue ","? )* "]"
      */
     private fun bracketList(): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() == SQUARE_BRACKET_L) {
+        if (builder.getTokenType() != SQUARE_BRACKET_L) {
+            // no open square bracket, so not a bracketList
+            return@nest false
+        }
             val listMark = builder.mark()
             // advance past the SQUARE_BRACKET_L
             builder.advanceLexer()
@@ -458,47 +462,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 listMark.error(LIST_NO_CLOSE.create())
             }
             return@nest true
-        } else {
-            // not a list
-            return@nest false
-        }
     }
 
     /**
-     * keyword -> ( IDENTIFIER | string ) ":"
-     */
-    private fun keyword(): Boolean {
-        // try to parse a keyword in the style of "IDENTIFIER followed by :"
-        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
-            val identifierMark = builder.mark()
-            builder.advanceLexer()
-            identifierMark.done(IDENTIFIER)
-            keywordMark.done(KEYWORD)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        }
-
-        // try to parse a keyword in the style of "string followed by :"
-        val keywordMark = builder.mark()
-        if (string() && builder.getTokenType() == COLON) {
-            keywordMark.done(KEYWORD)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        } else {
-            keywordMark.rollbackTo()
-        }
-
-        // not a keyword
-        return false
-    }
-
-    /**
-     * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null"
+     * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
      */
     private fun literal(): Boolean {
         if (string()) {
@@ -543,6 +510,39 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             terminalElementMark.rollbackTo()
             return false
         }
+    }
+
+    /**
+     * keyword -> ( IDENTIFIER | string ) ":"
+     */
+    private fun keyword(): Boolean {
+        // try to parse a keyword in the style of "IDENTIFIER followed by :"
+        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
+            val keywordMark = builder.mark()
+            val identifierMark = builder.mark()
+            builder.advanceLexer()
+            identifierMark.done(IDENTIFIER)
+            keywordMark.done(KEYWORD)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        }
+
+        // try to parse a keyword in the style of "string followed by :"
+        val keywordMark = builder.mark()
+        if (string() && builder.getTokenType() == COLON) {
+            keywordMark.done(KEYWORD)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        } else {
+            keywordMark.rollbackTo()
+        }
+
+        // not a keyword
+        return false
     }
 
     /**
@@ -647,7 +647,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
+     * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_OPEN_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
