@@ -5,27 +5,6 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
 
 /**
- * Default maximum nesting of objects and lists to allow in parsing.  This protects against
- * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
- * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
- * as needed (note that this may also be configured in calls to [Parser.parse])
- */
-const val DEFAULT_MAX_NESTING_LEVEL = 255
-
-/**
- * Used to bail out of parsing when when excessive nesting is detected
- */
-class ExcessiveNestingException: RuntimeException()
-
-/**
- * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
- * but is validated separately against [validHexChars]
- */
-private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
-private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
-
-/**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
@@ -765,3 +744,24 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
     }
 }
+
+/**
+ * Default maximum nesting of objects and lists to allow in parsing.  This protects against
+ * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
+ * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
+ * as needed (note that this may also be configured in calls to [Parser.parse])
+ */
+const val DEFAULT_MAX_NESTING_LEVEL = 255
+
+/**
+ * Used to bail out of parsing when excessive nesting is detected
+ */
+class ExcessiveNestingException: RuntimeException()
+
+/**
+ * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
+ * but is validated separately against [validHexChars]
+ */
+private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
+private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
