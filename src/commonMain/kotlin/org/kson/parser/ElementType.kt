@@ -124,7 +124,7 @@ enum class ParsedElementType : ElementType {
     LIST,
     LIST_ELEMENT,
     OBJECT_DEFINITION,
-    OBJECT_INTERNALS,
+    OBJECT,
     OBJECT_PROPERTY,
     ROOT
 }

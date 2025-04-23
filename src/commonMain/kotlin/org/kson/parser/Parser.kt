@@ -108,8 +108,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     private fun plainObject(allowEmpty: Boolean, isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         var foundProperties = false
 
-        val objectDefinitionMark = builder.mark()
-        val objectInternalsMark = builder.mark()
+        val objectMark = builder.mark()
 
         // parse the optional leading comma
         if (builder.getTokenType() == COMMA) {
@@ -119,7 +118,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // prohibit the empty-ISH objects internals containing just commas
             if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
-                objectInternalsMark.done(OBJECT_INTERNALS)
+                objectMark.done(OBJECT)
                 return@nest true
             } else {
                 leadingCommaMark.drop()
@@ -172,18 +171,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         if (foundProperties || allowEmpty) {
-            objectInternalsMark.done(OBJECT_INTERNALS)
-            if (isDelimited) {
-                // our delimitiing caller
-                objectDefinitionMark.drop()
-            } else {
-                objectDefinitionMark.done(OBJECT_DEFINITION)
-            }
+            objectMark.done(OBJECT)
             return@nest true
         } else {
             // otherwise we're not a valid object internals
-            objectInternalsMark.rollbackTo()
-            objectDefinitionMark.rollbackTo()
+            objectMark.rollbackTo()
             return@nest false
         }
     }
@@ -337,7 +329,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         if (builder.getTokenType() == CURLY_BRACE_R) {
             // advance past our CURLY_BRACE_R
             builder.advanceLexer()
-            delimitedObjectMark.done(OBJECT_DEFINITION)
+            delimitedObjectMark.drop()
         } else {
             delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
         }

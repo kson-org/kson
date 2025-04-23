@@ -122,18 +122,7 @@ class KsonRoot(
 
 abstract class ValueNode : AstNode()
 
-class ObjectDefinitionNode(private val internalsNode: ObjectInternalsNode) :
-    ValueNode() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
-        return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
-                internalsNode.toSource(indent, compileTarget)
-            }
-        }
-    }
-}
-
-class ObjectInternalsNode(private val properties: List<ObjectPropertyNode>) : ValueNode() {
+class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNode() {
     override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
@@ -190,7 +179,7 @@ class ObjectPropertyNode(
                 }"
             }
             is Yaml -> {
-                if (value is ListNode || value is ObjectDefinitionNode) {
+                if (value is ListNode || value is ObjectNode) {
                     // For lists and objects, put the value on the next line
                     name.toSource(indent, compileTarget) + ":\n" +
                             value.toSource(indent.next(false), compileTarget)

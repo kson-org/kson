@@ -195,16 +195,11 @@ class KsonBuilder(private val tokens: List<Token>) :
                         val comments = marker.getComments()
                         ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
                     }
-                    OBJECT_DEFINITION -> {
-                        val objectInternalsNode =
-                            unsafeAstCast<ObjectInternalsNode>(toAst(unsafeMarkerLookup(childMarkers, 0)))
-                        ObjectDefinitionNode(objectInternalsNode)
-                    }
-                    OBJECT_INTERNALS -> {
+                    OBJECT -> {
                         val propertyNodes = childMarkers.map {
                             unsafeAstCast<ObjectPropertyNode>(toAst(it))
                         }
-                        ObjectInternalsNode(propertyNodes)
+                        ObjectNode(propertyNodes)
                     }
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
