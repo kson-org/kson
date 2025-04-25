@@ -1,10 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.kson.jetbrains</id>
+    <id>kson</id>
     <name>Kson</name>
     <vendor>Kson.org</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.intellij.intelliLang</depends>
 
     <description><![CDATA[
         <p>
@@ -19,18 +20,18 @@
         <fileType name="Kson"
                   implementationClass="org.kson.jetbrains.file.KsonFileType"
                   fieldName="INSTANCE"
-                  language="org.kson.jetbrains"
+                  language="kson"
                   extensions="kson"/>
 
-        <lang.parserDefinition language="org.kson.jetbrains"
+        <lang.parserDefinition language="kson"
                                implementationClass="org.kson.jetbrains.parser.KsonParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="org.kson.jetbrains"
+        <lang.syntaxHighlighterFactory language="kson"
                                        implementationClass="org.kson.jetbrains.highlighter.KsonSyntaxHighlighterFactory"/>
         <typedHandler implementation="org.kson.jetbrains.editor.KsonTypedHandlerDelegate"/>
         <backspaceHandlerDelegate implementation="org.kson.jetbrains.editor.KsonBackspaceHandlerDelegate"/>
-        <lang.commenter language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
-        <lang.braceMatcher language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
-        <lang.quoteHandler language="org.kson.jetbrains" implementationClass="org.kson.jetbrains.editor.KsonQuoteHandler"/>
+        <lang.commenter language="kson" implementationClass="org.kson.jetbrains.editor.KsonCommenter"/>
+        <lang.braceMatcher language="kson" implementationClass="org.kson.jetbrains.editor.KsonPairedBraceMatcher"/>
+        <lang.quoteHandler language="kson" implementationClass="org.kson.jetbrains.editor.KsonQuoteHandler"/>
         <langCodeStyleSettingsProvider implementation="org.kson.jetbrains.config.KsonLanguageCodeStyleSettingsProvider"/>
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
         <formattingService implementation="org.kson.jetbrains.formatter.KsonExternalFormatter"/>
