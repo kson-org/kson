@@ -1,8 +1,8 @@
 package org.kson.parser
 
-import org.kson.collections.ImmutableList
-import org.kson.collections.toImmutableList
-import org.kson.collections.toImmutableMap
+import org.kson.stdlibx.collections.ImmutableList
+import org.kson.stdlibx.collections.toImmutableList
+import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
 
 /**

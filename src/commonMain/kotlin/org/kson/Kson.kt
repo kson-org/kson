@@ -4,7 +4,7 @@ import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
 import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
-import org.kson.collections.ImmutableList
+import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.tools.IndentFormatter

@@ -1,7 +1,7 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.psi.tree.IElementType
-import org.kson.collections.toImmutableMap
+import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.jetbrains.KsonLanguage
 import org.kson.parser.ElementType
 import org.kson.parser.TokenType

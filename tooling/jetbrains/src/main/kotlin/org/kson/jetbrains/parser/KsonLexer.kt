@@ -3,8 +3,8 @@ package org.kson.jetbrains.parser
 import com.intellij.lexer.LexerBase
 import com.intellij.lexer.LexerPosition
 import com.intellij.psi.tree.IElementType
-import org.kson.collections.ImmutableList
-import org.kson.collections.toImmutableList
+import org.kson.stdlibx.collections.ImmutableList
+import org.kson.stdlibx.collections.toImmutableList
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType

@@ -2,7 +2,7 @@ package org.kson
 
 import org.kson.CompileTarget.*
 import org.kson.ast.KsonRoot
-import org.kson.collections.ImmutableList
+import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType

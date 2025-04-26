@@ -1,4 +1,4 @@
-package org.kson.collections
+package org.kson.stdlibx.collections
 
 /**
  * Some useful immutable collection extensions from https://stackoverflow.com/a/37936456
