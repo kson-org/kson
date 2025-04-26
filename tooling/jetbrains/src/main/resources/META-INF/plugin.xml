@@ -43,5 +43,7 @@
         <colorSettingsPage implementation="org.kson.jetbrains.pages.KsonColorSettingsPage"/>
         <formattingService implementation="org.kson.jetbrains.formatter.KsonExternalFormatter"/>
         <enterHandlerDelegate implementation="org.kson.jetbrains.editor.KsonEnterHandlerDelegate"/>
+        <lang.foldingBuilder language="kson"
+                             implementationClass="org.kson.jetbrains.folding.KsonFoldingBuilder"/>
     </extensions>
 </idea-plugin>

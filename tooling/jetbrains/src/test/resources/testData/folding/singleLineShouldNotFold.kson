@@ -1,0 +1,3 @@
+brace_list: ["item1", "item2"]
+dash_list: - 1
+object: {key: "value"}
