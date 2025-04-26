@@ -42,7 +42,7 @@ interface KsonLexedElementType {
  * Our static collection of [IElementTokenType] used in parsing.  See the doc on [elem] for notes on why this
  * must be private and these must ONLY be created here
  */
-private val LEXED_ELEMENT: Map<TokenType, IElementType> = TokenType.values()
+private val LEXED_ELEMENT: Map<TokenType, IElementType> = TokenType.entries
     .associateWith {
         IElementTokenType(it)
     }.toImmutableMap()
@@ -52,7 +52,7 @@ private val LEXED_ELEMENT: Map<TokenType, IElementType> = TokenType.values()
  * must be private and these must ONLY be created here
  */
 private val PARSED_ELEMENT: Map<ParsedElementType, IElementType> =
-    ParsedElementType.values().associateWith { IElementParserElementType(it) }.toImmutableMap()
+    ParsedElementType.entries.associateWith { IElementParserElementType(it) }.toImmutableMap()
 
 /**
  * A class adapting [TokenType] to [IElementType] for our plugin
