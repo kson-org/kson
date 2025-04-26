@@ -1,0 +1,11 @@
+dollar_block: <fold text='$$...$$'>$$
+    function test() {
+        console.log("Hello");
+    }
+$$</fold>
+
+percent_block: <fold text='%%...%%'>%%
+    function test() {
+        console.log("Hello");
+    }
+%%</fold>
