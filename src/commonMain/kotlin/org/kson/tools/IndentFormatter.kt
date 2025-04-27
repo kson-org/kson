@@ -3,6 +3,7 @@ package org.kson.tools
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
 
 /**
@@ -12,6 +13,10 @@ import org.kson.parser.TokenType.*
  *
  * Does not modify any other formatting or spacing aside from removing any leading empty lines and
  * ensuring there is no trailing whitespace aside from a newline at the end of non-empty files.
+ * TODO FORMATTER: this formatter has been superseded by the new [AstNode]-based formatter and now only
+ *  supports use cases using [getCurrentLineIndentLevel] to compute the line indent from limited
+ *  context (i.e. for when a user presses enter in an edit).  This should be refactored (and hopefully
+ *  simplified) to focus on serving that use case
  *
  * @param indentType The [IndentType] to use for indentation
  */

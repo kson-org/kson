@@ -317,12 +317,16 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  */
 class Lexer(source: String, gapFree: Boolean = false) {
 
+    companion object {
+        val ignoredTokens = setOf(WHITESPACE, COMMENT)
+    }
+
     private val sourceScanner = SourceScanner(source)
     private val tokens = TokenizedSource(
         if (gapFree) {
             emptySet()
         } else {
-            setOf(WHITESPACE, COMMENT)
+            ignoredTokens
         }
     )
 

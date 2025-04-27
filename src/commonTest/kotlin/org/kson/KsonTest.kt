@@ -27,7 +27,7 @@ class KsonTest {
 
     /**
      * Assertion helper for testing that [source] parses without error and produces the AST described by
-     * [expectedKsonFromAst] (this often looks like a truism, ie. `key: val` parses to `key: val`, but it's
+     * [expectedKsonFromAst] (this often looks like a truism, i.e. `key: val` parses to `key: val`, but it's
      * an easy/quick/clear way to quickly produce platform- and implementation-agnostic tests that ensure
      * AST parsing is correct)
      *

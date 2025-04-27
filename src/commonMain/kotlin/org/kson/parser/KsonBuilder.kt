@@ -4,15 +4,28 @@ import org.kson.ast.*
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.Message
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
+ *
+ * @param tokens the [Token] stream to build into an AST
+ * @param errorTolerant whether to ignore errors and build a partial AST patched with [AstNodeError] nodes
  */
-class KsonBuilder(private val tokens: List<Token>) :
+class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Boolean = false) :
     AstBuilder,
     MarkerBuilderContext {
 
-    private var currentToken = 0
+    /**
+     * Initialize [currentToken] to the first non-[Lexer.ignoredTokens] token
+     */
+    private var currentToken = run {
+        var firstRealTokenIdx = 0
+        while (firstRealTokenIdx < tokens.size && Lexer.ignoredTokens.contains(tokens[firstRealTokenIdx].tokenType)) {
+            firstRealTokenIdx++
+        }
+        firstRealTokenIdx
+    }
     private var rootMarker = KsonMarker(this, object : MarkerCreator {
         override fun forgetMe(me: KsonMarker): KsonMarker {
             throw RuntimeException("The root marker has no creator that needs to forget it")
@@ -25,7 +38,13 @@ class KsonBuilder(private val tokens: List<Token>) :
     var hasErrors = false
 
     override fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String {
-        return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString(" ") { it.value }
+        return tokens.subList(firstTokenIndex, lastTokenIndex + 1)
+            .filter { it.tokenType != WHITESPACE && it.tokenType != COMMENT }
+            .joinToString("") { it.value }
+    }
+
+    override fun getRawText(firstTokenIndex: Int, lastTokenIndex: Int): String {
+        return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString("") { it.lexeme.text }
     }
 
     override fun getComments(tokenIndex: Int): List<String> {
@@ -58,6 +77,9 @@ class KsonBuilder(private val tokens: List<Token>) :
 
     override fun advanceLexer() {
         currentToken++
+        while (currentToken < tokens.size && Lexer.ignoredTokens.contains(tokens[currentToken].tokenType)) {
+            currentToken++
+        }
     }
 
     override fun lookAhead(numTokens: Int): TokenType? {
@@ -76,14 +98,30 @@ class KsonBuilder(private val tokens: List<Token>) :
         return rootMarker.addMark()
     }
 
+    /**
+     * Attempt to construct an [AstNode] tree from the [KsonMarker]s made in this builder
+     *
+     * @param messageSink a [MessageSink] to write any errors we encountered in parsing
+     * @return the [KsonRoot] of the resulting tree, or `null` if it could not be built
+     */
     fun buildTree(messageSink: MessageSink): KsonRoot? {
         rootMarker.done(ROOT)
 
-        return if (hasErrors) {
-            walkForErrors(rootMarker, messageSink)
-            return null
+        return if (errorTolerant) {
+            /**
+             * ignore errors and create an AST possibly patched with [AstNodeError]s
+             */
+            unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it) }
         } else {
-            unsafeAstCast(toAst(rootMarker))
+            if (!hasErrors) {
+                unsafeAstCreate<KsonRoot>(rootMarker) {
+                    throw ShouldNotHappenException("this should be the error-free code path")
+                }
+            } else {
+                // gather error info and return null
+                walkForErrors(rootMarker, messageSink)
+                return null
+            }
         }
     }
 
@@ -110,14 +148,11 @@ class KsonBuilder(private val tokens: List<Token>) :
 
     /**
      * Transform the given [KsonMarker] tree rooted at [marker] into a full Kson [AstNode] tree.
-     * This should NEVER be called if there are parse errors because:
      *
      * WARNING "UNSAFE" CODE: this is the RARE (ideally ONLY???) place where we allow unsafe/loose
-     *  coding practices for simplicity and speed.  This method gets to assume it is given a well-formed [KsonMarker]
-     *  tree (since it makes no sense to generate an AST tree for invalid code), and hence gets to assume things
-     *  about the structure and do check-free array look-ups and casts.  We've encapsulated the unsafe operations
-     *  into [unsafeAstCast] and [unsafeMarkerLookup]---if brittleness related to these operations becomes too common
-     *  and onerous, we should rethink this
+     *  coding practices to convert our [KsonMarker] tree in a proper [AstNode]-based AST.  We allow this
+     *  converter method to make assumptions about the structure of the [KsonMarker]s created in [Parser],
+     *  including performing casts (in [unsafeAstCreate])
      */
     private fun toAst(marker: KsonMarker): AstNode {
         if (!marker.isDone()) {
@@ -171,16 +206,27 @@ class KsonBuilder(private val tokens: List<Token>) :
                 val childMarkers = marker.childMarkers
                 when (marker.element) {
                     EMBED_BLOCK -> {
-                        val embedDelim =
-                            unsafeMarkerLookup(childMarkers, 0).getValue()
-                        val embedTag =
-                            unsafeMarkerLookup(childMarkers, 1).getValue()
-                        val embedContent =
-                            unsafeMarkerLookup(childMarkers, 2).getValue()
-                        EmbedBlockNode(embedTag, embedContent, EmbedDelim.fromString(embedDelim))
+                        /**
+                         * [Parser.embedBlock] ensures we always find an [EMBED_OPEN_DELIM] or an [EMBED_DELIM_PARTIAL],
+                         * here, so its first [Char] to understand which [EmbedDelim] is in use here
+                         */
+                        val embedDelimChar = childMarkers.getOrNull(0)?.getValue()?.getOrNull(0)
+                            ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
+                        val embedTag = childMarkers.getOrNull(1)?.getValue() ?: ""
+                        val embedContent = childMarkers.getOrNull(2)?.getValue() ?: ""
+                        EmbedBlockNode(embedTag, embedContent, EmbedDelim.fromString("$embedDelimChar$embedDelimChar"))
                     }
                     KEYWORD -> {
-                        val keywordContentMark = unsafeMarkerLookup(childMarkers, 0)
+                        /**
+                         * We assume [Parser.keyword] still structures a [KEYWORD] as wrapping either
+                         * an [IDENTIFIER] mark or a [STRING] mark
+                         */
+                        val keywordContentMark = if (childMarkers.size == 1) {
+                            childMarkers[0]
+                        } else {
+                            throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                        }
+
                         if (keywordContentMark.element == IDENTIFIER) {
                             IdentifierNode(keywordContentMark.getValue())
                         } else {
@@ -188,24 +234,49 @@ class KsonBuilder(private val tokens: List<Token>) :
                         }
                     }
                     LIST -> {
-                        val listElementNodes = childMarkers.map { unsafeAstCast<ListElementNode>(toAst(it)) }
+                        val listElementNodes = childMarkers.map { listElementMarker ->
+                            unsafeAstCreate<ListElementNode>(listElementMarker) { ListElementNodeError(it) }
+                        }
                         ListNode(listElementNodes)
                     }
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
-                        ListElementNode(unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))), comments)
+                        val listElementValue: ValueNode = if (childMarkers.size == 1) {
+                            unsafeAstCreate(childMarkers[0]) { ValueNodeError(it) }
+                        } else {
+                            throw ShouldNotHappenException("list element markers should mark exactly one value")
+                        }
+                        ListElementNodeImpl(
+                            listElementValue,
+                            comments)
                     }
                     OBJECT -> {
-                        val propertyNodes = childMarkers.map {
-                            unsafeAstCast<ObjectPropertyNode>(toAst(it))
+                        val propertyNodes = childMarkers.map { property ->
+                            unsafeAstCreate<ObjectPropertyNode>(property) { ObjectPropertyNodeError(it) }
                         }
                         ObjectNode(propertyNodes)
                     }
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
-                        ObjectPropertyNode(
-                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 0))),
-                            unsafeAstCast(toAst(unsafeMarkerLookup(childMarkers, 1))),
+                        /**
+                         * We assume [Parser.plainObject] still parses [OBJECT_PROPERTY]s as a keyword/value
+                         * pair OR a keyword with a missing value error
+                         */
+                        if (childMarkers.size > 2) {
+                            throw ShouldNotHappenException("unless object property parsing has changed significantly")
+                        }
+                        val keywordMark = childMarkers.getOrNull(0)
+                            ?: throw ShouldNotHappenException("should have a keyword marker")
+                        val keywordNode: KeywordNode = unsafeAstCreate(keywordMark) { KeywordNodeError(it) }
+                        val valueMark = childMarkers.getOrNull(1)
+                        val valueNode: ValueNode = if (valueMark == null) {
+                            ValueNodeError("")
+                        } else {
+                            unsafeAstCreate(valueMark) { ValueNodeError(it) }
+                        }
+                        ObjectPropertyNodeImpl(
+                            keywordNode,
+                            valueNode,
                             comments
                         )
                     }
@@ -222,7 +293,18 @@ class KsonBuilder(private val tokens: List<Token>) :
                             throw RuntimeException("Token list must end in EOF")
                         }
 
-                        KsonRoot(toAst(unsafeMarkerLookup(childMarkers, 0)), comments, eofToken.comments)
+                        if (childMarkers.size > 1) {
+                            val listElementNodes = childMarkers.map { listElementMarker ->
+                                unsafeAstCreate<ListElementNode>(listElementMarker) { ListElementNodeError(it) }
+                            }
+                            val listNode = ListNode(listElementNodes)
+                            KsonRootImpl(listNode, comments, eofToken.comments)
+                        } else {
+                            val rooMarker = childMarkers[0]
+                            KsonRootImpl(unsafeAstCreate(rooMarker) { AstNodeError(it) },
+                                comments,
+                                eofToken.comments)
+                        }
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -245,20 +327,25 @@ class KsonBuilder(private val tokens: List<Token>) :
      * and give us a place to say:
      *
      * THIS SHOULD NOT BE EMULATED ELSEWHERE.  See the doc on [KsonBuilder.toAst] for rationale on why it's okay here.
+     *
+     * @param marker the marker to transform into its corresponding [AstNode], if possible
+     * @param errorNodeGenerator a lambda to wrap an [ERROR] [marker]'s content in the appropriately typed
+     *   [AstNodeError] to be used in place of the node we can't create
      */
-    private fun <A : AstNode> unsafeAstCast(nodeToCast: AstNode): A {
+    private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
+        if (marker.element == ERROR) {
+            if (!errorTolerant) {
+                /**
+                 * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
+                 * never call [buildTree] when [hasErrors]
+                 */
+                throw RuntimeException("Should not find ERROR elements when not `errorTolerant`")
+            }
+            return errorNodeGenerator(marker.getRawText())
+        }
+        val nodeToCast = toAst(marker)
         @Suppress("UNCHECKED_CAST") // see method doc for suppress rationale
         return nodeToCast as A
-    }
-
-    /**
-     * Helper method to encapsulate the loose array lookups we're allowing in [KsonBuilder.toAst]
-     * and give us a place to say:
-     *
-     * THIS SHOULD NOT BE EMULATED ELSEWHERE.  See the doc on [KsonBuilder.toAst] for rationale on why it's okay here.
-     */
-    private fun unsafeMarkerLookup(markerList: ArrayList<KsonMarker>, index: Int): KsonMarker {
-        return markerList[index]
     }
 }
 
@@ -276,6 +363,11 @@ private interface MarkerBuilderContext {
      * Get the parsed [String] value for the range of tokens from [firstTokenIndex] to [lastTokenIndex], inclusive
      */
     fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String
+
+    /**
+     * Get the raw underlying text for the range of tokens from [firstTokenIndex] to [lastTokenIndex], inclusive
+     */
+    fun getRawText(firstTokenIndex: Int, lastTokenIndex: Int): String
 
     /**
      * Get any comments associated with the token at [tokenIndex]
@@ -330,6 +422,10 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
 
     fun isDone(): Boolean {
         return element != INCOMPLETE
+    }
+
+    fun getRawText(): String {
+        return context.getRawText(this.firstTokenIndex, this.lastTokenIndex)
     }
 
     fun getValue(): String {
