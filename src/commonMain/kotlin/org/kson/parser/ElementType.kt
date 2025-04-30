@@ -28,8 +28,8 @@ enum class TokenType : ElementType {
     ANGLE_BRACKET_R,
     // :
     COLON,
-    // ;
-    SEMICOLON,
+    // .
+    DOT,
     // ,
     COMMA,
     // lines starting with `#`

@@ -1247,7 +1247,7 @@ class IndentFormatterTest {
             """
                 key:
                 nested_key: 10
-                another_nest_key: 3;
+                another_nest_key: 3 .
                 unnested_key: 44
             """.trimIndent(),
             """
@@ -1268,7 +1268,7 @@ class IndentFormatterTest {
             """
                 - 
                 - "sub-list elem 1"
-                - "sub-list elem 2";
+                - "sub-list elem 2" .
                 - "outer list elem 1"
             """.trimIndent(),
             """

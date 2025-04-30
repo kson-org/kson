@@ -2204,7 +2204,8 @@ class KsonTest {
             """
                 key:
                   nested_key: 10
-                  another_nest_key: 3;
+                  another_nest_key: 3
+                  .
                 unnested_key: 44
             """.trimIndent(),
             """
@@ -2240,7 +2241,8 @@ class KsonTest {
             """
                 - 
                   - "sub-list elem 1"
-                  - "sub-list elem 2";
+                  - "sub-list elem 2"
+                  .
                 - "outer list elem 1"
             """.trimIndent(),
             """
@@ -2275,23 +2277,23 @@ class KsonTest {
         assertParserRejectsSource("""
             <
               - "sub-list elem 1"
-              - "sub-list elem 2";
-              - "sub-list elem 3";
+              - "sub-list elem 2" .
+              - "sub-list elem 3" .
               - "sub-list elem 4"
             >
             """.trimIndent(),
-            listOf(IGNORED_DASH_LIST_SEMICOLON, IGNORED_DASH_LIST_SEMICOLON)
+            listOf(IGNORED_DASH_LIST_END_DOT, IGNORED_DASH_LIST_END_DOT)
         )
 
         assertParserRejectsSource("""
             {
               key1: "val 1"
-              key2: "val 2";
-              key3: "val 3";
+              key2: "val 2" .
+              key3: "val 3" .
               key4: "val 4"
             }
             """.trimIndent(),
-            listOf(IGNORED_OBJECT_SEMICOLON, IGNORED_OBJECT_SEMICOLON)
+            listOf(IGNORED_OBJECT_END_DOT, IGNORED_OBJECT_END_DOT)
         )
     }
 }

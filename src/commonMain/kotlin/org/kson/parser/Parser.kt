@@ -14,11 +14,11 @@ import org.kson.parser.messages.MessageType.*
  * ksonValue -> plainObject
  *            | dashList
  *            | delimitedValue
- * plainObject -> objectInternals ";"+
+ * plainObject -> objectInternals "."+
  * objectInternals -> "," ( keyword ksonValue ","? )+
  *                  | ( ","? keyword ksonValue )*
  *                  | ( keyword ksonValue ","? )*
- * dashList -> dashListInternals ";"+
+ * dashList -> dashListInternals "."+
  * dashListInternals -> ( LIST_DASH ksonValue )*
  * delimitedValue -> delimitedObject
  *                 | delimitedDashList
@@ -97,13 +97,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     private fun ksonValue(): Boolean = plainObject(false) || dashList() || delimitedValue()
 
     /**
-     * plainObject -> objectInternals ";"+
+     * plainObject -> objectInternals "."+
      * objectInternals -> "," ( keyword ksonValue ","? )+
      *                  | ( ","? keyword ksonValue )*
      *                  | ( keyword ksonValue ","? )*
      *
      * Note: as in [dashList], we combine these two grammar rules here so it's clean/easy to implement
-     *   make a more friendly parse for users by giving warnings when semicolons are used in a delimited list
+     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
      */
     private fun plainObject(allowEmpty: Boolean, isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         var foundProperties = false
@@ -153,14 +153,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
                 propertyMark.done(OBJECT_PROPERTY)
 
-                if (builder.getTokenType() == SEMICOLON) {
-                    val semiColonMark = builder.mark()
+                if (builder.getTokenType() == DOT) {
+                    val dotMark = builder.mark()
                     builder.advanceLexer()
                     if (!isDelimited) {
-                        semiColonMark.drop()
+                        dotMark.drop()
                         break
                     } else {
-                        semiColonMark.error(IGNORED_OBJECT_SEMICOLON.create())
+                        dotMark.error(IGNORED_OBJECT_END_DOT.create())
                     }
                 }
             } else {
@@ -181,11 +181,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * dashList -> dashListInternals ";"+
+     * dashList -> dashListInternals "."+
      * dashListInternals -> ( LIST_DASH ksonValue )*
      *
      * Note: as in [plainObject], we combine these two grammar rules here so it's clean/easy to implement
-     *   make a more friendly parse for users by giving warnings when semicolons are used in a delimited list
+     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
      */
     private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         if (builder.getTokenType() == LIST_DASH) {
@@ -204,14 +204,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                     listElementMark.error(DANGLING_LIST_DASH.create())
                 }
 
-                if (builder.getTokenType() == SEMICOLON) {
-                    val semiColonMark = builder.mark()
+                if (builder.getTokenType() == DOT) {
+                    val dot = builder.mark()
                     builder.advanceLexer()
                     if (!isDelimited) {
-                        semiColonMark.drop()
+                        dot.drop()
                         break
                     } else {
-                        semiColonMark.error(IGNORED_DASH_LIST_SEMICOLON.create())
+                        dot.error(IGNORED_DASH_LIST_END_DOT.create())
                     }
                 }
             } while (builder.getTokenType() == LIST_DASH)

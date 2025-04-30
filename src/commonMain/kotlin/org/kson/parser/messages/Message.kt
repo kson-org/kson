@@ -130,24 +130,24 @@ enum class MessageType {
             return "This object key must be followed by a value"
         }
     },
-    IGNORED_OBJECT_SEMICOLON {
+    IGNORED_OBJECT_END_DOT {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This semicolon is ignored because this object is `{}`-delimited. " +
-                    "Semicolons only effect non-delimited objects"
+            return "This end-dot is ignored because this object is `{}`-delimited. " +
+                    "End-dots only effect non-delimited objects"
         }
     },
-    IGNORED_DASH_LIST_SEMICOLON {
+    IGNORED_DASH_LIST_END_DOT {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This semicolon is ignored because this list is `<>`-delimited. " +
-                    "Semicolons only effect non-delimited dashed lists"
+            return "This end-dot is ignored because this list is `<>`-delimited. " +
+                    "End-dots only effect non-delimited dashed lists"
         }
     },
     STRING_NO_CLOSE {
