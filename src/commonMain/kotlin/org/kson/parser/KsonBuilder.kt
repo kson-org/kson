@@ -294,11 +294,10 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
 
                         if (childMarkers.size > 1) {
-                            val listElementNodes = childMarkers.map { listElementMarker ->
-                                unsafeAstCreate<ListElementNode>(listElementMarker) { ListElementNodeError(it) }
+                            val errorContent = childMarkers.joinToString("") { childMarker ->
+                                childMarker.getRawText()
                             }
-                            val listNode = ListNode(listElementNodes)
-                            KsonRootImpl(listNode, comments, eofToken.comments)
+                            KsonRootImpl(ValueNodeError(errorContent), comments, eofToken.comments)
                         } else {
                             val rooMarker = childMarkers[0]
                             KsonRootImpl(unsafeAstCreate(rooMarker) { AstNodeError(it) },

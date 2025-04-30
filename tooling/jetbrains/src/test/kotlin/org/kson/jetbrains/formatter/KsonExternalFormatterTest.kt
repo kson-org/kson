@@ -35,19 +35,7 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                            }
             """.trimIndent(),
             """
-                {
-                  key: value
-                }
-            """.trimIndent()
-        )
-
-        // should not add an indent to a root object with no braces
-        doFullFormatTest(
-            "key: value",
-            """
-            {
-              key: value
-            }
+               key: value
             """.trimIndent()
         )
     }
@@ -60,11 +48,9 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                            ]
             """.trimIndent(),
             """
-                [
-                  1,
-                  2,
-                  3
-                ]
+                - 1
+                - 2
+                - 3
             """.trimIndent()
         )
 
@@ -77,13 +63,10 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                            ]
             """.trimIndent(),
             """
-              {
-                list: [
-                  1,
-                  2,
-                  3
-                ]
-              }
+                list:
+                  - 1
+                  - 2
+                  - 3
             """.trimIndent()
         )
     }
@@ -97,13 +80,10 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                     - 3
             """.trimIndent(),
             """
-            {
-              list: [
-                1,
-                2,
-                3
-              ]
-            }
+              list:
+                - 1
+                - 2
+                - 3
             """.trimIndent()
         )
     }
@@ -118,9 +98,7 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                        }
             """.trimIndent(),
             """
-                {
-                    key: value
-                }
+               key: value
             """.trimIndent()
         )
 
@@ -132,13 +110,10 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                             - third
             """.trimIndent(),
             """
-                {
-                    list: [
-                        first,
-                        second,
-                        third
-                    ]
-                }
+                list:
+                    - first
+                    - second
+                    - third
             """.trimIndent()
         )
     }
@@ -158,9 +133,7 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                    }
             """.trimIndent(),
             """
-                {
-                ${'\t'}key: value
-                }
+              ${'\t'}key: value
             """.trimIndent()
         )
 
@@ -172,13 +145,10 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
                             - third
             """.trimIndent(),
             """
-                {
-                ${'\t'}list: [
-                ${'\t'}${'\t'}first,
-                ${'\t'}${'\t'}second,
-                ${'\t'}${'\t'}third
-                ${'\t'}]
-                }
+                ${'\t'}list:
+                ${'\t'}${'\t'}- first
+                ${'\t'}${'\t'}- second
+                ${'\t'}${'\t'}- third
             """.trimIndent()
         )
     }

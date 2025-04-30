@@ -9,7 +9,19 @@ import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.tools.IndentType
 
 interface AstNode {
-    fun toSource(indent: Indent, compileTarget: CompileTarget): String
+    /**
+     * Public method for transforming the AST rooted at this node into the source of the given [compileTarget],
+     * rendered with the given [indent]
+     */
+    fun toSource(indent: Indent, compileTarget: CompileTarget): String = toSourceWithNext(indent, null, compileTarget)
+
+    /**
+     * Internal method for recursive source generation calls must pass down context about the next node to be
+     * rendered from this tree.
+     *
+     * This should only be called by other [AstNode] implementations.
+     */
+    fun toSourceWithNext(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String
 
     /**
      * Abstract representation of the indentation to apply when serializing an AST as source code
@@ -71,28 +83,28 @@ abstract class AstNodeImpl : AstNode {
      * Transpiles this [AstNode] to the given [compileTarget] source, respecting the configuration in the given
      * [CompileTarget]
      */
-    override fun toSource(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceWithNext(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return if (compileTarget.preserveComments && this is Documented && comments.isNotEmpty()) {
             // if we have comments, write them followed by the node content on the next line with an appropriate indent
             indent.firstLineIndent() + comments.joinToString("\n${indent.bodyLinesIndent()}") +
-                    "\n" + toSourceInternal(indent.clone(false), compileTarget)
+                    "\n" + toSourceInternal(indent.clone(false), nextNode, compileTarget)
         } else {
             // otherwise, just pass through to the node content
-            toSourceInternal(indent, compileTarget)
+            toSourceInternal(indent, nextNode, compileTarget)
         }
     }
 
     /**
      * Subclasses must implement serialization of the AST subtree rooted at their node to a corresponding
      * source code snippet for [compileTarget], EXCLUDING comments (comment writing is handled "higher" up
-     * in [toSource]).
+     * in [toSourceWithNext]).
      *
-     * This method is protected since it should never be called outside of [toSource], which handles ensuring
+     * This method is protected since it should never be called outside of [toSourceWithNext], which handles ensuring
      * comments are properly serialized for all nodes when appropriate.  So:
      *
-     * DO NOT call this method---call [toSource] instead.
+     * DO NOT call this method---call [toSourceWithNext] instead.
      */
-    protected abstract fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String
+    protected abstract fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String
 }
 
 /**
@@ -104,7 +116,7 @@ abstract class AstNodeImpl : AstNode {
  * which patches the AST with an [AstNodeError] where an [AstNodeImpl] would otherwise go
  */
 open class AstNodeError(private val invalidSource: String) : AstNode, AstNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
                 invalidSource.split("\n")
@@ -137,15 +149,20 @@ class KsonRootImpl(
     /**
      * Produces valid [compileTarget] source code for the AST rooted at this [KsonRoot]
      */
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
-                rootNode.toSource(indent, compileTarget) +
+                var ksonDocument = rootNode.toSourceWithNext(indent, null, compileTarget) +
                         if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
                             "\n\n" + documentEndComments.joinToString("\n")
                         } else {
                             ""
                         }
+                // remove any trailing newlines
+                while(ksonDocument.endsWith("\n")) {
+                    ksonDocument = ksonDocument.removeSuffix("\n")
+                }
+                ksonDocument
             }
         }
     }
@@ -156,17 +173,32 @@ class ValueNodeError(content: String) : ValueNode, AstNodeError(content)
 abstract class ValueNodeImpl : ValueNode, AstNodeImpl()
 
 class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson -> {
+            is Kson, is Yaml -> {
                 if (properties.isEmpty()) {
-                    "${indent.firstLineIndent()}{}"
+                    indent.firstLineIndent() + "{}"
                 } else {
-                    """
-                    |${indent.firstLineIndent()}{
-                    |${properties.joinToString("\n") { it.toSource(indent.next(false), compileTarget) }}
-                    |${indent.bodyLinesIndent()}}
-                    """.trimMargin()
+                    val outputObject = properties.withIndex().joinToString("\n") { (index, property) ->
+                        val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
+                        if (index == 0) {
+                            property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+                        } else {
+                            // ensure subsequent properties do not think they are hanging
+                            property.toSourceWithNext(indent.clone(false), nodeAfterThisChild, compileTarget)
+                        }
+                    }
+
+                    /**
+                     * Only need to explicitly end this object with a [org.kson.parser.TokenType.PERIOD] if the next
+                     * thing in this document is an [ObjectPropertyNode] that does not belong to this object
+                     */
+                    if (compileTarget is Kson && nextNode is ObjectPropertyNode) {
+                        "$outputObject\n${indent.bodyLinesIndent()}."
+                    } else {
+                        // put a newline after multi-property objects
+                        outputObject + if (properties.size > 1) "\n" else ""
+                    }
                 }
             }
             
@@ -176,19 +208,12 @@ class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeIm
                 } else {
                     """
                     |${indent.firstLineIndent()}{
-                    |${properties.joinToString(",\n") { it.toSource(indent.next(false), compileTarget) }}
+                    |${properties.withIndex().joinToString(",\n") { (index, property) ->
+                        val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
+                        property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget) }
+                    }
                     |${indent.bodyLinesIndent()}}
                     """.trimMargin()
-                }
-            }
-
-            is Yaml -> {
-                if (properties.isEmpty()) {
-                    indent.firstLineIndent() + "{}"
-                } else {
-                    properties.joinToString("\n") {
-                        it.toSource(indent, compileTarget)
-                    }
                 }
             }
         }
@@ -203,51 +228,80 @@ class ObjectPropertyNodeImpl(
     override val comments: List<String>
 ) :
     ObjectPropertyNode, AstNodeImpl(), Documented {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Json -> {
-                "${name.toSource(indent, compileTarget)}: ${
-                    value.toSource(
+            is Kson, is Yaml -> {
+                if (value is ListNode || value is ObjectNode) {
+                    // For lists and objects, put the value on the next line
+                    name.toSourceWithNext(indent, value, compileTarget) + ":\n" +
+                            value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
+                } else {
+                    name.toSourceWithNext(indent, value, compileTarget) + ": " +
+                            value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
+                }
+            }
+
+            is Json -> {
+                "${name.toSourceWithNext(indent, nextNode, compileTarget)}: ${
+                    value.toSourceWithNext(
                         indent.clone(true),
+                        nextNode,
                         compileTarget
                     )
                 }"
-            }
-            is Yaml -> {
-                if (value is ListNode || value is ObjectNode) {
-                    // For lists and objects, put the value on the next line
-                    name.toSource(indent, compileTarget) + ":\n" +
-                            value.toSource(indent.next(false), compileTarget)
-                } else {
-                    name.toSource(indent, compileTarget) + ": " + value.toSource(indent.clone(true), compileTarget)
-                }
             }
         }
     }
 }
 
-class ListNode(private val elements: List<ListElementNode>) : ValueNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+class ListNode(
+    private val elements: List<ListElementNode>
+) : ValueNodeImpl() {
+
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Json -> {
-                // We pad our list bracket with newlines if our list is non-empty
-                val bracketPadding = if (elements.isEmpty()) "" else "\n"
-                val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
-                indent.firstLineIndent() + "[" + bracketPadding +
-                        elements.joinToString(",\n") {
-                            it.toSource(indent.next(false), compileTarget)
-                        } +
-                        bracketPadding + endBraceIndent + "]"
+            is Kson -> {
+                if (elements.isEmpty()) {
+                    indent.firstLineIndent() + "<>"
+                } else {
+                    val outputList = elements.withIndex().joinToString("\n") { (index, element) ->
+                        val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
+                        element.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+                    }
+
+                    /**
+                     * Only need to explicitly end this list with a [org.kson.parser.TokenType.PERIOD] if the next
+                     * thing in this document is a [ListElementNode] that does not belong to this list
+                     */
+                    if (nextNode is ListElementNode) {
+                        "$outputList\n${indent.bodyLinesIndent()}."
+                    } else {
+                        outputList
+                    }
+                }
             }
 
             is Yaml -> {
                 if (elements.isEmpty()) {
                     indent.firstLineIndent() + "[]"
                 } else {
-                    elements.joinToString("\n") {
-                        it.toSource(indent.clone(false), compileTarget)
+                    elements.withIndex().joinToString("\n") { (index, element) ->
+                        val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
+                        element.toSourceWithNext(indent.clone(false), nodeAfterThisChild, compileTarget)
                     }
                 }
+            }
+
+            is Json -> {
+                // We pad our list bracket with newlines if our list is non-empty
+                val bracketPadding = if (elements.isEmpty()) "" else "\n"
+                val endBraceIndent = if (elements.isEmpty()) "" else indent.bodyLinesIndent()
+                indent.firstLineIndent() + "[" + bracketPadding +
+                        elements.withIndex().joinToString(",\n") { (index, element) ->
+                            val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
+                            element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
+                        } +
+                        bracketPadding + endBraceIndent + "]"
             }
         }
     }
@@ -257,18 +311,18 @@ interface ListElementNode : AstNode
 class ListElementNodeError(content: String) : AstNodeError(content), ListElementNode
 class ListElementNodeImpl(val value: ValueNode, override val comments: List<String>)
     : ListElementNode, AstNodeImpl(), Documented {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Json -> {
-                value.toSource(indent, compileTarget)
-            }
-            is Yaml -> {
+            is Kson, is Yaml -> {
                 if (value is ListNode) {
-                    indent.firstLineIndent() + "- \n" + value.toSource(indent.next(false), compileTarget)
+                    indent.bodyLinesIndent() + "- \n" + value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
                 } else {
-                    indent.firstLineIndent() + "- " + value.toSource(indent.clone(true), compileTarget)
+                    indent.bodyLinesIndent() + "- " + value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
                 }
             }
+
+            is Json ->  value.toSourceWithNext(indent, nextNode, compileTarget)
         }
     }
 }
@@ -280,7 +334,7 @@ abstract class KeywordNodeImpl : KeywordNode, ValueNodeImpl() {
 }
 
 open class StringNode(override val stringContent: String) : KeywordNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
                 indent.firstLineIndent() + "\"" + stringContent + "\""
@@ -294,7 +348,7 @@ open class StringNode(override val stringContent: String) : KeywordNodeImpl() {
 }
 
 class IdentifierNode(override val stringContent: String) : KeywordNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
                 indent.firstLineIndent() + stringContent
@@ -317,7 +371,7 @@ class NumberNode(stringValue: String) : ValueNodeImpl() {
                 "strings should be passed here but we got: " + stringValue)
     }
 
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json-> {
                 indent.firstLineIndent() + value.asString
@@ -327,7 +381,7 @@ class NumberNode(stringValue: String) : ValueNodeImpl() {
 }
 
 class TrueNode : ValueNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
                 indent.firstLineIndent() + "true"
@@ -337,7 +391,7 @@ class TrueNode : ValueNodeImpl() {
 }
 
 class FalseNode : ValueNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json-> {
                 indent.firstLineIndent() + "false"
@@ -347,7 +401,7 @@ class FalseNode : ValueNodeImpl() {
 }
 
 class NullNode : ValueNodeImpl() {
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
                 indent.firstLineIndent() + "null"
@@ -371,22 +425,16 @@ class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDe
         const val EMBED_CONTENT_KEYWORD = "embedContent"
     }
 
-    override fun toSourceInternal(indent: Indent, compileTarget: CompileTarget): String {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                // if our embed block is hanging off the previous line, we indent its body
-                val embedBodyIndent = if (indent.hangingIndent) {
-                    indent.next(false).bodyLinesIndent()
-                } else {
-                    indent.bodyLinesIndent()
-                }
                 val defaultDelimCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
                 if (defaultDelimCount == 0) {
                     // The primary delimiter is not in the content, so we can use the default delimiter
                     // without any escaping needed
                     indent.firstLineIndent() + EmbedDelim.Percent + embedTag + "\n" +
-                            embedBodyIndent + embedContent.split("\n")
-                                .joinToString("\n${embedBodyIndent}") { it } +
+                            indent.bodyLinesIndent() + embedContent.split("\n")
+                                .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                             EmbedDelim.Percent
                 } else {
                     // Otherwise, check if we can use the alternate delimiter without escaping
@@ -395,8 +443,8 @@ class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDe
                         // We can use the alternate delimiter, but must handle default delimiter escapes
                         val escapedContent = EmbedDelim.Dollar.escapeEmbedContent(embedContent)
                         indent.firstLineIndent() + EmbedDelim.Dollar + embedTag + "\n" +
-                                embedBodyIndent + escapedContent.split("\n")
-                                    .joinToString("\n${embedBodyIndent}") { it } +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                                 EmbedDelim.Dollar
                     } else {
                         // We'll choose the delimiter that requires less escaping
@@ -408,8 +456,8 @@ class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDe
 
                         val escapedContent = chosenDelimiter.escapeEmbedContent(embedContent)
                         indent.firstLineIndent() + chosenDelimiter + embedTag + "\n" +
-                                embedBodyIndent + escapedContent.split("\n")
-                                    .joinToString("\n${embedBodyIndent}") { it } +
+                                indent.bodyLinesIndent() + escapedContent.split("\n")
+                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                                 chosenDelimiter
                     }
                 }
