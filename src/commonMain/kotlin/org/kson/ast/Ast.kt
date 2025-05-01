@@ -190,7 +190,7 @@ class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeIm
                     }
 
                     /**
-                     * Only need to explicitly end this object with a [org.kson.parser.TokenType.PERIOD] if the next
+                     * Only need to explicitly end this object with a [org.kson.parser.TokenType.DOT] if the next
                      * thing in this document is an [ObjectPropertyNode] that does not belong to this object
                      */
                     if (compileTarget is Kson && nextNode is ObjectPropertyNode) {
@@ -270,7 +270,7 @@ class ListNode(
                     }
 
                     /**
-                     * Only need to explicitly end this list with a [org.kson.parser.TokenType.PERIOD] if the next
+                     * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
                      * thing in this document is a [ListElementNode] that does not belong to this list
                      */
                     if (nextNode is ListElementNode) {
