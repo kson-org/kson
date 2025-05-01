@@ -1153,4 +1153,22 @@ class IndentFormatterTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testInvalidKsonWithTrailingComments() {
+        assertFormatting(
+            """
+            # error: list with no value
+            -
+
+            # trailing comment
+        """.trimIndent(),
+            """
+            # error: list with no value
+            -
+
+            # trailing comment
+        """.trimIndent()
+        )
+    }
 }

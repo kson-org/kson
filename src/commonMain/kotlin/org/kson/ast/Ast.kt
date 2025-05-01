@@ -152,16 +152,23 @@ class KsonRootImpl(
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
-                var ksonDocument = rootNode.toSourceWithNext(indent, null, compileTarget) +
-                        if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
-                            "\n\n" + documentEndComments.joinToString("\n")
-                        } else {
-                            ""
-                        }
+                var ksonDocument = rootNode.toSourceWithNext(indent, null, compileTarget)
+
                 // remove any trailing newlines
                 while(ksonDocument.endsWith("\n")) {
                     ksonDocument = ksonDocument.removeSuffix("\n")
                 }
+
+                if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
+                    val endComments = documentEndComments.joinToString("\n")
+                    ksonDocument += if (ksonDocument.endsWith(endComments)) {
+                        // endComments are already embedded in the document, likely as part of a trailing error
+                        ""
+                    } else {
+                        "\n\n" + endComments
+                    }
+                }
+
                 ksonDocument
             }
         }
