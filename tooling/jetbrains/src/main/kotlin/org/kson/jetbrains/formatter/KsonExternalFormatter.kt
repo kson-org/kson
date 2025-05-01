@@ -4,11 +4,11 @@ import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
 import com.intellij.psi.PsiFile
-import org.kson.Kson
-import org.kson.KsonFormatterConfig
+import org.kson.tools.format
 import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
 import org.kson.tools.IndentType
+import org.kson.tools.KsonFormatterConfig
 
 class KsonExternalFormatter : AsyncDocumentFormattingService() {
     override fun canFormat(file: PsiFile): Boolean {
@@ -34,7 +34,7 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
         return object : FormattingTask {
             override fun run() {
                 val source = file.readText()
-                val formatted = Kson.format(source, KsonFormatterConfig(indentType))
+                val formatted = format(source, KsonFormatterConfig(indentType))
                 request.onTextReady(formatted)
             }
 

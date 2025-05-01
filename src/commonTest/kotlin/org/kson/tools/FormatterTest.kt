@@ -1,18 +1,9 @@
 package org.kson.tools
 
-import org.kson.Kson
-import org.kson.KsonFormatterConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * TODO FORMATTER: this test now primarily tests [Kson.format], rather than [IndentFormatter.indent].
- *   Refactoring to better reflect this (and to update [IndentFormatter] itself for its
- *   changed role, see the "TODO" there will come in a follow-up commit.  Doing this
- *   in two commits steps gives the individual commits more-focused and easier to
- *   follow/verify diffs
- */
-class IndentFormatterTest {
+class FormatterTest {
     private fun assertFormatting(
         source: String,
         expected: String,
@@ -20,7 +11,7 @@ class IndentFormatterTest {
     ) {
         assertEquals(
             expected,
-            Kson.format(source, KsonFormatterConfig(indentType))
+            format(source, KsonFormatterConfig(indentType))
         )
     }
 
