@@ -65,10 +65,8 @@ class CommandLineInterfaceTest {
         assertContains(
             output, """
                 serializedAst: %%
-                {
-                  key: val
-                  another_key: val
-                }
+                key: val
+                another_key: val
                 %%
             """.trimIndent(), false,
             "should get output confirming we've successfully parsed"
@@ -103,10 +101,8 @@ class CommandLineInterfaceTest {
         assertContains(
             output, """
                 serializedAst: %%
-                {
-                  file_key: file_val
-                  another_key: val
-                }
+                file_key: file_val
+                another_key: val
                 %%
             """.trimIndent(), false,
             "should get output confirming we've successfully parsed the file contents"

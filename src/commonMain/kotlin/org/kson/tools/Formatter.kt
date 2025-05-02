@@ -1,9 +1,28 @@
 package org.kson.tools
 
+import org.kson.*
+import org.kson.Kson.Companion.parseToAst
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
+
+/**
+ * Format the given [Kson] source according to [formatterConfig]
+ *
+ * @param ksonSource the [Kson] to format
+ * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
+ */
+fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
+    if (ksonSource.isBlank()) return ""
+    return KsonParseResult(
+        parseToAst(ksonSource, CoreCompileConfig(errorTolerant = true)),
+        CompileTarget.Kson(preserveComments = true, formatterConfig)
+    ).kson ?: ksonSource
+}
+
+data class KsonFormatterConfig(val indentType: IndentType = IndentType.Space(2))
 
 /**
  * Fast and flexible [Token]-based indentation for Kson.  Note that the given Kson does not need to be valid
@@ -12,6 +31,10 @@ import org.kson.parser.TokenType.*
  *
  * Does not modify any other formatting or spacing aside from removing any leading empty lines and
  * ensuring there is no trailing whitespace aside from a newline at the end of non-empty files.
+ * TODO: this formatter has been superseded by the new [AstNode]-based formatter and now only
+ *  supports use cases using [getCurrentLineIndentLevel] to compute the line indent from limited
+ *  context (i.e. for when a user presses enter in an edit).  This can likely be refactored and
+ *  simplified to focus on serving that use case
  *
  * @param indentType The [IndentType] to use for indentation
  */
@@ -28,7 +51,9 @@ class IndentFormatter(
      *   should assume the snippet itself is already indented nested to a level of [snippetNestingLevel].
      * @return The indented KSON source code
      */
-    fun indent(source: String, snippetNestingLevel: Int? = null): String {
+    @Deprecated("This formatter is no long a good general purpose formatter. " +
+            "See the TODO in this class's doc for details")
+    private fun indent(source: String, snippetNestingLevel: Int? = null): String {
         if (source.isBlank() && snippetNestingLevel == null) return ""
         val tokens = Lexer(source, gapFree = true).tokenize()
         val tokenLines = splitTokenLines(tokens)

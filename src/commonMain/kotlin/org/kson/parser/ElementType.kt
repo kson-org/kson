@@ -28,6 +28,8 @@ enum class TokenType : ElementType {
     ANGLE_BRACKET_R,
     // :
     COLON,
+    // .
+    DOT,
     // ,
     COMMA,
     // lines starting with `#`
@@ -122,7 +124,7 @@ enum class ParsedElementType : ElementType {
     LIST,
     LIST_ELEMENT,
     OBJECT_DEFINITION,
-    OBJECT_INTERNALS,
+    OBJECT,
     OBJECT_PROPERTY,
     ROOT
 }

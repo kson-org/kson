@@ -50,6 +50,7 @@ enum class JsonTestEditType {
  */
 private val jsonTestSuiteEditList = mapOf(
     "n_array_1_true_without_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
+    "n_array_colon_instead_of_comma.json" to JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_array_comma_and_number.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_array_extra_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,
     "n_array_inner_array_no_comma.json" to  JsonTestEditType.ACCEPT_N_FOR_SUPERSET,

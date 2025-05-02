@@ -3,12 +3,12 @@ package org.kson
 import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
 import org.kson.ast.AstNode
+import org.kson.ast.AstNodeError
 import org.kson.ast.KsonRoot
-import org.kson.collections.ImmutableList
+import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
-import org.kson.tools.IndentFormatter
-import org.kson.tools.IndentType
+import org.kson.tools.KsonFormatterConfig
 
 /**
  * Public interface to the [Kson] compiler
@@ -25,13 +25,16 @@ class Kson {
          */
         fun parseToAst(source: String, coreCompileConfig: CoreCompileConfig = CoreCompileConfig()): AstParseResult {
             val messageSink = MessageSink()
-            val tokens = Lexer(source).tokenize()
+            val tokens = Lexer(
+                source,
+                // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
+                gapFree = coreCompileConfig.errorTolerant).tokenize()
             if (tokens[0].tokenType == TokenType.EOF) {
                 messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
                 return AstParseResult(null, tokens, messageSink)
             }
 
-            val builder = KsonBuilder(tokens)
+            val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
             Parser(builder, coreCompileConfig.maxNestingLevel).parse()
             val ast = builder.buildTree(messageSink)
 
@@ -75,14 +78,6 @@ class Kson {
          */
         fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
             return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-        }
-
-        /**
-         * Format the given [Kson] source
-         */
-        fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
-            val indentFormatter = IndentFormatter(formatterConfig.indentType)
-            return indentFormatter.indent(ksonSource)
         }
     }
 }
@@ -136,7 +131,9 @@ class KsonParseResult(
      * The Kson compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val kson: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
+    val kson: String? = astParseResult.ast?.toSource(
+        AstNode.Indent(compileConfig.formatConfig.indentType),
+        compileConfig)
 }
 
 class YamlParseResult(
@@ -175,10 +172,12 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     /**
      * Compile target for serializing a Kson AST out to Kson source
      *
+     * @param formatConfig the settings for formatting the compiler Kson output
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Kson(
         override val preserveComments: Boolean = true,
+        val formatConfig: KsonFormatterConfig = KsonFormatterConfig(),
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
 
@@ -218,12 +217,14 @@ data class CoreCompileConfig(
      */
     val schemaJson: String = NO_SCHEMA,
     /**
+     * Whether to allow an AST to be built with errors (i.e. patched with [AstNodeError] nodes)
+     */
+    val errorTolerant: Boolean = false,
+    /**
      * The deep object/list nesting to allow in the parsed document.  See [DEFAULT_MAX_NESTING_LEVEL] for more details.
      */
     val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
 )
-
-data class KsonFormatterConfig(val indentType: IndentType = IndentType.Space(2))
 
 /**
  * A Json document specifying just `true` is the "trivial" schema that matches everything,

@@ -5,53 +5,35 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
 
 /**
- * Default maximum nesting of objects and lists to allow in parsing.  This protects against
- * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
- * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
- * as needed (note that this may also be configured in calls to [Parser.parse])
- */
-const val DEFAULT_MAX_NESTING_LEVEL = 255
-
-/**
- * Used to bail out of parsing when when excessive nesting is detected
- */
-class ExcessiveNestingException: RuntimeException()
-
-/**
- * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
- * but is validated separately against [validHexChars]
- */
-private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
-private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
-
-/**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
  * the following grammar, one method per grammar rule:
  *
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
- * kson -> (objectInternals | value) <end-of-file> ;
- * objectInternals -> "," ( keyword value ","? )+
- *              | ( ","? keyword value )*
- *              | ( keyword value ","? )*
- * value -> dashList
- *        | delimitedValue
- * delimitedValue -> delimitedDashList
- *                 | commaList
- *                 | objectDefinition
+ * root -> ksonValue <end-of-file>
+ * ksonValue -> plainObject
+ *            | dashList
+ *            | delimitedValue
+ * plainObject -> objectInternals "."+
+ * objectInternals -> "," ( keyword ksonValue ","? )+
+ *                  | ( ","? keyword ksonValue )*
+ *                  | ( keyword ksonValue ","? )*
+ * dashList -> dashListInternals "."+
+ * dashListInternals -> ( LIST_DASH ksonValue )*
+ * delimitedValue -> delimitedObject
+ *                 | delimitedDashList
+ *                 | bracketList
  *                 | literal
- *                 | embedBlock ;
- * objectDefinition -> "{" objectInternals "}" ;
- * delimitedDashList -> "<" dashList ">"
- * dashList -> ( LIST_DASH delimitedValue )*
- * commaList -> "[" "," ( value ","? )+ "]"
- *              | "[" ( ","? value )* "]"
- *              | "[" ( value ","? )* "]"
- * keyword -> ( IDENTIFIER | string ) ":" ;
- * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
+ *                 | embedBlock
+ * delimitedObject -> "{" objectInternals "}"
+ * delimitedDashList -> "<" dashListInternals ">"
+ * bracketList -> "[" "," ( ksonValue ","? )+ "]"
+ *              | "[" ( ","? ksonValue )* "]"
+ *              | "[" ( ksonValue ","? )* "]"
+ * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
+ * keyword -> ( IDENTIFIER | string ) ":"
  * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
- * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM ;
+ * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -68,7 +50,7 @@ private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '
 class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL) {
 
     /**
-     * kson -> (objectInternals | value) <end-of-file> ;
+     * root -> ksonValue <end-of-file>
      */
     fun parse() {
         if (builder.eof()) {
@@ -78,7 +60,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val rootMarker = builder.mark()
         try {
-            if (objectInternals(false) || value()) {
+            if (ksonValue()) {
                 if (hasUnexpectedTrailingContent()) {
                     // parser todo we likely want to see if we can continue parsing after adding the error noting
                     //             the unexpected extra content
@@ -108,14 +90,25 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * objectInternals -> "," ( keyword value ","? )+
-     *              | ( ","? keyword value )*
-     *              | ( keyword value ","? )*
+     * ksonValue -> plainObject
+     *           | dashList
+     *           | delimitedValue
      */
-    private fun objectInternals(allowEmpty: Boolean): Boolean = nestingTracker.nest {
+    private fun ksonValue(): Boolean = plainObject(false) || dashList() || delimitedValue()
+
+    /**
+     * plainObject -> objectInternals "."+
+     * objectInternals -> "," ( keyword ksonValue ","? )+
+     *                  | ( ","? keyword ksonValue )*
+     *                  | ( keyword ksonValue ","? )*
+     *
+     * Note: as in [dashList], we combine these two grammar rules here so it's clean/easy to implement
+     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
+     */
+    private fun plainObject(allowEmpty: Boolean, isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         var foundProperties = false
 
-        val objectInternalsMark = builder.mark()
+        val objectMark = builder.mark()
 
         // parse the optional leading comma
         if (builder.getTokenType() == COMMA) {
@@ -125,7 +118,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // prohibit the empty-ISH objects internals containing just commas
             if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
-                objectInternalsMark.done(OBJECT_INTERNALS)
+                objectMark.done(OBJECT)
                 return@nest true
             } else {
                 leadingCommaMark.drop()
@@ -145,8 +138,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
                 val valueMark = builder.mark()
 
-                // if we're followed by another keyword or we don't have a value, we're malformed
-                if (keyword() || !value()) {
+                if (!ksonValue()) {
+                    // if we don't have a value, we're malformed
                     valueMark.rollbackTo()
                     keywordMark.error(OBJECT_KEY_NO_VALUE.create())
                 } else {
@@ -159,6 +152,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                     processComma(builder)
                 }
                 propertyMark.done(OBJECT_PROPERTY)
+
+                if (builder.getTokenType() == DOT) {
+                    val dotMark = builder.mark()
+                    builder.advanceLexer()
+                    if (!isDelimited) {
+                        dotMark.drop()
+                        break
+                    } else {
+                        dotMark.error(IGNORED_OBJECT_END_DOT.create())
+                    }
+                }
             } else {
                 keywordMark.drop()
                 propertyMark.rollbackTo()
@@ -167,11 +171,54 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         if (foundProperties || allowEmpty) {
-            objectInternalsMark.done(OBJECT_INTERNALS)
+            objectMark.done(OBJECT)
             return@nest true
         } else {
             // otherwise we're not a valid object internals
-            objectInternalsMark.rollbackTo()
+            objectMark.rollbackTo()
+            return@nest false
+        }
+    }
+
+    /**
+     * dashList -> dashListInternals "."+
+     * dashListInternals -> ( LIST_DASH ksonValue )*
+     *
+     * Note: as in [plainObject], we combine these two grammar rules here so it's clean/easy to implement
+     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
+     */
+    private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
+        if (builder.getTokenType() == LIST_DASH) {
+            val listMark = builder.mark()
+
+            // parse the dash delimited list elements
+            do {
+                val listElementMark = builder.mark()
+                // advance past the LIST_DASH
+                builder.advanceLexer()
+
+                if (ksonValue()) {
+                    // this LIST_DASH is not dangling
+                    listElementMark.done(LIST_ELEMENT)
+                } else {
+                    listElementMark.error(DANGLING_LIST_DASH.create())
+                }
+
+                if (builder.getTokenType() == DOT) {
+                    val dot = builder.mark()
+                    builder.advanceLexer()
+                    if (!isDelimited) {
+                        dot.drop()
+                        break
+                    } else {
+                        dot.error(IGNORED_DASH_LIST_END_DOT.create())
+                    }
+                }
+            } while (builder.getTokenType() == LIST_DASH)
+
+            listMark.done(LIST)
+            return@nest true
+        } else {
             return@nest false
         }
     }
@@ -193,19 +240,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * value -> dashList
-     *        | delimitedValue
-     */
-    private fun value(): Boolean {
-        return dashList() || delimitedValue()
-    }
-
-    /**
-     * delimitedValue -> delimitedDashList
-     *                 | commaList
-     *                 | objectDefinition
+     * delimitedValue -> delimitedObject
+     *                 | delimitedDashList
+     *                 | bracketList
      *                 | literal
-     *                 | embedBlock ;
+     *                 | embedBlock
      */
     private fun delimitedValue(): Boolean {
         if (builder.getTokenType() == CURLY_BRACE_R) {
@@ -241,67 +280,68 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // of making sense of everything else
         }
 
-        return (delimitedDashList()
-                || commaList()
-                || objectDefinition()
+        return (delimitedObject()
+                || delimitedDashList()
+                || bracketList()
                 || literal()
                 || embedBlock())
     }
 
     /**
-     * objectDefinition -> "{" objectInternals "}" ;
+     * delimitedObject -> "{" objectInternals "}"
      */
-    private fun objectDefinition(): Boolean {
-        if (builder.getTokenType() == CURLY_BRACE_L) {
-            val objectDefinitionMark = builder.mark()
-
-            // advance past our CURLY_BRACE_L
-            builder.advanceLexer()
-
-            // parse any object internals, empty or otherwise
-            objectInternals(true)
-
-            // annotate anything unparsable within this object definition with an error
-            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-                val malformedInternals = builder.mark()
-
-                while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-                    builder.advanceLexer()
-                    val keywordMark = builder.mark()
-                    if (keyword()) {
-                        keywordMark.rollbackTo()
-                        break
-                    } else {
-                        keywordMark.drop()
-                    }
-                }
-
-                malformedInternals.error(OBJECT_BAD_INTERNALS.create())
-
-                // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
-                // on internals that are actually bad
-                objectInternals(false)
-            }
-
-            if (builder.getTokenType() == CURLY_BRACE_R) {
-                // advance past our CURLY_BRACE_R
-                builder.advanceLexer()
-                objectDefinitionMark.done(OBJECT_DEFINITION)
-            } else {
-                objectDefinitionMark.error(OBJECT_NO_CLOSE.create())
-            }
-            return true
-        } else {
-            // not an objectDefinition
+    private fun delimitedObject(): Boolean {
+        if (builder.getTokenType() != CURLY_BRACE_L) {
+            // no open curly brace, so not a delimitedObject
             return false
         }
+
+        val delimitedObjectMark = builder.mark()
+
+        // advance past our CURLY_BRACE_L
+        builder.advanceLexer()
+
+        // parse any object internals, empty or otherwise
+        plainObject(allowEmpty = true, isDelimited = true)
+
+        // annotate anything unparsable within this object definition with an error
+        while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+            val malformedInternals = builder.mark()
+
+            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                builder.advanceLexer()
+                val keywordMark = builder.mark()
+                if (keyword()) {
+                    keywordMark.rollbackTo()
+                    break
+                } else {
+                    keywordMark.drop()
+                }
+            }
+
+            malformedInternals.error(OBJECT_BAD_INTERNALS.create())
+
+            // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
+            // on internals that are actually bad
+            plainObject(allowEmpty = false, isDelimited = true)
+        }
+
+        if (builder.getTokenType() == CURLY_BRACE_R) {
+            // advance past our CURLY_BRACE_R
+            builder.advanceLexer()
+            delimitedObjectMark.drop()
+        } else {
+            delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
+        }
+        return true
     }
 
     /**
-     * delimitedDashList -> "<" dashList ">"
+     * delimitedDashList -> "<" dashListInternals ">"
      */
     private fun delimitedDashList(): Boolean {
         if (builder.getTokenType() != ANGLE_BRACKET_L) {
+            // no open angle bracket, so not a delimitedDashList
             return false
         }
 
@@ -310,7 +350,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // consume our ANGLE_BRACKET_L
         builder.advanceLexer()
 
-        val emptyList = !dashList()
+        val emptyList = !dashList(true)
 
         if (builder.getTokenType() == ANGLE_BRACKET_R) {
             builder.advanceLexer()
@@ -330,42 +370,15 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * dashList -> ( LIST_DASH delimitedValue )*
+     * bracketList -> "[" "," ( ksonValue ","? )+ "]"
+     *              | "[" ( ","? ksonValue )* "]"
+     *              | "[" ( ksonValue ","? )* "]"
      */
-    private fun dashList(): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() == LIST_DASH) {
-            val listMark = builder.mark()
-
-            // parse the dash delimited list elements
-            do {
-                val listElementMark = builder.mark()
-                // advance past the LIST_DASH
-                builder.advanceLexer()
-
-                if (builder.getTokenType() == LIST_DASH) {
-                    listElementMark.error(DANGLING_LIST_DASH.create())
-                } else if (delimitedValue()) {
-                    // this LIST_DASH is not dangling
-                    listElementMark.done(LIST_ELEMENT)
-                } else {
-                    listElementMark.error(DANGLING_LIST_DASH.create())
-                }
-            } while (builder.getTokenType() == LIST_DASH)
-
-            listMark.done(LIST)
-            return@nest true
-        } else {
+    private fun bracketList(): Boolean = nestingTracker.nest {
+        if (builder.getTokenType() != SQUARE_BRACKET_L) {
+            // no open square bracket, so not a bracketList
             return@nest false
         }
-    }
-
-    /**
-     * commaList -> "[" "," ( value ","? )+ "]"
-     *              | "[" ( ","? value )* "]"
-     *              | "[" ( value ","? )* "]"
-     */
-    private fun commaList(): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() == SQUARE_BRACKET_L) {
             val listMark = builder.mark()
             // advance past the SQUARE_BRACKET_L
             builder.advanceLexer()
@@ -390,22 +403,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
                 val listElementMark = builder.mark()
 
-                if (!value()) {
+                if (!ksonValue()) {
                     val invalidElementMark = builder.mark()
 
-                    // give a more precise/helpful error if it looks the user is accidentally sticking object notation in a list
-                    if (builder.getTokenType() == COLON) {
+                    // while we're not obviously another element or at the end of the list, mark this non-value as an error
+                    while(builder.getTokenType() != SQUARE_BRACKET_R
+                        && builder.getTokenType() != COMMA
+                        && !builder.eof()) {
                         builder.advanceLexer()
-                        invalidElementMark.error(LIST_STRAY_COLON.create())
-                    } else {
-                        // while we're not obviously another element or at the end of the list, mark this non-value as an error
-                        while(builder.getTokenType() != SQUARE_BRACKET_R
-                            && builder.getTokenType() != COMMA
-                            && !builder.eof()) {
-                            builder.advanceLexer()
-                        }
-                        invalidElementMark.error(LIST_INVALID_ELEM.create())
                     }
+                    invalidElementMark.error(LIST_INVALID_ELEM.create())
                 }
                 if (builder.getTokenType() == COMMA) {
                     processComma(builder)
@@ -426,47 +433,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 listMark.error(LIST_NO_CLOSE.create())
             }
             return@nest true
-        } else {
-            // not a list
-            return@nest false
-        }
     }
 
     /**
-     * keyword -> ( IDENTIFIER | string ) ":" ;
-     */
-    private fun keyword(): Boolean {
-        // try to parse a keyword in the style of "IDENTIFIER followed by :"
-        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
-            val identifierMark = builder.mark()
-            builder.advanceLexer()
-            identifierMark.done(IDENTIFIER)
-            keywordMark.done(KEYWORD)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        }
-
-        // try to parse a keyword in the style of "string followed by :"
-        val keywordMark = builder.mark()
-        if (string() && builder.getTokenType() == COLON) {
-            keywordMark.done(KEYWORD)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        } else {
-            keywordMark.rollbackTo()
-        }
-
-        // not a keyword
-        return false
-    }
-
-    /**
-     * literal -> string | IDENTIFIER | NUMBER | "true" | "false" | "null" ;
+     * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
      */
     private fun literal(): Boolean {
         if (string()) {
@@ -514,7 +484,40 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * string -> STRING_QUOTE STRING STRING_QUOTE
+     * keyword -> ( IDENTIFIER | string ) ":"
+     */
+    private fun keyword(): Boolean {
+        // try to parse a keyword in the style of "IDENTIFIER followed by :"
+        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
+            val keywordMark = builder.mark()
+            val identifierMark = builder.mark()
+            builder.advanceLexer()
+            identifierMark.done(IDENTIFIER)
+            keywordMark.done(KEYWORD)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        }
+
+        // try to parse a keyword in the style of "string followed by :"
+        val keywordMark = builder.mark()
+        if (string() && builder.getTokenType() == COLON) {
+            keywordMark.done(KEYWORD)
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        } else {
+            keywordMark.rollbackTo()
+        }
+
+        // not a keyword
+        return false
+    }
+
+    /**
+     * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
      */
     private fun string(): Boolean {
         if (builder.getTokenType() != STRING_OPEN_QUOTE) {
@@ -615,7 +618,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * embeddedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM ;
+     * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
      */
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_OPEN_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
@@ -733,3 +736,24 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
     }
 }
+
+/**
+ * Default maximum nesting of objects and lists to allow in parsing.  This protects against
+ * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
+ * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
+ * as needed (note that this may also be configured in calls to [Parser.parse])
+ */
+const val DEFAULT_MAX_NESTING_LEVEL = 255
+
+/**
+ * Used to bail out of parsing when excessive nesting is detected
+ */
+class ExcessiveNestingException: RuntimeException()
+
+/**
+ * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
+ * but is validated separately against [validHexChars]
+ */
+private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
+private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')

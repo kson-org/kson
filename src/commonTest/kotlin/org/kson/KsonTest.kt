@@ -2,7 +2,7 @@ package org.kson
 
 import org.kson.CompileTarget.*
 import org.kson.ast.KsonRoot
-import org.kson.collections.ImmutableList
+import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
@@ -27,7 +27,7 @@ class KsonTest {
 
     /**
      * Assertion helper for testing that [source] parses without error and produces the AST described by
-     * [expectedKsonFromAst] (this often looks like a truism, ie. `key: val` parses to `key: val`, but it's
+     * [expectedKsonFromAst] (this often looks like a truism, i.e. `key: val` parses to `key: val`, but it's
      * an easy/quick/clear way to quickly produce platform- and implementation-agnostic tests that ensure
      * AST parsing is correct)
      *
@@ -277,7 +277,7 @@ class KsonTest {
             """
                 []
             """,
-            "[]",
+            "<>",
             "[]",
             "[]"
         )
@@ -290,9 +290,7 @@ class KsonTest {
                 ["a string"]
             """,
             """
-                [
-                  "a string"
-                ]
+                - "a string"
             """.trimIndent(),
             """
                 - "a string"
@@ -309,11 +307,9 @@ class KsonTest {
                 [42.4, 43.1, 44.7]
             """,
             """
-                [
-                  42.4,
-                  43.1,
-                  44.7
-                ]
+                - 42.4
+                - 43.1
+                - 44.7
             """.trimIndent(),
             """
                 - 42.4
@@ -334,11 +330,9 @@ class KsonTest {
                 [true, false, null,]
             """,
             """
-                [
-                  true,
-                  false,
-                  null
-                ]
+                - true
+                - false
+                - null
             """.trimIndent(),
             """
                 - true
@@ -360,15 +354,12 @@ class KsonTest {
                 [true, false, [1.2, 3.4, 5.6]]
             """,
             """
-                [
-                  true,
-                  false,
-                  [
-                    1.2,
-                    3.4,
-                    5.6
-                  ]
-                ]
+                - true
+                - false
+                - 
+                  - 1.2
+                  - 3.4
+                  - 5.6
             """.trimIndent(),
             """
                 - true
@@ -399,9 +390,7 @@ class KsonTest {
                 - "a string"
             """,
             """
-                [
-                  "a string"
-                ]
+                - "a string"
             """.trimIndent(),
             """
                 - "a string"
@@ -420,11 +409,9 @@ class KsonTest {
                 - 44.7
             """,
             """
-                [
-                  42.4,
-                  43.1,
-                  44.7
-                ]
+                - 42.4
+                - 43.1
+                - 44.7
             """.trimIndent(),
             """
                 - 42.4
@@ -448,11 +435,9 @@ class KsonTest {
                     - null
             """,
             """
-                [
-                  true,
-                  false,
-                  null
-                ]
+                - true
+                - false
+                - null
             """.trimIndent(),
             """
                 - true
@@ -474,7 +459,7 @@ class KsonTest {
         assertParsesTo("""
                 <>
             """.trimIndent(),
-            "[]",
+            "<>",
             "[]",
             "[]"
         )
@@ -483,11 +468,9 @@ class KsonTest {
                 < - a - b - c >
             """.trimIndent(),
             """
-                [
-                  a,
-                  b,
-                  c
-                ]
+                - a
+                - b
+                - c
             """.trimIndent(),
             """
                 - a
@@ -511,11 +494,9 @@ class KsonTest {
                 >
             """.trimIndent(),
             """
-                [
-                  a,
-                  b,
-                  c
-                ]
+                - a
+                - b
+                - c
             """.trimIndent(),
             """
                 - a
@@ -543,11 +524,9 @@ class KsonTest {
             [- []]
         """.trimIndent(),
             """
-               [
-                 [
-                   []
-                 ]
-               ]
+               - 
+                 - 
+                   <>
             """.trimIndent(),
             """
                - 
@@ -574,21 +553,16 @@ class KsonTest {
               }
         """.trimIndent(),
             """
-                [
-                  {
-                    nestedDashList: [
-                      a,
-                      b,
-                      c
-                    ]
-                  }
-                ]
+                - nestedDashList:
+                    - a
+                    - b
+                    - c
             """.trimIndent(),
             """
                 - nestedDashList:
-                  - a
-                  - b
-                  - c
+                    - a
+                    - b
+                    - c
             """.trimIndent(),
             """
                 [
@@ -619,18 +593,15 @@ class KsonTest {
               >
         """.trimIndent(),
             """
-                [
-                  [
-                    a,
-                    b,
-                    [
-                      a1,
-                      b1,
-                      c1
-                    ],
-                    c
-                  ]
-                ]
+                - 
+                  - a
+                  - b
+                  - 
+                    - a1
+                    - b1
+                    - c1
+                    .
+                  - c
             """.trimIndent(),
             """
                 - 
@@ -669,17 +640,14 @@ class KsonTest {
             ]
         """,
         """
-            [
-              null,
-              true,
-              [
-                sublist
-              ],
-              [
-                another,
-                sublist
-              ]
-            ]
+            - null
+            - true
+            - 
+              - sublist
+              .
+            - 
+              - another
+              - sublist
         """.trimIndent(),
             """
             - null
@@ -736,7 +704,6 @@ class KsonTest {
             - 2
             - 4
             - 
-            - 8
         """.trimIndent(), listOf(DANGLING_LIST_DASH))
     }
 
@@ -755,11 +722,9 @@ class KsonTest {
     @Test
     fun testObjectSource() {
         val expectKsonRootObjectAst = """
-            {
               key: val
               "string key": 66.3
               hello: "y'all"
-            }
             """.trimIndent()
 
         val expectedYamlRootObject = """
@@ -812,12 +777,10 @@ class KsonTest {
                 "
             """.trimIndent(),
             """
-                {
-                  first: "value"
-                  second: "this is a string with a
+                first: "value"
+                second: "this is a string with a
                 raw newline in it and at its end
                 "
-                }
             """.trimIndent(),
             """
                 first: "value"
@@ -856,9 +819,7 @@ class KsonTest {
             """,
             """
                 #comment
-                {
-                  a: b
-                }
+                a: b
             """.trimIndent(),
             """
                 #comment
@@ -876,11 +837,9 @@ class KsonTest {
     @Test
     fun testObjectSourceOptionalComma() {
         val expectKsonForRootObjectAst = """
-            {
               key: val
               "string key": 66.3
               hello: "y'all"
-            }
             """.trimIndent()
 
         assertParsesTo(
@@ -1047,7 +1006,7 @@ class KsonTest {
 
     @Test
     fun testInvalidColonInList() {
-        assertParserRejectsSource("[key: 1]", listOf(LIST_STRAY_COLON))
+        assertParserRejectsSource("[key: 1, :]", listOf(LIST_INVALID_ELEM))
     }
 
     @Test
@@ -1058,7 +1017,7 @@ class KsonTest {
     @Test
     fun testKeywordWithoutValue() {
         assertParserRejectsSource("key:", listOf(OBJECT_KEY_NO_VALUE))
-        assertParserRejectsSource("key: key_with_val: 10 another_key:", listOf(OBJECT_KEY_NO_VALUE, OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("key: key_with_val: 10 another_key:", listOf(OBJECT_KEY_NO_VALUE))
         assertParserRejectsSource("[{key:} 1]", listOf(OBJECT_KEY_NO_VALUE))
     }
 
@@ -1110,15 +1069,12 @@ class KsonTest {
             }
         """,
         """
-            {
-              nested_obj: {
-                key: value
-              }
-              nested_list: [
-                1.1,
-                2.1
-              ]
-            }
+           nested_obj:
+             key: value
+             .
+           nested_list:
+             - 1.1
+             - 2.1
         """.trimIndent(),
         """
            nested_obj:
@@ -1162,6 +1118,46 @@ class KsonTest {
     }
 
     @Test
+    fun testCommentPreservationOnDashLists() {
+        assertParsesTo(
+            """
+                # comment one
+                - one
+                # comment two
+                - two
+                # comment three.1
+                # comment three.2
+                - three
+            """.trimIndent(),
+            """
+                # comment one
+                - one
+                # comment two
+                - two
+                # comment three.1
+                # comment three.2
+                - three
+            """.trimIndent(),
+            """
+                # comment one
+                - one
+                # comment two
+                - two
+                # comment three.1
+                # comment three.2
+                - three
+            """.trimIndent(),
+            """
+                [
+                  "one",
+                  "two",
+                  "three"
+                ]
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testMultipleCommentsOnNestedElement() {
         assertParsesTo(
             """
@@ -1174,13 +1170,11 @@ class KsonTest {
               ]
             """,
             """
-              [
-                # first comment
-                # second comment
-                # third comment
-                one,
-                two
-              ]
+              # first comment
+              # second comment
+              # third comment
+              - one
+              - two
             """.trimIndent(),
             """
               # first comment
@@ -1344,13 +1338,11 @@ class KsonTest {
                 key2: val2
             """,
             """
-               {
-                 # a comment
-                 # an odd but legal comment on this val
-                 key: val
-                 # another comment
-                 key2: val2
-               }
+               # a comment
+               # an odd but legal comment on this val
+               key: val
+               # another comment
+               key2: val2
             """.trimIndent(),
             """
                # a comment
@@ -1380,12 +1372,10 @@ class KsonTest {
                 ,
             """,
             """
-                {
-                  # this comment should be preserved on this property
-                  key1: val1
-                  # as should this one
-                  key2: val2
-                }
+                # this comment should be preserved on this property
+                key1: val1
+                # as should this one
+                key2: val2
             """.trimIndent(),
             """
                 # this comment should be preserved on this property
@@ -1415,12 +1405,10 @@ class KsonTest {
             """,
             """
                 # comment on list
-                [
-                  # comment on first_element
-                  first_element,
-                  # comment on second_element
-                  second_element
-                ]
+                # comment on first_element
+                - first_element
+                # comment on second_element
+                - second_element
             """.trimIndent(),
             """
                 # comment on list
@@ -1445,12 +1433,10 @@ class KsonTest {
                 - second_element
             """,
             """
-                [
-                  # comment on first_element
-                  first_element,
-                  # comment on second_element
-                  second_element
-                ]
+                # comment on first_element
+                - first_element
+                # comment on second_element
+                - second_element
             """.trimIndent(),
             """
                 # comment on first_element
@@ -1486,32 +1472,28 @@ class KsonTest {
             """,
             """
               # a list of lists
-              [
-                [
-                  # trailing comment on constant element
-                  1.2,
-                  # a nested list element
-                  2.2,
-                  3.2
-                ],
-                [
-                  # a nested dash-delimited list
-                  [
-                    10.2
-                  ],
-                  # a further nested braced list
-                  # trailing comment on nested list
-                  [
-                    4.2,
-                    # a further nested braced list element
-                    5.2
-                  ],
-                  [
-                    9.2,
-                    8.2
-                  ]
-                ]
-              ]
+              - 
+                # trailing comment on constant element
+                - 1.2
+                # a nested list element
+                - 2.2
+                - 3.2
+                .
+              - 
+                # a nested dash-delimited list
+                - 
+                  - 10.2
+                  .
+                # a further nested braced list
+                # trailing comment on nested list
+                - 
+                  - 4.2
+                  # a further nested braced list element
+                  - 5.2
+                  .
+                - 
+                  - 9.2
+                  - 8.2
             """.trimIndent(),
             """
             # a list of lists
@@ -1600,12 +1582,10 @@ class KsonTest {
             """
                 # leading
                 # trailing list brace
-                [
-                  # trailing "one"
-                  one,
-                  # trailing "two"
-                  two
-                ]
+                # trailing "one"
+                - one
+                # trailing "two"
+                - two
             """.trimIndent(),
             """
                 # leading
@@ -1635,10 +1615,8 @@ class KsonTest {
             """,
             """
                 # leading
-                {
-                  # trailing
-                  keyword: value
-                }
+                # trailing
+                keyword: value
             """.trimIndent(),
             """
                 # leading
@@ -1660,11 +1638,9 @@ class KsonTest {
                 }
             """,
             """
-                {
-                  # leading
-                  # trailing
-                  keyword: value
-                }
+                # leading
+                # trailing
+                keyword: value
             """.trimIndent(),
             """
                 # leading
@@ -2057,11 +2033,8 @@ class KsonTest {
             # document end comment
         """.trimIndent(),
         """
-            {
-              key: {
-                value: 42
-              }
-            }
+            key:
+              value: 42
         """.trimIndent(),
         """
             key:
@@ -2196,6 +2169,102 @@ class KsonTest {
             """
             "these double $$ dollars are %%%% embedded but escaped\n"
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedNonDelimitedObjects() {
+        assertParsesTo(
+            """
+                key:
+                  nested_key: 10
+                  another_nest_key: 3
+                  .
+                unnested_key: 44
+            """.trimIndent(),
+            """
+                key:
+                  nested_key: 10
+                  another_nest_key: 3
+                  .
+                unnested_key: 44
+            """.trimIndent(),
+            """
+                key:
+                  nested_key: 10
+                  another_nest_key: 3
+                
+                unnested_key: 44
+            """.trimIndent(),
+            """
+                {
+                  "key": {
+                    "nested_key": 10,
+                    "another_nest_key": 3
+                  },
+                  "unnested_key": 44
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedNonDelimitedDashLists() {
+        assertParsesTo(
+            """
+                - 
+                  - "sub-list elem 1"
+                  - "sub-list elem 2"
+                  .
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+                - 
+                  - "sub-list elem 1"
+                  - "sub-list elem 2"
+                  .
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+                - 
+                  - "sub-list elem 1"
+                  - "sub-list elem 2"
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+                [
+                  [
+                    "sub-list elem 1",
+                    "sub-list elem 2"
+                  ],
+                  "outer list elem 1"
+                ]
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testIgnoredPeriodError() {
+        assertParserRejectsSource("""
+            <
+              - "sub-list elem 1"
+              - "sub-list elem 2" .
+              - "sub-list elem 3" .
+              - "sub-list elem 4"
+            >
+            """.trimIndent(),
+            listOf(IGNORED_DASH_LIST_END_DOT, IGNORED_DASH_LIST_END_DOT)
+        )
+
+        assertParserRejectsSource("""
+            {
+              key1: "val 1"
+              key2: "val 2" .
+              key3: "val 3" .
+              key4: "val 4"
+            }
+            """.trimIndent(),
+            listOf(IGNORED_OBJECT_END_DOT, IGNORED_OBJECT_END_DOT)
         )
     }
 }

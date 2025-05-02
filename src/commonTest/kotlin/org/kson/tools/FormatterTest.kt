@@ -3,7 +3,7 @@ package org.kson.tools
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class IndentFormatterTest {
+class FormatterTest {
     private fun assertFormatting(
         source: String,
         expected: String,
@@ -11,7 +11,7 @@ class IndentFormatterTest {
     ) {
         assertEquals(
             expected,
-            IndentFormatter(indentType).indent(source)
+            format(source, KsonFormatterConfig(indentType))
         )
     }
 
@@ -32,9 +32,7 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              key: value
-            }
+            key: value
             """.trimIndent()
         )
 
@@ -45,9 +43,7 @@ class IndentFormatterTest {
                            }
             """.trimIndent(),
             """
-            {
-              key: value
-            }
+            key: value
             """.trimIndent()
         )
     }
@@ -63,11 +59,8 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              outer: {
-                inner: value
-              }
-            }
+            outer:
+              inner: value
             """.trimIndent()
         )
 
@@ -81,11 +74,8 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-            ${"\t"}outer: {
-            ${"\t"}${"\t"}inner: value
-            ${"\t"}}
-            }
+            outer:
+            ${"\t"}inner: value
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -103,12 +93,9 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-                key1: value1,
-                nested: {
-                    inner: value2
-                }
-            }
+            key1: value1
+            nested:
+                inner: value2
             """.trimIndent(),
             IndentType.Space(4)
         )
@@ -126,12 +113,12 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            object: { child1: { child2: {
+            object:
+              child1:
+                child2:
                   child2Property: 2
-                }
+                  .
                 child1Property: 1
-              }
-            }
             """.trimIndent()
         )
 
@@ -144,17 +131,15 @@ class IndentFormatterTest {
                   ]]]
             """.trimIndent(),
             """
-            [
-              [
-                [
-                  3
-            ]]]
+            - 
+              - 
+                - 3
             """.trimIndent()
         )
 
         assertFormatting(
             """
-            <<<
+            < - < - <
             - 3
             >
                     - 2
@@ -163,53 +148,13 @@ class IndentFormatterTest {
                      >
             """.trimIndent(),
             """
-            <<<
-                  - 3
-                >
-                - 2
-              >
-              - 1
-            >
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun testPreservesExistingFormatting() {
-        assertFormatting(
-            """
-            {key:    value,
-            nested:   {  a:   b,
-            c:    d
-            }
-            }
-            """.trimIndent(),
-            """
-            {key:    value,
-              nested:   {  a:   b,
-                c:    d
-              }
-            }
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun testPreservesLineBreaks() {
-        assertFormatting(
-            """
-            [
-            1,2,
-            3,
-            4
-            ]
-            """.trimIndent(),
-            """
-            [
-              1,2,
-              3,
-              4
-            ]
+            - 
+              - 
+                - 3
+                .
+              - 2
+              .
+            - 1
             """.trimIndent()
         )
     }
@@ -224,8 +169,8 @@ class IndentFormatterTest {
             """.trimIndent(),
             """
             - one
-            -   two
-            -    three
+            - two
+            - three
             """.trimIndent()
         )
     }
@@ -241,9 +186,7 @@ class IndentFormatterTest {
             """.trimIndent(),
             """
             key:
-              - {
-                a: b
-              }
+              - a: b
             """.trimIndent()
         )
     }
@@ -262,13 +205,11 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              code: %%sql
-                SELECT * 
-                  FROM table
-                    WHERE x = 1
-                %%
-            }
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
             """.trimIndent()
         )
     }
@@ -282,13 +223,50 @@ class IndentFormatterTest {
         assertFormatting(
             """
                 %%
-                This embed block %\% has escapes that should not be removed when formatting %\\\%
+                This embed block %\% has escapes that should be respected when formatting %\\\%
                 %%
             """.trimIndent(),
             """
-                %%
-                This embed block %\% has escapes that should not be removed when formatting %\\\%
-                %%
+                $$
+                This embed block %% has escapes that should be respected when formatting %\\%
+                $$
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockWithPartialEmbedDelim() {
+        assertFormatting(
+            """
+            code: %sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent(),
+            """
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+            code: ${'$'}sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              ${'$'}${'$'}
+            """.trimIndent(),
+            """
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
             """.trimIndent()
         )
     }
@@ -304,11 +282,11 @@ class IndentFormatterTest {
               %%
             """.trimIndent(),
             """
-              code: %%sql
-                SELECT * 
-                  FROM table
-                    WHERE x = 1
-                %%
+            code: %%sql
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
             """.trimIndent()
         )
     }
@@ -325,10 +303,9 @@ class IndentFormatterTest {
             """.trimIndent(),
             """
             # Header comment
-            {
-              # Property comment
-              key: value     # Trailing comment with lots of space
-            }
+            # Property comment
+            # Trailing comment with lots of space
+            key: value
             """.trimIndent()
         )
     }
@@ -345,10 +322,8 @@ class IndentFormatterTest {
               key2: value
             """.trimIndent(),
             """
-            key:
-              # a value
-              value
-              
+            # a value
+            key: value
             # a property
             key2: value
             """.trimIndent()
@@ -362,21 +337,22 @@ class IndentFormatterTest {
             """.trimIndent(),
             """
             key:
-              - 1 # a value
+              # a value
+              - 1
               - 2
             """.trimIndent()
         )
 
         assertFormatting(
             """
-            key:
-              - 1 
-              # a value
-              - 2
+        key:
+                    - 1 
+      # a value
+                  - 2
             """.trimIndent(),
             """
             key:
-              - 1 
+              - 1
               # a value
               - 2
             """.trimIndent()
@@ -396,12 +372,10 @@ class IndentFormatterTest {
                  key2: value
             """.trimIndent(),
             """
-            key:
-              # a value
-              # a value
-              # a value
-              value
-              
+            # a value
+            # a value
+            # a value
+            key: value
             # a property
             # a property
             # a property
@@ -422,12 +396,10 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            x: {
+            x:
               # comment
-              
               # comment
               y: 12
-            }
             """.trimIndent())
     }
 
@@ -452,26 +424,20 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            key:
+            # a value
+            # a value
+            key: value
+            key2:
               # a value
-              # a value
-              value
-              
-            key2: {
-              nested:
-                # a value
-                value
-                
+              nested: value
               # a property
               # a property
-              nested2:
-                value
-            }
+              nested2: value
             """.trimIndent()
         )
 
     }
-
+    
     @Test
     fun testEmbedBlocksAtDifferentNestingLevels() {
         assertFormatting(
@@ -496,24 +462,20 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              code1: %%sql
-                SELECT *
-                  FROM table
-                %%
-              nested: {
-                code2internalIndent: %%sql
-                      SELECT *
-                        FROM table
-                  %%
-                deeper: {
-                  code3: %%sql
+            code1: %%sql
+              SELECT *
+                FROM table
+              %%
+            nested:
+              code2internalIndent: %%sql
                     SELECT *
-                        FROM table
-                    %%
-                }
-              }
-            }
+                      FROM table
+                %%
+              deeper:
+                code3: %%sql
+                  SELECT *
+                      FROM table
+                  %%
             """.trimIndent()
         )
     }
@@ -531,13 +493,11 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              code: %%sql
-                raw1
-                raw2
-                raw3
-                %%
-            }
+            code: %%sql
+              raw1
+              raw2
+              raw3
+              %%
             """.trimIndent()
         )
     }
@@ -555,13 +515,11 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              code: %%sql
-                    indented
-                not_indented
-                      more_indented
-                %%
-            }
+            code: %%sql
+                  indented
+              not_indented
+                    more_indented
+              %%
             """.trimIndent()
         )
     }
@@ -588,22 +546,18 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              sql: %%sql
-                SELECT 1
-                %%
-              
-              pythonWithInternalIndent: %%python
-                    def foo():
-                        return 1
-                %%
-              
-              text: %%
-                plain text
-                  with some
-                    indentation
-                %%
-            }
+            sql: %%sql
+              SELECT 1
+              %%
+            pythonWithInternalIndent: %%python
+                  def foo():
+                      return 1
+              %%
+            text: %%
+              plain text
+                with some
+                  indentation
+              %%
             """.trimIndent()
         )
     }
@@ -621,13 +575,10 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              items: <
-                - first
-                - second
-                - third
-              >
-            }
+            items:
+              - first
+              - second
+              - third
             """.trimIndent()
         )
     }
@@ -638,30 +589,27 @@ class IndentFormatterTest {
             """
             <
             - outer1
-            <
+            - <
             - inner1
             - inner2
             >
             - outer2
-            <
+            - <
             - inner3
             - inner4
             >
             >
             """.trimIndent(),
             """
-            <
-              - outer1
-              <
-                - inner1
-                - inner2
-              >
-              - outer2
-              <
-                - inner3
-                - inner4
-              >
-            >
+            - outer1
+            - 
+              - inner1
+              - inner2
+              .
+            - outer2
+            - 
+              - inner3
+              - inner4
             """.trimIndent()
         )
 
@@ -677,22 +625,23 @@ class IndentFormatterTest {
             - x
             ]
             >
+            - y
             }
             >
             """.trimIndent(),
             """
-            - <
-              - {
-                key:
+            - 
+              - key:
                   - 1
                   - 2
-                  - <
-                    - [
-                      - x
-                    ]
-                  >
-              }
-            >
+                  - 
+                    - 
+                      - 
+                        - x
+                        .
+                      .
+                    .
+                  - y
             """.trimIndent()
         )
     }
@@ -710,13 +659,14 @@ class IndentFormatterTest {
               >
             """.trimIndent(),
             """
-              mixed: <
-                - [1,2]
-                - {x:y}
-                - <
+              mixed:
+                - 
+                  - 1
+                  - 2
+                  .
+                - x: y
+                - 
                   - nested
-                >
-              >
             """.trimIndent()
         )
 
@@ -741,23 +691,21 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              arrays: [
+            arrays:
+              - 
                 - first
                 - second
-              ],
-              angles: <
-                - third
-                - fourth
-              >,
-              mixed: <
-                - [1,2]
-                - {x:y}
-                - <
-                  - nested
-                >
-              >
-            }
+            angles:
+              - third
+              - fourth
+            mixed:
+              - 
+                - 1
+                - 2
+                .
+              - x: y
+              - 
+                - nested
             """.trimIndent()
         )
     }
@@ -772,10 +720,9 @@ class IndentFormatterTest {
             inner: value }}]
             """.trimIndent(),
             """
-            [{
-                key: value },
-              {nested: {
-                  inner: value }}]
+            - key: value
+            - nested:
+                inner: value
             """.trimIndent()
         )
     }
@@ -783,28 +730,28 @@ class IndentFormatterTest {
     @Test
     fun testEmptyNextLine() {
         assertFormatting(
-            "key: {\n" +
-                    "",
-            "key: {\n" +
-                    "  "
+            "key: {\n",
+            """
+            key: {
+            """.trimIndent()
         )
     }
 
     @Test
     fun testNonDefaultIndentSize() {
-        val indentSize = 4
         assertFormatting(
             """
             {
             key1: value1,
-            key2: {
-            key2_1:
-            - x
-            - y
+            nested: {
+            key2_1: [
+            x,
+            y
+            ]
             key2_2: {
             key2_2_1: value2_2_1
             }
-            },
+            }
             key3: [
             value3_1,
             value3_2
@@ -812,23 +759,20 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-                key1: value1,
-                key2: {
-                    key2_1:
-                        - x
-                        - y
-                    key2_2: {
-                        key2_2_1: value2_2_1
-                    }
-                },
-                key3: [
-                    value3_1,
-                    value3_2
-                ]
-            }
+            key1: value1
+            nested:
+                key2_1:
+                    - x
+                    - y
+                key2_2:
+                    key2_2_1: value2_2_1
+                    .
+                .
+            key3:
+                - value3_1
+                - value3_2
             """.trimIndent(),
-            IndentType.Space(indentSize)
+            IndentType.Space(4)
         )
     }
 
@@ -840,14 +784,12 @@ class IndentFormatterTest {
     fun testTabIndentation() {
         assertFormatting(
             """
-            {
-            key: value
-            }
+            key: 
+                subkey: value
             """.trimIndent(),
             """
-            {
-            ${"\t"}key: value
-            }
+            key:
+            ${"\t"}subkey: value
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -856,16 +798,14 @@ class IndentFormatterTest {
             """
             {
             outer: {
-            inner: value
+            inner: { very_inner: value }
             }
             }
             """.trimIndent(),
             """
-            {
-            ${"\t"}outer: {
-            ${"\t"}${"\t"}inner: value
-            ${"\t"}}
-            }
+            outer:
+            ${"\t"}inner:
+            ${"\t"}${"\t"}very_inner: value
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -884,13 +824,11 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-            ${"\t"}code: %%sql
-            ${"\t"}${"\t"}SELECT * 
-            ${"\t"}${"\t"}  FROM table
-            ${"\t"}${"\t"}    WHERE x = 1
-            ${"\t"}${"\t"}%%
-            }
+            code: %%sql
+            ${"\t"}SELECT * 
+            ${"\t"}  FROM table
+            ${"\t"}    WHERE x = 1
+            ${"\t"}%%
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -914,18 +852,12 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-            ${"\t"}list: <
-            ${"\t"}${"\t"}- item1
-            ${"\t"}${"\t"}- {
-            ${"\t"}${"\t"}${"\t"}nested: value
-            ${"\t"}${"\t"}}
-            ${"\t"}${"\t"}- [
-            ${"\t"}${"\t"}${"\t"}1,
-            ${"\t"}${"\t"}${"\t"}2
-            ${"\t"}${"\t"}]
-            ${"\t"}>
-            }
+            list:
+            ${"\t"}- item1
+            ${"\t"}- nested: value
+            ${"\t"}- 
+            ${"\t"}${"\t"}- 1
+            ${"\t"}${"\t"}- 2
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -947,64 +879,9 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              key1:
-                {
-                  key2:
-                    {
-                      key3: 
-                        value
-                    }
-                }
-            }
-            """.trimIndent()
-        )
-        assertFormatting(
-            """
-            {
             key1:
-            "string value"
-            key2:
-            123
-            key3:
-            [1, 2, 3]
-            key4:
-            {
-            nested:
-            value
-            }
-            key5:
-            - item1
-            - item2
-            key6:
-            <
-            - item1
-            - item2
-            >
-            }
-            """.trimIndent(),
-            """
-            {
-              key1:
-                "string value"
               key2:
-                123
-              key3:
-                [1, 2, 3]
-              key4:
-                {
-                  nested:
-                    value
-                }
-              key5:
-                - item1
-                - item2
-              key6:
-                <
-                  - item1
-                  - item2
-                >
-            }
+                key3: value
             """.trimIndent()
         )
     }
@@ -1026,17 +903,12 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              outer: {
-                inner1:
-                  [1, 2]
-                inner2:
-                  {
-                    deepKey:
-                      "deep value"
-                  }
-              }
-            }
+            outer:
+              inner1:
+                - 1
+                - 2
+              inner2:
+                deepKey: "deep value"
             """.trimIndent()
         )
     }
@@ -1054,27 +926,10 @@ class IndentFormatterTest {
             }
             """.trimIndent(),
             """
-            {
-              code:
-                %%sql
-                SELECT *
-                  FROM table
-                %%
-            }
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun testMixedNestColonNesting() {
-        assertFormatting(
-            """
-            key:
-            - { list_nest_key: 42 }
-            """.trimIndent(),
-            """
-            key:
-              - { list_nest_key: 42 }
+            code: %%sql
+              SELECT *
+                FROM table
+              %%
             """.trimIndent()
         )
     }
@@ -1226,5 +1081,85 @@ class IndentFormatterTest {
             "should work with mixed bracket types")
         assertEquals(3, formatter.getCurrentLineIndentLevel("      ]}>"),
             "should work with multiple mixed bracket types")
+    }
+
+    @Test
+    fun testNestedPlainObjects() {
+        assertFormatting(
+            """
+                key:
+                nested_key: 10
+                another_nest_key: 3 .
+                unnested_key: 44
+            """.trimIndent(),
+            """
+              key:
+                nested_key: 10
+                another_nest_key: 3
+                .
+              unnested_key: 44
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testNestedDashLists() {
+        assertFormatting(
+            """
+                - 
+                - "sub-list elem 1"
+                - "sub-list elem 2" .
+                - "outer list elem 1"
+            """.trimIndent(),
+            """
+              - 
+                - "sub-list elem 1"
+                - "sub-list elem 2"
+                .
+              - "outer list elem 1"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testPlainObjectsInPlainLists() {
+        assertFormatting(
+            """
+                - key11: 11
+                key12: 12
+                - key21: 22
+                key22: 22
+                - key31: 31
+                key32: 32
+            """.trimIndent(),
+            """
+            - key11: 11
+              key12: 12
+            
+            - key21: 22
+              key22: 22
+            
+            - key31: 31
+              key32: 32
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testInvalidKsonWithTrailingComments() {
+        assertFormatting(
+            """
+            # error: list with no value
+            -
+
+            # trailing comment
+        """.trimIndent(),
+            """
+            # error: list with no value
+            -
+
+            # trailing comment
+        """.trimIndent()
+        )
     }
 }

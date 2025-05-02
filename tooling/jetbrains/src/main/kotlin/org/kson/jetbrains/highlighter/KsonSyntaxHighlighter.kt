@@ -27,6 +27,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.ANGLE_BRACKET_L -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.ANGLE_BRACKET_R -> getPackedTextAttributes(KSON_ANGLE_BRACKET)
                 TokenType.COLON -> getPackedTextAttributes(KSON_COLON)
+                TokenType.DOT -> getPackedTextAttributes(KSON_END_DOT)
                 TokenType.COMMA -> getPackedTextAttributes(KSON_COMMA)
                 TokenType.COMMENT -> getPackedTextAttributes(KSON_COMMENT)
                 TokenType.EMBED_OPEN_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
@@ -63,6 +64,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         KSON_COLON(KsonBundle.message("kson.syntaxHighlighter.colon")),
         KSON_COMMA(KsonBundle.message("kson.syntaxHighlighter.comma")),
         KSON_COMMENT(KsonBundle.message("kson.syntaxHighlighter.comment")),
+        KSON_END_DOT("kson.syntaxHighlighter.end-dot"),
         KSON_DELIMITER(KsonBundle.message("kson.syntaxHighlighter.delimiter")),
         KSON_EMBED_TAG(KsonBundle.message("kson.syntaxHighlighter.embed_tag")),
         KSON_IDENTIFIER(KsonBundle.message("kson.syntaxHighlighter.identifier")),
@@ -78,6 +80,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
             KSON_SQUARE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
             KSON_ANGLE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
             KSON_COLON to DefaultLanguageHighlighterColors.SEMICOLON,
+            KSON_END_DOT to DefaultLanguageHighlighterColors.LINE_COMMENT,
             KSON_COMMA to DefaultLanguageHighlighterColors.PARENTHESES,
             KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
             KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,

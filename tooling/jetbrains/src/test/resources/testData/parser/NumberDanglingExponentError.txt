@@ -1,5 +1,5 @@
 FILE(0,8)
-  KsonPsiElement([Kson-parsed] OBJECT_INTERNALS)(0,8)
+  KsonPsiElement([Kson-parsed] OBJECT)(0,8)
     KsonPsiElement([Kson-parsed] OBJECT_PROPERTY)(0,8)
       KsonPsiElement([Kson-parsed] KEYWORD)(0,3)
         KsonPsiElement(IElementTokenType(tokenType=IDENTIFIER))(0,3)
