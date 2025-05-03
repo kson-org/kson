@@ -1,6 +1,5 @@
 package org.kson.jetbrains.editor
 
-import com.intellij.application.options.CodeStyle
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate.Result
 import com.intellij.openapi.actionSystem.DataContext
@@ -10,8 +9,8 @@ import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import org.kson.jetbrains.KsonLanguage
-import org.kson.tools.IndentFormatter
-import org.kson.tools.IndentType
+import org.kson.jetbrains.util.getIndentType
+import org.kson.jetbrains.util.getLineIndentLevel
 
 class KsonEnterHandlerDelegate : EnterHandlerDelegate {
     override fun preprocessEnter(
@@ -103,36 +102,19 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         val caretOffset = caretModel.offset
         val lineNumber = document.getLineNumber(caretOffset)
 
-        val prevLine = if (lineNumber > 0) {
-            val lineStart = document.getLineStartOffset(lineNumber - 1)
-            val lineEnd = document.getLineEndOffset(lineNumber - 1)
-            document.getText(TextRange(lineStart, lineEnd))
-        } else {
-            ""
-        }
-
-        val lineStart = document.getLineStartOffset(lineNumber)
-        val lineEnd = document.getLineEndOffset(lineNumber)
-        val currentLine = document.getText(TextRange(lineStart, lineEnd))
-
-        val indentOptions = CodeStyle.getIndentOptions(file)
-        val indentType = if (indentOptions.USE_TAB_CHARACTER) {
-            IndentType.Tab()
-        } else {
-            IndentType.Space(indentOptions.INDENT_SIZE)
-        }
-
-        val indentAdjustment = IndentFormatter(indentType).getCurrentLineIndentLevel(prevLine, currentLine)
-
-        val newIndent = indentType.indentString.repeat(indentAdjustment)
-
         // Delete any leading whitespace on the current line
+        val lineStart = document.getLineStartOffset(lineNumber)
         val lineEndOffset = document.getLineEndOffset(lineNumber)
         val lineText = document.getText(TextRange(lineStart, lineEndOffset))
         val leadingWhitespaceLength = lineText.takeWhile { it.isWhitespace() }.length
         if (leadingWhitespaceLength > 0) {
             document.deleteString(lineStart, lineStart + leadingWhitespaceLength)
         }
+
+        // Caculate the indent level
+        val indentType = file.getIndentType()
+        val indentAdjustment = document.getLineIndentLevel(lineNumber, indentType)
+        val newIndent = indentType.indentString.repeat(indentAdjustment)
 
         // Insert the calculated indent
         document.insertString(lineStart, newIndent)
