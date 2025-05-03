@@ -8,7 +8,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
-import org.kson.jetbrains.util.getLinePosition
 import org.kson.jetbrains.util.hasElementAtOffset
 import org.kson.parser.EmbedDelim
 import org.kson.parser.ParsedElementType.EMBED_BLOCK
@@ -55,7 +54,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
                             return Result.CONTINUE
                         }
 
-                        val openDelimLinePosition = document.getLinePosition(caretOffset - 2)
+                        val openDelimLinePosition = editor.caretModel.logicalPosition.column - 2
                         document.insertString(caretOffset, "\n${" ".repeat(openDelimLinePosition)}$embedDelimChar$embedDelimChar")
                         return Result.CONTINUE
                     }
