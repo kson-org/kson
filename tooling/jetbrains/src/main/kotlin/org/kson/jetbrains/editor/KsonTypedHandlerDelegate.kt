@@ -25,6 +25,11 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
         val document = editor.document
         val text = document.text
 
+        /**
+         * Position before the just-typed character, used for:
+         * 1. Detecting paired delimiters (%% or $$) by matching with the just-typed char
+         */
+        val preTypedPosition = caretOffset - 2
         if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET && caretOffset > 0) {
             /**
              * Handle auto-inserts of [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
@@ -39,7 +44,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
              */
             if (text.length > 1 && caretOffset > 1) {
                 for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                    if (char == embedDelimChar && text[caretOffset - 2] == embedDelimChar) {
+                    if (char == embedDelimChar && text[preTypedPosition] == embedDelimChar) {
                         // let's be very conservative with this insert: if we are not at the end of a line,
                         //     or followed by a comma (which is end of line-ish), don't do it
                         if (text.length != caretOffset
@@ -50,7 +55,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 
                         // ensure we're not contained in an element where embed block delimiter
                         // auto-insertions would be inappropriate
-                        if (file.hasElementAtOffset(caretOffset - 2, embedInsertProhibitedElems)) {
+                        if (file.hasElementAtOffset(preTypedPosition, embedInsertProhibitedElems)) {
                             return Result.CONTINUE
                         }
 
