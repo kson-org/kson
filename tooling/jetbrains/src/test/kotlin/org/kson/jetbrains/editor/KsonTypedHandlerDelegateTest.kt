@@ -175,6 +175,43 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 )
             }
 
+            doCharTest(
+                    """
+                    |key1: $halfDelim<caret>
+                    """.trimMargin(),
+                halfDelim,
+                    """
+                    |key1: $halfDelim$halfDelim<caret>
+                    |  $halfDelim$halfDelim
+                    """.trimMargin()
+            )
+
+            doCharTest(
+                    """
+                    |key1:
+                    |  key2: $halfDelim<caret>
+                    """.trimMargin(),
+                halfDelim,
+                    """
+                    |key1:
+                    |  key2: $halfDelim$halfDelim<caret>
+                    |    $halfDelim$halfDelim
+                    """.trimMargin()
+            )
+
+            doCharTest(
+                    """
+                    |key1: $halfDelim<caret>
+                    |key2: value2
+                    """.trimMargin(),
+                    halfDelim,
+                    """
+                    |key1: $halfDelim$halfDelim<caret>
+                    |  $halfDelim$halfDelim
+                    |key2: value2
+                    """.trimMargin()
+                )
+
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
                 doCharTest(
                     "$halfDelim<caret>",
