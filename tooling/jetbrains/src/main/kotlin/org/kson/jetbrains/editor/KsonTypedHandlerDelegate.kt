@@ -28,8 +28,17 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
         /**
          * Position before the just-typed character, used for:
          * 1. Detecting paired delimiters (%% or $$) by matching with the just-typed char
+         * 2. Checking if we're in a comment (since the PSI tree hasn't updated yet for the new character we check
+         *      whether the previous character is a comment)
          */
         val preTypedPosition = caretOffset - 2
+
+        // ensure we're not contained in an element where we NEVER want to
+        // auto-complete (e.g. COMMENTS).
+        if (file.hasElementAtOffset(preTypedPosition, autoCompleteProhibitedElems)) {
+            return Result.CONTINUE
+        }
+
         if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET && caretOffset > 0) {
             /**
              * Handle auto-inserts of [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
@@ -75,3 +84,8 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
  * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] auto-completes
  */
 private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT), elem(STRING))
+
+/**
+ * The [IElementType]s within which we NEVER want to perform auto-completes
+ */
+private val autoCompleteProhibitedElems = setOf(elem(COMMENT))
