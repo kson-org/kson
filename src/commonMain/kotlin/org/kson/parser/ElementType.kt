@@ -1,5 +1,7 @@
 package org.kson.parser
 
+import org.kson.parser.delimiters.EmbedDelim
+
 /**
  * [ElementType] unifies the two different types of elements marked by [AstMarker.done]:
  * [TokenType] and [ParsedElementType]

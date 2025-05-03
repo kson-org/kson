@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.ast.*
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
+import org.kson.parser.delimiters.EmbedDelim
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
