@@ -566,18 +566,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             !sourceScanner.eof()
             && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
         ) {
-            if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == '\\') {
-                // if this is all slashes until "delimChar", we're looking at an escaped embed delimiter
-                sourceScanner.advance()
-                while (sourceScanner.peek() == '\\') {
-                    sourceScanner.advance()
-                }
-                if (sourceScanner.peek() == delimChar) {
-                    sourceScanner.advance()
-                }
-            } else {
-                sourceScanner.advance()
-            }
+            sourceScanner.advance()
         }
 
         val embedBlockLexeme = sourceScanner.extractLexeme()
