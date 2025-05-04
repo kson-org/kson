@@ -233,7 +233,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             quoteStringToStringNode(keywordContentMark)
                         }
                     }
-                    LIST -> {
+                    DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
                             unsafeAstCreate<ListElementNode>(listElementMarker) { ListElementNodeError(it) }
                         }
