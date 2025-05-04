@@ -1,5 +1,5 @@
 FILE(0,28)
-  KsonPsiElement([Kson-parsed] LIST)(0,28)
+  KsonPsiElement([Kson-parsed] BRACKET_LIST)(0,28)
     PsiElement(IElementTokenType(tokenType=SQUARE_BRACKET_L))('[')(0,1)
     PsiErrorElement:Redundant comma found. A comma must delimit a value, one comma per value(1,5)
       PsiElement(IElementTokenType(tokenType=COMMA))(',')(1,2)
