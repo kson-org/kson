@@ -7,7 +7,7 @@ import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
  *
  * Embed blocks are designed to allow other tools to confidently extract their contents as simply as possible,
  * so a naive regex looking for the closing delimiter of either %% or $$ will always be correct.  But of course,
- * we also need to accomodate escaping embedded delimiters, so to accomplish both these goals, escaping an
+ * we also need to accommodate escaping embedded delimiters, so to accomplish both these goals, escaping an
  * embed delimiter within an embed is slightly novel/intricate.  So (explained in terms of `%%`, `$$` naturally works
  * the same), here's how they work:
  *
