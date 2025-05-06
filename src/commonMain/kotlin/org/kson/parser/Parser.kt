@@ -525,11 +525,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return false
         }
 
+        val stringMark = builder.mark()
         val possiblyUnclosedString = builder.mark()
         // consume our open quote
         builder.advanceLexer()
-
-        val stringMark = builder.mark()
 
         while (builder.getTokenType() != STRING_CLOSE_QUOTE && !builder.eof()) {
             when (builder.getTokenType()) {
@@ -567,18 +566,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
         }
 
-        stringMark.done(STRING)
-
         if (builder.eof()) {
             possiblyUnclosedString.error(STRING_NO_CLOSE.create())
-            return true
         } else {
             // string is closed, don't need this marker
             possiblyUnclosedString.drop()
             // consume our close quote
             builder.advanceLexer()
-            return true
         }
+
+        stringMark.done(QUOTED_STRING)
+        return true
     }
 
     private fun isValidStringEscape(stringEscapeText: String): Boolean {

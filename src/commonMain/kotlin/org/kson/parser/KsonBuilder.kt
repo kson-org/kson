@@ -4,6 +4,7 @@ import org.kson.ast.*
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.delimiters.StringQuote
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
@@ -174,6 +175,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     EMBED_CLOSE_DELIM,
                     EMBED_TAG,
                     EMBED_CONTENT,
+                    STRING,
                     ILLEGAL_CHAR,
                     WHITESPACE -> {
                         throw RuntimeException("These tokens do not generate their own AST nodes")
@@ -189,9 +191,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     }
                     NUMBER -> {
                         NumberNode(marker.getValue())
-                    }
-                    STRING -> {
-                        StringNode(marker.getValue())
                     }
                     TRUE -> {
                         TrueNode()
@@ -231,7 +230,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         if (keywordContentMark.element == IDENTIFIER) {
                             IdentifierNode(keywordContentMark.getValue())
                         } else {
-                            StringNode(keywordContentMark.getValue())
+                            quoteStringToStringNode(keywordContentMark)
                         }
                     }
                     LIST -> {
@@ -281,6 +280,9 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             comments
                         )
                     }
+                    QUOTED_STRING -> {
+                        quoteStringToStringNode(marker)
+                    }
                     ROOT -> {
                         val comments = marker.getComments()
 
@@ -320,6 +322,22 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 )
             }
         }
+    }
+
+    /**
+     *  Note that we do not use [unsafeAstCreate] for this transformation because both places in this [KsonBuilder]
+     *  are confident they have an error-free [QUOTED_STRING] that can be transformed into a [StringNode]
+     */
+    private fun quoteStringToStringNode(marker: KsonMarker): StringNode {
+        /**
+         * [Parser.string] ensures that a [QUOTED_STRING] contains its [STRING_OPEN_QUOTE]
+         * and [STRING_CLOSE_QUOTE]
+         */
+        val quotedString = marker.getValue()
+        val stringDelim = quotedString.first()
+        val stringContent = quotedString.substring(1, quotedString.length - 1)
+
+        return StringNode(stringContent, StringQuote.fromChar(stringDelim))
     }
 
     /**

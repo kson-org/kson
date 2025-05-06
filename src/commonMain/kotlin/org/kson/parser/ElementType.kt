@@ -128,5 +128,6 @@ enum class ParsedElementType : ElementType {
     OBJECT_DEFINITION,
     OBJECT,
     OBJECT_PROPERTY,
+    QUOTED_STRING,
     ROOT
 }

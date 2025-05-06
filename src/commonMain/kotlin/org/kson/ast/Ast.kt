@@ -7,6 +7,9 @@ import org.kson.parser.delimiters.EmbedDelim
 import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.tools.IndentType
+import org.kson.parser.delimiters.StringQuote
+import org.kson.parser.delimiters.StringQuote.SingleQuote
+import org.kson.parser.delimiters.StringQuote.DoubleQuote
 
 interface AstNode {
     /**
@@ -340,15 +343,50 @@ abstract class KeywordNodeImpl : KeywordNode, ValueNodeImpl() {
     abstract val stringContent: String
 }
 
-open class StringNode(override val stringContent: String) : KeywordNodeImpl() {
+/**
+ * Note: [ksonEscapedStringContent] is expected to be the exact content of a [stringQuote]-delimited [Kson] string,
+ *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
+ *   except that [Kson] allows raw whitespace to be embedded in strings
+ */
+open class StringNode(private val ksonEscapedStringContent: String, private val stringQuote: StringQuote) : KeywordNodeImpl() {
+
+    /**
+     * An "unquoted" Kson string: i.e. a valid Kson string with all escapes intact except for quote escapes.
+     * This string must be [SingleQuote]'ed or [DoubleQuote]'ed and then quote-escaped with [StringQuote.escapeQuotes]
+     * to obtain a fully valid KsonString
+     */
+    private val unquotedString: String by lazy {
+        stringQuote.unescapeQuotes(ksonEscapedStringContent)
+    }
+
+    override val stringContent: String by lazy {
+        unquotedString
+    }
+
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
-                indent.firstLineIndent() + "\"" + stringContent + "\""
+            is Kson -> {
+                indent.firstLineIndent() + run {
+                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
+                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
+
+                    val chosenDelimiter = if (singleQuoteCount < doubleQuoteCount) {
+                        SingleQuote
+                    } else {
+                        DoubleQuote
+                    }
+
+                    val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)
+                    "${chosenDelimiter}$escapedContent${chosenDelimiter}"
+                }
+            }
+
+            is Yaml -> {
+                indent.firstLineIndent() + "\"" + DoubleQuote.escapeQuotes(unquotedString) + "\""
             }
 
             is Json -> {
-                indent.firstLineIndent() + "\"${renderForJsonString(stringContent)}\""
+                indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(unquotedString))}\""
             }
         }
     }

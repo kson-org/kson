@@ -1,5 +1,5 @@
 FILE(0,9)
-  PsiErrorElement:Unclosed string(0,9)
-    PsiElement(IElementTokenType(tokenType=STRING_OPEN_QUOTE))('"')(0,1)
-    KsonPsiElement(IElementTokenType(tokenType=STRING))(1,9)
+  KsonPsiElement([Kson-parsed] QUOTED_STRING)(0,9)
+    PsiErrorElement:Unclosed string(0,9)
+      PsiElement(IElementTokenType(tokenType=STRING_OPEN_QUOTE))('"')(0,1)
       PsiElement(IElementTokenType(tokenType=STRING))('unclosed')(1,9)
