@@ -366,16 +366,28 @@ open class StringNode(private val ksonEscapedStringContent: String, private val 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                indent.firstLineIndent() + run {
-                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
-                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
-
-                    // prefer single-quotes unless double-quotes would require less escaping
-                    val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
-                        DoubleQuote
+                // Check if we can use this string as a bare identifier
+                val isSimple = unquotedString.isNotBlank() && unquotedString.withIndex().all { (index, letter) ->
+                    if (index == 0) {
+                        letter.isLetter() || letter == '_'
                     } else {
-                        SingleQuote
+                        letter.isLetterOrDigit() || letter == '_'
                     }
+                }
+
+                indent.firstLineIndent() +
+                    if (isSimple) {
+                        unquotedString
+                    } else {
+                        val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
+                        val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
+
+                        // prefer single-quotes unless double-quotes would require less escaping
+                        val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
+                            DoubleQuote
+                        } else {
+                            SingleQuote
+                        }
 
                     val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)
                     "${chosenDelimiter}$escapedContent${chosenDelimiter}"

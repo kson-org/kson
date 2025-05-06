@@ -15,7 +15,7 @@ class KsonTestComment : KsonTest() {
         """,
             """
             # this is a comment
-            'string'
+            string
         """.trimIndent(),
             """
             # this is a comment
