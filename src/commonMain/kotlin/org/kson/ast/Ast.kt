@@ -370,10 +370,11 @@ open class StringNode(private val ksonEscapedStringContent: String, private val 
                     val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
                     val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
 
-                    val chosenDelimiter = if (singleQuoteCount < doubleQuoteCount) {
-                        SingleQuote
-                    } else {
+                    // prefer single-quotes unless double-quotes would require less escaping
+                    val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
                         DoubleQuote
+                    } else {
+                        SingleQuote
                     }
 
                     val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)

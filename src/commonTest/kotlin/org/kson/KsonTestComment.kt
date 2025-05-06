@@ -15,7 +15,7 @@ class KsonTestComment : KsonTest() {
         """,
             """
             # this is a comment
-            "string"
+            'string'
         """.trimIndent(),
             """
             # this is a comment
@@ -192,7 +192,7 @@ class KsonTestComment : KsonTest() {
             """,
             """
                 # comment on a string
-                "a string"
+                'a string'
             """.trimIndent(),
             """
                 # comment on a string
@@ -256,7 +256,7 @@ class KsonTestComment : KsonTest() {
             """,
             """
                 # trailing comment
-                "a string"
+                'a string'
             """.trimIndent(),
             """
                 # trailing comment

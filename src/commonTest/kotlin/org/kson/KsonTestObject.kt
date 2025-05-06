@@ -19,7 +19,7 @@ class KsonTestObject : KsonTest() {
     fun testObjectSource() {
         val expectKsonRootObjectAst = """
               key: val
-              "string key": 66.3
+              'string key': 66.3
               hello: "y'all"
             """.trimIndent()
 
@@ -41,7 +41,7 @@ class KsonTestObject : KsonTest() {
             """
                 {
                     key: val
-                    "string key": 66.3
+                    'string key': 66.3
                     hello: "y'all"
                 }
             """,
@@ -73,10 +73,10 @@ class KsonTestObject : KsonTest() {
                 "
             """.trimIndent(),
             """
-                first: "value"
-                second: "this is a string with a
+                first: 'value'
+                second: 'this is a string with a
                 raw newline in it and at its end
-                "
+                '
             """.trimIndent(),
             """
                 first: "value"
@@ -120,7 +120,7 @@ class KsonTestObject : KsonTest() {
     fun testObjectSourceOptionalComma() {
         val expectKsonForRootObjectAst = """
               key: val
-              "string key": 66.3
+              'string key': 66.3
               hello: "y'all"
             """.trimIndent()
 
@@ -128,7 +128,7 @@ class KsonTestObject : KsonTest() {
             """
                 {
                     key: val
-                    "string key": 66.3,
+                    'string key': 66.3,
                     hello: "y'all",
                 }
             """,
