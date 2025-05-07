@@ -165,4 +165,25 @@ class KsonTestEmbedBlock : KsonTest() {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testEmbedBlockEndingInSlash() {
+        assertParsesTo(
+            """
+                %%
+                %\%%
+            """.trimIndent(),
+            """
+                %%
+                %\%%
+            """.trimIndent(),
+            """
+                |
+                  %\
+            """.trimIndent(),
+            """
+                "%\\"
+            """.trimIndent()
+        )
+    }
 } 
