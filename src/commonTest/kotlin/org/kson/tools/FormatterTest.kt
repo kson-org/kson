@@ -908,7 +908,7 @@ class FormatterTest {
                 - 1
                 - 2
               inner2:
-                deepKey: "deep value"
+                deepKey: 'deep value'
             """.trimIndent()
         )
     }
@@ -1108,15 +1108,15 @@ class FormatterTest {
             """
                 - 
                 - "sub-list elem 1"
-                - "sub-list elem 2" .
+                - 'sub-list elem 2' .
                 - "outer list elem 1"
             """.trimIndent(),
             """
               - 
-                - "sub-list elem 1"
-                - "sub-list elem 2"
+                - 'sub-list elem 1'
+                - 'sub-list elem 2'
                 .
-              - "outer list elem 1"
+              - 'outer list elem 1'
             """.trimIndent()
         )
     }

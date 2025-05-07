@@ -22,7 +22,7 @@ class KsonTestList : KsonTest() {
                 ["a string"]
             """,
             """
-                - "a string"
+                - 'a string'
             """.trimIndent(),
             """
                 - "a string"
@@ -122,7 +122,7 @@ class KsonTestList : KsonTest() {
                 - "a string"
             """,
             """
-                - "a string"
+                - 'a string'
             """.trimIndent(),
             """
                 - "a string"
@@ -413,10 +413,10 @@ class KsonTestList : KsonTest() {
             """.trimIndent(),
             """
                 - 
-                  - "sub-list elem 1"
-                  - "sub-list elem 2"
+                  - 'sub-list elem 1'
+                  - 'sub-list elem 2'
                   .
-                - "outer list elem 1"
+                - 'outer list elem 1'
             """.trimIndent(),
             """
                 - 

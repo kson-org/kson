@@ -9,7 +9,7 @@ class KsonTestString : KsonTest() {
             """
                 "This is a string"
             """,
-            "\"This is a string\"",
+            "'This is a string'",
             "\"This is a string\"",
             "\"This is a string\""
         )
@@ -17,7 +17,7 @@ class KsonTestString : KsonTest() {
 
     @Test
     fun testEmptyString() {
-        assertParsesTo("''", "\"\"", "\"\"", "\"\"")
+        assertParsesTo("''", "''", "\"\"", "\"\"")
     }
 
     @Test
@@ -28,8 +28,8 @@ class KsonTestString : KsonTest() {
             |${'\t'}tabbed-indented second line"
             """.trimMargin(),
             """
-            |"This is a string with raw, unescaped whitespace ${'\t'}
-            |${'\t'}tabbed-indented second line"
+            |'This is a string with raw, unescaped whitespace ${'\t'}
+            |${'\t'}tabbed-indented second line'
             """.trimMargin(),
             """
             |"This is a string with raw, unescaped whitespace ${'\t'}
@@ -100,7 +100,7 @@ class KsonTestString : KsonTest() {
                 "string 'with' \"quotes\""
             """.trimIndent(),
             """
-                "string 'with' \"quotes\""
+                'string \'with\' "quotes"'
             """.trimIndent(),
             """
                 "string 'with' \"quotes\""
@@ -154,7 +154,7 @@ class KsonTestString : KsonTest() {
                 "\\\\n"
             """.trimIndent(),
             """
-                "\\\\n"
+                '\\\\n'
             """.trimIndent(),
             """
                 "\\\\n"
@@ -170,7 +170,7 @@ class KsonTestString : KsonTest() {
                 "\\"
             """.trimIndent(),
             """
-                "\\"
+                '\\'
             """.trimIndent(),
             """
                 "\\"
