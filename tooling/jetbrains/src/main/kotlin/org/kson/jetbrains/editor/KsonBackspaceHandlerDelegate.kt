@@ -11,7 +11,7 @@ import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.hasElementAtOffset
-import org.kson.parser.EmbedDelim
+import org.kson.parser.delimiters.EmbedDelim
 import org.kson.parser.TokenType.*
 
 class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {

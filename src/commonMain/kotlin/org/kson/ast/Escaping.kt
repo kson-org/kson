@@ -1,5 +1,8 @@
 package org.kson.ast
 
+import org.kson.Kson
+import org.kson.parser.delimiters.StringQuote
+
 /**
  * Render the given string for inclusion in a JSON string literal.
  * This handles JSON-required escape sequences according to the [JSON RFC 8259 specification](https://datatracker.ietf.org/doc/html/rfc8259)
@@ -36,6 +39,30 @@ fun renderForJsonString(content: String): String {
         i++
     }
     
+    return sb.toString()
+}
+
+/**
+ * [Kson] strings allow raw whitespace, but otherwise escapes are identical to Json (modulo which [StringQuote] the
+ * Kson string uses), so this function can help prepare an escaped Kson string for rendering as a Json string
+ *
+ * @param ksonEscapedString a string escaped according to Kson string escaping rules
+ * @return a string escaped according to Json's rules (modulo the [StringQuote] of the [ksonEscapedString])
+ */
+fun escapeRawWhitespace(ksonEscapedString: String): String {
+    val sb = StringBuilder(ksonEscapedString.length + 2)
+
+    var i = 0
+    while (i < ksonEscapedString.length) {
+        when (val char = ksonEscapedString[i]) {
+            '\n' -> sb.append("\\n")
+            '\r' -> sb.append("\\r")
+            '\t' -> sb.append("\\t")
+            else -> sb.append(char)
+        }
+        i++
+    }
+
     return sb.toString()
 }
 
