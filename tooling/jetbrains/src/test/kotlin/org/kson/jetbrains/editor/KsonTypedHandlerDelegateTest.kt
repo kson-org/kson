@@ -15,6 +15,33 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 '<',
                 "<<caret>>"
             )
+
+            // should not auto-insert in comment block
+            doCharTest(
+                "#    <caret>",
+                '<',
+                "#    <<caret>"
+            )
+
+            // should not auto-insert in comment block
+            doCharTest(
+                """
+                    # This is a commented line
+                    <caret>
+                """.trimIndent(),
+                '<',
+                """
+                    # This is a commented line
+                    <<caret>>
+                """.trimIndent(),
+            )
+
+            // should not auto-insert in comment block
+            doCharTest(
+                "#<caret>",
+                '<',
+                "#<<caret>"
+            )
         }
 
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
@@ -133,6 +160,17 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                     $altFullDelim
                         $fullDelim<caret>
                     $altFullDelim
+                    """.trimIndent()
+                )
+
+                // should not auto-insert in commented line
+                doCharTest(
+                    """
+                    # $halfDelim<caret>
+                    """.trimIndent(),
+                    halfDelim,
+                    """
+                    # $fullDelim<caret>
                     """.trimIndent()
                 )
             }
