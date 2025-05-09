@@ -2,6 +2,7 @@ package org.kson.jetbrains.editor
 
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
+import org.kson.jetbrains.file.KsonFileType
 import org.kson.parser.delimiters.EmbedDelim
 
 class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
@@ -113,11 +114,11 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 // should only delete when closing embed delimiter has correct indent
                 doIdeActionTest(
                     """
-                    |  my_embed: $fullDelim<caret>
-                    |            $fullDelim
+                    |my_embed: $fullDelim<caret>
+                    |  $fullDelim
                     """.trimMargin(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "  my_embed: $halfDelim<caret>"
+                    "my_embed: $halfDelim<caret>"
                 )
 
                 // should not delete if closing embed delimiter does not have the correct indent (i.e. does not look auto-inserted)
@@ -129,7 +130,6 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
                     my_embed: $halfDelim<caret>
-                      $fullDelim
                     """.trimIndent()
                 )
 
@@ -287,5 +287,78 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 "x<caret>z"
             )
         }
+    }
+
+    /**
+     * Integration test that verifies both auto-insertion and deletion behavior work together correctly
+     */
+    fun testAutoInsertAndDeleteIntegration() {
+        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+            doTypingAndBackspaceTest(
+                "<caret>",
+                "<",
+                "<<caret>>",
+                "<caret>"
+            )
+
+            doTypingAndBackspaceTest(
+                "<caret>",
+                "%%",
+                """
+                %%<caret>
+                %%
+                """.trimIndent(),
+                "%<caret>"
+            )
+
+            doTypingAndBackspaceTest(
+                "key: <caret>",
+                "$$",
+                """
+                key: $$<caret>
+                  $$
+                """.trimIndent(),
+                "key: $<caret>"
+            )
+
+            doTypingAndBackspaceTest(
+                "key: <caret>",
+                "%%",
+                """
+                key: %%<caret>
+                  %%
+                """.trimIndent(),
+                "key: %<caret>"
+            )
+        }
+    }
+
+    private fun doTypingAndBackspaceTest(
+        initialText: String,
+        charsToType: String,
+        expectedAfterTyping: String,
+        expectedAfterBackspace: String
+    ) {
+        // First verify the auto-insertion
+        doTypingTest(initialText, charsToType, expectedAfterTyping)
+
+        // Then verify the deletion
+        doIdeActionTest(
+            expectedAfterTyping,
+            IdeActions.ACTION_EDITOR_BACKSPACE,
+            expectedAfterBackspace
+        )
+    }
+
+    private fun doTypingTest(
+        initialText: String,
+        charsToType: String,
+        expectedText: String
+    ) {
+        myFixture.configureByText(KsonFileType, initialText)
+        for (char in charsToType) {
+            myFixture.type(char)
+        }
+        myFixture.checkResult(expectedText)
     }
 }

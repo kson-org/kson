@@ -10,6 +10,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
+import org.kson.jetbrains.util.getIndentType
+import org.kson.jetbrains.util.getLineIndentLevel
 import org.kson.jetbrains.util.hasElementAtOffset
 import org.kson.parser.delimiters.EmbedDelim
 import org.kson.parser.TokenType.*
@@ -69,13 +71,16 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
                         val nextLineEndOffset = document.getLineEndOffset(nextLine)
                         val nextLineText = document.getText(TextRange(nextLineStartOffset, nextLineEndOffset))
 
-                        val openDelimLinePosition = editor.caretModel.logicalPosition.column - 2
+                        // Calculate the indent level of the inserted new line
+                        val indentType = file.getIndentType()
+                        val indentLevel = document.getLineIndentLevel(nextLine, indentType)
+                        val newIndent = indentType.indentString.repeat(indentLevel)
 
                         /**
                          * If the next line looks like an embed delimiter inserted by [KsonTypedHandlerDelegate],
                          * clean it up along with the current backspace deletion
                          */
-                        val toBeDeletedIfFound = "${" ".repeat(openDelimLinePosition)}$embedDelimChar$embedDelimChar"
+                        val toBeDeletedIfFound = "${newIndent}$embedDelimChar$embedDelimChar"
                         val toBeDeletedIfFoundWithComma = "$toBeDeletedIfFound,"
                         if (nextLineText == toBeDeletedIfFound
                             || nextLineText == toBeDeletedIfFoundWithComma) {

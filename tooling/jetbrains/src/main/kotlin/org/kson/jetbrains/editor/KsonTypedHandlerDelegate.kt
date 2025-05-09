@@ -8,6 +8,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
+import org.kson.jetbrains.util.getIndentType
+import org.kson.jetbrains.util.getLineIndentLevel
 import org.kson.jetbrains.util.hasElementAtOffset
 import org.kson.parser.delimiters.EmbedDelim
 import org.kson.parser.ParsedElementType.EMBED_BLOCK
@@ -68,8 +70,18 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
                             return Result.CONTINUE
                         }
 
-                        val openDelimLinePosition = editor.caretModel.logicalPosition.column - 2
-                        document.insertString(caretOffset, "\n${" ".repeat(openDelimLinePosition)}$embedDelimChar$embedDelimChar")
+                        // Insert the new line on which we auto-complete the [EmbedDelim]
+                        document.insertString(caretOffset, "\n")
+
+                        // Calculate the indent level of the inserted new line
+                        val newLineCaret = caretOffset + 1
+                        val lineNumber = document.getLineNumber(newLineCaret)
+                        val indentType = file.getIndentType()
+                        val indentLevel = document.getLineIndentLevel(lineNumber, indentType)
+                        val newIndent = indentType.indentString.repeat(indentLevel)
+
+                        // Insert the embed delimiters with the calculated indent
+                        document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
                         return Result.CONTINUE
                     }
                 }
