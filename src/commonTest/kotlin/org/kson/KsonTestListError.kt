@@ -81,12 +81,12 @@ class KsonTestListError : KsonTestError() {
         assertParserRejectsSource("""
             <
               - "sub-list elem 1"
-              - "sub-list elem 2" .
-              - "sub-list elem 3" .
+              - "sub-list elem 2" =
+              - "sub-list elem 3" =
               - "sub-list elem 4"
             >
             """.trimIndent(),
-            listOf(IGNORED_DASH_LIST_END_DOT, IGNORED_DASH_LIST_END_DOT)
+            listOf(IGNORED_DASH_LIST_END_DASH, IGNORED_DASH_LIST_END_DASH)
         )
     }
 }

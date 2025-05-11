@@ -327,7 +327,7 @@ class KsonTestList : KsonTest() {
                     - a1
                     - b1
                     - c1
-                    .
+                    =
                   - c
             """.trimIndent(),
             """
@@ -371,7 +371,7 @@ class KsonTestList : KsonTest() {
             - true
             - 
               - sublist
-              .
+              =
             - 
               - another
               - sublist
@@ -408,14 +408,14 @@ class KsonTestList : KsonTest() {
                 - 
                   - "sub-list elem 1"
                   - "sub-list elem 2"
-                  .
+                  =
                 - "outer list elem 1"
             """.trimIndent(),
             """
                 - 
                   - 'sub-list elem 1'
                   - 'sub-list elem 2'
-                  .
+                  =
                 - 'outer list elem 1'
             """.trimIndent(),
             """

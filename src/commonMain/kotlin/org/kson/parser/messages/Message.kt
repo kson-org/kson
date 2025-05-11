@@ -140,14 +140,14 @@ enum class MessageType {
                     "End-dots only effect non-delimited objects"
         }
     },
-    IGNORED_DASH_LIST_END_DOT {
+    IGNORED_DASH_LIST_END_DASH {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This end-dot is ignored because this list is `<>`-delimited. " +
-                    "End-dots only effect non-delimited dashed lists"
+            return "This end-dash is ignored because this list is `<>`-delimited. " +
+                    "End-dashes only effect non-delimited dashed lists"
         }
     },
     STRING_NO_CLOSE {

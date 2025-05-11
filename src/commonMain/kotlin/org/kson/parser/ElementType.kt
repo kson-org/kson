@@ -32,6 +32,8 @@ enum class TokenType : ElementType {
     COLON,
     // .
     DOT,
+    // =
+    END_DASH,
     // ,
     COMMA,
     // lines starting with `#`

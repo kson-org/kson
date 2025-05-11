@@ -284,7 +284,7 @@ class ListNode(
                      * thing in this document is a [ListElementNode] that does not belong to this list
                      */
                     if (nextNode is ListElementNode) {
-                        "$outputList\n${indent.bodyLinesIndent()}."
+                        "$outputList\n${indent.bodyLinesIndent()}="
                     } else {
                         outputList
                     }
