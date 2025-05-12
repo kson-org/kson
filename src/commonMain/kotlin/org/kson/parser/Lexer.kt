@@ -283,6 +283,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             '>' -> addLiteralToken(ANGLE_BRACKET_R)
             ':' -> addLiteralToken(COLON)
             '.' -> addLiteralToken(DOT)
+            '=' -> addLiteralToken(END_DASH)
             ',' -> addLiteralToken(COMMA)
             '"', '\'' -> {
                 addLiteralToken(STRING_OPEN_QUOTE)

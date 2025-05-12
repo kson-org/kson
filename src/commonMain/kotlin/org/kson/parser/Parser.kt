@@ -18,7 +18,7 @@ import org.kson.parser.messages.MessageType.*
  * objectInternals -> "," ( keyword ksonValue ","? )+
  *                  | ( ","? keyword ksonValue )*
  *                  | ( keyword ksonValue ","? )*
- * dashList -> dashListInternals "."+
+ * dashList -> dashListInternals "="+
  * dashListInternals -> ( LIST_DASH ksonValue )*
  * delimitedValue -> delimitedObject
  *                 | delimitedDashList
@@ -181,7 +181,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * dashList -> dashListInternals "."+
+     * dashList -> dashListInternals "="+
      * dashListInternals -> ( LIST_DASH ksonValue )*
      *
      * Note: as in [plainObject], we combine these two grammar rules here so it's clean/easy to implement
@@ -204,14 +204,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                     listElementMark.error(DANGLING_LIST_DASH.create())
                 }
 
-                if (builder.getTokenType() == DOT) {
-                    val dot = builder.mark()
+                if (builder.getTokenType() == END_DASH) {
+                    val endDashMark = builder.mark()
                     builder.advanceLexer()
                     if (!isDelimited) {
-                        dot.drop()
+                        endDashMark.drop()
                         break
                     } else {
-                        dot.error(IGNORED_DASH_LIST_END_DOT.create())
+                        endDashMark.error(IGNORED_DASH_LIST_END_DASH.create())
                     }
                 }
             } while (builder.getTokenType() == LIST_DASH)

@@ -9,9 +9,16 @@ class FormatterTest {
         expected: String,
         indentType: IndentType = IndentType.Space(2)
     ) {
+        val formattedKson = format(source, KsonFormatterConfig(indentType))
         assertEquals(
             expected,
-            format(source, KsonFormatterConfig(indentType))
+            formattedKson
+        )
+
+        assertEquals(
+            expected,
+            format(formattedKson, KsonFormatterConfig(indentType)),
+            "formatting should be idempotent, but this reformat changed the result"
         )
     }
 
@@ -151,9 +158,9 @@ class FormatterTest {
             - 
               - 
                 - 3
-                .
+                =
               - 2
-              .
+              =
             - 1
             """.trimIndent()
         )
@@ -605,7 +612,7 @@ class FormatterTest {
             - 
               - inner1
               - inner2
-              .
+              =
             - outer2
             - 
               - inner3
@@ -638,9 +645,9 @@ class FormatterTest {
                     - 
                       - 
                         - x
-                        .
-                      .
-                    .
+                        =
+                      =
+                    =
                   - y
             """.trimIndent()
         )
@@ -663,7 +670,7 @@ class FormatterTest {
                 - 
                   - 1
                   - 2
-                  .
+                  =
                 - x: y
                 - 
                   - nested
@@ -702,10 +709,50 @@ class FormatterTest {
               - 
                 - 1
                 - 2
-                .
+                =
               - x: y
               - 
                 - nested
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testFormattingMixedUnnesting(){
+        assertFormatting(
+            """
+            outer_key1: {
+              inner_key: [1, 2, 3]
+            }
+            outer_key2: value
+            """.trimIndent(),
+            """
+            outer_key1:
+              inner_key:
+                - 1
+                - 2
+                - 3
+              .
+            outer_key2: value
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+             [
+              [
+                {
+                  "inner_key": "x"
+                }
+              ],
+              "outer_list_elem"
+            ]
+            """.trimIndent(),
+            """
+            - 
+              - inner_key: x
+              =
+            - outer_list_elem
             """.trimIndent()
         )
     }
@@ -1108,14 +1155,14 @@ class FormatterTest {
             """
                 - 
                 - "sub-list elem 1"
-                - 'sub-list elem 2' .
+                - "sub-list elem 2" =
                 - "outer list elem 1"
             """.trimIndent(),
             """
               - 
                 - 'sub-list elem 1'
                 - 'sub-list elem 2'
-                .
+                =
               - 'outer list elem 1'
             """.trimIndent()
         )

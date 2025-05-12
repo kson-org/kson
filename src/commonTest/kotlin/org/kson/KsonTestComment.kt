@@ -420,19 +420,19 @@ class KsonTestComment : KsonTest() {
                 # a nested list element
                 - 2.2
                 - 3.2
-                .
+                =
               - 
                 # a nested dash-delimited list
                 - 
                   - 10.2
-                  .
+                  =
                 # a further nested braced list
                 # trailing comment on nested list
                 - 
                   - 4.2
                   # a further nested braced list element
                   - 5.2
-                  .
+                  =
                 - 
                   - 9.2
                   - 8.2
