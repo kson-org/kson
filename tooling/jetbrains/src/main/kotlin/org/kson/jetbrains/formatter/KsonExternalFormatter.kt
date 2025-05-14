@@ -15,7 +15,7 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
         return file is KsonPsiFile
     }
 
-    override fun getFeatures(): Set<Feature> = setOf(Feature.FORMAT_FRAGMENTS)
+    override fun getFeatures(): Set<Feature> = emptySet()
     override fun getNotificationGroupId(): String = KsonFileType.name
     override fun getName(): String = KsonFileType.name
 
