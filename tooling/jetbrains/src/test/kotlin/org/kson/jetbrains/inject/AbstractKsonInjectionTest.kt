@@ -41,7 +41,7 @@ abstract class AbstractKsonInjectionTest : BasePlatformTestCase() {
         )
     }
 
-    protected fun assertTypingInFragmentEditorEscapes(
+    protected fun assertTypingInFragmentEditorMatches(
         @Language("kson") text: String,
         typedInFragmentEditor: String,
         expectedTextInFile: String
@@ -52,9 +52,9 @@ abstract class AbstractKsonInjectionTest : BasePlatformTestCase() {
         fragmentEditor.type(typedInFragmentEditor)
 
         assertEquals(
-            "should find properly escaped text in main editor",
+            "typed text in fragment editor does not match",
             expectedTextInFile,
-            myFixture.editor.document.text
+            InjectionTestFixture(myFixture).topLevelFile.text
         )
     }
 

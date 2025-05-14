@@ -6,9 +6,7 @@ import com.intellij.lang.injection.MultiHostInjector
 import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import org.kson.jetbrains.psi.KsonEmbedBlock
-import org.kson.jetbrains.psi.KsonEmbedContent
-import org.kson.jetbrains.psi.KsonPsiElement
+import org.kson.jetbrains.psi.*
 
 /**
  * Injector for Kson Embed Content
@@ -31,15 +29,24 @@ open class EmbedContentInjector : MultiHostInjector {
         }
 
         val embedBlock = host.embedBlock ?: return
+
         val language = findLangForInjection(embedBlock) ?: return
 
+        // Get the ranges that will be used for injection
+        val ranges = host.indentHandler.getUntrimmedRanges(host)
+        if (ranges.isEmpty()) return
+
         registrar.startInjecting(language)
-        registrar.addPlace(
-            null,
-            null,
-            host,
-            TextRange(0, host.textLength)
-        )
+
+        // Process each range individually to maintain proper mapping
+        for (range in ranges) {
+            registrar.addPlace(
+                null,
+                null,
+                host,
+                range
+            )
+        }
         registrar.doneInjecting()
     }
 

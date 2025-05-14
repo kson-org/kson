@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import org.kson.jetbrains.file.KsonFileType
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 /**
  * Generator for creating KSON PSI elements.
@@ -21,20 +22,23 @@ class KsonElementGenerator(project: Project) {
     private var myProject: Project = project
 
     /**
-     * Create a lightweight in-memory [KsonEmbedContent] filled with `content`.
+     * Create a lightweight in-memory [KsonEmbedBlock].
      *
-     * @param content content of the embed content to be created
+     * @param embedDelim delimiter of the embed block to be created
+     * @param content content of the embed block to be created
+     * @param tag of the embed block to be created
+     * @param indentText of the embed content
      * @return created embed content
      */
-    fun createEmbedContent(content: String): KsonEmbedContent? {
+    fun createEmbedBlock(embedDelim: EmbedDelim, content: String, tag: String="",  indentText: String = ""): KsonEmbedBlock {
+        val indentedContent = content.lines().map { indentText + it }.joinToString("\n")
         val fileContent =
             """
-            |$$
-            |$content$$
+            |${embedDelim.delimiter}${tag}
+            |$indentedContent${embedDelim.delimiter}
             """.trimMargin()
         val file = createDummyFile(fileContent)
-        val embedBlock = file.firstChild as KsonEmbedBlock
-        return embedBlock.embedContent
+        return file.firstChild as KsonEmbedBlock
     }
 
     /**

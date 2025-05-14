@@ -9,7 +9,7 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
 open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageInjectionHost {
     val embedBlock: KsonEmbedBlock?
         get() = node.treeParent?.psi as? KsonEmbedBlock
-
+    val indentHandler = KsonTrimIndentHandler()
     override fun isValidHost(): Boolean {
         // First check if parent is a valid KsonEmbedBlock
         if (this.embedBlock !is KsonEmbedBlock) return false
@@ -35,91 +35,51 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
 
     private class EmbedContentLiteralTextEscaper(host: KsonEmbedContent) :
         LiteralTextEscaper<PsiLanguageInjectionHost>(host) {
-        private val embedDelim =
-            host.embedBlock?.embedDelim ?: EmbedDelim.Percent
-        private val minIndent = EmbedBlockIndent(host.text).computeMinimumIndent()
+        private val embedDelim = host.embedBlock?.embedDelim ?: EmbedDelim.Percent
 
         /**
-         * Decodes the host text by:
-         * 1. Unescaping any delimiters in the embed content using the embed block's delimiter rules
-         * 2. Removing the minimum common indentation from all lines
+         * Decodes the host text by unescaping any delimiters in the embed content using the embed block's
+         * delimiter rules
          *
          * @param rangeInsideHost The range of text to decode
          * @param outChars StringBuilder to receive the decoded text
          * @return true if decoding was successful, false otherwise
          */
         override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
-            val hostText = myHost.text ?: return false
-
-            // For whitespace-only content, on a single line we don't need to decode
-            if (hostText.all { it.isWhitespace() } && numberOfLines(hostText) == 1) {
-                outChars.append(hostText)
-                return true
-            }
+            val hostText = rangeInsideHost.substring(myHost.text)
 
             // Unescape the embed content
             val unescapedText = embedDelim.unescapeEmbedContent(hostText)
-
-            // Remove the minimum common indentation
-            val lines = unescapedText.split("\n")
-            val unindentedLines = lines.map { line ->
-                line.substring(minIndent)
-            }.joinToString("\n")
-
-            outChars.append(unindentedLines)
+            outChars.append(unescapedText)
             return true
         }
 
         /**
          * Returns the offset in the host text for the given offset in the decoded text.
          * This method handles the reverse mapping of offsets from the decoded text back to the host text,
-         * taking into account:
-         * 1. The minimum indentation that was removed during decoding
-         * 2. Any escaped delimiters in the original text
+         * taking into account the escaped delimiters in the original text
          *
          * @param offsetInDecoded The offset in the decoded text
          * @param rangeInsideHost The range of text to decode
          * @return The offset in the host text, or -1 if the offset is invalid
          */
         override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
-            val embedContentText = myHost.text ?: return -1
-            if (embedContentText.isEmpty() || offsetInDecoded < 0) return -1
+            val hostText = rangeInsideHost.substring(myHost.text)
+            if (hostText.isEmpty() || offsetInDecoded < 0) return -1
 
-            // For whitespace-only content on a single line we use direct offset mapping.
-            if (embedContentText.all { it.isWhitespace() } && numberOfLines(embedContentText) == 1) {
-                return if (offsetInDecoded <= embedContentText.length) offsetInDecoded else -1
-            }
+            // First ensure the offset is within the range
+            if (offsetInDecoded > rangeInsideHost.length) return -1
 
-            var currentOffset = 0
-            var decodedOffset = 0
+            // Calculate the actual offset in the host text
+            val hostOffset = rangeInsideHost.startOffset + offsetInDecoded
 
-            // Iterate over the lines of the embed content text and find the line containing the target offset
-            // Then we know how many indentations to add back to the line to get the host offset
-            for (line in embedContentText.split("\n")) {
-                // Calculate the length of the line after removing the minimum indentation
-                val decodedLineLength = if (line.length >= minIndent) line.length - minIndent else line.length
-
-                // If the target offset is within the current line, we can return the host offset
-                if (decodedOffset + decodedLineLength >= offsetInDecoded) {
-                    val remainingOffset = offsetInDecoded - decodedOffset
-                    val lineOffset = if (line.length >= minIndent) minIndent + remainingOffset else remainingOffset
-                    currentOffset += if (lineOffset <= line.length) lineOffset else line.length
-                    break
-                }
-
-                // Add the full line length to the host offset
-                currentOffset += line.length + 1  // +1 for newline
-                // Add the decoded line length to the decoded offset
-                decodedOffset += decodedLineLength + 1  // +1 for newline
-            }
-
-            // Find all escaped delimiter positions before our target position
-            val escapedIndices = embedDelim.findEscapedDelimiterIndices(embedContentText)
-                .filter { it < currentOffset }
-            currentOffset += escapedIndices.size
+            // Find all escaped delimiter positions before our target position and adjust offset
+            val escapedIndices = embedDelim.findEscapedDelimiterIndices(hostText)
+                .filter { it < hostOffset }
+            val adjustedOffset = hostOffset + escapedIndices.size
 
             // Ensure the result is within the valid range
-            return if (currentOffset <= rangeInsideHost.endOffset) currentOffset else -1
+            return if (adjustedOffset <= rangeInsideHost.endOffset) adjustedOffset else -1
         }
 
         override fun isOneLine(): Boolean = false
@@ -128,7 +88,7 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
     internal class Manipulator : AbstractElementManipulator<KsonEmbedContent>() {
         /**
          * This is the inverse of the decode method.
-         * It takes the content of the embed content and returns the updated embed content. With proper escaping and minimum indentation.
+         * It takes the content of the embed content and returns the updated embed content with proper escaping and minimum indentation.
          *
          * This method is called when the user edits the content of the embed content, in a designated editor,
          * to improve the user experience we removed the minimum indentation and escaped the content properly for editing in the designated editor.
@@ -145,36 +105,32 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
         ): KsonEmbedContent? {
             val embedBlock = element.embedBlock ?: return null
             val embedDelim = embedBlock.embedDelim
+            val escapedContentText = embedDelim.escapeEmbedContent(content)
 
-            val minIndentElement = EmbedBlockIndent(element.text).computeMinimumIndent()
-            val minIndentContent = EmbedBlockIndent(content).computeMinimumIndent()
+            val minimumIndentEmbedBlock = EmbedBlockIndent(element.text).computeMinimumIndent()
+            val indentText = " ".repeat(minimumIndentEmbedBlock)
 
-            // Add back the minimum indentation if the content has less indent than the embed block
-            val processedContent = if (minIndentContent < minIndentElement || minIndentContent == 0  ) {
-                // Add minimum indentation to each line for direct edits
-                content.split("\n").map { " ".repeat(minIndentElement) + it }.joinToString("\n")
-            } else {
-                content
-            }
+            val lines = escapedContentText.lines()
 
-            // Escape the content properly
-            val escapedContent = embedDelim.escapeEmbedContent(processedContent)
+            /**
+            * TODO this is a bit of a hack now. In most cases this handles an update in the fragment editor well.
+            * However, it fails if we are typing on the last line and also shows some buggy behavior with auto completing
+            * xml. Removing `index==lines.lastIndex` runs into the issue that the minimum indent is shifted forward
+            * each 'update'
+            **/
+            val indentedLines = lines
+                .mapIndexed { index, line ->
+                    if (index == 0 || index == lines.lastIndex) line
+                    else line.prependIndent(indentText)
+                }
+                .joinToString("\n")
+
+            val updatedElementText = element.text.replaceRange(range.startOffset, range.endOffset, indentedLines)
 
             // Generate the updated embed content and replace the existing one
             val ksonGenerator = KsonElementGenerator(element.project)
-            val updatedEmbedContent = ksonGenerator.createEmbedContent(escapedContent) ?: return null
+            val updatedEmbedContent = ksonGenerator.createEmbedBlock(embedDelim, updatedElementText).embedContent ?: return null
             return element.replace(updatedEmbedContent) as KsonEmbedContent?
-        }
-    }
-
-    companion object {
-        /**
-         * Returns the number of lines in the given content.
-         *
-         * TODO double check if we shouldn't handle this with the minimumIndent in EmbedBlock
-         */
-        private fun numberOfLines(content: String): Int {
-            return content.split("\n").size
         }
     }
 }
