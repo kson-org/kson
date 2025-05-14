@@ -1,28 +1,30 @@
 package org.kson.jetbrains.formatter
 
-import com.intellij.formatting.service.AsyncDocumentFormattingService
-import com.intellij.formatting.service.AsyncFormattingRequest
+import com.intellij.formatting.FormattingContext
+import com.intellij.formatting.service.AbstractDocumentFormattingService
 import com.intellij.formatting.service.FormattingService.Feature
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import org.kson.tools.format
-import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
 import org.kson.tools.IndentType
 import org.kson.tools.KsonFormatterConfig
+import org.kson.tools.format
 
-class KsonExternalFormatter : AsyncDocumentFormattingService() {
+class KsonExternalFormatter : AbstractDocumentFormattingService() {
     override fun canFormat(file: PsiFile): Boolean {
         return file is KsonPsiFile
     }
 
     override fun getFeatures(): Set<Feature> = emptySet()
-    override fun getNotificationGroupId(): String = KsonFileType.name
-    override fun getName(): String = KsonFileType.name
 
-    override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
-        val formattingContext = request.context
-        val file = request.ioFile ?: return null
-
+    override fun formatDocument(
+        document: Document,
+        formattingRanges: MutableList<TextRange>,
+        formattingContext: FormattingContext,
+        canChangeWhiteSpaceOnly: Boolean,
+        quickFormat: Boolean
+    ) {
         val indentOptions = formattingContext.codeStyleSettings
             .getIndentOptions(formattingContext.containingFile.fileType)
         val indentType = if (indentOptions.USE_TAB_CHARACTER) {
@@ -30,17 +32,8 @@ class KsonExternalFormatter : AsyncDocumentFormattingService() {
         } else {
             IndentType.Space(indentOptions.INDENT_SIZE)
         }
-            
-        return object : FormattingTask {
-            override fun run() {
-                val source = file.readText()
-                val formatted = format(source, KsonFormatterConfig(indentType))
-                request.onTextReady(formatted)
-            }
 
-            override fun cancel(): Boolean = false
-
-            override fun isRunUnderProgress(): Boolean = true
-        }
+        val formatted = format(document.text, KsonFormatterConfig(indentType))
+        document.setText(formatted)
     }
 }
