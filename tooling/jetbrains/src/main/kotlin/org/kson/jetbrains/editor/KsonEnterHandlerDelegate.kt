@@ -2,37 +2,56 @@ package org.kson.jetbrains.editor
 
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate
 import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate.Result
+import com.intellij.injected.editor.EditorWindow
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
+import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.util.getIndentType
 import org.kson.jetbrains.util.getLineIndentLevel
 
 class KsonEnterHandlerDelegate : EnterHandlerDelegate {
     override fun preprocessEnter(
+        file: PsiFile, editor: Editor, caretOffset: Ref<Int>, caretAdvance: Ref<Int>, dataContext: DataContext,
+        originalHandler: EditorActionHandler?
+    ): Result {
+        val offset = caretOffset.get().toInt()
+        if (editor !is EditorWindow) {
+            return preprocessEnter(file, editor, offset)
+        }
+
+        val hostPosition = getHostPosition(dataContext) ?: return Result.Continue
+        return preprocessEnter(hostPosition)
+    }
+
+    private fun preprocessEnter(
+        hostPosition: HostPosition,
+    ): Result {
+        val (file, editor, offset) = hostPosition
+        return preprocessEnter(file, editor, offset)
+    }
+
+    private fun preprocessEnter(
         file: PsiFile,
         editor: Editor,
-        caretOffsetRef: Ref<Int>,
-        caretAdvanceRef: Ref<Int>,
-        dataContext: DataContext,
-        originalHandler: EditorActionHandler?
+        offset: Int,
     ): Result {
         if (!file.language.isKindOf(KsonLanguage)) {
             return EnterHandlerDelegate.Result.Continue
         }
-
         val document = editor.document
-        val caretOffset = caretOffsetRef.get()
         val text = document.text
 
-        if (caretOffset > 0 && caretOffset < text.length) {
-            val before = text[caretOffset - 1]
+        if (offset > 0 && offset < text.length) {
+            val before = text[offset - 1]
 
-            var afterIndex = caretOffset
+            var afterIndex = offset
 
             /**
              * Works around the the newline IntelliJ auto-inserts on ENTER at a '{' that messes with the
@@ -68,13 +87,13 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
                 (before == '<' && after == '>')
             ) {
                 // Remove any whitespace we found between the delimiters
-                if (afterIndex > caretOffset) {
-                    document.deleteString(caretOffset, afterIndex)
+                if (afterIndex > offset) {
+                    document.deleteString(offset, afterIndex)
                 }
 
                 // now put position the cursor on its line and indent it
-                document.insertString(caretOffset, "\n")
-                val nextLineOffset = editor.document.getLineStartOffset(editor.document.getLineNumber(caretOffset) + 1)
+                document.insertString(offset, "\n")
+                val nextLineOffset = editor.document.getLineStartOffset(editor.document.getLineNumber(offset) + 1)
                 editor.caretModel.moveToOffset(nextLineOffset)
                 indentCaretLine(editor, file)
             }
@@ -82,11 +101,16 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return Result.Continue
     }
 
-    override fun postProcessEnter(
-        file: PsiFile,
-        editor: Editor,
-        dataContext: DataContext
-    ): Result {
+    override fun postProcessEnter(file: PsiFile, editor: Editor, dataContext: DataContext): Result {
+        if (editor !is EditorWindow) {
+            return postProcessEnter(file, editor)
+        }
+
+        val hostPosition = getHostPosition(dataContext) ?: return Result.Continue
+        return postProcessEnter(hostPosition.file, hostPosition.editor)
+    }
+
+    private fun postProcessEnter(file: PsiFile, editor: Editor): Result {
         if (!file.language.isKindOf(KsonLanguage)) {
             return EnterHandlerDelegate.Result.Continue
         }
@@ -111,12 +135,24 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
             document.deleteString(lineStart, lineStart + leadingWhitespaceLength)
         }
 
-        // Caculate the indent level
+        // Calculate the indent level
         val indentType = file.getIndentType()
         val indentAdjustment = document.getLineIndentLevel(lineNumber, indentType)
         val newIndent = indentType.indentString.repeat(indentAdjustment)
 
         // Insert the calculated indent
         document.insertString(lineStart, newIndent)
+    }
+
+    private data class HostPosition(val file: PsiFile, val editor: Editor, val offset: Int)
+
+    private fun getHostPosition(dataContext: DataContext): HostPosition? {
+        val editor = CommonDataKeys.HOST_EDITOR.getData(dataContext) as? EditorEx ?: return null
+        val project = CommonDataKeys.PROJECT.getData(dataContext) ?: return null
+
+        val virtualFile = editor.virtualFile ?: return null
+        val psiFile = PsiManager.getInstance(project).findFile(virtualFile) ?: return null
+
+        return HostPosition(psiFile, editor, editor.caretModel.offset)
     }
 }
