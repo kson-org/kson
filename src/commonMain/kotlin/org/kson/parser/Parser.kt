@@ -14,11 +14,11 @@ import org.kson.parser.messages.MessageType.*
  * ksonValue -> plainObject
  *            | dashList
  *            | delimitedValue
- * plainObject -> objectInternals "."+
+ * plainObject -> objectInternals "."?
  * objectInternals -> "," ( keyword ksonValue ","? )+
  *                  | ( ","? keyword ksonValue )*
  *                  | ( keyword ksonValue ","? )*
- * dashList -> dashListInternals "="+
+ * dashList -> dashListInternals "="?
  * dashListInternals -> ( LIST_DASH ksonValue )*
  * delimitedValue -> delimitedObject
  *                 | delimitedDashList
