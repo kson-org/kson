@@ -49,6 +49,12 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
         return tokens.subList(firstTokenIndex, lastTokenIndex + 1).joinToString("") { it.lexeme.text }
     }
 
+    override fun getLocation(firstTokenIndex: Int, lastTokenIndex: Int): Location {
+        return Location.merge(
+            tokens[firstTokenIndex].lexeme.location,
+            tokens[lastTokenIndex].lexeme.location)
+    }
+
     override fun getComments(tokenIndex: Int): List<String> {
         return tokens[tokenIndex].comments
     }
@@ -113,7 +119,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
             /**
              * ignore errors and create an AST possibly patched with [AstNodeError]s
              */
-            unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it) }
+            unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
         } else {
             if (!hasErrors) {
                 unsafeAstCreate<KsonRoot>(rootMarker) {
@@ -181,19 +187,19 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         throw RuntimeException("These tokens do not generate their own AST nodes")
                     }
                     FALSE -> {
-                        FalseNode()
+                        FalseNode(marker.getLocation())
                     }
                     UNQUOTED_STRING -> {
-                        UnquotedStringNode(marker.getValue())
+                        UnquotedStringNode(marker.getValue(), marker.getLocation())
                     }
                     NULL -> {
-                        NullNode()
+                        NullNode(marker.getLocation())
                     }
                     NUMBER -> {
-                        NumberNode(marker.getValue())
+                        NumberNode(marker.getValue(), marker.getLocation())
                     }
                     TRUE -> {
-                        TrueNode()
+                        TrueNode(marker.getLocation())
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -214,7 +220,11 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
                         val embedTag = childMarkers.getOrNull(1)?.getValue() ?: ""
                         val embedContent = childMarkers.getOrNull(2)?.getValue() ?: ""
-                        EmbedBlockNode(embedTag, embedContent, EmbedDelim.fromString("$embedDelimChar$embedDelimChar"))
+                        EmbedBlockNode(
+                            embedTag,
+                            embedContent,
+                            EmbedDelim.fromString("$embedDelimChar$embedDelimChar"),
+                            marker.getLocation())
                     }
                     STRING -> {
                         /**
@@ -228,33 +238,38 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
 
                         if (stringContentMark.element == UNQUOTED_STRING) {
-                            UnquotedStringNode(stringContentMark.getValue())
+                            UnquotedStringNode(stringContentMark.getValue(), marker.getLocation())
                         } else {
                             quoteStringToStringNode(stringContentMark)
                         }
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
-                            unsafeAstCreate<ListElementNode>(listElementMarker) { ListElementNodeError(it) }
+                            unsafeAstCreate<ListElementNode>(listElementMarker) {
+                                ListElementNodeError(it, marker.getLocation())
+                            }
                         }
-                        ListNode(listElementNodes)
+                        ListNode(listElementNodes, marker.getLocation())
                     }
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
                         val listElementValue: ValueNode = if (childMarkers.size == 1) {
-                            unsafeAstCreate(childMarkers[0]) { ValueNodeError(it) }
+                            unsafeAstCreate(childMarkers[0]) { ValueNodeError(it, marker.getLocation()) }
                         } else {
                             throw ShouldNotHappenException("list element markers should mark exactly one value")
                         }
                         ListElementNodeImpl(
                             listElementValue,
-                            comments)
+                            comments,
+                            marker.getLocation())
                     }
                     OBJECT -> {
                         val propertyNodes = childMarkers.map { property ->
-                            unsafeAstCreate<ObjectPropertyNode>(property) { ObjectPropertyNodeError(it) }
+                            unsafeAstCreate<ObjectPropertyNode>(property) {
+                                ObjectPropertyNodeError(it, marker.getLocation())
+                            }
                         }
-                        ObjectNode(propertyNodes)
+                        ObjectNode(propertyNodes, marker.getLocation())
                     }
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
@@ -267,17 +282,22 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
-                        val stringNode: StringNode = unsafeAstCreate(keywordMark) { StringNodeError(it) }
+                        val stringNode: StringNode = unsafeAstCreate(keywordMark) {
+                            StringNodeError(it, marker.getLocation())
+                        }
                         val valueMark = childMarkers.getOrNull(1)
                         val valueNode: ValueNode = if (valueMark == null) {
-                            ValueNodeError("")
+                            ValueNodeError("", marker.getLocation())
                         } else {
-                            unsafeAstCreate(valueMark) { ValueNodeError(it) }
+                            unsafeAstCreate(valueMark) {
+                                ValueNodeError(it, marker.getLocation())
+                            }
                         }
                         ObjectPropertyNodeImpl(
                             stringNode,
                             valueNode,
-                            comments
+                            comments,
+                            marker.getLocation()
                         )
                     }
                     QUOTED_STRING -> {
@@ -300,12 +320,18 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             val errorContent = childMarkers.joinToString("") { childMarker ->
                                 childMarker.getRawText()
                             }
-                            KsonRootImpl(ValueNodeError(errorContent), comments, eofToken.comments)
+                            KsonRootImpl(ValueNodeError(
+                                errorContent,
+                                marker.getLocation()),
+                                comments,
+                                eofToken.comments,
+                                marker.getLocation())
                         } else {
                             val rooMarker = childMarkers[0]
-                            KsonRootImpl(unsafeAstCreate(rooMarker) { AstNodeError(it) },
+                            KsonRootImpl(unsafeAstCreate(rooMarker) { AstNodeError(it, marker.getLocation()) },
                                 comments,
-                                eofToken.comments)
+                                eofToken.comments,
+                                marker.getLocation())
                         }
                     }
                     else -> {
@@ -337,7 +363,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
         val stringDelim = quotedString.first()
         val stringContent = quotedString.substring(1, quotedString.length - 1)
 
-        return QuotedStringNode(stringContent, StringQuote.fromChar(stringDelim))
+        return QuotedStringNode(stringContent, StringQuote.fromChar(stringDelim), marker.getLocation())
     }
 
     /**
@@ -386,6 +412,12 @@ private interface MarkerBuilderContext {
      * Get the raw underlying text for the range of tokens from [firstTokenIndex] to [lastTokenIndex], inclusive
      */
     fun getRawText(firstTokenIndex: Int, lastTokenIndex: Int): String
+
+    /**
+     * Get the location of the underlying text for the range of tokens from [firstTokenIndex] to [lastTokenIndex],
+     * inclusive
+     */
+    fun getLocation(firstTokenIndex: Int, lastTokenIndex: Int): Location
 
     /**
      * Get any comments associated with the token at [tokenIndex]
@@ -448,6 +480,10 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
 
     fun getValue(): String {
         return context.getValue(this.firstTokenIndex, this.lastTokenIndex)
+    }
+
+    fun getLocation() : Location {
+        return context.getLocation(this.firstTokenIndex, this.lastTokenIndex)
     }
 
     /**
