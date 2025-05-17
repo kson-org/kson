@@ -1,4 +1,4 @@
-package org.kson.parser.delimiters
+package org.kson.parser.behavior
 
 import org.kson.Kson
 

@@ -1,4 +1,4 @@
-package org.kson.parser.delimiters
+package org.kson.parser.behavior.embedblock
 
 import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
 

@@ -13,7 +13,7 @@ import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getIndentType
 import org.kson.jetbrains.util.getLineIndentLevel
 import org.kson.jetbrains.util.hasElementAtOffset
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.TokenType.*
 
 class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {

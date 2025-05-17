@@ -1,7 +1,7 @@
 package org.kson.ast
 
 import org.kson.Kson
-import org.kson.parser.delimiters.StringQuote
+import org.kson.parser.behavior.StringQuote
 
 /**
  * Render the given string for inclusion in a JSON string literal.

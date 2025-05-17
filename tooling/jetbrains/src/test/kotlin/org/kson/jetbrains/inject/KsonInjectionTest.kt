@@ -2,7 +2,7 @@ package org.kson.jetbrains.inject
 
 import com.intellij.lang.xml.XMLLanguage
 import com.intellij.testFramework.fixtures.InjectionAssertionData
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 /**
  * Tests for KSON language injection functionality.

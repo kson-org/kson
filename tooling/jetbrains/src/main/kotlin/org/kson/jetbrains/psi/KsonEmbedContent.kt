@@ -3,7 +3,8 @@ package org.kson.jetbrains.psi
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedBlockIndent
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageInjectionHost {
     val embedBlock: KsonEmbedBlock?
@@ -36,7 +37,7 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
         LiteralTextEscaper<PsiLanguageInjectionHost>(host) {
         private val embedDelim =
             host.embedBlock?.embedDelim ?: EmbedDelim.Percent
-        private val minIndent = host.embedBlock?.let { KsonEmbedBlock.minimumIndentEmbedBlock(it) } ?: 0
+        private val minIndent = EmbedBlockIndent(host.text).computeMinimumIndent()
 
         /**
          * Decodes the host text by:
@@ -145,8 +146,8 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
             val embedBlock = element.embedBlock ?: return null
             val embedDelim = embedBlock.embedDelim
 
-            val minIndentElement = KsonEmbedBlock.minimumIndentEmbedBlock(embedBlock)
-            val minIndentContent = minimumIndent(content)
+            val minIndentElement = EmbedBlockIndent(element.text).computeMinimumIndent()
+            val minIndentContent = EmbedBlockIndent(content).computeMinimumIndent()
 
             // Add back the minimum indentation if the content has less indent than the embed block
             val processedContent = if (minIndentContent < minIndentElement || minIndentContent == 0  ) {
@@ -168,30 +169,12 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
 
     companion object {
         /**
-         * Returns the minimum common number of spaces of the given content.
-         */
-        private fun minimumIndent(content: String): Int {
-            val linesWithNewlines = content.split("\n").map { it + "\n" }
-            val minCommonIndent =
-                linesWithNewlines.subList(1, linesWithNewlines.size)
-                    .minOfOrNull { it.indexOfFirst { char -> !isInlineWhitespace(char) } } ?: 0
-            return minCommonIndent
-        }
-
-        /**
          * Returns the number of lines in the given content.
          *
          * TODO double check if we shouldn't handle this with the minimumIndent in EmbedBlock
          */
         private fun numberOfLines(content: String): Int {
             return content.split("\n").size
-        }
-
-        /**
-         * Returns true if the given [char] is a non-newline whitespace
-         */
-        private fun isInlineWhitespace(char: Char?): Boolean {
-            return char == ' ' || char == '\r' || char == '\t'
         }
     }
 }
