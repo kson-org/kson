@@ -82,7 +82,7 @@ interface AstNode {
 /**
  * Base [AstNode] to be subclassed by all Kson AST Node classes
  */
-abstract class AstNodeImpl : AstNode {
+sealed class AstNodeImpl : AstNode {
     /**
      * Transpiles this [AstNode] to the given [compileTarget] source, respecting the configuration in the given
      * [CompileTarget]
@@ -145,9 +145,9 @@ interface Documented {
 interface KsonRoot : AstNode
 class KsonRootError(content: String) : KsonRoot, AstNodeError(content)
 class KsonRootImpl(
-    private val rootNode: AstNode,
+    val rootNode: AstNode,
     override val comments: List<String>,
-    private val documentEndComments: List<String>
+    val documentEndComments: List<String>
 ) : KsonRoot, AstNodeImpl(), Documented {
 
     /**
@@ -183,7 +183,7 @@ interface ValueNode : AstNode
 class ValueNodeError(content: String) : ValueNode, AstNodeError(content)
 abstract class ValueNodeImpl : ValueNode, AstNodeImpl()
 
-class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeImpl() {
+class ObjectNode(val properties: List<ObjectPropertyNode>) : ValueNodeImpl() {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
@@ -234,8 +234,8 @@ class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeIm
 interface ObjectPropertyNode : AstNode
 class ObjectPropertyNodeError(content: String) : ObjectPropertyNode, AstNodeError(content)
 class ObjectPropertyNodeImpl(
-    private val name: StringNode,
-    private val value: ValueNode,
+    val name: StringNode,
+    val value: ValueNode,
     override val comments: List<String>
 ) :
     ObjectPropertyNode, AstNodeImpl(), Documented {
@@ -266,7 +266,7 @@ class ObjectPropertyNodeImpl(
 }
 
 class ListNode(
-    private val elements: List<ListElementNode>
+    val elements: List<ListElementNode>
 ) : ValueNodeImpl() {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -463,10 +463,10 @@ class NullNode : ValueNodeImpl() {
     }
 }
 
-class EmbedBlockNode(private val embedTag: String, embedContent: String, embedDelim: EmbedDelim) :
+class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: EmbedDelim) :
     ValueNodeImpl() {
 
-    private val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
+    val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
 
     companion object {
         /**
