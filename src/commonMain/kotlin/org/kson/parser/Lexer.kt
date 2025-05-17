@@ -4,7 +4,8 @@ import org.kson.stdlibx.collections.ImmutableList
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
-import org.kson.parser.delimiters.EmbedDelim.*
+import org.kson.parser.behavior.embedblock.EmbedDelim.*
+import org.kson.parser.behavior.embedblock.EmbedBlockIndent
 
 private val KEYWORDS =
     mapOf(
@@ -477,7 +478,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
         val embedBlockLexeme = sourceScanner.extractLexeme()
 
-        val trimmedEmbedBlockContent = trimMinimumIndent(embedBlockLexeme.text)
+        val trimmedEmbedBlockContent = EmbedBlockIndent(embedBlockLexeme.text).trimMinimumIndent()
         addToken(EMBED_CONTENT, embedBlockLexeme, trimmedEmbedBlockContent)
 
         /**
@@ -492,35 +493,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
             sourceScanner.advance()
             addLiteralToken(EMBED_CLOSE_DELIM)
         }
-    }
-
-    /**
-     * Given a [textBlock], computes the minimum indent of all its lines, then returns
-     * the [textBlock] with that indent trimmed from each line.
-     *
-     * NOTE: blank lines are considered pure indent and used in this calculation, so for instance:
-     *
-     * "   this string
-     *         has a minimum indent defined
-     *       by its last line
-     *    "
-     *
-     * becomes:
-     *
-     * "  this string
-     *      has a minimum indent defined
-     *    by its blank last line
-     * "
-     */
-    private fun trimMinimumIndent(textBlock: String): String {
-        val linesWithNewlines = textBlock.split("\n").map { it + "\n" }
-
-        val minCommonIndent =
-            linesWithNewlines.minOfOrNull { it.indexOfFirst { char -> !isInlineWhitespace(char) } } ?: 0
-
-        return textBlock
-            .split("\n")
-            .joinToString("\n") { it.drop(minCommonIndent) }
     }
 
     private fun number() {

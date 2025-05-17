@@ -1,7 +1,7 @@
 package org.kson.jetbrains.editor
 
 import com.intellij.openapi.fileTypes.PlainTextFileType
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
     /**
