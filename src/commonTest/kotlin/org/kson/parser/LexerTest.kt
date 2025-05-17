@@ -116,7 +116,7 @@ class LexerTest {
             """
                 "This is a string"
             """,
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
     }
 
@@ -226,7 +226,7 @@ class LexerTest {
             """
                 ["a string"]
             """,
-            listOf(SQUARE_BRACKET_L, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, SQUARE_BRACKET_R)
+            listOf(SQUARE_BRACKET_L, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, SQUARE_BRACKET_R)
         )
 
         assertTokenizesTo(
@@ -249,7 +249,7 @@ class LexerTest {
             """
                 - "a string"
             """,
-            listOf(LIST_DASH, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
+            listOf(LIST_DASH, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         assertTokenizesTo(
@@ -297,11 +297,11 @@ class LexerTest {
                 LIST_DASH,
                 LIST_DASH,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 LIST_DASH,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 LIST_DASH,
                 NUMBER
@@ -331,18 +331,18 @@ class LexerTest {
             """,
             listOf(
                 CURLY_BRACE_L,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 CURLY_BRACE_R
             )
@@ -355,18 +355,18 @@ class LexerTest {
                 hello: "y'all"
             """,
             listOf(
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE
             )
         )
@@ -384,18 +384,18 @@ class LexerTest {
                 hello: "y'all"
             """,
             listOf(
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 COLON,
                 NUMBER,
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 COLON,
                 STRING_OPEN_QUOTE,
-                STRING,
+                STRING_CONTENT,
                 STRING_CLOSE_QUOTE
             )
         )
@@ -562,7 +562,7 @@ class LexerTest {
             """
             test: %
             """,
-            listOf(IDENTIFIER, COLON, EMBED_DELIM_PARTIAL, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(UNQUOTED_STRING, COLON, EMBED_DELIM_PARTIAL, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -595,7 +595,7 @@ class LexerTest {
             """
             "this string has no end quote
             """,
-            listOf(STRING_OPEN_QUOTE, STRING),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT),
             "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
     }
@@ -606,18 +606,18 @@ class LexerTest {
             """
             'this string has no end quote
             """,
-            listOf(STRING_OPEN_QUOTE, STRING),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT),
             "should simply tokenize unterminated strings.  Errors are handled in parsing."
         )
     }
 
     @Test
-    fun testIdentifierLexemeContent() {
+    fun testUnquotedStringLexemeContent() {
         val tokens = assertTokenizesTo(
             """   
                 a_key: "a_value"
             """,
-            listOf(IDENTIFIER, COLON, STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
+            listOf(UNQUOTED_STRING, COLON, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         assertEquals("a_key", tokens[0].value)
@@ -641,17 +641,17 @@ class LexerTest {
             """.trimMargin(),
             listOf(
                 Pair(CURLY_BRACE_L, Location(0, 0, 0, 1, 0, 1)),
-                Pair(IDENTIFIER, Location(1, 4, 1, 7, 6, 9)),
+                Pair(UNQUOTED_STRING, Location(1, 4, 1, 7, 6, 9)),
                 Pair(COLON, Location(1, 7, 1, 8, 9, 10)),
-                Pair(IDENTIFIER, Location(1, 9, 1, 12, 11, 14)),
-                Pair(IDENTIFIER, Location(2, 4, 2, 8, 19, 23)),
+                Pair(UNQUOTED_STRING, Location(1, 9, 1, 12, 11, 14)),
+                Pair(UNQUOTED_STRING, Location(2, 4, 2, 8, 19, 23)),
                 Pair(COLON, Location(2, 8, 2, 9, 23, 24)),
                 Pair(SQUARE_BRACKET_L, Location(2, 10, 2, 11, 25, 26)),
                 Pair(TRUE, Location(2, 11, 2, 15, 26, 30)),
                 Pair(COMMA, Location(2, 15, 2, 16, 30, 31)),
                 Pair(FALSE, Location(2, 17, 2, 22, 32, 37)),
                 Pair(SQUARE_BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
-                Pair(IDENTIFIER, Location(3, 4, 3, 9, 43, 48)),
+                Pair(UNQUOTED_STRING, Location(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
                 Pair(EMBED_OPEN_DELIM, Location(3, 11, 3, 13, 50, 52)),
                 Pair(EMBED_PREAMBLE_NEWLINE, Location(3, 13, 4, 0, 52, 53)),
@@ -668,7 +668,7 @@ class LexerTest {
             """   
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         // sanity check the tokens are lexing to what we expect
@@ -683,7 +683,7 @@ class LexerTest {
             """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         // sanity check the tokens are lexing to what we expect
@@ -696,7 +696,7 @@ class LexerTest {
     fun testStringWhitespaceAfterEscape() {
         assertTokenizesTo(
             """'string with \' whitespace after an escape'""",
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE),
             testGapFreeLexing = true
         )
 
@@ -704,7 +704,7 @@ class LexerTest {
             """
                 'string with \' whitespace after an escape'
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
 
@@ -712,7 +712,7 @@ class LexerTest {
             """
                 'string with all whitespace after escape: \'     '
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ESCAPE, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }
@@ -723,7 +723,7 @@ class LexerTest {
             """
                 'string with   whitespace after an illegal escape char'
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING, STRING_ILLEGAL_CONTROL_CHARACTER, STRING, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ILLEGAL_CONTROL_CHARACTER, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }
@@ -761,7 +761,7 @@ class LexerTest {
                 # comment!
                 key: val
             """,
-            listOf(WHITESPACE, COMMENT, WHITESPACE, IDENTIFIER, COLON, WHITESPACE, IDENTIFIER, WHITESPACE),
+            listOf(WHITESPACE, COMMENT, WHITESPACE, UNQUOTED_STRING, COLON, WHITESPACE, UNQUOTED_STRING, WHITESPACE),
             "Should include WHITESPACE tokens when lexing gap-free",
             true
         )
@@ -773,11 +773,11 @@ class LexerTest {
             """.trimMargin(),
             listOf(
                 Pair(WHITESPACE, Location(0, 0, 0, 2, 0, 2)),
-                Pair(IDENTIFIER, Location(0, 2, 0, 8, 2, 8)),
+                Pair(UNQUOTED_STRING, Location(0, 2, 0, 8, 2, 8)),
                 Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
                 Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
                 Pair(STRING_OPEN_QUOTE, Location(0, 10, 0, 11, 10, 11)),
-                Pair(STRING, Location(0, 11, 0, 17, 11, 17)),
+                Pair(STRING_CONTENT, Location(0, 11, 0, 17, 11, 17)),
                 Pair(STRING_CLOSE_QUOTE, Location(0, 17, 0, 18, 17, 18)),
                 Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
             ),
@@ -819,7 +819,7 @@ class LexerTest {
             """
                 "stuff" # comment about stuff
             """,
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         val endQuoteToken = tokenList[2]
@@ -847,13 +847,13 @@ class LexerTest {
     fun testHashInString() {
         assertTokenizesTo(
             "'# not a comment' # yes a coment",
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, WHITESPACE, COMMENT),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE, COMMENT),
             testGapFreeLexing = true
         )
 
         assertTokenizesTo(
             "'also # not a comment'# yes a comment",
-            listOf(STRING_OPEN_QUOTE, STRING, STRING_CLOSE_QUOTE, COMMENT),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, COMMENT),
             testGapFreeLexing = true
         )
     }

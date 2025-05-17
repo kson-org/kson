@@ -30,9 +30,9 @@ import org.kson.parser.messages.MessageType.*
  * bracketList -> "[" "," ( ksonValue ","? )+ "]"
  *              | "[" ( ","? ksonValue )* "]"
  *              | "[" ( ksonValue ","? )* "]"
- * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
- * keyword -> ( IDENTIFIER | string ) ":"
- * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
+ * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
+ * keyword -> ( UNQUOTED_STRING | string ) ":"
+ * string -> STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE
  * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
  * ```
  *
@@ -434,7 +434,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * literal -> string | NUMBER | IDENTIFIER | "true" | "false" | "null"
+     * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
      */
     private fun literal(): Boolean {
         if (string()) {
@@ -465,7 +465,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val terminalElementMark = builder.mark()
         if (elementType != null && setOf(
-                IDENTIFIER,
+                UNQUOTED_STRING,
                 TRUE,
                 FALSE,
                 NULL
@@ -482,16 +482,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * keyword -> ( IDENTIFIER | string ) ":"
+     * keyword -> ( UNQUOTED_STRING | string ) ":"
      */
     private fun keyword(): Boolean {
-        // try to parse a keyword in the style of "IDENTIFIER followed by :"
-        if (builder.getTokenType() == IDENTIFIER && builder.lookAhead(1) == COLON) {
+        // try to parse a keyword in the style of "UNQUOTED_STRING followed by :"
+        if (builder.getTokenType() == UNQUOTED_STRING && builder.lookAhead(1) == COLON) {
             val keywordMark = builder.mark()
-            val identifierMark = builder.mark()
+            val unquotedStringMark = builder.mark()
             builder.advanceLexer()
-            identifierMark.done(IDENTIFIER)
-            keywordMark.done(KEYWORD)
+            unquotedStringMark.done(UNQUOTED_STRING)
+            keywordMark.done(STRING)
 
             // advance past the COLON
             builder.advanceLexer()
@@ -501,7 +501,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // try to parse a keyword in the style of "string followed by :"
         val keywordMark = builder.mark()
         if (string() && builder.getTokenType() == COLON) {
-            keywordMark.done(KEYWORD)
+            keywordMark.done(STRING)
 
             // advance past the COLON
             builder.advanceLexer()
@@ -530,7 +530,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         while (builder.getTokenType() != STRING_CLOSE_QUOTE && !builder.eof()) {
             when (builder.getTokenType()) {
-                STRING -> builder.advanceLexer()
+                STRING_CONTENT -> builder.advanceLexer()
                 STRING_UNICODE_ESCAPE -> {
                     val unicodeEscapeMark = builder.mark()
                     val unicodeEscapeText = builder.getTokenText()

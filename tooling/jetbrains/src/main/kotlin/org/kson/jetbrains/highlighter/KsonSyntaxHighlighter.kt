@@ -38,12 +38,12 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.EMBED_PREAMBLE_NEWLINE -> TextAttributesKey.EMPTY_ARRAY
                 TokenType.EMBED_CONTENT -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.FALSE -> getPackedTextAttributes(KSON_KEYWORD)
-                TokenType.IDENTIFIER -> getPackedTextAttributes(KSON_IDENTIFIER)
+                TokenType.UNQUOTED_STRING -> getPackedTextAttributes(KSON_UNQUOTED_STRING)
                 TokenType.ILLEGAL_CHAR -> getPackedTextAttributes(KSON_INVALID)
                 TokenType.LIST_DASH -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.NULL -> getPackedTextAttributes(KSON_KEYWORD)
                 TokenType.NUMBER -> getPackedTextAttributes(KSON_NUMBER)
-                TokenType.STRING -> getPackedTextAttributes(KSON_CONTENT)
+                TokenType.STRING_CONTENT -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_UNICODE_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_ESCAPE -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.STRING_OPEN_QUOTE -> getPackedTextAttributes(KSON_CONTENT)
@@ -68,7 +68,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         KSON_END_DOT("kson.syntaxHighlighter.end-dot"),
         KSON_DELIMITER(KsonBundle.message("kson.syntaxHighlighter.delimiter")),
         KSON_EMBED_TAG(KsonBundle.message("kson.syntaxHighlighter.embed_tag")),
-        KSON_IDENTIFIER(KsonBundle.message("kson.syntaxHighlighter.identifier")),
+        KSON_UNQUOTED_STRING(KsonBundle.message("kson.syntaxHighlighter.unquoted")),
         KSON_KEYWORD(KsonBundle.message("kson.syntaxHighlighter.keyword")),
         KSON_INVALID(KsonBundle.message("kson.syntaxHighlighter.invalid")),
         KSON_NUMBER(KsonBundle.message("kson.syntaxHighlighter.number")),
@@ -86,7 +86,7 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
             KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
             KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
-            KSON_IDENTIFIER to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
+            KSON_UNQUOTED_STRING to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
             KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,
             KSON_INVALID to HighlighterColors.BAD_CHARACTER,
             KSON_NUMBER to DefaultLanguageHighlighterColors.NUMBER,

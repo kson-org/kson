@@ -234,7 +234,7 @@ class ObjectNode(private val properties: List<ObjectPropertyNode>) : ValueNodeIm
 interface ObjectPropertyNode : AstNode
 class ObjectPropertyNodeError(content: String) : ObjectPropertyNode, AstNodeError(content)
 class ObjectPropertyNodeImpl(
-    private val name: KeywordNode,
+    private val name: StringNode,
     private val value: ValueNode,
     override val comments: List<String>
 ) :
@@ -338,9 +338,9 @@ class ListElementNodeImpl(val value: ValueNode, override val comments: List<Stri
     }
 }
 
-interface KeywordNode : ValueNode
-class KeywordNodeError(content: String) : KeywordNode, AstNodeError(content)
-abstract class KeywordNodeImpl : KeywordNode, ValueNodeImpl() {
+interface StringNode : ValueNode
+class StringNodeError(content: String) : StringNode, AstNodeError(content)
+abstract class StringNodeImpl : StringNode, ValueNodeImpl() {
     abstract val stringContent: String
 }
 
@@ -349,7 +349,7 @@ abstract class KeywordNodeImpl : KeywordNode, ValueNodeImpl() {
  *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
  *   except that [Kson] allows raw whitespace to be embedded in strings
  */
-open class StringNode(private val ksonEscapedStringContent: String, private val stringQuote: StringQuote) : KeywordNodeImpl() {
+open class QuotedStringNode(private val ksonEscapedStringContent: String, private val stringQuote: StringQuote) : StringNodeImpl() {
 
     /**
      * An "unquoted" Kson string: i.e. a valid Kson string with all escapes intact except for quote escapes.
@@ -367,7 +367,7 @@ open class StringNode(private val ksonEscapedStringContent: String, private val 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                // Check if we can use this string as a bare identifier
+                // Check if we can use this string unquoted
                 val isSimple = StringUnquoted.isUnquotable(unquotedString)
 
                 indent.firstLineIndent() +
@@ -400,7 +400,7 @@ open class StringNode(private val ksonEscapedStringContent: String, private val 
     }
 }
 
-class IdentifierNode(override val stringContent: String) : KeywordNodeImpl() {
+class UnquotedStringNode(override val stringContent: String) : StringNodeImpl() {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {

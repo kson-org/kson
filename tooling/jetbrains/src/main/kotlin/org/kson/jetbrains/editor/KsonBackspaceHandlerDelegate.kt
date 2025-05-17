@@ -105,4 +105,4 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
 /**
  * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] delimiter auto-deletes
  */
-private val embedDeleteProhibitedElems = setOf(elem(EMBED_CONTENT), elem(STRING))
+private val embedDeleteProhibitedElems = setOf(elem(EMBED_CONTENT), elem(STRING_CONTENT))

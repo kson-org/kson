@@ -183,8 +183,8 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     FALSE -> {
                         FalseNode()
                     }
-                    IDENTIFIER -> {
-                        IdentifierNode(marker.getValue())
+                    UNQUOTED_STRING -> {
+                        UnquotedStringNode(marker.getValue())
                     }
                     NULL -> {
                         NullNode()
@@ -216,21 +216,21 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         val embedContent = childMarkers.getOrNull(2)?.getValue() ?: ""
                         EmbedBlockNode(embedTag, embedContent, EmbedDelim.fromString("$embedDelimChar$embedDelimChar"))
                     }
-                    KEYWORD -> {
+                    STRING -> {
                         /**
-                         * We assume [Parser.keyword] still structures a [KEYWORD] as wrapping either
-                         * an [IDENTIFIER] mark or a [STRING] mark
+                         * We assume [Parser.keyword] still structures a [STRING] as wrapping either
+                         * an [UNQUOTED_STRING] mark or a [QUOTED_STRING] mark
                          */
-                        val keywordContentMark = if (childMarkers.size == 1) {
+                        val stringContentMark = if (childMarkers.size == 1) {
                             childMarkers[0]
                         } else {
                             throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
                         }
 
-                        if (keywordContentMark.element == IDENTIFIER) {
-                            IdentifierNode(keywordContentMark.getValue())
+                        if (stringContentMark.element == UNQUOTED_STRING) {
+                            UnquotedStringNode(stringContentMark.getValue())
                         } else {
-                            quoteStringToStringNode(keywordContentMark)
+                            quoteStringToStringNode(stringContentMark)
                         }
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
@@ -267,7 +267,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
-                        val keywordNode: KeywordNode = unsafeAstCreate(keywordMark) { KeywordNodeError(it) }
+                        val stringNode: StringNode = unsafeAstCreate(keywordMark) { StringNodeError(it) }
                         val valueMark = childMarkers.getOrNull(1)
                         val valueNode: ValueNode = if (valueMark == null) {
                             ValueNodeError("")
@@ -275,7 +275,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             unsafeAstCreate(valueMark) { ValueNodeError(it) }
                         }
                         ObjectPropertyNodeImpl(
-                            keywordNode,
+                            stringNode,
                             valueNode,
                             comments
                         )
@@ -326,9 +326,9 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
 
     /**
      *  Note that we do not use [unsafeAstCreate] for this transformation because both places in this [KsonBuilder]
-     *  are confident they have an error-free [QUOTED_STRING] that can be transformed into a [StringNode]
+     *  are confident they have an error-free [QUOTED_STRING] that can be transformed into a [QuotedStringNode]
      */
-    private fun quoteStringToStringNode(marker: KsonMarker): StringNode {
+    private fun quoteStringToStringNode(marker: KsonMarker): QuotedStringNode {
         /**
          * [Parser.string] ensures that a [QUOTED_STRING] contains its [STRING_OPEN_QUOTE]
          * and [STRING_CLOSE_QUOTE]
@@ -337,7 +337,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
         val stringDelim = quotedString.first()
         val stringContent = quotedString.substring(1, quotedString.length - 1)
 
-        return StringNode(stringContent, StringQuote.fromChar(stringDelim))
+        return QuotedStringNode(stringContent, StringQuote.fromChar(stringDelim))
     }
 
     /**
