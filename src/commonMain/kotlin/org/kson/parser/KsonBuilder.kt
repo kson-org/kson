@@ -253,8 +253,8 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     }
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
-                        val listElementValue: ValueNode = if (childMarkers.size == 1) {
-                            unsafeAstCreate(childMarkers[0]) { ValueNodeError(it, marker.getLocation()) }
+                        val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
+                            unsafeAstCreate(childMarkers[0]) { KsonValueNodeError(it, marker.getLocation()) }
                         } else {
                             throw ShouldNotHappenException("list element markers should mark exactly one value")
                         }
@@ -286,16 +286,16 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             StringNodeError(it, marker.getLocation())
                         }
                         val valueMark = childMarkers.getOrNull(1)
-                        val valueNode: ValueNode = if (valueMark == null) {
-                            ValueNodeError("", marker.getLocation())
+                        val ksonValueNode: KsonValueNode = if (valueMark == null) {
+                            KsonValueNodeError("", marker.getLocation())
                         } else {
                             unsafeAstCreate(valueMark) {
-                                ValueNodeError(it, marker.getLocation())
+                                KsonValueNodeError(it, marker.getLocation())
                             }
                         }
                         ObjectPropertyNodeImpl(
                             stringNode,
-                            valueNode,
+                            ksonValueNode,
                             comments,
                             marker.getLocation()
                         )
@@ -320,7 +320,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             val errorContent = childMarkers.joinToString("") { childMarker ->
                                 childMarker.getRawText()
                             }
-                            KsonRootImpl(ValueNodeError(
+                            KsonRootImpl(KsonValueNodeError(
                                 errorContent,
                                 marker.getLocation()),
                                 comments,
@@ -328,7 +328,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                                 marker.getLocation())
                         } else {
                             val rooMarker = childMarkers[0]
-                            KsonRootImpl(unsafeAstCreate(rooMarker) { AstNodeError(it, marker.getLocation()) },
+                            KsonRootImpl(unsafeAstCreate(rooMarker) { KsonValueNodeError(it, marker.getLocation()) },
                                 comments,
                                 eofToken.comments,
                                 marker.getLocation())

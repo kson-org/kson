@@ -9,22 +9,22 @@ import org.kson.parser.NumberParser
  * any error- or null-checking
  */
 sealed class AstApi(val location: Location)
+abstract class KsonValueNodeApi(location: Location) : AstApi(location)
 
-class KsonRootApi(val rootNode: AstApi, location: Location) : AstApi(location)
-abstract class ValueNodeApi(location: Location) : AstApi(location)
-class ObjectNodeApi(val properties: List<ObjectPropertyNodeApi>, location: Location) : ValueNodeApi(location)
-class ListNodeApi(val elements: List<ListElementNodeApi>, location: Location) : ValueNodeApi(location)
-class ListElementNodeApi(val valueNodeApi: ValueNodeApi, location: Location) : AstApi(location)
+class KsonRootApi(val rootNode: KsonValueNodeApi, location: Location) : AstApi(location)
+class ObjectNodeApi(val properties: List<ObjectPropertyNodeApi>, location: Location) : KsonValueNodeApi(location)
+class ListNodeApi(val elements: List<ListElementNodeApi>, location: Location) : KsonValueNodeApi(location)
+class ListElementNodeApi(val valueNodeApi: KsonValueNodeApi, location: Location) : AstApi(location)
 class ObjectPropertyNodeApi(val name: StringNodeApi,
-                            val value: ValueNodeApi,
-                            location: Location) : ValueNodeApi(location)
+                            val value: KsonValueNodeApi,
+                            location: Location) :AstApi(location)
 class EmbedBlockNodeApi(val embedTag: String,
                         val embedContent: String,
-                        location: Location) : ValueNodeApi(location)
-class StringNodeApi(val value: String, location: Location) : ValueNodeApi(location)
-class NumberNodeApi(val value: NumberParser.ParsedNumber, location: Location) : ValueNodeApi(location)
-class BooleanNodeApi(val value: Boolean, location: Location) : ValueNodeApi(location)
-class NullNodeApi(location: Location) : ValueNodeApi(location)
+                        location: Location) : KsonValueNodeApi(location)
+class StringNodeApi(val value: String, location: Location) : KsonValueNodeApi(location)
+class NumberNodeApi(val value: NumberParser.ParsedNumber, location: Location) : KsonValueNodeApi(location)
+class BooleanNodeApi(val value: Boolean, location: Location) : KsonValueNodeApi(location)
+class NullNodeApi(location: Location) : KsonValueNodeApi(location)
 
 fun AstNode.toAstApi(): AstApi {
     if (this !is AstNodeImpl) {
@@ -34,13 +34,13 @@ fun AstNode.toAstApi(): AstApi {
         throw RuntimeException("Cannot create ${AstApi::class.simpleName} Node from a ${this::class.simpleName}")
     }
     return when (this) {
-        is KsonRootImpl -> KsonRootApi(rootNode.toAstApi(), location)
+        is KsonRootImpl -> KsonRootApi(rootNode.toAstApi() as KsonValueNodeApi, location)
         is ObjectNode -> ObjectNodeApi(properties.map { it.toAstApi() as ObjectPropertyNodeApi }, location)
         is ListNode -> ListNodeApi(elements.map { it.toAstApi() as ListElementNodeApi }, location)
-        is ListElementNodeImpl -> ListElementNodeApi(value.toAstApi() as ValueNodeApi, location)
+        is ListElementNodeImpl -> ListElementNodeApi(value.toAstApi() as KsonValueNodeApi, location)
         is ObjectPropertyNodeImpl -> ObjectPropertyNodeApi(
             name.toAstApi() as StringNodeApi,
-            value.toAstApi() as ValueNodeApi,
+            value.toAstApi() as KsonValueNodeApi,
             location)
         is EmbedBlockNode -> EmbedBlockNodeApi(embedTag, embedContent, location)
         is StringNodeImpl -> StringNodeApi(stringContent, location)
@@ -48,7 +48,7 @@ fun AstNode.toAstApi(): AstApi {
         is TrueNode -> BooleanNodeApi(true, location)
         is FalseNode -> BooleanNodeApi(false, location)
         is NullNode -> NullNodeApi(location)
-        is ValueNodeImpl -> this.toAstApi() as ValueNodeApi
+        is KsonValueNodeImpl -> this.toAstApi() as KsonValueNodeApi
         is AstNodeError -> throw RuntimeException("Cannot create Valid Ast Node from ${this::class.simpleName}")
     }
 }
