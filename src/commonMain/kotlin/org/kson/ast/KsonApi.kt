@@ -14,9 +14,9 @@ abstract class KsonValue(location: Location) : KsonApi(location)
 
 class KsonObject(val properties: List<KsonObjectProperty>, location: Location) : KsonValue(location)
 class KsonList(val elements: List<KsonListElement>, location: Location) : KsonValue(location)
-class KsonListElement(val valueNodeApi: KsonValue, location: Location) : KsonApi(location)
+class KsonListElement(val ksonValue: KsonValue, location: Location) : KsonApi(location)
 class KsonObjectProperty(val name: KsonString,
-                         val value: KsonValue,
+                         val ksonValue: KsonValue,
                          location: Location) :KsonApi(location)
 class EmbedBlock(val embedTag: String,
                  val embedContent: String,

@@ -53,27 +53,27 @@ class KsonApiTest {
 
         // Verify string value
         val stringProp = properties["stringVal"]!!
-        assertTrue(stringProp.value is KsonString)
-        assertEquals("hello world", (stringProp.value as KsonString).value)
+        assertTrue(stringProp.ksonValue is KsonString)
+        assertEquals("hello world", (stringProp.ksonValue as KsonString).value)
 
         // Verify number value
         val numberProp = properties["numberVal"]!!
-        assertTrue(numberProp.value is KsonNumber)
-        assertEquals(42.5, ((numberProp.value as KsonNumber).value as NumberParser.ParsedNumber.Decimal).value)
+        assertTrue(numberProp.ksonValue is KsonNumber)
+        assertEquals(42.5, ((numberProp.ksonValue as KsonNumber).value as NumberParser.ParsedNumber.Decimal).value)
 
         // Verify boolean value
         val booleanProp = properties["booleanVal"]!!
-        assertTrue(booleanProp.value is KsonBoolean)
-        assertEquals(true, (booleanProp.value as KsonBoolean).value)
+        assertTrue(booleanProp.ksonValue is KsonBoolean)
+        assertEquals(true, (booleanProp.ksonValue as KsonBoolean).value)
 
         // Verify null value
         val nullProp = properties["nullVal"]!!
-        assertTrue(nullProp.value is KsonNull)
+        assertTrue(nullProp.ksonValue is KsonNull)
 
         // Verify embed block
         val embedProp = properties["embedBlock"]!!
-        assertTrue(embedProp.value is EmbedBlock)
-        val embedBlock = embedProp.value as EmbedBlock
+        assertTrue(embedProp.ksonValue is EmbedBlock)
+        val embedBlock = embedProp.ksonValue as EmbedBlock
         assertEquals("", embedBlock.embedTag)
         assertEquals("""
             This is an embed block
@@ -83,21 +83,21 @@ class KsonApiTest {
 
         // Verify nested object
         val nestedObjectProp = properties["nestedObject"]!!
-        assertTrue(nestedObjectProp.value is KsonObject)
-        val nestedObject = nestedObjectProp.value as KsonObject
+        assertTrue(nestedObjectProp.ksonValue is KsonObject)
+        val nestedObject = nestedObjectProp.ksonValue as KsonObject
         val nestedProps = nestedObject.properties.associateBy { it.name.value }
         
-        assertEquals("value1", (nestedProps["key1"]!!.value as KsonString).value)
+        assertEquals("value1", (nestedProps["key1"]!!.ksonValue as KsonString).value)
         
-        val deepObject = nestedProps["key2"]!!.value as KsonObject
+        val deepObject = nestedProps["key2"]!!.ksonValue as KsonObject
         val deepProps = deepObject.properties.associateBy { it.name.value }
-        assertEquals("deep value", (deepProps["deepKey"]!!.value as KsonString).value)
+        assertEquals("deep value", (deepProps["deepKey"]!!.ksonValue as KsonString).value)
 
         // Verify nested list
         val nestedListProp = properties["nestedList"]!!
-        assertTrue(nestedListProp.value is KsonList)
-        val nestedList = nestedListProp.value as KsonList
-        val elements = nestedList.elements.map { it.valueNodeApi }
+        assertTrue(nestedListProp.ksonValue is KsonList)
+        val nestedList = nestedListProp.ksonValue as KsonList
+        val elements = nestedList.elements.map { it.ksonValue }
 
         assertEquals(6, elements.size)
         assertTrue(elements[0] is KsonString)
@@ -114,11 +114,11 @@ class KsonApiTest {
         assertTrue(elements[4] is KsonObject)
         val objectInList = elements[4] as KsonObject
         val objectInListProps = objectInList.properties.associateBy { it.name.value }
-        assertEquals("value", (objectInListProps["objectInList"]!!.value as KsonString).value)
+        assertEquals("value", (objectInListProps["objectInList"]!!.ksonValue as KsonString).value)
         
         assertTrue(elements[5] is KsonList)
         val nestedListInList = elements[5] as KsonList
-        val nestedListElements = nestedListInList.elements.map { it.valueNodeApi }
+        val nestedListElements = nestedListInList.elements.map { it.ksonValue }
         assertEquals(3, nestedListElements.size)
         assertTrue(nestedListElements.all { it is KsonString })
         assertEquals(
