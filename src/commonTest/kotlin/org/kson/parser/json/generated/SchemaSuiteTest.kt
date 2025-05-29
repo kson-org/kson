@@ -27,6 +27,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null,2,3,4]
@@ -50,6 +51,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null,2,3,"foo"]
@@ -73,6 +75,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -96,6 +99,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"2","3"]
@@ -119,6 +123,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3,4,5]
@@ -142,6 +147,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -165,6 +171,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -188,6 +195,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -211,6 +219,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -234,6 +243,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3,4]
@@ -257,6 +267,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3,4,5]
@@ -280,6 +291,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -303,6 +315,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo",false]
@@ -326,6 +339,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,null]
@@ -349,6 +363,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"hello"]
@@ -372,6 +387,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["x",2,3]
@@ -395,6 +411,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["x","y"]
@@ -418,6 +435,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo","bar",37]
@@ -441,6 +459,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null]
@@ -464,6 +483,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null]
@@ -486,6 +506,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -509,6 +530,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"quux":"boom"}
@@ -532,6 +554,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -555,6 +578,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobarbaz"
@@ -578,6 +602,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -601,6 +626,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"vroom":2}
@@ -624,6 +650,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"ármányos":2}
@@ -647,6 +674,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"élmény":2}
@@ -670,6 +698,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -693,6 +722,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"quux":true}
@@ -716,6 +746,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"quux":12}
@@ -739,6 +770,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":true}
@@ -762,6 +794,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -785,6 +818,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"quux":true}
@@ -808,6 +842,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":true}
@@ -831,6 +866,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":null}
@@ -853,6 +889,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz","bar":2}
@@ -876,6 +913,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz"}
@@ -899,6 +937,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -922,6 +961,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz","bar":"quux"}
@@ -945,6 +985,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux","bar":2,"baz":null}
@@ -968,6 +1009,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux","baz":null}
@@ -991,6 +1033,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2,"baz":null}
@@ -1014,6 +1057,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux","bar":2}
@@ -1037,6 +1081,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -1060,6 +1105,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 25
@@ -1083,6 +1129,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 35
@@ -1106,6 +1153,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1129,6 +1177,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1152,6 +1201,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1175,6 +1225,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1198,6 +1249,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1221,6 +1273,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1244,6 +1297,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1267,6 +1321,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1290,6 +1345,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1313,6 +1369,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -1336,6 +1393,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -1359,6 +1417,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1382,6 +1441,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 5
@@ -1405,6 +1465,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -1428,6 +1489,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 15
@@ -1451,6 +1513,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2
@@ -1474,6 +1537,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 10
@@ -1497,6 +1561,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 6
@@ -1520,6 +1585,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 30
@@ -1542,6 +1608,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1565,6 +1632,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.5
@@ -1588,6 +1656,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -1611,6 +1680,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.5
@@ -1634,6 +1704,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -1657,6 +1728,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -1680,6 +1752,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1703,6 +1776,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1726,6 +1800,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1749,6 +1824,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1772,6 +1848,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -1795,6 +1872,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz"}
@@ -1818,6 +1896,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz","bar":2}
@@ -1841,6 +1920,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":2,"bar":"quux"}
@@ -1864,6 +1944,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1887,6 +1968,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -1910,6 +1992,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -1933,6 +2016,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -1949,6 +2033,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__numberIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -1966,6 +2051,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__stringIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -1983,6 +2069,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__booleanTrueIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -2000,6 +2087,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__booleanFalseIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -2017,6 +2105,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__nullIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -2034,6 +2123,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__objectIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -2051,6 +2141,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__emptyObjectIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -2068,6 +2159,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__arrayIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -2085,6 +2177,7 @@ class SchemaSuiteTest {
      */
     @Test
     fun boolean_schema_booleanSchema_true__emptyArrayIsValid() {
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -2108,6 +2201,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -2131,6 +2225,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -2154,6 +2249,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -2177,6 +2273,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -2200,6 +2297,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -2223,6 +2321,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -2246,6 +2345,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -2269,6 +2369,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -2292,6 +2393,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -2314,6 +2416,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2
@@ -2337,6 +2440,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 5
@@ -2360,6 +2464,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -2383,6 +2488,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar","baz":"bax"}
@@ -2406,6 +2512,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"baz":"bax","foo":"bar"}
@@ -2429,6 +2536,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -2452,6 +2560,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -2475,6 +2584,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar"}]
@@ -2498,6 +2608,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [2]
@@ -2521,6 +2632,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -2544,6 +2656,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -2567,6 +2680,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -2590,6 +2704,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -2613,6 +2728,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -2636,6 +2752,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.0
@@ -2659,6 +2776,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -2682,6 +2800,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -2705,6 +2824,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -2728,6 +2848,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false]
@@ -2751,6 +2872,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0]
@@ -2774,6 +2896,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0.0]
@@ -2797,6 +2920,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true]
@@ -2820,6 +2944,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -2843,6 +2968,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1.0]
@@ -2866,6 +2992,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":false}
@@ -2889,6 +3016,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":0}
@@ -2912,6 +3040,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":0.0}
@@ -2935,6 +3064,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":true}
@@ -2958,6 +3088,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":1}
@@ -2981,6 +3112,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":1.0}
@@ -3004,6 +3136,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -3027,6 +3160,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -3050,6 +3184,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.0
@@ -3073,6 +3208,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -3096,6 +3232,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -3119,6 +3256,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -3142,6 +3280,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -3165,6 +3304,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -3188,6 +3328,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -3211,6 +3352,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2
@@ -3234,6 +3376,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2
@@ -3257,6 +3400,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2.0
@@ -3280,6 +3424,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.0
@@ -3303,6 +3448,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2.00001
@@ -3326,6 +3472,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 9007199254740992
@@ -3349,6 +3496,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 9007199254740991
@@ -3372,6 +3520,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 9007199254740992.0
@@ -3395,6 +3544,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 9007199254740991.0
@@ -3418,6 +3568,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hello\u0000there"
@@ -3441,6 +3592,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hellothere"
@@ -3463,6 +3615,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,4,5]
@@ -3486,6 +3639,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,4,6]
@@ -3509,6 +3663,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,4,5,6]
@@ -3532,6 +3687,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [2,3,4]
@@ -3555,6 +3711,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -3578,6 +3735,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -3601,6 +3759,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,4,5]
@@ -3624,6 +3783,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,4,5,5]
@@ -3647,6 +3807,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3,4]
@@ -3670,6 +3831,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -3693,6 +3855,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -3716,6 +3879,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -3739,6 +3903,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -3762,6 +3927,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "contains does not apply to strings"
@@ -3785,6 +3951,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [2,4,8]
@@ -3808,6 +3975,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [3,6,9]
@@ -3831,6 +3999,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [6,12]
@@ -3854,6 +4023,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,5]
@@ -3877,6 +4047,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -3900,6 +4071,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -3923,6 +4095,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null]
@@ -3945,6 +4118,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":13}
@@ -3968,6 +4142,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -3991,6 +4166,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":"good"}
@@ -4014,6 +4190,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4037,6 +4214,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"alpha":1}
@@ -4060,6 +4238,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"alpha":5}
@@ -4083,6 +4262,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4105,6 +4285,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"definitions":{"foo":{"type":"integer"}}}
@@ -4128,6 +4309,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"definitions":{"foo":{"type":1}}}
@@ -4150,6 +4332,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4173,6 +4356,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -4196,6 +4380,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -4219,6 +4404,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -4242,6 +4428,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["bar"]
@@ -4265,6 +4452,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -4288,6 +4476,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -4311,6 +4500,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4334,6 +4524,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -4357,6 +4548,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -4380,6 +4572,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4403,6 +4596,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -4426,6 +4620,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"quux":3}
@@ -4449,6 +4644,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"quux":2}
@@ -4472,6 +4668,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":1,"quux":2}
@@ -4495,6 +4692,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"quux":1}
@@ -4518,6 +4716,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -4541,6 +4740,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux"}
@@ -4564,6 +4764,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux","bar":2}
@@ -4587,6 +4788,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":2,"bar":"quux"}
@@ -4610,6 +4812,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"quux","bar":"quux"}
@@ -4633,6 +4836,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -4656,6 +4860,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -4679,6 +4884,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -4702,6 +4908,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -4725,6 +4932,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":1,"foo\rbar":2}
@@ -4748,6 +4956,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\tbar":1,"a":2,"b":3,"c":4}
@@ -4771,6 +4980,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo'bar":1,"foo\"bar":2}
@@ -4794,6 +5004,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":1,"foo":2}
@@ -4817,6 +5028,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\tbar":1,"a":2}
@@ -4840,6 +5052,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo'bar":1}
@@ -4863,6 +5076,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\"bar":2}
@@ -4886,6 +5100,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -4909,6 +5124,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":1}
@@ -4932,6 +5148,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -4955,6 +5172,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"baz":1}
@@ -4977,6 +5195,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -5000,6 +5219,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 4
@@ -5023,6 +5243,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -5046,6 +5267,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -5069,6 +5291,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":false}
@@ -5092,6 +5315,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -5115,6 +5339,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12,"boo":42}
@@ -5138,6 +5363,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -5161,6 +5387,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 6
@@ -5184,6 +5411,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "test"
@@ -5207,6 +5435,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foo","bar":"bar"}
@@ -5230,6 +5459,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foot","bar":"bar"}
@@ -5253,6 +5483,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foo","bar":"bart"}
@@ -5276,6 +5507,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":"bar"}
@@ -5299,6 +5531,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foo"}
@@ -5322,6 +5555,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -5345,6 +5579,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo\nbar"
@@ -5368,6 +5603,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo\rbar"
@@ -5391,6 +5627,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "abc"
@@ -5414,6 +5651,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -5437,6 +5675,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -5460,6 +5699,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.0
@@ -5483,6 +5723,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false]
@@ -5506,6 +5747,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0]
@@ -5529,6 +5771,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0.0]
@@ -5552,6 +5795,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -5575,6 +5819,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -5598,6 +5843,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -5621,6 +5867,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true]
@@ -5644,6 +5891,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -5667,6 +5915,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1.0]
@@ -5690,6 +5939,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -5713,6 +5963,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -5736,6 +5987,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.0
@@ -5759,6 +6011,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false]
@@ -5782,6 +6035,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0]
@@ -5805,6 +6059,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0.0]
@@ -5828,6 +6083,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -5851,6 +6107,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -5874,6 +6131,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -5897,6 +6155,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true]
@@ -5920,6 +6179,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -5943,6 +6203,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1.0]
@@ -5966,6 +6227,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hello\u0000there"
@@ -5989,6 +6251,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hellothere"
@@ -6011,6 +6274,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.2
@@ -6034,6 +6298,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3.0
@@ -6057,6 +6322,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3.5
@@ -6080,6 +6346,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "x"
@@ -6102,6 +6369,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.2
@@ -6125,6 +6393,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -6148,6 +6417,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.6
@@ -6171,6 +6441,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "x"
@@ -6193,6 +6464,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6216,6 +6488,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6239,6 +6512,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6262,6 +6536,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6285,6 +6560,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6308,6 +6584,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -6331,6 +6608,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6354,6 +6632,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6377,6 +6656,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6400,6 +6680,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6423,6 +6704,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6446,6 +6728,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -6469,6 +6752,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6492,6 +6776,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6515,6 +6800,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6538,6 +6824,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6561,6 +6848,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6584,6 +6872,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -6607,6 +6896,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6630,6 +6920,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6653,6 +6944,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6676,6 +6968,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6699,6 +6992,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6722,6 +7016,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -6745,6 +7040,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6768,6 +7064,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6791,6 +7088,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6814,6 +7112,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6837,6 +7136,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6860,6 +7160,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -6883,6 +7184,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -6906,6 +7208,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -6929,6 +7232,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -6952,6 +7256,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -6975,6 +7280,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -6998,6 +7304,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7021,6 +7328,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7044,6 +7352,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7067,6 +7376,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7090,6 +7400,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7113,6 +7424,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7136,6 +7448,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7159,6 +7472,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7182,6 +7496,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7205,6 +7520,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7228,6 +7544,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7251,6 +7568,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7274,6 +7592,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7297,6 +7616,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7320,6 +7640,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7343,6 +7664,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7366,6 +7688,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7389,6 +7712,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7412,6 +7736,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7435,6 +7760,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7458,6 +7784,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7481,6 +7808,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7504,6 +7832,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7527,6 +7856,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7550,6 +7880,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7573,6 +7904,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7596,6 +7928,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7619,6 +7952,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7642,6 +7976,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7665,6 +8000,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7688,6 +8024,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7711,6 +8048,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7734,6 +8072,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7757,6 +8096,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7780,6 +8120,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7803,6 +8144,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7826,6 +8168,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7849,6 +8192,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -7872,6 +8216,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -7895,6 +8240,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -7918,6 +8264,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -7941,6 +8288,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -7964,6 +8312,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -7987,6 +8336,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -8010,6 +8360,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -8033,6 +8384,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -8056,6 +8408,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -8079,6 +8432,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -8102,6 +8456,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -8125,6 +8480,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -8148,6 +8504,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -8171,6 +8528,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -8194,6 +8552,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -8217,6 +8576,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -8240,6 +8600,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -8263,6 +8624,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -8286,6 +8648,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -8309,6 +8672,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -8332,6 +8696,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -8355,6 +8720,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -8378,6 +8744,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -8401,6 +8768,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -8424,6 +8792,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 13.7
@@ -8447,6 +8816,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -8470,6 +8840,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -8493,6 +8864,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -8516,6 +8888,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -8538,6 +8911,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -8561,6 +8935,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hello"
@@ -8584,6 +8959,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -8607,6 +8983,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hello"
@@ -8630,6 +9007,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -8653,6 +9031,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "hello"
@@ -8676,6 +9055,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -1
@@ -8699,6 +9079,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -100
@@ -8722,6 +9103,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -8745,6 +9127,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -1
@@ -8768,6 +9151,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 4
@@ -8791,6 +9175,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -8814,6 +9199,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -1
@@ -8837,6 +9223,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -100
@@ -8860,6 +9247,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 4
@@ -8883,6 +9271,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -8906,6 +9295,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -100
@@ -8929,6 +9319,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -8952,6 +9343,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "then"
@@ -8975,6 +9367,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "else"
@@ -8998,6 +9391,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "then"
@@ -9021,6 +9415,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "else"
@@ -9044,6 +9439,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "yes"
@@ -9067,6 +9463,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "other"
@@ -9090,6 +9487,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "no"
@@ -9113,6 +9511,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "invalid"
@@ -9135,6 +9534,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -9158,6 +9558,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"a string"}
@@ -9180,6 +9581,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -9203,6 +9605,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"x"]
@@ -9226,6 +9629,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -9249,6 +9653,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"0":"invalid","length":1}
@@ -9272,6 +9677,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo"]
@@ -9295,6 +9701,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo",1]
@@ -9318,6 +9725,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -9341,6 +9749,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo",true]
@@ -9364,6 +9773,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -9387,6 +9797,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"0":"invalid","1":"valid","length":2}
@@ -9410,6 +9821,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo",true]
@@ -9433,6 +9845,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -9456,6 +9869,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo",true]
@@ -9479,6 +9893,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -9502,6 +9917,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -9525,6 +9941,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo"]
@@ -9548,6 +9965,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -9571,6 +9989,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
@@ -9594,6 +10013,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
@@ -9617,6 +10037,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[{"foo":null},{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
@@ -9640,6 +10061,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":null},[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
@@ -9663,6 +10085,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[{},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
@@ -9686,6 +10109,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[{"foo":null}],[{"foo":null}]]
@@ -9709,6 +10133,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[[[1]],[[2],[3]]],[[[4],[5],[6]]]]
@@ -9732,6 +10157,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[[["1"]],[[2],[3]]],[[[4],[5],[6]]]]
@@ -9755,6 +10181,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[[1],[2],[3]],[[4],[5],[6]]]
@@ -9778,6 +10205,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null]
@@ -9801,6 +10229,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [null]
@@ -9823,6 +10252,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -9846,6 +10276,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -9869,6 +10300,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -9892,6 +10324,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -9915,6 +10348,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -9938,6 +10372,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -9960,6 +10395,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "f"
@@ -9983,6 +10419,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "fo"
@@ -10006,6 +10443,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -10029,6 +10467,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 100
@@ -10052,6 +10491,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "💩💩"
@@ -10075,6 +10515,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "f"
@@ -10098,6 +10539,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -10120,6 +10562,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -10143,6 +10586,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -10166,6 +10610,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"baz":3}
@@ -10189,6 +10634,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -10212,6 +10658,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -10235,6 +10682,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -10258,6 +10706,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -10281,6 +10730,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"baz":3}
@@ -10304,6 +10754,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -10327,6 +10778,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -10349,6 +10801,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.6
@@ -10372,6 +10825,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3.0
@@ -10395,6 +10849,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3.5
@@ -10418,6 +10873,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "x"
@@ -10441,6 +10897,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 299.97
@@ -10464,6 +10921,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 300
@@ -10487,6 +10945,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 300.00
@@ -10510,6 +10969,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 300.5
@@ -10532,6 +10992,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -10555,6 +11016,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1]
@@ -10578,6 +11040,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -10601,6 +11064,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -10624,6 +11088,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -10647,6 +11112,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -10669,6 +11135,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -10692,6 +11159,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "fo"
@@ -10715,6 +11183,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "f"
@@ -10738,6 +11207,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -10761,6 +11231,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "💩"
@@ -10784,6 +11255,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -10807,6 +11279,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "f"
@@ -10829,6 +11302,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -10852,6 +11326,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -10875,6 +11350,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -10898,6 +11374,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -10921,6 +11398,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -10944,6 +11422,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -10967,6 +11446,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -10990,6 +11470,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -11012,6 +11493,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.6
@@ -11035,6 +11517,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -11058,6 +11541,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.6
@@ -11081,6 +11565,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "x"
@@ -11104,6 +11589,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -1
@@ -11127,6 +11613,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -11150,6 +11637,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2
@@ -11173,6 +11661,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2.0
@@ -11196,6 +11685,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -2.0001
@@ -11219,6 +11709,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 -3
@@ -11242,6 +11733,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "x"
@@ -11264,6 +11756,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 10
@@ -11287,6 +11780,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 7
@@ -11310,6 +11804,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -11333,6 +11828,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -11356,6 +11852,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 4.5
@@ -11379,6 +11876,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 35
@@ -11402,6 +11900,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.0075
@@ -11425,6 +11924,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0.00751
@@ -11448,6 +11948,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1e308
@@ -11471,6 +11972,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12391239123
@@ -11493,6 +11995,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -11516,6 +12019,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -11539,6 +12043,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -11562,6 +12067,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -11585,6 +12091,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -11608,6 +12115,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -11631,6 +12139,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -11654,6 +12163,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -11677,6 +12187,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -11700,6 +12211,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":1,"baz":2}
@@ -11723,6 +12235,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -11746,6 +12259,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -11769,6 +12283,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -11792,6 +12307,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -11815,6 +12331,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -11838,6 +12355,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -11861,6 +12379,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -11884,6 +12403,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -11907,6 +12427,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -11930,6 +12451,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -11953,6 +12475,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -11976,6 +12499,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -11999,6 +12523,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -12022,6 +12547,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -12045,6 +12571,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -12068,6 +12595,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -12091,6 +12619,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -12114,6 +12643,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -12137,6 +12667,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -12160,6 +12691,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12183,6 +12715,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -12206,6 +12739,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -12229,6 +12763,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -12252,6 +12787,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -12275,6 +12811,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -12298,6 +12835,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -12321,6 +12859,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -12344,6 +12883,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12366,6 +12906,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -12389,6 +12930,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 2.5
@@ -12412,6 +12954,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -12435,6 +12978,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.5
@@ -12458,6 +13002,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 3
@@ -12481,6 +13026,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -12504,6 +13050,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12527,6 +13074,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12550,6 +13098,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12573,6 +13122,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12596,6 +13146,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12619,6 +13170,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -12642,6 +13194,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz"}
@@ -12665,6 +13218,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"baz","bar":2}
@@ -12688,6 +13242,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":2,"bar":"quux"}
@@ -12711,6 +13266,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -12734,6 +13290,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -12757,6 +13314,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -12780,6 +13338,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -12803,6 +13362,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"baz":3}
@@ -12826,6 +13386,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2,"baz":3}
@@ -12849,6 +13410,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":8}
@@ -12872,6 +13434,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foo"}
@@ -12895,6 +13458,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"foo","bar":8}
@@ -12918,6 +13482,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"baz":"quux"}
@@ -12941,6 +13506,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -12964,6 +13530,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -12986,6 +13553,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "aaa"
@@ -13009,6 +13577,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "abc"
@@ -13032,6 +13601,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -13055,6 +13625,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -13078,6 +13649,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -13101,6 +13673,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -13124,6 +13697,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -13147,6 +13721,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -13170,6 +13745,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "xxaayy"
@@ -13192,6 +13768,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -13215,6 +13792,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"foooooo":2}
@@ -13238,6 +13816,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar","fooooo":2}
@@ -13261,6 +13840,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar","foooooo":"baz"}
@@ -13284,6 +13864,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo"]
@@ -13307,6 +13888,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -13330,6 +13912,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -13353,6 +13936,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":21}
@@ -13376,6 +13960,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"aaaa":18}
@@ -13399,6 +13984,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":21,"aaaa":18}
@@ -13422,6 +14008,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":"bar"}
@@ -13445,6 +14032,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"aaaa":31}
@@ -13468,6 +14056,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"aaa":"foo","aaaa":31}
@@ -13491,6 +14080,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"answer 1":"42"}
@@ -13514,6 +14104,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a31b":null}
@@ -13537,6 +14128,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a_x_3":3}
@@ -13560,6 +14152,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a_X_3":3}
@@ -13583,6 +14176,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -13606,6 +14200,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -13629,6 +14224,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -13652,6 +14248,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foobar":1}
@@ -13675,6 +14272,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -13698,6 +14296,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foobar":null}
@@ -13720,6 +14319,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":"baz"}
@@ -13743,6 +14343,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":{}}
@@ -13766,6 +14367,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[],"bar":{}}
@@ -13789,6 +14391,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"quux":[]}
@@ -13812,6 +14415,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -13835,6 +14439,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -13858,6 +14463,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[1,2]}
@@ -13881,6 +14487,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[1,2,3,4]}
@@ -13904,6 +14511,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[]}
@@ -13927,6 +14535,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"fxo":[1,2]}
@@ -13950,6 +14559,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"fxo":[]}
@@ -13973,6 +14583,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":[]}
@@ -13996,6 +14607,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"quux":3}
@@ -14019,6 +14631,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"quux":"foo"}
@@ -14042,6 +14655,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -14065,6 +14679,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -14088,6 +14703,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":2}
@@ -14111,6 +14727,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1,"bar":2}
@@ -14134,6 +14751,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":1,"foo\"bar":1,"foo\\bar":1,"foo\rbar":1,"foo\tbar":1,"foo\fbar":1}
@@ -14157,6 +14775,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":"1","foo\"bar":"1","foo\\bar":"1","foo\rbar":"1","foo\tbar":"1","foo\fbar":"1"}
@@ -14180,6 +14799,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":null}
@@ -14203,13 +14823,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 []
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             true,
             """properties whose names are Javascript object property names -> ignores arrays""")
@@ -14227,13 +14847,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 12
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             true,
             """properties whose names are Javascript object property names -> ignores other non-objects""")
@@ -14251,13 +14871,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             true,
             """properties whose names are Javascript object property names -> none of the properties mentioned""")
@@ -14275,13 +14895,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"__proto__":"foo"}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             false,
             """properties whose names are Javascript object property names -> __proto__ not valid""")
@@ -14299,13 +14919,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"toString":{"length":37}}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             false,
             """properties whose names are Javascript object property names -> toString not valid""")
@@ -14323,13 +14943,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"constructor":{"length":37}}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             false,
             """properties whose names are Javascript object property names -> constructor not valid""")
@@ -14347,13 +14967,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"__proto__":12,"toString":{"length":"foo"},"constructor":37}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
             """,
             true,
             """properties whose names are Javascript object property names -> all present and valid""")
@@ -14370,6 +14990,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"f":{},"foo":{}}
@@ -14393,6 +15014,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{},"foobar":{}}
@@ -14416,6 +15038,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -14439,6 +15062,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3,4]
@@ -14462,6 +15086,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foobar"
@@ -14485,6 +15110,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -14508,6 +15134,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"a":{},"aa":{},"aaa":{}}
@@ -14531,6 +15158,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"aaA":{}}
@@ -14554,6 +15182,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -14577,6 +15206,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -14600,6 +15230,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -14623,6 +15254,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -14646,6 +15278,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -14668,6 +15301,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":false}
@@ -14691,6 +15325,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"foo":false}}
@@ -14714,6 +15349,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":false}
@@ -14737,6 +15373,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":false}}
@@ -14760,6 +15397,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":3}
@@ -14783,6 +15421,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":true}
@@ -14806,6 +15445,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -14829,6 +15469,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,"foo"]
@@ -14852,6 +15493,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"slash":"aoeu"}
@@ -14875,6 +15517,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"tilde":"aoeu"}
@@ -14898,6 +15541,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"percent":"aoeu"}
@@ -14921,6 +15565,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"slash":123}
@@ -14944,6 +15589,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"tilde":123}
@@ -14967,6 +15613,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"percent":123}
@@ -14990,6 +15637,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 5
@@ -15013,6 +15661,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15036,6 +15685,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[]}
@@ -15059,6 +15709,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":[1,2,3]}
@@ -15082,6 +15733,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"string"}
@@ -15105,6 +15757,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15128,6 +15781,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -15151,6 +15805,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"minLength":1}
@@ -15174,6 +15829,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"minLength":-1}
@@ -15197,6 +15853,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"${'$'}ref":"a"}
@@ -15220,6 +15877,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"${'$'}ref":2}
@@ -15243,6 +15901,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"${'$'}ref":"a"}
@@ -15266,6 +15925,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"${'$'}ref":2}
@@ -15289,6 +15949,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -15312,6 +15973,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -15335,6 +15997,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"meta":"root","nodes":[{"value":1,"subtree":{"meta":"child","nodes":[{"value":1.1},{"value":1.2}]}},{"value":2,"subtree":{"meta":"child","nodes":[{"value":2.1},{"value":2.2}]}}]}
@@ -15358,6 +16021,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"meta":"root","nodes":[{"value":1,"subtree":{"meta":"child","nodes":[{"value":"string is invalid"},{"value":1.2}]}},{"value":2,"subtree":{"meta":"child","nodes":[{"value":2.1},{"value":2.2}]}}]}
@@ -15381,6 +16045,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\"bar":1}
@@ -15404,6 +16069,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\"bar":"1"}
@@ -15427,6 +16093,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -15450,6 +16117,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15473,6 +16141,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -15496,6 +16165,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15519,6 +16189,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -15542,6 +16213,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15565,6 +16237,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "this is a string"
@@ -15588,6 +16261,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"type":"string"}
@@ -15611,6 +16285,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"${'$'}ref":"#/definitions/a_string"}
@@ -15634,6 +16309,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":1},"bar":"a"}
@@ -15657,6 +16333,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":"a"},"bar":1}
@@ -15680,6 +16357,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":"a"},"bar":"a"}
@@ -15703,6 +16381,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":1},"bar":"a"}
@@ -15726,6 +16405,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":"a"},"bar":1}
@@ -15749,6 +16429,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":{"bar":"a"},"bar":"a"}
@@ -15772,6 +16453,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -15795,6 +16477,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -15818,6 +16501,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":37}
@@ -15841,6 +16525,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -15864,6 +16549,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -15887,6 +16573,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -15910,6 +16597,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -15933,6 +16621,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -15956,6 +16645,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -15979,6 +16669,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -16002,6 +16693,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -16025,6 +16717,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -16048,6 +16741,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -16071,6 +16765,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -16094,6 +16789,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":"bar"}
@@ -16117,6 +16813,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":12}
@@ -16140,6 +16837,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -16163,6 +16861,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -16186,6 +16885,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -16209,6 +16909,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -16232,6 +16933,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -16255,6 +16957,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -16278,6 +16981,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -16301,6 +17005,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -16324,6 +17029,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16347,6 +17053,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16370,6 +17077,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16393,6 +17101,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16416,6 +17125,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16439,6 +17149,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16461,6 +17172,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16484,6 +17196,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16507,6 +17220,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16530,6 +17244,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16553,6 +17268,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16576,6 +17292,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16599,6 +17316,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[1]]
@@ -16622,6 +17340,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["a"]]
@@ -16645,6 +17364,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"list":[1]}
@@ -16668,6 +17388,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"list":["a"]}
@@ -16691,6 +17412,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"list":[1]}
@@ -16714,6 +17436,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"list":["a"]}
@@ -16737,6 +17460,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"name":"foo"}
@@ -16760,6 +17484,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"name":null}
@@ -16783,6 +17508,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"name":{"name":null}}
@@ -16806,6 +17532,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":1}
@@ -16829,6 +17556,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":"a"}
@@ -16852,6 +17580,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16875,6 +17604,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -16898,6 +17628,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"name":{"foo":1}}
@@ -16921,6 +17652,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"name":{"foo":"a"}}
@@ -16944,6 +17676,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -16967,6 +17700,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "a"
@@ -16989,6 +17723,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":1}
@@ -17012,6 +17747,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"bar":1}
@@ -17035,6 +17771,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -17058,6 +17795,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -17081,6 +17819,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 12
@@ -17104,6 +17843,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -17127,6 +17867,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -17150,6 +17891,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":1,"foo\"bar":1,"foo\\bar":1,"foo\rbar":1,"foo\tbar":1,"foo\fbar":1}
@@ -17173,6 +17915,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo\nbar":"1","foo\"bar":"1"}
@@ -17196,13 +17939,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 []
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             true,
             """required properties whose names are Javascript object property names -> ignores arrays""")
@@ -17220,13 +17963,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 12
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             true,
             """required properties whose names are Javascript object property names -> ignores other non-objects""")
@@ -17244,13 +17987,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             false,
             """required properties whose names are Javascript object property names -> none of the properties mentioned""")
@@ -17268,13 +18011,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"__proto__":"foo"}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             false,
             """required properties whose names are Javascript object property names -> __proto__ present""")
@@ -17292,13 +18035,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"toString":{"length":37}}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             false,
             """required properties whose names are Javascript object property names -> toString present""")
@@ -17316,13 +18059,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"constructor":{"length":37}}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             false,
             """required properties whose names are Javascript object property names -> constructor present""")
@@ -17340,13 +18083,13 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
                 {"__proto__":12,"toString":{"length":"foo"},"constructor":37}
             """,
             """
-                // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
-{"required":["__proto__","toString","constructor"]}
+                {"required":["__proto__","toString","constructor"]}
             """,
             true,
             """required properties whose names are Javascript object property names -> all present""")
@@ -17363,6 +18106,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -17386,6 +18130,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -17409,6 +18154,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -17432,6 +18178,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -17455,6 +18202,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "1"
@@ -17478,6 +18226,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -17501,6 +18250,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -17524,6 +18274,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -17547,6 +18298,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -17570,6 +18322,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -17593,6 +18346,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.0
@@ -17616,6 +18370,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -17639,6 +18394,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -17662,6 +18418,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "1"
@@ -17685,6 +18442,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -17708,6 +18466,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -17731,6 +18490,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -17754,6 +18514,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -17777,6 +18538,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -17800,6 +18562,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -17823,6 +18586,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -17846,6 +18610,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "1"
@@ -17869,6 +18634,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -17892,6 +18658,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -17915,6 +18682,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -17938,6 +18706,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -17961,6 +18730,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -17984,6 +18754,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -18007,6 +18778,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -18030,6 +18802,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18053,6 +18826,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -18076,6 +18850,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -18099,6 +18874,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -18122,6 +18898,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -18145,6 +18922,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -18168,6 +18946,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -18191,6 +18970,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18214,6 +18994,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -18237,6 +19018,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -18260,6 +19042,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -18283,6 +19066,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -18306,6 +19090,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -18329,6 +19114,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -18352,6 +19138,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -18375,6 +19162,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18398,6 +19186,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -18421,6 +19210,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -18444,6 +19234,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -18467,6 +19258,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -18490,6 +19282,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -18513,6 +19306,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -18536,6 +19330,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -18559,6 +19354,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -18582,6 +19378,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 0
@@ -18605,6 +19402,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18628,6 +19426,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ""
@@ -18651,6 +19450,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -18674,6 +19474,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -18697,6 +19498,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -18720,6 +19522,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 false
@@ -18743,6 +19546,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -18766,6 +19570,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1
@@ -18789,6 +19594,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18812,6 +19618,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 1.1
@@ -18835,6 +19642,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {}
@@ -18858,6 +19666,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 []
@@ -18881,6 +19690,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 true
@@ -18904,6 +19714,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -18927,6 +19738,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -18950,6 +19762,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -18973,6 +19786,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -18996,6 +19810,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":123}
@@ -19019,6 +19834,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -19042,6 +19858,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -19065,6 +19882,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -19088,6 +19906,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,3]
@@ -19111,6 +19930,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 {"foo":123}
@@ -19134,6 +19954,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 null
@@ -19157,6 +19978,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 123
@@ -19180,6 +20002,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 "foo"
@@ -19202,6 +20025,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -19225,6 +20049,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,1]
@@ -19248,6 +20073,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2,1]
@@ -19271,6 +20097,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1.0,1.00,1]
@@ -19294,6 +20121,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0,false]
@@ -19317,6 +20145,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,true]
@@ -19340,6 +20169,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo","bar","baz"]
@@ -19363,6 +20193,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 ["foo","bar","foo"]
@@ -19386,6 +20217,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar"},{"foo":"baz"}]
@@ -19409,6 +20241,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar"},{"foo":"bar"}]
@@ -19432,6 +20265,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar","bar":"foo"},{"bar":"foo","foo":"bar"}]
@@ -19455,6 +20289,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":false}}}]
@@ -19478,6 +20313,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":true}}}]
@@ -19501,6 +20337,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["foo"],["bar"]]
@@ -19524,6 +20361,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["foo"],["foo"]]
@@ -19547,6 +20385,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["foo"],["bar"],["foo"]]
@@ -19570,6 +20409,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,true]
@@ -19593,6 +20433,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0,false]
@@ -19616,6 +20457,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[1],[true]]
@@ -19639,6 +20481,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[0],[false]]
@@ -19662,6 +20505,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[[1],"foo"],[[true],"foo"]]
@@ -19685,6 +20529,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [[[0],"foo"],[[false],"foo"]]
@@ -19708,6 +20553,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{},[1],true,null,1,"{}"]
@@ -19731,6 +20577,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{},[1],true,null,{},1]
@@ -19754,6 +20601,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"a":1,"b":2},{"a":2,"b":1}]
@@ -19777,6 +20625,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"a":1,"b":2},{"b":2,"a":1}]
@@ -19800,6 +20649,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"a":false},{"a":0}]
@@ -19823,6 +20673,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"a":true},{"a":1}]
@@ -19846,6 +20697,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true]
@@ -19869,6 +20721,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false]
@@ -19892,6 +20745,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,false]
@@ -19915,6 +20769,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,true]
@@ -19938,6 +20793,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,"foo","bar"]
@@ -19961,6 +20817,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false,"foo","bar"]
@@ -19984,6 +20841,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,"foo","foo"]
@@ -20007,6 +20865,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false,"foo","foo"]
@@ -20030,6 +20889,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true]
@@ -20053,6 +20913,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false]
@@ -20076,6 +20937,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,false]
@@ -20099,6 +20961,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,true]
@@ -20122,6 +20985,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,null]
@@ -20145,6 +21009,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,2]
@@ -20168,6 +21033,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,1]
@@ -20191,6 +21057,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1.0,1.00,1]
@@ -20214,6 +21081,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0,false]
@@ -20237,6 +21105,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,true]
@@ -20260,6 +21129,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar"},{"foo":"baz"}]
@@ -20283,6 +21153,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":"bar"},{"foo":"bar"}]
@@ -20306,6 +21177,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":false}}}]
@@ -20329,6 +21201,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":true}}}]
@@ -20352,6 +21225,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["foo"],["bar"]]
@@ -20375,6 +21249,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [["foo"],["foo"]]
@@ -20398,6 +21273,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [1,true]
@@ -20421,6 +21297,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [0,false]
@@ -20444,6 +21321,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{},[1],true,null,1]
@@ -20467,6 +21345,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [{},[1],true,null,{},1]
@@ -20490,6 +21369,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true]
@@ -20513,6 +21393,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false]
@@ -20536,6 +21417,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,false]
@@ -20559,6 +21441,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,true]
@@ -20582,6 +21465,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,"foo","bar"]
@@ -20605,6 +21489,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false,"foo","bar"]
@@ -20628,6 +21513,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,"foo","foo"]
@@ -20651,6 +21537,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false,"foo","foo"]
@@ -20674,6 +21561,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true]
@@ -20697,6 +21585,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,false]
@@ -20720,6 +21609,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,false]
@@ -20743,6 +21633,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [true,true]
@@ -20766,6 +21657,7 @@ class SchemaSuiteTest {
         * [org.kson.jsonsuite.schemaTestSuiteExclusions]
         */
         return
+        
         assertKsonEnforcesSchema(
             """
                 [false,true,null]

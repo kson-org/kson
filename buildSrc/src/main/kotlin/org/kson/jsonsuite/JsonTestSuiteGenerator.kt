@@ -247,7 +247,7 @@ class SchemaSuiteTest {
 ${    tests.joinToString("\n") {
         val theTests = ArrayList<String>()
         for (schema in it.schemaTestGroups) {
-            val schemaComment = if (schema.comment != null) "// " + schema.comment + "\n" else ""
+            val schemaComment = if (schema.comment != null) "// " + schema.comment else ""
             for (test in schema.tests) {
                 // construct a legal and unique name for this test
                 val schemaTestName = "${formatForTestName(it.testFileName)}_${formatForTestName(schema.description)}_${formatForTestName(test.description)}"
@@ -271,12 +271,13 @@ ${    tests.joinToString("\n") {
                     else {
                             ""
                         }}
+                    |        $schemaComment
                     |        assertKsonEnforcesSchema(
                     |            ${"\"\"\""}
                     |                ${formatForTest(test.data)}
                     |            ${"\"\"\""},
                     |            ${"\"\"\""}
-                    |                ${schemaComment}${formatForTest(schema.schema)}
+                    |                ${formatForTest(schema.schema)}
                     |            ${"\"\"\""},
                     |            ${test.valid},
                     |            ${"\"\"\""}${formatForTest(schema.description)} -> ${formatForTest(test.description)}${"\"\"\""})
