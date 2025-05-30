@@ -180,4 +180,22 @@ class KsonTestString : KsonTest() {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testUnquotedNonAlphaNumericString() {
+        assertParsesTo(
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+               "水滴石穿"
+            """.trimIndent()
+        )
+    }
 }
