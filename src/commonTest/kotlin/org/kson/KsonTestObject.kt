@@ -94,6 +94,34 @@ class KsonTestObject : KsonTest() {
     }
 
     @Test
+    fun testProhibitedKey(){
+        assertParsesTo(
+            """
+                "false": 'false' 
+                "true": 'true'
+                "null": "null" 
+            """.trimIndent(),
+            """
+                'false': 'false'
+                'true': 'true'
+                'null': 'null'
+            """.trimIndent(),
+            """
+                "false": "false"
+                "true": "true"
+                "null": "null"
+            """.trimIndent(),
+            """
+                {
+                  "false": "false",
+                  "true": "true",
+                  "null": "null"
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testObjectSourceWithImmediateTrailingComment() {
         assertParsesTo(
             """
