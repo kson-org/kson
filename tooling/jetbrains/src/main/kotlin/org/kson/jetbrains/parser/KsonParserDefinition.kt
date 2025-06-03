@@ -13,6 +13,7 @@ import com.intellij.psi.tree.TokenSet
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.psi.KsonPsiElement
 import org.kson.jetbrains.psi.KsonPsiFile
+import org.kson.parser.ParsedElementType
 import org.kson.parser.TokenType
 
 class KsonParserDefinition : ParserDefinition {
@@ -41,7 +42,11 @@ class KsonParserDefinition : ParserDefinition {
     }
 
     override fun createElement(node: ASTNode): PsiElement {
-        return KsonPsiElement(node)
+        return when (node.elementType) {
+            elem(ParsedElementType.EMBED_BLOCK) -> org.kson.jetbrains.psi.KsonEmbedBlock(node)
+            elem(TokenType.EMBED_CONTENT) -> org.kson.jetbrains.psi.KsonEmbedContent(node)
+            else -> KsonPsiElement(node)
+        }
     }
 
     override fun createFile(viewProvider: FileViewProvider): PsiFile {

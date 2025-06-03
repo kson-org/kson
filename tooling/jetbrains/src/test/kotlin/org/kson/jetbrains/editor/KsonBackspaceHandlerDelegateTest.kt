@@ -3,7 +3,7 @@ package org.kson.jetbrains.editor
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import org.kson.jetbrains.file.KsonFileType
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
     /**

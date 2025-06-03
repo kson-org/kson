@@ -1,4 +1,4 @@
-package org.kson.parser.delimiters
+package org.kson.parser.behavior.embedblock
 
 import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
 
@@ -58,6 +58,17 @@ sealed class EmbedDelim(val char: Char) {
     fun countDelimiterOccurrences(content: String): Int {
         return needsEscapesPattern.findAll(content).count()
     }
+
+    /**
+     * Returns a list of indices where delimiters are escaped in the content.
+     * For each escaped delimiter like %\%, returns the index of the first character.
+     */
+    fun findEscapedDelimiterIndices(content: String): List<Int> {
+        return needsEscapesPattern.findAll(content)
+            .map { it.range.first }
+            .toList()
+    }
+
 
     /**
      * Perform any needed escapes on this embed content

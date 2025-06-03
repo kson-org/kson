@@ -3,13 +3,13 @@ package org.kson.ast
 import org.kson.CompileTarget
 import org.kson.CompileTarget.*
 import org.kson.ast.AstNode.Indent
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.tools.IndentType
-import org.kson.parser.delimiters.StringQuote
-import org.kson.parser.delimiters.StringQuote.SingleQuote
-import org.kson.parser.delimiters.StringQuote.DoubleQuote
+import org.kson.parser.behavior.StringQuote
+import org.kson.parser.behavior.StringQuote.SingleQuote
+import org.kson.parser.behavior.StringQuote.DoubleQuote
 
 interface AstNode {
     /**

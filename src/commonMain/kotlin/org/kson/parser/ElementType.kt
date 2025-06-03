@@ -1,6 +1,6 @@
 package org.kson.parser
 
-import org.kson.parser.delimiters.EmbedDelim
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 /**
  * [ElementType] unifies the two different types of elements marked by [AstMarker.done]:
