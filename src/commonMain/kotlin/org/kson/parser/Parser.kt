@@ -736,12 +736,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 }
 
 /**
- * Default maximum nesting of objects and lists to allow in parsing.  This protects against
- * excessive nesting crashing the parser.  This default was chosen somewhat arbitrarily,
- * and may not be appropriate for all platforms.  If/when we have issues here, let's tweak
- * as needed (note that this may also be configured in calls to [Parser.parse])
+ * Default maximum nesting of objects and lists to allow in parsing.  Because the parser is
+ * recursive, excessive nesting could crash it due to a stack overflow.  This default was chosen
+ * because it's enough to make our test suite pass on all supported platforms.  If/when we have
+ * issues here, let's tweak as needed (note that this may also be configured in calls to
+ * [Parser.parse])
  */
-const val DEFAULT_MAX_NESTING_LEVEL = 255
+const val DEFAULT_MAX_NESTING_LEVEL = 128
 
 /**
  * Used to bail out of parsing when excessive nesting is detected
