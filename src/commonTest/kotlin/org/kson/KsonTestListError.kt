@@ -55,25 +55,21 @@ class KsonTestListError : KsonTestError() {
         // test six nested lists with a nesting limit of 5
         assertParserRejectsSource("[[[[[[]]]]]]", listOf(MAX_NESTING_LEVEL_EXCEEDED), 5)
 
-        // same test as above, but with dashed sub-lists sprinkled in
+        // test 157 nested lists with a nesting limit of 156
         assertParserRejectsSource("""
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 156)
 
         // same test as above, but with dashed sub-lists sprinkled in
         assertParserRejectsSource("""
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ - [
             [[[[[[[[[ - 1 - 2 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[ - 3 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-            [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 256)
+        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 156)
     }
 
     @Test
