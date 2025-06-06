@@ -1,0 +1,8 @@
+simple_list: <fold text='< 2 items >'>- "item1"
+- "item2"</fold>
+
+nested_list: <fold text='< 2 items >'>- "outer1"
+- <fold text='[ 2 items ]'>[
+    "inner1",
+    "inner2"
+  ]</fold></fold>

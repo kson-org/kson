@@ -1,0 +1,17 @@
+dollar_block: <fold text='$$...$$'>$$
+    function test() {
+        console.log("Hello");
+    }
+$$</fold>
+
+percent_block: <fold text='%%...%%'>%%
+    function test() {
+        console.log("Hello");
+    }
+%%</fold>
+
+tagged_block: <fold text='%%kotlin...%%'>%%kotlin
+    function test() {
+        console.log("Hello");
+    }
+%%</fold>

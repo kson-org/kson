@@ -71,7 +71,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                  * If we did not consume tokens all they way up to EOF, then we have a bug in how we handle this case
                  * (and how we report helpful errors for it).  Fail loudly so it gets fixed.
                  */
-                if(!builder.eof()) {
+                if (!builder.eof()) {
                     throw RuntimeException("Bug: this parser must consume all tokens in all cases, but failed in this case.")
                 } else {
                     rootMarker.drop()
@@ -82,7 +82,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // reset all parsing and mark the whole document with our nesting error
             rootMarker.rollbackTo()
             val nestedExpressionMark = builder.mark()
-            while(!builder.eof()) {
+            while (!builder.eof()) {
                 builder.advanceLexer()
             }
             nestedExpressionMark.error(MAX_NESTING_LEVEL_EXCEEDED.create(maxNestingLevel.toString()))
@@ -216,7 +216,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
             } while (builder.getTokenType() == LIST_DASH)
 
-            listMark.done(LIST)
+            if (!isDelimited) {
+                listMark.done(DASH_LIST)
+            } else {
+                listMark.drop()
+            }
             return@nest true
         } else {
             return@nest false
@@ -350,18 +354,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // consume our ANGLE_BRACKET_L
         builder.advanceLexer()
 
-        val emptyList = !dashList(true)
+        dashList(true)
 
         if (builder.getTokenType() == ANGLE_BRACKET_R) {
             builder.advanceLexer()
-            /**
-             * if this list is empty, then [dashList] didn't mark it, so we need to
-             */
-            if (emptyList) {
-                listMark.done(LIST)
-            } else {
-                listMark.drop()
-            }
+            listMark.done(DASH_DELIMITED_LIST)
         } else {
             listMark.error(LIST_NO_CLOSE.create())
         }
@@ -379,60 +376,61 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // no open square bracket, so not a bracketList
             return@nest false
         }
-            val listMark = builder.mark()
-            // advance past the SQUARE_BRACKET_L
-            builder.advanceLexer()
+        val listMark = builder.mark()
+        // advance past the SQUARE_BRACKET_L
+        builder.advanceLexer()
 
-            // parse the optional leading comma
-            if (builder.getTokenType() == COMMA) {
-                val leadingCommaMark = builder.mark()
-                processComma(builder)
+        // parse the optional leading comma
+        if (builder.getTokenType() == COMMA) {
+            val leadingCommaMark = builder.mark()
+            processComma(builder)
 
-                // prohibit the empty-ISH list "[,]"
-                if (builder.getTokenType() == SQUARE_BRACKET_R) {
-                    // advance past the SQUARE_BRACKET_R
-                    builder.advanceLexer()
-                    leadingCommaMark.error(EMPTY_COMMAS.create())
-                    listMark.done(LIST)
-                    return@nest true
-                } else {
-                    leadingCommaMark.drop()
-                }
-            }
-
-            while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
-                val listElementMark = builder.mark()
-
-                if (!ksonValue()) {
-                    val invalidElementMark = builder.mark()
-
-                    // while we're not obviously another element or at the end of the list, mark this non-value as an error
-                    while(builder.getTokenType() != SQUARE_BRACKET_R
-                        && builder.getTokenType() != COMMA
-                        && !builder.eof()) {
-                        builder.advanceLexer()
-                    }
-                    invalidElementMark.error(LIST_INVALID_ELEM.create())
-                }
-                if (builder.getTokenType() == COMMA) {
-                    processComma(builder)
-
-                    listElementMark.done(LIST_ELEMENT)
-                    continue
-                } else {
-                    listElementMark.done(LIST_ELEMENT)
-                }
-            }
-
+            // prohibit the empty-ISH list "[,]"
             if (builder.getTokenType() == SQUARE_BRACKET_R) {
                 // advance past the SQUARE_BRACKET_R
                 builder.advanceLexer()
-                // just closed a well-formed list
-                listMark.done(LIST)
+                leadingCommaMark.error(EMPTY_COMMAS.create())
+                listMark.done(BRACKET_LIST)
+                return@nest true
             } else {
-                listMark.error(LIST_NO_CLOSE.create())
+                leadingCommaMark.drop()
             }
-            return@nest true
+        }
+
+        while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
+            val listElementMark = builder.mark()
+
+            if (!ksonValue()) {
+                val invalidElementMark = builder.mark()
+
+                // while we're not obviously another element or at the end of the list, mark this non-value as an error
+                while (builder.getTokenType() != SQUARE_BRACKET_R
+                    && builder.getTokenType() != COMMA
+                    && !builder.eof()
+                ) {
+                    builder.advanceLexer()
+                }
+                invalidElementMark.error(LIST_INVALID_ELEM.create())
+            }
+            if (builder.getTokenType() == COMMA) {
+                processComma(builder)
+
+                listElementMark.done(LIST_ELEMENT)
+                continue
+            } else {
+                listElementMark.done(LIST_ELEMENT)
+            }
+        }
+
+        if (builder.getTokenType() == SQUARE_BRACKET_R) {
+            // advance past the SQUARE_BRACKET_R
+            builder.advanceLexer()
+            // just closed a well-formed list
+            listMark.done(BRACKET_LIST)
+        } else {
+            listMark.error(LIST_NO_CLOSE.create())
+        }
+        return@nest true
     }
 
     /**
@@ -543,6 +541,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                         unicodeEscapeMark.error(STRING_BAD_UNICODE_ESCAPE.create(unicodeEscapeText))
                     }
                 }
+
                 STRING_ESCAPE -> {
                     val stringEscapeMark = builder.mark()
                     val stringEscapeText = builder.getTokenText()
@@ -553,12 +552,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                         stringEscapeMark.error(STRING_BAD_ESCAPE.create(stringEscapeText))
                     }
                 }
+
                 STRING_ILLEGAL_CONTROL_CHARACTER -> {
                     val controlCharacterMark = builder.mark()
                     val badControlChar = builder.getTokenText()
                     builder.advanceLexer()
                     controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
                 }
+
                 else -> {
                     stringMark.rollbackTo()
                     return false
@@ -747,12 +748,14 @@ const val DEFAULT_MAX_NESTING_LEVEL = 128
 /**
  * Used to bail out of parsing when excessive nesting is detected
  */
-class ExcessiveNestingException: RuntimeException()
+class ExcessiveNestingException : RuntimeException()
 
 /**
  * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
  * but is validated separately against [validHexChars]
  */
 private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
-private val validHexChars = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F')
+private val validHexChars = setOf(
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'
+)

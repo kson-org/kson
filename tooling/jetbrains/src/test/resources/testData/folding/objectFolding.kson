@@ -1,0 +1,4 @@
+<fold text='object: { 2 keys }'>object: {
+    key1: "value1",
+    key2: "value2"
+}</fold> 
