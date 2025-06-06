@@ -10,6 +10,7 @@ import org.kson.tools.IndentType
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.SingleQuote
 import org.kson.parser.behavior.StringQuote.DoubleQuote
+import org.kson.parser.behavior.StringUnquoted
 
 interface AstNode {
     /**
@@ -367,13 +368,7 @@ open class StringNode(private val ksonEscapedStringContent: String, private val 
         return when (compileTarget) {
             is Kson -> {
                 // Check if we can use this string as a bare identifier
-                val isSimple = unquotedString.isNotBlank() && unquotedString.withIndex().all { (index, letter) ->
-                    if (index == 0) {
-                        letter.isLetter() || letter == '_'
-                    } else {
-                        letter.isLetterOrDigit() || letter == '_'
-                    }
-                }
+                val isSimple = StringUnquoted.isUnquotable(unquotedString)
 
                 indent.firstLineIndent() +
                     if (isSimple) {

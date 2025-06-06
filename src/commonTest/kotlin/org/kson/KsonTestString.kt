@@ -180,4 +180,71 @@ class KsonTestString : KsonTest() {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testUnquotedNonAlphaNumericString() {
+        assertParsesTo(
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+                水滴石穿
+            """.trimIndent(),
+            """
+               "水滴石穿"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testReservedKeywordStringsAreQuoted() {
+        // Test that strings with reserved keyword content are properly quoted
+        assertParsesTo(
+            """
+                "true"
+            """.trimIndent(),
+            """
+                'true'
+            """.trimIndent(),
+            """
+                "true"
+            """.trimIndent(),
+            """
+                "true"
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                "false"
+            """.trimIndent(),
+            """
+                'false'
+            """.trimIndent(),
+            """
+                "false"
+            """.trimIndent(),
+            """
+                "false"
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                "null"
+            """.trimIndent(),
+            """
+                'null'
+            """.trimIndent(),
+            """
+                "null"
+            """.trimIndent(),
+            """
+                "null"
+            """.trimIndent()
+        )
+    }
 }

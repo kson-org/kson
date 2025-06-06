@@ -4,6 +4,7 @@ import org.kson.stdlibx.collections.ImmutableList
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
+import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
 import org.kson.parser.behavior.embedblock.EmbedBlockIndent
 
@@ -303,11 +304,11 @@ class Lexer(source: String, gapFree: Boolean = false) {
             else -> {
                 when {
                     // a minus or a digit starts a number
-                    char == '-' || isDigit(char) -> {
+                    char == '-' || char.isDigit() -> {
                         number()
                     }
-                    // identifiers start with an alphabetic character or an underscore
-                    isAlphaOrUnderscore(char) -> {
+                    // check if we are starting an unquoted string
+                    StringUnquoted.isUnquotedStartChar(char) -> {
                         identifier()
                     }
                     else -> {
@@ -350,7 +351,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun identifier() {
-        while (isAlphaNumeric(sourceScanner.peek())) sourceScanner.advance()
+        while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())) sourceScanner.advance()
 
         val lexeme = sourceScanner.extractLexeme()
         val type: TokenType = KEYWORDS[lexeme.text] ?: IDENTIFIER
@@ -497,10 +498,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun number() {
-        // since we're here, we know a number has been started with a minus sign or digit,
-        // so lex the following chars generously (i.e. include alpha stuff if it's attached to this number)
-        // as part of that number and look for problems in the number's structure later in the parser
-        while (isAlphaNumeric(sourceScanner.peek())
+        /**
+         * Since we're here, we know a number has been started with a minus sign or digit,
+         * so lex the following chars generously as if it was trying to be an unquoted string
+         * in case the user is mistakenly just starting it with a digit.  We'll give a helpful error
+         * in [NumberParser]
+         */
+        while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())
             || sourceScanner.peek() == '+'
             || sourceScanner.peek() == '-'
             || sourceScanner.peek() == '.') sourceScanner.advance()
@@ -594,18 +598,5 @@ class Lexer(source: String, gapFree: Boolean = false) {
             }
         }
         return CommentMetadata(commentsForToken, trailingCommentTokens)
-    }
-
-    private fun isDigit(c: Char?): Boolean {
-        return c in '0'..'9'
-    }
-
-    private fun isAlphaOrUnderscore(c: Char?): Boolean {
-        return c in 'a'..'z' ||
-                c in 'A'..'Z' || c == '_'
-    }
-
-    private fun isAlphaNumeric(c: Char?): Boolean {
-        return isAlphaOrUnderscore(c) || isDigit(c)
     }
 }
