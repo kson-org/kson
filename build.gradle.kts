@@ -15,8 +15,8 @@ val sharedProps = Properties().apply {
 }
 
 plugins {
-    kotlin("multiplatform") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("multiplatform") version "2.1.21"
+    kotlin("plugin.serialization") version "2.1.21"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -131,7 +131,7 @@ kotlin {
         }
     }
     val host = HostManager.host
-    when (host.family) {
+    val nativeTarget = when (host.family) {
         Family.OSX -> when (host.architecture) {
             Architecture.ARM64 -> macosArm64("nativeKson")
             else -> macosX64("nativeKson")
@@ -139,6 +139,14 @@ kotlin {
         Family.LINUX -> linuxX64("nativeKson")
         Family.MINGW -> mingwX64("nativeKson")
         else -> throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
+    }
+
+    nativeTarget.apply {
+        binaries {
+            sharedLib {
+                baseName = "kson"
+            }
+        }
     }
 
     sourceSets {
