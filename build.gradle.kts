@@ -18,8 +18,16 @@ plugins {
     kotlin("multiplatform") version "2.1.21"
     kotlin("plugin.serialization") version "2.1.21"
 
+    id("com.google.devtools.ksp") version "2.1.21-2.0.2"
+
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+
+    id("idea")
+}
+
+dependencies {
+    add("kspCommonMainMetadata", project(":tooling:public-api-metadata-collector"))
 }
 
 // NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
@@ -41,6 +49,7 @@ repositories {
 }
 
 val generateJsonTestSuiteTask = "generateJsonTestSuite"
+val generateBindingsTask = "generateBindings"
 
 tasks {
     register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
@@ -52,6 +61,8 @@ tasks {
             dependsOn(generateJsonTestSuiteTask)
         }
     }
+
+    register<GenerateBindingsTask>(generateBindingsTask)
 
     val javaVersion = "11"
     withType<JavaCompile> {
