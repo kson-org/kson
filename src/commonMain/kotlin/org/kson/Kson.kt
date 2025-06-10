@@ -116,7 +116,8 @@ interface ParseResult {
  * Core [ParseResult] produced by the [Kson] parser attempting to create a Kson abstract syntax tree ([ast])
  * from some Kson source
  */
-data class AstParseResult(
+@ConsistentCopyVisibility
+data class AstParseResult internal constructor(
     override val ast: KsonRoot?,
     override val lexedTokens: List<Token>,
     private val messageSink: MessageSink
@@ -140,7 +141,7 @@ data class AstParseResult(
     }
 }
 
-class KsonParseResult(
+class KsonParseResult internal constructor(
     private val astParseResult: AstParseResult,
     compileConfig: Kson
 ) : ParseResult by astParseResult {
@@ -153,7 +154,7 @@ class KsonParseResult(
         compileConfig)
 }
 
-class YamlParseResult(
+class YamlParseResult internal constructor(
     private val astParseResult: AstParseResult,
     compileConfig: Yaml
 ) : ParseResult by astParseResult {
