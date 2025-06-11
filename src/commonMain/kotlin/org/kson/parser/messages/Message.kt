@@ -287,6 +287,15 @@ enum class MessageType {
             val overflowNumber = parsedArgs.getArg("Overflow Number")
             return "The integer \"$overflowNumber\" is too large and cannot be represented."
         }
+    },
+    BAD_SCHEMA {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unable to parse schema"
+        }
     };
 
     /**

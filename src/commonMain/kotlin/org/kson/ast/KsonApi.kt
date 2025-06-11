@@ -12,7 +12,7 @@ sealed class KsonApi(val location: Location)
 
 abstract class KsonValue(location: Location) : KsonApi(location)
 
-class KsonObject(private val propertyList: List<KsonObjectProperty>, location: Location) : KsonValue(location) {
+class KsonObject(val propertyList: List<KsonObjectProperty>, location: Location) : KsonValue(location) {
     val propertyMap: Map<String, KsonValue> by lazy {
         propertyList.associate { it.name.value to it.ksonValue }
     }
