@@ -194,56 +194,12 @@ data class ObjectSchema(
 private fun areItemsUnique(elements: List<KsonListElement>): Boolean {
   for (i in elements.indices) {
     for (j in i + 1 until elements.size) {
-      if (valuesEqual(elements[i].ksonValue, elements[j].ksonValue)) {
+      if (elements[i].ksonValue == elements[j].ksonValue) {
         return false
       }
     }
   }
   return true
-}
-
-/**
- * JSON Schema equality comparison that handles special cases for numbers.
- * In JSON Schema, integer and decimal representations of the same value are considered equal.
- */
-private fun valuesEqual(a: KsonValue, b: KsonValue): Boolean {
-  return when {
-    a is KsonNumber && b is KsonNumber -> {
-      val aDouble = when (a.value) {
-        is org.kson.parser.NumberParser.ParsedNumber.Decimal -> a.value.value
-        is org.kson.parser.NumberParser.ParsedNumber.Integer -> a.value.value.toDouble()
-      }
-      val bDouble = when (b.value) {
-        is org.kson.parser.NumberParser.ParsedNumber.Decimal -> b.value.value
-        is org.kson.parser.NumberParser.ParsedNumber.Integer -> b.value.value.toDouble()
-      }
-      aDouble == bDouble
-    }
-    a is KsonString && b is KsonString -> a.value == b.value
-    a is KsonBoolean && b is KsonBoolean -> a.value == b.value
-    a is KsonNull && b is KsonNull -> true
-    a is KsonList && b is KsonList -> listsEqual(a, b)
-    a is KsonObject && b is KsonObject -> objectsEqual(a, b)
-    else -> false
-  }
-}
-
-private fun objectsEqual(a: KsonObject, b: KsonObject): Boolean {
-  if (a.propertyMap.size != b.propertyMap.size) return false
-  
-  return a.propertyMap.all { (key, value) ->
-    b.propertyMap[key]?.let { bValue ->
-      valuesEqual(value, bValue)
-    } ?: false
-  }
-}
-
-private fun listsEqual(a: KsonList, b: KsonList): Boolean {
-  if (a.elements.size != b.elements.size) return false
-  
-  return a.elements.zip(b.elements).all { (aElement, bElement) ->
-    valuesEqual(aElement.ksonValue, bElement.ksonValue)
-  }
 }
 
 /**

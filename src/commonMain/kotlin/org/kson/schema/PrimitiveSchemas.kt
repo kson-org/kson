@@ -48,61 +48,8 @@ data class ConstSchema(
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
   override fun validate(node: KsonValue, messageSink: MessageSink) {
-    if (!valuesEqual(node, constValue)) {
+    if (node != constValue) {
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be exactly equal to const value"))
-    }
-  }
-
-  /**
-   * JSON Schema equality comparison that handles special cases for numbers.
-   * In JSON Schema, integer and decimal representations of the same value are considered equal.
-   */
-  private fun valuesEqual(a: KsonValue, b: KsonValue): Boolean {
-    return when {
-      // Same type comparison
-      a::class == b::class -> when (a) {
-        is KsonString -> a.value == (b as KsonString).value
-        is KsonBoolean -> a.value == (b as KsonBoolean).value
-        is KsonNull -> true  // Both are null
-        is KsonNumber -> numbersEqual(a, b as KsonNumber)
-        is KsonObject -> objectsEqual(a, b as KsonObject)
-        is KsonList -> listsEqual(a, b as KsonList)
-        else -> false
-      }
-      // Special case: Numbers can be equal across integer/decimal representations
-      a is KsonNumber && b is KsonNumber -> numbersEqual(a, b)
-      else -> false
-    }
-  }
-
-  private fun numbersEqual(a: KsonNumber, b: KsonNumber): Boolean {
-    val aValue = when (a.value) {
-      is NumberParser.ParsedNumber.Integer -> a.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> a.value.value
-    }
-    val bValue = when (b.value) {
-      is NumberParser.ParsedNumber.Integer -> b.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> b.value.value
-    }
-    return aValue == bValue
-  }
-
-  private fun objectsEqual(a: KsonObject, b: KsonObject): Boolean {
-    val aProps = a.propertyMap
-    val bProps = b.propertyMap
-    
-    if (aProps.size != bProps.size) return false
-    
-    return aProps.all { (key, value) ->
-      bProps[key]?.let { valuesEqual(value, it) } ?: false
-    }
-  }
-
-  private fun listsEqual(a: KsonList, b: KsonList): Boolean {
-    if (a.elements.size != b.elements.size) return false
-    
-    return a.elements.zip(b.elements).all { (aElement, bElement) ->
-      valuesEqual(aElement.ksonValue, bElement.ksonValue)
     }
   }
 }
@@ -330,61 +277,8 @@ data class EnumSchema(
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
   override fun validate(node: KsonValue, messageSink: MessageSink) {
-    if (!enumValues.any { valuesEqual(node, it) }) {
+    if (!enumValues.any { node == it }) {
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be one of the enum values"))
-    }
-  }
-
-  /**
-   * JSON Schema equality comparison that handles special cases for numbers.
-   * In JSON Schema, integer and decimal representations of the same value are considered equal.
-   */
-  private fun valuesEqual(a: KsonValue, b: KsonValue): Boolean {
-    return when {
-      // Same type comparison
-      a::class == b::class -> when (a) {
-        is KsonString -> a.value == (b as KsonString).value
-        is KsonBoolean -> a.value == (b as KsonBoolean).value
-        is KsonNull -> true  // Both are null
-        is KsonNumber -> numbersEqual(a, b as KsonNumber)
-        is KsonObject -> objectsEqual(a, b as KsonObject)
-        is KsonList -> listsEqual(a, b as KsonList)
-        else -> false
-      }
-      // Special case: Numbers can be equal across integer/decimal representations
-      a is KsonNumber && b is KsonNumber -> numbersEqual(a, b)
-      else -> false
-    }
-  }
-
-  private fun numbersEqual(a: KsonNumber, b: KsonNumber): Boolean {
-    val aValue = when (a.value) {
-      is NumberParser.ParsedNumber.Integer -> a.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> a.value.value
-    }
-    val bValue = when (b.value) {
-      is NumberParser.ParsedNumber.Integer -> b.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> b.value.value
-    }
-    return aValue == bValue
-  }
-
-  private fun objectsEqual(a: KsonObject, b: KsonObject): Boolean {
-    val aProps = a.propertyMap
-    val bProps = b.propertyMap
-    
-    if (aProps.size != bProps.size) return false
-    
-    return aProps.all { (key, value) ->
-      bProps[key]?.let { valuesEqual(value, it) } ?: false
-    }
-  }
-
-  private fun listsEqual(a: KsonList, b: KsonList): Boolean {
-    if (a.elements.size != b.elements.size) return false
-    
-    return a.elements.zip(b.elements).all { (aElement, bElement) ->
-      valuesEqual(aElement.ksonValue, bElement.ksonValue)
     }
   }
 }
@@ -547,68 +441,15 @@ data class ConstraintSchema(
   /**
    * Check if all items in a list are unique using JSON Schema equality semantics.
    */
-  private fun areItemsUnique(elements: List<org.kson.ast.KsonListElement>): Boolean {
+  private fun areItemsUnique(elements: List<KsonListElement>): Boolean {
     for (i in elements.indices) {
       for (j in i + 1 until elements.size) {
-        if (valuesEqual(elements[i].ksonValue, elements[j].ksonValue)) {
+        if (elements[i].ksonValue == elements[j].ksonValue) {
           return false
         }
       }
     }
     return true
-  }
-
-  /**
-   * JSON Schema equality comparison that handles special cases for numbers.
-   * In JSON Schema, integer and decimal representations of the same value are considered equal.
-   */
-  private fun valuesEqual(a: KsonValue, b: KsonValue): Boolean {
-    return when {
-      // Same type comparison
-      a::class == b::class -> when (a) {
-        is KsonString -> a.value == (b as KsonString).value
-        is KsonBoolean -> a.value == (b as KsonBoolean).value
-        is KsonNull -> true  // Both are null
-        is KsonNumber -> numbersEqual(a, b as KsonNumber)
-        is KsonObject -> objectsEqual(a, b as KsonObject)
-        is KsonList -> listsEqual(a, b as KsonList)
-        else -> false
-      }
-      // Special case: Numbers can be equal across integer/decimal representations
-      a is KsonNumber && b is KsonNumber -> numbersEqual(a, b)
-      else -> false
-    }
-  }
-
-  private fun numbersEqual(a: KsonNumber, b: KsonNumber): Boolean {
-    val aValue = when (a.value) {
-      is NumberParser.ParsedNumber.Integer -> a.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> a.value.value
-    }
-    val bValue = when (b.value) {
-      is NumberParser.ParsedNumber.Integer -> b.value.value.toDouble()
-      is NumberParser.ParsedNumber.Decimal -> b.value.value
-    }
-    return aValue == bValue
-  }
-
-  private fun objectsEqual(a: org.kson.ast.KsonObject, b: org.kson.ast.KsonObject): Boolean {
-    val aProps = a.propertyMap
-    val bProps = b.propertyMap
-    
-    if (aProps.size != bProps.size) return false
-    
-    return aProps.all { (key, value) ->
-      bProps[key]?.let { valuesEqual(value, it) } ?: false
-    }
-  }
-
-  private fun listsEqual(a: org.kson.ast.KsonList, b: org.kson.ast.KsonList): Boolean {
-    if (a.elements.size != b.elements.size) return false
-    
-    return a.elements.zip(b.elements).all { (aElement, bElement) ->
-      valuesEqual(aElement.ksonValue, bElement.ksonValue)
-    }
   }
 }
 
