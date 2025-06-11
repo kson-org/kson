@@ -1,6 +1,8 @@
 package org.kson.schema
 
 import org.kson.ast.*
+import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType
 
 /**
  * Schema for array values.
@@ -19,44 +21,47 @@ data class ArraySchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     if (node !is KsonList) {
-      return if (enforceArrayType) {
-        ValidationResult.Invalid(listOf("Expected array"))
-      } else {
-        ValidationResult.Valid // Array schemas without explicit type ignore non-arrays
+      if (enforceArrayType) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected array"))
       }
+      // Array schemas without explicit type ignore non-arrays
+      return
     }
-    
-    val errors = mutableListOf<String>()
+
     val listElements = node.elements
 
     minItems?.let { min ->
-      if (listElements.size < min) errors.add("Array length must be >= $min")
+      if (listElements.size < min) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be >= $min"))
+      }
     }
     
     maxItems?.let { max ->
-      if (listElements.size > max) errors.add("Array length must be <= $max")
+      if (listElements.size > max) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be <= $max"))
+      }
     }
     
     uniqueItems?.let { unique ->
       if (unique && !areItemsUnique(listElements)) {
-        errors.add("Array items must be unique")
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array items must be unique"))
       }
     }
 
     // Validate contains (at least one item must match)
     contains?.let { schema ->
       if (listElements.isEmpty()) {
-        errors.add("Array must contain at least one item matching the contains schema")
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array must contain at least one item matching the contains schema"))
       } else {
         val hasMatch = listElements.any { element ->
-          schema.validate(element.ksonValue) is ValidationResult.Valid
+          val tempMessageSink = MessageSink()
+          schema.validate(element.ksonValue, tempMessageSink)
+          !tempMessageSink.hasErrors()
         }
-        if (hasMatch) {
-          // no-op: IntelliJ was complaining that this needed both if and else
-        } else {
-          errors.add("Array must contain at least one item matching the contains schema")
+        if (!hasMatch) {
+          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array must contain at least one item matching the contains schema"))
         }
       }
     }
@@ -64,12 +69,7 @@ data class ArraySchema(
     // Validate prefix items (tuple validation)
     prefixItems?.forEachIndexed { index, schema ->
       if (index < listElements.size) {
-        when (val result = schema.validate(listElements[index].ksonValue)) {
-          is ValidationResult.Invalid -> errors.addAll(
-            result.errors.map { "Item at index $index: $it" }
-          )
-          ValidationResult.Valid -> {}
-        }
+        schema.validate(listElements[index].ksonValue, messageSink)
       }
     }
     
@@ -77,12 +77,7 @@ data class ArraySchema(
     items?.let { schema ->
       listElements.forEachIndexed { index, element ->
         if (prefixItems == null || index >= prefixItems.size) {
-          when (val result = schema.validate(element.ksonValue)) {
-            is ValidationResult.Invalid -> errors.addAll(
-              result.errors.map { "Item at index $index: $it" }
-            )
-            ValidationResult.Valid -> {}
-          }
+          schema.validate(element.ksonValue, messageSink)
         }
       }
     }
@@ -94,24 +89,17 @@ data class ArraySchema(
       if (additionalItemsStartIndex < listElements.size) {
         when (additionalItems) {
           AdditionalItems.Forbidden -> {
-            errors.add("Additional items not allowed beyond index ${additionalItemsStartIndex - 1}")
+            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Additional items not allowed beyond index ${additionalItemsStartIndex - 1}"))
           }
           is AdditionalItems.Schema -> {
             for (index in additionalItemsStartIndex until listElements.size) {
-              when (val result = additionalItems.schema.validate(listElements[index].ksonValue)) {
-                is ValidationResult.Invalid -> errors.addAll(
-                  result.errors.map { "Item at index $index: $it" }
-                )
-                ValidationResult.Valid -> {}
-              }
+              additionalItems.schema.validate(listElements[index].ksonValue, messageSink)
             }
           }
           AdditionalItems.Allowed -> {}
         }
       }
     }
-    
-    return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
   }
 }
 
@@ -131,31 +119,34 @@ data class ObjectSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     if (node !is KsonObject) {
-      return if (enforceObjectType) {
-        ValidationResult.Invalid(listOf("Expected object"))
-      } else {
-        ValidationResult.Valid // Object schemas without explicit type ignore non-objects
+      if (enforceObjectType) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected object"))
       }
+      // Object schemas without explicit type ignore non-objects
+      return
     }
-    
-    val errors = mutableListOf<String>()
+
     val objectProperties = node.propertyMap
     
     // Check required properties
     required.forEach { prop ->
       if (!objectProperties.containsKey(prop)) {
-        errors.add("Missing required property: $prop")
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Missing required property: $prop"))
       }
     }
     
     minProperties?.let { min ->
-      if (objectProperties.size < min) errors.add("Object must have >= $min properties")
+      if (objectProperties.size < min) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have >= $min properties"))
+      }
     }
     
     maxProperties?.let { max ->
-      if (objectProperties.size > max) errors.add("Object must have <= $max properties")
+      if (objectProperties.size > max) {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have <= $max properties"))
+      }
     }
     
     // Track which properties have been validated
@@ -164,12 +155,7 @@ data class ObjectSchema(
     // Validate declared properties
     objectProperties.forEach { (key, value) ->
       properties[key]?.let { schema ->
-        when (val result = schema.validate(value)) {
-          is ValidationResult.Invalid -> errors.addAll(
-            result.errors.map { "Property '$key': $it" }
-          )
-          ValidationResult.Valid -> {}
-        }
+        schema.validate(value, messageSink)
         validatedProps.add(key)
       }
     }
@@ -178,12 +164,7 @@ data class ObjectSchema(
     objectProperties.forEach { (key, value) ->
       patternProperties.forEach { (pattern, schema) ->
         if (pattern.containsMatchIn(key)) {
-          when (val result = schema.validate(value)) {
-            is ValidationResult.Invalid -> errors.addAll(
-              result.errors.map { "Property '$key': $it" }
-            )
-            ValidationResult.Valid -> {}
-          }
+          schema.validate(value, messageSink)
           validatedProps.add(key)
         }
       }
@@ -194,23 +175,16 @@ data class ObjectSchema(
     if (additionalProps.isNotEmpty()) {
       when (additionalProperties) {
         AdditionalProperties.Forbidden -> {
-          errors.add("Additional properties not allowed: ${additionalProps.joinToString()}")
+          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Additional properties not allowed: ${additionalProps.joinToString()}"))
         }
         is AdditionalProperties.Schema -> {
           additionalProps.forEach { prop ->
-            when (val result = additionalProperties.schema.validate(objectProperties[prop]!!)) {
-              is ValidationResult.Invalid -> errors.addAll(
-                result.errors.map { "Property '$prop': $it" }
-              )
-              ValidationResult.Valid -> {}
-            }
+            additionalProperties.schema.validate(objectProperties[prop]!!, messageSink)
           }
         }
         AdditionalProperties.Allowed -> {}
       }
     }
-    
-    return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
   }
 }
 
@@ -282,13 +256,12 @@ data class DependenciesSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     // Dependencies only apply to objects
     if (node !is KsonObject) {
-      return ValidationResult.Valid
+      return
     }
-    
-    val errors = mutableListOf<String>()
+
     val objectProperties = node.propertyMap
     
     dependencies.forEach { (propertyName, dependency) ->
@@ -298,24 +271,17 @@ data class DependenciesSchema(
             // Check that all required properties are present
             dependency.requiredProperties.forEach { requiredProp ->
               if (!objectProperties.containsKey(requiredProp)) {
-                errors.add("Property '$propertyName' requires property '$requiredProp' to be present")
+                messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Property '$propertyName' requires property '$requiredProp' to be present"))
               }
             }
           }
           is DependencyType.SchemaDependency -> {
             // Validate the object against the dependency schema
-            when (val result = dependency.schema.validate(node)) {
-              is ValidationResult.Invalid -> errors.addAll(
-                result.errors.map { "Dependency for property '$propertyName': $it" }
-              )
-              ValidationResult.Valid -> {}
-            }
+            dependency.schema.validate(node, messageSink)
           }
         }
       }
     }
-    
-    return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
   }
 }
 
@@ -344,26 +310,18 @@ data class PropertyNamesSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     // PropertyNames only applies to objects
     if (node !is KsonObject) {
-      return ValidationResult.Valid
+      return
     }
-    
-    val errors = mutableListOf<String>()
+
     val objectProperties = node.propertyMap
     
     objectProperties.keys.forEach { propertyName ->
       // Validate each property name as a string against the name schema
       val nameValue = KsonString(propertyName, org.kson.parser.Location(0, 0, 0, 0, 0, 0))
-      when (val result = nameSchema.validate(nameValue)) {
-        is ValidationResult.Invalid -> errors.addAll(
-          result.errors.map { "Property name '$propertyName': $it" }
-        )
-        ValidationResult.Valid -> {}
-      }
+      nameSchema.validate(nameValue, messageSink)
     }
-    
-    return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
   }
 } 

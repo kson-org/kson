@@ -1,5 +1,6 @@
 package org.kson.schema
 import org.kson.ast.KsonValue
+import org.kson.parser.MessageSink
 
 /**
  * Base interface for all JSON Schema types.
@@ -11,20 +12,9 @@ sealed interface JsonSchema {
   val definitions: Map<String, JsonSchema>?
 
   /**
-   * Validates a [KsonValue] node against this schema
+   * Validates a [KsonValue] node against this schema, logging any validation errors to the [messageSink]
    */
-  fun validate(node: KsonValue): ValidationResult
-}
-
-/**
- * Result of schema validation.
- */
-sealed interface ValidationResult {
-  /** Indicates successful validation */
-  data object Valid : ValidationResult
-  
-  /** Indicates validation failure with list of error messages */
-  data class Invalid(val errors: List<String>) : ValidationResult
+  fun validate(node: KsonValue, messageSink: MessageSink)
 }
 
 /**

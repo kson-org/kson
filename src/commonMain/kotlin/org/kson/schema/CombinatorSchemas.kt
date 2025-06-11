@@ -1,6 +1,8 @@
 package org.kson.schema
 
 import org.kson.ast.KsonValue
+import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType.*
 
 /**
  * Schema that requires all subschemas to be valid.
@@ -12,19 +14,10 @@ data class AllOfSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
-    val errors = mutableListOf<String>()
-    
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     subschemas.forEachIndexed { index, schema ->
-      when (val result = schema.validate(node)) {
-        is ValidationResult.Invalid -> errors.addAll(
-          result.errors.map { "Schema $index: $it" }
-        )
-        ValidationResult.Valid -> {}
-      }
+      schema.validate(node, messageSink)
     }
-    
-    return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
   }
 }
 
@@ -38,21 +31,18 @@ data class AnyOfSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
-    val allErrors = mutableListOf<String>()
-    
-    subschemas.forEachIndexed { index, schema ->
-      when (val result = schema.validate(node)) {
-        ValidationResult.Valid -> return ValidationResult.Valid
-        is ValidationResult.Invalid -> allErrors.addAll(
-          result.errors.map { "Schema $index: $it" }
-        )
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    subschemas.forEach { schema ->
+      val tempMessageSink = MessageSink()
+      schema.validate(node, tempMessageSink)
+      if (!tempMessageSink.hasErrors()) {
+        // At least one schema matched, validation succeeds
+        return
       }
     }
     
-    return ValidationResult.Invalid(
-      listOf("None of the schemas matched:") + allErrors
-    )
+    // If we get here, none of the schemas matched
+    messageSink.error(node.location, SCHEMA_VALIDATION_ERROR.create("None of the schemas matched"))
   }
 }
 
@@ -66,27 +56,25 @@ data class OneOfSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
     var validCount = 0
-    val allErrors = mutableListOf<String>()
     
-    subschemas.forEachIndexed { index, schema ->
-      when (val result = schema.validate(node)) {
-        ValidationResult.Valid -> validCount++
-        is ValidationResult.Invalid -> allErrors.addAll(
-          result.errors.map { "Schema $index: $it" }
-        )
+    subschemas.forEach { schema ->
+      val tempMessageSink = MessageSink()
+      schema.validate(node, tempMessageSink)
+      if (!tempMessageSink.hasErrors()) {
+        validCount++
       }
     }
     
-    return when {
-      validCount == 0 -> ValidationResult.Invalid(
-        listOf("None of the schemas matched:") + allErrors
-      )
-      validCount > 1 -> ValidationResult.Invalid(
-        listOf("Multiple schemas matched ($validCount). Expected exactly one.")
-      )
-      else -> ValidationResult.Valid
+    when {
+      validCount == 0 -> {
+        messageSink.error(node.location, SCHEMA_VALIDATION_ERROR.create("None of the schemas matched"))
+      }
+      // must have exactly one valid schema, not more
+      validCount > 1 -> {
+        messageSink.error(node.location, SCHEMA_VALIDATION_ERROR.create("Multiple schemas matched ($validCount). Expected exactly one."))
+      }
     }
   }
 }
@@ -101,13 +89,13 @@ data class NotSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult =
-    when (schema.validate(node)) {
-      ValidationResult.Valid -> ValidationResult.Invalid(
-        listOf("Schema should not match")
-      )
-      is ValidationResult.Invalid -> ValidationResult.Valid
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    val tempMessageSink = MessageSink()
+    schema.validate(node, tempMessageSink)
+    if (!tempMessageSink.hasErrors()) {
+      messageSink.error(node.location, SCHEMA_VALIDATION_ERROR.create("Schema should not match"))
     }
+  }
 }
 
 /**
@@ -122,14 +110,15 @@ data class IfThenElseSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult {
-    return when (ifSchema.validate(node)) {
-      ValidationResult.Valid -> {
-        thenSchema?.validate(node) ?: ValidationResult.Valid
-      }
-      is ValidationResult.Invalid -> {
-        elseSchema?.validate(node) ?: ValidationResult.Valid
-      }
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    val tempMessageSink = MessageSink()
+    ifSchema.validate(node, tempMessageSink)
+    if (!tempMessageSink.hasErrors()) {
+      // If condition passed, apply then schema if present
+      thenSchema?.validate(node, messageSink)
+    } else {
+      // If condition failed, apply else schema if present
+      elseSchema?.validate(node, messageSink)
     }
   }
 }
@@ -144,6 +133,7 @@ data class RefSchema(
   override val default: KsonValue? = null,
   override val definitions: Map<String, JsonSchema>? = null
 ) : JsonSchema {
-  override fun validate(node: KsonValue): ValidationResult =
-    error("\$ref must be resolved before validation")
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    messageSink.error(node.location, SCHEMA_VALIDATION_ERROR.create("\$ref must be resolved before validation"))
+  }
 } 

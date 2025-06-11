@@ -7,7 +7,6 @@ import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.schema.SchemaParser
-import org.kson.schema.ValidationResult
 import org.kson.tools.KsonFormatterConfig
 
 /**
@@ -43,20 +42,9 @@ class Kson {
                 return AstParseResult(ast, tokens, messageSink)
             } else {
                 val schema = SchemaParser.parse(coreCompileConfig.schemaJson)
-                when (val result = schema.validate(ast?.toKsonApi() as KsonValue)) {
-                    is ValidationResult.Valid -> {
-                        return AstParseResult(ast, tokens, messageSink)
-                    }
-                    is ValidationResult.Invalid -> {
-                        result.errors.forEach { error ->
-                            messageSink.error(
-                                ast.toKsonApi().location,
-                                MessageType.BAD_SCHEMA.create()
-                            )
-                        }
-                        return AstParseResult(null, tokens, messageSink)
-                    }
-                }
+                // validate against our schema, logging any errors to our message sink
+                schema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+                return AstParseResult(ast, tokens, messageSink)
             }
         }
 

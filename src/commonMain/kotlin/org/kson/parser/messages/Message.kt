@@ -296,6 +296,16 @@ enum class MessageType {
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Unable to parse schema"
         }
+    },
+    SCHEMA_VALIDATION_ERROR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Error Message")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val errorMessage = parsedArgs.getArg("Error Message")
+            return "Schema validation failed: $errorMessage"
+        }
     };
 
     /**
