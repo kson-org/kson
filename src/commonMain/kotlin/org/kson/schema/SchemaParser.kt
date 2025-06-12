@@ -41,15 +41,6 @@ object SchemaParser {
     }
   }
 
-  private fun extractLong(value: KsonValue?): Long? {
-    return (value as? KsonNumber)?.value?.let { parsedNumber ->
-      when (parsedNumber) {
-        is NumberParser.ParsedNumber.Integer -> parsedNumber.value
-        is NumberParser.ParsedNumber.Decimal -> parsedNumber.value.toLong()
-      }
-    }
-  }
-
   private fun extractInt(value: KsonValue?): Int? {
     return (value as? KsonNumber)?.value?.let { parsedNumber ->
       when (parsedNumber) {
@@ -120,15 +111,19 @@ object SchemaParser {
         minimum = extractDouble(schemaProperties["minimum"]),
         maximum = extractDouble(schemaProperties["maximum"]),
         multipleOf = extractDouble(schemaProperties["multipleOf"]),
+        exclusiveMinimum = extractDouble(schemaProperties["exclusiveMinimum"]),
+        exclusiveMaximum = extractDouble(schemaProperties["exclusiveMaximum"]),
         title = title,
         description = description,
         default = default,
         definitions = definitions
       ))
       typeValue == "integer" -> schemas.add(IntegerSchema(
-        minimum = extractLong(schemaProperties["minimum"]),
-        maximum = extractLong(schemaProperties["maximum"]),
-        multipleOf = extractLong(schemaProperties["multipleOf"]),
+        // dm todo test for schemas with double min/max and type integer
+        minimum = extractDouble(schemaProperties["minimum"]),
+        maximum = extractDouble(schemaProperties["maximum"]),
+        // dm todo test for schemas with double multipleOf and type integer
+        multipleOf = extractDouble(schemaProperties["multipleOf"]),
         title = title,
         description = description,
         default = default,
@@ -360,8 +355,7 @@ object SchemaParser {
 
     // Handle propertyNames
     if (schemaProperties.containsKey("propertyNames")) {
-      val propertyNamesValue = schemaProperties["propertyNames"]!!
-      val nameSchema = when (propertyNamesValue) {
+      val nameSchema = when (val propertyNamesValue = schemaProperties["propertyNames"]!!) {
         is KsonBoolean -> {
           if (propertyNamesValue.value) TrueSchema() else FalseSchema()
         }

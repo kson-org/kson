@@ -30,26 +30,11 @@ data class ArraySchema(
       return
     }
 
+    validateMinItems(node, messageSink, minItems)
+    validateMaxItems(node, messageSink, maxItems)
+    validateUniqueItems(node, messageSink, uniqueItems)
+
     val listElements = node.elements
-
-    minItems?.let { min ->
-      if (listElements.size < min) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be >= $min"))
-      }
-    }
-    
-    maxItems?.let { max ->
-      if (listElements.size > max) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be <= $max"))
-      }
-    }
-    
-    uniqueItems?.let { unique ->
-      if (unique && !areItemsUnique(listElements)) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array items must be unique"))
-      }
-    }
-
     // Validate contains (at least one item must match)
     contains?.let { schema ->
       if (listElements.isEmpty()) {
@@ -136,18 +121,9 @@ data class ObjectSchema(
         messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Missing required property: $prop"))
       }
     }
-    
-    minProperties?.let { min ->
-      if (objectProperties.size < min) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have >= $min properties"))
-      }
-    }
-    
-    maxProperties?.let { max ->
-      if (objectProperties.size > max) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have <= $max properties"))
-      }
-    }
+
+    validateMinProperties(node, messageSink, minProperties)
+    validateMaxProperties(node, messageSink, maxProperties)
     
     // Track which properties have been validated
     val validatedProps = mutableSetOf<String>()
@@ -186,20 +162,6 @@ data class ObjectSchema(
       }
     }
   }
-}
-
-/**
- * Check if all items in a list are unique using JSON Schema equality semantics.
- */
-private fun areItemsUnique(elements: List<KsonListElement>): Boolean {
-  for (i in elements.indices) {
-    for (j in i + 1 until elements.size) {
-      if (elements[i].ksonValue == elements[j].ksonValue) {
-        return false
-      }
-    }
-  }
-  return true
 }
 
 /**

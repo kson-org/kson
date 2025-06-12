@@ -4,6 +4,8 @@ import org.kson.ast.*
 import org.kson.parser.NumberParser
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
+import kotlin.math.abs
+import kotlin.math.max
 
 /**
  * Schema for boolean values.
@@ -57,10 +59,12 @@ data class ConstSchema(
 /**
  * Schema for number values.
  */
-data class NumberSchema(
+open class NumberSchema(
   val minimum: Double? = null,
   val maximum: Double? = null,
   val multipleOf: Double? = null,
+  val exclusiveMinimum: Double? = null,
+  val exclusiveMaximum: Double? = null,
   override val title: String? = null,
   override val description: String? = null,
   override val default: KsonValue? = null,
@@ -72,84 +76,43 @@ data class NumberSchema(
       return
     }
 
-    val number = when (val value = node.value) {
-      is NumberParser.ParsedNumber.Decimal -> value.value
-      is NumberParser.ParsedNumber.Integer -> value.value.toDouble()
-    }
-    
-    minimum?.let { min ->
-      if (number < min) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be >= $min"))
-      }
-    }
-    
-    maximum?.let { max ->
-      if (number > max) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be <= $max"))
-      }
-    }
-    
-    multipleOf?.let { multiple ->
-      if (multiple != 0.0) {
-        val remainder = number % multiple
-        val epsilon = 1e-10 * kotlin.math.max(kotlin.math.abs(number), kotlin.math.abs(multiple))
-        if (kotlin.math.abs(remainder) > epsilon && kotlin.math.abs(remainder - multiple) > epsilon) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be multiple of $multiple"))
-        }
-      }
-    }
+    validateMinMax(node, minimum, maximum, messageSink)
+    validateMultipleOf(node, multipleOf, messageSink)
+    validateExclusiveMin(node, exclusiveMinimum, messageSink)
+    validateExclusiveMax(node, exclusiveMaximum, messageSink)
   }
 }
 
 /**
  * Schema for integer values.
  */
-data class IntegerSchema(
-  val minimum: Long? = null,
-  val maximum: Long? = null,
-  val multipleOf: Long? = null,
-  override val title: String? = null,
-  override val description: String? = null,
-  override val default: KsonValue? = null,
-  override val definitions: Map<String, JsonSchema>? = null
-) : JsonSchema {
+class IntegerSchema(
+  minimum: Double? = null,
+  maximum: Double? = null,
+  multipleOf: Double? = null,
+  exclusiveMinimum: Double? = null,
+  exclusiveMaximum: Double? = null,
+  title: String? = null,
+  description: String? = null,
+  default: KsonValue? = null,
+  definitions: Map<String, JsonSchema>? = null
+) : NumberSchema(minimum, maximum, multipleOf, exclusiveMinimum, exclusiveMaximum, title, description, default, definitions) {
   override fun validate(node: KsonValue, messageSink: MessageSink) {
     if (node !is KsonNumber) {
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected integer"))
       return
     }
 
-    val number = when(node.value) {
-      is NumberParser.ParsedNumber.Integer -> {
-        node.value.value
-      }
-      is NumberParser.ParsedNumber.Decimal -> {
-        if (node.value.asString.matches(allZerosDecimalRegex)) {
-          node.value.value.toLong()
-        } else {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected integer"))
-          return
-        }
+    if (node.value is NumberParser.ParsedNumber.Decimal) {
+      if (node.value.asString.matches(allZerosDecimalRegex)) {
+        node.value.value.toLong()
+      } else {
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected integer"))
+        return
       }
     }
     
-    minimum?.let { min ->
-      if (number < min) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be >= $min"))
-      }
-    }
-    
-    maximum?.let { max ->
-      if (number > max) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be <= $max"))
-      }
-    }
-    
-    multipleOf?.let { multiple ->
-      if (multiple != 0L && (number % multiple) != 0L) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be multiple of $multiple"))
-      }
-    }
+    super.validate(node, messageSink)
   }
 }
 
@@ -171,53 +134,11 @@ data class StringSchema(
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected string"))
       return
     }
-    
-    val str = node.value
-    
-    minLength?.let { min ->
-      if (countCodePoints(str) < min) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be >= $min"))
-      }
-    }
-    
-    maxLength?.let { max ->
-      if (countCodePoints(str) > max) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be <= $max"))
-      }
-    }
-    
-    pattern?.let { regex ->
-      if (!regex.containsMatchIn(str)) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String must match pattern: ${regex.pattern}"))
-      }
-    }
-    
-    enum?.let { values ->
-      if (!values.contains(str)) {
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String must be one of: ${values.joinToString()}"))
-      }
-    }
-  }
-  
-  /**
-   * Count Unicode code points in a string, not UTF-16 code units.
-   * This is required by JSON Schema specification.
-   */
-  private fun countCodePoints(str: String): Int {
-    var count = 0
-    var i = 0
-    while (i < str.length) {
-      val char = str[i]
-      if (char.isHighSurrogate() && i + 1 < str.length && str[i + 1].isLowSurrogate()) {
-        // This is a surrogate pair, count as one code point
-        i += 2
-      } else {
-        // Regular character, count as one code point
-        i += 1
-      }
-      count++
-    }
-    return count
+
+    validateMinLength(node, messageSink, minLength)
+    validateMaxLength(node, messageSink, maxLength)
+    validatePattern(node, messageSink, pattern)
+    validateEnum(node, messageSink, enum)
   }
 }
 
@@ -313,143 +234,31 @@ data class ConstraintSchema(
   override fun validate(node: KsonValue, messageSink: MessageSink) {
     // Apply number constraints only to numbers
     if (node is KsonNumber) {
-      val number = when (val value = node.value) {
-        is NumberParser.ParsedNumber.Decimal -> value.value
-        is NumberParser.ParsedNumber.Integer -> value.value.toDouble()
-      }
-      
-      minimum?.let { min ->
-        if (number < min) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be >= $min"))
-        }
-      }
-      
-      maximum?.let { max ->
-        if (number > max) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be <= $max"))
-        }
-      }
-      
-      exclusiveMinimum?.let { min ->
-        if (number <= min) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be > $min"))
-        }
-      }
-      
-      exclusiveMaximum?.let { max ->
-        if (number >= max) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be < $max"))
-        }
-      }
-      
-      multipleOf?.let { multiple ->
-        if (multiple != 0.0) {
-          val remainder = number % multiple
-          val epsilon = 1e-10 * kotlin.math.max(kotlin.math.abs(number), kotlin.math.abs(multiple))
-          if (kotlin.math.abs(remainder) > epsilon && kotlin.math.abs(remainder - multiple) > epsilon) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be multiple of $multiple"))
-          }
-        }
-      }
+      validateMinMax(node, minimum, maximum, messageSink)
+      validateExclusiveMin(node, exclusiveMinimum, messageSink)
+      validateExclusiveMax(node, exclusiveMaximum, messageSink)
+      validateMultipleOf(node, multipleOf, messageSink)
     }
     
     // Apply string constraints only to strings
     if (node is KsonString) {
-      val str = node.value
-      
-      minLength?.let { min ->
-        if (countCodePoints(str) < min) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be >= $min"))
-        }
-      }
-      
-      maxLength?.let { max ->
-        if (countCodePoints(str) > max) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be <= $max"))
-        }
-      }
-      
-      pattern?.let { regex ->
-        if (!regex.containsMatchIn(str)) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String must match pattern: ${regex.pattern}"))
-        }
-      }
+      validateMinLength(node, messageSink, minLength)
+      validateMaxLength(node, messageSink, maxLength)
+      validatePattern(node, messageSink, pattern)
     }
     
     // Apply array constraints only to arrays
     if (node is KsonList) {
-      val listElements = node.elements
-      
-      minItems?.let { min ->
-        if (listElements.size < min) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be >= $min"))
-        }
-      }
-      
-      maxItems?.let { max ->
-        if (listElements.size > max) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be <= $max"))
-        }
-      }
-      
-      uniqueItems?.let { unique ->
-        if (unique && !areItemsUnique(listElements)) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array items must be unique"))
-        }
-      }
+      validateMinItems(node, messageSink, minItems)
+      validateMaxItems(node, messageSink, maxItems)
+      validateUniqueItems(node, messageSink, uniqueItems)
     }
     
     // Apply object constraints only to objects
     if (node is KsonObject) {
-      val objectProperties = node.propertyMap
-      
-      minProperties?.let { min ->
-        if (objectProperties.size < min) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have >= $min properties"))
-        }
-      }
-      
-      maxProperties?.let { max ->
-        if (objectProperties.size > max) {
-          messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have <= $max properties"))
-        }
-      }
+      validateMinProperties(node, messageSink, minProperties)
+      validateMaxProperties(node, messageSink, maxProperties)
     }
-  }
-  
-  /**
-   * Count Unicode code points in a string, not UTF-16 code units.
-   * This is required by JSON Schema specification.
-   */
-  private fun countCodePoints(str: String): Int {
-    var count = 0
-    var i = 0
-    while (i < str.length) {
-      val char = str[i]
-      if (char.isHighSurrogate() && i + 1 < str.length && str[i + 1].isLowSurrogate()) {
-        // This is a surrogate pair, count as one code point
-        i += 2
-      } else {
-        // Regular character, count as one code point
-        i += 1
-      }
-      count++
-    }
-    return count
-  }
-  
-  /**
-   * Check if all items in a list are unique using JSON Schema equality semantics.
-   */
-  private fun areItemsUnique(elements: List<KsonListElement>): Boolean {
-    for (i in elements.indices) {
-      for (j in i + 1 until elements.size) {
-        if (elements[i].ksonValue == elements[j].ksonValue) {
-          return false
-        }
-      }
-    }
-    return true
   }
 }
 
@@ -490,4 +299,173 @@ data class MultipleTypeSchema(
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected one of: ${allowedTypes.joinToString()}, but got: $nodeType"))
     }
   }
+}
+
+private fun validateMinMax(node: KsonNumber, minimum: Double?, maximum: Double?, messageSink: MessageSink) {
+  val number = node.value.asDouble
+
+  minimum?.let { min ->
+    if (number < min) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be >= $min"))
+    }
+  }
+
+  maximum?.let { max ->
+    if (number > max) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be <= $max"))
+    }
+  }
+}
+
+private fun validateExclusiveMin(node: KsonNumber, exclusiveMinimum: Double?, messageSink: MessageSink) {
+  val number = node.value.asDouble
+  exclusiveMinimum?.let { min ->
+    if (number <= min) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be > $min"))
+    }
+  }
+}
+
+private fun validateExclusiveMax(node: KsonNumber, exclusiveMaximum: Double?, messageSink: MessageSink) {
+  val number = node.value.asDouble
+  exclusiveMaximum?.let { max ->
+    if (number >= max) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be < $max"))
+    }
+  }
+}
+
+private fun validateMultipleOf(node: KsonNumber, multipleOf: Double?, messageSink: MessageSink) {
+  val number = node.value.asDouble
+  multipleOf?.let { multiple ->
+    if (multiple != 0.0) {
+      val remainder = number % multiple
+      val epsilon = 1e-10 * max(abs(number), abs(multiple))
+      if (abs(remainder) > epsilon && abs(remainder - multiple) > epsilon) {
+        messageSink.error(
+          node.location,
+          MessageType.SCHEMA_VALIDATION_ERROR.create("Value must be multiple of $multiple")
+        )
+      }
+    }
+  }
+}
+
+private fun validateMinLength(node: KsonString, messageSink: MessageSink, minLength: Int?) {
+  val str = node.value
+  minLength?.let { min ->
+    if (countCodePoints(str) < min) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be >= $min"))
+    }
+  }
+}
+
+private fun validateMaxLength(node: KsonString, messageSink: MessageSink, maxLength: Int?) {
+  val str = node.value
+  maxLength?.let { max ->
+    if (countCodePoints(str) > max) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String length must be <= $max"))
+    }
+  }
+}
+
+private fun validatePattern(node: KsonString, messageSink: MessageSink, pattern: Regex?) {
+  val str = node.value
+  pattern?.let { regex ->
+    if (!regex.containsMatchIn(str)) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String must match pattern: ${regex.pattern}"))
+    }
+  }
+}
+
+private fun validateEnum(node: KsonString, messageSink: MessageSink, enum: Set<String>?) {
+  val str = node.value
+  enum?.let { values ->
+    if (!values.contains(str)) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("String must be one of: ${values.joinToString()}"))
+    }
+  }
+}
+
+fun validateMinItems(node: KsonList, messageSink: MessageSink, minItems: Int?) {
+  val listElements = node.elements
+  minItems?.let { min ->
+    if (listElements.size < min) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be >= $min"))
+    }
+  }
+}
+
+fun validateMaxItems(node: KsonList, messageSink: MessageSink, maxItems: Int?) {
+  val listElements = node.elements
+  maxItems?.let { max ->
+    if (listElements.size > max) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array length must be <= $max"))
+    }
+  }
+}
+
+fun validateUniqueItems(node: KsonList, messageSink: MessageSink, uniqueItems: Boolean?) {
+  val listElements = node.elements
+  uniqueItems?.let { unique ->
+    if (unique && !areItemsUnique(listElements)) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Array items must be unique"))
+    }
+  }
+}
+
+fun validateMinProperties(node: KsonObject, messageSink: MessageSink, minProperties: Int?) {
+  val objectProperties = node.propertyMap
+  minProperties?.let { min ->
+    if (objectProperties.size < min) {
+      messageSink.error(
+        node.location,
+        MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have >= $min properties")
+      )
+    }
+  }
+}
+
+fun validateMaxProperties(node: KsonObject, messageSink: MessageSink, maxProperties: Int?) {
+  val objectProperties = node.propertyMap
+  maxProperties?.let { max ->
+    if (objectProperties.size > max) {
+      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Object must have <= $max properties"))
+    }
+  }
+}
+
+/**
+ * Check if all items in a list are unique using JSON Schema equality semantics.
+ */
+private fun areItemsUnique(elements: List<KsonListElement>): Boolean {
+  for (i in elements.indices) {
+    for (j in i + 1 until elements.size) {
+      if (elements[i].ksonValue == elements[j].ksonValue) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+/**
+ * Count Unicode code points in a string, not UTF-16 code units.
+ * This is required by JSON Schema specification.
+ */
+private fun countCodePoints(str: String): Int {
+  var count = 0
+  var i = 0
+  while (i < str.length) {
+    val char = str[i]
+    if (char.isHighSurrogate() && i + 1 < str.length && str[i + 1].isLowSurrogate()) {
+      // This is a surrogate pair, count as one code point
+      i += 2
+    } else {
+      // Regular character, count as one code point
+      i += 1
+    }
+    count++
+  }
+  return count
 }
