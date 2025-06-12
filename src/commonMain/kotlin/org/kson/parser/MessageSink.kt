@@ -1,6 +1,5 @@
 package org.kson.parser
 
-import org.kson.stdlibx.collections.ImmutableList
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.parser.messages.Message
 
@@ -45,7 +44,7 @@ class MessageSink {
      * Return the list of all [LoggedMessage]s sent to this [MessageSink],
      * in the order they were logged
      */
-    fun loggedMessages(): ImmutableList<LoggedMessage> {
+    fun loggedMessages(): List<LoggedMessage> {
         return messages.toImmutableList()
     }
 }
