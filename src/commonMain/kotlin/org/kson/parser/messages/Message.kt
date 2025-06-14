@@ -288,6 +288,42 @@ enum class MessageType {
             return "The integer \"$overflowNumber\" is too large and cannot be represented."
         }
     },
+    SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Additional items are not allowed"
+        }
+    },
+    SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Additional properties are not allowed"
+        }
+    },
+    SCHEMA_ALL_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match all of the specified schemas"
+        }
+    },
+    SCHEMA_ANY_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match at least one of the specified schemas"
+        }
+    },
     SCHEMA_ARRAY_REQUIRED {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
@@ -308,13 +344,13 @@ enum class MessageType {
             return "Schema property \"$schemaPropertyName\" must be true or false"
         }
     },
-    SCHEMA_DEPENDENCIES_OBJECT_REQUIRED {
+    SCHEMA_CONTAINS_VALIDATION_FAILED {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema \"dependencies\" must be an object"
+            return "Array must contain at least one item that matches the contains schema"
         }
     },
     SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED {
@@ -333,6 +369,15 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Schema must not be empty"
+        }
+    },
+    SCHEMA_ENUM_VALUE_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value is not one of the allowed enum values"
         }
     },
     SCHEMA_FALSE_SCHEMA_ERROR {
@@ -354,6 +399,15 @@ enum class MessageType {
             return "Schema property \"$schemaPropertyName\" must be an integer"
         }
     },
+    SCHEMA_NOT_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must not match the specified schema"
+        }
+    },
     SCHEMA_NUMBER_REQUIRED {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")
@@ -371,6 +425,35 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Schema must be an object or boolean"
+        }
+    },
+    SCHEMA_OBJECT_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a number"
+        }
+    },
+    SCHEMA_ONE_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match exactly one of the specified schemas"
+        }
+    },
+    SCHEMA_REQUIRED_PROPERTY_MISSING {
+        override fun expectedArgs(): List<String> {
+            return listOf("Missing Properties")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val missingProperties = parsedArgs.getArg("Missing Properties")
+            return "Missing required properties: $missingProperties"
         }
     },
     SCHEMA_STRING_ARRAY_ENTRY_ERROR {

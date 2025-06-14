@@ -10,7 +10,7 @@ class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
     override fun validate(node: KsonValue, messageSink: MessageSink) {
         val enumValues = enum.elements.map { it.ksonValue }
         if (!enumValues.contains(node)) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+            messageSink.error(node.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create())
         }
     }
 }

@@ -53,7 +53,7 @@ sealed interface AdditionalItemsValidator {
 data class AdditionalItemsBooleanValidator(val allowed: Boolean): AdditionalItemsValidator {
     override fun validateArray(remainingItems: List<KsonValue>, location: Location, messageSink: MessageSink) {
         if (!allowed && remainingItems.isNotEmpty()) {
-            messageSink.error(location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+            messageSink.error(location, MessageType.SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED.create())
         }
     }
 }

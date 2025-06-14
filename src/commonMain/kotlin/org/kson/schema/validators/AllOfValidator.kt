@@ -14,7 +14,7 @@ class AllOfValidator(val allOf: List<JsonSchema>) : JsonSchemaValidator {
             !allOfMessageSink.hasErrors()
         }
         if (!allValid) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+            messageSink.error(node.location, MessageType.SCHEMA_ALL_OF_VALIDATION_FAILED.create())
         }
     }
 }

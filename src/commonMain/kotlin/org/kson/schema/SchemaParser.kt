@@ -71,7 +71,7 @@ object SchemaParser {
           parseSchemaElement(value, messageSink)
         }
       } else {
-        messageSink.error(definitions.location, SCHEMA_VALIDATION_ERROR.create("dm todo"))
+        messageSink.error(definitions.location, SCHEMA_OBJECT_REQUIRED.create("definitions"))
         null
       }
     }
@@ -241,7 +241,7 @@ object SchemaParser {
           parseSchemaElement(it.value, messageSink)
         }
       } else {
-        messageSink.error(properties.location, SCHEMA_VALIDATION_ERROR.create("dm todo"))
+        messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))
         null
       }
     }
@@ -252,7 +252,7 @@ object SchemaParser {
           parseSchemaElement(it.value, messageSink) ?: return@mapValues null
         }
       } else {
-        messageSink.error(patternProperties.location, SCHEMA_VALIDATION_ERROR.create("dm todo"))
+        messageSink.error(patternProperties.location, SCHEMA_OBJECT_REQUIRED.create("patternProperties"))
         null
       }
     }
@@ -357,7 +357,7 @@ object SchemaParser {
 
     schemaProperties["dependencies"] ?.let { dependencies ->
       if (dependencies !is KsonObject) {
-        messageSink.error(dependencies.location, SCHEMA_DEPENDENCIES_OBJECT_REQUIRED.create())
+        messageSink.error(dependencies.location, SCHEMA_OBJECT_REQUIRED.create("dependencies"))
         return@let
       }
 

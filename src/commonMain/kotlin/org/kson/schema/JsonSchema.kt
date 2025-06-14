@@ -31,12 +31,7 @@ class JsonObjectSchema(
    */
   override fun validate(node: KsonValue, messageSink: MessageSink) {
     if (typeValidator != null) {
-      val typeMessageSink = MessageSink()
-      typeValidator.validate(node, typeMessageSink)
-      if (typeMessageSink.hasErrors()) {
-        // schema todo add these errors to the broader message sink
-        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
-        // can't continue validating if we're the wrong type
+      if (!typeValidator.validate(node, messageSink)) {
         return
       }
     }

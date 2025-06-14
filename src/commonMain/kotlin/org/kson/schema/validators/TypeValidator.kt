@@ -3,13 +3,12 @@ package org.kson.schema.validators
 import org.kson.ast.*
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
-import org.kson.schema.JsonSchemaValidator
 import org.kson.schema.asSchemaInteger
 
-class TypeValidator(private val allowedTypes: List<String>) : JsonSchemaValidator {
+class TypeValidator(private val allowedTypes: List<String>) {
   constructor(type: String) : this(listOf(type))
 
-  override fun validate(node: KsonValue, messageSink: MessageSink) {
+  fun validate(node: KsonValue, messageSink: MessageSink): Boolean {
     val nodeType = when (node) {
       is KsonBoolean -> "boolean"
       is KsonNull -> "null"
@@ -30,6 +29,9 @@ class TypeValidator(private val allowedTypes: List<String>) : JsonSchemaValidato
       // if our node is an integer, this type is valid if the more-general "number" is an allowedType
       && !(nodeType == "integer" && allowedTypes.contains("number"))) {
       messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected one of: ${allowedTypes.joinToString()}, but got: $nodeType"))
+      return false
     }
+
+    return true
   }
 }

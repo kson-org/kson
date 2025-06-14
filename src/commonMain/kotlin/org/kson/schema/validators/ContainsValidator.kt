@@ -14,7 +14,7 @@ class ContainsValidator(private val containsSchema: JsonSchema) : JsonArrayValid
             !containsMessageSink.hasErrors()
         }
         if (!foundMatchingElement) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+            messageSink.error(node.location, MessageType.SCHEMA_CONTAINS_VALIDATION_FAILED.create())
         }
     }
 }

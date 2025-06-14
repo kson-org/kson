@@ -13,7 +13,7 @@ class NotValidator(private val notSchema: JsonSchema?) : JsonSchemaValidator {
         }
         val notMessageSink = MessageSink()
         if(notSchema.valid(node, notMessageSink)) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo should not have succeeded"))
+            messageSink.error(node.location, MessageType.SCHEMA_NOT_VALIDATION_FAILED.create())
         }
     }
 }

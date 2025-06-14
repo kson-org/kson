@@ -16,7 +16,7 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
         }
 
         if (!anyValid) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+            messageSink.error(node.location, MessageType.SCHEMA_ANY_OF_VALIDATION_FAILED.create())
         }
     }
 }
