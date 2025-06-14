@@ -9,7 +9,7 @@ import org.kson.schema.JsonArrayValidator
 class UniqueItemsValidator(private val uniqueItems: Boolean) : JsonArrayValidator() {
     override fun validateArray(node: KsonList, messageSink: MessageSink) {
         if (uniqueItems && !areItemsUnique(node.elements)) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Items in this array must be unique"))
+            messageSink.error(node.location, MessageType.SCHEMA_ARRAY_ITEMS_NOT_UNIQUE.create())
         }
     }
 

@@ -2,6 +2,7 @@ package org.kson.schema.validators
 
 import org.kson.ast.KsonObject
 import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
 
@@ -27,7 +28,7 @@ data class DependencyValidatorArray(val dependency: Set<String>) : DependencyVal
             propertyNames.contains(it)
         }
         if (!allPresent) {
-            messageSink.error(ksonObject.location, org.kson.parser.messages.MessageType.SCHEMA_VALIDATION_ERROR.create("Missing required dependencies"))
+            messageSink.error(ksonObject.location, MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES.create())
         }
         return allPresent
     }

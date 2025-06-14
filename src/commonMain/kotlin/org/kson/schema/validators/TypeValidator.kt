@@ -28,7 +28,7 @@ class TypeValidator(private val allowedTypes: List<String>) {
     if (!allowedTypes.contains(nodeType)
       // if our node is an integer, this type is valid if the more-general "number" is an allowedType
       && !(nodeType == "integer" && allowedTypes.contains("number"))) {
-      messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("Expected one of: ${allowedTypes.joinToString()}, but got: $nodeType"))
+      messageSink.error(node.location, MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(allowedTypes.joinToString(), nodeType))
       return false
     }
 
