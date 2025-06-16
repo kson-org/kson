@@ -5,6 +5,9 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.konan.target.Architecture
+import org.jetbrains.kotlin.konan.target.Family
+import org.jetbrains.kotlin.konan.target.HostManager
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -127,13 +130,15 @@ kotlin {
             }
         }
     }
-    val hostOs = System.getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    when {
-        hostOs == "Mac OS X" -> macosX64("nativeKson")
-        hostOs == "Linux" -> linuxX64("nativeKson")
-        isMingwX64 -> mingwX64("nativeKson")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+    val host = HostManager.host
+    when (host.family) {
+        Family.OSX -> when (host.architecture) {
+            Architecture.ARM64 -> macosArm64("nativeKson")
+            else -> macosX64("nativeKson")
+        }
+        Family.LINUX -> linuxX64("nativeKson")
+        Family.MINGW -> mingwX64("nativeKson")
+        else -> throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
     }
 
     sourceSets {
