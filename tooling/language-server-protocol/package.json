@@ -1,0 +1,42 @@
+{
+  "name": "kson-language-server",
+  "authors": [
+    {
+      "name": "Bart Dubbeldam",
+      "email": "bart.dubbeldam@dc-analytic.com"
+    },
+    {
+      "name": "Daniel Marcotte",
+      "email": "dmarcotte@gmail.com"
+    }
+  ],
+  "version": "0.0.1",
+  "description": "Kson Language Server implementation in TypeScript",
+  "type": "module",
+  "main": "./out/ksonServer.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha 'out/test/**/*.test.js'"
+  },
+  "keywords": [
+    "kson",
+    "language-server",
+    "lsp",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "kson": "file:../../build/dist/js/productionLibrary",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "devDependencies": {
+    "@types/mocha": "10.0.10",
+    "@types/node": "20.0.0",
+    "mocha": "^10.0.10",
+    "tsx": "^4.20.2",
+    "typescript": "^5.8.3"
+  }
+}
