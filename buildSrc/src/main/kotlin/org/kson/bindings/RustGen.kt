@@ -116,7 +116,7 @@ class RustGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsGen
         }
         builder.append(")")
 
-        if (metadata.returnType != null) {
+        if (metadata.returnType != null && metadata.returnType.classifier != "kotlin.Unit") {
             builder.append(" -> ${translateType(metadata.returnType!!, true)}")
         }
 

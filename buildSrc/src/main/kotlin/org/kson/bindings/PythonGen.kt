@@ -13,7 +13,7 @@ class PythonGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsG
             |with open('libkson/kson.h', 'r') as f:
             |   header = f.read()
             |ffi.cdef(header)
-            |lib = ffi.dlopen('libkson/kson.dll')
+            |lib = ffi.dlopen('kson.dll')
             |symbols = lib.kson_symbols()
             |
             |def cast_and_call(func, args):
