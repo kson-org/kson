@@ -7,18 +7,18 @@ import org.kson.schema.JsonSchemaValidator
 
 class IfValidator(private val ifSchema: JsonSchema?, private val thenSchema: JsonSchema?, private val elseSchema: JsonSchema?) :
     JsonSchemaValidator {
-    override fun validate(node: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
         if (ifSchema == null) {
             return
         }
 
         val tmpMessageSink = MessageSink()
-        if (ifSchema.valid(node, tmpMessageSink)) {
+        if (ifSchema.valid(ksonValue, tmpMessageSink)) {
             // if condition is true, run then schema if it exists
-            thenSchema?.validate(node, messageSink)
+            thenSchema?.validate(ksonValue, messageSink)
         } else {
             // if condition is false, run else schema if it exists
-            elseSchema?.validate(node, messageSink)
+            elseSchema?.validate(ksonValue, messageSink)
         }
     }
 }

@@ -6,9 +6,9 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonSchemaValidator
 
 class ConstValidator(private val const: KsonValue) : JsonSchemaValidator {
-    override fun validate(node: KsonValue, messageSink: MessageSink) {
-        if (node != const) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALUE_NOT_EQUAL_TO_CONST.create())
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+        if (ksonValue != const) {
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_NOT_EQUAL_TO_CONST.create())
         }
     }
 }

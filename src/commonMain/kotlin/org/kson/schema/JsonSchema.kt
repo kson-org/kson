@@ -6,8 +6,12 @@ import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
 
+
+/**
+ * Base [JsonSchema] type that [KsonValue]s may be validated against
+ */
 sealed interface JsonSchema {
-  fun validate(node: KsonValue, messageSink: MessageSink)
+  fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 
   fun valid(node: KsonValue, messageSink: MessageSink): Boolean {
     val numErrors = messageSink.loggedMessages().size
@@ -16,6 +20,9 @@ sealed interface JsonSchema {
   }
 }
 
+/**
+ * The main [JsonSchema] object representation
+ */
 class JsonObjectSchema(
   val title: String?,
   val description: String?,
@@ -29,25 +36,30 @@ class JsonObjectSchema(
   /**
    * Validates a [KsonValue] node against this schema, logging any validation errors to the [messageSink]
    */
-  override fun validate(node: KsonValue, messageSink: MessageSink) {
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
     if (typeValidator != null) {
-      if (!typeValidator.validate(node, messageSink)) {
+      if (!typeValidator.validate(ksonValue, messageSink)) {
+        // we're not the right type for this document, validation cannot continue
         return
       }
     }
 
+    // no `type` violations, run all other validators configured for this schema
     schemaValidators.forEach { validator ->
-      validator.validate(node, messageSink)
+      validator.validate(ksonValue, messageSink)
     }
   }
 }
 
+/**
+ * The most basic valid JsonSchema: `true` accepts all Json, `false` accepts none.
+ */
 class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
-  override fun validate(node: KsonValue, messageSink: MessageSink) {
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
     if (valid) {
       return
     } else {
-      messageSink.error(node.location, MessageType.SCHEMA_FALSE_SCHEMA_ERROR.create())
+      messageSink.error(ksonValue.location, MessageType.SCHEMA_FALSE_SCHEMA_ERROR.create())
     }
   }
 }

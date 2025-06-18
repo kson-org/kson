@@ -9,52 +9,56 @@ import org.kson.parser.MessageSink
 
 // schema todo capture file/location info from schema to link back to schema def?
 interface JsonSchemaValidator {
-    fun validate(node: KsonValue, messageSink: MessageSink)
+    /**
+     * Validates that the given [ksonValue] satisfies this [JsonNumberValidator].  Logs any validation errors to the
+     * given [messageSink]
+     */
+    fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 }
 
 abstract class JsonNumberValidator : JsonSchemaValidator {
-    final override fun validate(node: KsonValue, messageSink: MessageSink) {
-        if (node !is KsonNumber) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+        if (ksonValue !is KsonNumber) {
             return
         }
 
-        validateNumber(node, messageSink)
+        validateNumber(ksonValue, messageSink)
     }
 
     abstract fun validateNumber(node: KsonNumber, messageSink: MessageSink)
 }
 
 abstract class JsonArrayValidator : JsonSchemaValidator {
-    final override fun validate(node: KsonValue, messageSink: MessageSink) {
-        if (node !is KsonList) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+        if (ksonValue !is KsonList) {
             return
         }
 
-        validateArray(node, messageSink)
+        validateArray(ksonValue, messageSink)
     }
 
     abstract fun validateArray(node: KsonList, messageSink: MessageSink)
 }
 
 abstract class JsonObjectValidator : JsonSchemaValidator {
-    final override fun validate(node: KsonValue, messageSink: MessageSink) {
-        if (node !is KsonObject) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+        if (ksonValue !is KsonObject) {
             return
         }
 
-        validateObject(node, messageSink)
+        validateObject(ksonValue, messageSink)
     }
 
     abstract fun validateObject(node: KsonObject, messageSink: MessageSink)
 }
 
 abstract class JsonStringValidator : JsonSchemaValidator {
-    override fun validate(node: KsonValue, messageSink: MessageSink) {
-        if (node !is KsonString) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+        if (ksonValue !is KsonString) {
             return
         }
 
-        validateString(node, messageSink)
+        validateString(ksonValue, messageSink)
     }
 
     abstract fun validateString(node: KsonString, messageSink: MessageSink)

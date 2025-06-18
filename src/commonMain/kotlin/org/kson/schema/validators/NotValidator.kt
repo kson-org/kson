@@ -7,13 +7,13 @@ import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
 
 class NotValidator(private val notSchema: JsonSchema?) : JsonSchemaValidator {
-    override fun validate(node: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
         if (notSchema == null) {
             return
         }
         val notMessageSink = MessageSink()
-        if(notSchema.valid(node, notMessageSink)) {
-            messageSink.error(node.location, MessageType.SCHEMA_NOT_VALIDATION_FAILED.create())
+        if(notSchema.valid(ksonValue, notMessageSink)) {
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_NOT_VALIDATION_FAILED.create())
         }
     }
 }
