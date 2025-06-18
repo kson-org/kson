@@ -95,7 +95,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 /**
  * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] auto-completes
  */
-private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT), elem(STRING))
+private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT), elem(STRING_CONTENT))
 
 /**
  * The [IElementType]s within which we NEVER want to perform auto-completes

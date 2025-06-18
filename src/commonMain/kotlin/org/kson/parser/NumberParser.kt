@@ -29,15 +29,14 @@ class NumberParser(private val numberCandidate: String) {
     private var hasDecimalPoint = false
     private var hasExponent = false
 
-    sealed class ParsedNumber() {
-        abstract val asString: String
-        protected abstract fun trimLeadingZeros(input: String): String
+    sealed interface ParsedNumber {
+        val asString: String
 
-        class Integer(rawString: String) : ParsedNumber() {
+        class Integer(rawString: String) : ParsedNumber {
             override val asString = trimLeadingZeros(rawString)
             val value = convertToLong(rawString.trimStart('0').ifEmpty { "0" })
 
-            override fun trimLeadingZeros(input: String): String {
+            fun trimLeadingZeros(input: String): String {
                 // Handle negative numbers separately to preserve the minus sign
                 if (input.startsWith("-")) {
                     val trimmed = input.substring(1).trimStart('0')
@@ -50,7 +49,7 @@ class NumberParser(private val numberCandidate: String) {
             }
         }
 
-        class Decimal(rawString: String) : ParsedNumber() {
+        class Decimal(rawString: String) : ParsedNumber {
             override val asString = trimLeadingZeros(rawString)
             val value: Double by lazy {
                 asString.toDouble()
@@ -60,7 +59,7 @@ class NumberParser(private val numberCandidate: String) {
              * Note this handles leading zeros both on the integer part and
              * the exponent part
              */
-            override fun trimLeadingZeros(input: String): String {
+            fun trimLeadingZeros(input: String): String {
                 val isNegative = input.startsWith("-")
                 val unsigned = if (isNegative) input.substring(1) else input
 

@@ -2,9 +2,7 @@ package org.kson
 
 import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
-import org.kson.ast.AstNode
-import org.kson.ast.AstNodeError
-import org.kson.ast.KsonRoot
+import org.kson.ast.*
 import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
@@ -17,7 +15,8 @@ class Kson {
     companion object {
         /**
          * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
-         * we support, and may be used as a standalone parse to validate a [Kson] document
+         * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]
+         * from [AstParseResult.api]
          *
          * @param source The Kson source to parse
          * @param coreCompileConfig the [CoreCompileConfig] for this parse
@@ -117,6 +116,18 @@ data class AstParseResult(
     private val messageSink: MessageSink
 ) : ParseResult {
     override val messages = messageSink.loggedMessages()
+
+    /**
+     * A [KsonApi] on the AST constructed here, or null if there were errors trying to parse
+     * (consult [messageSink] for information on any errors)
+     */
+    val api: KsonApi? by lazy {
+        if (ast == null || hasErrors()) {
+            null
+        } else {
+            ast.toKsonApi()
+        }
+    }
 
     override fun hasErrors(): Boolean {
         return messageSink.hasErrors()

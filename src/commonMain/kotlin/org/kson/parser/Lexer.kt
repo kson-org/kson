@@ -289,7 +289,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             ',' -> addLiteralToken(COMMA)
             '"', '\'' -> {
                 addLiteralToken(STRING_OPEN_QUOTE)
-                string(char)
+                quotedString(char)
             }
             Percent.char, Dollar.char -> {
                 // look for the required second embed delim char
@@ -309,7 +309,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                     }
                     // check if we are starting an unquoted string
                     StringUnquoted.isUnquotedStartChar(char) -> {
-                        identifier()
+                        unquotedString()
                     }
                     else -> {
                         addLiteralToken(ILLEGAL_CHAR)
@@ -350,15 +350,15 @@ class Lexer(source: String, gapFree: Boolean = false) {
         return char == ' ' || char == '\r' || char == '\t'
     }
 
-    private fun identifier() {
+    private fun unquotedString() {
         while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())) sourceScanner.advance()
 
         val lexeme = sourceScanner.extractLexeme()
-        val type: TokenType = KEYWORDS[lexeme.text] ?: IDENTIFIER
+        val type: TokenType = KEYWORDS[lexeme.text] ?: UNQUOTED_STRING
         addToken(type, lexeme, lexeme.text)
     }
 
-    private fun string(delimiter: Char) {
+    private fun quotedString(delimiter: Char) {
         var hasUntokenizedStringCharacters = false
         while (sourceScanner.peek() != delimiter) {
             val nextStringChar = sourceScanner.peek() ?: break
@@ -369,7 +369,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 && !isWhitespace(nextStringChar)
             ) {
                 if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(STRING)
+                    addLiteralToken(STRING_CONTENT)
                     hasUntokenizedStringCharacters = false
                 }
                 // advance past the illegal char and tokenize it
@@ -377,7 +377,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 addLiteralToken(STRING_ILLEGAL_CONTROL_CHARACTER)
             } else if (nextStringChar == '\\') {
                 if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(STRING)
+                    addLiteralToken(STRING_CONTENT)
                     hasUntokenizedStringCharacters = false
                 }
 
@@ -410,7 +410,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         }
 
         if (hasUntokenizedStringCharacters) {
-            addLiteralToken(STRING)
+            addLiteralToken(STRING_CONTENT)
         }
 
         if (sourceScanner.eof()) {
@@ -551,7 +551,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         if (currentTokenType == COMMENT
             || currentTokenType == WHITESPACE
             || currentTokenType == EMBED_PREAMBLE_NEWLINE
-            || currentTokenType == STRING
+            || currentTokenType == STRING_CONTENT
             || currentTokenType == STRING_ESCAPE
             || currentTokenType == STRING_UNICODE_ESCAPE
             || currentTokenType == STRING_ILLEGAL_CONTROL_CHARACTER
