@@ -41,9 +41,12 @@ class Kson {
             if (coreCompileConfig.schemaJson == NO_SCHEMA) {
                 return AstParseResult(ast, tokens, messageSink)
             } else {
-                val schema = SchemaParser.parse(coreCompileConfig.schemaJson)
+                val schemaParseResult = SchemaParser.parse(coreCompileConfig.schemaJson)
+                val jsonSchema = schemaParseResult.jsonSchema
+                    ?: // schema todo make a schema parser entry point and suggest they run this through it to troubleshoot
+                    throw IllegalStateException("Schema parse failed:\n" + LoggedMessage.print(schemaParseResult.messages))
                 // validate against our schema, logging any errors to our message sink
-                schema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+                jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
                 return AstParseResult(ast, tokens, messageSink)
             }
         }

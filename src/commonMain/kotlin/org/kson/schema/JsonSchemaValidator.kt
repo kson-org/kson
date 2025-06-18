@@ -1,0 +1,82 @@
+package org.kson.schema
+
+import org.kson.ast.KsonList
+import org.kson.ast.KsonNumber
+import org.kson.ast.KsonObject
+import org.kson.ast.KsonString
+import org.kson.ast.KsonValue
+import org.kson.parser.MessageSink
+
+// schema todo capture file/location info from schema to link back to schema def?
+interface JsonSchemaValidator {
+    fun validate(node: KsonValue, messageSink: MessageSink)
+}
+
+abstract class JsonNumberValidator : JsonSchemaValidator {
+    final override fun validate(node: KsonValue, messageSink: MessageSink) {
+        if (node !is KsonNumber) {
+            return
+        }
+
+        validateNumber(node, messageSink)
+    }
+
+    abstract fun validateNumber(node: KsonNumber, messageSink: MessageSink)
+}
+
+abstract class JsonArrayValidator : JsonSchemaValidator {
+    final override fun validate(node: KsonValue, messageSink: MessageSink) {
+        if (node !is KsonList) {
+            return
+        }
+
+        validateArray(node, messageSink)
+    }
+
+    abstract fun validateArray(node: KsonList, messageSink: MessageSink)
+}
+
+abstract class JsonObjectValidator : JsonSchemaValidator {
+    final override fun validate(node: KsonValue, messageSink: MessageSink) {
+        if (node !is KsonObject) {
+            return
+        }
+
+        validateObject(node, messageSink)
+    }
+
+    abstract fun validateObject(node: KsonObject, messageSink: MessageSink)
+}
+
+abstract class JsonStringValidator : JsonSchemaValidator {
+    override fun validate(node: KsonValue, messageSink: MessageSink) {
+        if (node !is KsonString) {
+            return
+        }
+
+        validateString(node, messageSink)
+    }
+
+    abstract fun validateString(node: KsonString, messageSink: MessageSink)
+
+    /**
+     * Count Unicode code points in a string, not UTF-16 code units.
+     * This is required by JSON Schema specification.
+     */
+    protected fun countCodePoints(str: String): Int {
+        var count = 0
+        var index = 0
+        while (index < str.length) {
+            val char = str[index]
+            index += if (char.isHighSurrogate() && index + 1 < str.length && str[index + 1].isLowSurrogate()) {
+                // This is a surrogate pair, count as one code point
+                2
+            } else {
+                // Regular character, count as one code point
+                1
+            }
+            count++
+        }
+        return count
+    }
+}

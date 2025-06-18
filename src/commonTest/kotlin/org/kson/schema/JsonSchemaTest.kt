@@ -12,11 +12,12 @@ interface JsonSchemaTest {
                                  schemaJson: String,
                                  shouldAcceptAsValid: Boolean,
                                  message: String? = null) {
-        // accepted as valid if and only if we parsed without error
-        val acceptedAsValid = !Kson.parseToAst(
+        val parseResult = Kson.parseToAst(
             ksonSource.trimIndent(),
             coreCompileConfig = CoreCompileConfig(schemaJson = schemaJson.trimIndent())
-        ).hasErrors()
+        )
+        // accepted as valid if and only if we parsed without error
+        val acceptedAsValid = !parseResult.hasErrors()
 
         assertEquals(
             shouldAcceptAsValid,

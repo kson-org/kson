@@ -1,0 +1,45 @@
+package org.kson.schema.validators
+
+import org.kson.ast.KsonObject
+import org.kson.parser.MessageSink
+import org.kson.schema.JsonObjectValidator
+import org.kson.schema.JsonSchema
+
+class DependenciesValidator(private val dependencies: Map<String, DependencyValidator>)
+    : JsonObjectValidator() {
+    override fun validateObject(node: KsonObject, messageSink: MessageSink) {
+        val properties = node.propertyMap
+        dependencies.forEach { (name, dependency) ->
+            properties[name]?.let {
+                dependency.validate(node, messageSink)
+            }
+        }
+    }
+}
+
+sealed interface DependencyValidator {
+    fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean
+}
+data class DependencyValidatorArray(val dependency: Set<String>) : DependencyValidator {
+    override fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean {
+        val propertyNames = ksonObject.propertyMap.keys
+        val allPresent = dependency.all {
+            propertyNames.contains(it)
+        }
+        if (!allPresent) {
+            messageSink.error(ksonObject.location, org.kson.parser.messages.MessageType.SCHEMA_VALIDATION_ERROR.create("Missing required dependencies"))
+        }
+        return allPresent
+    }
+}
+data class DependencyValidatorSchema(val dependency: JsonSchema?) : DependencyValidator {
+    override fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean {
+        if (dependency == null) {
+            return true
+        }
+        val numErrors = messageSink.loggedMessages().size
+        dependency.validate(ksonObject, messageSink)
+        // valid if we didn't add any new errors
+        return messageSink.loggedMessages().size == numErrors
+    }
+}

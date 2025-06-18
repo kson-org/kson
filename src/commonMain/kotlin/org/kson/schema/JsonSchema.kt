@@ -1,46 +1,87 @@
 package org.kson.schema
+import org.kson.ast.KsonNumber
 import org.kson.ast.KsonValue
 import org.kson.parser.MessageSink
+import org.kson.parser.NumberParser
+import org.kson.parser.messages.MessageType
+import org.kson.schema.validators.TypeValidator
 
-/**
- * Base interface for all JSON Schema types.
- */
 sealed interface JsonSchema {
-  val title: String?
-  val description: String?
-  val default: KsonValue?
-  val definitions: Map<String, JsonSchema>?
+  fun validate(node: KsonValue, messageSink: MessageSink)
+
+  fun valid(node: KsonValue, messageSink: MessageSink): Boolean {
+    val numErrors = messageSink.loggedMessages().size
+    validate(node, messageSink)
+    return messageSink.loggedMessages().size == numErrors
+  }
+}
+
+class JsonObjectSchema(
+  val title: String?,
+  val description: String?,
+  val default: KsonValue?,
+  val definitions: Map<String, JsonSchema?>?,
+
+  private val typeValidator: TypeValidator?,
+  private val schemaValidators: List<JsonSchemaValidator>
+) : JsonSchema {
 
   /**
    * Validates a [KsonValue] node against this schema, logging any validation errors to the [messageSink]
    */
-  fun validate(node: KsonValue, messageSink: MessageSink)
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    if (typeValidator != null) {
+      val typeMessageSink = MessageSink()
+      typeValidator.validate(node, typeMessageSink)
+      if (typeMessageSink.hasErrors()) {
+        // schema todo add these errors to the broader message sink
+        messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo"))
+        // can't continue validating if we're the wrong type
+        return
+      }
+    }
+
+    schemaValidators.forEach { validator ->
+      validator.validate(node, messageSink)
+    }
+  }
+}
+
+class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
+  override fun validate(node: KsonValue, messageSink: MessageSink) {
+    if (valid) {
+      return
+    } else {
+      messageSink.error(node.location, MessageType.SCHEMA_FALSE_SCHEMA_ERROR.create())
+    }
+  }
 }
 
 /**
- * Models the additionalProperties keyword behavior in object schemas.
+ * Converts the given `KsonNumber` to its corresponding integer representation, if applicable.
+ *
+ * This function checks if the `KsonNumber` represents an integer or a decimal number that can
+ * safely be interpreted as an integer according to JSON Schema rules. If the value is a decimal
+ * but matches a pattern of all zeros after the decimal point (e.g., "1.0"), it is converted to
+ * a long integer. Otherwise, it returns `null`.
+ *
+ * @param ksonNumber The `KsonNumber` instance to be converted to a long integer
+ * @return The integer value of the `KsonNumber` if it represents an integer or a decimal that
+ *         can be safely interpreted as an integer, otherwise, returns `null`
  */
-sealed interface AdditionalProperties {
-  /** Additional properties are allowed */
-  data object Allowed : AdditionalProperties
-  
-  /** Additional properties are forbidden */
-  data object Forbidden : AdditionalProperties
-  
-  /** Additional properties must validate against the given schema */
-  data class Schema(val schema: JsonSchema) : AdditionalProperties
+fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
+  return when (ksonNumber.value) {
+    is NumberParser.ParsedNumber.Integer -> ksonNumber.value.value
+    is NumberParser.ParsedNumber.Decimal -> {
+      if (ksonNumber.value.asString.matches(allZerosDecimalRegex)) {
+        // 1.0-type numbers are considered integers by JsonSchema, and it's safe to `toInt` it
+        ksonNumber.value.value.toLong()
+      } else {
+        null
+      }
+    }
+  }
 }
 
-/**
- * Models the additionalItems keyword behavior in array schemas.
- */
-sealed interface AdditionalItems {
-  /** Additional items are allowed */
-  data object Allowed : AdditionalItems
-  
-  /** Additional items are forbidden */
-  data object Forbidden : AdditionalItems
-  
-  /** Additional items must validate against the given schema */
-  data class Schema(val schema: JsonSchema) : AdditionalItems
-} 
+// cached regex for testing if all the digits after the decimal are zero in a decimal string
+private val allZerosDecimalRegex = Regex(".*\\.0*")

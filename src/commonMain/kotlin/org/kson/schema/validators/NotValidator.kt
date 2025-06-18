@@ -1,0 +1,19 @@
+package org.kson.schema.validators
+
+import org.kson.ast.KsonValue
+import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType
+import org.kson.schema.JsonSchema
+import org.kson.schema.JsonSchemaValidator
+
+class NotValidator(private val notSchema: JsonSchema?) : JsonSchemaValidator {
+    override fun validate(node: KsonValue, messageSink: MessageSink) {
+        if (notSchema == null) {
+            return
+        }
+        val notMessageSink = MessageSink()
+        if(notSchema.valid(node, notMessageSink)) {
+            messageSink.error(node.location, MessageType.SCHEMA_VALIDATION_ERROR.create("dm todo should not have succeeded"))
+        }
+    }
+}

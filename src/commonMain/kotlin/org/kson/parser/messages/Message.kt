@@ -288,15 +288,130 @@ enum class MessageType {
             return "The integer \"$overflowNumber\" is too large and cannot be represented."
         }
     },
-    BAD_SCHEMA {
+    SCHEMA_ARRAY_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be an array"
+        }
+    },
+    SCHEMA_BOOLEAN_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be true or false"
+        }
+    },
+    SCHEMA_DEPENDENCIES_OBJECT_REQUIRED {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unable to parse schema"
+            return "Schema \"dependencies\" must be an object"
         }
     },
+    SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Property names in a \"dependencies\" list must be strings"
+        }
+    },
+    SCHEMA_EMPTY_SCHEMA {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema must not be empty"
+        }
+    },
+    SCHEMA_FALSE_SCHEMA_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema always fails"
+        }
+    },
+    SCHEMA_INTEGER_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be an integer"
+        }
+    },
+    SCHEMA_NUMBER_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a number"
+        }
+    },
+    SCHEMA_OBJECT_OR_BOOLEAN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema must be an object or boolean"
+        }
+    },
+    SCHEMA_STRING_ARRAY_ENTRY_ERROR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema \"$schemaPropertyName\" array entries must be a strings"
+        }
+    },
+    SCHEMA_STRING_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a string"
+        }
+    },
+    SCHEMA_TYPE_ARRAY_ENTRY_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema \"type\" array entries must be a strings"
+        }
+    },
+    SCHEMA_TYPE_TYPE_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema \"type\" must be a string or array of strings"
+        }
+    },
+    // schema todo improve all the usages of this to be more precise
     SCHEMA_VALIDATION_ERROR {
         override fun expectedArgs(): List<String> {
             return listOf("Error Message")
