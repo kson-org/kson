@@ -3,6 +3,7 @@ package org.kson.jsonsuite
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import java.io.File
 import java.nio.file.Path
 
 /**
@@ -340,7 +341,7 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
                 it.nameWithoutExtension,
                 // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
                 it.readText(Charsets.UTF_8),
-                it.absolutePath.replace("$projectRoot/", ""),
+                it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
                 JsonTestSuiteEditList.get(it.name)
             )
         }.sortedBy { it.rawTestName }
@@ -371,7 +372,7 @@ private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, pri
                 val schemaTestGroups: List<SchemaTestGroup> = prettyPrintingJson.decodeFromString(contents)
                 SchemaTestData(
                     it.nameWithoutExtension,
-                    it.absolutePath.replace("$projectRoot/", ""),
+                    it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
                     schemaTestGroups,
                 )
             }.sortedBy { it.filePathFromProjectRoot }
