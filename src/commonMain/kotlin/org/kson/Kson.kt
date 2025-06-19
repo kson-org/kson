@@ -1,3 +1,6 @@
+@file:OptIn(kotlin.js.ExperimentalJsExport::class)
+@file:JsExport
+
 package org.kson
 
 import org.kson.CompileTarget.*
@@ -7,6 +10,7 @@ import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.schema.SchemaParser
 import org.kson.tools.KsonFormatterConfig
+import kotlin.js.JsExport
 
 /**
  * Public interface to the [Kson] compiler

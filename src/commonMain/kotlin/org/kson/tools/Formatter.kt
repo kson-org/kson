@@ -7,6 +7,8 @@ import org.kson.parser.Token
 import org.kson.parser.TokenType
 import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 /**
  * Format the given [Kson] source according to [formatterConfig]
@@ -22,6 +24,8 @@ fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormat
     ).kson ?: ksonSource
 }
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 data class KsonFormatterConfig(val indentType: IndentType = IndentType.Space(2))
 
 /**
@@ -306,6 +310,8 @@ class IndentFormatter(
     }
 }
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 sealed class IndentType {
     abstract val indentString: String
 
