@@ -11,79 +11,78 @@ import org.kson.tools.KsonFormatterConfig
 /**
  * Public interface to the [Kson] compiler
  */
-class Kson {
-    companion object {
-        /**
-         * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
-         * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]
-         * from [AstParseResult.api]
-         *
-         * @param source The Kson source to parse
-         * @param coreCompileConfig the [CoreCompileConfig] for this parse
-         * @return An [AstParseResult]
-         */
-        fun parseToAst(source: String, coreCompileConfig: CoreCompileConfig = CoreCompileConfig()): AstParseResult {
-            val messageSink = MessageSink()
-            val tokens = Lexer(
-                source,
-                // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
-                gapFree = coreCompileConfig.errorTolerant).tokenize()
-            if (tokens[0].tokenType == TokenType.EOF) {
-                messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
-                return AstParseResult(null, tokens, messageSink)
-            }
-
-            val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
-            Parser(builder, coreCompileConfig.maxNestingLevel).parse()
-            val ast = builder.buildTree(messageSink)
-
-            if (coreCompileConfig.schemaJson == NO_SCHEMA) {
-                return AstParseResult(ast, tokens, messageSink)
-            } else {
-                val schemaParseResult = SchemaParser.parse(coreCompileConfig.schemaJson)
-                val jsonSchema = schemaParseResult.jsonSchema
-                    ?: // schema todo make a schema parser entry point and suggest they run this through it to troubleshoot
-                    throw IllegalStateException("Schema parse failed:\n" + LoggedMessage.print(schemaParseResult.messages))
-                // validate against our schema, logging any errors to our message sink
-                jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
-                return AstParseResult(ast, tokens, messageSink)
-            }
+object Kson {
+    /**
+     * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
+     * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]
+     * from [AstParseResult.api]
+     *
+     * @param source The Kson source to parse
+     * @param coreCompileConfig the [CoreCompileConfig] for this parse
+     * @return An [AstParseResult]
+     */
+    fun parseToAst(source: String, coreCompileConfig: CoreCompileConfig = CoreCompileConfig()): AstParseResult {
+        val messageSink = MessageSink()
+        val tokens = Lexer(
+            source,
+            // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
+            gapFree = coreCompileConfig.errorTolerant
+        ).tokenize()
+        if (tokens[0].tokenType == TokenType.EOF) {
+            messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
+            return AstParseResult(null, tokens, messageSink)
         }
 
-        /**
-         * Parse the given Kson [source] and compile it to Yaml
-         *
-         * @param source The Kson source to parse
-         * @param compileConfig a [CompileTarget.Yaml] object with this compilation's config
-         * @return A [YamlParseResult]
-         */
-        fun parseToYaml(source: String, compileConfig: Yaml = Yaml()): YamlParseResult {
-            return YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-        }
+        val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
+        Parser(builder, coreCompileConfig.maxNestingLevel).parse()
+        val ast = builder.buildTree(messageSink)
 
-        /**
-         * Parse the given Kson [source] and compile it to Json
-         *
-         * @param source The Kson source to parse
-         * @param compileConfig a [CompileTarget.Json] object with this compilation's config
-         * @return A [JsonParseResult]
-         */
-        fun parseToJson(source: String, compileConfig: Json = Json()): JsonParseResult {
-            return JsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+        if (coreCompileConfig.schemaJson == NO_SCHEMA) {
+            return AstParseResult(ast, tokens, messageSink)
+        } else {
+            val schemaParseResult = SchemaParser.parse(coreCompileConfig.schemaJson)
+            val jsonSchema = schemaParseResult.jsonSchema
+                ?: // schema todo make a schema parser entry point and suggest they run this through it to troubleshoot
+                throw IllegalStateException("Schema parse failed:\n" + LoggedMessage.print(schemaParseResult.messages))
+            // validate against our schema, logging any errors to our message sink
+            jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+            return AstParseResult(ast, tokens, messageSink)
         }
+    }
 
-        /**
-         * Parse the given Kson [source] and re-compile it out to Kson.  Useful for testing and transformations
-         * like re-writing Json into Kson (the Json is itself Kson since Kson is a superset of Json, whereas the
-         * compiled Kson output is in more canonical Kson syntax)
-         *
-         * @param source The Kson source to parse
-         * @param compileConfig a [CompileTarget.Kson] object with this compilation's config
-         * @return A [KsonParseResult]
-         */
-        fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
-            return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-        }
+    /**
+     * Parse the given Kson [source] and compile it to Yaml
+     *
+     * @param source The Kson source to parse
+     * @param compileConfig a [CompileTarget.Yaml] object with this compilation's config
+     * @return A [YamlParseResult]
+     */
+    fun parseToYaml(source: String, compileConfig: Yaml = Yaml()): YamlParseResult {
+        return YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+    }
+
+    /**
+     * Parse the given Kson [source] and compile it to Json
+     *
+     * @param source The Kson source to parse
+     * @param compileConfig a [CompileTarget.Json] object with this compilation's config
+     * @return A [JsonParseResult]
+     */
+    fun parseToJson(source: String, compileConfig: Json = Json()): JsonParseResult {
+        return JsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
+    }
+
+    /**
+     * Parse the given Kson [source] and re-compile it out to Kson.  Useful for testing and transformations
+     * like re-writing Json into Kson (the Json is itself Kson since Kson is a superset of Json, whereas the
+     * compiled Kson output is in more canonical Kson syntax)
+     *
+     * @param source The Kson source to parse
+     * @param compileConfig a [CompileTarget.Kson] object with this compilation's config
+     * @return A [KsonParseResult]
+     */
+    fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
+        return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
     }
 }
 
@@ -150,7 +149,8 @@ class KsonParseResult(
      */
     val kson: String? = astParseResult.ast?.toSource(
         AstNode.Indent(compileConfig.formatConfig.indentType),
-        compileConfig)
+        compileConfig
+    )
 }
 
 class YamlParseResult(
@@ -174,7 +174,6 @@ class JsonParseResult(
      */
     val json: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
 }
-
 
 
 /**

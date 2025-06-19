@@ -1,7 +1,7 @@
 package org.kson.tools
 
 import org.kson.*
-import org.kson.Kson.Companion.parseToAst
+import org.kson.Kson.parseToAst
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
