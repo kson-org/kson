@@ -2,12 +2,16 @@ package org.kson.ast
 
 import org.kson.parser.Location
 import org.kson.parser.NumberParser
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 /**
  * The [KsonApi] classes provide a client-friendly API interface for fully valid Kson [AstNode] trees that
  * exposes just the data properties of the represented Kson and can be traversed confidently without
  * any error- or null-checking
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 sealed class KsonApi(val location: Location)
 
 abstract class KsonValue(location: Location) : KsonApi(location) {

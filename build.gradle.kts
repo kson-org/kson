@@ -177,6 +177,14 @@ kotlin {
                 }
             }
         }
+        nodejs {
+            testTask {
+                useMocha()
+            }
+        }
+        binaries.library()
+        useEsModules()
+        generateTypeScriptDefinitions()
     }
     val host = HostManager.host
     val nativeTarget = when (host.family) {
