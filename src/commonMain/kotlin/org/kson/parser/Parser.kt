@@ -94,7 +94,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *           | dashList
      *           | delimitedValue
      */
-    private fun ksonValue(): Boolean = plainObject(false) || dashList() || delimitedValue()
+    private fun ksonValue(): Boolean = plainObject() || dashList() || delimitedValue()
 
     /**
      * plainObject -> objectInternals "."+
@@ -105,7 +105,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * Note: as in [dashList], we combine these two grammar rules here so it's clean/easy to implement
      *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
      */
-    private fun plainObject(allowEmpty: Boolean, isDelimited: Boolean = false): Boolean = nestingTracker.nest {
+    private fun plainObject(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         var foundProperties = false
 
         val objectMark = builder.mark()
@@ -132,6 +132,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 if (builder.getTokenType() == CURLY_BRACE_R) {
                     // object got closed before giving this keyword a value
                     keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                    // mark that we saw that near-property
+                    foundProperties = true
                     propertyMark.done(OBJECT_PROPERTY)
                     break
                 }
@@ -170,7 +172,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
         }
 
-        if (foundProperties || allowEmpty) {
+        if (foundProperties) {
             objectMark.done(OBJECT)
             return@nest true
         } else {
@@ -305,8 +307,15 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // advance past our CURLY_BRACE_L
         builder.advanceLexer()
 
-        // parse any object internals, empty or otherwise
-        plainObject(allowEmpty = true, isDelimited = true)
+        if (builder.getTokenType() == CURLY_BRACE_R) {
+            // looking at empty object, advance past our end brace and mark it
+            builder.advanceLexer()
+            delimitedObjectMark.done(OBJECT)
+            return true
+        }
+
+        // parse our object internals
+        plainObject(isDelimited = true)
 
         // annotate anything unparsable within this object definition with an error
         while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
@@ -327,7 +336,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
             // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
             // on internals that are actually bad
-            plainObject(allowEmpty = false, isDelimited = true)
+            plainObject(isDelimited = true)
         }
 
         if (builder.getTokenType() == CURLY_BRACE_R) {
@@ -403,14 +412,20 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             if (!ksonValue()) {
                 val invalidElementMark = builder.mark()
 
-                // while we're not obviously another element or at the end of the list, mark this non-value as an error
-                while (builder.getTokenType() != SQUARE_BRACKET_R
-                    && builder.getTokenType() != COMMA
-                    && !builder.eof()
+                var containsInvalidElement = false
+                while (builder.getTokenType() != SQUARE_BRACKET_R &&
+                    builder.getTokenType() != COMMA &&
+                    !builder.eof()
                 ) {
                     builder.advanceLexer()
+                    containsInvalidElement = true
                 }
-                invalidElementMark.error(LIST_INVALID_ELEM.create())
+
+                if (containsInvalidElement) {
+                    invalidElementMark.error(LIST_INVALID_ELEM.create())
+                } else {
+                    invalidElementMark.drop()
+                }
             }
             if (builder.getTokenType() == COMMA) {
                 processComma(builder)
@@ -641,12 +656,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 val tagText = builder.getTokenText()
                 // advance past our optional embed tag
                 builder.advanceLexer()
+                embedTagMark.done(EMBED_TAG)
                 tagText
             } else {
                 // no embed tag
+                embedTagMark.drop()
                 ""
             }
-            embedTagMark.done(EMBED_TAG)
 
             val prematureEndMark = builder.mark()
             if (builder.getTokenType() == EMBED_CLOSE_DELIM) {

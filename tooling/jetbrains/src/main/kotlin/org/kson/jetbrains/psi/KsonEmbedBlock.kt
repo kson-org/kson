@@ -7,8 +7,8 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
-    val embedBlockTag: String?
-        get() = node.findChildByType(elem(TokenType.EMBED_TAG))?.text
+    val embedBlockTag: String
+        get() = node.findChildByType(elem(TokenType.EMBED_TAG))?.text ?: ""
 
     val embedDelim: EmbedDelim
         get() = getDelim(this)

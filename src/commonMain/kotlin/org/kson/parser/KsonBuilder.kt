@@ -216,10 +216,11 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                          * [Parser.embedBlock] ensures we always find an [EMBED_OPEN_DELIM] or an [EMBED_DELIM_PARTIAL],
                          * here, so its first [Char] to understand which [EmbedDelim] is in use here
                          */
-                        val embedDelimChar = childMarkers.getOrNull(0)?.getValue()?.getOrNull(0)
+                        val embedDelimChar = childMarkers.firstOrNull()?.getValue()?.firstOrNull()
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
-                        val embedTag = childMarkers.getOrNull(1)?.getValue() ?: ""
-                        val embedContent = childMarkers.getOrNull(2)?.getValue() ?: ""
+                        val embedTag = childMarkers.find { it.element == EMBED_TAG }?.getValue() ?: ""
+                        val embedContent = childMarkers.find { it.element == EMBED_CONTENT }?.getValue() ?: ""
+
                         EmbedBlockNode(
                             embedTag,
                             embedContent,
@@ -594,6 +595,14 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     override fun done(elementType: ElementType) {
         // the last token we advanced past is our last token
         lastTokenIndex = context.getTokenIndex() - 1
+        if (lastTokenIndex < firstTokenIndex) {
+            /**
+             * This happens marking an empty token, e.g. empty tags or empty objects.
+             * If we try to mark NOT_A_TOKEN then the [lastTokenIndex] is smaller than the
+             * [firstTokenIndex] when we hit [done] because of the minus 1.
+             */
+            throw RuntimeException("Must not create empty elements.")
+        }
         element = elementType
     }
 
