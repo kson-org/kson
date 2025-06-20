@@ -597,11 +597,10 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         lastTokenIndex = context.getTokenIndex() - 1
         if (lastTokenIndex < firstTokenIndex) {
             /**
-             * This happens marking an empty token, e.g. empty tags or empty objects.
-             * If we try to mark NOT_A_TOKEN then the [lastTokenIndex] is smaller than the
-             * [firstTokenIndex] when we hit [done] because of the minus 1.
+             * Raise an alarm if we accidentally make an empty mark. We want all markers to mark either
+             * a non-empty parsed element OR a non-empty chunk of source that is in error
              */
-            throw RuntimeException("Must not create empty elements.")
+            throw ShouldNotHappenException("Must not create empty elements.")
         }
         element = elementType
     }
