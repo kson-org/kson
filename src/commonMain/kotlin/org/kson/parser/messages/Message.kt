@@ -287,6 +287,370 @@ enum class MessageType {
             val overflowNumber = parsedArgs.getArg("Overflow Number")
             return "The integer \"$overflowNumber\" is too large and cannot be represented."
         }
+    },
+    SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Additional items are not allowed"
+        }
+    },
+    SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Additional properties are not allowed"
+        }
+    },
+    SCHEMA_ALL_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match all of the specified schemas"
+        }
+    },
+    SCHEMA_ANY_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match at least one of the specified schemas"
+        }
+    },
+    SCHEMA_ARRAY_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be an array"
+        }
+    },
+    SCHEMA_BOOLEAN_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be true or false"
+        }
+    },
+    SCHEMA_CONTAINS_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Array must contain at least one item that matches the contains schema"
+        }
+    },
+    SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Property names in a \"dependencies\" list must be strings"
+        }
+    },
+    SCHEMA_EMPTY_SCHEMA {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema must not be empty"
+        }
+    },
+    SCHEMA_ENUM_VALUE_NOT_ALLOWED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value is not one of the allowed enum values"
+        }
+    },
+    SCHEMA_FALSE_SCHEMA_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema always fails"
+        }
+    },
+    SCHEMA_INTEGER_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be an integer"
+        }
+    },
+    SCHEMA_NOT_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must not match the specified schema"
+        }
+    },
+    SCHEMA_NUMBER_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a number"
+        }
+    },
+    SCHEMA_OBJECT_OR_BOOLEAN {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema must be an object or boolean"
+        }
+    },
+    SCHEMA_OBJECT_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a number"
+        }
+    },
+    SCHEMA_ONE_OF_VALIDATION_FAILED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must match exactly one of the specified schemas"
+        }
+    },
+    SCHEMA_REQUIRED_PROPERTY_MISSING {
+        override fun expectedArgs(): List<String> {
+            return listOf("Missing Properties")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val missingProperties = parsedArgs.getArg("Missing Properties")
+            return "Missing required properties: $missingProperties"
+        }
+    },
+    SCHEMA_STRING_ARRAY_ENTRY_ERROR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema \"$schemaPropertyName\" array entries must be a strings"
+        }
+    },
+    SCHEMA_STRING_REQUIRED {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a string"
+        }
+    },
+    SCHEMA_TYPE_ARRAY_ENTRY_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema \"type\" array entries must be a strings"
+        }
+    },
+    SCHEMA_TYPE_TYPE_ERROR {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Schema \"type\" must be a string or array of strings"
+        }
+    },
+    SCHEMA_VALUE_MUST_BE_MULTIPLE_OF {
+        override fun expectedArgs(): List<String> {
+            return listOf("Multiple Of Value")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val multipleOfValue = parsedArgs.getArg("Multiple Of Value")
+            return "Value must be multiple of $multipleOfValue"
+        }
+    },
+    SCHEMA_STRING_LENGTH_TOO_SHORT {
+        override fun expectedArgs(): List<String> {
+            return listOf("Minimum Length")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val minLength = parsedArgs.getArg("Minimum Length")
+            return "String length must be >= $minLength"
+        }
+    },
+    SCHEMA_STRING_LENGTH_TOO_LONG {
+        override fun expectedArgs(): List<String> {
+            return listOf("Maximum Length")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maxLength = parsedArgs.getArg("Maximum Length")
+            return "String length must be <= $maxLength"
+        }
+    },
+    SCHEMA_VALUE_TYPE_MISMATCH {
+        override fun expectedArgs(): List<String> {
+            return listOf("Expected Types", "Actual Type")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val expectedTypes = parsedArgs.getArg("Expected Types")
+            val actualType = parsedArgs.getArg("Actual Type")
+            return "Expected one of: $expectedTypes, but got: $actualType"
+        }
+    },
+    SCHEMA_ARRAY_ITEMS_NOT_UNIQUE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Items in this array must be unique"
+        }
+    },
+    SCHEMA_VALUE_TOO_LARGE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Maximum Value")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maximum = parsedArgs.getArg("Maximum Value")
+            return "Value must be <= $maximum"
+        }
+    },
+    SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Exclusive Maximum Value")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val exclusiveMaximum = parsedArgs.getArg("Exclusive Maximum Value")
+            return "Value must be < $exclusiveMaximum"
+        }
+    },
+    SCHEMA_VALUE_TOO_SMALL {
+        override fun expectedArgs(): List<String> {
+            return listOf("Minimum Value")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val minimum = parsedArgs.getArg("Minimum Value")
+            return "Value must be >= $minimum"
+        }
+    },
+    SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Exclusive Minimum Value")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val exclusiveMinimum = parsedArgs.getArg("Exclusive Minimum Value")
+            return "Value must be > $exclusiveMinimum"
+        }
+    },
+    SCHEMA_VALUE_NOT_EQUAL_TO_CONST {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Value must be exactly equal to const value"
+        }
+    },
+    SCHEMA_ARRAY_TOO_LONG {
+        override fun expectedArgs(): List<String> {
+            return listOf("Maximum Items")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maxItems = parsedArgs.getArg("Maximum Items")
+            return "Array length must be <= $maxItems"
+        }
+    },
+    SCHEMA_ARRAY_TOO_SHORT {
+        override fun expectedArgs(): List<String> {
+            return listOf("Minimum Items")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val minItems = parsedArgs.getArg("Minimum Items")
+            return "Array length must be >= $minItems"
+        }
+    },
+    SCHEMA_OBJECT_TOO_MANY_PROPERTIES {
+        override fun expectedArgs(): List<String> {
+            return listOf("Maximum Properties")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val maxProperties = parsedArgs.getArg("Maximum Properties")
+            return "Object must have <= $maxProperties properties"
+        }
+    },
+    SCHEMA_OBJECT_TOO_FEW_PROPERTIES {
+        override fun expectedArgs(): List<String> {
+            return listOf("Minimum Properties")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val minProperties = parsedArgs.getArg("Minimum Properties")
+            return "Object must have >= $minProperties properties"
+        }
+    },
+    SCHEMA_STRING_PATTERN_MISMATCH {
+        override fun expectedArgs(): List<String> {
+            return listOf("Pattern")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val pattern = parsedArgs.getArg("Pattern")
+            return "String must match pattern: $pattern"
+        }
+    },
+    SCHEMA_MISSING_REQUIRED_DEPENDENCIES {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Missing required dependencies"
+        }
     };
 
     /**
@@ -341,12 +705,8 @@ enum class MessageType {
      * Lookup wrapper for [MessageType.create] arguments to protect against typo'ed lookups
      */
     protected class ParsedErrorArgs(private val messageType: MessageType, args: List<String>) {
-        private val parsedArgs: Map<String, String>
-
-        init {
-            // zip the given args up with corresponding argName for lookups
-            parsedArgs = messageType.expectedArgs().zip(args).toMap()
-        }
+        // zip the given args up with corresponding argName for lookups
+        private val parsedArgs: Map<String, String> = messageType.expectedArgs().zip(args).toMap()
 
         /**
          * Get an arg by name, or error loudly if no such arg exists

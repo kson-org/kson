@@ -1,0 +1,16 @@
+package org.kson.schema.validators
+
+import org.kson.ast.KsonObject
+import org.kson.parser.MessageSink
+import org.kson.parser.messages.MessageType
+import org.kson.schema.JsonObjectValidator
+
+class MinPropertiesValidator(private val minProperties: Long) : JsonObjectValidator() {
+    override fun validateObject(node: KsonObject, messageSink: MessageSink) {
+        if (node.propertyMap.size < minProperties) {
+            messageSink.error(node.location, 
+                MessageType.SCHEMA_OBJECT_TOO_FEW_PROPERTIES.create(minProperties.toString())
+            )
+        }
+    }
+}

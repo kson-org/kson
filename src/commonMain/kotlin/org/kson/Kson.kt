@@ -5,6 +5,7 @@ import org.kson.CompileTarget.Kson
 import org.kson.ast.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
+import org.kson.schema.SchemaParser
 import org.kson.tools.KsonFormatterConfig
 
 /**
@@ -39,7 +40,13 @@ class Kson {
             if (coreCompileConfig.schemaJson == NO_SCHEMA) {
                 return AstParseResult(ast, tokens, messageSink)
             } else {
-                TODO("Json Schema support for Kson not yet implemented")
+                val schemaParseResult = SchemaParser.parse(coreCompileConfig.schemaJson)
+                val jsonSchema = schemaParseResult.jsonSchema
+                    ?: // schema todo make a schema parser entry point and suggest they run this through it to troubleshoot
+                    throw IllegalStateException("Schema parse failed:\n" + LoggedMessage.print(schemaParseResult.messages))
+                // validate against our schema, logging any errors to our message sink
+                jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+                return AstParseResult(ast, tokens, messageSink)
             }
         }
 

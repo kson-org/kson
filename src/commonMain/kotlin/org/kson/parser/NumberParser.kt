@@ -29,10 +29,20 @@ class NumberParser(private val numberCandidate: String) {
     private var hasDecimalPoint = false
     private var hasExponent = false
 
-    sealed interface ParsedNumber {
-        val asString: String
+    sealed class ParsedNumber {
+        abstract val asString: String
 
-        class Integer(rawString: String) : ParsedNumber {
+        /**
+         * Get this [ParsedNumber] as a [Double]
+         */
+        val asDouble: Double by lazy {
+            when (this) {
+                is Decimal -> value
+                is Integer -> value.toDouble()
+            }
+        }
+
+        class Integer(rawString: String) : ParsedNumber() {
             override val asString = trimLeadingZeros(rawString)
             val value = convertToLong(rawString.trimStart('0').ifEmpty { "0" })
 
@@ -49,7 +59,7 @@ class NumberParser(private val numberCandidate: String) {
             }
         }
 
-        class Decimal(rawString: String) : ParsedNumber {
+        class Decimal(rawString: String) : ParsedNumber() {
             override val asString = trimLeadingZeros(rawString)
             val value: Double by lazy {
                 asString.toDouble()
