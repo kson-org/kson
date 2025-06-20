@@ -30,7 +30,7 @@ open class KsonTestError {
         source: String,
         expectedParseMessageTypes: List<MessageType>,
         maxNestingLevel: Int? = null
-    ): ImmutableList<LoggedMessage> {
+    ): List<LoggedMessage> {
         val parseResult = if (maxNestingLevel != null) {
             Kson.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
         } else {

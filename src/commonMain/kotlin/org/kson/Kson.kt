@@ -3,7 +3,6 @@ package org.kson
 import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
 import org.kson.ast.*
-import org.kson.stdlibx.collections.ImmutableList
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.tools.KsonFormatterConfig
@@ -98,7 +97,7 @@ interface ParseResult {
     /**
      * The user-facing messages logged during this parse
      */
-    val messages: ImmutableList<LoggedMessage>
+    val messages: List<LoggedMessage>
 
     /**
      * True if the input source could not be parsed. [messages] will contain errors in this case.
