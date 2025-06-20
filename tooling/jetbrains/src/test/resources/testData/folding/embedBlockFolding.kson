@@ -15,3 +15,9 @@ tagged_block: <fold text='%%kotlin...%%'>%%kotlin
         console.log("Hello");
     }
 %%</fold>
+
+single_start_delim: <fold text='%%kotlin...%%'>%kotlin
+    function test() {
+        console.log("Hello");
+    }
+%%</fold>
