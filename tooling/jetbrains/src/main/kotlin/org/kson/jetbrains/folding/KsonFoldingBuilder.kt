@@ -177,7 +177,7 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
             elem(ParsedElementType.EMBED_BLOCK) -> {
                 val embedBlock = node.psi as KsonEmbedBlock
                 val embedDelim = embedBlock.embedDelim
-                val embedBlockTag = embedBlock.embedBlockTag ?: return ""
+                val embedBlockTag = embedBlock.embedBlockTag
                 "${embedDelim.delimiter}${embedBlockTag}...${embedDelim.delimiter}"
             }
 

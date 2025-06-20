@@ -6,9 +6,7 @@ class KsonTestObject : KsonTest() {
     @Test
     fun testEmptyObjectSource() {
         assertParsesTo(
-            """
-                {}
-            """,
+            "{    }",
             "{}",
             "{}",
             "{}"
