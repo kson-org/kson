@@ -19,9 +19,9 @@ class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
 
     companion object {
         private fun getDelim(host: KsonEmbedBlock): EmbedDelim {
-            return host.children.find {
-                it.node.elementType == elem(TokenType.EMBED_OPEN_DELIM)
-            }?.text?.let { EmbedDelim.fromString(it) } ?: throw ShouldNotHappenException("Embed delimiter not found")
+            val openEmbedDelim = host.children.getOrNull(0) ?: throw ShouldNotHappenException("Embed delimiter not found")
+            val embedDelim = openEmbedDelim.text.firstOrNull().let { EmbedDelim.fromString("$it$it") }
+            return embedDelim
         }
     }
 }
