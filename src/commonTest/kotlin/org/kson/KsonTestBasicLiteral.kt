@@ -2,7 +2,7 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestBasicLiteral : KsonTest() {
+class KsonTestBasicLiteral : KsonTest {
     @Test
     fun testBooleanLiteralSource() {
         assertParsesTo(
