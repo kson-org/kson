@@ -34,7 +34,7 @@ describe('KSON Formatter', () => {
     }
 
     // Object formatting tests
-    it('object - single property', () => {
+    it('should format an object with a single property', () => {
         const content = '{"x" : 1}';
         const expected = [
             'x: 1'
@@ -42,7 +42,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('object - multiple properties', () => {
+    it('should format an object with multiple properties', () => {
         const content = '{"x" : 1,  "y" : "foo", "z"  : true}';
         const expected = [
             'x: 1',
@@ -52,7 +52,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('object - no properties', () => {
+    it('should format an object with no properties', () => {
         const content = '{"x" : {    },  "y" : {}}';
         const expected = [
             'x:',
@@ -63,7 +63,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('object - nesting', () => {
+    it('should handle nested objects', () => {
         const content = '{"x" : {  "y" : { "z"  : { }}, "a": true}}';
         const expected = [
             'x:',
@@ -77,7 +77,7 @@ describe('KSON Formatter', () => {
     });
 
     // Array formatting tests
-    it('array - single item', () => {
+    it('should format an array with a single item', () => {
         const content = '["[]"]';
         const expected = [
             "- '[]'"
@@ -85,7 +85,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('array - multiple items', () => {
+    it('should format an array with multiple items', () => {
         const content = '[true,null,1.2]';
         const expected = [
             '- true',
@@ -95,13 +95,13 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('array - no items', () => {
+    it('should format an array with no items', () => {
         const content = '[      ]';
         const expected = '<>';
         assertFormatting(content, expected);
     });
 
-    it('array - nesting', () => {
+    it('should handle nested arrays', () => {
         const content = '[ [], [ [ {} ], "a" ]  ]';
         const expected = [
             '- ',
@@ -116,25 +116,17 @@ describe('KSON Formatter', () => {
     });
 
     // Indentation options tests
-    it('tabs instead of spaces', () => {
-        const content = '{"x" : 1,  "y" : "foo"}';
-        const expected = [
-            'x: 1',
-            'y: foo'
-        ].join('\n');
-        assertFormatting(content, expected, false);
-    });
-
-    it('nested with tabs', () => {
+    it('should be configurable to indent with tabs - nested objects', () => {
         const content = '{"outer":{"inner":"value"}}';
         const expected = [
             'outer:',
             '\tinner: value'
         ].join('\n');
-        assertFormatting(content, expected, false);
+        let insertSpaces = false;
+        assertFormatting(content, expected, insertSpaces);
     });
 
-    it('list with tabs', () => {
+    it('should be configurable to indent with tabs - list ', () => {
         const content = [
             `list:[1,2,3]`
         ].join('\n');
@@ -145,42 +137,43 @@ describe('KSON Formatter', () => {
             `\t- 2`,
             `\t- 3`,
         ].join('\n');
-        assertFormatting(content, expected, false);
+        let insertSpaces = false;
+        assertFormatting(content, expected, insertSpaces);
     });
 
     // Edge cases
-    it('empty object', () => {
+    it('should handle an empty object', () => {
         const content = '{}';
         const expected = '{}';
         assertFormatting(content, expected);
     });
 
-    it('single value - string', () => {
+    it('should turn the string into an unquoted string', () => {
         const content = '"hello"';
         const expected = 'hello';
         assertFormatting(content, expected);
     });
 
-    it('single value - number', () => {
+    it('should handle a single number value', () => {
         const content = '42';
         const expected = '42';
         assertFormatting(content, expected);
     });
 
-    it('single value - boolean', () => {
+    it('should handle a single boolean value', () => {
         const content = 'true';
         const expected = 'true';
         assertFormatting(content, expected);
     });
 
-    it('single value - null', () => {
+    it('should handle a single null value', () => {
         const content = 'null';
         const expected = 'null';
         assertFormatting(content, expected);
     });
 
     // Whitespace handling
-    it('preserve string content', () => {
+    it('should preserve whitespace', () => {
         const content = '{"text":"  spaces  and\ttabs\t"}';
         const expected = [
             'text: \'  spaces  and\ttabs\t\''
@@ -188,7 +181,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('object with trailing comma', () => {
+    it('should handle an object with a trailing comma', () => {
         const content = '{"a": 1, "b": 2,}';
         const expected = [
             'a: 1',
@@ -197,7 +190,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('array with trailing comma', () => {
+    it('should handle an array with a trailing comma', () => {
         const content = '[1, 2, 3,]';
         const expected = [
             '- 1',
@@ -208,7 +201,7 @@ describe('KSON Formatter', () => {
     });
 
     // Special characters and escapes
-    it('string with escapes', () => {
+    it('should handle a string with escapes', () => {
         const content = '{"text":"Hello\\nWorld\\t\\"quoted\\""}';
         const expected = [
             'text: \'Hello\\nWorld\\t\"quoted\"\''
@@ -216,7 +209,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     });
 
-    it('unicode characters', () => {
+    it('should handle unicode characters', () => {
         const content = '{"emoji":"🚀","chinese":"你好","math":"∑"}';
         const expected = [
             'emoji: \'🚀\'',
@@ -227,7 +220,7 @@ describe('KSON Formatter', () => {
     });
 
     // Large numbers and scientific notation
-    it('large numbers', () => {
+    it('should handle large numbers', () => {
         const content = '{"big":1234567890,"small":0.000001,"scientific":1.23e-10}';
         const expected = [
             'big: 1234567890',
@@ -238,7 +231,7 @@ describe('KSON Formatter', () => {
     });
 
     // Embed blocks
-    it('embed blocks', () => {
+    it('should correctly format embed blocks', () => {
         const content = [
             `embedBlock: $$kotlin`,
             `min indent of 2`,
@@ -252,7 +245,7 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected);
     })
 
-    it('embed blocks - tab formatting', () => {
+    it('should handle embed block with tab indentation', () => {
         const content = [
             `embedBlock: $$kotlin`,
             `min indent of 2`,
@@ -263,7 +256,8 @@ describe('KSON Formatter', () => {
             `\tmin indent of 2`,
             `\t%%`
         ].join('\n')
-        assertFormatting(content, expected, false);
+        let insertSpaces = false;
+        assertFormatting(content, expected, insertSpaces);
     })
 });
 

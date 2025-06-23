@@ -64,7 +64,7 @@ describe('KSON Semantic Tokens', () => {
         return tokens;
     }
 
-    it('distinction key and string', () => {
+    it('should distinguish between a key and a string', () => {
         const content = 'key: string';
         const expectedTokens: DecodedToken[] = [
             {deltaLine: 0, deltaStart: 0, length: 3, type: SemanticTokenTypes.variable, modifiers: []}, // key
@@ -75,7 +75,7 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     })
 
-    it('number value', () => {
+    it('should handle a number value', () => {
         const content = 'number: 42';
 
         const expectedTokens: DecodedToken[] = [
@@ -88,7 +88,7 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     });
 
-    it('boolean value', () => {
+    it('should handle a boolean value', () => {
         const content = 'flag: true';
 
         const expectedTokens: DecodedToken[] = [
@@ -103,7 +103,7 @@ describe('KSON Semantic Tokens', () => {
     });
 
     // Array token tests
-    it('simple array', () => {
+    it('should handle a simple array', () => {
         const content = [
             'items:',
             '  - first',
@@ -126,7 +126,7 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     });
 
-    it('embed block', () => {
+    it('should handle an embed block', () => {
         const content = [
             'embedBlock: $$tag',
             '  multi-line',
@@ -151,7 +151,7 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     });
 
-    it('all punctuation', () => {
+    it('should handle all punctuation', () => {
         const content = '{ "key": [ "v1", "v2" ] }';
 
         const expectedTokens: DecodedToken[] = [
