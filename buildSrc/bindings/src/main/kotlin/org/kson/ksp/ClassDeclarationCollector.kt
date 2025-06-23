@@ -1,4 +1,4 @@
-package org.kson.public_api_metadata_collector
+package org.kson.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
@@ -34,7 +34,8 @@ class ClassDeclarationCollector(val codeGenerator: CodeGenerator) : SymbolProces
 
 
         // Gather public API metadata
-        val kotlinVisitor = PackageMetadataVisitor(visitor.topLevelClassDeclarations)
+        val kotlinVisitor =
+            PackageMetadataVisitor(visitor.topLevelClassDeclarations)
         while (kotlinVisitor.visitNextClass()) {
             // Iterate until all relevant classes have been visited
         }

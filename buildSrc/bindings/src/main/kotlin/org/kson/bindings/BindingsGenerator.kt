@@ -1,6 +1,7 @@
 package org.kson.bindings
 
 import kotlinx.serialization.json.Json
+import org.kson.metadata.SimplePackageMetadata
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories

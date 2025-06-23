@@ -27,7 +27,8 @@ plugins {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", project(":tooling:public-api-metadata-collector"))
+    add("kspCommonMainMetadata", files("build/ksp-jars/bindings-ksp-processor.jar"))
+    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 }
 
 // NOTE: `./gradlew wrapper` must be run for edit to this config to take effect

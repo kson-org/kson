@@ -1,4 +1,4 @@
-package org.kson.bindings
+package org.kson.metadata
 
 import kotlinx.serialization.Serializable
 

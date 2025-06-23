@@ -1,4 +1,4 @@
-# Cross-Language API Architecture
+# Bindings
 
 For a configuration language such as Kson, it's crucial to support multiple programming languages.
 The more interoperable Kson is across languages, the more useful it will be to people!
@@ -10,7 +10,7 @@ compile down to JVM bytecode, Javascript and native code. This means we have can
 JVM-based languages (Kotlin, Java, etc), Javascript (including type declarations for Typescript),
 and C (through a very low-level API).
 
-### Supporting other languages
+### Bindings for other languages
 
 There are plenty of languages out there without Kotlin Multiplatform support. However, Kotlin
 exposes native library functions and types through the C ABI, which means we can call those
@@ -30,15 +30,15 @@ fact, it replicates the Kson API from the original Kotlin code as much as the la
 
 Generating the wrapper happens in two stages:
 
-- Collect metadata about Kson's public API (see `tooling/public-api-metadata-collector`)
+- Collect metadata about Kson's public API (see `bindings/src/main/kotlin/org/kson/ksp`)
 - Based on the metadata, generate wrappers for different programming languages (see `buildSrc/src/main/kotlin/GenerateBindingsTask.kt`)
 
 ### What about static linking?
 
-Using a shared library requires distributing the library's files, which is slightly annoying. Most
-compiled languages allow statically linking library's during compilation, meaning that the library
-becomes part of the compiled binary. That way, the only artifact that needs to be distributed is the
-binary.
+Using a shared library requires distributing the library's files, which is slightly annoying. In
+theory, we could get around this limitation by using static linking for the languages that support
+it (most compiled languages). That means the Kson library would become part of the compiled binary
+instead of needing to be distributed alongside it.
 
 We evaluated static linking for our Rust wrapper, but it turns out that Kotlin Multiplatform makes
 that pretty much impossible on Windows. The gist of the issue is that the compiled library requires
@@ -48,4 +48,5 @@ official toolchain (MSVC), which provides a C++ runtime that is incompatible wit
 I know, static linking gets very complicated when there is a mismatch between the C++ runtime of the
 library and the C++ runtime of the application. It might even be impossible, but I'm not 100% sure.
 In any case, my attempts at it failed and we settled on dynamic linking (i.e., using a shared
-library) even for compiled languages.
+library) even for compiled languages. Note that we _could_ use static linking on Linux and MacOS,
+but IMO it's not worth the hassle.

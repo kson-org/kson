@@ -1,5 +1,14 @@
 package org.kson.bindings
 
+import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.IncludeParentClass
+import org.kson.metadata.SimpleClassMetadata
+import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleFunctionMetadata
+import org.kson.metadata.SimplePackageMetadata
+import org.kson.metadata.SimpleParamMetadata
+import org.kson.metadata.SimpleType
+
 class PythonGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsGenerator {
     val builder = StringBuilder()
 
@@ -136,7 +145,8 @@ class PythonGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsG
         if (metadata.returnType != null) {
             if (this.metadata.classes.containsKey(metadata.returnType.classifier)) {
                 val className = FullyQualifiedClassName(metadata.returnType.classifier)
-                builder.append("$declarationIndent    resultObj = object.__new__(${className.unqualifiedName(IncludeParentClass.Yes())})\n")
+                builder.append("$declarationIndent    resultObj = object.__new__(${className.unqualifiedName(
+                    IncludeParentClass.Yes())})\n")
                 builder.append("$declarationIndent    resultObj.ptr = result\n")
                 builder.append("$declarationIndent    result = resultObj\n")
             }

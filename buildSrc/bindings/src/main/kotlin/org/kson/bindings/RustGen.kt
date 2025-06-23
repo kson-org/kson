@@ -1,5 +1,14 @@
 package org.kson.bindings
 
+import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.IncludeParentClass
+import org.kson.metadata.SimpleClassMetadata
+import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleFunctionMetadata
+import org.kson.metadata.SimplePackageMetadata
+import org.kson.metadata.SimpleParamMetadata
+import org.kson.metadata.SimpleType
+
 class RustGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsGenerator {
     val builder = StringBuilder()
 

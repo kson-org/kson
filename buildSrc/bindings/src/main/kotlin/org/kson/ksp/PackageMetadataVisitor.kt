@@ -1,4 +1,4 @@
-package org.kson.public_api_metadata_collector
+package org.kson.ksp
 
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.getDeclaredFunctions
@@ -10,6 +10,13 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Visibility
+import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.SimpleClassMetadata
+import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleFunctionMetadata
+import org.kson.metadata.SimplePackageMetadata
+import org.kson.metadata.SimpleParamMetadata
+import org.kson.metadata.SimpleType
 import java.util.LinkedList
 import java.util.Queue
 
@@ -89,7 +96,12 @@ class PackageMetadataVisitor {
             // Public functions
             if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
                 if (it.isConstructor()) {
-                    constructors.add(SimpleConstructorMetadata(it.parameters.map { parameter -> SimpleParamMetadata(parameter.name!!.asString(), simplifyType(parameter.type.resolve())) }, it.docString))
+                    constructors.add(SimpleConstructorMetadata(it.parameters.map { parameter ->
+                        SimpleParamMetadata(
+                            parameter.name!!.asString(),
+                            simplifyType(parameter.type.resolve())
+                        )
+                    }, it.docString))
                     it.parameters.forEach { param ->
                         this.visitType(param.type.resolve())
                     }
@@ -100,12 +112,24 @@ class PackageMetadataVisitor {
 
             // Properties
             if (it is KSPropertyDeclaration && it.getVisibility() == Visibility.PUBLIC && it.simpleName.asString() == "ast") {
-                functions.add(SimpleFunctionMetadata("get_${it.simpleName.asString()}", false, arrayListOf(), simplifyType(it.type.resolve()), it.docString))
+                functions.add(
+                    SimpleFunctionMetadata(
+                        "get_${it.simpleName.asString()}", false, arrayListOf(),
+                        simplifyType(it.type.resolve()), it.docString
+                    )
+                )
                 this.visitType(it.type.resolve())
             }
         }
 
-        val classMetadata = SimpleClassMetadata(FullyQualifiedClassName(className), supertypes.toTypedArray(), constructors.toTypedArray(), functions.toTypedArray(), arrayOf(), classDecl.docString)
+        val classMetadata = SimpleClassMetadata(
+            FullyQualifiedClassName(className),
+            supertypes.toTypedArray(),
+            constructors.toTypedArray(),
+            functions.toTypedArray(),
+            arrayOf(),
+            classDecl.docString
+        )
         val classParent = classDecl.parentDeclaration
         if (classParent is KSClassDeclaration) {
             val list = this.nestedClasses.getOrPut(classParent.qualifiedName!!.asString()) { arrayListOf() }
