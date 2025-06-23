@@ -95,17 +95,17 @@ import {WorkspaceFolders} from 'vscode-languageserver/lib/common/workspaceFolder
 import {ConnectionStub} from "./ConnectionStub";
 
 /**
- * This is the {@link BaseConnectionStub} used for any test that needs to use a {@link Connection}.
+ * This is the {@link BoilerplateConnectionStub} used for any test that needs to use a {@link Connection}.
  * An example implementation can be found in {@link ConnectionStub}. You could make your own by extending this class.
  */
-export abstract class BaseConnectionStub implements Connection {
+export abstract class BoilerplateConnectionStub implements Connection {
     private stubMustImplement = 'This method must be overridden in your stub, if your test need to call it';
 
     listen(): void {
         throw new Error(this.stubMustImplement);
     }
 
-    onRequest(_method: unknown, _handler?: unknown): import("vscode-languageserver").Disposable {
+    onRequest(_method: unknown, _handler?: unknown): Disposable {
         throw new Error(this.stubMustImplement);
     }
 
@@ -113,7 +113,7 @@ export abstract class BaseConnectionStub implements Connection {
         throw new Error(this.stubMustImplement);
     }
 
-    onNotification(_method: unknown, _handler?: unknown): import("vscode-languageserver").Disposable {
+    onNotification(_method: unknown, _handler?: unknown): Disposable {
         throw new Error(this.stubMustImplement);
     }
 

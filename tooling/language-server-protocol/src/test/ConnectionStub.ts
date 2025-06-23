@@ -11,14 +11,23 @@ import {
     DocumentDiagnosticReport,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, WillSaveTextDocumentParams, DidSaveTextDocumentParams
 } from "vscode-languageserver";
-import {BaseConnectionStub} from "./BaseConnectionStub";
+import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
 
 /**
- * Stub class used for tests that need Connections.
- * It extends the {@link BaseConnectionStub} by overriding its methods.
+ * A stub implementation of the `Connection` interface for testing purposes.
+ *
+ * This class extends {@link BoilerplateConnectionStub}, which provides a base implementation
+ * of the `Connection` interface where all methods throw an error by default.
+ *
+ * `ConnectionStub` overrides the specific methods from `Connection` that are required by
+ * the services under test (e.g., `onDocumentFormatting`, `onDidOpenTextDocument`).
+ * These overridden methods store the provided handlers in public properties (e.g., `formattingHandler`),
+ * allowing tests to invoke them directly and verify the behavior of the services.
+ *
+ * This setup allows to test language features by simulating client-side events and requests.
  */
-export class ConnectionStub extends BaseConnectionStub {
+export class ConnectionStub extends BoilerplateConnectionStub {
     public formattingHandler: ServerRequestHandler<DocumentFormattingParams, TextEdit[] | null | undefined, never, void>;
     public didOpenHandler: NotificationHandler<DidOpenTextDocumentParams>;
     public didChangeHandler: NotificationHandler<DidChangeTextDocumentParams>;
@@ -37,78 +46,55 @@ export class ConnectionStub extends BaseConnectionStub {
             semanticTokens: {
                 on: (handler: ServerRequestHandler<SemanticTokensParams, SemanticTokens, any, void>) => {
                     this.semanticTokensHandler = handler;
-                    return {
-                        dispose: () => {
-                        }
-                    };
+                    return NOOP_DISPOSABLE;
                 }
             },
             diagnostics: {
                 on: (handler: ServerRequestHandler<DocumentDiagnosticParams, DocumentDiagnosticReport, any, void>) => {
                     this.diagnosticsHandler = handler;
-                    return {
-                        dispose: () => {
-                        }
-                    };
+                    return NOOP_DISPOSABLE;
                 }
             }
-        } as any;
+        } as Languages;
     }
 
     override onDocumentFormatting(handler: ServerRequestHandler<DocumentFormattingParams, TextEdit[] | undefined | null, never, void>): Disposable {
         this.formattingHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onDidOpenTextDocument(handler: NotificationHandler<DidOpenTextDocumentParams>): Disposable {
         this.didOpenHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onDidChangeTextDocument(handler: NotificationHandler<DidChangeTextDocumentParams>): Disposable {
         this.didChangeHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onDidCloseTextDocument(handler: NotificationHandler<DidCloseTextDocumentParams>): Disposable {
         this.didCloseHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onWillSaveTextDocument(handler: NotificationHandler<WillSaveTextDocumentParams>): Disposable {
         this.willSaveHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onWillSaveTextDocumentWaitUntil(handler: ServerRequestHandler<WillSaveTextDocumentParams, TextEdit[] | null | undefined, never, void>): Disposable {
         this.willSaveWaitUntilHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
 
     onDidSaveTextDocument(handler: NotificationHandler<DidSaveTextDocumentParams>): Disposable {
         this.didSaveHandler = handler;
-        return {
-            dispose: () => {
-            }
-        };
+        return NOOP_DISPOSABLE;
     }
-
 }
+
+const NOOP_DISPOSABLE: Disposable = {
+    dispose: () => {
+    }
+};
