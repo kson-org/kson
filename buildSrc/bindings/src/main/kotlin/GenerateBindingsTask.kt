@@ -8,12 +8,14 @@ open class GenerateBindingsTask : DefaultTask() {
     init {
         val projectRoot = project.projectDir.toPath()
 
-        val destinationDir = projectRoot.resolve("tooling/bindings")
         val sourceBinaryDir = projectRoot.resolve("build/bin/nativeKson/releaseShared/")
+        val nonGeneratedSources = projectRoot.resolve("buildSrc/bindings/src/main")
         val metadataPath = projectRoot.resolve("build/generated/ksp/metadata/commonMain/resources/org/kson/public-api.json")
+        val destinationDir = projectRoot.resolve("build/generated/bindings")
 
         bindingsGenerator = BindingsGenerator(
             sourceBinaryDir,
+            nonGeneratedSources,
             metadataPath,
             destinationDir,
         )
