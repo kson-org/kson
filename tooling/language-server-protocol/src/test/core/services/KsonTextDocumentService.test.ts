@@ -56,7 +56,7 @@ describe('KsonTextDocumentService', () => {
                 }
             };
             const result = await connection.formattingHandler(params, {} as any, {} as any, undefined);
-            assert.ok(result, "result should not be null or undefined");
+            assert.ok(result, "should not get a null or undefined result");
 
             /**
              * {@link result} is either an {@link ResponseError} or a {@link TextEdit[]}.

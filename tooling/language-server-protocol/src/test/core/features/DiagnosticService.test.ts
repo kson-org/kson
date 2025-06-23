@@ -43,7 +43,7 @@ describe('KSON Diagnostics', () => {
         assert.deepStrictEqual(simplifiedDiagnostics, expected, 'Diagnostic mismatch');
     }
 
-    it('empty document', () => {
+    it('should have a diagnostic error for empty document', () => {
         const content = '';
         const expected = [
                 Diagnostic.create(
