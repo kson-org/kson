@@ -2,7 +2,12 @@ package org.kson.bindings
 
 import kotlinx.serialization.json.Json
 import org.kson.metadata.SimplePackageMetadata
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.StandardCopyOption
+import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
@@ -29,6 +34,25 @@ interface LanguageSpecificBindingsGenerator {
 class BindGenLanguage(val generator: LanguageSpecificBindingsGenerator, val targetDir: String, val targetFile: String)
 
 class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val metadataPath: Path, val destinationDir: Path) {
+    companion object {
+        // We need a handwritten function to recursively copy a directory, because
+        // `File.copyRecursively` doesn't allow overwriting files (only the top-level file / dir)
+        private fun copyDirectoryRecursively(source: Path, target: Path) {
+            Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
+                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    val targetDir = target.resolve(source.relativize(dir))
+                    Files.createDirectories(targetDir)
+                    return FileVisitResult.CONTINUE
+                }
+
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    val targetFile = target.resolve(source.relativize(file))
+                    Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING)
+                    return FileVisitResult.CONTINUE
+                }
+            })
+        }
+    }
 
     fun generateAll() {
         val packageMetadata = Json.decodeFromString<SimplePackageMetadata>(metadataPath.readText())
@@ -42,8 +66,10 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
 
         languages.forEach {
             // First copy the non-generated files for this language
-            sourceBinaryDir.resolve(it.targetDir).toFile()
-                .copyRecursively(target = destinationDir.resolve(it.targetDir).toFile(), overwrite = true)
+            copyDirectoryRecursively(
+                sourceBinaryDir.resolve(it.targetDir),
+                destinationDir.resolve(it.targetDir)
+            )
 
             // Now generate the wrapper
             val code = it.generator.generate()
