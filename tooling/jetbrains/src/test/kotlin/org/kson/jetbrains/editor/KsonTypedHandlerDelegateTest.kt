@@ -36,6 +36,13 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 """.trimIndent(),
             )
 
+            // should not auto-insert if already closed
+            doCharTest(
+                "<caret>>",
+                '<',
+                "<<caret>>"
+            )
+
             // should not auto-insert in comment block
             doCharTest(
                 "#<caret>",

@@ -4,8 +4,10 @@ import com.intellij.codeInsight.CodeInsightSettings
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.childrenOfType
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getIndentType
@@ -20,6 +22,13 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
         // this handler runs on typing events in all filetypes, so
         // be careful to return quickly if this event isn't for us
         if (!file.viewProvider.baseLanguage.isKindOf(KsonLanguage)) {
+            return Result.CONTINUE
+        }
+
+        /** If our file contains an error we immediately continue
+         * Indirectly this prevents auto-insertion when we have a dangling '>' or [EMBED_CLOSE_DELIM]
+         **/
+        if (file.childrenOfType<PsiErrorElement>().isNotEmpty()) {
             return Result.CONTINUE
         }
 
