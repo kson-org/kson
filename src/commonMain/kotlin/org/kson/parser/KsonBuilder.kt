@@ -213,10 +213,10 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 when (marker.element) {
                     EMBED_BLOCK -> {
                         /**
-                         * [Parser.embedBlock] ensures we always find an [EMBED_OPEN_DELIM] or an [EMBED_DELIM_PARTIAL],
-                         * here, so its first [Char] to understand which [EmbedDelim] is in use here
+                         * [Parser.embedBlock] ensures we always find an [EMBED_OPEN_DELIM],
+                         * here, which we use to understand which [EmbedDelim] is in use here
                          */
-                        val embedDelimChar = childMarkers.firstOrNull()?.getValue()?.firstOrNull()
+                        val embedDelimChar = childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getValue()
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
                         val embedTag = childMarkers.find { it.element == EMBED_TAG }?.getValue() ?: ""
                         val embedContent = childMarkers.find { it.element == EMBED_CONTENT }?.getValue() ?: ""
@@ -224,7 +224,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         EmbedBlockNode(
                             embedTag,
                             embedContent,
-                            EmbedDelim.fromString("$embedDelimChar$embedDelimChar"),
+                            EmbedDelim.fromString(embedDelimChar),
                             marker.getLocation())
                     }
                     STRING -> {

@@ -83,53 +83,53 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      */
     fun testDeleteEmptyEmbedDelimitersPairs() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {
-            val halfDelim = delimiter.char
-            val fullDelim = delimiter.delimiter
-            val altFullDelim = if (delimiter == EmbedDelim.Percent) {
-                EmbedDelim.Dollar.delimiter
+            val openDelim = delimiter.openDelimiter
+            val closeDelim = delimiter.closeDelimiter
+            val altDelim = if (delimiter == EmbedDelim.Percent) {
+                EmbedDelim.Dollar
             } else {
-                EmbedDelim.Percent.delimiter
+                EmbedDelim.Percent
             }
 
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
                 doIdeActionTest(
                     """
-                    $fullDelim<caret>
-                    $fullDelim
+                    $openDelim<caret>
+                    $closeDelim
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "$halfDelim<caret>"
+                    "<caret>"
                 )
 
                 // should delete even if a comma follows the closing delimiter
                 doIdeActionTest(
                     """
-                    $fullDelim<caret>
-                    $fullDelim,
+                    $openDelim<caret>
+                    $closeDelim,
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "$halfDelim<caret>,"
+                    "<caret>,"
                 )
 
                 // should only delete when closing embed delimiter has correct indent
                 doIdeActionTest(
                     """
-                    |my_embed: $fullDelim<caret>
-                    |  $fullDelim
+                    |my_embed: $openDelim<caret>
+                    |  $closeDelim
                     """.trimMargin(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "my_embed: $halfDelim<caret>"
+                    "my_embed: <caret>"
                 )
 
                 // should not delete if closing embed delimiter does not have the correct indent (i.e. does not look auto-inserted)
                 doIdeActionTest(
                     """
-                    my_embed: $fullDelim<caret>
-                      $fullDelim
+                    my_embed: $openDelim<caret>
+                      $closeDelim
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    my_embed: $halfDelim<caret>
+                    my_embed: <caret>
                     """.trimIndent()
                 )
 
@@ -137,77 +137,77 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 doIdeActionTest(
                     // note the 'tag' text here after the <caret>
                     """
-                    $fullDelim<caret>tag
-                    $fullDelim
+                    $openDelim<caret>tag
+                    $closeDelim
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    $halfDelim<caret>tag
-                    $fullDelim
+                    <caret>tag
+                    $closeDelim
                     """.trimIndent()
                 )
 
                 // should not delete if anything other than a newline follows the opening delimiter
                 doIdeActionTest(
                     // note the extra space here after the <caret>
-                    "$fullDelim<caret> \n" +
-                            fullDelim,
+                    "$openDelim<caret> \n" +
+                            closeDelim,
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "$halfDelim<caret> \n" +
-                            fullDelim
+                    "<caret> \n" +
+                            closeDelim
                 )
 
                 // should not delete if anything other than a newline, a comma or EOF follows the closing delimiter
                 doIdeActionTest(
                     // note the "stuff" trailing the closing delim here
                     """
-                    $fullDelim<caret>
-                    $fullDelim stuff
+                    $openDelim<caret>
+                    $closeDelim stuff
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    $halfDelim<caret>
-                    $fullDelim stuff
+                    <caret>
+                    $closeDelim stuff
                     """.trimIndent()
                 )
 
                 // should not delete if anything other than a newline or EOF follows the closing delimiter
                 doIdeActionTest(
-                    "$fullDelim<caret>\n" +
+                    "$openDelim<caret>\n" +
                             // note the trailing space here
-                            "$fullDelim ",
+                            "$closeDelim ",
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "$halfDelim<caret>\n" +
-                            "$fullDelim "
+                    "<caret>\n" +
+                            "$closeDelim "
                 )
 
                 // should not delete inside strings
                 doIdeActionTest(
                     """
-                    "$fullDelim<caret>
-                    $fullDelim"
+                    "$openDelim<caret>
+                    $closeDelim"
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    "$halfDelim<caret>
-                    $fullDelim"
+                    "<caret>
+                    $closeDelim"
                     """.trimIndent()
                 )
 
                 // should not delete inside embeds
                 doIdeActionTest(
                     """
-                    $altFullDelim
-                      $fullDelim<caret>
-                      $fullDelim
-                    $altFullDelim"
+                    ${altDelim.openDelimiter}
+                      $openDelim<caret>
+                      $closeDelim
+                    ${altDelim.closeDelimiter}"
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    $altFullDelim
-                      $halfDelim<caret>
-                      $fullDelim
-                    $altFullDelim"
+                    ${altDelim.openDelimiter}
+                      <caret>
+                      $closeDelim
+                    ${altDelim.closeDelimiter}"
                     """.trimIndent()
                 )
             }
@@ -215,13 +215,13 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
                 doIdeActionTest(
                     """
-                    $fullDelim<caret>
-                    $fullDelim
+                    $openDelim<caret>
+                    $closeDelim
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
-                    $halfDelim<caret>
-                    $fullDelim
+                    <caret>
+                    $closeDelim
                     """.trimIndent()
                 )
             }
@@ -235,12 +235,12 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
             doIdeActionTest(
                 """
-                %%<caret>
+                %<caret>
                 %%
                 """.trimIndent(),
                 IdeActions.ACTION_EDITOR_BACKSPACE,
                 """
-                %<caret>
+                <caret>
                 %%
                 """.trimIndent(),
                 // NOTE: this is NOT a Kson file
@@ -249,12 +249,12 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
 
             doIdeActionTest(
                 """
-                $$<caret>
+                $<caret>
                 $$
                 """.trimIndent(),
                 IdeActions.ACTION_EDITOR_BACKSPACE,
                 """
-                $<caret>
+                <caret>
                 $$
                 """.trimIndent(),
                 // NOTE: this is NOT a Kson file
@@ -303,32 +303,32 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
 
             doTypingAndBackspaceTest(
                 "<caret>",
-                "%%",
+                "%",
                 """
-                %%<caret>
+                %<caret>
                 %%
                 """.trimIndent(),
-                "%<caret>"
+                "<caret>"
             )
 
             doTypingAndBackspaceTest(
                 "key: <caret>",
-                "$$",
+                "$",
                 """
-                key: $$<caret>
+                key: $<caret>
                   $$
                 """.trimIndent(),
-                "key: $<caret>"
+                "key: <caret>"
             )
 
             doTypingAndBackspaceTest(
                 "key: <caret>",
-                "%%",
+                "%",
                 """
-                key: %%<caret>
+                key: %<caret>
                   %%
                 """.trimIndent(),
-                "key: %<caret>"
+                "key: <caret>"
             )
         }
     }

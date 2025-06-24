@@ -504,20 +504,20 @@ class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: Emb
                 if (defaultDelimCount == 0) {
                     // The primary delimiter is not in the content, so we can use the default delimiter
                     // without any escaping needed
-                    indent.firstLineIndent() + EmbedDelim.Percent + embedTag + "\n" +
+                    indent.firstLineIndent() + EmbedDelim.Percent.openDelimiter + embedTag + "\n" +
                             indent.bodyLinesIndent() + embedContent.split("\n")
                                 .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                            EmbedDelim.Percent
+                            EmbedDelim.Percent.closeDelimiter
                 } else {
                     // Otherwise, check if we can use the alternate delimiter without escaping
                     val altDelimCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
                     if (altDelimCount == 0) {
                         // We can use the alternate delimiter, but must handle default delimiter escapes
                         val escapedContent = EmbedDelim.Dollar.escapeEmbedContent(embedContent)
-                        indent.firstLineIndent() + EmbedDelim.Dollar + embedTag + "\n" +
+                        indent.firstLineIndent() + EmbedDelim.Dollar.openDelimiter + embedTag + "\n" +
                                 indent.bodyLinesIndent() + escapedContent.split("\n")
                                     .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                                EmbedDelim.Dollar
+                                EmbedDelim.Dollar.closeDelimiter
                     } else {
                         // We'll choose the delimiter that requires less escaping
                         val chosenDelimiter = if (altDelimCount < defaultDelimCount) {
@@ -527,10 +527,10 @@ class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: Emb
                         }
 
                         val escapedContent = chosenDelimiter.escapeEmbedContent(embedContent)
-                        indent.firstLineIndent() + chosenDelimiter + embedTag + "\n" +
+                        indent.firstLineIndent() + chosenDelimiter.openDelimiter + embedTag + "\n" +
                                 indent.bodyLinesIndent() + escapedContent.split("\n")
                                     .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                                chosenDelimiter
+                                chosenDelimiter.closeDelimiter
                     }
                 }
             }

@@ -52,7 +52,7 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
                  * handle deleting [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
                  */
                 for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                    if (caretOffset > 1 && text[caretOffset - 2] == embedDelimChar && text[caretOffset - 1] == embedDelimChar) {
+                    if (text[caretOffset - 1] == embedDelimChar) {
                         if (text[caretOffset] != '\n') {
                              // if we're not at the end of the line, then we're definitely not part of an auto-inserted
                              // pair, so no auto-deletion

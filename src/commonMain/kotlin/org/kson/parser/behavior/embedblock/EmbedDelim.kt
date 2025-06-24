@@ -3,7 +3,8 @@ package org.kson.parser.behavior.embedblock
 import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
 
 /**
- * Represents an embed delimiter in KSON, which can be either %% or $$
+ * Represents an embed delimiter in KSON, which starts with an[openDelimiter], a single $ or % character, and ends
+ * with a [closeDelimiter], the same character doubled — $$ or %%.
  *
  * Embed blocks are designed to allow other tools to confidently extract their contents as simply as possible,
  * so a naive regex looking for the closing delimiter of either %% or $$ will always be correct.  But of course,
@@ -17,13 +18,15 @@ import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
  *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in the output, etc
  */
 sealed class EmbedDelim(val char: Char) {
-    /** The full delimiter string (either "%%" or "$$") */
-    val delimiter: String = "$char$char"
+    /** The full open delimiter string (either "%" or "$") */
+    val openDelimiter: Char = char
+    /** The full close delimiter string (either "%%" or "$$") */
+    val closeDelimiter: String = "$char$char"
 
     private val delimCharForRegex = Regex.escapeReplacement("$char")
 
     /**
-     * This regex matches strings that need to be escaped for including in a [delimiter] delimited embed block
+     * This regex matches strings that need to be escaped for including in a [closeDelimiter] delimited embed block
      * The pattern also matches zero or more trailing slashes ensures that in a situation like `%\%\%`, we correctly
      * identify that the leading `%\%` needs escaping, not the second
      *
@@ -44,10 +47,10 @@ sealed class EmbedDelim(val char: Char) {
      */
     private val hasEscapesPattern = "$delimCharForRegex\\\\([\\\\]*)$delimCharForRegex\\\\*".toRegex()
 
-    /** Percent-style delimiter (%%), our "primary" delimiter */
+    /** Percent-style delimiter (%, %%), our "primary" delimiter */
     object Percent : EmbedDelim('%')
 
-    /** Dollar-style delimiter ($$), our "alternate" delimiter */
+    /** Dollar-style delimiter ($, $$), our "alternate" delimiter */
     object Dollar : EmbedDelim('$')
 
     /**
@@ -82,7 +85,7 @@ sealed class EmbedDelim(val char: Char) {
     }
 
     /**
-     * Process escapes in embed content delimiter by this [EmbedDelim].  See the doc on [EmbedDelim] more for details on
+     * Process escapes in embed content delimiter by this [EmbedDelim]. See the doc on [EmbedDelim] more for details on
      * the escaping rules at work here.
      */
     fun unescapeEmbedContent(content: String): String {
@@ -94,14 +97,14 @@ sealed class EmbedDelim(val char: Char) {
     }
 
     override fun toString(): String {
-        return delimiter
+        return char.toString()
     }
 
     companion object {
         fun fromString(delimString: String): EmbedDelim {
             return when (delimString) {
-                "%%" -> Percent
-                "$$" -> Dollar
+                "%" -> Percent
+                "$" -> Dollar
                 else -> throw RuntimeException("Unknown embed delimiter string: $delimString")
             }
         }

@@ -128,7 +128,7 @@ describe('KSON Semantic Tokens', () => {
 
     it('should handle an embed block', () => {
         const content = [
-            'embedBlock: $$tag',
+            'embedBlock: $tag',
             '  multi-line',
             '  embed content',
             '  $$'
@@ -138,8 +138,8 @@ describe('KSON Semantic Tokens', () => {
             // line 0
             {deltaLine: 0, deltaStart: 0, length: 10, type: SemanticTokenTypes.variable, modifiers: []}, // embedBlock
             {deltaLine: 0, deltaStart: 10, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 0, deltaStart: 2, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
-            {deltaLine: 0, deltaStart: 2, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
+            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // $
+            {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
             {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // \n
             // line 1
             {deltaLine: 1, deltaStart: 0, length: 31, type: SemanticTokenTypes.macro, modifiers: []}, // indented embed content

@@ -163,7 +163,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
         """.trimMargin()
         val fileContent =
             """
-            |$$${language.id}
+            |$${language.id}
             |$injectedContent$$
             """.trimMargin()
         hasInjectionPresent(
@@ -176,7 +176,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
 
         hasLanguageInjectionAvailable(
             """
-            key: %%custom
+            key: %custom
             {<caret>
                 "key": "should have injection within `EMBED_CONTENT`"
             }
@@ -186,7 +186,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
 
         hasLanguageInjectionAvailable(
             """
-            key: %%<caret>custom
+            key: %<caret>custom
             {
                 "key": "should not have injection outside `EMBED_CONTENT`"
             }
@@ -196,7 +196,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
 
         hasLanguageInjectionAvailable(
             """
-            key:<caret> %%custom
+            key:<caret> %custom
             {
                "key": "should not have injection outside of `EMBED_CONTENT`"
             }
@@ -206,7 +206,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
 
         hasLanguageInjectionAvailable(
             """
-            key: %%html
+            key: %html
             {<caret>
                 "key": "should not have injection for already injected language"
             }
@@ -218,7 +218,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
     fun testEnterInMainEditor() {
         val fileContent =
             """
-                |key: %%
+                |key: %
                 |  <div><caret></div>
                 |  %%
                 |
@@ -232,7 +232,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
             ),
             expectedTextInMainAfterActions =
                 """
-                    |key: %%
+                    |key: %
                     |  <div>
                     |  
                     |  </div>
@@ -244,12 +244,12 @@ class KsonInjectionTest : BasePlatformTestCase() {
     fun testAutoCompleteXmlFirstLine() {
         hasCorrectAutoCompletion(
             before = """
-                |key: %%xml
+                |key: %xml
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
             after = """
-                |key: %%xml
+                |key: %xml
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
                 """.trimMargin()
@@ -259,13 +259,13 @@ class KsonInjectionTest : BasePlatformTestCase() {
     fun testAutoCompleteXmlLastLine() {
         hasCorrectAutoCompletion(
             before = """
-                |key: %%xml
+                |key: %xml
                 |  
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
             after = """
-                |key: %%xml
+                |key: %xml
                 |  
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
@@ -276,23 +276,23 @@ class KsonInjectionTest : BasePlatformTestCase() {
     fun testAutoCompleteXmlMultipleBlocks() {
         hasCorrectAutoCompletion(
             before = """
-                |block1: %%html
+                |block1: %html
                 |   empty block
                 |%%
                 |
                 |
-                |key: %%xml
+                |key: %xml
                 |  
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
             after = """
-                |block1: %%html
+                |block1: %html
                 |   empty block
                 |%%
                 |
                 |
-                |key: %%xml
+                |key: %xml
                 |  
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
@@ -302,7 +302,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
 
     fun testLanguageListCompletion() {
         val fileContent = """
-            key: %%<caret>
+            key: %<caret>
             %%
         """.trimIndent()
 

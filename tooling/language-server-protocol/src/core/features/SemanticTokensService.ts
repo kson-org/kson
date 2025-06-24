@@ -140,7 +140,6 @@ export class SemanticTokensService {
             case TokenType.EMBED_PREAMBLE_NEWLINE:
             case TokenType.EMBED_OPEN_DELIM:
             case TokenType.EMBED_CLOSE_DELIM:
-            case TokenType.EMBED_DELIM_PARTIAL:
                 semanticType = SemanticTokenTypes.function;
                 break;
 

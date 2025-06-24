@@ -635,20 +635,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
      */
     private fun embedBlock(): Boolean {
-        if (builder.getTokenType() == EMBED_OPEN_DELIM || builder.getTokenType() == EMBED_DELIM_PARTIAL) {
+        if (builder.getTokenType() == EMBED_OPEN_DELIM) {
             val embedBlockMark = builder.mark()
             val embedBlockStartDelimMark = builder.mark()
 
-            val embedStartDelimiter = if (builder.getTokenType() == EMBED_DELIM_PARTIAL) {
-                val delimChar = builder.getTokenText()
-                builder.advanceLexer()
-                embedBlockStartDelimMark.error(EMBED_BLOCK_DANGLING_DELIM.create(delimChar))
-                "$delimChar$delimChar"
-            } else {
+            val embedStartDelimiter = if (builder.getTokenType() == EMBED_OPEN_DELIM) {
                 val delimText = builder.getTokenText()
                 builder.advanceLexer()
                 embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
                 delimText
+            } else {
+                null
             }
 
             val embedTagMark = builder.mark()

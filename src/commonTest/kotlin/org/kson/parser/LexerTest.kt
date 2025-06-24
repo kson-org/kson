@@ -405,7 +405,7 @@ class LexerTest {
     fun testEmbedBlockSource() {
         assertTokenizesTo(
             """
-                %%
+                %
                     this is a raw embed
                 %%
             """,
@@ -414,7 +414,7 @@ class LexerTest {
 
         assertTokenizesTo(
             """
-                %%sql
+                %sql
                     select * from something
                 %%
             """,
@@ -426,7 +426,7 @@ class LexerTest {
     fun testEmbedBlockIndentTrimming() {
         val oneLineEmbedTokens = assertTokenizesTo(
             """
-                %%
+                %
                 this is a raw embed
                 %%
             """,
@@ -437,7 +437,7 @@ class LexerTest {
 
         val mulitLineEmbedTokens = assertTokenizesTo(
             """
-                %%sql
+                %sql
                     this is a multi-line
                         raw embed
                 who's indent will be determined by
@@ -460,7 +460,7 @@ class LexerTest {
 
         val mulitLineIndentedEmbedTokens = assertTokenizesTo(
             """
-                %%sql
+                %sql
                     this is a multi-line
                         raw embed
                 who's indent will be determined by
@@ -486,7 +486,7 @@ class LexerTest {
     fun testEmbedBlockTrialingWhitespace() {
         val trailingNewlineTokens = assertTokenizesTo(
             """
-                %%
+                %
                 this should have a newline at the end
                 %%
             """,
@@ -497,7 +497,7 @@ class LexerTest {
 
         val trailingSpacesTokens = assertTokenizesTo(
             """
-                %%
+                %
                 this lovely embed
                     should have four trailing 
                     spaces and a newline at the end    
@@ -518,7 +518,7 @@ class LexerTest {
 
         val zeroTrailingWhitespaceTokens = assertTokenizesTo(
             """
-                %%
+                %
                     this on the other hand,
                     should have spaces but no newline at the end    %%
             """,
@@ -534,25 +534,25 @@ class LexerTest {
     @Test
     fun testEmbedBlockTrailingWhitespace() {
         assertTokenizesTo(
-            // note the extra whitespace after the opening `%%`
+            // note the extra whitespace after the opening `%`
             """
-                %%   
+                %   
                     this is a raw embed
                 %%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
-            "should allow trailing whitespace after the opening '%%'"
+            "should allow trailing whitespace after the opening '%'"
         )
 
         assertTokenizesTo(
-            // note the extra whitespace after the opening `%%`
+            // note the extra whitespace after the opening `%`
             """   
-                %%sql
+                %sql
                     select * from something
                 %%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
-            "should allow trailing whitespace after the opening '%%embedTag'"
+            "should allow trailing whitespace after the opening '%embedTag'"
         )
     }
 
@@ -562,7 +562,7 @@ class LexerTest {
             """
             test: %
             """,
-            listOf(UNQUOTED_STRING, COLON, EMBED_DELIM_PARTIAL, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(UNQUOTED_STRING, COLON, EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
         )
     }
 
@@ -582,7 +582,7 @@ class LexerTest {
     fun testUnclosedEmbedBlock() {
         assertTokenizesTo(
             """
-            %%
+            %
             This embed block lacks its closing delimiter
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
@@ -632,7 +632,7 @@ class LexerTest {
             |{
             |    key: val
             |    list: [true, false]
-            |    embed: %%
+            |    embed: %
             |      multiline tokens
             |      should have correct
             |      Locations too
@@ -653,11 +653,11 @@ class LexerTest {
                 Pair(SQUARE_BRACKET_R, Location.create(2, 22, 2, 23, 37, 38)),
                 Pair(UNQUOTED_STRING, Location.create(3, 4, 3, 9, 43, 48)),
                 Pair(COLON, Location.create(3, 9, 3, 10, 48, 49)),
-                Pair(EMBED_OPEN_DELIM, Location.create(3, 11, 3, 13, 50, 52)),
-                Pair(EMBED_PREAMBLE_NEWLINE, Location.create(3, 13, 4, 0, 52, 53)),
-                Pair(EMBED_CONTENT, Location.create(4, 0, 7, 6, 53, 128)),
-                Pair(EMBED_CLOSE_DELIM, Location.create(7, 6, 7, 8, 128, 130)),
-                Pair(CURLY_BRACE_R, Location.create(8, 0, 8, 1, 131, 132))
+                Pair(EMBED_OPEN_DELIM, Location.create(3, 11, 3, 12, 50, 51)),
+                Pair(EMBED_PREAMBLE_NEWLINE, Location.create(3, 12, 4, 0, 51, 52)),
+                Pair(EMBED_CONTENT, Location.create(4, 0, 7, 6, 52, 127)),
+                Pair(EMBED_CLOSE_DELIM, Location.create(7, 6, 7, 8, 127, 129)),
+                Pair(CURLY_BRACE_R, Location.create(8, 0, 8, 1, 130, 131))
             )
         )
     }
@@ -732,7 +732,7 @@ class LexerTest {
     fun testEmbeddedBlockDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
-                %%
+                %
                 these double %\% percents are embedded but escaped%%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
@@ -745,7 +745,7 @@ class LexerTest {
     fun testEmbeddedBlockAltDelimiterEscapes() {
         val singleEscapeTokens = assertTokenizesTo(
             """   
-                $$
+                $
                 these double $\$ dollars are embedded but escaped$$
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
