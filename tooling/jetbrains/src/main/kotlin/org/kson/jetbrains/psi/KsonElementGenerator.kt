@@ -34,8 +34,8 @@ class KsonElementGenerator(project: Project) {
         val indentedContent = content.lines().map { indentText + it }.joinToString("\n")
         val fileContent =
             """
-            |${embedDelim.delimiter}${tag}
-            |$indentedContent${embedDelim.delimiter}
+            |${embedDelim.openDelimiter}${tag}
+            |$indentedContent${embedDelim.closeDelimiter}
             """.trimMargin()
         val file = createDummyFile(fileContent)
         return file.firstChild as KsonEmbedBlock

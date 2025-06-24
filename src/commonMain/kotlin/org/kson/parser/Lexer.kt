@@ -330,13 +330,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 quotedString(char)
             }
             Percent.char, Dollar.char -> {
-                // look for the required second embed delim char
-                if (sourceScanner.peek() == char) {
-                    sourceScanner.advance()
-                    addLiteralToken(EMBED_OPEN_DELIM)
-                } else {
-                    addLiteralToken(EMBED_DELIM_PARTIAL)
-                }
+                addLiteralToken(EMBED_OPEN_DELIM)
                 embeddedBlock(char)
             }
             else -> {

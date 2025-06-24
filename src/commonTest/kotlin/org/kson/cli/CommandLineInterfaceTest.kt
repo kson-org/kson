@@ -64,7 +64,7 @@ class CommandLineInterfaceTest {
 
         assertContains(
             output, """
-                serializedAst: %%
+                serializedAst: %
                 key: val
                 another_key: val
                 %%
@@ -100,7 +100,7 @@ class CommandLineInterfaceTest {
 
         assertContains(
             output, """
-                serializedAst: %%
+                serializedAst: %
                 file_key: file_val
                 another_key: val
                 %%

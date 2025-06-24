@@ -62,37 +62,35 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
             /**
              * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
              */
-            if (text.length > 1 && caretOffset > 1) {
-                for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                    if (char == embedDelimChar && text[preTypedPosition] == embedDelimChar) {
-                        // let's be very conservative with this insert: if we are not at the end of a line,
-                        //     or followed by a comma (which is end of line-ish), don't do it
-                        if (text.length != caretOffset
-                            && text[caretOffset] != '\n'
-                            && text[caretOffset] != ',') {
-                            return Result.CONTINUE
-                        }
-
-                        // ensure we're not contained in an element where embed block delimiter
-                        // auto-insertions would be inappropriate
-                        if (file.hasElementAtOffset(preTypedPosition, embedInsertProhibitedElems)) {
-                            return Result.CONTINUE
-                        }
-
-                        // Insert the new line on which we auto-complete the [EmbedDelim]
-                        document.insertString(caretOffset, "\n")
-
-                        // Calculate the indent level of the inserted new line
-                        val newLineCaret = caretOffset + 1
-                        val lineNumber = document.getLineNumber(newLineCaret)
-                        val indentType = file.getIndentType()
-                        val indentLevel = document.getLineIndentLevel(lineNumber, indentType)
-                        val newIndent = indentType.indentString.repeat(indentLevel)
-
-                        // Insert the embed delimiters with the calculated indent
-                        document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
+            for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
+                if (char == embedDelimChar) {
+                    // let's be very conservative with this insert: if we are not at the end of a line,
+                    //     or followed by a comma (which is end of line-ish), don't do it
+                    if (text.length != caretOffset
+                        && text[caretOffset] != '\n'
+                        && text[caretOffset] != ',') {
                         return Result.CONTINUE
                     }
+
+                    // ensure we're not contained in an element where embed block delimiter
+                    // auto-insertions would be inappropriate
+                    if (file.hasElementAtOffset(caretOffset - 1, embedInsertProhibitedElems)) {
+                        return Result.CONTINUE
+                    }
+
+                    // Insert the new line on which we auto-complete the [EmbedDelim]
+                    document.insertString(caretOffset, "\n")
+
+                    // Calculate the indent level of the inserted new line
+                    val newLineCaret = caretOffset + 1
+                    val lineNumber = document.getLineNumber(newLineCaret)
+                    val indentType = file.getIndentType()
+                    val indentLevel = document.getLineIndentLevel(lineNumber, indentType)
+                    val newIndent = indentType.indentString.repeat(indentLevel)
+
+                    // Insert the embed delimiters with the calculated indent
+                    document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
+                    return Result.CONTINUE
                 }
             }
         }
