@@ -9,7 +9,20 @@ import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+/**
+ * Responsible for generating Kson bindings for a particular programming language
+ */
 interface LanguageSpecificBindingsGenerator {
+    /**
+     * Generate Kson bindings
+     *
+     * Note: since this method takes no arguments, each implementation of
+     * [LanguageSpecificBindingsGenerator] should obtain the necessary input data through other
+     * means (e.g. in its constructor).
+     *
+     * @return A string representing a valid program in the target language, providing a high-level
+     *         wrapper around Kson's low-level bindings
+     */
     fun generate(): String
 }
 
@@ -20,7 +33,10 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
     fun generateAll() {
         val packageMetadata = Json.decodeFromString<SimplePackageMetadata>(metadataPath.readText())
         val languages = arrayOf(
+            // See `bindings/src/main/python` for the related non-generated files
             BindGenLanguage(PythonGen(packageMetadata), "python", "lib.py"),
+
+            // See `bindings/src/main/rust` for the related non-generated files
             BindGenLanguage(RustGen(packageMetadata), "rust", "src/lib.rs")
         )
 
