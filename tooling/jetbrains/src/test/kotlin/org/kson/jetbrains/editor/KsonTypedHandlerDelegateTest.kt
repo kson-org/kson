@@ -23,7 +23,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 "#    <<caret>"
             )
 
-            // should not auto-insert in comment block
+            // should auto-insert below comment block
             doCharTest(
                 """
                     # This is a commented line
