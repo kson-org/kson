@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
@@ -8,6 +9,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.konan.target.Architecture
 import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.kson.bindings.BindingsGenerator
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -65,6 +67,38 @@ tasks {
 
     register<GenerateBindingsTask>(generateBindingsTask) {
         dependsOn("kspCommonMainKotlinMetadata", "nativeKsonBinaries")
+    }
+
+    BindingsGenerator.languages().forEach {
+        val langName = it.targetDir.uppercaseFirstChar()
+        val taskName = "test${langName}Bindings"
+        register<Exec>(taskName) {
+            val commandStr = it.testCommand.joinToString(" ")
+
+            group = "verification"
+            description = "Run $commandStr on generated $langName bindings"
+            dependsOn(generateBindingsTask)
+
+            workingDir = file("build/generated/bindings/${it.targetDir}")
+            commandLine = it.testCommand
+
+            // Show stdout and stderr
+            standardOutput = System.out
+            errorOutput = System.err
+
+            // Ensure the task fails if the test command fails
+            isIgnoreExitValue = false
+
+            doFirst {
+                if (!workingDir.exists()) {
+                    throw GradleException("$langName bindings directory does not exist: ${workingDir.absolutePath}")
+                }
+            }
+        }
+
+        check {
+            dependsOn(taskName)
+        }
     }
 
     val javaVersion = "11"

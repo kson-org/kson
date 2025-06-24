@@ -9,11 +9,14 @@ import org.kson.metadata.SimplePackageMetadata
 import org.kson.metadata.SimpleParamMetadata
 import org.kson.metadata.SimpleType
 
-class RustGen(val metadata: SimplePackageMetadata) : LanguageSpecificBindingsGenerator {
+class RustGen : LanguageSpecificBindingsGenerator {
     val builder = StringBuilder()
+    var metadata: SimplePackageMetadata = SimplePackageMetadata.empty()
 
-    override fun generate(): String {
+    override fun generate(packageMetadata: SimplePackageMetadata): String {
         builder.clear()
+        metadata = packageMetadata
+
         builder.append(
             """
             |#![allow(non_snake_case)]

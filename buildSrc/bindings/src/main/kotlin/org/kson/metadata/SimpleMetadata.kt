@@ -3,7 +3,13 @@ package org.kson.metadata
 import kotlinx.serialization.Serializable
 
 @Serializable
-class SimplePackageMetadata(val classes: HashMap<String, SimpleClassMetadata>, val nestedClasses: HashMap<String, ArrayList<String>>, val externalTypes: List<String>)
+class SimplePackageMetadata(val classes: HashMap<String, SimpleClassMetadata>, val nestedClasses: HashMap<String, ArrayList<String>>, val externalTypes: List<String>) {
+    companion object {
+        fun empty(): SimplePackageMetadata {
+            return SimplePackageMetadata(HashMap(), HashMap(), ArrayList())
+        }
+    }
+}
 
 @Serializable
 class SimpleClassMetadata(val name: FullyQualifiedClassName, val supertypes: Array<FullyQualifiedClassName>, val constructors: Array<SimpleConstructorMetadata>, val functions: Array<SimpleFunctionMetadata>, val enumConstants: Array<String>, val docString: String?)

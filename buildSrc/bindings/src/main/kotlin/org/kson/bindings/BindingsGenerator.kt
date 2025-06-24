@@ -21,20 +21,32 @@ interface LanguageSpecificBindingsGenerator {
     /**
      * Generate Kson bindings
      *
-     * Note: since this method takes no arguments, each implementation of
-     * [LanguageSpecificBindingsGenerator] should obtain the necessary input data through other
-     * means (e.g. in its constructor).
-     *
+     * @param packageMetadata metadata about Kson's public API
      * @return A string representing a valid program in the target language, providing a high-level
      *         wrapper around Kson's low-level bindings
      */
-    fun generate(): String
+    fun generate(packageMetadata: SimplePackageMetadata): String
 }
 
-class BindGenLanguage(val generator: LanguageSpecificBindingsGenerator, val targetDir: String, val targetFile: String)
+class BindGenLanguage(
+    val generator: LanguageSpecificBindingsGenerator,
+    val targetDir: String,
+    val targetFile: String,
+    val testCommand: List<String>
+)
 
 class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val metadataPath: Path, val destinationDir: Path) {
     companion object {
+        fun languages(): List<BindGenLanguage> {
+            return listOf(
+                // See `bindings/src/main/python` for the related non-generated files
+                BindGenLanguage(PythonGen(), "python", "lib.py", listOf("uv", "run", "pytest")),
+
+                // See `bindings/src/main/rust` for the related non-generated files
+                BindGenLanguage(RustGen(), "rust", "src/lib.rs", listOf("cargo", "test"))
+            )
+        }
+
         // We need a handwritten function to recursively copy a directory, because
         // `File.copyRecursively` doesn't allow overwriting files (only the top-level file / dir)
         private fun copyDirectoryRecursively(source: Path, target: Path) {
@@ -56,15 +68,7 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
 
     fun generateAll() {
         val packageMetadata = Json.decodeFromString<SimplePackageMetadata>(metadataPath.readText())
-        val languages = arrayOf(
-            // See `bindings/src/main/python` for the related non-generated files
-            BindGenLanguage(PythonGen(packageMetadata), "python", "lib.py"),
-
-            // See `bindings/src/main/rust` for the related non-generated files
-            BindGenLanguage(RustGen(packageMetadata), "rust", "src/lib.rs")
-        )
-
-        languages.forEach {
+        languages().forEach {
             // First copy the non-generated files for this language
             copyDirectoryRecursively(
                 sourceBinaryDir.resolve(it.targetDir),
@@ -72,7 +76,7 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
             )
 
             // Now generate the wrapper
-            val code = it.generator.generate()
+            val code = it.generator.generate(packageMetadata)
             destinationDir.resolve("${it.targetDir}/${it.targetFile}").writeText(code)
 
             // Place the preprocessed .h and binary in the bindings' dir
