@@ -63,7 +63,9 @@ tasks {
         }
     }
 
-    register<GenerateBindingsTask>(generateBindingsTask)
+    register<GenerateBindingsTask>(generateBindingsTask) {
+        dependsOn("kspCommonMainKotlinMetadata", "nativeKsonBinaries")
+    }
 
     val javaVersion = "11"
     withType<JavaCompile> {

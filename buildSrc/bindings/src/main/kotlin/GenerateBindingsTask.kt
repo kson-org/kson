@@ -20,7 +20,8 @@ open class GenerateBindingsTask : DefaultTask() {
             destinationDir,
         )
 
-        dependsOn("kspCommonMainKotlinMetadata", "nativeKsonBinaries")
+        description = "Generate language bindings for Kson"
+        group = "build"
     }
 
     @TaskAction
