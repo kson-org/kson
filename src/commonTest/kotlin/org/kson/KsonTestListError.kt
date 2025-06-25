@@ -3,6 +3,7 @@ package org.kson
 import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class KsonTestListError : KsonTestError() {
     @Test
@@ -23,7 +24,8 @@ class KsonTestListError : KsonTestError() {
 
     @Test
     fun testUnclosedListError() {
-        assertParserRejectsSourceWithLocation("[", listOf(LIST_NO_CLOSE), listOf(Location.create(0, 0, 0, 1, 0, 1)))
+        val errorMessages = assertParserRejectsSource("[", listOf(LIST_NO_CLOSE))
+        assertEquals(Location(0, 0, 0, 1, 0, 1), errorMessages[0].location)
         assertParserRejectsSource("[1,2,", listOf(LIST_NO_CLOSE))
     }
 
