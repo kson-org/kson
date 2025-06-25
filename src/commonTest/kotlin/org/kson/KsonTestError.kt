@@ -4,7 +4,6 @@ import org.kson.ast.KsonRoot
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
-import org.kson.stdlibx.collections.ImmutableList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
