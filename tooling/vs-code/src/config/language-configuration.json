@@ -4,21 +4,16 @@
   },
   "onEnterRules": [
     {
+      "description": "Indent on a key without value",
       "beforeText": "^\\s*[^:]+:\\s*$",
       "action": {
         "indent": "indent"
       }
     },
     {
-      "beforeText": "^\\s*[^:]+:\\s*%%$",
-      "afterText": "^%%$",
-      "action": {
-        "indent": "indent"
-      }
-    },
-    {
-      "beforeText": "^\\s*[^:]+:\\s*\\$\\$$",
-      "afterText": "^\\$\\$$",
+      "description": "Indent embed blocks with % or $ characters and an optional tag",
+      "beforeText": "^\\s*[^:]+:\\s*[%|$][a-zA-Z]*$",
+      "afterText": "^[%|$]{2}$",
       "action": {
         "indent": "indent"
       }
@@ -43,38 +38,70 @@
     ]
   ],
   "autoClosingPairs": [
-    [
-      "{",
-      "}"
-    ],
-    [
-      "[",
-      "]"
-    ],
-    [
-      "<",
-      ">"
-    ],
-    [
-      "(",
-      ")"
-    ],
-    [
-      "\"",
-      "\""
-    ],
-    [
-      "'",
-      "'"
-    ],
-    [
-      "$$",
-      "$$"
-    ],
-    [
-      "%%",
-      "%%"
-    ]
+    {
+      "open": "{",
+      "close": "}",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "[",
+      "close": "]",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "(",
+      "close": ")",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "<",
+      "close": ">",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "'",
+      "close": "'",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "\"",
+      "close": "\"",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "$",
+      "close": "$$",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    },
+    {
+      "open": "%",
+      "close": "%%",
+      "notIn": [
+        "string",
+        "comment"
+      ]
+    }
   ],
   "surroundingPairs": [
     [
@@ -100,14 +127,6 @@
     [
       "'",
       "'"
-    ],
-    [
-      "$$",
-      "$$"
-    ],
-    [
-      "%%",
-      "%%"
     ]
   ]
 }

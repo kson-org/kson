@@ -32,6 +32,13 @@
         "configuration": "./src/config/language-configuration.json"
       }
     ],
+    "grammars": [
+      {
+        "language": "kson",
+        "scopeName": "source.kson",
+        "path": "./src/config/syntaxes/kson.tmLanguage.json"
+      }
+    ],
     "configuration": {
       "title": "Kson"
     }
