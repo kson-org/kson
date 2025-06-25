@@ -39,12 +39,7 @@ export class DiagnosticService {
      */
     private loggedMessageToDiagnostic(loggedMessage: LoggedMessage): Diagnostic {
         return {
-            range: this.locationToRange(loggedMessage.location || {
-                firstLine: 0,
-                firstColumn: 0,
-                lastLine: 0,
-                lastColumn: 0
-            }),
+            range: this.locationToRange(loggedMessage.location),
             severity: DiagnosticSeverity.Error,
             source: 'kson',
             message: loggedMessage.message.toString(),
@@ -58,12 +53,12 @@ export class DiagnosticService {
     private locationToRange(location: any): Range {
         return {
             start: {
-                line: location.firstLine || 0,
-                character: location.firstColumn || 0
+                line: location.start.line,
+                character: location.start.column
             },
             end: {
-                line: location.lastLine || 0,
-                character: location.lastColumn || 0
+                line: location.end.line,
+                character: location.end.column
             }
         };
     }
