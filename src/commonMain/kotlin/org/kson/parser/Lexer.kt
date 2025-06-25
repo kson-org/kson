@@ -101,10 +101,8 @@ private class SourceScanner(private val source: String) {
      */
     fun currentLocation() =
         Location(
-            selectionFirstLine,
-            selectionFirstColumn,
-            selectionEndLine,
-            selectionEndColumn,
+            Position(selectionFirstLine, selectionFirstColumn),
+            Position(selectionEndLine, selectionEndColumn),
             selectionStartOffset,
             selectionEndOffset
         )
@@ -117,25 +115,37 @@ private class SourceScanner(private val source: String) {
 data class Lexeme(val text: String, val location: Location)
 
 /**
+ * [Position]s are used to describe the [Location.start] and [Location.end] of a chunk inside a
+ * given source file.
+ *
+ * @param line The zero-based line number
+ * @param column The zero-based column number
+ */
+data class Position(val line: Int, val column: Int) {
+    /**
+     *  Override the [toString] to easily print locations in error messages as base-1 indexed line/column numbers
+     *  following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+     *  for this sort of output
+     */
+    override fun toString(): String {
+        return "${line + 1}.${column + 1}"
+    }
+}
+
+/**
  * [Location]s describe the position of a chunk of source inside a given kson source file
  */
 data class Location(
     /**
-     * Line where this location starts (counting lines starting at zero)
+     * [Position] where this [Location] starts
      */
-    val firstLine: Int,
+    val start: Position,
+
     /**
-     * Column of [firstLine] where this location starts (counting columns starting zero)
+     * [Position] where this [Location] ends
      */
-    val firstColumn: Int,
-    /**
-     * Line where this location ends (counting lines starting at zero)
-     */
-    val lastLine: Int,
-    /**
-     * Column of [lastLine] where this location ends (counting columns starting at zero)
-     */
-    val lastColumn: Int,
+    val end: Position,
+
     /**
      * The zero-based start offset of this location relative to the whole document
      */
@@ -147,6 +157,36 @@ data class Location(
 ) {
     companion object {
         /**
+         * Creates a new [Location] instance using line and column positions directly.
+         *
+         * This factory method provides a convenient way to create a [Location] by specifying the positions
+         * as individual line and column numbers, without needing to construct [Position] objects first.
+         *
+         * @param firstLine The zero-based line number where the location starts
+         * @param firstColumn The zero-based column number where the location starts
+         * @param lastLine The zero-based line number where the location ends
+         * @param lastColumn The zero-based column number where the location ends
+         * @param startOffset The zero-based character offset from the start of the document to the location's start
+         * @param endOffset The zero-based character offset from the start of the document to the location's end
+         * @return A new [Location] instance with the specified positions
+         */
+        fun create(
+            firstLine: Int,
+            firstColumn: Int,
+            lastLine: Int,
+            lastColumn: Int,
+            startOffset: Int,
+            endOffset: Int
+        ): Location {
+            return Location(
+                Position(firstLine, firstColumn),
+                Position(lastLine, lastColumn),
+                startOffset,
+                endOffset
+            )
+        }
+
+        /**
          * Merge two locations into a Location which spans from the beginning of [startLocation] to the end of
          * [endLocation].  [startLocation] must be positioned before [endLocation]
          */
@@ -155,10 +195,8 @@ data class Location(
                 throw RuntimeException("`startLocation` must be before `endLocation`")
             }
             return Location(
-                startLocation.firstLine,
-                startLocation.firstColumn,
-                endLocation.lastLine,
-                endLocation.lastColumn,
+                startLocation.start,
+                endLocation.end,
                 startLocation.startOffset,
                 endLocation.endOffset
             )
