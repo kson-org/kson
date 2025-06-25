@@ -1,0 +1,58 @@
+{
+  "name": "kson-vscode-plugin",
+  "displayName": "Kson Language Support",
+  "description": "Provides language support for the Kson data format.",
+  "authors": [
+    {
+      "name": "Bart Dubbeldam",
+      "email": "bart.dubbeldam@dc-analytic.com"
+    },
+    {
+      "name": "Daniel Marcotte",
+      "email": "dmarcotte@gmail.com"
+    }
+  ],
+  "version": "0.0.1",
+  "main": "./out/client/node/ksonClientMain.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "kson",
+        "aliases": [
+          "Kson",
+          "kson"
+        ],
+        "extensions": [
+          ".kson"
+        ],
+        "icon": {
+          "light": "./assets/kson-icon.png",
+          "dark": "./assets/kson-icon.png"
+        },
+        "configuration": "./src/config/language-configuration.json"
+      }
+    ],
+    "configuration": {
+      "title": "Kson"
+    }
+  },
+  "engines": {
+    "vscode": "^1.100.0",
+    "node": "^20.18.1"
+  },
+  "scripts": {
+    "compile": "tsc -b"
+  },
+  "dependencies": {
+    "kson-language-server": "file:../language-server-protocol",
+    "vscode": "^1.1.37",
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.0.0",
+    "@types/vscode": "1.100.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
