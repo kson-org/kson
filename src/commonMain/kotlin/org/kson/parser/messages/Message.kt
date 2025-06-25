@@ -1,8 +1,13 @@
 package org.kson.parser.messages
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
 /**
  * Instances of [Message] are created with [MessageType.create]
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 interface Message {
     val type: MessageType
     override fun toString(): String
@@ -15,6 +20,8 @@ interface Message {
  * and also facilitates easy/robust testing against [MessageType] types (rather than for instance brittle string
  * matches on error message content)
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 enum class MessageType {
     BLANK_SOURCE {
         override fun expectedArgs(): List<String> {
