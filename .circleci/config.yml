@@ -46,7 +46,7 @@ jobs:
 
       # installed needed native dependency on Linux
       - run: sudo apt update
-      - run: sudo apt install libncurses5
+      - run: sudo apt install libncurses-dev
       - run:
           name: Get rid of erroneous git config
           command: |
