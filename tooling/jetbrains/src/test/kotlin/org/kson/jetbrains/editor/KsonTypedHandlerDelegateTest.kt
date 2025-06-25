@@ -42,6 +42,20 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 '<',
                 "#<<caret>"
             )
+
+            // should not auto-insert in a string
+            doCharTest(
+                "\"<caret>\"",
+                '<',
+                "\"<<caret>\""
+            )
+
+            // should not auto-insert in a string
+            doCharTest(
+                "\"  <caret>\"",
+                '<',
+                "\"  <<caret>\""
+            )
         }
 
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
@@ -135,6 +149,17 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                     """.trimIndent(),
                 )
 
+                doCharTest(
+                    """
+                    "  <caret>
+                    "
+                    """.trimIndent(),
+                    openDelim,
+                    """
+                    "  $openDelim<caret>
+                    "
+                    """.trimIndent(),
+                )
                 // should not auto-insert inside other embeds
                 doCharTest(
                     """
