@@ -23,7 +23,7 @@ class KsonTestListError : KsonTestError() {
 
     @Test
     fun testUnclosedListError() {
-        assertParserRejectsSourceWithLocation("[", listOf(LIST_NO_CLOSE), listOf(Location(0, 0, 0, 1, 0, 1)))
+        assertParserRejectsSourceWithLocation("[", listOf(LIST_NO_CLOSE), listOf(Location.create(0, 0, 0, 1, 0, 1)))
         assertParserRejectsSource("[1,2,", listOf(LIST_NO_CLOSE))
     }
 

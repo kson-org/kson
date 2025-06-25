@@ -109,7 +109,7 @@ open class KsonTestError {
         assertParserRejectsSourceWithLocation(
             "{ key: value } 4.5",
             listOf(EOF_NOT_REACHED),
-            listOf(Location(0, 15, 0, 18, 15, 18))
+            listOf(Location.create(0, 15, 0, 18, 15, 18))
         )
         assertParserRejectsSource("key: value illegal extra identifiers", listOf(EOF_NOT_REACHED))
     }
