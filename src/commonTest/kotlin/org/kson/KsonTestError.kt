@@ -1,6 +1,7 @@
 package org.kson
 
 import org.kson.ast.KsonRoot
+import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
@@ -55,6 +56,31 @@ open class KsonTestError {
         return parseResult.messages
     }
 
+    /**
+     * Calls [assertParserRejectsSource], but also tests the [Location] of each [LoggedMessage]
+     * by asserting it against [expectedParseMessageLocation].
+     *
+     * @param source is the kson source to parse into a [KsonRoot]
+     * @param expectedParseMessageTypes a list of [MessageType]s produced by parsing [source]
+     * @param expectedParseMessageLocation a list of [Location]s produced by parsing [source]
+     * @param maxNestingLevel the maximum allowable nested lists and objects to configure the parser to accept
+     * @return the produced messages for further validation
+     */
+    protected fun assertParserRejectsSourceWithLocation(
+        source: String,
+        expectedParseMessageTypes: List<MessageType>,
+        expectedParseMessageLocation: List<Location>,
+        maxNestingLevel: Int? = null,
+    ): List<LoggedMessage> {
+        val loggedMessages = assertParserRejectsSource(source, expectedParseMessageTypes, maxNestingLevel)
+        assertEquals(
+            expectedParseMessageLocation,
+            loggedMessages.map { it.location },
+            "Should have the expected locations for the messages."
+        )
+        return loggedMessages
+    }
+
     @Test
     fun testBlankKsonSource() {
         assertParserRejectsSource("", listOf(BLANK_SOURCE))
@@ -80,7 +106,11 @@ open class KsonTestError {
     @Test
     fun testInvalidTrailingKson() {
         assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(EOF_NOT_REACHED))
-        assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
+        assertParserRejectsSourceWithLocation(
+            "{ key: value } 4.5",
+            listOf(EOF_NOT_REACHED),
+            listOf(Location(0, 15, 0, 18, 15, 18))
+        )
         assertParserRejectsSource("key: value illegal extra identifiers", listOf(EOF_NOT_REACHED))
     }
 

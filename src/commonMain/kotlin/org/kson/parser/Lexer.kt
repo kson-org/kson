@@ -162,7 +162,7 @@ data class Location(
             }
             return Location(
                 startLocation.firstLine,
-                startLocation.firstLine,
+                startLocation.firstColumn,
                 endLocation.lastLine,
                 endLocation.lastColumn,
                 startLocation.startOffset,
