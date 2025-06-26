@@ -8,38 +8,43 @@ import {
 
 async function main() {
   try {
-    console.log('Starting VSIX test setup...');
+    const useVsix = process.env.USE_VSIX === 'true';
+    console.log(`Starting test setup (USE_VSIX=${useVsix})...`);
 
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../');
-    const extensionTestsPath = path.resolve(__dirname, './suite/index');
-    const vsixPath = path.resolve(extensionDevelopmentPath, './out/vscode-kson-plugin.vsix');
+    const projectRootPath = path.resolve(__dirname, '../../');
+    const extensionTestsPath = path.resolve(__dirname, './index');
+    const workspacePath = path.resolve(projectRootPath, 'test/workspace');
 
     console.log('Downloading VS Code...');
     const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
     console.log('VS Code download complete.');
 
-    const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+    let extensionDevelopmentPath: string;
 
-    console.log('Installing VSIX...');
-    // Install the .vsix
-    cp.spawnSync(
-      cliPath,
-      [...args, '--install-extension', vsixPath, '--disable-extensions'],
-      {
+    if (useVsix) {
+      const vsixPath = path.resolve(projectRootPath, './out/vscode-kson-plugin.vsix');
+      const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+
+      console.log('Installing VSIX...');
+      cp.spawnSync(cliPath, [...args, '--install-extension', vsixPath], {
         encoding: 'utf-8',
         stdio: 'inherit'
-      }
-    );
-    console.log('VSIX installation complete.');
+      });
+      console.log('VSIX installation complete.');
+
+      // Use an empty directory for extensionDevelopmentPath to ensure we're testing the installed VSIX.
+      extensionDevelopmentPath = path.resolve(projectRootPath, 'test/empty-for-vsix-test');
+    } else {
+      extensionDevelopmentPath = projectRootPath;
+    }
 
     console.log('Running tests...');
     // Run the extension test
     await runTests({
       vscodeExecutablePath,
-      extensionDevelopmentPath: '/Users/bart/workspace/code/kson',
-      // extensionDevelopmentPath: '.',
+      extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: [path.resolve(extensionDevelopmentPath, 'test/workspace')]
+      launchArgs: [workspacePath]
     });
     console.log('Tests finished.');
   } catch (err) {

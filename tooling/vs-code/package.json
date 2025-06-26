@@ -53,15 +53,14 @@
     "node": "^20.18.1"
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
     "package": "npm run check-types && node esbuild.js --production",
     "package:vsix": "npm run package && vsce package --no-dependencies --out out/vscode-kson-plugin.vsix",
     "compile": "npm run check-types && node esbuild.js",
     "compile-tests": "tsc -p ./tsconfig.json",
     "bundle": "node esbuild.js",
     "check-types": "tsc --noEmit",
-    "test": "npm run compile-tests && vscode-test",
-    "test:vsix": "npm run package && npm run compile-tests && node out/test/runVsixTests.js"
+    "test": "npm run compile-tests && USE_VSIX=false node out/test/runVsixTests.js",
+    "test:vsix": "npm run compile-tests && npm run package:vsix && USE_VSIX=true node out/test/runVsixTests.js"
   },
   "dependencies": {
     "kson-language-server": "file:../language-server-protocol",
@@ -70,12 +69,10 @@
     "vscode-languageserver": "^9.0.1"
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.0.0",
     "@types/uuid": "^9.0.8",
     "@types/vscode": "1.101.0",
-    "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.25.5",
