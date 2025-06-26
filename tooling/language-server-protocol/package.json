@@ -13,7 +13,7 @@
   "version": "0.0.1",
   "description": "Kson Language Server implementation in TypeScript",
   "type": "module",
-  "main": "./out/ksonServer.js",
+  "main": "./out/startKsonServer.js",
   "scripts": {
     "build": "tsc",
     "test": "mocha 'out/test/**/*.test.js'"
