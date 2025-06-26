@@ -41,7 +41,7 @@ TODO document the language, remembering to clearly note:
 
 #### Troubleshooting setup:
 
-* **Ubuntu setup:** if an error is reported by gradle similar to `error while loading shared libraries: libtinfo.so.5`, install libncurses5 with `apt install libncurses5`. See also [Kotlin/Native Setup instructions](https://github.com/JetBrains/kotlin-native/blob/27232bca5f2fb0164f1aa465d38e5042c6d7d55b/README.md).
+* **Ubuntu setup:** if an error is reported by gradle similar to `error while loading shared libraries: libtinfo.so.5`, install `libncurses-dev` with `apt install libncurses-dev`. See also [Kotlin/Native Setup instructions](https://github.com/JetBrains/kotlin-native/blob/27232bca5f2fb0164f1aa465d38e5042c6d7d55b/README.md), and [this similar issue in the Ktor project](https://youtrack.jetbrains.com/issue/KTOR-7909/Contribution-Installation-Instructions-Replace-libncurses5-with-libncurses6-for-Ubuntu-20.04-and-Later) along with [its fix, here](https://github.com/ktorio/ktor/pull/4529)
 
 ### Kson Editors and Tooling
 
