@@ -32,10 +32,9 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 
         val caretOffset = editor.caretModel.offset
         val document = editor.document
-        val text = document.text
 
-        // ensure we're not contained in an element where we NEVER want to
-        // auto-complete (e.g. COMMENTS).
+        val nextChar = findNextChar(caretOffset, document.text)
+        // ensure we're not contained in an element where we NEVER want to auto-complete (e.g. COMMENTS and STRINGS).
         if (file.hasElementAtOffset(caretOffset - 1, autoCompleteProhibitedElems)) {
             return Result.CONTINUE
         }
@@ -46,7 +45,9 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
                  * Handle auto-inserts of [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
                  */
                 '<' -> {
-                    document.insertString(caretOffset, ">")
+                    if (nextChar != '>') {
+                        document.insertString(caretOffset, ">")
+                    }
                     return Result.CONTINUE
                 }
 
@@ -56,10 +57,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
                 EmbedDelim.Dollar.char, EmbedDelim.Percent.char -> {
                     // let's be very conservative with this insert: if we are not at the end of a line,
                     //     or followed by a comma (which is end of line-ish), don't do it
-                    if (caretOffset != text.length
-                        && text[caretOffset] != '\n'
-                        && text[caretOffset] != ','
-                    ) {
+                    if (nextChar != '\n' && nextChar != ',') {
                         return Result.CONTINUE
                     }
 
@@ -88,6 +86,27 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
         }
         return Result.CONTINUE
     }
+}
+
+/**
+ * Look ahead for the closing delimiter, skipping whitespace
+ */
+private fun findNextChar(caretOffset: Int, text: String): Char {
+    if (caretOffset == text.length){
+        return '\n'
+    }
+    // Look ahead for the closing delimiter, skipping whitespace
+    val nextChar = {
+        var afterIndex = caretOffset
+
+        while (afterIndex < text.length - 1 && text[afterIndex].isWhitespace() && text[afterIndex] != '\n') {
+            afterIndex++
+        }
+
+        text[afterIndex]
+    }
+
+    return nextChar()
 }
 
 /**

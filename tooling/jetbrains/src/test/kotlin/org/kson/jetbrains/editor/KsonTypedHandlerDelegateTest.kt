@@ -56,6 +56,13 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 '<',
                 "\"  <<caret>\""
             )
+
+            // should not auto-insert if new character closes brackets
+            doCharTest(
+                "<caret> >",
+                '<',
+                "<<caret> >"
+            )
         }
 
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
