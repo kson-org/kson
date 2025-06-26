@@ -12,6 +12,7 @@
       "email": "dmarcotte@gmail.com"
     }
   ],
+  "publisher": "kson-org",
   "version": "0.0.1",
   "main": "./out/src/client/node/ksonClientMain.js",
   "contributes": {
@@ -49,23 +50,29 @@
   },
   "scripts": {
     "compile": "tsc -b",
-    "test": "npm run compile && vscode-test"
+    "test": "npm run compile && vscode-test",
+    "test:vsix": "npm run package && npm run compile && node out/test/runVsixTests.js",
+    "package": "vsce package --no-dependencies"
   },
   "dependencies": {
+
     "kson-language-server": "file:../language-server-protocol",
+    "typescript": "^5.5.4",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.0.0",
     "@types/uuid": "^9.0.8",
     "@types/vscode": "1.101.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
+    "glob": "^11.0.0",
     "mocha": "^11.7.1",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3",
     "uuid": "^9.0.1"
   }
 }
