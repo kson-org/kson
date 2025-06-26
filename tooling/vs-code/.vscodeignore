@@ -9,6 +9,11 @@ test/
 esbuild.js
 tsconfig.json
 *.vsix
+.gradle/
+build/
+.gitignore
+build.gradle.kts
+gradle.properties
 
 # Ignore files outside of the project directory
 ../

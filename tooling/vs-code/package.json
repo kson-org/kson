@@ -60,7 +60,7 @@
     "bundle": "node esbuild.js",
     "check-types": "tsc --noEmit",
     "test": "npm run compile-tests && USE_VSIX=false node out/test/runVsixTests.js",
-    "test:vsix": "npm run compile-tests && npm run package:vsix && USE_VSIX=true node out/test/runVsixTests.js"
+    "testVsix": "npm run compile-tests && npm run package:vsix && USE_VSIX=true node out/test/runVsixTests.js"
   },
   "dependencies": {
     "kson-language-server": "file:../language-server-protocol",

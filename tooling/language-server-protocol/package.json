@@ -15,7 +15,7 @@
   "type": "module",
   "main": "./out/startKsonServer.js",
   "scripts": {
-    "build": "tsc",
+    "compile": "tsc",
     "test": "mocha 'out/test/**/*.test.js'"
   },
   "keywords": [
