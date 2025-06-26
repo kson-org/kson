@@ -29,14 +29,14 @@
           "light": "./assets/kson-icon.png",
           "dark": "./assets/kson-icon.png"
         },
-        "configuration": "./src/config/language-configuration.json"
+        "configuration": "./config/language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "kson",
         "scopeName": "source.kson",
-        "path": "./src/config/syntaxes/kson.tmLanguage.json"
+        "path": "./config/kson.tmLanguage.json"
       }
     ],
     "configuration": {
