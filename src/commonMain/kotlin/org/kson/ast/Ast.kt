@@ -12,6 +12,8 @@ import org.kson.parser.Parser
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 interface AstNode {
     /**
@@ -156,6 +158,8 @@ interface Documented {
     val comments: List<String>
 }
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 interface KsonRoot : AstNode
 class KsonRootError(content: String, location: Location) : KsonRoot, AstNodeError(content, location)
 class KsonRootImpl(

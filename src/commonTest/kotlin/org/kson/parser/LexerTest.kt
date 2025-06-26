@@ -640,24 +640,24 @@ class LexerTest {
             |}
             """.trimMargin(),
             listOf(
-                Pair(CURLY_BRACE_L, Location.create(0, 0, 0, 1, 0, 1)),
-                Pair(UNQUOTED_STRING, Location.create(1, 4, 1, 7, 6, 9)),
-                Pair(COLON, Location.create(1, 7, 1, 8, 9, 10)),
-                Pair(UNQUOTED_STRING, Location.create(1, 9, 1, 12, 11, 14)),
-                Pair(UNQUOTED_STRING, Location.create(2, 4, 2, 8, 19, 23)),
-                Pair(COLON, Location.create(2, 8, 2, 9, 23, 24)),
-                Pair(SQUARE_BRACKET_L, Location.create(2, 10, 2, 11, 25, 26)),
-                Pair(TRUE, Location.create(2, 11, 2, 15, 26, 30)),
-                Pair(COMMA, Location.create(2, 15, 2, 16, 30, 31)),
-                Pair(FALSE, Location.create(2, 17, 2, 22, 32, 37)),
-                Pair(SQUARE_BRACKET_R, Location.create(2, 22, 2, 23, 37, 38)),
-                Pair(UNQUOTED_STRING, Location.create(3, 4, 3, 9, 43, 48)),
-                Pair(COLON, Location.create(3, 9, 3, 10, 48, 49)),
-                Pair(EMBED_OPEN_DELIM, Location.create(3, 11, 3, 13, 50, 52)),
-                Pair(EMBED_PREAMBLE_NEWLINE, Location.create(3, 13, 4, 0, 52, 53)),
-                Pair(EMBED_CONTENT, Location.create(4, 0, 7, 6, 53, 128)),
-                Pair(EMBED_CLOSE_DELIM, Location.create(7, 6, 7, 8, 128, 130)),
-                Pair(CURLY_BRACE_R, Location.create(8, 0, 8, 1, 131, 132))
+                Pair(CURLY_BRACE_L, Location(0, 0, 0, 1, 0, 1)),
+                Pair(UNQUOTED_STRING, Location(1, 4, 1, 7, 6, 9)),
+                Pair(COLON, Location(1, 7, 1, 8, 9, 10)),
+                Pair(UNQUOTED_STRING, Location(1, 9, 1, 12, 11, 14)),
+                Pair(UNQUOTED_STRING, Location(2, 4, 2, 8, 19, 23)),
+                Pair(COLON, Location(2, 8, 2, 9, 23, 24)),
+                Pair(SQUARE_BRACKET_L, Location(2, 10, 2, 11, 25, 26)),
+                Pair(TRUE, Location(2, 11, 2, 15, 26, 30)),
+                Pair(COMMA, Location(2, 15, 2, 16, 30, 31)),
+                Pair(FALSE, Location(2, 17, 2, 22, 32, 37)),
+                Pair(SQUARE_BRACKET_R, Location(2, 22, 2, 23, 37, 38)),
+                Pair(UNQUOTED_STRING, Location(3, 4, 3, 9, 43, 48)),
+                Pair(COLON, Location(3, 9, 3, 10, 48, 49)),
+                Pair(EMBED_OPEN_DELIM, Location(3, 11, 3, 13, 50, 52)),
+                Pair(EMBED_PREAMBLE_NEWLINE, Location(3, 13, 4, 0, 52, 53)),
+                Pair(EMBED_CONTENT, Location(4, 0, 7, 6, 53, 128)),
+                Pair(EMBED_CLOSE_DELIM, Location(7, 6, 7, 8, 128, 130)),
+                Pair(CURLY_BRACE_R, Location(8, 0, 8, 1, 131, 132))
             )
         )
     }
@@ -772,14 +772,14 @@ class LexerTest {
                 |
             """.trimMargin(),
             listOf(
-                Pair(WHITESPACE, Location.create(0, 0, 0, 2, 0, 2)),
-                Pair(UNQUOTED_STRING, Location.create(0, 2, 0, 8, 2, 8)),
-                Pair(COLON, Location.create(0, 8, 0, 9, 8, 9)),
-                Pair(WHITESPACE, Location.create(0, 9, 0, 10, 9, 10)),
-                Pair(STRING_OPEN_QUOTE, Location.create(0, 10, 0, 11, 10, 11)),
-                Pair(STRING_CONTENT, Location.create(0, 11, 0, 17, 11, 17)),
-                Pair(STRING_CLOSE_QUOTE, Location.create(0, 17, 0, 18, 17, 18)),
-                Pair(WHITESPACE, Location.create(0, 18, 1, 0, 18, 19))
+                Pair(WHITESPACE, Location(0, 0, 0, 2, 0, 2)),
+                Pair(UNQUOTED_STRING, Location(0, 2, 0, 8, 2, 8)),
+                Pair(COLON, Location(0, 8, 0, 9, 8, 9)),
+                Pair(WHITESPACE, Location(0, 9, 0, 10, 9, 10)),
+                Pair(STRING_OPEN_QUOTE, Location(0, 10, 0, 11, 10, 11)),
+                Pair(STRING_CONTENT, Location(0, 11, 0, 17, 11, 17)),
+                Pair(STRING_CLOSE_QUOTE, Location(0, 17, 0, 18, 17, 18)),
+                Pair(WHITESPACE, Location(0, 18, 1, 0, 18, 19))
             ),
             true
         )

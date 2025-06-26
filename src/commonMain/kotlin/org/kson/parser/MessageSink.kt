@@ -2,24 +2,27 @@ package org.kson.parser
 
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.parser.messages.Message
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 data class LoggedMessage(
     val location: Location,
     val message: Message
 ) {
     companion object {
         /**
-         * Print a user-friendly version of a [List] of [LoggedMessage].
-         *
-         * Note: locations are output as base-1 indexed firstLine/firstColumn/lastLine/lastColumn numbers
+         * Print a user-friendly version of a [List] of [LoggedMessage].  Note: locations
+         * are output as base-1 indexed firstLine/firstColumn/lastLine/lastColumn numbers
          * following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
          * for this sort of output
          */
         fun print(loggedMessages: List<LoggedMessage>): String {
             return loggedMessages.joinToString("\n") { loggedMessage ->
                 val location = loggedMessage.location
-                "Error:${location.start}" +
-                        " - ${location.end}, ${
+                "Error:${location.firstLine + 1}.${location.firstColumn + 1}" +
+                        " - ${location.lastLine + 1}.${location.lastColumn + 1}, ${
                             loggedMessage.message
                         }"
             }
@@ -30,6 +33,8 @@ data class LoggedMessage(
 /**
  * todo currently assumes everything is an error.  We'll refactor if/when we support WARN/INFO/etc.
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class MessageSink {
     private val messages = mutableListOf<LoggedMessage>()
 
