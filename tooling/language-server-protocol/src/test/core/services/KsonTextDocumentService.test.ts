@@ -136,7 +136,7 @@ describe('KsonTextDocumentService', () => {
                     "range": {
                         "start": {
                             "line": 0,
-                            "character": 0
+                            "character": 14
                         },
                         "end": {
                             "line": 0,
