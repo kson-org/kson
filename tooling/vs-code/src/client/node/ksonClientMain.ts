@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(logOutputChannel);
 
     try {
-        const serverModule = context.asAbsolutePath('./out/src/server/node/ksonServerMain.js');
+        const serverModule = context.asAbsolutePath('./dist/server.js');
 
         // Debug options for development
         const debugPort = process.env.KSON_DEBUG_PORT || '6009';

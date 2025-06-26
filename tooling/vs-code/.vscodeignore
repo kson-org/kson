@@ -1,0 +1,14 @@
+.vscode/
+.vscode-test/
+.vscode-test.js
+dist/**/*.map
+node_modules
+out/
+src/
+test/
+esbuild.js
+tsconfig.json
+*.vsix
+
+# Ignore files outside of the project directory
+../
