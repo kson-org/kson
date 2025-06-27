@@ -65,7 +65,7 @@ private fun formatParseResult(parseResult: ParseResult): String {
         |${parseResult.messages.joinToString(",\n  ", prefix = "  ")}
         |]
         |
-        |serializedAst: %%
+        |serializedAst: %
         |${parseResult.ast?.toSource(AstNode.Indent(), CompileTarget.Kson())}
         |%%
     """.trimMargin()

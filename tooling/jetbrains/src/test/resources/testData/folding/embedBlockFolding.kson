@@ -1,22 +1,16 @@
-dollar_block: <fold text='$$...$$'>$$
+dollar_block: <fold text='$...$$'>$
     function test() {
         console.log("Hello");
     }
 $$</fold>
 
-percent_block: <fold text='%%...%%'>%%
+percent_block: <fold text='%...%%'>%
     function test() {
         console.log("Hello");
     }
 %%</fold>
 
-tagged_block: <fold text='%%kotlin...%%'>%%kotlin
-    function test() {
-        console.log("Hello");
-    }
-%%</fold>
-
-single_start_delim: <fold text='%%kotlin...%%'>%kotlin
+tagged_block: <fold text='%kotlin...%%'>%kotlin
     function test() {
         console.log("Hello");
     }

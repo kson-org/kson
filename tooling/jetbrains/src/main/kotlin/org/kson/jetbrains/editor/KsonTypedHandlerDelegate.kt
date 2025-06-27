@@ -53,37 +53,35 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
             /**
              * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
              */
-            if (text.length > 1 && caretOffset > 1) {
-                for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                    if (char == embedDelimChar && text[preTypedPosition] == embedDelimChar) {
-                        // let's be very conservative with this insert: if we are not at the end of a line,
-                        //     or followed by a comma (which is end of line-ish), don't do it
-                        if (text.length != caretOffset
-                            && text[caretOffset] != '\n'
-                            && text[caretOffset] != ',') {
-                            return Result.CONTINUE
-                        }
-
-                        // ensure we're not contained in an element where embed block delimiter
-                        // auto-insertions would be inappropriate
-                        if (file.hasElementAtOffset(preTypedPosition, embedInsertProhibitedElems)) {
-                            return Result.CONTINUE
-                        }
-
-                        // Insert the new line on which we auto-complete the [EmbedDelim]
-                        document.insertString(caretOffset, "\n")
-
-                        // Calculate the indent level of the inserted new line
-                        val newLineCaret = caretOffset + 1
-                        val lineNumber = document.getLineNumber(newLineCaret)
-                        val indentType = file.getIndentType()
-                        val indentLevel = document.getLineIndentLevel(lineNumber, indentType)
-                        val newIndent = indentType.indentString.repeat(indentLevel)
-
-                        // Insert the embed delimiters with the calculated indent
-                        document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
+            for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
+                if (char == embedDelimChar) {
+                    // let's be very conservative with this insert: if we are not at the end of a line,
+                    //     or followed by a comma (which is end of line-ish), don't do it
+                    if (text.length != caretOffset
+                        && text[caretOffset] != '\n'
+                        && text[caretOffset] != ',') {
                         return Result.CONTINUE
                     }
+
+                    // ensure we're not contained in an element where embed block delimiter
+                    // auto-insertions would be inappropriate
+                    if (file.hasElementAtOffset(preTypedPosition, embedInsertProhibitedElems)) {
+                        return Result.CONTINUE
+                    }
+
+                    // Insert the new line on which we auto-complete the [EmbedDelim]
+                    document.insertString(caretOffset, "\n")
+
+                    // Calculate the indent level of the inserted new line
+                    val newLineCaret = caretOffset + 1
+                    val lineNumber = document.getLineNumber(newLineCaret)
+                    val indentType = file.getIndentType()
+                    val indentLevel = document.getLineIndentLevel(lineNumber, indentType)
+                    val newIndent = indentType.indentString.repeat(indentLevel)
+
+                    // Insert the embed delimiters with the calculated indent
+                    document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
+                    return Result.CONTINUE
                 }
             }
         }
@@ -95,9 +93,9 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 /**
  * The [IElementType]s within which we do NOT want to perform [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] auto-completes
  */
-private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT), elem(STRING_CONTENT))
+private val embedInsertProhibitedElems = setOf(elem(EMBED_BLOCK), elem(EMBED_CONTENT))
 
 /**
  * The [IElementType]s within which we NEVER want to perform auto-completes
  */
-private val autoCompleteProhibitedElems = setOf(elem(COMMENT))
+private val autoCompleteProhibitedElems = setOf(elem(COMMENT), elem(STRING_CONTENT), elem(STRING_OPEN_QUOTE))

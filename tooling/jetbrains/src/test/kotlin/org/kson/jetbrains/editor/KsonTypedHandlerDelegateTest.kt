@@ -23,7 +23,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 "#    <<caret>"
             )
 
-            // should not auto-insert in comment block
+            // should auto-insert below comment block
             doCharTest(
                 """
                     # This is a commented line
@@ -74,76 +74,63 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      */
     fun testEmbedDelimiterAutoInsert() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {
-            val halfDelim = delimiter.char
-            val fullDelim = delimiter.delimiter
-            val altFullDelim = if (delimiter == EmbedDelim.Percent) {
-                EmbedDelim.Dollar.delimiter
+            val openDelim = delimiter.openDelimiter
+            val closeDelimiter = delimiter.closeDelimiter
+            val altDelim = if (delimiter == EmbedDelim.Percent) {
+                EmbedDelim.Dollar
             } else {
-                EmbedDelim.Percent.delimiter
+                EmbedDelim.Percent
             }
 
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
                 doCharTest(
-                    "$halfDelim<caret>",
-                    halfDelim,
+                    "<caret>",
+                    openDelim,
                     """
-                    $fullDelim<caret>
-                    $fullDelim
+                    $openDelim<caret>
+                    $closeDelimiter
                     """.trimIndent(),
                 )
 
                 // should auto-insert if making a list item, i.e. followed by a comma
                 doCharTest(
-                    "$halfDelim<caret>,",
-                    halfDelim,
+                    "<caret>,",
+                    openDelim,
                     """
-                    $fullDelim<caret>
-                    $fullDelim,
+                    $openDelim<caret>
+                    $closeDelimiter,
                     """.trimIndent(),
                 )
 
                 // should not auto-insert if anything other than a comma follows our embed delim
                 doCharTest(
-                    "$halfDelim<caret>stuff",
-                    halfDelim,
-                    "$fullDelim<caret>stuff"
-                )
-
-                // should not auto-insert if already closed
-                doCharTest(
-                    """
-                    $halfDelim<caret>
-                    $fullDelim
-                    """.trimIndent(),
-                    halfDelim,
-                    """
-                    $fullDelim<caret>
-                    $fullDelim
-                    """.trimIndent(),
+                    "<caret>stuff",
+                    openDelim,
+                    "$openDelim<caret>stuff"
                 )
 
                 // should not auto-insert if closing an embed block
                 doCharTest(
                     """
-                    $fullDelim
-                    $halfDelim<caret>
+                    $openDelim
+                    $openDelim<caret>
                     """.trimIndent(),
-                    halfDelim,
+                    openDelim,
                     """
-                    $fullDelim
-                    $fullDelim<caret>
+                    $openDelim
+                    $closeDelimiter<caret>
                     """.trimIndent(),
                 )
 
                 // should not auto-insert inside strings
                 doCharTest(
                     """
-                    "$halfDelim<caret>
+                    "<caret>
                     "
                     """.trimIndent(),
-                    halfDelim,
+                    openDelim,
                     """
-                    "$fullDelim<caret>
+                    "$openDelim<caret>
                     "
                     """.trimIndent(),
                 )
@@ -151,72 +138,72 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 // should not auto-insert inside other embeds
                 doCharTest(
                     """
-                    $altFullDelim
-                        $halfDelim<caret>
-                    $altFullDelim
+                    ${altDelim.openDelimiter}
+                        <caret>
+                    ${altDelim.closeDelimiter}
                     """.trimIndent(),
-                    halfDelim,
+                    openDelim,
                     """
-                    $altFullDelim
-                        $fullDelim<caret>
-                    $altFullDelim
+                    ${altDelim.openDelimiter}
+                        $openDelim<caret>
+                    ${altDelim.closeDelimiter}
                     """.trimIndent()
                 )
 
                 // should not auto-insert in commented line
                 doCharTest(
                     """
-                    # $halfDelim<caret>
+                    #<caret>
                     """.trimIndent(),
-                    halfDelim,
+                    openDelim,
                     """
-                    # $fullDelim<caret>
+                    #$openDelim<caret>
                     """.trimIndent()
                 )
             }
 
             doCharTest(
-                    """
-                    |key1: $halfDelim<caret>
+                """
+                    |key1: <caret>
                     """.trimMargin(),
-                halfDelim,
-                    """
-                    |key1: $halfDelim$halfDelim<caret>
-                    |  $halfDelim$halfDelim
+                openDelim,
+                """
+                    |key1: $openDelim<caret>
+                    |  $closeDelimiter
                     """.trimMargin()
             )
 
             doCharTest(
-                    """
+                """
                     |key1:
-                    |  key2: $halfDelim<caret>
+                    |  key2: <caret>
                     """.trimMargin(),
-                halfDelim,
-                    """
+                openDelim,
+                """
                     |key1:
-                    |  key2: $halfDelim$halfDelim<caret>
-                    |    $halfDelim$halfDelim
+                    |  key2: $openDelim<caret>
+                    |    $closeDelimiter
                     """.trimMargin()
             )
 
             doCharTest(
-                    """
-                    |key1: $halfDelim<caret>
+                """
+                    |key1: <caret>
                     |key2: value2
                     """.trimMargin(),
-                    halfDelim,
-                    """
-                    |key1: $halfDelim$halfDelim<caret>
-                    |  $halfDelim$halfDelim
+                openDelim,
+                """
+                    |key1: $openDelim<caret>
+                    |  $closeDelimiter
                     |key2: value2
                     """.trimMargin()
-                )
+            )
 
             withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
                 doCharTest(
-                    "$halfDelim<caret>",
-                    halfDelim,
-                    "$fullDelim<caret>"
+                    "<caret>",
+                    openDelim,
+                    "$openDelim<caret>"
                 )
             }
         }

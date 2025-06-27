@@ -43,17 +43,13 @@ enum class TokenType : ElementType {
     // lines starting with `#`
     COMMENT,
     /**
-     * Opening delimiter for an embed block, either `%%` or `$$`, see [EmbedDelim.Percent] and [EmbedDelim.Dollar]
+     * Opening delimiter for an embed block, either `%` or `$`, see [EmbedDelim.Percent] and [EmbedDelim.Dollar]
      */
     EMBED_OPEN_DELIM,
     /**
-     * Closing delimiter for an embed block, matches the [EMBED_OPEN_DELIM] for the block it closes
+     * Closing delimiter for an embed block, either `%%` or `$$`, matches the [EMBED_OPEN_DELIM] for the block it closes
      */
     EMBED_CLOSE_DELIM,
-    /**
-     * A single `%` or `$` where an [EMBED_OPEN_DELIM] should be. Used to give helpful errors to the user.
-     */
-    EMBED_DELIM_PARTIAL,
     /**
      * The line of text starting at an embed block's [EMBED_OPEN_DELIM], "tagging" that embedded content
      */
