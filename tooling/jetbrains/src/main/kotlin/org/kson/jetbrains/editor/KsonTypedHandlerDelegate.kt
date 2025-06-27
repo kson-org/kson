@@ -3,6 +3,7 @@ package org.kson.jetbrains.editor
 import com.intellij.codeInsight.CodeInsightSettings
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
@@ -16,7 +17,13 @@ import org.kson.parser.ParsedElementType.EMBED_BLOCK
 import org.kson.parser.TokenType.*
 
 class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
-    override fun charTyped(char: Char, project: Project, editor: Editor, file: PsiFile): Result {
+    override fun beforeCharTyped(
+        char: Char,
+        project: Project,
+        editor: Editor,
+        file: PsiFile,
+        fileType: FileType
+    ): Result {
         // this handler runs on typing events in all filetypes, so
         // be careful to return quickly if this event isn't for us
         if (!file.viewProvider.baseLanguage.isKindOf(KsonLanguage)) {
@@ -25,47 +32,38 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 
         val caretOffset = editor.caretModel.offset
         val document = editor.document
-        val text = document.text
 
-        /**
-         * Position before the just-typed character, used for:
-         * 1. Detecting paired delimiters (%% or $$) by matching with the just-typed char
-         * 2. Checking if we're in a comment (since the PSI tree hasn't updated yet for the new character we check
-         *      whether the previous character is a comment)
-         */
-        val preTypedPosition = caretOffset - 2
-
-        // ensure we're not contained in an element where we NEVER want to
-        // auto-complete (e.g. COMMENTS).
-        if (file.hasElementAtOffset(preTypedPosition, autoCompleteProhibitedElems)) {
+        val nextChar = findNextChar(caretOffset, document.text)
+        // ensure we're not contained in an element where we NEVER want to auto-complete (e.g. COMMENTS and STRINGS).
+        if (file.hasElementAtOffset(caretOffset - 1, autoCompleteProhibitedElems)) {
             return Result.CONTINUE
         }
 
-        if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET && caretOffset > 0) {
-            /**
-             * Handle auto-inserts of [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
-             */
-            if (char == '<') {
-                document.insertString(caretOffset, ">")
-                return Result.CONTINUE
-            }
+        if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET) {
+            when (char) {
+                /**
+                 * Handle auto-inserts of [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
+                 */
+                '<' -> {
+                    if (nextChar != '>') {
+                        document.insertString(caretOffset, ">")
+                    }
+                    return Result.CONTINUE
+                }
 
-            /**
-             * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
-             */
-            for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                if (char == embedDelimChar) {
+                /**
+                 * Handle auto-inserts of [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
+                 */
+                EmbedDelim.Dollar.char, EmbedDelim.Percent.char -> {
                     // let's be very conservative with this insert: if we are not at the end of a line,
                     //     or followed by a comma (which is end of line-ish), don't do it
-                    if (text.length != caretOffset
-                        && text[caretOffset] != '\n'
-                        && text[caretOffset] != ',') {
+                    if (nextChar != '\n' && nextChar != ',') {
                         return Result.CONTINUE
                     }
 
                     // ensure we're not contained in an element where embed block delimiter
                     // auto-insertions would be inappropriate
-                    if (file.hasElementAtOffset(preTypedPosition, embedInsertProhibitedElems)) {
+                    if (file.hasElementAtOffset(caretOffset - 1, embedInsertProhibitedElems)) {
                         return Result.CONTINUE
                     }
 
@@ -80,14 +78,35 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
                     val newIndent = indentType.indentString.repeat(indentLevel)
 
                     // Insert the embed delimiters with the calculated indent
-                    document.insertString(newLineCaret, "${newIndent}$embedDelimChar$embedDelimChar")
+                    val embedDelim = EmbedDelim.fromString(char.toString())
+                    document.insertString(newLineCaret, "${newIndent}${embedDelim.closeDelimiter}")
                     return Result.CONTINUE
                 }
             }
         }
-
         return Result.CONTINUE
     }
+}
+
+/**
+ * Look ahead for the closing delimiter, skipping whitespace
+ */
+private fun findNextChar(caretOffset: Int, text: String): Char {
+    if (caretOffset == text.length){
+        return '\n'
+    }
+    // Look ahead for the closing delimiter, skipping whitespace
+    val nextChar = {
+        var afterIndex = caretOffset
+
+        while (afterIndex < text.length - 1 && text[afterIndex].isWhitespace() && text[afterIndex] != '\n') {
+            afterIndex++
+        }
+
+        text[afterIndex]
+    }
+
+    return nextChar()
 }
 
 /**
