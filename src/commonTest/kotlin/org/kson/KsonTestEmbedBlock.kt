@@ -2,7 +2,7 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestEmbedBlock : KsonTest() {
+class KsonTestEmbedBlock : KsonTest {
     @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
