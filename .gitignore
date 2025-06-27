@@ -33,3 +33,5 @@ gradle/jdk
 .idea
 # kotlin metadata
 .kotlin
+# node generated files
+node_modules
