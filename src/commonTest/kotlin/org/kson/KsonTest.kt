@@ -21,7 +21,7 @@ interface KsonTest {
      * and custom [CompileSettings] may be constructed as needed
      */
     data class CompileSettings(
-        val ksonSettings: CompileTarget.Kson = CompileTarget.Kson(),
+        val ksonSettings: CompileTarget.Kson = Kson(),
         val yamlSettings: Yaml = Yaml(),
         val jsonSettings: Json = Json()
     )
