@@ -10,13 +10,13 @@ node {
 }
 
 tasks {
-    named("npm_run_build"){
+    named("npm_run_compile"){
         dependsOn(":jsNodeProductionLibraryDistribution")
         dependsOn(npmInstall)
     }
 
     named("npm_run_test"){
-        dependsOn("npm_run_build")
+        dependsOn("npm_run_compile")
     }
 
     named("check") {

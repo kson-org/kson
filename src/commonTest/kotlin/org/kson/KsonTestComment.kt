@@ -491,13 +491,13 @@ class KsonTestComment : KsonTest {
         assertParsesTo(
             """
                 # a comment on an embed block
-                %%
+                %
                 embedded stuff
                 %%
             """,
             """
                # a comment on an embed block
-               %%
+               %
                embedded stuff
                %%
             """.trimIndent(),

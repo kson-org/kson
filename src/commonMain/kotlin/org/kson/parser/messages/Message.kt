@@ -32,16 +32,6 @@ enum class MessageType {
             return "Unable to parse a blank file.  A Kson document must describe a value."
         }
     },
-    EMBED_BLOCK_DANGLING_DELIM {
-        override fun expectedArgs(): List<String> {
-            return listOf("Embed delimiter character")
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val embedDelimChar = parsedArgs.getArg("Embed delimiter character")
-            return "Incomplete embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
-        }
-    },
     EMBED_BLOCK_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return listOf("Embed delimiter")

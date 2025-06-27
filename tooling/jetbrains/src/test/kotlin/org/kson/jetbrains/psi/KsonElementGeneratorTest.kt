@@ -19,7 +19,7 @@ class KsonElementGeneratorTest : BasePlatformTestCase() {
         val generatedBlock = generator.createEmbedBlock(EmbedDelim.Percent, content, tag = "custom")
 
         val expectedBlock = """
-            |%%custom
+            |%custom
             |  content with a newline current indent of 2
             |   %%
         """.trimMargin()
@@ -34,7 +34,7 @@ class KsonElementGeneratorTest : BasePlatformTestCase() {
         val generatedBlock = generator.createEmbedBlock(EmbedDelim.Percent, content, tag = "custom", indentText = "  ")
 
         val expectedBlock = """
-            |%%custom
+            |%custom
             |    content with a newline and added indent of 2
             |    %%
         """.trimMargin()

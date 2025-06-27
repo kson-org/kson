@@ -38,7 +38,7 @@ class KsonApiTest {
               numberVal: 42.5
               booleanVal: true
               nullVal: null
-              embedBlock: %%
+              embedBlock: %
               This is an embed block
               with multiple lines
               %%

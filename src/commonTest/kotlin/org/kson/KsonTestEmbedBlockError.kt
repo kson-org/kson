@@ -27,7 +27,7 @@ class KsonTestEmbedBlockError : KsonTestError {
 
     @Test
     fun testUnclosedEmbedAlternateDelimiterError() {
-        assertParserRejectsSource("$$\n", listOf(EMBED_BLOCK_NO_CLOSE))
+        assertParserRejectsSource("$\n", listOf(EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
@@ -36,23 +36,14 @@ class KsonTestEmbedBlockError : KsonTestError {
             """
                 %
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
+            listOf(EMBED_BLOCK_NO_CLOSE)
         )
 
         assertParserRejectsSource(
             """
                 $
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
-        )
-
-        assertParserRejectsSource(
-            """
-                test: %myTag
-                    Some embedBlockContent
-                %%
-            """,
-            listOf(EMBED_BLOCK_DANGLING_DELIM)
+            listOf(EMBED_BLOCK_NO_CLOSE)
         )
     }
 }

@@ -17,7 +17,7 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.TokenType.*
 
 class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
-    override fun beforeCharDeleted(c: Char, file: PsiFile, editor: Editor) {
+    override fun beforeCharDeleted(charDeleted: Char, file: PsiFile, editor: Editor) {
         // this handler runs on all backspace events in all filetypes, so
         // be careful to return quickly if this event isn't for us
         if (!file.viewProvider.baseLanguage.isKindOf(KsonLanguage)) {
@@ -26,71 +26,69 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
 
         val caretOffset = editor.caretModel.offset
         val document = editor.document
-        val text = document.text
+        val nextChar = document.text.getOrNull(caretOffset) ?: return
 
-        if (caretOffset > 0 && text.length > caretOffset) {
+        if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE) {
             /**
              * handle deleting [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] pairs
              */
-            if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE
-                && (text[caretOffset - 1] == '"' && text[caretOffset] == '"'
-                || text[caretOffset - 1] == '\'' && text[caretOffset] == '\'')) {
-                document.deleteString(caretOffset, caretOffset + 1)
-                return
+            when (charDeleted to nextChar) {
+                '"' to '"', '\'' to '\'' -> {
+                    document.deleteString(caretOffset, caretOffset + 1)
+                    return
+                }
             }
+        }
 
-            if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET) {
+        if (CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET) {
+            when (charDeleted to nextChar) {
                 /**
                  * handle deleting [ANGLE_BRACKET_L]/[ANGLE_BRACKET_R] pairs
                  */
-                if (text[caretOffset - 1] == '<' && text[caretOffset] == '>') {
+                '<' to '>' -> {
                     document.deleteString(caretOffset, caretOffset + 1)
                     return
                 }
 
                 /**
                  * handle deleting [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] pairs
+                 * Note: if we're not at the end of the line, then we're definitely not part of an auto-inserted
+                 * pair, so no auto-deletion
                  */
-                for (embedDelimChar in listOf(EmbedDelim.Percent.char, EmbedDelim.Dollar.char)) {
-                    if (caretOffset > 1 && text[caretOffset - 2] == embedDelimChar && text[caretOffset - 1] == embedDelimChar) {
-                        if (text[caretOffset] != '\n') {
-                             // if we're not at the end of the line, then we're definitely not part of an auto-inserted
-                             // pair, so no auto-deletion
-                            return
-                        }
+                EmbedDelim.Percent.char to '\n', EmbedDelim.Dollar.char to '\n' -> {
+                    // ensure we're not contained in an element where auto-deleting embed block delimiter
+                    // would be inappropriate
+                    if (file.hasElementAtOffset(caretOffset - 1, embedDeleteProhibitedElems)) {
+                        return
+                    }
 
-                        // ensure we're not contained in an element where auto-deleting embed block delimiter
-                        // would be inappropriate
-                        if (file.hasElementAtOffset(caretOffset - 1, embedDeleteProhibitedElems)) {
-                            return
-                        }
+                    val project = file.project
+                    val nextLine = document.getLineNumber(caretOffset) + 1
+                    val nextLineStartOffset = document.getLineStartOffset(nextLine)
+                    val nextLineEndOffset = document.getLineEndOffset(nextLine)
+                    val nextLineText = document.getText(TextRange(nextLineStartOffset, nextLineEndOffset))
 
-                        val project = file.project
-                        val nextLine = document.getLineNumber(caretOffset) + 1
-                        val nextLineStartOffset = document.getLineStartOffset(nextLine)
-                        val nextLineEndOffset = document.getLineEndOffset(nextLine)
-                        val nextLineText = document.getText(TextRange(nextLineStartOffset, nextLineEndOffset))
+                    // Calculate the indent level of the inserted new line
+                    val indentType = file.getIndentType()
+                    val indentLevel = document.getLineIndentLevel(nextLine, indentType)
+                    val newIndent = indentType.indentString.repeat(indentLevel)
 
-                        // Calculate the indent level of the inserted new line
-                        val indentType = file.getIndentType()
-                        val indentLevel = document.getLineIndentLevel(nextLine, indentType)
-                        val newIndent = indentType.indentString.repeat(indentLevel)
-
-                        /**
-                         * If the next line looks like an embed delimiter inserted by [KsonTypedHandlerDelegate],
-                         * clean it up along with the current backspace deletion
-                         */
-                        val toBeDeletedIfFound = "${newIndent}$embedDelimChar$embedDelimChar"
-                        val toBeDeletedIfFoundWithComma = "$toBeDeletedIfFound,"
-                        if (nextLineText == toBeDeletedIfFound
-                            || nextLineText == toBeDeletedIfFoundWithComma) {
-                            CommandProcessor.getInstance().executeCommand(project,{
-                                ApplicationManager.getApplication().runWriteAction {
-                                    val deletionOffsetInLine = nextLineStartOffset + toBeDeletedIfFound.length
-                                    document.deleteString(nextLineStartOffset - 1, deletionOffsetInLine)
-                                }
-                            }, null, null)
-                        }
+                    /**
+                     * If the next line looks like an embed delimiter inserted by [KsonTypedHandlerDelegate],
+                     * clean it up along with the current backspace deletion
+                     */
+                    val embedDelim = EmbedDelim.fromString(charDeleted.toString())
+                    val toBeDeletedIfFound = "${newIndent}${embedDelim.closeDelimiter}"
+                    val toBeDeletedIfFoundWithComma = "$toBeDeletedIfFound,"
+                    if (nextLineText == toBeDeletedIfFound
+                        || nextLineText == toBeDeletedIfFoundWithComma
+                    ) {
+                        CommandProcessor.getInstance().executeCommand(project, {
+                            ApplicationManager.getApplication().runWriteAction {
+                                val deletionOffsetInLine = nextLineStartOffset + toBeDeletedIfFound.length
+                                document.deleteString(nextLineStartOffset - 1, deletionOffsetInLine)
+                            }
+                        }, null, null)
                     }
                 }
             }

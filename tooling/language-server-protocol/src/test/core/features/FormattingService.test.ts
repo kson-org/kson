@@ -233,12 +233,12 @@ describe('KSON Formatter', () => {
     // Embed blocks
     it('should correctly format embed blocks', () => {
         const content = [
-            `embedBlock: $$kotlin`,
+            `embedBlock: $kotlin`,
             `min indent of 2`,
             `$$`
         ].join('\n')
         const expected = [
-            `embedBlock: %%kotlin`,
+            `embedBlock: %kotlin`,
             `  min indent of 2`,
             `  %%`
         ].join('\n')
@@ -247,12 +247,12 @@ describe('KSON Formatter', () => {
 
     it('should handle embed block with tab indentation', () => {
         const content = [
-            `embedBlock: $$kotlin`,
+            `embedBlock: $kotlin`,
             `min indent of 2`,
             `$$`
         ].join('\n')
         const expected = [
-            `embedBlock: %%kotlin`,
+            `embedBlock: %kotlin`,
             `\tmin indent of 2`,
             `\t%%`
         ].join('\n')
