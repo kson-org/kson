@@ -64,7 +64,6 @@
   },
   "dependencies": {
     "kson-language-server": "file:../language-server-protocol",
-    "typescript": "^5.5.4",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1"
   },
@@ -79,6 +78,7 @@
     "glob": "^11.0.0",
     "mocha": "^11.7.1",
     "tsx": "^4.20.3",
+    "typescript": "^5.5.4",
     "uuid": "^9.0.1"
   }
 }
