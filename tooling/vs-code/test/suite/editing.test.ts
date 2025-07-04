@@ -42,7 +42,7 @@ describe('Editing Tests', () => {
 
         assertTextEqual(document, [
             'key: $',
-            '  $$'
+            '    $$'
         ].join('\n'));
     }).timeout(10000);
 
@@ -55,7 +55,7 @@ describe('Editing Tests', () => {
 
         assertTextEqual(document, [
             'key: %tag',
-            '  %%'
+            '    %%'
         ].join('\n'));
     }).timeout(10000);
 }); 

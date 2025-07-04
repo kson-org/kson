@@ -18,7 +18,7 @@ describe('Formatting Tests', () => {
         const expectedText = [
             'a: 1',
             'b:',
-            '  c: 2'
+            '    c: 2'
         ].join('\n');
 
         const [uri, document] = await createTestFile(unformattedContent);
