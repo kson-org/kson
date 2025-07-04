@@ -38,7 +38,8 @@ async function main() {
 
     // Base entry points for browser
     const browserEntryPoints = {
-        browserClient: './src/client/browser/ksonClientMain.ts'
+        browserClient: './src/client/browser/ksonClientMain.ts',
+        browserServer: './src/server/browser/ksonServerMain.ts'
     };
 
     // Add test entry points if building tests
