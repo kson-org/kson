@@ -3,27 +3,6 @@ const esbuild = require('esbuild');
 const production = process.argv.includes('--production');
 const includeTests = process.argv.includes('--tests');
 
-/**
- * @type {import('esbuild').Plugin}
- */
-const esbuildProblemMatcherPlugin = {
-  name: 'esbuild-problem-matcher',
-
-  setup(build) {
-    build.onStart(() => {
-      console.log('[watch] build started');
-    });
-    build.onEnd(result => {
-      result.errors.forEach(({ text, location }) => {
-        console.error(`✘ [ERROR] ${text}`);
-        if (location == null) return;
-        console.error(`    ${location.file}:${location.line}:${location.column}:`);
-      });
-      console.log('[watch] build finished');
-    });
-  }
-};
-
 // Base configuration that's shared between all builds
 const baseConfig = {
     bundle: true,
@@ -32,7 +11,6 @@ const baseConfig = {
     sourcemap: !production,
     sourcesContent: false,
     logLevel: 'warning',
-    plugins: [esbuildProblemMatcherPlugin]
 };
 
 async function main() {

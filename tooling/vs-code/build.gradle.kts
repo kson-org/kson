@@ -15,6 +15,10 @@ tasks {
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
 
+    named("npm_run_vscode"){
+        dependsOn(npmInstall)
+    }
+
     named("check") {
         dependsOn("npm_run_testVsix")
     }

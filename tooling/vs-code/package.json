@@ -59,6 +59,7 @@
     "compile": "npm run check-types && node esbuild.js",
     "compile-tests": "node esbuild.js --tests",
     "check-types": "tsc --noEmit",
+    "vscode": "npm run package:vsix && tsx test/runExtension.ts",
     "test": "npm run compile-tests && RUN_MODE=test-node node dist/runTests.js",
     "test:browser": "npm run compile-tests && RUN_MODE=test-browser node dist/runTests.js"
   },
