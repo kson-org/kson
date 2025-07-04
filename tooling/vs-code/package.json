@@ -55,7 +55,7 @@
   },
   "scripts": {
     "package": "npm run check-types && node esbuild.js --production",
-    "package:vsix": "npm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
+    "package:vsix": "rimraf ./dist && npm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
     "compile": "npm run check-types && node esbuild.js",
     "compile-tests": "node esbuild.js --tests",
     "check-types": "tsc --noEmit",
@@ -80,6 +80,7 @@
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
     "process": "^0.11.10",
+    "rimraf": "^6.0.1",
     "tsx": "^4.20.3",
     "typescript": "^5.5.4",
     "uuid": "^9.0.1"
