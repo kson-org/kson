@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { createTestFile, cleanUp, assertTextEqual } from './common';
-import {afterEach, describe, test} from 'mocha';
 
 
 describe('Formatting Tests', () => {

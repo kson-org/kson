@@ -19,6 +19,7 @@
     "url": "https://github.com/kson-org/kson"
   },
   "main": "./dist/client.js",
+  "browser": "./dist/browserClient.js",
   "contributes": {
     "languages": [
       {
@@ -58,9 +59,8 @@
     "compile": "npm run check-types && node esbuild.js",
     "compile-tests": "node esbuild.js --tests",
     "check-types": "tsc --noEmit",
-    "test": "npm run compile-tests && USE_VSIX=false node out/test/runVsixTests.js",
-    "testVsix": "npm run compile-tests && npm run package:vsix && USE_VSIX=true node out/test/runVsixTests.js"
     "test": "npm run compile-tests && RUN_MODE=test-node node dist/runTests.js",
+    "test:browser": "npm run compile-tests && RUN_MODE=test-browser node dist/runTests.js"
   },
   "dependencies": {
     "kson-language-server": "file:../language-server-protocol",
@@ -73,10 +73,12 @@
     "@types/uuid": "^9.0.8",
     "@types/vscode": "1.101.0",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-web": "^0.0.71",
     "@vscode/vsce": "^3.6.0",
+    "assert": "^2.1.0",
     "esbuild": "^0.25.5",
-    "glob": "^11.0.0",
     "mocha": "^11.7.1",
+    "process": "^0.11.10",
     "tsx": "^4.20.3",
     "typescript": "^5.5.4",
     "uuid": "^9.0.1"

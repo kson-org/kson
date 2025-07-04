@@ -57,11 +57,21 @@ async function main() {
         client: './src/client/node/ksonClientMain.ts',
         server: './src/server/node/ksonServerMain.ts'
     };
+
+    // Base entry points for browser
+    const browserEntryPoints = {
+        browserClient: './src/client/browser/ksonClientMain.ts'
+    };
+
     // Add test entry points if building tests
     if (includeTests) {
         // Node-only test runners
         nodeEntryPoints['runTests'] = './test/runTests.ts';
         nodeEntryPoints['index.node'] = './test/node/index.node.ts';
+
+        // Browser-only test entry
+        browserEntryPoints['index.browser'] = './test/browser/index.browser.ts';
+
         // Shared test files (built for both platforms)
         const sharedTestEntryPoints = {
             'index.common': './test/index.common.ts',
@@ -72,6 +82,7 @@ async function main() {
 
         // Add shared test files to both entry point sets
         Object.assign(nodeEntryPoints, sharedTestEntryPoints);
+        Object.assign(browserEntryPoints, sharedTestEntryPoints);
     }
 
     // Create contexts array to handle multiple builds
@@ -87,6 +98,20 @@ async function main() {
     });
     contexts.push(nodeCtx);
 
+    // Browser build context - only build if we have browser entry points
+    const browserCtx = await esbuild.context({
+        ...baseConfig,
+        entryPoints: browserEntryPoints,
+        outdir: buildConfig.outDir,
+        platform: 'browser',
+        external: ['vscode', 'path'],
+        define: {
+            'process.env.NODE_ENV': '"test"',
+            'global': 'globalThis'
+        },
+        inject: ['./test/browser/process-shim.js']
+    });
+    contexts.push(browserCtx);
 
     // Execute build
     await Promise.all(contexts.map(ctx => ctx.rebuild()));

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import * as assert from 'node:assert';
+import * as assert from 'assert';
 import {createTestFile, cleanUp} from './common';
-import {test, describe} from 'mocha';
+
 
 describe('Diagnostic Tests', () => {
 
