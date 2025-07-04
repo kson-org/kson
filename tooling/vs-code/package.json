@@ -32,17 +32,17 @@
           ".kson"
         ],
         "icon": {
-          "light": "./assets/kson-icon.png",
-          "dark": "./assets/kson-icon.png"
+          "light": "./extension/assets/kson-icon.png",
+          "dark": "./extension/assets/kson-icon.png"
         },
-        "configuration": "./config/language-configuration.json"
+        "configuration": "./extension/config/language-configuration.json"
       }
     ],
     "grammars": [
       {
         "language": "kson",
         "scopeName": "source.kson",
-        "path": "./config/kson.tmLanguage.json"
+        "path": "./extension/config/kson.tmLanguage.json"
       }
     ],
     "configuration": {
