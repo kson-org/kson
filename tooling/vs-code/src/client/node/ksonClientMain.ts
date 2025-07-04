@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import {
     ServerOptions,
     TransportKind,
@@ -28,7 +29,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(logOutputChannel);
 
     try {
-        const serverModule = context.asAbsolutePath('./dist/server.js');
+        const serverModule = path.join(__dirname, 'server.js');
 
         // Debug options for development
         const debugPort = process.env.KSON_DEBUG_PORT || '6009';
