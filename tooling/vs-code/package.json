@@ -54,13 +54,13 @@
   },
   "scripts": {
     "package": "npm run check-types && node esbuild.js --production",
-    "package:vsix": "npm run package && vsce package --no-dependencies --out out/vscode-kson-plugin.vsix",
+    "package:vsix": "npm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
     "compile": "npm run check-types && node esbuild.js",
-    "compile-tests": "tsc -p ./tsconfig.json",
-    "bundle": "node esbuild.js",
+    "compile-tests": "node esbuild.js --tests",
     "check-types": "tsc --noEmit",
     "test": "npm run compile-tests && USE_VSIX=false node out/test/runVsixTests.js",
     "testVsix": "npm run compile-tests && npm run package:vsix && USE_VSIX=true node out/test/runVsixTests.js"
+    "test": "npm run compile-tests && RUN_MODE=test-node node dist/runTests.js",
   },
   "dependencies": {
     "kson-language-server": "file:../language-server-protocol",

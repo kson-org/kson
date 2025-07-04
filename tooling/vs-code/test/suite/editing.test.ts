@@ -13,7 +13,7 @@ describe('Editing Tests', () => {
         }
     });
 
-    test('Should auto-close $ to $$$', async () => {
+    it('Should auto-close $ to $$$', async () => {
         const [uri, document] = await createTestFile();
         testFileUri = uri;
 
@@ -23,7 +23,7 @@ describe('Editing Tests', () => {
         assertTextEqual(document, '$$$');
     }).timeout(10000);
 
-    test('Should auto-close % to %%%', async () => {
+    it('Should auto-close % to %%%', async () => {
         const [uri, document] = await createTestFile();
         testFileUri = uri;
 
@@ -33,7 +33,7 @@ describe('Editing Tests', () => {
         assertTextEqual(document, '%%%');
     }).timeout(10000);
 
-    test('Should indent an embed block delimited with $, without tag', async () => {
+    it('Should indent an embed block delimited with $, without tag', async () => {
         const [uri, document] = await createTestFile();
         testFileUri = uri;
 
@@ -46,7 +46,7 @@ describe('Editing Tests', () => {
         ].join('\n'));
     }).timeout(10000);
 
-    test('Should indent an embed block delimited with %, with tag', async () => {
+    it('Should indent an embed block delimited with %, with tag', async () => {
         const [uri, document] = await createTestFile();
         testFileUri = uri;
 

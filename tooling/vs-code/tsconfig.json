@@ -3,7 +3,7 @@
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "out",
+    "outDir": "dist",
     // Custom types
     "typeRoots": [
       "./node_modules/@types"

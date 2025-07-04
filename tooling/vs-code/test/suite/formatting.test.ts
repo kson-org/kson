@@ -13,7 +13,7 @@ describe('Formatting Tests', () => {
         }
     });
 
-    test('Should format a Kson document', async () => {
+    it('Should format a Kson document', async () => {
         const unformattedContent = '{"a":1,"b":{"c":2}}';
         const expectedText = [
             'a: 1',
