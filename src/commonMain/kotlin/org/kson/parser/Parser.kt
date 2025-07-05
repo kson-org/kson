@@ -500,6 +500,21 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * keyword -> ( UNQUOTED_STRING | string ) ":"
      */
     private fun keyword(): Boolean {
+        // helpful errors for keywords that clash with reserved words
+        if ((builder.getTokenType() == NULL
+                    || builder.getTokenType() == TRUE
+                    || builder.getTokenType() == FALSE
+                ) && builder.lookAhead(1) == COLON) {
+            val keywordMark = builder.mark()
+            val reservedWord = builder.getTokenText()
+            builder.advanceLexer()
+            keywordMark.error(OBJECT_KEYWORD_RESERVED_WORD.create(reservedWord))
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        }
+
         // try to parse a keyword in the style of "UNQUOTED_STRING followed by :"
         if (builder.getTokenType() == UNQUOTED_STRING && builder.lookAhead(1) == COLON) {
             val keywordMark = builder.mark()
