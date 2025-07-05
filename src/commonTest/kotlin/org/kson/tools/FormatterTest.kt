@@ -1209,4 +1209,24 @@ class FormatterTest {
         """.trimIndent()
         )
     }
+
+    /**
+     * If a Kson document is fairly well-formed but has some unexpected trialing content, we should still
+     * be able to format the valid portion of the document
+     */
+    @Test
+    fun testFormattingSucceedsWithInvalidTrailingContent() {
+        assertFormatting(
+            """
+                {outer:{inner: value}}
+                "Illegal trailing content"
+            """.trimIndent(),
+            """
+                outer:
+                  inner: value
+
+                "Illegal trailing content"
+            """.trimIndent()
+        )
+    }
 }

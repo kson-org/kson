@@ -317,23 +317,27 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             throw RuntimeException("Token list must end in EOF")
                         }
 
-                        if (childMarkers.size > 1) {
-                            val errorContent = childMarkers.joinToString("") { childMarker ->
-                                childMarker.getRawText()
-                            }
-                            KsonRootImpl(KsonValueNodeError(
+                        val rootNode = unsafeAstCreate<KsonValueNode>(childMarkers[0]) {
+                            KsonValueNodeError(it, marker.getLocation())
+                        }
+
+                        val erroneousTrailingContent = if (childMarkers.size > 1) {
+                            val errorContent = childMarkers.subList(1, childMarkers.size)
+                                .joinToString("") { childMarker ->
+                                    childMarker.getRawText()
+                                }
+                            KsonValueNodeError(
                                 errorContent,
-                                marker.getLocation()),
-                                comments,
-                                eofToken.comments,
                                 marker.getLocation())
                         } else {
-                            val rooMarker = childMarkers[0]
-                            KsonRootImpl(unsafeAstCreate(rooMarker) { KsonValueNodeError(it, marker.getLocation()) },
-                                comments,
-                                eofToken.comments,
-                                marker.getLocation())
+                            null
                         }
+
+                        KsonRootImpl(rootNode,
+                            erroneousTrailingContent,
+                            comments,
+                            eofToken.comments,
+                            marker.getLocation())
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
