@@ -678,7 +678,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                  * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
                  * so give an error to help the user fix this construct
                  */
-                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter.toString(), embedTagText))
+                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
                 embedBlockMark.done(EMBED_BLOCK)
                 return true
             } else {
@@ -686,10 +686,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
 
             if (builder.eof()) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
                 return true
             } else if (builder.getTokenType() != EMBED_PREAMBLE_NEWLINE) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
                 return true
             }
 
@@ -710,7 +710,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 builder.advanceLexer()
                 embedBlockMark.done(EMBED_BLOCK)
             } else if (builder.eof()) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
             }
 
             return true
