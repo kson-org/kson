@@ -61,6 +61,81 @@ class KsonTestObject : KsonTest {
         )
     }
 
+    /**
+     * For plain/un-delimited objects nested in []-bracket lists, objects have precedence for any optional commas given
+     */
+    @Test
+    fun testObjectCommaPrecedence() {
+        assertParsesTo(
+            """
+                [
+                  ObjA1: 1,
+                  ObjA2: [
+                    nested1:v,
+                    nested2:v,
+                    nested3:v,
+                    .,
+                    alsoNested:v,
+                  ],
+                  ObjA3: 3,
+                  
+                  "A string",
+                  
+                  ObjB4: 4,
+                ]
+            """.trimIndent(),
+            """
+                - ObjA1: 1
+                  ObjA2:
+                    - nested1: v
+                      nested2: v
+                      nested3: v
+                
+                    - alsoNested: v
+                      .
+                  ObjA3: 3
+
+                - 'A string'
+                - ObjB4: 4
+            """.trimIndent(),
+            """
+                - ObjA1: 1
+                  ObjA2:
+                    - nested1: v
+                      nested2: v
+                      nested3: v
+                
+                    - alsoNested: v
+                  ObjA3: 3
+
+                - "A string"
+                - ObjB4: 4
+            """.trimIndent(),
+            """
+                [
+                  {
+                    "ObjA1": 1,
+                    "ObjA2": [
+                      {
+                        "nested1": "v",
+                        "nested2": "v",
+                        "nested3": "v"
+                      },
+                      {
+                        "alsoNested": "v"
+                      }
+                    ],
+                    "ObjA3": 3
+                  },
+                  "A string",
+                  {
+                    "ObjB4": 4
+                  }
+                ]
+            """.trimIndent()
+        )
+    }
+
     @Test
     fun testObjectSourceMixedWithStringContainingRawNewlines() {
         assertParsesTo(
