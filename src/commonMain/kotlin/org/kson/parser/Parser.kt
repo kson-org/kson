@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
@@ -61,20 +62,21 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         val rootMarker = builder.mark()
         try {
             if (ksonValue()) {
-                if (hasUnexpectedTrailingContent()) {
-                    // parser todo we likely want to see if we can continue parsing after adding the error noting
-                    //             the unexpected extra content
+                handleUnexpectedTrailingContent()
+                if (!builder.eof()) {
+                    /**
+                     * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
+                     */
+                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
                 }
                 rootMarker.drop()
             } else {
-                /**
-                 * If we did not consume tokens all they way up to EOF, then we have a bug in how we handle this case
-                 * (and how we report helpful errors for it).  Fail loudly so it gets fixed.
-                 */
                 if (!builder.eof()) {
-                    throw RuntimeException("Bug: this parser must consume all tokens in all cases, but failed in this case.")
-                } else {
-                    rootMarker.drop()
+                    /**
+                     * [ksonValue] must either parse something valid or mark the entire invalid Kson string
+                     * with a helpful error
+                     */
+                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
                 }
             }
         } catch (nestingException: ExcessiveNestingException) {
@@ -678,7 +680,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                  * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
                  * so give an error to help the user fix this construct
                  */
-                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter.toString(), embedTagText))
+                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
                 embedBlockMark.done(EMBED_BLOCK)
                 return true
             } else {
@@ -686,10 +688,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
 
             if (builder.eof()) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
                 return true
             } else if (builder.getTokenType() != EMBED_PREAMBLE_NEWLINE) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
                 return true
             }
 
@@ -710,7 +712,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 builder.advanceLexer()
                 embedBlockMark.done(EMBED_BLOCK)
             } else if (builder.eof()) {
-                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter.toString()))
+                embedBlockMark.error(EMBED_BLOCK_NO_CLOSE.create(embedStartDelimiter))
             }
 
             return true
@@ -721,22 +723,17 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * Returns true if there is still un-parsed content in [builder], marking an
-     * error if it finds unexpected content.  Should only be called to validate the state
-     * of [builder] after a successful parse
+     * Handle any un-parsed content in [builder], marking it in error if found.
+     * Should only be called to validate the state of [builder] after a successful parse
      */
-    private fun hasUnexpectedTrailingContent(): Boolean {
-        if (builder.eof()) {
-            // all good: every token has been consumed
-            return false
-        } else {
+    private fun handleUnexpectedTrailingContent() {
+        if (!builder.eof()) {
             // mark the unexpected content
             val unexpectedContentMark = builder.mark()
             while (!builder.eof()) {
                 builder.advanceLexer()
             }
             unexpectedContentMark.error(EOF_NOT_REACHED.create())
-            return true
         }
     }
 
