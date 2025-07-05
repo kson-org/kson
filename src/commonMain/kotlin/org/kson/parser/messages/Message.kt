@@ -127,6 +127,16 @@ enum class MessageType {
             return "This object key must be followed by a value"
         }
     },
+    OBJECT_KEYWORD_RESERVED_WORD {
+        override fun expectedArgs(): List<String> {
+            return listOf("Reserved Word")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val reservedWord = parsedArgs.getArg("Reserved Word")
+            return "`$reservedWord` cannot be used as an object key"
+        }
+    },
     IGNORED_OBJECT_END_DOT {
         override fun expectedArgs(): List<String> {
             return emptyList()
