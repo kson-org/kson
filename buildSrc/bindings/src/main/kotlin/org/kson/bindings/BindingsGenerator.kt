@@ -47,6 +47,15 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
             )
         }
 
+        private fun getHeaderFileName(): String {
+            return when {
+                Platform.isWindows -> "kson_api.h"
+                Platform.isLinux -> "libkson_api.h"
+                Platform.isMacOs -> "kson_api.h"
+                else -> throw Exception("Unsupported OS")
+            }
+        }
+
         // We need a handwritten function to recursively copy a directory, because
         // `File.copyRecursively` doesn't allow overwriting files (only the top-level file / dir)
         private fun copyDirectoryRecursively(source: Path, target: Path) {
@@ -81,12 +90,13 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
 
             // Place the preprocessed .h and binary in the bindings' dir
             destinationDir.resolve("${it.targetDir}/libkson").createDirectories()
+            val headerFileName = getHeaderFileName()
             TinyCPreprocessor().preprocess(
-                binaryDir.resolve("kson_api.h").pathString,
+                binaryDir.resolve(headerFileName).pathString,
                 destinationDir.resolve("${it.targetDir}/libkson/kson.h").pathString
             )
-            binaryDir.resolve("kson.dll")
-                .copyTo(destinationDir.resolve("${it.targetDir}/libkson/kson.dll"), true)
+            binaryDir.resolve(Platform.sharedLibraryName)
+                .copyTo(destinationDir.resolve("${it.targetDir}/libkson/${Platform.sharedLibraryName}"), true)
         }
     }
 }

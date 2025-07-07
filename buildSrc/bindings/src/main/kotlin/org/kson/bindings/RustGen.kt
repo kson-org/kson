@@ -27,17 +27,17 @@ class RustGen : LanguageSpecificBindingsGenerator {
             |#[cfg(test)]
             |mod test;
             |
-            |static KSON_LIB: std::sync::LazyLock<libloading::Library> = std::sync::LazyLock::new(|| unsafe { libloading::Library::new("libkson/kson.dll").unwrap() });
+            |static KSON_LIB: std::sync::LazyLock<libloading::Library> = std::sync::LazyLock::new(|| unsafe { libloading::Library::new("${Platform.sharedLibraryName}").unwrap() });
             |
-            |static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbols> = std::sync::LazyLock::new(||
+            |static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::${Platform.symbolPrefix}kson_ExportedSymbols> = std::sync::LazyLock::new(||
             |  unsafe {
-            |    let func: libloading::Symbol<unsafe extern "C" fn() -> *mut kson_ffi::kson_ExportedSymbols> = KSON_LIB.get(b"kson_symbols").unwrap();
+            |    let func: libloading::Symbol<unsafe extern "C" fn() -> *mut kson_ffi::${Platform.symbolPrefix}kson_ExportedSymbols> = KSON_LIB.get(b"${Platform.symbolPrefix}kson_symbols").unwrap();
             |    *func()
             |  }
             |);
             |
             |struct GcKsonPtr {
-            |  inner: kson_ffi::kson_KNativePtr,
+            |  inner: kson_ffi::${Platform.symbolPrefix}kson_KNativePtr,
             |}
             |
             |impl Drop for GcKsonPtr {
@@ -252,6 +252,6 @@ class RustGen : LanguageSpecificBindingsGenerator {
     }
 
     fun bindgenStructName(className: FullyQualifiedClassName): String {
-        return "kson_ffi::kson_kref_${className.fullyQualifiedName().replace('/', '_').replace('.', '_')}"
+        return "kson_ffi::${Platform.symbolPrefix}kson_kref_${className.fullyQualifiedName().replace('/', '_').replace('.', '_')}"
     }
 }

@@ -26,8 +26,8 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             |with open('libkson/kson.h', 'r') as f:
             |   header = f.read()
             |ffi.cdef(header)
-            |lib = ffi.dlopen('kson.dll')
-            |symbols = lib.kson_symbols()
+            |lib = ffi.dlopen('${Platform.sharedLibraryName}')
+            |symbols = lib.${Platform.symbolPrefix}kson_symbols()
             |
             |def cast_and_call(func, args):
             |    paramTypes = ffi.typeof(func).args

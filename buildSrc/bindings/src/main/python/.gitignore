@@ -2,3 +2,4 @@ __pycache__
 libkson
 lib.py
 kson.dll
+kson.shared

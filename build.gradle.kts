@@ -79,8 +79,21 @@ tasks {
             description = "Run $commandStr on generated $langName bindings"
             dependsOn(generateBindingsTask)
 
-            workingDir = file("build/generated/bindings/${it.targetDir}")
+            val bindingsPath = "build/generated/bindings/${it.targetDir}"
+            workingDir = file(bindingsPath)
             commandLine = it.testCommand
+
+            // Let the subprocess find the kson shared library
+            val (libraryPathVariable, libraryPathSeparator) = when {
+                org.gradle.internal.os.OperatingSystem.current().isWindows -> Pair("PATH", ";")
+                else -> Pair("LD_LIBRARY_PATH", ":")
+            }
+            var libraryPath = System.getenv(libraryPathVariable) ?: ""
+            if (libraryPath.isNotEmpty() && !libraryPath.endsWith(libraryPathSeparator)) {
+                libraryPath += libraryPathSeparator
+            }
+            libraryPath += project.file(bindingsPath).absoluteFile.resolve("libkson").toString()
+            environment(libraryPathVariable, libraryPath)
 
             // Show stdout and stderr
             standardOutput = System.out

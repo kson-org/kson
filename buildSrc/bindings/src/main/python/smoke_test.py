@@ -1,9 +1,3 @@
-import shutil
-
-# Note: when packaging the python library, the kson DLL will be in a place the OS can find. For
-# testing, we need to put it in the same dir as the main python script.
-shutil.copy("libkson/kson.dll", "kson.dll")
-
 from lib import *
 
 def test_smoke_1():

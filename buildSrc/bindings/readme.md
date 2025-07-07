@@ -17,9 +17,9 @@ exposes native library functions and types through the C ABI, which means we can
 functions from any programming language that can call C functions (i.e., every programming language
 under the sun).
 
-We use a built-in gradle task to compile Kson as a native shared library (i.e., a `.dll` or `.so`
-file with its associated C header file). This shared library can be loaded by a program, which then
-becomes able to call the library's functions.
+We use a built-in gradle task to compile Kson as a native shared library (i.e., a `.dll`, `.so` or
+`.dylib` file with its associated C header file). This shared library can be loaded by a program,
+which then becomes able to call the library's functions.
 
 Note that the functions and types provided by the native library are too low-level for human
 consumption. For that reason, we generate a user-friendly wrapper around the native library for each
