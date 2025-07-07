@@ -1,6 +1,7 @@
 package org.kson.bindings
 
 import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.FunctionKind
 import org.kson.metadata.IncludeParentClass
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
@@ -117,11 +118,11 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
     fun generateWrapperFunction(classIndent: String, className: FullyQualifiedClassName, metadata: SimpleFunctionMetadata) {
         // Wrapper function signature
         val declarationIndent = "$classIndent    "
-        if (metadata.static) {
+        if (metadata.isStatic) {
             builder.append("$declarationIndent@staticmethod\n")
         }
         builder.append("${declarationIndent}def ${metadata.name}(")
-        if (!metadata.static) {
+        if (!metadata.isStatic) {
             builder.append("self, ")
         }
         metadata.params.forEach {
@@ -130,16 +131,17 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
         builder.append("):\n")
         builder.append(PythonDocStringFormatter.format(declarationIndent + "    ", metadata.docString))
 
-        // FFI call
-        val self = if (metadata.static) {
-            "symbols.kotlin.root.${className.javaClassName()}.Companion._instance(), "
-        } else {
-            "self.ptr, "
-        }
-        val maybeCompanion = if (metadata.static) {
+        val maybeCompanion = if (metadata.kind == FunctionKind.StaticCompanion) {
             ".Companion"
         } else {
             ""
+        }
+
+        // FFI call
+        val self = if (metadata.isStatic) {
+            "symbols.kotlin.root.${className.javaClassName()}${maybeCompanion}._instance(), "
+        } else {
+            "self.ptr, "
         }
         val fnName = "symbols.kotlin.root.${className.javaClassName()}${maybeCompanion}.${metadata.name}"
         generateFunctionCall("$declarationIndent    ", fnName, self, metadata.params, metadata.returnType)

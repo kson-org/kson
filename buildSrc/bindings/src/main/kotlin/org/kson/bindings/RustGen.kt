@@ -1,6 +1,7 @@
 package org.kson.bindings
 
 import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.FunctionKind
 import org.kson.metadata.IncludeParentClass
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
@@ -120,7 +121,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
         // Wrapper function signature
         val docString = RustDocStringFormatter.format("  ", metadata.docString)
         builder.append("${docString}  pub fn ${metadata.name}(")
-        if (!metadata.static) {
+        if (!metadata.isStatic) {
             builder.append("&self, ")
         }
         metadata.params.forEach {
@@ -134,16 +135,17 @@ class RustGen : LanguageSpecificBindingsGenerator {
 
         builder.append(" {\n")
 
-        // FFI call
-        val self = if (metadata.static) {
-            "KSON_SYMBOLS.kotlin.root.${className.javaClassName()}.Companion._instance.unwrap()(), "
-        } else {
-            "${bindgenStructName(className)} { pinned: self.kson_ref.inner.inner }, "
-        }
-        val maybeCompanion = if (metadata.static) {
+        val maybeCompanion = if (metadata.kind == FunctionKind.StaticCompanion) {
             ".Companion"
         } else {
             ""
+        }
+
+        // FFI call
+        val self = if (metadata.isStatic) {
+            "KSON_SYMBOLS.kotlin.root.${className.javaClassName()}${maybeCompanion}._instance.unwrap()(), "
+        } else {
+            "${bindgenStructName(className)} { pinned: self.kson_ref.inner.inner }, "
         }
         val fnName = "kotlin.root.${className.javaClassName()}${maybeCompanion}.${metadata.name}"
         generateFunctionCall(fnName, self, metadata.params, metadata.returnType)

@@ -5,12 +5,14 @@ import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.getVisibility
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isLocal
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Visibility
 import org.kson.metadata.FullyQualifiedClassName
+import org.kson.metadata.FunctionKind
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
 import org.kson.metadata.SimpleFunctionMetadata
@@ -84,7 +86,7 @@ class PackageMetadataVisitor {
                     // Static functions
                     it.getDeclaredFunctions().forEach { fnDecl ->
                         if (fnDecl.simpleName.asString() != "<init>") {
-                            visitFunction(functions, fnDecl, static = true)
+                            visitFunction(functions, fnDecl, FunctionKind.StaticCompanion)
                         }
                     }
                 } else {
@@ -96,17 +98,25 @@ class PackageMetadataVisitor {
             // Public functions
             if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
                 if (it.isConstructor()) {
-                    constructors.add(SimpleConstructorMetadata(it.parameters.map { parameter ->
-                        SimpleParamMetadata(
-                            parameter.name!!.asString(),
-                            simplifyType(parameter.type.resolve())
-                        )
-                    }, it.docString))
-                    it.parameters.forEach { param ->
-                        this.visitType(param.type.resolve())
+                    if (classDecl.classKind != ClassKind.OBJECT) {
+                        constructors.add(SimpleConstructorMetadata(it.parameters.map { parameter ->
+                            SimpleParamMetadata(
+                                parameter.name!!.asString(),
+                                simplifyType(parameter.type.resolve())
+                            )
+                        }, it.docString))
+                        it.parameters.forEach { param ->
+                            this.visitType(param.type.resolve())
+                        }
                     }
+
                 } else {
-                    this.visitFunction(functions, it, static = false)
+                    val kind = if (classDecl.classKind == ClassKind.OBJECT) {
+                        FunctionKind.StaticTopLevel
+                    } else {
+                        FunctionKind.NonStatic
+                    }
+                    this.visitFunction(functions, it, kind)
                 }
             }
 
@@ -114,7 +124,7 @@ class PackageMetadataVisitor {
             if (it is KSPropertyDeclaration && it.getVisibility() == Visibility.PUBLIC && it.simpleName.asString() == "ast") {
                 functions.add(
                     SimpleFunctionMetadata(
-                        "get_${it.simpleName.asString()}", false, arrayListOf(),
+                        "get_${it.simpleName.asString()}", FunctionKind.NonStatic, arrayListOf(),
                         simplifyType(it.type.resolve()), it.docString
                     )
                 )
@@ -140,12 +150,12 @@ class PackageMetadataVisitor {
         return true
     }
 
-    fun visitFunction(functions: ArrayList<SimpleFunctionMetadata>, function: KSFunctionDeclaration, static: Boolean) {
+    fun visitFunction(functions: ArrayList<SimpleFunctionMetadata>, function: KSFunctionDeclaration, kind: FunctionKind) {
         if (function.getVisibility() == Visibility.PUBLIC && function.typeParameters.isEmpty() && !this.ignoredFunctions.contains(function.simpleName.asString())) {
             functions.add(
                 SimpleFunctionMetadata(
                     function.simpleName.asString(),
-                    static,
+                    kind,
                     function.parameters.map {
                         SimpleParamMetadata(
                             it.name!!.asString(),

@@ -18,7 +18,9 @@ class SimpleClassMetadata(val name: FullyQualifiedClassName, val supertypes: Arr
 class SimpleConstructorMetadata(val params: List<SimpleParamMetadata>, val docString: String?)
 
 @Serializable
-class SimpleFunctionMetadata(val name: String, val static: Boolean, val params: List<SimpleParamMetadata>, val returnType: SimpleType?, val docString: String?)
+class SimpleFunctionMetadata(val name: String, val kind: FunctionKind, val params: List<SimpleParamMetadata>, val returnType: SimpleType?, val docString: String?) {
+    val isStatic = kind == FunctionKind.StaticTopLevel || kind == FunctionKind.StaticCompanion
+}
 
 @Serializable
 class SimpleParamMetadata(val name: String, val type: SimpleType)
@@ -64,6 +66,18 @@ class SimpleType(val classifier: String) {
 
 @Serializable
 sealed class IncludeParentClass {
+    @Serializable
     object No : IncludeParentClass()
+    @Serializable
     class Yes(val separator: String = ".") : IncludeParentClass()
+}
+
+@Serializable
+sealed class FunctionKind {
+    @Serializable
+    object StaticTopLevel : FunctionKind()
+    @Serializable
+    object StaticCompanion : FunctionKind()
+    @Serializable
+    object NonStatic : FunctionKind()
 }
