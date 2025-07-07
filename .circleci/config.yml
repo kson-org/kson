@@ -44,9 +44,14 @@ jobs:
           keys:
             - v1-jdk-{{ checksum "jdk.properties" }}
 
-      # installed needed native dependency on Linux
+      # Install needed native dependencies on Linux
       - run: sudo apt update
-      - run: sudo apt install libncurses-dev
+      - run: sudo apt install libncurses-dev libclang-dev rustup
+
+      # Install `uv` and `rust` (necessary for testing the bindings)
+      - run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - run: rustup default stable && rustc --version
+
       - run:
           name: Get rid of erroneous git config
           command: |
