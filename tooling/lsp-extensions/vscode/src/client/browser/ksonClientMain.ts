@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
-
-let languageClient: LanguageClient | undefined;
+import {deactivate} from '../common/deactivate';
 
 /**
  * Browser-specific activation function for the KSON extension.
@@ -30,7 +29,7 @@ export async function activate(context: vscode.ExtensionContext) {
             ];
         }
 
-        languageClient = new LanguageClient(
+        let languageClient = new LanguageClient(
             'kson-browser',
             'KSON Language Server (Browser)',
             clientOptions,
@@ -50,12 +49,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 }
 
-/**
- * Deactivation function for browser environment.
- */
-export async function deactivate(): Promise<void> {
-    if (languageClient) {
-        await languageClient.stop();
-        languageClient = undefined;
-    }
-}
+deactivate().catch(error => {
+    console.error('Deactivation failed:', error);
+});

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import {deactivate} from '../common/deactivate';
 import {
     ServerOptions,
     TransportKind,
@@ -9,8 +10,6 @@ import {
 import {
     createClientOptions
 } from '../../config/clientOptions';
-
-let languageClient: LanguageClient | undefined;
 
 /**
  * Node.js-specific activation function for the KSON extension.
@@ -36,7 +35,7 @@ export async function activate(context: vscode.ExtensionContext) {
             debug: {module: serverModule, transport: TransportKind.ipc, options: debugOptions}
         };
         const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel)
-        languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
+        let languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
 
         await languageClient.start();
         console.log('Kson Language Server started');
@@ -49,12 +48,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 }
 
-/**
- * Deactivation function for Node.js environment.
- */
-export async function deactivate(): Promise<void> {
-    if (languageClient) {
-        await languageClient.dispose();
-        languageClient = undefined;
-    }
-} 
+deactivate().catch(error => {
+    console.error('Deactivation failed:', error);
+});
