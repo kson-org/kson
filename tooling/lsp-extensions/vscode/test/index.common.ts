@@ -2,7 +2,6 @@
 export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
     return new Promise((resolve, reject) => {
         // Configure mocha
-
         if (isBrowser) {
             mocha.setup({
                 /**
