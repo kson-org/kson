@@ -3,7 +3,7 @@ package org.kson
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonTestObjectError : KsonTestError() {
+class KsonTestObjectError : KsonTestError {
     @Test
     fun testObjectSourceWithInvalidInternals() {
         assertParserRejectsSource("""
@@ -55,6 +55,19 @@ class KsonTestObjectError : KsonTestError() {
             }
             """.trimIndent(),
             listOf(IGNORED_OBJECT_END_DOT, IGNORED_OBJECT_END_DOT)
+        )
+    }
+
+    @Test
+    fun testHelpfulErrorForReservedWordKeys() {
+        assertParserRejectsSource(
+            """
+               key: value
+               null: "can't use null as a key" 
+               true: "can't use true as a key" 
+               false: "can't use false as a key" 
+            """.trimIndent(),
+            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD)
         )
     }
 }

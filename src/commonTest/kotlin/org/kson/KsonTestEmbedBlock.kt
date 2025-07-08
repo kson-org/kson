@@ -2,17 +2,17 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestEmbedBlock : KsonTest() {
+class KsonTestEmbedBlock : KsonTest {
     @Test
     fun testEmbedBlockSource() {
         assertParsesTo(
             """
-                %%
+                %
                     this is a raw embed
                 %%
             """,
             """
-                %%
+                %
                     this is a raw embed
                 %%
             """.trimIndent(),
@@ -28,12 +28,12 @@ class KsonTestEmbedBlock : KsonTest() {
 
         assertParsesTo(
             """
-                %%sql
+                %sql
                     select * from something
                 %%
             """,
             """
-                %%sql
+                %sql
                     select * from something
                 %%
             """.trimIndent(),
@@ -52,13 +52,13 @@ class KsonTestEmbedBlock : KsonTest() {
     fun testEmbedBlockWithAlternativeDelimiter() {
         assertParsesTo(
             """
-                $$
+                $
                     this is a raw embed with alternative delimiter
                 $$
             """.trimIndent(),
             // note that we prefer the primary %% delimiter in our transpiler output
             """
-                %%
+                %
                     this is a raw embed with alternative delimiter
                 %%
             """.trimIndent(),
@@ -74,12 +74,12 @@ class KsonTestEmbedBlock : KsonTest() {
 
         assertParsesTo(
             """
-                $$${"sql"}
+                $${"sql"}
                     select * from something
                 $$
             """.trimIndent(),
             """
-                %%sql
+                %sql
                     select * from something
                 %%
             """.trimIndent(),
@@ -98,13 +98,13 @@ class KsonTestEmbedBlock : KsonTest() {
     fun testEmbedBlockWithEscapes() {
         assertParsesTo(
             """
-            %%
+            %
             this is an escaped delim %\%
             whereas in this case, this is not $\$
             %%
             """.trimIndent(),
             """
-            %%
+            %
             this is an escaped delim %\%
             whereas in this case, this is not $\$
             %%
@@ -122,12 +122,12 @@ class KsonTestEmbedBlock : KsonTest() {
 
         assertParsesTo(
             """
-            %%
+            %
             more %\% %\% %\% than $$ should yield a $$-delimited block
             %%
             """.trimIndent(),
             """
-            $$
+            $
             more %% %% %% than $\$ should yield a $\$-delimited block
             $$
             """.trimIndent(),
@@ -146,12 +146,12 @@ class KsonTestEmbedBlock : KsonTest() {
     fun testEmbedBlockWithAlternativeDelimiterAndEscapes() {
         assertParsesTo(
             """
-            $$
+            $
             these double $\$ dollars are %%%% embedded but escaped
             $$
             """.trimIndent(),
             """
-            $$
+            $
             these double $\$ dollars are %%%% embedded but escaped
             $$
             """.trimIndent(),
@@ -170,11 +170,11 @@ class KsonTestEmbedBlock : KsonTest() {
     fun testEmbedBlockEndingInSlash() {
         assertParsesTo(
             """
-                %%
+                %
                 %\%%
             """.trimIndent(),
             """
-                %%
+                %
                 %\%%
             """.trimIndent(),
             """

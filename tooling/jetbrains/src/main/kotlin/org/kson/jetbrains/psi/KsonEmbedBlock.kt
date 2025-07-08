@@ -1,6 +1,7 @@
 package org.kson.jetbrains.psi
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.util.elementType
 import org.kson.jetbrains.parser.elem
 import org.kson.parser.TokenType
 import org.kson.parser.behavior.embedblock.EmbedDelim
@@ -19,9 +20,10 @@ class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
 
     companion object {
         private fun getDelim(host: KsonEmbedBlock): EmbedDelim {
-            val openEmbedDelim = host.children.getOrNull(0) ?: throw ShouldNotHappenException("Embed delimiter not found")
-            val embedDelim = openEmbedDelim.text.firstOrNull().let { EmbedDelim.fromString("$it$it") }
-            return embedDelim
+            val embedDelimText =
+                host.children.find { it.elementType == elem(TokenType.EMBED_OPEN_DELIM) }?.text
+                    ?: throw ShouldNotHappenException("Embed delimiter not found")
+            return EmbedDelim.fromString(embedDelimText)
         }
     }
 }

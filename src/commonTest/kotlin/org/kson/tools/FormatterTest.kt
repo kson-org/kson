@@ -204,7 +204,7 @@ class FormatterTest {
         assertFormatting(
             """
             {
-            code: %%sql
+            code: %sql
             SELECT * 
               FROM table
                 WHERE x = 1
@@ -212,7 +212,7 @@ class FormatterTest {
             }
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
               SELECT * 
                 FROM table
                   WHERE x = 1
@@ -229,12 +229,12 @@ class FormatterTest {
     fun testEmbedBlockWithEscapes() {
         assertFormatting(
             """
-                %%
+                %
                 This embed block %\% has escapes that should be respected when formatting %\\\%
                 %%
             """.trimIndent(),
             """
-                $$
+                $
                 This embed block %% has escapes that should be respected when formatting %\\%
                 $$
             """.trimIndent()
@@ -252,7 +252,7 @@ class FormatterTest {
               %%
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
               SELECT * 
                 FROM table
                   WHERE x = 1
@@ -269,7 +269,7 @@ class FormatterTest {
               ${'$'}${'$'}
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
               SELECT * 
                 FROM table
                   WHERE x = 1
@@ -282,14 +282,14 @@ class FormatterTest {
     fun testAlreadyIndentedEmbedBlock() {
         assertFormatting(
             """
-            code: %%sql
+            code: %sql
               SELECT * 
                 FROM table
                   WHERE x = 1
               %%
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
               SELECT * 
                 FROM table
                   WHERE x = 1
@@ -450,17 +450,17 @@ class FormatterTest {
         assertFormatting(
             """
             {
-            code1: %%sql
+            code1: %sql
             SELECT *
               FROM table
             %%
             nested: {
-            code2internalIndent: %%sql
+            code2internalIndent: %sql
                 SELECT *
                   FROM table
             %%
             deeper: {
-            code3: %%sql
+            code3: %sql
             SELECT *
                 FROM table
             %%
@@ -469,17 +469,17 @@ class FormatterTest {
             }
             """.trimIndent(),
             """
-            code1: %%sql
+            code1: %sql
               SELECT *
                 FROM table
               %%
             nested:
-              code2internalIndent: %%sql
+              code2internalIndent: %sql
                     SELECT *
                       FROM table
                 %%
               deeper:
-                code3: %%sql
+                code3: %sql
                   SELECT *
                       FROM table
                   %%
@@ -492,7 +492,7 @@ class FormatterTest {
         assertFormatting(
             """
             {
-            code: %%sql
+            code: %sql
             raw1
             raw2
             raw3
@@ -500,7 +500,7 @@ class FormatterTest {
             }
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
               raw1
               raw2
               raw3
@@ -514,7 +514,7 @@ class FormatterTest {
         assertFormatting(
             """
             {
-            code: %%sql
+            code: %sql
                 indented
             not_indented
                   more_indented
@@ -522,7 +522,7 @@ class FormatterTest {
             }
             """.trimIndent(),
             """
-            code: %%sql
+            code: %sql
                   indented
               not_indented
                     more_indented
@@ -536,7 +536,7 @@ class FormatterTest {
         assertFormatting(
             """
             {
-            sql: %%sql
+            sql: %sql
             SELECT 1
             %%
             
@@ -545,7 +545,7 @@ class FormatterTest {
                     return 1
             %%
             
-            text: %%
+            text: %
             plain text
               with some
                 indentation
@@ -553,14 +553,14 @@ class FormatterTest {
             }
             """.trimIndent(),
             """
-            sql: %%sql
+            sql: %sql
               SELECT 1
               %%
             pythonWithInternalIndent: %%python
                   def foo():
                       return 1
               %%
-            text: %%
+            text: %
               plain text
                 with some
                   indentation
@@ -1207,6 +1207,26 @@ class FormatterTest {
 
             # trailing comment
         """.trimIndent()
+        )
+    }
+
+    /**
+     * If a Kson document is fairly well-formed but has some unexpected trialing content, we should still
+     * be able to format the valid portion of the document
+     */
+    @Test
+    fun testFormattingSucceedsWithInvalidTrailingContent() {
+        assertFormatting(
+            """
+                {outer:{inner: value}}
+                "Illegal trailing content"
+            """.trimIndent(),
+            """
+                outer:
+                  inner: value
+
+                "Illegal trailing content"
+            """.trimIndent()
         )
     }
 }

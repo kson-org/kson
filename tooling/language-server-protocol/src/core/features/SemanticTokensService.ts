@@ -58,8 +58,8 @@ export class SemanticTokensService {
 
                 const tokenLocation = token.lexeme.location;
                 semanticTokenBuilder.push(
-                    tokenLocation.firstLine,
-                    tokenLocation.firstColumn,
+                    tokenLocation.start.line,
+                    tokenLocation.start.column,
                     tokenLocation.endOffset - tokenLocation.startOffset,
                     KSON_LEGEND.tokenTypes.indexOf(tokenType),
                     0
@@ -140,7 +140,6 @@ export class SemanticTokensService {
             case TokenType.EMBED_PREAMBLE_NEWLINE:
             case TokenType.EMBED_OPEN_DELIM:
             case TokenType.EMBED_CLOSE_DELIM:
-            case TokenType.EMBED_DELIM_PARTIAL:
                 semanticType = SemanticTokenTypes.function;
                 break;
 

@@ -3,7 +3,7 @@ package org.kson
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonTestEmbedBlockError : KsonTestError() {
+class KsonTestEmbedBlockError : KsonTestError {
     /**
      * Regression test for a parsing problem we had at the boundary:
      * this was blowing up with an index out of bounds rather than
@@ -27,7 +27,7 @@ class KsonTestEmbedBlockError : KsonTestError() {
 
     @Test
     fun testUnclosedEmbedAlternateDelimiterError() {
-        assertParserRejectsSource("$$\n", listOf(EMBED_BLOCK_NO_CLOSE))
+        assertParserRejectsSource("$\n", listOf(EMBED_BLOCK_NO_CLOSE))
     }
 
     @Test
@@ -36,23 +36,14 @@ class KsonTestEmbedBlockError : KsonTestError() {
             """
                 %
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
+            listOf(EMBED_BLOCK_NO_CLOSE)
         )
 
         assertParserRejectsSource(
             """
                 $
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE, EMBED_BLOCK_DANGLING_DELIM)
-        )
-
-        assertParserRejectsSource(
-            """
-                test: %myTag
-                    Some embedBlockContent
-                %%
-            """,
-            listOf(EMBED_BLOCK_DANGLING_DELIM)
+            listOf(EMBED_BLOCK_NO_CLOSE)
         )
     }
 }

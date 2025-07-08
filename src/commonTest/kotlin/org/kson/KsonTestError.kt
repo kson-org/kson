@@ -1,22 +1,20 @@
 package org.kson
 
 import org.kson.ast.KsonRoot
+import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
-import org.kson.parser.messages.MessageType.*
-import org.kson.stdlibx.collections.ImmutableList
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Base class for tests that exercise and verify [Kson] behavior on invalid Kson.  For tests parsing valid Kson,
- * see [KsonTest] and its subclasses.
+ * Interface to tie together our tests that exercise and verify [Kson] behavior on invalid Kson and give a home to our
+ *  * custom assertions for these tests.  For tests parsing valid Kson, see [KsonTest].
  *
- * Subclasses of this test are split out basically along the lines of the grammar.  Tests that cross-cut concerns
- * may live in this root test class.
+ * The tests of type [KsonTestError] are split out basically along the lines of the grammar.  Tests that cross-cut
+ * concerns may live in this root test class.
  */
-open class KsonTestError {
+interface KsonTestError {
     /**
      * Assertion helper for testing that [source] is rejected by the parser with the messages listed in
      * [expectedParseMessageTypes]
@@ -26,7 +24,7 @@ open class KsonTestError {
      * @param maxNestingLevel the maximum allowable nested lists and objects to configure the parser to accept
      * @return the produced messages for further validation
      */
-    protected fun assertParserRejectsSource(
+    fun assertParserRejectsSource(
         source: String,
         expectedParseMessageTypes: List<MessageType>,
         maxNestingLevel: Int? = null
@@ -56,68 +54,28 @@ open class KsonTestError {
         return parseResult.messages
     }
 
-    @Test
-    fun testBlankKsonSource() {
-        assertParserRejectsSource("", listOf(BLANK_SOURCE))
-        assertParserRejectsSource("  ", listOf(BLANK_SOURCE))
-        assertParserRejectsSource("\t", listOf(BLANK_SOURCE))
-    }
-
-    @Test
-    fun testIllegalCharacterError() {
-        assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
-    }
-
-    @Test
-    fun testIllegalMinusSignError() {
-        assertParserRejectsSource(
-            """
-                -nope
-            """.trimIndent(),
-            listOf(ILLEGAL_MINUS_SIGN)
+    /**
+     * Calls [assertParserRejectsSource], but also tests the [Location] of each [LoggedMessage]
+     * by asserting it against [expectedParseMessageLocation].
+     *
+     * @param source is the kson source to parse into a [KsonRoot]
+     * @param expectedParseMessageTypes a list of [MessageType]s produced by parsing [source]
+     * @param expectedParseMessageLocation a list of [Location]s produced by parsing [source]
+     * @param maxNestingLevel the maximum allowable nested lists and objects to configure the parser to accept
+     * @return the produced messages for further validation
+     */
+    fun assertParserRejectsSourceWithLocation(
+        source: String,
+        expectedParseMessageTypes: List<MessageType>,
+        expectedParseMessageLocation: List<Location>,
+        maxNestingLevel: Int? = null,
+    ): List<LoggedMessage> {
+        val loggedMessages = assertParserRejectsSource(source, expectedParseMessageTypes, maxNestingLevel)
+        assertEquals(
+            expectedParseMessageLocation,
+            loggedMessages.map { it.location },
+            "Should have the expected locations for the messages."
         )
+        return loggedMessages
     }
-
-    @Test
-    fun testInvalidTrailingKson() {
-        assertParserRejectsSource("[1] illegal_key: illegal_value", listOf(EOF_NOT_REACHED))
-        assertParserRejectsSource("{ key: value } 4.5", listOf(EOF_NOT_REACHED))
-        assertParserRejectsSource("key: value illegal extra identifiers", listOf(EOF_NOT_REACHED))
-    }
-
-    @Test
-    fun testEmptyCommas() {
-        assertParserRejectsSource("[,]", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("{,}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource(",", listOf(EMPTY_COMMAS))
-
-        assertParserRejectsSource("[,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
-        assertParserRejectsSource("{,,}", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
-        assertParserRejectsSource(",,", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
-
-        assertParserRejectsSource("[1,,3]", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("{one: 1 ,, three: 3}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("one: 1 ,, three: 3", listOf(EMPTY_COMMAS))
-
-        assertParserRejectsSource("[1,2,3,,,,,,]", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("{one: 1, two: 2, three: 3,,,,,,}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("one: 1 ,two: 2, three: 3,,,,,,", listOf(EMPTY_COMMAS))
-
-        assertParserRejectsSource("[,,,, x ,, y ,,,,,,, z ,,,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
-        assertParserRejectsSource(",,,, x:1 ,, y:2 ,,,,,,, z:3 ,,,,", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
-    }
-
-    @Test
-    fun testIllegalMixedListAndObjectNesting() {
-        // test nesting a mix of objects, bracket lists, and dashed lists
-        assertParserRejectsSource("""
-            [
-              { 
-                 a: - { 
-                        b: [ { c: - [] } ]
-                      }
-              }
-            ]
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 7)
-    }
-} 
+}

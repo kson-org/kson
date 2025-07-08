@@ -32,16 +32,6 @@ enum class MessageType {
             return "Unable to parse a blank file.  A Kson document must describe a value."
         }
     },
-    EMBED_BLOCK_DANGLING_DELIM {
-        override fun expectedArgs(): List<String> {
-            return listOf("Embed delimiter character")
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val embedDelimChar = parsedArgs.getArg("Embed delimiter character")
-            return "Incomplete embed delimiter.  Did you mean \"$embedDelimChar$embedDelimChar\"?"
-        }
-    },
     EMBED_BLOCK_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return listOf("Embed delimiter")
@@ -135,6 +125,16 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This object key must be followed by a value"
+        }
+    },
+    OBJECT_KEYWORD_RESERVED_WORD {
+        override fun expectedArgs(): List<String> {
+            return listOf("Reserved Word")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val reservedWord = parsedArgs.getArg("Reserved Word")
+            return "`$reservedWord` cannot be used as an object key"
         }
     },
     IGNORED_OBJECT_END_DOT {
