@@ -1,0 +1,56 @@
+# Example KSON file
+# This is a comment
+
+# Simple key-value pairs
+name: "John Doe"
+age: 30
+active: true
+
+# Nested objects
+address: {
+  street: "123 Main St"
+  city: "New York"
+  zipCode: "10001"
+}
+
+# Arrays
+hobbies: [
+  "reading"
+  "swimming"
+  "coding"
+]
+
+# Mixed array
+mixedData: [
+  42
+  "hello"
+  true
+  { nested: "value" }
+]
+
+# Multi-line strings with embed blocks
+description: $
+This is a multi-line
+string example in KSON
+$$
+
+# Code embed block with language tag
+script: %javascript
+function hello() {
+  console.log("Hello from KSON!");
+}
+%%
+
+# Complex nested structure
+project: {
+  name: "KSON Editor"
+  version: "1.0.0"
+  dependencies: {
+    "monaco-editor": "^0.45.0"
+    "vscode-languageclient": "^9.0.0"
+  }
+  scripts: {
+    build: "npm run compile"
+    test: "npm test"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "monaco-editor",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
+    "kson-language-server": "file:../language-server-protocol",
+    "monaco-editor-wrapper": "^6.9.0",
+    "vscode-languageserver": "^9.0.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.2"
+  }
+}
