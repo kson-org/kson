@@ -15,9 +15,6 @@ export async function createTestFile(initialContent: string = ''): Promise<[vsco
     
     const document = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(document);
-    
-    // Wait for language server to initialize
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
     return [uri, document];
 }

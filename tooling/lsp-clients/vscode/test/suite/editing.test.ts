@@ -17,8 +17,7 @@ describe('Editing Tests', () => {
         testFileUri = uri;
 
         await vscode.commands.executeCommand('type', { text: '$' });
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         assertTextEqual(document, '$$$');
     }).timeout(10000);
 
@@ -27,8 +26,7 @@ describe('Editing Tests', () => {
         testFileUri = uri;
 
         await vscode.commands.executeCommand('type', { text: '%' });
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         assertTextEqual(document, '%%%');
     }).timeout(10000);
 
@@ -37,7 +35,6 @@ describe('Editing Tests', () => {
         testFileUri = uri;
 
         await vscode.commands.executeCommand('type', { text: 'key: $\n' });
-        await new Promise(resolve => setTimeout(resolve, 500));
 
         assertTextEqual(document, [
             'key: $',
@@ -50,7 +47,6 @@ describe('Editing Tests', () => {
         testFileUri = uri;
 
         await vscode.commands.executeCommand('type', { text: 'key: %tag\n' });
-        await new Promise(resolve => setTimeout(resolve, 500));
 
         assertTextEqual(document, [
             'key: %tag',

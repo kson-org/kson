@@ -24,7 +24,6 @@ describe('Formatting Tests', () => {
         testFileUri = uri;
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
         assertTextEqual(document, expectedText);
     }).timeout(10000);
