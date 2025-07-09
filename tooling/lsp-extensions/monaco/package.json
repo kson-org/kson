@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
-    "kson-language-server": "file:../language-server-protocol",
+    "@kson/lsp-shared": "file:../shared",
     "monaco-editor-wrapper": "^6.9.0",
     "vscode-languageserver": "^9.0.1"
   },

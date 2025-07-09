@@ -11,10 +11,9 @@ import { MessageTransports } from 'vscode-languageclient';
 import type { WrapperConfig } from 'monaco-editor-wrapper';
 import { configureDefaultWorkerFactory } from 'monaco-editor-wrapper/workers/workerLoaders';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
-import ksonLanguageConfig from './kson.configuration.json?raw';
-import ksonTextmateGrammar from './kson.tmLanguage.json?raw';
 import exampleText from '../../resources/kson/example.kson?raw';
 
+import { languageConfigurationString, tmLanguageString, KSON_LANGUAGE_ID, KSON_EXTENSIONS, KSON_ALIASES, KSON_SCOPE_NAME } from '@kson/lsp-shared';
 
 export const setupKsonClientExtended = async (params: {
     worker: Worker
@@ -23,8 +22,8 @@ export const setupKsonClientExtended = async (params: {
 
     const extensionFilesOrContents = new Map<string, string | URL>();
     // vite build is easier with string content
-    extensionFilesOrContents.set('/kson-configuration.json', ksonLanguageConfig);
-    extensionFilesOrContents.set('/kson-grammar.json', ksonTextmateGrammar);
+    extensionFilesOrContents.set('/kson-configuration.json', languageConfigurationString);
+    extensionFilesOrContents.set('/kson-grammar.json', tmLanguageString);
     return {
         $type: 'extended',
         htmlContainer: document.getElementById('monaco-editor-root')!,
@@ -55,14 +54,14 @@ export const setupKsonClientExtended = async (params: {
                 },
                 contributes: {
                     languages: [{
-                        id: 'kson',
-                        extensions: ['.kson'],
-                        aliases: ['kson', 'KSON'],
+                        id: KSON_LANGUAGE_ID,
+                        extensions: KSON_EXTENSIONS,
+                        aliases: KSON_ALIASES,
                         configuration: './kson-configuration.json'
                     }],
                     grammars: [{
-                        language: 'kson',
-                        scopeName: 'source.kson',
+                        language: KSON_LANGUAGE_ID,
+                        scopeName: KSON_SCOPE_NAME,
                         path: './kson-grammar.json'
                     }]
                 }
@@ -82,7 +81,7 @@ export const setupKsonClientExtended = async (params: {
             configs: {
                 kson: {
                     clientOptions: {
-                        documentSelector: ['kson']
+                        documentSelector: [KSON_LANGUAGE_ID]
                     },
                     connection: {
                         options: {

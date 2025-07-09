@@ -1,0 +1,40 @@
+{
+  "name": "@kson/lsp-shared",
+  "version": "0.0.1",
+  "description": "Shared configurations and utilities for KSON LSP extensions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./connection": {
+      "types": "./dist/connection/index.d.ts",
+      "default": "./dist/connection/index.js"
+    }
+  },
+  "scripts": {
+    "compile": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "kson",
+    "lsp",
+    "shared"
+  ],
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "kson-language-server": "file:../../language-server-protocol"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
