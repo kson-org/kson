@@ -21,8 +21,5 @@
     "forceConsistentCasingInFileNames": true,
     // Performance improvement
     "skipLibCheck": true
-  },
-  "include": [
-    "src"
-  ]
+  }
 }

@@ -3,20 +3,20 @@
   "version": "0.0.1",
   "description": "Shared configurations and utilities for KSON LSP extensions",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
     },
     "./config": {
-      "types": "./dist/config/index.d.ts",
-      "default": "./dist/config/index.js"
+      "types": "./dist/src/config/index.d.ts",
+      "default": "./dist/src/config/index.js"
     },
     "./connection": {
-      "types": "./dist/connection/index.d.ts",
-      "default": "./dist/connection/index.js"
+      "types": "./dist/src/connection/index.d.ts",
+      "default": "./dist/src/connection/index.js"
     }
   },
   "scripts": {

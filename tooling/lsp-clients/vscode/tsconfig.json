@@ -1,28 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "dist",
-    // Custom types
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
-    // Useful settings for debugging
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "inlineSourceMap": false,
-    "inlineSources": true,
-    // CommonJS interop
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    // Prevents cross-platform issues
-    "forceConsistentCasingInFileNames": true,
-    // Performance improvement
-    "skipLibCheck": true
-  },
-  "include": [
-    "src", "test"
-  ]
+  "extends": "../tsconfig.json",
+  "include": ["src/**/*", "tests/**/*"]
 }
