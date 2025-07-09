@@ -14,6 +14,8 @@ import kotlin.js.JsExport
 @JsExport
 sealed class KsonApi(val location: Location)
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 abstract class KsonValue(location: Location) : KsonApi(location) {
     /**
      * Ensure all our [KsonValue] classes implement their [equals] and [hashCode]

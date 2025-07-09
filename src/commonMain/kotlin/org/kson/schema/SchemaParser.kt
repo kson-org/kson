@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.js.ExperimentalJsExport::class)
+
 package org.kson.schema
 
 import org.kson.ast.*
@@ -9,32 +11,7 @@ import org.kson.schema.validators.*
  * Parses a JSON Schema string into our JsonSchema model.
  */
 object SchemaParser {
-  /**
-   * Parse a JSON schema string into a JsonSchema object.
-   */
-  fun parse(schemaJson: String): SchemaParseResult {
-    // Parse JSON directly using Lexer and Parser to avoid circular dependency
-    val messageSink = MessageSink()
-    val tokens = Lexer(schemaJson).tokenize()
-    
-    if (tokens[0].tokenType == TokenType.EOF) {
-      messageSink.error(tokens[0].lexeme.location, SCHEMA_EMPTY_SCHEMA.create())
-      return SchemaParseResult(null, messageSink)
-    }
-
-    val builder = KsonBuilder(tokens)
-    Parser(builder).parse()
-    val schemaAst = builder.buildTree(messageSink)
-    
-    if (schemaAst == null || messageSink.hasErrors()) {
-      return SchemaParseResult(null, messageSink)
-    }
-
-    val jsonSchema = parseSchemaElement(schemaAst.toKsonApi() as KsonValue, messageSink)
-    return SchemaParseResult(jsonSchema, messageSink)
-  }
-
-  private fun parseSchemaElement(schemaValue: KsonValue, messageSink: MessageSink): JsonSchema? {
+  fun parseSchemaElement(schemaValue: KsonValue, messageSink: MessageSink): JsonSchema? {
     return when (schemaValue) {
       is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
       is KsonObject -> parseObjectSchema(schemaValue, messageSink)
@@ -385,9 +362,4 @@ object SchemaParser {
 
     return JsonObjectSchema(title, description, default, definitions, typeValidator, validators)
   }
-}
-
-data class SchemaParseResult(val jsonSchema: JsonSchema?,
-                             private val messageSink: MessageSink) {
-  val messages = messageSink.loggedMessages()
 }

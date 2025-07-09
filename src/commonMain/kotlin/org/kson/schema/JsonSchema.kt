@@ -5,15 +5,19 @@ import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
 
 /**
  * Base [JsonSchema] type that [KsonValue]s may be validated against
  */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 sealed interface JsonSchema {
   fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 
-  fun valid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
+  fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
     val numErrors = messageSink.loggedMessages().size
     validate(ksonValue, messageSink)
     return messageSink.loggedMessages().size == numErrors

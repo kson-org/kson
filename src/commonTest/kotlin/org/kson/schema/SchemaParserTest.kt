@@ -2,22 +2,9 @@ package org.kson.schema
 
 import org.kson.parser.messages.MessageType
 import kotlin.test.*
+import org.kson.Kson
 
-class SchemaParserTest {
-
-    /**
-     * Assertion helper for testing that [source] is successfully parsed by the schema parser
-     * (produces non-null jsonSchema) with no error messages
-     */
-    private fun assertValidSchema(source: String): JsonSchema {
-        val result = SchemaParser.parse(source)
-
-        val jsonSchema = result.jsonSchema
-        assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds")
-        assertTrue(result.messages.isEmpty(), "Should have no error messages when parsing succeeds")
-        
-        return jsonSchema
-    }
+class SchemaParserTest : JsonSchemaTest {
 
     /**
      * Assertion helper for testing that [source] is partially parsed by the schema parser
@@ -27,7 +14,7 @@ class SchemaParserTest {
         source: String,
         expectedMessageTypes: List<MessageType>
     ) {
-        val result = SchemaParser.parse(source)
+        val result = Kson.parseSchema(source)
         assertEquals(
             expectedMessageTypes,
             result.messages.map { it.message.type },
@@ -59,13 +46,6 @@ class SchemaParserTest {
     @Test
     fun testParseEmptySchema() {
         assertSchemaHasValidationErrors("", listOf(MessageType.SCHEMA_EMPTY_SCHEMA))
-    }
-
-    @Test
-    fun testParseInvalidJson() {
-        val result = SchemaParser.parse("{ invalid json }")
-        assertNull(result.jsonSchema)
-        assertTrue(result.messages.isNotEmpty())
     }
 
     @Test

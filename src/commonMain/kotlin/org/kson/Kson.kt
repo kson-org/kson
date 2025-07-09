@@ -8,6 +8,9 @@ import org.kson.CompileTarget.Kson
 import org.kson.ast.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
+import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
+import org.kson.schema.JsonBooleanSchema
+import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.tools.KsonFormatterConfig
 import kotlin.js.JsExport
@@ -44,14 +47,33 @@ object Kson {
         if (coreCompileConfig.schemaJson == NO_SCHEMA) {
             return AstParseResult(ast, tokens, messageSink)
         } else {
-            val schemaParseResult = SchemaParser.parse(coreCompileConfig.schemaJson)
-            val jsonSchema = schemaParseResult.jsonSchema
-                ?: // schema todo make a schema parser entry point and suggest they run this through it to troubleshoot
-                throw IllegalStateException("Schema parse failed:\n" + LoggedMessage.print(schemaParseResult.messages))
+            val jsonSchema = coreCompileConfig.schemaJson
             // validate against our schema, logging any errors to our message sink
             jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
             return AstParseResult(ast, tokens, messageSink)
         }
+    }
+
+    /**
+     * Parse the give Kson [source] as a Json Schema declaration
+     *
+     * @param source The Kson source to parse into a Json Schema
+     * @return A [SchemaParseResult]
+     */
+    fun parseSchema(source: String): SchemaParseResult {
+        val astParseResult = parseToAst(source)
+        val firstToken = astParseResult.lexedTokens[0]
+        if (firstToken.tokenType == TokenType.EOF) {
+            return SchemaParseResult(null, listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create())))
+        }
+        val ksonApi = astParseResult.api
+        if (ksonApi == null || astParseResult.hasErrors()) {
+            return SchemaParseResult(null, astParseResult.messages)
+        }
+
+        val messageSink = MessageSink()
+        val jsonSchema = SchemaParser.parseSchemaElement(ksonApi as KsonValue, messageSink)
+        return SchemaParseResult(jsonSchema, messageSink.loggedMessages())
     }
 
     /**
@@ -142,6 +164,11 @@ data class AstParseResult(
         return messageSink.hasErrors()
     }
 }
+
+data class SchemaParseResult(
+    val jsonSchema: JsonSchema?,
+    val messages: List<LoggedMessage>)
+
 
 class KsonParseResult(
     private val astParseResult: AstParseResult,
@@ -235,7 +262,7 @@ data class CoreCompileConfig(
     /**
      * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
      */
-    val schemaJson: String = NO_SCHEMA,
+    val schemaJson: JsonSchema = NO_SCHEMA,
     /**
      * Whether to allow an AST to be built with errors (i.e. patched with [AstNodeError] nodes)
      */
@@ -247,8 +274,8 @@ data class CoreCompileConfig(
 )
 
 /**
- * A Json document specifying just `true` is the "trivial" schema that matches everything,
+ * A [JsonBooleanSchema] specifying just `true` is the "trivial" schema that matches everything,
  * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
  * for more detail
  */
-private const val NO_SCHEMA = "true"
+private val NO_SCHEMA = JsonBooleanSchema(true)
