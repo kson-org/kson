@@ -9,11 +9,6 @@ import {
  * VS Code extension launcher with VSIX.
  *
  * This script downloads VS Code, installs the VSIX package, and launches VS Code.
- * 
- * Environment variables:
- * - PLATFORM: 'desktop' (default) or 'browser'
- *   - 'desktop': Launches VS Code desktop with the VSIX
- *   - 'browser': Launches VS Code desktop with web extension development kind
  */
 async function main() {
   try {

@@ -2,6 +2,10 @@ const esbuild = require('esbuild');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Depending on the production or test flag we either include test files or not.
+ * @type {boolean}
+ */
 const production = process.argv.includes('--production');
 const includeTests = process.argv.includes('--tests');
 

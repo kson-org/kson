@@ -5,6 +5,12 @@ import {
     runTests as runNodeTests,
 } from '@vscode/test-electron';
 
+/**
+ * Test runner script that runs the smoke tests by installing the kson plugin in a vscode instance.
+ * With the environment variable `RUN_MODE`, one can specify whether all tests (`test-all`) needed to be
+ * run, just the node (`test-node`) or just the browser (`test-browser`) tests.
+ *
+ */
 async function main() {
     try {
         // test-browser or test-node or test-all
