@@ -5,10 +5,10 @@ import com.intellij.openapi.fileTypes.PlainTextFileType
 import org.kson.jetbrains.file.KsonFileType
 import org.kson.parser.behavior.embedblock.EmbedDelim
 
-class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
+class KsonCoreBackspaceHandlerDelegateTest : KsonCoreEditorActionTest() {
     /**
      * Validate quote pairs are deleted when they are empty and the caret is between them
-     * This is the inverse operation to what is tested in [KsonQuoteMatcherTest.testAutoInsert]
+     * This is the inverse operation to what is tested in [KsonCoreQuoteMatcherTest.testAutoInsert]
      */
     fun testDeleteEmptyQuotePairs() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE(), true) {
@@ -42,7 +42,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
 
     /**
      * Validate angle bracket pairs are deleted when they are empty and the caret is between them
-     * This is the inverse operation to what is tested in [KsonTypedHandlerDelegateTest.testAngleBracketAutoInsert]
+     * This is the inverse operation to what is tested in [KsonCoreTypedHandlerDelegateTest.testAngleBracketAutoInsert]
      */
     fun testDeleteEmptyAngleBracketPairs() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -79,7 +79,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
 
     /**
      * Validate embed delimiter pairs are deleted when they are empty and the caret is between them
-     * This is the inverse operation to what is tested in [KsonTypedHandlerDelegateTest.testEmbedDelimiterAutoInsert]
+     * This is the inverse operation to what is tested in [KsonCoreTypedHandlerDelegateTest.testEmbedDelimiterAutoInsert]
      */
     fun testDeleteEmptyEmbedDelimitersPairs() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {

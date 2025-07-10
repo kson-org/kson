@@ -1,6 +1,6 @@
 package org.kson.ast
 
-import org.kson.Kson
+import org.kson.KsonCore
 import org.kson.parser.behavior.StringQuote
 
 /**
@@ -43,7 +43,7 @@ fun renderForJsonString(content: String): String {
 }
 
 /**
- * [Kson] strings allow raw whitespace, but otherwise escapes are identical to Json (modulo which [StringQuote] the
+ * [KsonCore] strings allow raw whitespace, but otherwise escapes are identical to Json (modulo which [StringQuote] the
  * Kson string uses), so this function can help prepare an escaped Kson string for rendering as a Json string
  *
  * @param ksonEscapedString a string escaped according to Kson string escaping rules

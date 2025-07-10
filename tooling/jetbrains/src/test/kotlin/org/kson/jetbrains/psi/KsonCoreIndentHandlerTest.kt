@@ -4,7 +4,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.kson.parser.behavior.embedblock.EmbedDelim
 
-class KsonIndentHandlerTest : BasePlatformTestCase() {
+class KsonCoreIndentHandlerTest : BasePlatformTestCase() {
     private lateinit var generator: KsonElementGenerator
 
     override fun setUp() {

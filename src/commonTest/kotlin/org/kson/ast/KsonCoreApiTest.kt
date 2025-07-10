@@ -1,13 +1,13 @@
 package org.kson.ast
 
-import org.kson.Kson
+import org.kson.KsonCore
 import org.kson.parser.NumberParser.ParsedNumber
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class KsonApiTest {
+class KsonCoreApiTest {
     @Test
     fun testKsonApiBasicUsage() {
         val source = """
@@ -15,7 +15,7 @@ class KsonApiTest {
           port: 8080
         """.trimIndent()
 
-        val parseResult = Kson.parseToAst(source)
+        val parseResult = KsonCore.parseToAst(source)
         val ast = parseResult.ast
         assertNotNull(ast, "should not be null for this test's valid Kson")
 
@@ -65,7 +65,7 @@ class KsonApiTest {
             }
         """.trimIndent()
 
-        val parseResult = Kson.parseToAst(source)
+        val parseResult = KsonCore.parseToAst(source)
         assertTrue(!parseResult.hasErrors(), "Parse should succeed without errors")
 
         val objectNode = parseResult.ast!!.toKsonApi()

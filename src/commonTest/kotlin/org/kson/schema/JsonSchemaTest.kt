@@ -1,7 +1,7 @@
 package org.kson.schema
 
 import org.kson.CoreCompileConfig
-import org.kson.Kson
+import org.kson.KsonCore
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -15,7 +15,7 @@ interface JsonSchemaTest {
                                  shouldAcceptAsValid: Boolean,
                                  message: String? = null) {
         val jsonSchema = assertValidSchema(schemaJson)
-        val parseResult = Kson.parseToAst(
+        val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
         )
@@ -33,7 +33,7 @@ interface JsonSchemaTest {
      * (produces non-null jsonSchema) with no error messages
      */
     fun assertValidSchema(source: String): JsonSchema {
-        val result = Kson.parseSchema(source)
+        val result = KsonCore.parseSchema(source)
 
         val jsonSchema = result.jsonSchema
         assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds")

@@ -16,9 +16,10 @@ import org.kson.tools.KsonFormatterConfig
 import kotlin.js.JsExport
 
 /**
- * Public interface to the [Kson] compiler
+ * Top-level entry point for "core" Kson implementation. This is the key interface for all the services provided by
+ * Kson.
  */
-object Kson {
+object KsonCore {
     /**
      * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
      * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]

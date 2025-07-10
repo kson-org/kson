@@ -2,7 +2,7 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestList : KsonTest {
+class KsonCoreTestList : KsonTest {
     @Test
     fun testEmptyListSource() {
         assertParsesTo(

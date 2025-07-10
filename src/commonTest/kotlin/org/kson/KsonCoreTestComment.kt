@@ -7,7 +7,7 @@ import kotlin.test.Test
 /**
  * Tests for Kson comment handling and preservation
  */
-class KsonTestComment : KsonTest {
+class KsonCoreTestComment : KsonTest {
     @Test
     fun testSourceWithComment() {
         assertParsesTo("""

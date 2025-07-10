@@ -4,7 +4,7 @@ import {
     DiagnosticSeverity
 } from 'vscode-languageserver';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {Kson, MessageType} from 'kson';
+import {KsonCore, MessageType} from 'kson';
 import {describe, it} from 'mocha';
 import assert from "assert";
 import {DiagnosticService} from "../../../core/features/DiagnosticService";
@@ -19,7 +19,7 @@ describe('KSON Diagnostics', () => {
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
         const ksonDocument: KsonDocument = new KsonDocument(
             document,
-            Kson.getInstance().parseToAst(unformatted),
+            KsonCore.getInstance().parseToAst(unformatted),
         );
 
         const diagnosticReport = diagnosticService.createDocumentDiagnosticReport(ksonDocument);
@@ -61,5 +61,3 @@ describe('KSON Diagnostics', () => {
         assertDiagnostic(content, expected);
     });
 });
-
-

@@ -16,7 +16,7 @@ import org.kson.jetbrains.file.KsonFileType
 /**
  * Tests for KSON language injection functionality.
  */
-class KsonInjectionTest : BasePlatformTestCase() {
+class KsonCoreInjectionTest : BasePlatformTestCase() {
     private lateinit var settings: CodeStyleSettings
 
     override fun setUp() {

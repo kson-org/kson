@@ -9,11 +9,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Interface to tie together our tests that exercise and verify [Kson] behavior on valid Kson and give a home to our
+ * Interface to tie together our tests that exercise and verify [KsonCore] behavior on valid Kson and give a home to our
  * custom assertions for these tests.  For tests parsing invalid Kson, see [KsonTestError].
  *
  * The tests of type [KsonTest] are split out basically along the lines of the grammar.  Tests that cross-cut concerns
- * may live in [KsonTestGeneralValue].
+ * may live in [KsonCoreTestGeneralValue].
  */
 interface KsonTest {
     /**
@@ -21,7 +21,7 @@ interface KsonTest {
      * and custom [CompileSettings] may be constructed as needed
      */
     data class CompileSettings(
-        val ksonSettings: CompileTarget.Kson = Kson(),
+        val ksonSettings: Kson = Kson(),
         val yamlSettings: Yaml = Yaml(),
         val jsonSettings: Json = Json()
     )
@@ -64,7 +64,7 @@ interface KsonTest {
             )
         }
 
-        val ksonParseResult = Kson.parseToKson(source, compileSettings.ksonSettings)
+        val ksonParseResult = KsonCore.parseToKson(source, compileSettings.ksonSettings)
 
         assertFalse(
             ksonParseResult.hasErrors(),
@@ -84,7 +84,7 @@ interface KsonTest {
         )
 
         // now validate the Yaml produced for this source
-        val yamlResult = Kson.parseToYaml(source, compileSettings.yamlSettings)
+        val yamlResult = KsonCore.parseToYaml(source, compileSettings.yamlSettings)
         assertEquals(
             expectedYaml,
             yamlResult.yaml,
@@ -92,7 +92,7 @@ interface KsonTest {
         )
 
         // now validate the Json produced for this source
-        val jsonResult = Kson.parseToJson(source, compileSettings.jsonSettings)
+        val jsonResult = KsonCore.parseToJson(source, compileSettings.jsonSettings)
         assertEquals(
             expectedJson,
             jsonResult.json,

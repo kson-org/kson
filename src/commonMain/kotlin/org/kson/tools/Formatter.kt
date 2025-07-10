@@ -1,7 +1,7 @@
 package org.kson.tools
 
 import org.kson.*
-import org.kson.Kson.parseToAst
+import org.kson.KsonCore.parseToAst
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
@@ -11,9 +11,9 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 /**
- * Format the given [Kson] source according to [formatterConfig]
+ * Format the given [KsonCore] source according to [formatterConfig]
  *
- * @param ksonSource the [Kson] to format
+ * @param ksonSource the [KsonCore] to format
  * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
  */
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {

@@ -21,7 +21,7 @@ import org.kson.jetbrains.file.KsonFileType
  * - Most if not all of these tests should be wrapped in call to [withConfigSetting] which explicity sets the
  * appropriate config setting for the action under test
  */
-abstract class KsonEditorActionTest : BasePlatformTestCase() {
+abstract class KsonCoreEditorActionTest : BasePlatformTestCase() {
     /**
      * [CodeInsightSettings.getInstance] is globally mutable in the tests, and so must be treated careful and always
      * restored to its previous state after changes in a particular test.  This class, together with [withConfigSetting]
@@ -77,7 +77,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
 
     /**
      * Call this method to test behavior when the "Comment with Line Comment" action is executed.
-     * See class documentation for more info: [KsonEditorActionTest]
+     * See class documentation for more info: [KsonCoreEditorActionTest]
      */
     fun doLineCommentTest(before: String, expected: String) {
         doExecuteActionTest(before, expected) {
@@ -89,7 +89,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
 
     /**
      * Call this method to test behavior when the given [charToType] is typed at the &lt;caret&gt;.
-     * See class documentation for more info: [KsonEditorActionTest]
+     * See class documentation for more info: [KsonCoreEditorActionTest]
      *
      * @param before the file contents (with inline "`<caret>`") before the action is executed
      * @param charToType the [Char] to type at the `<caret>` in the [before] text
@@ -108,7 +108,7 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
 
     /**
      * Call this method to test behavior when the given [com.intellij.openapi.actionSystem.IdeActions] is performed
-     * at &lt;caret&gt;. See class documentation for more info: [KsonEditorActionTest]
+     * at &lt;caret&gt;. See class documentation for more info: [KsonCoreEditorActionTest]
      *
      * @param before the file contents (with inline "`<caret>`") before the action is executed
      * @param ideActionId one of the ideActionIds enumerated in [com.intellij.openapi.actionSystem.IdeActions] to be

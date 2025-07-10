@@ -1,6 +1,6 @@
 import {TextEdit, FormattingOptions} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
-import {Kson, IndentType, CompileTarget, KsonFormatterConfig} from 'kson';
+import {KsonCore, IndentType, CompileTarget, KsonFormatterConfig} from 'kson';
 
 /**
  * Service responsible for formatting Kson documents
@@ -17,7 +17,7 @@ export class FormattingService {
             formatterConfig
         );
 
-        const parseResult = Kson.getInstance().parseToKson(
+        const parseResult = KsonCore.getInstance().parseToKson(
             document.textDocument.getText(),
             compileConfig
         )

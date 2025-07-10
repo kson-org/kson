@@ -2,7 +2,7 @@ import {FormattingService} from '../../../core/features/FormattingService';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {FormattingOptions} from 'vscode-languageserver';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {Kson} from 'kson';
+import {KsonCore} from 'kson';
 import {describe, it} from 'mocha';
 import assert from "assert";
 
@@ -19,7 +19,7 @@ describe('KSON Formatter', () => {
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
         const ksonDocument: KsonDocument = new KsonDocument(
             document,
-            Kson.getInstance().parseToAst(unformatted),
+            KsonCore.getInstance().parseToAst(unformatted),
         );
 
         const options: FormattingOptions = {
@@ -260,5 +260,3 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected, insertSpaces);
     })
 });
-
-

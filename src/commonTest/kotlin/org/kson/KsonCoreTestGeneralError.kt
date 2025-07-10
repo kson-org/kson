@@ -7,7 +7,7 @@ import kotlin.test.Test
 /**
  * Tests for general/mixed Kson values that don't fit neatly into the other [KsonTestError] tests
  */
-class KsonTestGeneralError: KsonTestError {
+class KsonCoreTestGeneralError: KsonTestError {
     @Test
     fun testBlankKsonSource() {
         assertParserRejectsSource("", listOf(BLANK_SOURCE))

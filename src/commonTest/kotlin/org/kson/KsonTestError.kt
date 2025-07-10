@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Interface to tie together our tests that exercise and verify [Kson] behavior on invalid Kson and give a home to our
+ * Interface to tie together our tests that exercise and verify [KsonCore] behavior on invalid Kson and give a home to our
  *  * custom assertions for these tests.  For tests parsing valid Kson, see [KsonTest].
  *
  * The tests of type [KsonTestError] are split out basically along the lines of the grammar.  Tests that cross-cut
@@ -30,9 +30,9 @@ interface KsonTestError {
         maxNestingLevel: Int? = null
     ): List<LoggedMessage> {
         val parseResult = if (maxNestingLevel != null) {
-            Kson.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
+            KsonCore.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
         } else {
-            Kson.parseToAst(source)
+            KsonCore.parseToAst(source)
         }
 
         assertEquals(

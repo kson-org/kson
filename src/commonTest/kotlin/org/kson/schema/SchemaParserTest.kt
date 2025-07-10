@@ -2,7 +2,7 @@ package org.kson.schema
 
 import org.kson.parser.messages.MessageType
 import kotlin.test.*
-import org.kson.Kson
+import org.kson.KsonCore
 
 class SchemaParserTest : JsonSchemaTest {
 
@@ -14,7 +14,7 @@ class SchemaParserTest : JsonSchemaTest {
         source: String,
         expectedMessageTypes: List<MessageType>
     ) {
-        val result = Kson.parseSchema(source)
+        val result = KsonCore.parseSchema(source)
         assertEquals(
             expectedMessageTypes,
             result.messages.map { it.message.type },
