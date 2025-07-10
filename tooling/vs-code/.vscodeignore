@@ -1,7 +1,7 @@
 .vscode/
 .vscode-test/
+.vscode-test-web/
 .vscode-test.js
-dist/**/*.map
 node_modules
 out/
 src/

@@ -10,12 +10,17 @@ node {
 }
 
 tasks {
-    named("npm_run_testVsix"){
+    named("npm_run_testPlugin"){
         dependsOn(npmInstall)
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
 
+    named("npm_run_vscode"){
+        dependsOn(npmInstall)
+    }
+
     named("check") {
-        dependsOn("npm_run_testVsix")
+        dependsOn("npm_run_testPlugin")
+        dependsOn("npm_run_packagePlugin")
     }
 }

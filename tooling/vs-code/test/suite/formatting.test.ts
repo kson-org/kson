@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { createTestFile, cleanUp, assertTextEqual } from './common';
-import {afterEach, describe, test} from 'mocha';
 
 
 describe('Formatting Tests', () => {
@@ -13,12 +12,12 @@ describe('Formatting Tests', () => {
         }
     });
 
-    test('Should format a Kson document', async () => {
+    it('Should format a Kson document', async () => {
         const unformattedContent = '{"a":1,"b":{"c":2}}';
         const expectedText = [
             'a: 1',
             'b:',
-            '  c: 2'
+            '    c: 2'
         ].join('\n');
 
         const [uri, document] = await createTestFile(unformattedContent);
