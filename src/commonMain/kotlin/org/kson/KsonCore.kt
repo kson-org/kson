@@ -1,6 +1,3 @@
-@file:OptIn(kotlin.js.ExperimentalJsExport::class)
-@file:JsExport
-
 package org.kson
 
 import org.kson.CompileTarget.*
@@ -13,7 +10,6 @@ import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.tools.KsonFormatterConfig
-import kotlin.js.JsExport
 
 /**
  * Top-level entry point for "core" Kson implementation. This is the key interface for all the services provided by

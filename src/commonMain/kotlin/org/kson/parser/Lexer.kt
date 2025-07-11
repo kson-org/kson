@@ -7,8 +7,6 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
 import org.kson.parser.behavior.embedblock.EmbedBlockIndent
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 
 private val KEYWORDS =
     mapOf(
@@ -114,8 +112,6 @@ private class SourceScanner(private val source: String) {
  * A [String]/[Location] pair representing the raw [text] of a [Token]
  * along with its [location] in the parsed source input
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 data class Lexeme(val text: String, val location: Location)
 
 /**
@@ -125,8 +121,6 @@ data class Lexeme(val text: String, val location: Location)
  * @param line The zero-based line number
  * @param column The zero-based column number
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 data class Position(val line: Int, val column: Int) {
     /**
      *  Override the [toString] to easily print locations in error messages as base-1 indexed line/column numbers
@@ -141,8 +135,6 @@ data class Position(val line: Int, val column: Int) {
 /**
  * [Location]s describe the position of a chunk of source inside a given kson source file
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 data class Location(
     /**
      * [Position] where this [Location] starts
@@ -212,8 +204,6 @@ data class Location(
     }
 }
 
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 data class Token(
     /**
      * The [TokenType] of this [Token]

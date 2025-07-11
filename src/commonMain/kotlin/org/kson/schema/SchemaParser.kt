@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.js.ExperimentalJsExport::class)
-
 package org.kson.schema
 
 import org.kson.ast.*
