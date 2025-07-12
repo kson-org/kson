@@ -44,6 +44,10 @@ jobs:
           keys:
             - v1-jdk-{{ checksum "jdk.properties" }}
 
+      - restore_cache:
+          keys:
+            - v1-vscode-tests
+
       # installed needed native dependency on Linux
       - run: sudo apt update
       - run: sudo apt install libncurses-dev
@@ -67,6 +71,11 @@ jobs:
       - run:
           name: Verify Kson project
           command: ./gradlew check
+      - save_cache:
+          paths:
+            - ./tooling/lsp-clients/vscode/.vscode-test
+            - ./tooling/lsp-clients/vscode/.vscode-test-web
+          key: v1-vscode-tests
 
       - save_cache:
           paths:
