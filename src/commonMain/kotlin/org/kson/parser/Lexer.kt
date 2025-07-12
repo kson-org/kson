@@ -101,8 +101,8 @@ private class SourceScanner(private val source: String) {
      */
     fun currentLocation() =
         Location(
-            Position(selectionFirstLine, selectionFirstColumn),
-            Position(selectionEndLine, selectionEndColumn),
+            Coordinates(selectionFirstLine, selectionFirstColumn),
+            Coordinates(selectionEndLine, selectionEndColumn),
             selectionStartOffset,
             selectionEndOffset
         )
@@ -115,13 +115,13 @@ private class SourceScanner(private val source: String) {
 data class Lexeme(val text: String, val location: Location)
 
 /**
- * [Position]s are used to describe the [Location.start] and [Location.end] of a chunk inside a
+ * [Coordinates]s are used to describe the [Location.start] and [Location.end] of a chunk inside a
  * given source file.
  *
  * @param line The zero-based line number
  * @param column The zero-based column number
  */
-data class Position(val line: Int, val column: Int) {
+data class Coordinates(val line: Int, val column: Int) {
     /**
      *  Override the [toString] to easily print locations in error messages as base-1 indexed line/column numbers
      *  following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
@@ -137,14 +137,14 @@ data class Position(val line: Int, val column: Int) {
  */
 data class Location(
     /**
-     * [Position] where this [Location] starts
+     * [Coordinates] where this [Location] starts
      */
-    val start: Position,
+    val start: Coordinates,
 
     /**
-     * [Position] where this [Location] ends
+     * [Coordinates] where this [Location] ends
      */
-    val end: Position,
+    val end: Coordinates,
 
     /**
      * The zero-based start offset of this location relative to the whole document
@@ -160,7 +160,7 @@ data class Location(
          * Creates a new [Location] instance using line and column positions directly.
          *
          * This factory method provides a convenient way to create a [Location] by specifying the positions
-         * as individual line and column numbers, without needing to construct [Position] objects first.
+         * as individual line and column numbers, without needing to construct [Coordinates] objects first.
          *
          * @param firstLine The zero-based line number where the location starts
          * @param firstColumn The zero-based column number where the location starts
@@ -179,8 +179,8 @@ data class Location(
             endOffset: Int
         ): Location {
             return Location(
-                Position(firstLine, firstColumn),
-                Position(lastLine, lastColumn),
+                Coordinates(firstLine, firstColumn),
+                Coordinates(lastLine, lastColumn),
                 startOffset,
                 endOffset
             )
