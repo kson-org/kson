@@ -364,6 +364,10 @@ interface StringNode : KsonValueNode
 class StringNodeError(content: String, location: Location) : StringNode, AstNodeError(content, location)
 abstract class StringNodeImpl(location: Location) : StringNode, KsonValueNodeImpl(location) {
     abstract val stringContent: String
+
+    val processedStringContent: String by lazy {
+        unescapeStringContent(stringContent)
+    }
 }
 
 /**
