@@ -1,10 +1,16 @@
+@file:OptIn(kotlin.js.ExperimentalJsExport::class)
+@file:JsExport
+
 package org.kson
 
+import org.kson.Kson.parseSchema
+import org.kson.Kson.publishMessages
 import org.kson.ast.KsonValue
 import org.kson.parser.*
 import org.kson.schema.JsonSchema
 import org.kson.tools.IndentType
 import org.kson.tools.KsonFormatterConfig
+import kotlin.js.JsExport
 
 /**
  * The [Kson](https://kson.org) language
@@ -90,95 +96,9 @@ object Kson {
     }
 
     /**
-     * Result of a Kson conversion operation
-     */
-    sealed class Result {
-        data class Success(val output: String) : Result()
-        data class Failure(val errors: List<Message>) : Result()
-    }
-
-    /**
-     * A [parseSchema] result
-     */
-    sealed class SchemaResult {
-        data class Success(val schemaValidator: SchemaValidator) : SchemaResult()
-        data class Failure(val errors: List<Message>) : SchemaResult()
-    }
-
-    /**
-     * A validator that can check if Kson source conforms to a schema.
-     */
-    class SchemaValidator(private val schema: JsonSchema) {
-        /**
-         * Validates the given Kson source against this validator's schema.
-         * @param kson The Kson source to validate
-         *
-         * @return A list of validation error messages, or empty list if valid
-         */
-        fun validate(kson: String): List<Message> {
-            val astParseResult = KsonCore.parseToAst(kson)
-            if (astParseResult.hasErrors()) {
-                return publishMessages(astParseResult.messages)
-            }
-
-            val messageSink = MessageSink()
-            val ksonApi = astParseResult.api
-            if (ksonApi != null) {
-                schema.validate(ksonApi as KsonValue, messageSink)
-            }
-
-            return publishMessages(messageSink.loggedMessages())
-        }
-    }
-
-    /**
-     * Options for formatting Kson output.
-     */
-    sealed class FormatOptions {
-        /** Use spaces for indentation with the specified count */
-        data class Spaces(val size: Int = 2) : FormatOptions()
-
-        /** Use tabs for indentation */
-        data object Tabs : FormatOptions()
-
-        companion object {
-            /** Default formatting: 2 spaces */
-            val DEFAULT = Spaces(2)
-        }
-    }
-
-    /**
-     * The result of statically analyzing a Kson document
-     */
-    data class Analysis internal constructor(val errors: List<Message>, val tokens: List<Token>)
-
-    /**
-     * [Token] produced by the lexing phase of a Kson parse
-     */
-    data class Token internal constructor(val tokenType: String,
-                                          val value: String,
-                                          val start: Position,
-                                          val end: Position)
-
-    /**
-     * Represents a message logged during Kson processing
-     */
-    data class Message internal constructor(val message: String, val start: Position, val end: Position)
-
-    /**
-     * A 1-based line/column position in a document
-     *
-     * @param line The line number where the error occurred (1-based)
-     * @param column The column number where the error occurred (1-based)
-     */
-    class Position internal constructor(val line: Int, val column: Int) {
-        internal constructor(coordinates: Coordinates) : this(coordinates.line + 1, coordinates.column + 1)
-    }
-
-    /**
      * "Publish" our internal [LoggedMessage]s to list of public-facing [Message] objects
      */
-    private fun publishMessages(loggedMessages: List<LoggedMessage>): List<Message> {
+    internal fun publishMessages(loggedMessages: List<LoggedMessage>): List<Message> {
         return loggedMessages.map {
             Message(
                 message = it.message.toString(),
@@ -187,4 +107,93 @@ object Kson {
             )
         }
     }
+}
+
+
+/**
+ * Result of a Kson conversion operation
+ */
+sealed class Result {
+    data class Success(val output: String) : Result()
+    data class Failure(val errors: List<Message>) : Result()
+}
+
+/**
+ * A [parseSchema] result
+ */
+sealed class SchemaResult {
+    data class Success(val schemaValidator: SchemaValidator) : SchemaResult()
+    data class Failure(val errors: List<Message>) : SchemaResult()
+}
+
+/**
+ * A validator that can check if Kson source conforms to a schema.
+ */
+class SchemaValidator(private val schema: JsonSchema) {
+    /**
+     * Validates the given Kson source against this validator's schema.
+     * @param kson The Kson source to validate
+     *
+     * @return A list of validation error messages, or empty list if valid
+     */
+    fun validate(kson: String): List<Message> {
+        val astParseResult = KsonCore.parseToAst(kson)
+        if (astParseResult.hasErrors()) {
+            return publishMessages(astParseResult.messages)
+        }
+
+        val messageSink = MessageSink()
+        val ksonApi = astParseResult.api
+        if (ksonApi != null) {
+            schema.validate(ksonApi as KsonValue, messageSink)
+        }
+
+        return publishMessages(messageSink.loggedMessages())
+    }
+}
+
+/**
+ * Options for formatting Kson output.
+ */
+sealed class FormatOptions {
+    /** Use spaces for indentation with the specified count */
+    data class Spaces(val size: Int = 2) : FormatOptions()
+
+    /** Use tabs for indentation */
+    data object Tabs : FormatOptions()
+
+    companion object {
+        /** Default formatting: 2 spaces */
+        val DEFAULT = Spaces(2)
+    }
+}
+
+/**
+ * The result of statically analyzing a Kson document
+ */
+data class Analysis internal constructor(val errors: List<Message>, val tokens: List<Token>)
+
+/**
+ * [Token] produced by the lexing phase of a Kson parse
+ */
+data class Token internal constructor(
+    val tokenType: String,
+    val value: String,
+    val start: Position,
+    val end: Position
+)
+
+/**
+ * Represents a message logged during Kson processing
+ */
+data class Message internal constructor(val message: String, val start: Position, val end: Position)
+
+/**
+ * A 1-based line/column position in a document
+ *
+ * @param line The line number where the error occurred (1-based)
+ * @param column The column number where the error occurred (1-based)
+ */
+class Position internal constructor(val line: Int, val column: Int) {
+    internal constructor(coordinates: Coordinates) : this(coordinates.line + 1, coordinates.column + 1)
 }
