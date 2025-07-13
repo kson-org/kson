@@ -26,6 +26,7 @@ Thumbs.db
 out
 target
 build
+dist
 # gradlew generated files
 .gradle
 gradle/jdk

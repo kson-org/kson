@@ -7,4 +7,7 @@ As a love letter to humans maintaining computer configuration, [Kson](https://ks
 ## Contents
 
 * [Kson support for JetBrains IDEs](jetbrains/readme.md)
+* [Implementation of the Language Server Protocol](./language-server-protocol)
+  * [Monaco Editor](./lsp-clients/monaco)
+  * [VS Code Plugin](./lsp-clients/vscode)
 * More to come...
