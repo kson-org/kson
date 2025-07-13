@@ -2,7 +2,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {describe, it} from 'mocha';
 import assert from "assert"
 import {SemanticTokenTypes} from 'vscode-languageserver';
-import {KsonCore} from 'kson';
+import {Kson} from 'kson';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {KSON_LEGEND, SemanticTokensService} from '../../../core/features/SemanticTokensService';
 
@@ -20,12 +20,12 @@ describe('KSON Semantic Tokens', () => {
     function assertSemanticTokens(text: string, expectedTokens: DecodedToken[]): void {
         const uri = 'test://test.kson';
         const document = TextDocument.create(uri, 'kson', 0, text);
-        const parseResult = KsonCore.getInstance().parseToKson(text);
+        const analysisResult = Kson.getInstance().analyze(text);
 
         // Create a mock document entry for the semantic tokens
         const documentEntry: KsonDocument = new KsonDocument(
             document,
-            parseResult,
+            analysisResult,
         );
 
         // Get the unprocessed tokens for debugging

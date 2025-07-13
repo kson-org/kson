@@ -1,5 +1,5 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {KsonCore} from 'kson';
+import {Kson} from 'kson';
 import {KsonDocument} from "./KsonDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
 
@@ -19,7 +19,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-                const parseResult = KsonCore.getInstance().parseToAst(content);
+                const parseResult = Kson.getInstance().analyze(content);
                 return new KsonDocument(textDocument, parseResult);
             },
             update: (
@@ -32,7 +32,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     changes,
                     version
                 );
-                const parseResult = KsonCore.getInstance().parseToAst(textDocument.getText());
+                const parseResult = Kson.getInstance().analyze(textDocument.getText());
                 return new KsonDocument(
                     textDocument,
                     parseResult

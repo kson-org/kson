@@ -1,6 +1,6 @@
 import {TextEdit, FormattingOptions} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
-import {KsonCore, IndentType, CompileTarget, KsonFormatterConfig} from 'kson';
+import {FormatOptions, Kson} from 'kson';
 
 /**
  * Service responsible for formatting Kson documents
@@ -8,26 +8,18 @@ import {KsonCore, IndentType, CompileTarget, KsonFormatterConfig} from 'kson';
 export class FormattingService {
 
     formatDocument(document: KsonDocument, options: FormattingOptions): TextEdit[] {
-        const indentType = options.insertSpaces
-            ? new IndentType.Space(options.tabSize)
-            : new IndentType.Tab();
-        const formatterConfig = new KsonFormatterConfig(indentType);
-        const compileConfig = new CompileTarget.Kson(
-            true,
-            formatterConfig
+        const indentType: FormatOptions = options.insertSpaces
+            ? new FormatOptions.Spaces(options.tabSize)
+            // @ts-ignore
+            : new FormatOptions.Tabs;
+
+        const formattedKson = Kson.getInstance().format(
+            document.textDocument.getText(),
+            indentType
         );
 
-        const parseResult = KsonCore.getInstance().parseToKson(
-            document.textDocument.getText(),
-            compileConfig
-        )
-
-        if (!parseResult.kson) {
-            return [];
-        }
-
         return [
-            TextEdit.replace(document.getFullDocumentRange(), parseResult.kson)
+            TextEdit.replace(document.getFullDocumentRange(), formattedKson)
         ];
     }
 } 

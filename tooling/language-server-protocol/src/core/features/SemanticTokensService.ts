@@ -1,7 +1,8 @@
 import {SemanticTokens, SemanticTokensBuilder, SemanticTokensLegend, SemanticTokenTypes} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument';
-import {Token, TokenType} from 'kson';
+import {Token} from 'kson';
 
+const TokenType = undefined
 
 export const KSON_LEGEND: SemanticTokensLegend = {
     tokenTypes: [
@@ -46,7 +47,7 @@ export class SemanticTokensService {
     private tokenizeKsonDocument(document: KsonDocument): SemanticTokens {
         const semanticTokenBuilder = new SemanticTokensBuilder()
 
-        const parsedTokens = document.getParseResult().lexedTokens.asJsReadonlyArrayView();
+        const parsedTokens = document.getAnalysisResult().tokens.asJsReadonlyArrayView();
         if (parsedTokens) {
             for (let i = 0; i < parsedTokens.length; i++) {
                 const token = parsedTokens[i];
@@ -56,11 +57,10 @@ export class SemanticTokensService {
                 const nextTokens = parsedTokens.slice(i + 1, i + 4);
                 const tokenType = this.mapTokenToSemantic(token, nextTokens);
 
-                const tokenLocation = token.lexeme.location;
                 semanticTokenBuilder.push(
-                    tokenLocation.start.line,
-                    tokenLocation.start.column,
-                    tokenLocation.endOffset - tokenLocation.startOffset,
+                    token.start.line,
+                    token.start.column,
+                    token.value.length,
                     KSON_LEGEND.tokenTypes.indexOf(tokenType),
                     0
                 )

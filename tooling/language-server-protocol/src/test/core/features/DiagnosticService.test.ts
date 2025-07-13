@@ -4,7 +4,7 @@ import {
     DiagnosticSeverity
 } from 'vscode-languageserver';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {KsonCore, MessageType} from 'kson';
+import {Kson} from 'kson';
 import {describe, it} from 'mocha';
 import assert from "assert";
 import {DiagnosticService} from "../../../core/features/DiagnosticService";
@@ -19,13 +19,12 @@ describe('KSON Diagnostics', () => {
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
         const ksonDocument: KsonDocument = new KsonDocument(
             document,
-            KsonCore.getInstance().parseToAst(unformatted),
+            Kson.getInstance().analyze(unformatted),
         );
 
         const diagnosticReport = diagnosticService.createDocumentDiagnosticReport(ksonDocument);
 
         // We simplify diagnosticReport to a list of Diagnostic without message.
-        // that does not contain the message
         const getDiagnostics = (report: RelatedFullDocumentDiagnosticReport): Diagnostic[] => (
             report.items.map(diagnostic =>
                 Diagnostic.create(
@@ -53,7 +52,7 @@ describe('KSON Diagnostics', () => {
                     },
                     "",
                     DiagnosticSeverity.Error,
-                    MessageType.BLANK_SOURCE.name,
+                    "",
                     "kson"
                 ),
             ];
