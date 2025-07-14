@@ -57,7 +57,7 @@ class KsonSmokeTest {
         assertIs<String>(error.message)
         assertIs<Position>(error.start)
         assertIs<Position>(error.end)
-        assertTrue(error.start.line > 0)
+        assertTrue(error.start.line == 0)
         assertTrue(error.start.column > 0)
     }
     

@@ -219,13 +219,13 @@ enum class TokenType {
 data class Message internal constructor(val message: String, val start: Position, val end: Position)
 
 /**
- * A 1-based line/column position in a document
+ * A zero-based line/column position in a document
  *
- * @param line The line number where the error occurred (1-based)
- * @param column The column number where the error occurred (1-based)
+ * @param line The line number where the error occurred (0-based)
+ * @param column The column number where the error occurred (0-based)
  */
 class Position internal constructor(val line: Int, val column: Int) {
-    internal constructor(coordinates: Coordinates) : this(coordinates.line + 1, coordinates.column + 1)
+    internal constructor(coordinates: Coordinates) : this(coordinates.line, coordinates.column)
 }
 
 /**
