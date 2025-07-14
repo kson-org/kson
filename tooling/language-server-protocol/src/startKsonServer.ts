@@ -14,7 +14,7 @@ import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
  *
  * @param connection
  */
-function startKsonServer(connection: Connection): void {
+export function startKsonServer(connection: Connection): void {
     // Initialize core components
     const documentManager = new KsonDocumentsManager();
     const textDocumentService = new KsonTextDocumentService(documentManager);
@@ -56,5 +56,3 @@ function startKsonServer(connection: Connection): void {
     connection.listen();
     connection.console.info('Kson Language Server started and listening');
 }
-
-export {startKsonServer};
