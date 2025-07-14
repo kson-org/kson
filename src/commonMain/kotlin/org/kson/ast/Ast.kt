@@ -164,7 +164,7 @@ interface KsonRoot : AstNode
 class KsonRootError(content: String, location: Location) : KsonRoot, AstNodeError(content, location)
 class KsonRootImpl(
     val rootNode: KsonValueNode,
-    private val trailingContent: KsonValueNodeError?,
+    private val trailingContent: List<KsonValueNode>,
     override val comments: List<String>,
     private val documentEndComments: List<String>,
     location: Location
@@ -178,13 +178,16 @@ class KsonRootImpl(
             is Kson, is Yaml, is Json -> {
                 var ksonDocument = rootNode.toSourceWithNext(indent, null, compileTarget)
 
+                trailingContent.forEach {
+                    if (ksonDocument.takeLast(2) != "\n\n") {
+                        ksonDocument += "\n\n"
+                    }
+                    ksonDocument += it.toSourceWithNext(indent, null, compileTarget)
+                }
+
                 // remove any trailing newlines
                 while(ksonDocument.endsWith("\n")) {
                     ksonDocument = ksonDocument.removeSuffix("\n")
-                }
-
-                if (trailingContent != null) {
-                    ksonDocument += "\n\n" + trailingContent.toSourceWithNext(indent, null, compileTarget)
                 }
 
                 if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
