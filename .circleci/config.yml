@@ -44,6 +44,10 @@ jobs:
           keys:
             - v1-jdk-{{ checksum "jdk.properties" }}
 
+      - restore_cache:
+          keys:
+            - v1-vscode-tests
+
       # installed needed native dependency on Linux
       - run: sudo apt update
       - run: sudo apt install libncurses-dev
@@ -66,7 +70,20 @@ jobs:
 
       - run:
           name: Verify Kson project
-          command: ./gradlew check
+          # This check excludes `:tooling:lsp-clients:check` since that consistently resulted
+          # in OOM-errors during the vite build.
+          command: ./gradlew -x :tooling:lsp-clients:check check
+
+      - run:
+          name: Verify Kson tooling
+          # This check is run separately and without daemon to prevent OOM-errors during the vite build in Monaco
+          command: ./gradlew :tooling:lsp-clients:check --no-daemon
+
+      - save_cache:
+          paths:
+            - ./tooling/lsp-clients/vscode/.vscode-test
+            - ./tooling/lsp-clients/vscode/.vscode-test-web
+          key: v1-vscode-tests
 
       - save_cache:
           paths:

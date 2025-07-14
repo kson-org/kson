@@ -1,0 +1,22 @@
+{
+  "name": "kson-lsp-extensions",
+  "version": "0.0.1",
+  "private": true,
+  "description": "KSON Language Server Protocol Extensions",
+  "workspaces": [
+    "shared",
+    "vscode",
+    "monaco"
+  ],
+  "scripts": {
+    "buildPlugins": "npm run compile && npm run build -w monaco && npm run packagePlugin -w vscode",
+    "compile": "npm run compile -w shared && npm run compile -w vscode",
+    "clean": "npm run clean --workspaces --if-present",
+    "test": "npm run compile && npm run test --workspaces --if-present",
+    "vscode": "npm run compile && npm run vscode -w vscode",
+    "monaco": "npm run dev -w monaco"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
