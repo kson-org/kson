@@ -26,7 +26,7 @@ import org.kson.parser.messages.MessageType.BLANK_SOURCE
  * - the [testData.parser] directory is configured by [getTestDataPath] and the first constructor
  *   arg to [ParsingTestCase]
  */
-class KsonCoreParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
+class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
 
     /**
      * Sanity check parse of a file containing many Kson constructs

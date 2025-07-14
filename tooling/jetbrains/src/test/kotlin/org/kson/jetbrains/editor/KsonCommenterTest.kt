@@ -1,6 +1,6 @@
 package org.kson.jetbrains.editor
 
-class KsonCoreCommenterTest : KsonCoreEditorActionTest() {
+class KsonCommenterTest : KsonEditorActionTest() {
     /**
      * Sanity check that [KsonCommenter] is correctly hooked up
      */

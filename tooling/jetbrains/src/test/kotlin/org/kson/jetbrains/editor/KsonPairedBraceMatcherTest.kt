@@ -1,6 +1,6 @@
 package org.kson.jetbrains.editor
 
-class KsonCorePairedBraceMatcherTest : KsonCoreEditorActionTest() {
+class KsonPairedBraceMatcherTest : KsonEditorActionTest() {
     /**
      * Sanity check that [KsonPairedBraceMatcher] is correctly hooked up
      */

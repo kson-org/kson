@@ -20,7 +20,7 @@ import org.kson.jetbrains.file.KsonFileType
  * is mostly sanity checking that things are hooked up correctly and that IDE-specific
  * functionality is working, such as IDE configuration
  */
-class KsonCoreExternalFormatterTest : BasePlatformTestCase() {
+class KsonExternalFormatterTest : BasePlatformTestCase() {
     private lateinit var settings: CodeStyleSettings
     
     override fun setUp() {

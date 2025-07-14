@@ -7,7 +7,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.file.KsonFileType
 
-class KsonCoreEnterHandlerDelegateTest : BasePlatformTestCase() {
+class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
     private fun doTest(before: String, after: String, useTabs: Boolean = false, indentSize: Int = 2) {
         val settings = CodeStyle.createTestSettings()
         val commonSettings = settings.getCommonSettings(KsonLanguage)

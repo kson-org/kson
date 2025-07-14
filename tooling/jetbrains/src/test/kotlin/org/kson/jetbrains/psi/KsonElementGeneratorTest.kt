@@ -3,7 +3,7 @@ package org.kson.jetbrains.psi
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.kson.parser.behavior.embedblock.EmbedDelim
 
-class KsonCoreElementGeneratorTest : BasePlatformTestCase() {
+class KsonElementGeneratorTest : BasePlatformTestCase() {
     private lateinit var generator: KsonElementGenerator
 
     override fun setUp() {

@@ -3,10 +3,10 @@ package org.kson.jetbrains.editor
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import org.kson.parser.behavior.embedblock.EmbedDelim
 
-class KsonCoreTypedHandlerDelegateTest : KsonCoreEditorActionTest() {
+class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
     /**
      * Sanity check that our angle-bracket auto-insert code is working.
-     * This is the inverse operation to what is tested in [KsonCoreBackspaceHandlerDelegateTest.testDeleteEmptyAngleBracketPairs]
+     * This is the inverse operation to what is tested in [KsonBackspaceHandlerDelegateTest.testDeleteEmptyAngleBracketPairs]
      */
     fun testAngleBracketAutoInsert() {
         withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
@@ -91,7 +91,7 @@ class KsonCoreTypedHandlerDelegateTest : KsonCoreEditorActionTest() {
 
     /**
      * Verify our embed-delimiter auto-insert code is working as desired
-     * This is the inverse operation to what is tested in [KsonCoreBackspaceHandlerDelegateTest.testDeleteEmptyEmbedDelimitersPairs]
+     * This is the inverse operation to what is tested in [KsonBackspaceHandlerDelegateTest.testDeleteEmptyEmbedDelimitersPairs]
      */
     fun testEmbedDelimiterAutoInsert() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {

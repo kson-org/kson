@@ -5,7 +5,7 @@ import com.intellij.util.PsiErrorElementUtil
 import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
 
-class KsonCorePsiFileTest : BasePlatformTestCase() {
+class KsonPsiFileTest : BasePlatformTestCase() {
 
     fun testKsonFile() {
         val psiFile = myFixture.configureByText(KsonFileType, "key: val")

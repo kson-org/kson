@@ -2,7 +2,7 @@ package org.kson.jetbrains.folding
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
-class KsonCoreFoldingTest : BasePlatformTestCase() {
+class KsonFoldingTest : BasePlatformTestCase() {
     override fun getTestDataPath(): String = "src/test/resources/testData/folding"
 
     override fun setUp() {

@@ -1,9 +1,9 @@
 package org.kson.jetbrains.editor
 
-class KsonCoreQuoteMatcherTest : KsonCoreEditorActionTest() {
+class KsonQuoteMatcherTest : KsonEditorActionTest() {
     /**
      * Sanity check that [KsonQuoteHandler] is correctly hooked up for auto-inserting close quotes
-     * This is the inverse operation to what is tested in [KsonCoreBackspaceHandlerDelegateTest.testDeleteEmptyQuotePairs]
+     * This is the inverse operation to what is tested in [KsonBackspaceHandlerDelegateTest.testDeleteEmptyQuotePairs]
      */
     fun testAutoInsert() {
         doCharTest(
