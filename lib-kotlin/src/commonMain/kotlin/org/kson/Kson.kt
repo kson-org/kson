@@ -126,7 +126,7 @@ sealed class SchemaResult {
 /**
  * A validator that can check if Kson source conforms to a schema.
  */
-class SchemaValidator(private val schema: JsonSchema) {
+class SchemaValidator internal constructor(private val schema: JsonSchema) {
     /**
      * Validates the given Kson source against this validator's schema.
      * @param kson The Kson source to validate
