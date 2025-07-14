@@ -9,9 +9,9 @@ import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
 
 /**
- * Format the given [KsonCore] source according to [formatterConfig]
+ * Format the given Kson source according to [formatterConfig]
  *
- * @param ksonSource the [KsonCore] to format
+ * @param ksonSource the Kson to format
  * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
  */
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {

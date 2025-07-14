@@ -7,7 +7,7 @@ import org.kson.ast.AstNode
 import org.kson.mpp.PlatformShim
 
 /**
- * A [CommandLineInterface] for parsing [KsonCore].  Platform-specific configuration is injected in [platformShim],
+ * A [CommandLineInterface] for parsing Kson.  Platform-specific configuration is injected in [platformShim],
  * and output is written to [out].  See [formatParseResult] for details on the output format.
  */
 class CommandLineInterface(private val platformShim: PlatformShim, private val out: (String) -> Unit) {
