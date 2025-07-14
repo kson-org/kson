@@ -160,7 +160,7 @@ fun AstNode.toKsonApi(): KsonApi {
             value.toKsonApi() as KsonValue,
             location)
         is EmbedBlockNode -> EmbedBlock(embedTag, embedContent, location)
-        is StringNodeImpl -> KsonString(stringContent, location)
+        is StringNodeImpl -> KsonString(processedStringContent, location)
         is NumberNode -> KsonNumber(value, location)
         is TrueNode -> KsonBoolean(true, location)
         is FalseNode -> KsonBoolean(false, location)

@@ -147,4 +147,52 @@ class KsonApiTest {
             nestedListElements.map { (it as KsonString).value }
         )
     }
+
+    @Test
+    fun testKsonApiStringProcessing() {
+        // Test various escape sequences to ensure KsonString returns properly unescaped content
+        val source = """
+            {
+              basicEscapes: "Hello\nWorld\tTabbed\"Quote\""
+              unicodeEscapes: "\u0041\u20AC\u2028\u2029"
+              backslashes: "C:\\Users\\path\\to\\file"
+              forwardSlash: "http:\/\/example.com"
+              controlChars: "\b\f\r"
+              surrogatePair: "\uD83D\uDE00"
+              mixedContent: "Line 1\nLine 2\t\"quoted\"\u0041"
+              regexPattern: "\\d+\\.\\d+"
+            }
+        """.trimIndent()
+
+        val parseResult = Kson.parseToAst(source)
+        val ast = parseResult.ast
+        assertNotNull(ast, "should not be null for this test's valid Kson")
+
+        val rootObject = ast.toKsonApi() as KsonObject
+        val properties = rootObject.propertyMap
+
+        // Test basic escapes - newline, tab, and quotes should be unescaped
+        assertEquals("Hello\nWorld\tTabbed\"Quote\"", (properties["basicEscapes"] as KsonString).value)
+
+        // Test Unicode escapes - should be converted to actual characters
+        assertEquals("A€\u2028\u2029", (properties["unicodeEscapes"] as KsonString).value)
+
+        // Test backslashes - double backslashes should become single
+        assertEquals("C:\\Users\\path\\to\\file", (properties["backslashes"] as KsonString).value)
+
+        // Test forward slash - escaped forward slash should be unescaped
+        assertEquals("http://example.com", (properties["forwardSlash"] as KsonString).value)
+
+        // Test control characters
+        assertEquals("\b\u000C\r", (properties["controlChars"] as KsonString).value)
+
+        // Test surrogate pair - should be converted to emoji
+        assertEquals("😀", (properties["surrogatePair"] as KsonString).value)
+
+        // Test mixed content
+        assertEquals("Line 1\nLine 2\t\"quoted\"A", (properties["mixedContent"] as KsonString).value)
+
+        // Test regex pattern - important for schema validation
+        assertEquals("\\d+\\.\\d+", (properties["regexPattern"] as KsonString).value)
+    }
 } 
