@@ -145,7 +145,7 @@ describe('KsonTextDocumentService', () => {
                     },
                     "severity": DiagnosticSeverity.Error,
                     "source": "kson",
-                    "message": "Unexpected trailing content.  The previous content parsed as a complete Kson document.",
+                    "message": "Unexpected trailing content. The previous content parsed as a complete Kson document.",
                     "code": MessageType.EOF_NOT_REACHED.name
                 }
             ]
