@@ -175,7 +175,7 @@ data class Analysis internal constructor(val errors: List<Message>, val tokens: 
  */
 data class Token internal constructor(
     val tokenType: TokenType,
-    val value: String,
+    val text: String,
     val start: Position,
     val end: Position)
 
@@ -378,7 +378,7 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
 private fun createPublicToken(publicTokenType: TokenType, internalToken: InternalToken): Token {
     return Token(
         publicTokenType,
-        internalToken.value,
+        internalToken.lexeme.text,
         Position(internalToken.lexeme.location.start),
         Position(internalToken.lexeme.location.end)
     )

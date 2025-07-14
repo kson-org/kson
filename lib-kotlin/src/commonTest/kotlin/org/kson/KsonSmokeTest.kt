@@ -88,7 +88,7 @@ class KsonSmokeTest {
 
         val token = analysis.tokens.first()
         assertIs<TokenType>(token.tokenType)
-        assertIs<String>(token.value)
+        assertIs<String>(token.text)
         assertIs<Position>(token.start)
         assertIs<Position>(token.end)
     }
