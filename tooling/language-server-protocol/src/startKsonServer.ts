@@ -8,6 +8,7 @@ import {
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
+import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 
 /**
  * Core Kson Language Server implementation.
@@ -39,11 +40,26 @@ export function startKsonServer(connection: Connection): void {
                 identifier: 'kson',
                 interFileDependencies: false,
                 workspaceDiagnostics: false
-            } as DiagnosticRegistrationOptions
+            } as DiagnosticRegistrationOptions,
 
+            workspace: {
+                workspaceFolders: {
+                    supported: true,
+                    changeNotifications: true
+                }
+            }
         };
 
         return {capabilities};
+    });
+
+    // Handle configuration changes
+    connection.onDidChangeConfiguration((change) => {
+        // Update the text document service with new configuration
+        const configuration = ksonSettingsWithDefaults(change.settings);
+        textDocumentService.updateConfiguration(configuration);
+
+        connection.console.info('Configuration updated');
     });
 
     // Setup document handling
