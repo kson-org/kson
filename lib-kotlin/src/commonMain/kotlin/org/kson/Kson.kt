@@ -10,6 +10,8 @@ import org.kson.parser.*
 import org.kson.schema.JsonSchema
 import org.kson.tools.IndentType
 import org.kson.tools.KsonFormatterConfig
+import org.kson.parser.TokenType as InternalTokenType
+import org.kson.parser.Token as InternalToken
 import kotlin.js.JsExport
 
 /**
@@ -69,12 +71,7 @@ object Kson {
      */
     fun analyze(kson: String) : Analysis {
         val parseResult = KsonCore.parseToAst(kson)
-        val tokens = parseResult.lexedTokens.map {
-            Token(it.tokenType.name,
-                it.value,
-                Position(it.lexeme.location.start),
-                Position(it.lexeme.location.end))
-        }
+        val tokens = convertTokens(parseResult.lexedTokens)
         val messages = parseResult.messages.map {
             Message(it.message.toString(), Position(it.location.start), Position(it.location.end))
         }
@@ -177,11 +174,44 @@ data class Analysis internal constructor(val errors: List<Message>, val tokens: 
  * [Token] produced by the lexing phase of a Kson parse
  */
 data class Token internal constructor(
-    val tokenType: String,
+    val tokenType: TokenType,
     val value: String,
     val start: Position,
-    val end: Position
-)
+    val end: Position)
+
+enum class TokenType {
+    /**
+     * See [convertTokens] for the mapping from our [org.kson.parser.TokenType]/[InternalTokenType] tokens
+     */
+    CURLY_BRACE_L,
+    CURLY_BRACE_R,
+    SQUARE_BRACKET_L,
+    SQUARE_BRACKET_R,
+    ANGLE_BRACKET_L,
+    ANGLE_BRACKET_R,
+    COLON,
+    DOT,
+    END_DASH,
+    COMMA,
+    COMMENT,
+    EMBED_OPEN_DELIM,
+    EMBED_CLOSE_DELIM,
+    EMBED_TAG,
+    EMBED_PREAMBLE_NEWLINE,
+    EMBED_CONTENT,
+    FALSE,
+    UNQUOTED_STRING,
+    ILLEGAL_CHAR,
+    LIST_DASH,
+    NULL,
+    NUMBER,
+    STRING_OPEN_QUOTE,
+    STRING_CLOSE_QUOTE,
+    STRING_CONTENT,
+    TRUE,
+    WHITESPACE,
+    EOF
+}
 
 /**
  * Represents a message logged during Kson processing
@@ -196,4 +226,160 @@ data class Message internal constructor(val message: String, val start: Position
  */
 class Position internal constructor(val line: Int, val column: Int) {
     internal constructor(coordinates: Coordinates) : this(coordinates.line + 1, coordinates.column + 1)
+}
+
+/**
+ * Convert a list of internal tokens to public tokens
+ */
+private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
+    val tokens = mutableListOf<Token>()
+    var i = 0
+
+    while (i < internalTokens.size) {
+        val currentToken = internalTokens[i]
+
+        when (currentToken.tokenType) {
+            InternalTokenType.STRING_OPEN_QUOTE -> {
+                // we collapse all string content tokens into one for the public API (our internals track more
+                // refined string content tokens to produce better errors, but those refined tokens are
+                // not needed by outside clients)
+                val contentBuilder = StringBuilder()
+                var contentStart: Coordinates? = null
+                var contentEnd: Coordinates? = null
+
+                while (i++ < internalTokens.size &&
+                    internalTokens[i].tokenType != InternalTokenType.STRING_CLOSE_QUOTE) {
+                    val contentToken = internalTokens[i]
+                    if (contentStart == null) {
+                        contentStart = contentToken.lexeme.location.start
+                    }
+                    contentEnd = contentToken.lexeme.location.end
+                    contentBuilder.append(contentToken.value)
+                }
+
+                // Add the open quote token
+                tokens.add(createPublicToken(TokenType.STRING_OPEN_QUOTE, currentToken))
+
+                // Add consolidated string content if any
+                if (contentBuilder.isNotEmpty() && contentStart != null && contentEnd != null) {
+                    tokens.add(Token(
+                        TokenType.STRING_CONTENT,
+                        contentBuilder.toString(),
+                        Position(contentStart),
+                        Position(contentEnd)
+                    ))
+                }
+
+                // Add the close quote token if present
+                if (i < internalTokens.size) {
+                    if (internalTokens[i].tokenType == InternalTokenType.STRING_CLOSE_QUOTE) {
+                        val closeQuoteToken = internalTokens[i]
+                        tokens.add(createPublicToken(TokenType.STRING_CLOSE_QUOTE, closeQuoteToken))
+                    } else {
+                        throw IllegalStateException("Bug: a string must end with a closing quote token or EOF")
+                    }
+                }
+
+            }
+            // String content tokens are handled above in STRING_OPEN_QUOTE case
+            InternalTokenType.STRING_CONTENT,
+            InternalTokenType.STRING_CLOSE_QUOTE,
+            InternalTokenType.STRING_ILLEGAL_CONTROL_CHARACTER,
+            InternalTokenType.STRING_UNICODE_ESCAPE,
+            InternalTokenType.STRING_ESCAPE -> {
+                throw IllegalStateException("String content tokens should be handled in STRING_OPEN_QUOTE case")
+            }
+            // Regular token conversions - direct mapping
+            InternalTokenType.CURLY_BRACE_L -> {
+                tokens.add(createPublicToken(TokenType.CURLY_BRACE_L, currentToken))
+            }
+            InternalTokenType.CURLY_BRACE_R -> {
+                tokens.add(createPublicToken(TokenType.CURLY_BRACE_R, currentToken))
+            }
+            InternalTokenType.SQUARE_BRACKET_L -> {
+                tokens.add(createPublicToken(TokenType.SQUARE_BRACKET_L, currentToken))
+            }
+            InternalTokenType.SQUARE_BRACKET_R -> {
+                tokens.add(createPublicToken(TokenType.SQUARE_BRACKET_R, currentToken))
+            }
+            InternalTokenType.ANGLE_BRACKET_L -> {
+                tokens.add(createPublicToken(TokenType.ANGLE_BRACKET_L, currentToken))
+            }
+            InternalTokenType.ANGLE_BRACKET_R -> {
+                tokens.add(createPublicToken(TokenType.ANGLE_BRACKET_R, currentToken))
+            }
+            InternalTokenType.COLON -> {
+                tokens.add(createPublicToken(TokenType.COLON, currentToken))
+            }
+            InternalTokenType.DOT -> {
+                tokens.add(createPublicToken(TokenType.DOT, currentToken))
+            }
+            InternalTokenType.END_DASH -> {
+                tokens.add(createPublicToken(TokenType.END_DASH, currentToken))
+            }
+            InternalTokenType.COMMA -> {
+                tokens.add(createPublicToken(TokenType.COMMA, currentToken))
+            }
+            InternalTokenType.COMMENT -> {
+                tokens.add(createPublicToken(TokenType.COMMENT, currentToken))
+            }
+            InternalTokenType.EMBED_OPEN_DELIM -> {
+                tokens.add(createPublicToken(TokenType.EMBED_OPEN_DELIM, currentToken))
+            }
+            InternalTokenType.EMBED_CLOSE_DELIM -> {
+                tokens.add(createPublicToken(TokenType.EMBED_CLOSE_DELIM, currentToken))
+            }
+            InternalTokenType.EMBED_TAG -> {
+                tokens.add(createPublicToken(TokenType.EMBED_TAG, currentToken))
+            }
+            InternalTokenType.EMBED_PREAMBLE_NEWLINE -> {
+                tokens.add(createPublicToken(TokenType.EMBED_PREAMBLE_NEWLINE, currentToken))
+            }
+            InternalTokenType.EMBED_CONTENT -> {
+                tokens.add(createPublicToken(TokenType.EMBED_CONTENT, currentToken))
+            }
+            InternalTokenType.FALSE -> {
+                tokens.add(createPublicToken(TokenType.FALSE, currentToken))
+            }
+            InternalTokenType.UNQUOTED_STRING -> {
+                tokens.add(createPublicToken(TokenType.UNQUOTED_STRING, currentToken))
+            }
+            InternalTokenType.ILLEGAL_CHAR -> {
+                tokens.add(createPublicToken(TokenType.ILLEGAL_CHAR, currentToken))
+            }
+            InternalTokenType.LIST_DASH -> {
+                tokens.add(createPublicToken(TokenType.LIST_DASH, currentToken))
+            }
+            InternalTokenType.NULL -> {
+                tokens.add(createPublicToken(TokenType.NULL, currentToken))
+            }
+            InternalTokenType.NUMBER -> {
+                tokens.add(createPublicToken(TokenType.NUMBER, currentToken))
+            }
+            InternalTokenType.TRUE -> {
+                tokens.add(createPublicToken(TokenType.TRUE, currentToken))
+            }
+            InternalTokenType.WHITESPACE -> {
+                tokens.add(createPublicToken(TokenType.WHITESPACE, currentToken))
+            }
+            InternalTokenType.EOF -> {
+                tokens.add(createPublicToken(TokenType.EOF, currentToken))
+            }
+        }
+        i++
+    }
+
+    return tokens
+}
+
+/**
+ * Helper function to create a public [Token] from an [org.kson.parser.Token]/[InternalToken]
+ */
+private fun createPublicToken(publicTokenType: TokenType, internalToken: InternalToken): Token {
+    return Token(
+        publicTokenType,
+        internalToken.value,
+        Position(internalToken.lexeme.location.start),
+        Position(internalToken.lexeme.location.end)
+    )
 }
