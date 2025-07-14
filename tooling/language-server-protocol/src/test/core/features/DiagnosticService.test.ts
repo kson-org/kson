@@ -29,7 +29,7 @@ describe('KSON Diagnostics', () => {
             report.items.map(diagnostic =>
                 Diagnostic.create(
                     diagnostic.range
-                    , ""
+                    , diagnostic.message
                     , diagnostic.severity
                     , diagnostic.code
                     , diagnostic.source
@@ -50,9 +50,9 @@ describe('KSON Diagnostics', () => {
                         start: {line: 0, character: 0},
                         end: {line: 0, character: 0}
                     },
-                    "",
+                    "Unable to parse a blank file.  A Kson document must describe a value.",
                     DiagnosticSeverity.Error,
-                    "",
+                    undefined,
                     "kson"
                 ),
             ];

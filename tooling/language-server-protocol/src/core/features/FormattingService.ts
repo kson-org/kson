@@ -10,8 +10,7 @@ export class FormattingService {
     formatDocument(document: KsonDocument, options: FormattingOptions): TextEdit[] {
         const indentType: FormatOptions = options.insertSpaces
             ? new FormatOptions.Spaces(options.tabSize)
-            // @ts-ignore
-            : new FormatOptions.Tabs;
+            : FormatOptions.Tabs;
 
         const formattedKson = Kson.getInstance().format(
             document.textDocument.getText(),

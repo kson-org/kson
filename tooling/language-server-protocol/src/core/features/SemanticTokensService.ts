@@ -1,8 +1,6 @@
 import {SemanticTokens, SemanticTokensBuilder, SemanticTokensLegend, SemanticTokenTypes} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument';
-import {Token} from 'kson';
-
-const TokenType = undefined
+import {Token, TokenType} from 'kson';
 
 export const KSON_LEGEND: SemanticTokensLegend = {
     tokenTypes: [
@@ -91,11 +89,6 @@ export class SemanticTokensService {
                 } else {
                     semanticType = SemanticTokenTypes.string;
                 }
-                break;
-            case TokenType.STRING_ESCAPE:
-            case TokenType.STRING_UNICODE_ESCAPE:
-            case TokenType.STRING_ILLEGAL_CONTROL_CHARACTER:
-                semanticType = SemanticTokenTypes.string;
                 break;
 
             // Numbers

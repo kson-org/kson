@@ -8,7 +8,6 @@ import {
     SemanticTokensParams,
     TextEdit
 } from "vscode-languageserver";
-import {Message} from "kson";
 import assert from "assert";
 import {beforeEach, describe, it} from 'mocha';
 import {ConnectionStub} from "../../ConnectionStub";
@@ -146,7 +145,6 @@ describe('KsonTextDocumentService', () => {
                     "severity": DiagnosticSeverity.Error,
                     "source": "kson",
                     "message": "Unexpected trailing content.  The previous content parsed as a complete Kson document.",
-                    "code": ""
                 }
             ]
             await assertDiagnostics(content, expected)
