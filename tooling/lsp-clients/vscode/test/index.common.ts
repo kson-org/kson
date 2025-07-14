@@ -20,7 +20,7 @@ export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
                 // Browser: use dynamic imports
                 await import('./suite/diagnostics.test');
                 await import('./suite/editing.test');
-                await import('./suite/formatting.test');
+                await import('./suite/formatting-settings.test');
             } else {
                 // Node: use addFile
                 const path = await import('path');
@@ -30,7 +30,7 @@ export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
                 const testFiles = [
                     'suite/diagnostics.test.js',
                     'suite/editing.test.js',
-                    'suite/formatting.test.js'
+                    'suite/formatting-settings.test.js'
                 ];
 
                 testFiles.forEach(f => {

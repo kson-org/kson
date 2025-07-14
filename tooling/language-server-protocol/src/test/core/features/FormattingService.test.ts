@@ -1,10 +1,10 @@
 import {FormattingService} from '../../../core/features/FormattingService';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {FormattingOptions} from 'vscode-languageserver';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {Kson} from 'kson';
 import {describe, it} from 'mocha';
 import assert from "assert";
+import {ksonSettingsWithDefaults} from "../../../core/KsonSettings";
 
 /**
  * Tests for testing the JSON document formatting functionality.
@@ -22,12 +22,19 @@ describe('KSON Formatter', () => {
             Kson.getInstance().analyze(unformatted),
         );
 
-        const options: FormattingOptions = {
-            tabSize: 2,
-            insertSpaces
-        };
+        const ksonSettings = ksonSettingsWithDefaults(
+            {
+                kson:
+                    {
+                        format: {
+                            insertSpaces: insertSpaces,
+                            tabSize: 2
+                        }
+                    }
+            }
+        )
 
-        const edits = formattingService.formatDocument(ksonDocument, options);
+        const edits = formattingService.formatDocument(ksonDocument, ksonSettings.kson.formatOptions);
         const formatted = applyEdits(document, edits);
 
         assert.strictEqual(formatted, expected, 'should have a matching formatted document');

@@ -46,7 +46,20 @@
       }
     ],
     "configuration": {
-      "title": "Kson"
+      "title": "Kson",
+      "properties": {
+        "kson.format.tabSize": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "description": "Number of spaces for indentation"
+        },
+        "kson.format.insertSpaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use spaces instead of tabs for indentation"
+        }
+      }
     }
   },
   "engines": {

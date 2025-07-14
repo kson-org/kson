@@ -75,7 +75,7 @@ async function main() {
             'index.common': './test/index.common.ts',
             'suite/diagnostics.test': './test/suite/diagnostics.test.ts',
             'suite/editing.test': './test/suite/editing.test.ts',
-            'suite/formatting.test': './test/suite/formatting.test.ts'
+            'suite/formatting-settings.test': './test/suite/formatting-settings.test.ts'
         };
 
         // Add shared test files to both entry point sets
