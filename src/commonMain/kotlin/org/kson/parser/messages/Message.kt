@@ -61,7 +61,7 @@ enum class MessageType {
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected trailing content.  The previous content parsed as a complete Kson document."
+            return "Unexpected trailing content. The previous content parsed as a complete Kson document."
         }
     },
     LIST_NO_CLOSE {

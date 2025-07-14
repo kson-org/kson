@@ -1228,5 +1228,41 @@ class FormatterTest {
                 "Illegal trailing content"
             """.trimIndent()
         )
+
+        assertFormatting(
+            """
+                key: value trailingContent
+                list: [1,2,3] extraTrailingContent
+            """.trimIndent(),
+            """
+                key: value
+                
+                trailingContent
+          
+                
+                list:
+                  - 1
+                  - 2
+                  - 3
+                
+                extraTrailingContent
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+                key: value extraValue list:[1,2,3]
+            """.trimIndent(),
+            """
+                key: value
+                
+                extraValue 
+          
+                list:
+                  - 1
+                  - 2
+                  - 3
+            """.trimIndent()
+        )
     }
 }
