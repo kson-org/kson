@@ -129,9 +129,9 @@ describe('KSON Semantic Tokens', () => {
     it('should handle an embed block', () => {
         const content = [
             'embedBlock: $tag',
-            '  multi-line',
-            '  embed content',
-            '  $$'
+            '    multi-line',
+            '   embed content',
+            '   $$'
         ].join('\n');
 
         const expectedTokens: DecodedToken[] = [
@@ -141,10 +141,13 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // $
             {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
             {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // \n
-            // line 1
-            {deltaLine: 1, deltaStart: 0, length: 31, type: SemanticTokenTypes.macro, modifiers: []}, // indented embed content
-            // line 2
-            {deltaLine: 2, deltaStart: 2, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
+            // line 1 - first line of embed content
+            {deltaLine: 1, deltaStart: 0, length: 14, type: SemanticTokenTypes.macro, modifiers: []}, // "    multi-line\n"
+            // line 2 - second line of embed content
+            {deltaLine: 1, deltaStart: 0, length: 16, type: SemanticTokenTypes.macro, modifiers: []}, // "   embed content\n"
+            // Line 3 - third line (whitespace)
+            {deltaLine: 1, deltaStart: 0, length: 3, type: SemanticTokenTypes.macro, modifiers: []}, // "   "
+            {deltaLine: 0, deltaStart: 3, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
             {deltaLine: 0, deltaStart: 2, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 

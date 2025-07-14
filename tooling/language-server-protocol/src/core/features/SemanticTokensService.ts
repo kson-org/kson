@@ -55,18 +55,51 @@ export class SemanticTokensService {
                 const nextTokens = parsedTokens.slice(i + 1, i + 4);
                 const tokenType = this.mapTokenToSemantic(token, nextTokens);
 
-                semanticTokenBuilder.push(
-                    token.start.line,
-                    token.start.column,
-                    token.value.length,
-                    KSON_LEGEND.tokenTypes.indexOf(tokenType),
-                    0
-                )
+                this.addSemanticToken(semanticTokenBuilder, token, tokenType);
             }
         }
         return semanticTokenBuilder.build();
     }
 
+    /**
+     * Add the semantic tokens to the {@link semanticTokenBuilder}. The LSP does not support multi-line semantic tokens,
+     * so in case we have an `EMBED_CONTENT` tokentype we need to split up the lines and add them one-by-one.
+     * @param semanticTokenBuilder
+     * @param token
+     * @param tokenType
+     * @private
+     */
+    private addSemanticToken(
+        semanticTokenBuilder: SemanticTokensBuilder,
+        token: Token,
+        tokenType: string | undefined
+    ): void {
+        if (token.tokenType === TokenType.EMBED_CONTENT) {
+            // Split multi-line embed content into separate tokens
+            const lines = token.text.split('\n');
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                const line = lines[lineIndex];
+
+                if (line.length > 0) { // Only create token for non-empty lines
+                    semanticTokenBuilder.push(
+                        token.start.line + lineIndex,
+                        token.start.column,
+                        line.length,
+                        KSON_LEGEND.tokenTypes.indexOf(tokenType),
+                        0
+                    );
+                }
+            }
+        } else {
+            semanticTokenBuilder.push(
+                token.start.line,
+                token.start.column,
+                token.text.length,
+                KSON_LEGEND.tokenTypes.indexOf(tokenType),
+                0
+            );
+        }
+    }
 
     /**
      * Map the {@link Token}s to vscode supported {@link SemanticTokenTypes}.
