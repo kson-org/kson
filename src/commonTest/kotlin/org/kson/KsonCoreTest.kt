@@ -10,12 +10,12 @@ import kotlin.test.assertFalse
 
 /**
  * Interface to tie together our tests that exercise and verify [KsonCore] behavior on valid Kson and give a home to our
- * custom assertions for these tests.  For tests parsing invalid Kson, see [KsonTestError].
+ * custom assertions for these tests.  For tests parsing invalid Kson, see [KsonCoreTestError].
  *
- * The tests of type [KsonTest] are split out basically along the lines of the grammar.  Tests that cross-cut concerns
+ * The tests of type [KsonCoreTest] are split out basically along the lines of the grammar.  Tests that cross-cut concerns
  * may live in [KsonCoreTestGeneralValue].
  */
-interface KsonTest {
+interface KsonCoreTest {
     /**
      * Holder for compilation settings used in test.  For most tests, these should be good defaults,
      * and custom [CompileSettings] may be constructed as needed

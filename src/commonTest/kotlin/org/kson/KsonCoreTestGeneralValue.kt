@@ -1,13 +1,13 @@
 package org.kson
 
-import org.kson.KsonTest.*
+import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 
 /**
- * Tests for general/mixed Kson values that don't fit neatly into the other [KsonTest] tests
+ * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests
  */
-class KsonCoreTestGeneralValue : KsonTest {
+class KsonCoreTestGeneralValue : KsonCoreTest {
     /**
      * A regression test that demonstrates as directly as possible the grammar ambiguity inherent to
      * trying to use one syntax element (the end-dot `.`) for closing both lists and objects.  In

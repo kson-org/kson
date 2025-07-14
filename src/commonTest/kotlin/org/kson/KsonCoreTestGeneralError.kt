@@ -5,9 +5,9 @@ import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
 /**
- * Tests for general/mixed Kson values that don't fit neatly into the other [KsonTestError] tests
+ * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTestError] tests
  */
-class KsonCoreTestGeneralError: KsonTestError {
+class KsonCoreTestGeneralError: KsonCoreTestError {
     @Test
     fun testBlankKsonSource() {
         assertParserRejectsSource("", listOf(BLANK_SOURCE))

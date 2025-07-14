@@ -1,13 +1,13 @@
 package org.kson
 
 import org.kson.CompileTarget.*
-import org.kson.KsonTest.*
+import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 
 /**
  * Tests for Kson comment handling and preservation
  */
-class KsonCoreTestComment : KsonTest {
+class KsonCoreTestComment : KsonCoreTest {
     @Test
     fun testSourceWithComment() {
         assertParsesTo("""

@@ -3,7 +3,7 @@ package org.kson
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonCoreTestNumberError : KsonTestError {
+class KsonCoreTestNumberError : KsonCoreTestError {
     @Test
     fun testDanglingExponentError() {
         assertParserRejectsSource(

@@ -4,7 +4,7 @@ import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonCoreTestListError : KsonTestError {
+class KsonCoreTestListError : KsonCoreTestError {
     @Test
     fun testUnclosedDelimitedDashList() {
         assertParserRejectsSource("<", listOf(LIST_NO_CLOSE))
