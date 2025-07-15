@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { v4 as uuid } from 'uuid';
-import * as assert from 'assert';
+import { assert } from './assert';
 
 export async function createTestFile(initialContent: string = ''): Promise<[vscode.Uri, vscode.TextDocument]> {
     const workspaceFolder = getWorkspaceFolder();
