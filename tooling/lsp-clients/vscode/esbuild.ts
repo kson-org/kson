@@ -1,6 +1,7 @@
 const esbuild = require('esbuild');
-const fs = require('fs');
-const path = require('path');
+const { cpSync, writeFileSync } = require('fs');
+const { join, basename } = require('path');
+const { glob } = require('glob');
 
 /**
  * Depending on the production or test flag we either include test files or not.
@@ -20,18 +21,7 @@ const baseConfig = {
 };
 
 function copyExtensionFiles() {
-    const extensionDir = path.join(__dirname, 'dist', 'extension');
-    const sharedExtensionDir = path.join(__dirname, '..', 'shared', 'extension');
-    
-    // Copy the entire shared extension directory
-    fs.cpSync(sharedExtensionDir, extensionDir, { recursive: true });
-    
-    console.log('[build] Extension files copied from shared');
-}
-
 async function main() {
-    // Copy shared extension files before building
-    copyExtensionFiles();
     
     // Determine output directory and externals based on build type
     const buildConfig = includeTests
@@ -88,6 +78,11 @@ async function main() {
 
     // Main build context (Node.js)
     const nodeCtx = await esbuild.context({
+    // Copy extension files
+    cpSync(join(__dirname, '..', 'shared', 'extension'),
+           join(__dirname, 'dist', 'extension'),
+           { recursive: true });
+
         ...baseConfig,
         entryPoints: nodeEntryPoints,
         outdir: buildConfig.outDir,
