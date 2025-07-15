@@ -104,10 +104,8 @@ async function main() {
         platform: 'browser',
         external: ['vscode', 'path'],
         define: {
-            'process.env.NODE_ENV': '"test"',
             'global': 'globalThis'
         },
-        inject: ['./test/browser/process-shim.js']
     });
     contexts.push(browserCtx);
 

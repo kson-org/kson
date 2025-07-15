@@ -104,7 +104,6 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/test-web": "^0.0.71",
     "@vscode/vsce": "^3.6.0",
-    "assert": "^2.1.0",
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
     "process": "^0.11.10",
