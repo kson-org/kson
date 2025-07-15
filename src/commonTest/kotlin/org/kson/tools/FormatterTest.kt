@@ -1194,6 +1194,33 @@ class FormatterTest {
     }
 
     @Test
+    fun testInvalidObjectsInPlainLists() {
+        assertFormatting(
+            """
+            - key11: 11
+              key12:
+            """.trimIndent(),
+            """
+                - key11: 11
+                  key12:
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+            - {
+              key11: 11
+              key12:
+              }
+            """.trimIndent(),
+            """
+                - key11: 11
+                  key12:
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testInvalidKsonWithTrailingComments() {
         assertFormatting(
             """

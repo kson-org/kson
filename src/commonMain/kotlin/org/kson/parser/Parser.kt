@@ -533,7 +533,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // try to parse a keyword in the style of "string followed by :"
         val keywordMark = builder.mark()
         if (string() && builder.getTokenType() == COLON) {
-            keywordMark.done(STRING)
+            keywordMark.done(OBJECT_KEY)
 
             // advance past the COLON
             builder.advanceLexer()
