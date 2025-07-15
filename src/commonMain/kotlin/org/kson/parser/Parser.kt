@@ -727,14 +727,23 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * Should only be called to validate the state of [builder] after a successful parse
      */
     private fun handleUnexpectedTrailingContent() {
-        if (!builder.eof()) {
-            // mark the unexpected content
-            val unexpectedContentMark = builder.mark()
-            while (!builder.eof()) {
-                builder.advanceLexer()
+        // get a sequence of all unexpectedTrailingContent until the end of the file.
+        generateSequence { builder.takeIf { !it.eof() } }
+            .forEachIndexed { index, _ ->
+                // mark the unexpected content
+                val unexpectedContentMark = builder.mark()
+
+                // try to parse a kson value, or consume a token if we can't
+                if (!ksonValue()) {
+                    builder.advanceLexer()
+                }
+
+                // only mark first element in error
+                when (index) {
+                    0 -> unexpectedContentMark.error(EOF_NOT_REACHED.create())
+                    else -> unexpectedContentMark.drop()
+                }
             }
-            unexpectedContentMark.error(EOF_NOT_REACHED.create())
-        }
     }
 
     private var nestingTracker = object {
