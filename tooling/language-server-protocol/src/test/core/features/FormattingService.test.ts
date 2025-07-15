@@ -19,7 +19,7 @@ describe('KSON Formatter', () => {
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
         const ksonDocument: KsonDocument = new KsonDocument(
             document,
-            Kson.getInstance().parseToAst(unformatted),
+            Kson.getInstance().analyze(unformatted),
         );
 
         const options: FormattingOptions = {
@@ -260,5 +260,3 @@ describe('KSON Formatter', () => {
         assertFormatting(content, expected, insertSpaces);
     })
 });
-
-

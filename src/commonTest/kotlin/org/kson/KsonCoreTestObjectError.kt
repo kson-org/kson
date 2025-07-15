@@ -3,7 +3,7 @@ package org.kson
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonTestObjectError : KsonTestError {
+class KsonCoreTestObjectError : KsonCoreTestError {
     @Test
     fun testObjectSourceWithInvalidInternals() {
         assertParserRejectsSource("""

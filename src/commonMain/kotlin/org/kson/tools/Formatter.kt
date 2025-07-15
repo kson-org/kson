@@ -1,19 +1,17 @@
 package org.kson.tools
 
 import org.kson.*
-import org.kson.Kson.parseToAst
+import org.kson.KsonCore.parseToAst
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
 import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 
 /**
- * Format the given [Kson] source according to [formatterConfig]
+ * Format the given Kson source according to [formatterConfig]
  *
- * @param ksonSource the [Kson] to format
+ * @param ksonSource the Kson to format
  * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
  */
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
@@ -24,8 +22,6 @@ fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormat
     ).kson ?: ksonSource
 }
 
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 data class KsonFormatterConfig(val indentType: IndentType = IndentType.Space(2))
 
 /**
@@ -310,8 +306,6 @@ class IndentFormatter(
     }
 }
 
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 sealed class IndentType {
     abstract val indentString: String
 

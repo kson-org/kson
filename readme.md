@@ -21,6 +21,12 @@ TODO document the language, remembering to clearly note:
   * In Settings, under `Build, Execution, Deployment -> Build Tools -> Gradle`, for `Gradle JVM`:
     * choose "Add JDK..." and select the `Contents/Home` folder of the JDK under `gradle/jdk` (this JDK is installed the first time you run `./gradlew check` from the command line)
 
+#### Project structure
+
+- The [root build](build.gradle.kts) of this project contains the **core Kson implementation**
+  - [lib-kotlin/]() defines the public Kson Kotlin Multiplatform interface  
+  - [tooling/](tooling) contains tooling/editor/IDE support for Kson
+- The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a seperate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
 
 #### Some useful gradle commands:
 

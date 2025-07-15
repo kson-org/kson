@@ -146,7 +146,9 @@ kotlin {
         }
         Family.LINUX -> linuxX64("nativeKson")
         Family.MINGW -> mingwX64("nativeKson")
-        else -> throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
+        Family.IOS, Family.TVOS, Family.WATCHOS, Family.ANDROID -> {
+            throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
+        }
     }
 
     nativeTarget.apply {

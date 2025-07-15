@@ -1,13 +1,13 @@
 package org.kson
 
-import org.kson.KsonTest.*
+import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 
 /**
- * Tests for general/mixed Kson values that don't fit neatly into the other [KsonTest] tests
+ * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests
  */
-class KsonTestGeneralValue : KsonTest {
+class KsonCoreTestGeneralValue : KsonCoreTest {
     /**
      * A regression test that demonstrates as directly as possible the grammar ambiguity inherent to
      * trying to use one syntax element (the end-dot `.`) for closing both lists and objects.  In
@@ -20,7 +20,7 @@ class KsonTestGeneralValue : KsonTest {
         val compileSettings = CompileSettings().ksonSettings
 
         // Note that "test_key" is a sibling of "outer_key"
-        val parseTwoOuterKeys = Kson.parseToKson("""
+        val parseTwoOuterKeys = KsonCore.parseToKson("""
             "outer_key": {
                 "inner_key": [
                   1,
@@ -31,10 +31,10 @@ class KsonTestGeneralValue : KsonTest {
             "test_key": "value"
             """.trimIndent(), compileSettings)
 
-        val doubleParseTwoOuterKeys = Kson.parseToKson(parseTwoOuterKeys.kson!!, compileSettings)
+        val doubleParseTwoOuterKeys = KsonCore.parseToKson(parseTwoOuterKeys.kson!!, compileSettings)
 
         // Note that "test_key" is a sibling of "inner_key"
-        val parseTwoInnerKeys = Kson.parseToKson(
+        val parseTwoInnerKeys = KsonCore.parseToKson(
             """
             "outer_key": {
                 "inner_key": [

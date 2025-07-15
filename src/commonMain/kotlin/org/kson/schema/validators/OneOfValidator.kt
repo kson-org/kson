@@ -10,7 +10,7 @@ class OneOfValidator(private val oneOf: List<JsonSchema>) : JsonSchemaValidator 
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
         val hasExactlyOneOf = oneOf.count {
             val oneOfMessageSink = MessageSink()
-            it.valid(ksonValue, oneOfMessageSink)
+            it.isValid(ksonValue, oneOfMessageSink)
         } == 1
         if (!hasExactlyOneOf) {
             // schema todo maybe merge in some of the errors we found?

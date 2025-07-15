@@ -1,20 +1,20 @@
-import {ParseResult} from 'kson';
+import {Analysis} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
 
 /**
  * Kson Document Entry.
  * This class wraps a standard {@link TextDocument} and adds KSON-specific information,
- * like the {@link parseResult}. It implements the {@link TextDocument} so the {@link KsonDocumentsManager} can
+ * like the {@link parseAnalysis}. It implements the {@link TextDocument} so the {@link KsonDocumentsManager} can
  * implement the standard {@link TextDocuments} manager.
  */
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
-    private readonly parseResult: ParseResult;
+    private readonly parseAnalysis: Analysis;
 
-    constructor(textDocument: TextDocument, parseResult: ParseResult) {
+    constructor(textDocument: TextDocument, parseAnalysis:Analysis) {
         this.textDocument = textDocument;
-        this.parseResult = parseResult;
+        this.parseAnalysis = parseAnalysis;
     }
 
     get uri(): DocumentUri {
@@ -48,11 +48,11 @@ export class KsonDocument implements TextDocument {
     /**
      * Returns the parse result of this {@link KsonDocument}
      */
-    getParseResult(): ParseResult {
-        if (!this.parseResult) {
+    getAnalysisResult(): Analysis {
+        if (!this.parseAnalysis) {
             throw new Error(`No parse result for : ${this.uri}`);
         }
-        return this.parseResult;
+        return this.parseAnalysis;
     }
 
     /**

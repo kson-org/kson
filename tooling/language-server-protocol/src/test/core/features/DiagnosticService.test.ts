@@ -4,7 +4,7 @@ import {
     DiagnosticSeverity
 } from 'vscode-languageserver';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {Kson, MessageType} from 'kson';
+import {Kson} from 'kson';
 import {describe, it} from 'mocha';
 import assert from "assert";
 import {DiagnosticService} from "../../../core/features/DiagnosticService";
@@ -19,18 +19,17 @@ describe('KSON Diagnostics', () => {
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
         const ksonDocument: KsonDocument = new KsonDocument(
             document,
-            Kson.getInstance().parseToAst(unformatted),
+            Kson.getInstance().analyze(unformatted),
         );
 
         const diagnosticReport = diagnosticService.createDocumentDiagnosticReport(ksonDocument);
 
         // We simplify diagnosticReport to a list of Diagnostic without message.
-        // that does not contain the message
         const getDiagnostics = (report: RelatedFullDocumentDiagnosticReport): Diagnostic[] => (
             report.items.map(diagnostic =>
                 Diagnostic.create(
                     diagnostic.range
-                    , ""
+                    , diagnostic.message
                     , diagnostic.severity
                     , diagnostic.code
                     , diagnostic.source
@@ -51,9 +50,9 @@ describe('KSON Diagnostics', () => {
                         start: {line: 0, character: 0},
                         end: {line: 0, character: 0}
                     },
-                    "",
+                    "Unable to parse a blank file.  A Kson document must describe a value.",
                     DiagnosticSeverity.Error,
-                    MessageType.BLANK_SOURCE.name,
+                    undefined,
                     "kson"
                 ),
             ];
@@ -61,5 +60,3 @@ describe('KSON Diagnostics', () => {
         assertDiagnostic(content, expected);
     });
 });
-
-

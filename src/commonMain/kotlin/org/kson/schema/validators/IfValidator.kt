@@ -13,7 +13,7 @@ class IfValidator(private val ifSchema: JsonSchema?, private val thenSchema: Jso
         }
 
         val tmpMessageSink = MessageSink()
-        if (ifSchema.valid(ksonValue, tmpMessageSink)) {
+        if (ifSchema.isValid(ksonValue, tmpMessageSink)) {
             // if condition is true, run then schema if it exists
             thenSchema?.validate(ksonValue, messageSink)
         } else {

@@ -127,7 +127,7 @@ private fun generateJsonSuiteTestClass(
 ): String {
     return """package $testClassPackage
 
-import org.kson.Kson
+import org.kson.KsonCore
 import org.kson.parser.LoggedMessage
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -203,7 +203,7 @@ private fun assertParseResult(
     expectedParseResult: JsonParseResult,
     source: String
 ) {
-    val parseResult = Kson.parseToAst(source)
+    val parseResult = KsonCore.parseToAst(source)
 
     when (expectedParseResult) {
         ${ResultEnumData.className}.${ResultEnumData.acceptEntry}, ${ResultEnumData.className}.${ResultEnumData.acceptEntryForKson} -> assertFalse(

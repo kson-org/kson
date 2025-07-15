@@ -2,7 +2,7 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestNumber : KsonTest {
+class KsonCoreTestNumber : KsonCoreTest {
     /**
      * See also [org.kson.parser.NumberParserTest] for more targeted number parsing tests
      */

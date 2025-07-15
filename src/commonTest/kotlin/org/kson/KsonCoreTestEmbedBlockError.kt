@@ -3,7 +3,7 @@ package org.kson
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 
-class KsonTestEmbedBlockError : KsonTestError {
+class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     /**
      * Regression test for a parsing problem we had at the boundary:
      * this was blowing up with an index out of bounds rather than

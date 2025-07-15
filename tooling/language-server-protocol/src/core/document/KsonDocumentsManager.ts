@@ -19,7 +19,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-                const parseResult = Kson.getInstance().parseToAst(content);
+                const parseResult = Kson.getInstance().analyze(content);
                 return new KsonDocument(textDocument, parseResult);
             },
             update: (
@@ -32,7 +32,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     changes,
                     version
                 );
-                const parseResult = Kson.getInstance().parseToAst(textDocument.getText());
+                const parseResult = Kson.getInstance().analyze(textDocument.getText());
                 return new KsonDocument(
                     textDocument,
                     parseResult

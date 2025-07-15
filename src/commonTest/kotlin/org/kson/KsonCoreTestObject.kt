@@ -2,7 +2,7 @@ package org.kson
 
 import kotlin.test.Test
 
-class KsonTestObject : KsonTest {
+class KsonCoreTestObject : KsonCoreTest {
     @Test
     fun testEmptyObjectSource() {
         assertParsesTo(
