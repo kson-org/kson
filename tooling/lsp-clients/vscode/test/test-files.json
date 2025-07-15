@@ -1,0 +1,7 @@
+{
+  "tests": [
+    "formatting-settings.test",
+    "editing.test",
+    "diagnostics.test"
+  ]
+}

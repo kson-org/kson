@@ -1,7 +1,7 @@
 const esbuild = require('esbuild');
-const { cpSync, writeFileSync } = require('fs');
-const { join, basename } = require('path');
-const { glob } = require('glob');
+const {cpSync, writeFileSync} = require('fs');
+const {join, basename} = require('path');
+const {glob} = require('glob');
 
 /**
  * Depending on the production or test flag we either include test files or not.
@@ -10,106 +10,94 @@ const { glob } = require('glob');
 const production = process.argv.includes('--production');
 const includeTests = process.argv.includes('--tests');
 
-// Base configuration that's shared between all builds
-const baseConfig = {
-    bundle: true,
-    format: 'cjs',
-    minify: production,
-    sourcemap: !production,
-    sourcesContent: false,
-    logLevel: 'warning',
-};
+async function getTestEntries() {
+    if (!includeTests) return {};
 
-function copyExtensionFiles() {
-async function main() {
-    
-    // Determine output directory and externals based on build type
-    const buildConfig = includeTests
-        ? {
-            external: ['vscode', 'mocha', '@vscode/test-electron', '@vscode/test-web',
-                'chromium-bidi/lib/cjs/bidiMapper/BidiMapper',
-                'chromium-bidi/lib/cjs/cdp/CdpConnection']
-        }
-        : {
-            external: ['vscode']
-        };
-    buildConfig.outDir = './dist'
+    // Find all test files automatically
+    const testFiles = await glob('test/suite/*.test.ts');
+    const entries = {};
+    const testList = [];
 
-    if (!production && !includeTests) {
-        throw new Error('Unknown build type - use --production or --tests');
-    }
+    // Add each test file as an entry point
+    testFiles.forEach(file => {
+        // Keep the same output structure
+        const entryName = file.replace('.ts', '').replace(/\//g, '/');
+        entries[entryName] = `./${file}`;
 
-    // Base entry points for Node.js
-    const nodeEntryPoints = {
-        client: './src/client/node/ksonClientMain.ts',
-        server: './src/server/node/ksonServerMain.ts'
+        // Add to test list for manifest
+        testList.push(basename(file, '.ts'));
+    });
+
+    // Write test manifest for runtime discovery
+    const manifest = {
+        tests: testList
     };
+    writeFileSync(join(__dirname, 'test', 'test-files.json'), JSON.stringify(manifest, null, 2));
+    console.log(`📝 Generated test manifest with ${testList.length} tests`);
 
-    // Base entry points for browser
-    const browserEntryPoints = {
-        browserClient: './src/client/browser/ksonClientMain.ts',
-        browserServer: './src/server/browser/ksonServerMain.ts'
-    };
+    // Add test runners and common files
+    entries['runTests'] = './test/runTests.ts';
+    entries['test/index.node'] = './test/node/index.node.ts';
+    entries['test/index.browser'] = './test/browser/index.browser.ts';
+    entries['test/index.common'] = './test/index.common.ts';
 
-    // Add test entry points if building tests
-    if (includeTests) {
-        // Node-only test runners
-        nodeEntryPoints['runTests'] = './test/runTests.ts';
-        nodeEntryPoints['index.node'] = './test/node/index.node.ts';
+    return entries;
+}
 
-        // Browser-only test entry
-        browserEntryPoints['index.browser'] = './test/browser/index.browser.ts';
-
-        // Shared test files (built for both platforms)
-        const sharedTestEntryPoints = {
-            'index.common': './test/index.common.ts',
-            'suite/diagnostics.test': './test/suite/diagnostics.test.ts',
-            'suite/editing.test': './test/suite/editing.test.ts',
-            'suite/formatting-settings.test': './test/suite/formatting-settings.test.ts'
-        };
-
-        // Add shared test files to both entry point sets
-        Object.assign(nodeEntryPoints, sharedTestEntryPoints);
-        Object.assign(browserEntryPoints, sharedTestEntryPoints);
-    }
-
-    // Create contexts array to handle multiple builds
-    const contexts = [];
-
-    // Main build context (Node.js)
-    const nodeCtx = await esbuild.context({
+async function build() {
     // Copy extension files
     cpSync(join(__dirname, '..', 'shared', 'extension'),
-           join(__dirname, 'dist', 'extension'),
-           { recursive: true });
+        join(__dirname, 'dist', 'extension'),
+        {recursive: true});
 
+    const testEntries = await getTestEntries();
+
+    // Common build options
+    const baseConfig = {
+        bundle: true,
+        format: 'cjs',
+        minify: production,
+        sourcemap: !production,
+        outdir: './dist',
+        logLevel: 'info',
+    };
+
+    // Build for Node.js
+    await esbuild.build({
         ...baseConfig,
-        entryPoints: nodeEntryPoints,
-        outdir: buildConfig.outDir,
+        entryPoints: {
+            'client': './src/client/node/ksonClientMain.ts',
+            'server': './src/server/node/ksonServerMain.ts',
+            ...testEntries
+        },
         platform: 'node',
-        external: buildConfig.external
+        external: ['vscode', ...(includeTests ? ['mocha', '@vscode/test-electron', '@vscode/test-web'] : [])]
     });
-    contexts.push(nodeCtx);
 
-    // Browser build context - only build if we have browser entry points
-    const browserCtx = await esbuild.context({
+    // Build for browser
+    await esbuild.build({
         ...baseConfig,
-        entryPoints: browserEntryPoints,
-        outdir: buildConfig.outDir,
+        entryPoints: {
+            'browserClient': './src/client/browser/ksonClientMain.ts',
+            'browserServer': './src/server/browser/ksonServerMain.ts',
+            // Add browser test entries when in test mode
+            ...(includeTests ? Object.fromEntries(
+                Object.entries(testEntries).filter(([key]) =>
+                    ['browser', 'common', 'suite'].some(term => key.includes(term))
+                )
+            ) : {})
+        },
         platform: 'browser',
         external: ['vscode', 'path'],
         define: {
             'global': 'globalThis'
         },
     });
-    contexts.push(browserCtx);
 
-    // Execute build
-    await Promise.all(contexts.map(ctx => ctx.rebuild()));
-    await Promise.all(contexts.map(ctx => ctx.dispose()));
+    console.log(`✅ Build complete!`);
 }
 
-main().catch(e => {
-  console.error(e);
-  process.exit(1);
-}); 
+build().catch(e => {
+    console.error('❌ Build failed:', e);
+    process.exit(1);
+});

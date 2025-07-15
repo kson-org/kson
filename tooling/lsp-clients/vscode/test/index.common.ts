@@ -1,4 +1,6 @@
 // Common test runner logic shared between Node and browser environments
+import testManifest from './test-files.json';
+
 export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
     return new Promise((resolve, reject) => {
         // Configure mocha
@@ -17,24 +19,18 @@ export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
         // Load tests
         const loadTests = async () => {
             if (isBrowser) {
-                // Browser: use dynamic imports
-                await import('./suite/diagnostics.test');
-                await import('./suite/editing.test');
-                await import('./suite/formatting-settings.test');
+                // Browser: use dynamic imports from manifest
+                for (const testName of testManifest.tests) {
+                    await import(`./suite/${testName}.ts`);
+                }
             } else {
                 // Node: use addFile
                 const path = await import('path');
                 const testsRoot = path.resolve(__dirname);
 
-                // Directly add test files without glob
-                const testFiles = [
-                    'suite/diagnostics.test.js',
-                    'suite/editing.test.js',
-                    'suite/formatting-settings.test.js'
-                ];
-
-                testFiles.forEach(f => {
-                    mocha.addFile(path.resolve(testsRoot, f));
+                // Use test files from manifest
+                testManifest.tests.forEach(testName => {
+                    mocha.addFile(path.resolve(testsRoot, 'suite', `${testName}.js`));
                 });
             }
         };
