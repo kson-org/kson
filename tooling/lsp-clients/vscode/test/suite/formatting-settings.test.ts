@@ -13,6 +13,10 @@ describe('Formatting Settings Test Suite', () => {
         const [uri, doc] = await createTestFile(unformattedContent);
         testFileUri = uri;
         document = doc;
+
+        // Wait for the extension to be active
+        const extension = vscode.extensions.getExtension('kson-org.kson-vscode-plugin');
+        await extension.activate();
     })
 
     afterEach(async () => {
