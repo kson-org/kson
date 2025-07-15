@@ -3,19 +3,6 @@ import testManifest from './test-files.json';
 
 export async function runTests(mocha: any, isBrowser: boolean): Promise<void> {
     return new Promise((resolve, reject) => {
-        // Configure mocha
-        if (isBrowser) {
-            mocha.setup({
-                /**
-                 * Set this to 'bdd'(behavior-driven-development) for now. Changing this throws unexpected errors when running the
-                 * tests.
-                 */
-                ui: 'bdd',
-                reporter: undefined,
-                timeout: 10000
-            });
-        }
-
         // Load tests
         const loadTests = async () => {
             if (isBrowser) {
