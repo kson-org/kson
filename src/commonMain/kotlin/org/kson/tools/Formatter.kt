@@ -22,7 +22,15 @@ fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormat
     ).kson ?: ksonSource
 }
 
-data class KsonFormatterConfig(val indentType: IndentType = IndentType.Space(2))
+enum class FormattingStyle {
+    PLAIN,
+    DELIMITED
+}
+
+data class KsonFormatterConfig(
+    val indentType: IndentType = IndentType.Space(2),
+    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+)
 
 /**
  * Fast and flexible [Token]-based indentation for Kson.  Note that the given Kson does not need to be valid
