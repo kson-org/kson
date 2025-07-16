@@ -8,7 +8,8 @@ import org.kson.Kson.publishMessages
 import org.kson.ast.KsonValue
 import org.kson.parser.*
 import org.kson.schema.JsonSchema
-import org.kson.tools.IndentType
+import org.kson.tools.FormattingStyle as InternalFormattingStyle
+import org.kson.tools.IndentType as InternalIndentType
 import org.kson.tools.KsonFormatterConfig
 import org.kson.parser.TokenType as InternalTokenType
 import org.kson.parser.Token as InternalToken
@@ -25,14 +26,8 @@ object Kson {
      * @param formatOptions The formatting options to apply
      * @return The formatted Kson source
      */
-    fun format(kson: String, formatOptions: FormatOptions = FormatOptions.DEFAULT): String {
-        val indentType = when (formatOptions) {
-            is FormatOptions.Spaces -> IndentType.Space(formatOptions.size)
-            is FormatOptions.Tabs -> IndentType.Tab()
-        }
-        
-        val config = KsonFormatterConfig(indentType = indentType)
-        return org.kson.tools.format(kson, config)
+    fun format(kson: String, formatOptions: FormatOptions = FormatOptions()): String {
+        return org.kson.tools.format(kson, formatOptions.toInternal())
     }
 
     /**
@@ -152,17 +147,47 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
 /**
  * Options for formatting Kson output.
  */
-sealed class FormatOptions {
+data class FormatOptions(
+    val indentType: IndentType = IndentType.Spaces(2),
+    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+) {
+    /**
+     * Map [FormatOptions] to [KsonFormatterConfig] that is used internally to format a Kson document.
+     */
+    internal fun toInternal(): KsonFormatterConfig {
+        val indentType = when (indentType) {
+            is IndentType.Spaces -> InternalIndentType.Space(indentType.size)
+            is IndentType.Tabs -> InternalIndentType.Tab()
+        }
+
+        val formattingStyle = when (formattingStyle){
+            FormattingStyle.PLAIN -> InternalFormattingStyle.PLAIN
+            FormattingStyle.DELIMITED -> InternalFormattingStyle.DELIMITED
+        }
+        return KsonFormatterConfig(indentType = indentType, formattingStyle)
+    }
+}
+
+/**
+ * [FormattingStyle] options for Kson Output
+ */
+enum class FormattingStyle{
+    /**
+     * These values map to [InternalFormattingStyle]
+     */
+    PLAIN,
+    DELIMITED
+}
+
+/**
+ * Options for indenting Kson Output
+ */
+sealed class IndentType {
     /** Use spaces for indentation with the specified count */
-    data class Spaces(val size: Int = 2) : FormatOptions()
+    data class Spaces(val size: Int = 2) : IndentType()
 
     /** Use tabs for indentation */
-    data object Tabs : FormatOptions()
-
-    companion object {
-        /** Default formatting: 2 spaces */
-        val DEFAULT = Spaces(2)
-    }
+    data object Tabs : IndentType()
 }
 
 /**

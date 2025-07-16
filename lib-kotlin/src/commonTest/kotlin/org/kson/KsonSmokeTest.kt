@@ -23,18 +23,37 @@ class KsonSmokeTest {
     @Test
     fun testFormat_withSpacesOption() {
         val input = """{"name": "test", "value": 123}"""
-        val formatted = Kson.format(input, FormatOptions.Spaces(6))
+        val formatted = Kson.format(input, FormatOptions(IndentType.Spaces(6)))
         assertEquals("""
                   name: test
                   value: 123
             """.trimIndent(),
             formatted)
     }
+
+    @Test
+    fun testFormat_withDelimitedOption() {
+        val input = """{"name": "test", "list": [1, 2, 3]}"""
+        val formatted = Kson.format(input, FormatOptions(formattingStyle = FormattingStyle.DELIMITED))
+        assertEquals(
+            """
+            {
+              name: test
+              list: <
+                - 1
+                - 2
+                - 3
+              >
+            }
+        """.trimIndent(),
+            formatted
+        )
+    }
     
     @Test
     fun testFormat_withTabsOption() {
         val input = """{"name": "test", "value": 123}"""
-        val result = Kson.format(input, FormatOptions.Tabs)
+        val result = Kson.format(input, FormatOptions(IndentType.Tabs))
         assertIs<String>(result)
         assertTrue(result.isNotEmpty())
     }
