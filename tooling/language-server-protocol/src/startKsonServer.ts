@@ -8,6 +8,7 @@ import {
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
+import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 
 /**
@@ -41,6 +42,16 @@ export function startKsonServer(connection: Connection): void {
                 interFileDependencies: false,
                 workspaceDiagnostics: false
             } as DiagnosticRegistrationOptions,
+
+            // Code lens
+            codeLensProvider: {
+                resolveProvider: false
+            },
+
+            // Execute command
+            executeCommandProvider: {
+                commands: getAllCommandIds()
+            },
 
             workspace: {
                 workspaceFolders: {

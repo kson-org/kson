@@ -6,11 +6,16 @@ import {
     DocumentFormattingParams,
     DocumentDiagnosticParams,
     DocumentDiagnosticReport,
+    CodeLens,
+    CodeLensParams,
+    ExecuteCommandParams,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
 import {DiagnosticService} from '../features/DiagnosticService.js';
 import {SemanticTokensService} from '../features/SemanticTokensService.js';
+import {CodeLensService} from '../features/CodeLensService.js';
+import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 
 /**
@@ -22,13 +27,16 @@ export class KsonTextDocumentService {
     private formattingService: FormattingService;
     private diagnosticService: DiagnosticService;
     private semanticTokensService: SemanticTokensService;
+    private codeLensService: CodeLensService;
+    private commandExecutor!: CommandExecutor;
     private configuration: Required<KsonSettings>;
 
     constructor(private documentManager: KsonDocumentsManager) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService();
         this.semanticTokensService = new SemanticTokensService();
-        
+        this.codeLensService = new CodeLensService();
+
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
     }
@@ -46,6 +54,14 @@ export class KsonTextDocumentService {
      */
     connect(connection: Connection): void {
         this.connection = connection;
+
+        // Initialize CommandExecutor with the connection
+        this.commandExecutor = new CommandExecutor(
+            this.connection,
+            this.documentManager,
+            this.formattingService,
+            () => this.configuration
+        );
 
         this.setupLanguageFeatures();
     }
@@ -66,6 +82,8 @@ export class KsonTextDocumentService {
         this.connection.onDocumentFormatting(this.onDocumentFormatting.bind(this));
         this.connection.languages.semanticTokens.on(this.onSemanticTokensFull.bind(this));
         this.connection.languages.diagnostics.on(this.onDiagnostic.bind(this));
+        this.connection.onCodeLens(this.onCodeLens.bind(this));
+        this.connection.onExecuteCommand(this.onExecuteCommand.bind(this));
     }
 
 
@@ -107,4 +125,26 @@ export class KsonTextDocumentService {
             };
         }
     }
-} 
+
+    private async onCodeLens(params: CodeLensParams): Promise<CodeLens[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            return this.codeLensService.getCodeLenses(document);
+        } catch (error) {
+            this.connection.console.error(`Error providing code lenses: ${error}`);
+            return [];
+        }
+    }
+
+    private async onExecuteCommand(params: ExecuteCommandParams): Promise<any> {
+        try {
+            return await this.commandExecutor.execute(params);
+        } catch (error) {
+            this.connection.console.error(`Error executing command: ${error}`);
+            this.connection.window.showErrorMessage(`Command execution failed: ${error}`);
+        }
+    }
+}
