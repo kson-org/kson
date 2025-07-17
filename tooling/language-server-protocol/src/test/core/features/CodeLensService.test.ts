@@ -5,6 +5,7 @@ import {Kson} from 'kson';
 import {describe, it} from 'mocha';
 import assert from 'assert';
 import {TextDocument} from 'vscode-languageserver-textdocument';
+import {FormattingStyle} from 'kson'
 
 describe('CodeLensService', () => {
     const service = new CodeLensService();
@@ -22,14 +23,20 @@ describe('CodeLensService', () => {
         // First lens should be "plain format"
         assert.strictEqual(lenses[0].command?.title, 'plain');
         assert.strictEqual(lenses[0].command?.command, CommandType.PLAIN_FORMAT);
-        assert.deepStrictEqual(lenses[0].command?.arguments, ['file:///test.kson']);
+        assert.deepStrictEqual(lenses[0].command?.arguments, [{
+            documentUri: 'file:///test.kson',
+            formattingStyle: FormattingStyle.PLAIN
+        }]);
         assert.deepStrictEqual(lenses[0].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[0].range.end, { line: 0, character: 0 });
 
         // Second lens should be "delimited format"
         assert.strictEqual(lenses[1].command?.title, 'delimited');
         assert.strictEqual(lenses[1].command?.command, CommandType.DELIMITED_FORMAT);
-        assert.deepStrictEqual(lenses[1].command?.arguments, ['file:///test.kson']);
+        assert.deepStrictEqual(lenses[1].command?.arguments, [{
+            documentUri: 'file:///test.kson',
+            formattingStyle: FormattingStyle.DELIMITED
+        }]);
         assert.deepStrictEqual(lenses[1].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[1].range.end, { line: 0, character: 0 });
     });

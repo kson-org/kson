@@ -6,7 +6,8 @@ import {
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
 import {CommandType} from './CommandType.js';
-import {FormatOptions, FormattingStyle} from 'kson';
+import {CommandParameters, isValidCommand} from './CommandParameters.js';
+import {FormatOptions} from 'kson';
 import type {KsonSettings} from '../KsonSettings.js';
 import {KsonDocument} from "../document/KsonDocument";
 
@@ -28,13 +29,23 @@ export class CommandExecutor {
     async execute(params: ExecuteCommandParams): Promise<any> {
         const {command, arguments: args} = params;
 
-        if (!args || args.length === 0) {
+        if (!isValidCommand(command)) {
+            this.connection.console.warn(`Unknown command: ${command}`);
             return;
         }
 
-        const documentUri = args[0] as string;
-        const document = this.documentManager.get(documentUri);
+        /**
+         * To provide type safety the length of the arguments should always be a list of length 1. This single element
+         * is then parsed to {@link CommandParameters}. For a new command you are expected to create a new
+         * {@link CommandParameters} with the arguments that are expected.
+         */
+        if (!args || args.length === 0) {
+            this.connection.console.warn(`No arguments provided for command: ${command}`);
+            return;
+        }
+        const commandArgs = args[0] as CommandParameters[typeof command];
 
+        const document = this.documentManager.get(commandArgs.documentUri);
         if (!document) {
             this.connection.window.showErrorMessage('Document not found');
             return;
@@ -42,18 +53,14 @@ export class CommandExecutor {
 
         switch (command) {
             case CommandType.PLAIN_FORMAT:
-            case CommandType.DELIMITED_FORMAT:
-                const baseFormattingOptions = this.getConfiguration().kson.formatOptions;
-                const formattingStyle = command === CommandType.PLAIN_FORMAT ? FormattingStyle.PLAIN : FormattingStyle.DELIMITED;
+            case CommandType.DELIMITED_FORMAT: {
+                const indentType = this.getConfiguration().kson.formatOptions.indentType;
 
-                return this.executeFormat(documentUri, document, new FormatOptions(
-                    baseFormattingOptions.indentType,
-                    formattingStyle
+                return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
+                    indentType,
+                    commandArgs.formattingStyle,
                 ));
-
-            default:
-                this.connection.console.warn(`Unknown command: ${command}`);
-                return;
+            }
         }
     }
 

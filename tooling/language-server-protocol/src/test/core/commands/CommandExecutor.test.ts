@@ -6,6 +6,7 @@ import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentSe
 import {KsonDocumentsManager} from "../../../core/document/KsonDocumentsManager";
 import {DidOpenTextDocumentParams, ExecuteCommandParams} from "vscode-languageserver";
 import {CommandType} from "../../../core/commands/CommandType";
+import {FormattingStyle} from "kson";
 
 describe('KSON Command Executor', () => {
     let connection: ConnectionStub;
@@ -53,7 +54,7 @@ describe('KSON Command Executor', () => {
         ].join('\n');
         await executeAndAssertCommand(content, expected, {
             command: CommandType.PLAIN_FORMAT,
-            arguments: [TEST_URI]
+            arguments: [{ documentUri: TEST_URI, formattingStyle: FormattingStyle.PLAIN }]
         });
     });
 
@@ -66,7 +67,7 @@ describe('KSON Command Executor', () => {
         ].join('\n');
         await executeAndAssertCommand(content, expected, {
             command: CommandType.DELIMITED_FORMAT,
-            arguments: [TEST_URI]
+            arguments: [{ documentUri: TEST_URI, formattingStyle: FormattingStyle.DELIMITED  }]
         });
     });
 
