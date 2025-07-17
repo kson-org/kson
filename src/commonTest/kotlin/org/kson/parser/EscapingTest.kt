@@ -1,6 +1,7 @@
 package org.kson.parser
 
 import org.kson.ast.renderForJsonString
+import org.kson.ast.unescapeStringContent
 import org.kson.testSupport.validateJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -108,5 +109,89 @@ class EscapingTest {
         val longString = input.repeat(1000)
         val longExpected = expected.repeat(1000)
         assertJsonStringEscaping(longString, longExpected)
+    }
+
+    // Tests for unescapeJsonString
+
+    @Test
+    fun testUnescapeBasicEscapes() {
+        assertEquals("\"", unescapeStringContent("\\\""))
+        assertEquals("\\", unescapeStringContent("\\\\"))
+        assertEquals("/", unescapeStringContent("\\/"))
+        assertEquals("\b", unescapeStringContent("\\b"))
+        assertEquals("\u000C", unescapeStringContent("\\f"))
+        assertEquals("\n", unescapeStringContent("\\n"))
+        assertEquals("\r", unescapeStringContent("\\r"))
+        assertEquals("\t", unescapeStringContent("\\t"))
+    }
+
+    @Test
+    fun testUnescapeUnicodeEscapes() {
+        assertEquals("A", unescapeStringContent("\\u0041"))
+        assertEquals("€", unescapeStringContent("\\u20AC"))
+        assertEquals("\u2028", unescapeStringContent("\\u2028"))
+        assertEquals("\u2029", unescapeStringContent("\\u2029"))
+        assertEquals("\u0000", unescapeStringContent("\\u0000"))
+        assertEquals("\u001F", unescapeStringContent("\\u001F"))
+    }
+
+    @Test
+    fun testUnescapeSurrogatePairs() {
+        // Musical G-clef (U+1D11E)
+        assertEquals("𝄞", unescapeStringContent("\\uD834\\uDD1E"))
+        // Emoji: 🌍 (U+1F30D)
+        assertEquals("🌍", unescapeStringContent("\\uD83C\\uDF0D"))
+        // Mathematical bold capital A (U+1D400)
+        assertEquals("𝐀", unescapeStringContent("\\uD835\\uDC00"))
+    }
+
+    @Test
+    fun testUnescapeMixedContent() {
+        assertEquals("Hello \"World\"!", unescapeStringContent("Hello \\\"World\\\"!"))
+        assertEquals("Line 1\nLine 2\tTabbed", unescapeStringContent("Line 1\\nLine 2\\tTabbed"))
+        assertEquals("Path: C:\\Users\\John", unescapeStringContent("Path: C:\\\\Users\\\\John"))
+        assertEquals("\"Hello\n世界\t!", unescapeStringContent("\\\"Hello\\n世界\\t!"))
+    }
+
+    @Test
+    fun testUnescapeNoEscapes() {
+        assertEquals("Hello World", unescapeStringContent("Hello World"))
+        assertEquals("123.456", unescapeStringContent("123.456"))
+        assertEquals("こんにちは", unescapeStringContent("こんにちは"))
+    }
+
+    @Test
+    fun testUnescapeInvalidEscapes() {
+        // Invalid escape sequences should be preserved
+        assertEquals("\\x", unescapeStringContent("\\x"))
+        assertEquals("\\", unescapeStringContent("\\"))
+        
+        // Invalid unicode (not enough digits)
+        assertEquals("\\u12", unescapeStringContent("\\u12"))
+        assertEquals("\\u", unescapeStringContent("\\u"))
+        assertEquals("\\uXYZ", unescapeStringContent("\\uXYZ"))
+    }
+
+    @Test
+    fun testRoundTripEscaping() {
+        val testStrings = listOf(
+            "Hello World",
+            "Quote: \"test\"",
+            "Backslash: \\",
+            "Newline:\nTab:\t",
+            "Unicode: €",
+            "Emoji: 😀",
+            "Path: /home/user",
+            "Control: \b\u000C",
+            "\u0000\u001F", // control characters
+            "\u2028\u2029", // line/paragraph separators
+            "Mixed\\\"content\nwith\ttabs"
+        )
+        
+        for (original in testStrings) {
+            val escaped = renderForJsonString(original)
+            val unescaped = unescapeStringContent(escaped)
+            assertEquals(original, unescaped, "Failed to round-trip: $original")
+        }
     }
 } 

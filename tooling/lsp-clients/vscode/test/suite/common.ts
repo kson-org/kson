@@ -1,0 +1,40 @@
+import * as vscode from 'vscode';
+import { v4 as uuid } from 'uuid';
+import * as assert from 'assert';
+
+export async function createTestFile(initialContent: string = ''): Promise<[vscode.Uri, vscode.TextDocument]> {
+    const workspaceFolder = getWorkspaceFolder();
+    const fileName = `${uuid()}.kson`;
+    
+    // Always use VS Code's URI joining which works in both environments
+    const uri = vscode.Uri.joinPath(workspaceFolder.uri, fileName);
+    
+    // Use TextEncoder for browser compatibility (works in Node.js too)
+    const encoder = new TextEncoder();
+    await vscode.workspace.fs.writeFile(uri, encoder.encode(initialContent));
+    
+    const document = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(document);
+
+    return [uri, document];
+}
+
+export async function cleanUp(uri: vscode.Uri) {
+    if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.uri.toString() === uri.toString()) {
+        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    }
+    await vscode.workspace.fs.delete(uri, { useTrash: false });
+}
+
+export function assertTextEqual(document: vscode.TextDocument, expectedText: string) {
+    const actualText = document.getText();
+    assert.strictEqual(actualText, expectedText);
+}
+
+function getWorkspaceFolder(): vscode.WorkspaceFolder {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+        throw new Error('No workspace folder open');
+    }
+    return workspaceFolders[0];
+}

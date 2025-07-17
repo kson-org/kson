@@ -1,13 +1,13 @@
 package org.kson.cli
 
 import org.kson.CompileTarget
-import org.kson.Kson
+import org.kson.KsonCore
 import org.kson.ParseResult
 import org.kson.ast.AstNode
 import org.kson.mpp.PlatformShim
 
 /**
- * A [CommandLineInterface] for parsing [Kson].  Platform-specific configuration is injected in [platformShim],
+ * A [CommandLineInterface] for parsing Kson.  Platform-specific configuration is injected in [platformShim],
  * and output is written to [out].  See [formatParseResult] for details on the output format.
  */
 class CommandLineInterface(private val platformShim: PlatformShim, private val out: (String) -> Unit) {
@@ -42,7 +42,7 @@ class CommandLineInterface(private val platformShim: PlatformShim, private val o
             inputBuilder.toString()
         }
 
-        val parseResult = Kson.parseToAst(ksonSource)
+        val parseResult = KsonCore.parseToAst(ksonSource)
         out(formatParseResult(parseResult))
 
         if (parseResult.hasErrors()) {

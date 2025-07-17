@@ -1,8 +1,6 @@
 package org.kson.parser
 
 import org.kson.parser.behavior.embedblock.EmbedDelim
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 
 /**
  * [ElementType] unifies the two different types of elements marked by [AstMarker.done]:
@@ -17,8 +15,6 @@ interface ElementType
  *   some are produced by [Lexer] for the purpose of helping the parser produce more effective help/errors for
  *   the end user
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 enum class TokenType : ElementType {
     // {
     CURLY_BRACE_L,

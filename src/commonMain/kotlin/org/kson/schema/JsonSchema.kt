@@ -6,16 +6,15 @@ import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
 
-
 /**
  * Base [JsonSchema] type that [KsonValue]s may be validated against
  */
 sealed interface JsonSchema {
   fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 
-  fun valid(node: KsonValue, messageSink: MessageSink): Boolean {
+  fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
     val numErrors = messageSink.loggedMessages().size
-    validate(node, messageSink)
+    validate(ksonValue, messageSink)
     return messageSink.loggedMessages().size == numErrors
   }
 }
@@ -34,7 +33,7 @@ class JsonObjectSchema(
 ) : JsonSchema {
 
   /**
-   * Validates a [KsonValue] node against this schema, logging any validation errors to the [messageSink]
+   * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]
    */
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
     if (typeValidator != null) {

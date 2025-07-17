@@ -1,13 +1,8 @@
 package org.kson.parser.messages
 
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
-
 /**
  * Instances of [Message] are created with [MessageType.create]
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 interface Message {
     val type: MessageType
     override fun toString(): String
@@ -20,8 +15,6 @@ interface Message {
  * and also facilitates easy/robust testing against [MessageType] types (rather than for instance brittle string
  * matches on error message content)
  */
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 enum class MessageType {
     BLANK_SOURCE {
         override fun expectedArgs(): List<String> {
@@ -61,7 +54,7 @@ enum class MessageType {
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected trailing content.  The previous content parsed as a complete Kson document."
+            return "Unexpected trailing content. The previous content parsed as a complete Kson document."
         }
     },
     LIST_NO_CLOSE {

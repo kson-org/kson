@@ -7,9 +7,10 @@ class FormatterTest {
     private fun assertFormatting(
         source: String,
         expected: String,
-        indentType: IndentType = IndentType.Space(2)
+        indentType: IndentType = IndentType.Space(2),
+        formattingStyle: FormattingStyle = FormattingStyle.PLAIN
     ) {
-        val formattedKson = format(source, KsonFormatterConfig(indentType))
+        val formattedKson = format(source, KsonFormatterConfig(indentType, formattingStyle))
         assertEquals(
             expected,
             formattedKson
@@ -17,7 +18,7 @@ class FormatterTest {
 
         assertEquals(
             expected,
-            format(formattedKson, KsonFormatterConfig(indentType)),
+            format(formattedKson, KsonFormatterConfig(indentType, formattingStyle)),
             "formatting should be idempotent, but this reformat changed the result"
         )
     }
@@ -1227,6 +1228,170 @@ class FormatterTest {
 
                 "Illegal trailing content"
             """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+                key: value trailingContent
+                list: [1,2,3] extraTrailingContent
+            """.trimIndent(),
+            """
+                key: value
+                
+                trailingContent
+          
+                
+                list:
+                  - 1
+                  - 2
+                  - 3
+                
+                extraTrailingContent
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+                key: value extraValue list:[1,2,3]
+            """.trimIndent(),
+            """
+                key: value
+                
+                extraValue 
+          
+                list:
+                  - 1
+                  - 2
+                  - 3
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingStyleObjects() {
+        assertFormatting(
+            """
+                key: value
+            """.trimIndent(),
+            """
+                {
+                  key: value
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+
+        assertFormatting(
+            """
+                key: 
+                  nested: value
+                  .
+                unnested: value
+            """.trimIndent(),
+            """
+                {
+                  key: {
+                    nested: value
+                  }
+                  unnested: value
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingStyleLists(){
+        assertFormatting(
+            """
+                list: [1,2,3]
+            """.trimIndent(),
+            """
+                {
+                  list: <
+                    - 1
+                    - 2
+                    - 3
+                  >
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+
+        assertFormatting(
+            """
+                [1,2,3]
+            """.trimIndent(),
+            """
+               <
+                 - 1
+                 - 2
+                 - 3
+               >
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+
+        assertFormatting(
+            """
+                list: 
+                  - 1
+                  - 2
+                  - key: value
+                  - 
+                     - "new list"
+                     =
+                  - test
+            """.trimIndent(),
+            """
+                {
+                  list: <
+                    - 1
+                    - 2
+                    - {
+                        key: value
+                      }
+                    - <
+                        - 'new list'
+                      >
+                    - test
+                  >
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingStyleEmbed(){
+        assertFormatting(
+            """
+                $
+                content
+                $$
+            """.trimIndent(),
+            """
+                %
+                content
+                %%
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+
+        assertFormatting(
+            """
+                embedBlock: $
+                content
+                $$
+            """.trimIndent(),
+            """
+                {
+                  embedBlock: %
+                    content
+                    %%
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
         )
     }
 }

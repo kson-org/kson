@@ -5,8 +5,8 @@ import {
     DocumentDiagnosticReport,
     RelatedFullDocumentDiagnosticReport
 } from 'vscode-languageserver';
-import {LoggedMessage} from 'kson';
 import {KsonDocument} from '../document/KsonDocument';
+import {Message} from 'kson';
 
 /**
  * Service responsible for providing diagnostic information for Kson documents.
@@ -22,7 +22,7 @@ export class DiagnosticService {
     }
 
     private getDiagnostics(document: KsonDocument): Diagnostic[] {
-        return this.loggedMessagesToDiagnostics(document.getParseResult().messages.asJsReadonlyArrayView());
+        return this.loggedMessagesToDiagnostics(document.getAnalysisResult().errors.asJsReadonlyArrayView());
     }
 
     /**
@@ -30,35 +30,34 @@ export class DiagnosticService {
      * @param messages
      * @private
      */
-    private loggedMessagesToDiagnostics(messages: readonly LoggedMessage[]): Diagnostic[] {
+    private loggedMessagesToDiagnostics(messages: readonly Message[]): Diagnostic[] {
         return messages.map(msg => this.loggedMessageToDiagnostic(msg));
     }
 
     /**
      * Convert Kson {@link LoggedMessage} type to a to language server {@link Diagnostic} type.
      */
-    private loggedMessageToDiagnostic(loggedMessage: LoggedMessage): Diagnostic {
+    private loggedMessageToDiagnostic(loggedMessage: Message): Diagnostic {
         return {
-            range: this.locationToRange(loggedMessage.location),
+            range: this.locationToRange(loggedMessage),
             severity: DiagnosticSeverity.Error,
             source: 'kson',
             message: loggedMessage.message.toString(),
-            code: loggedMessage.message.type.name
         };
     }
 
     /**
      * Convert Kson Location to LSP Range.
      */
-    private locationToRange(location: any): Range {
+    private locationToRange(message: Message): Range {
         return {
             start: {
-                line: location.start.line,
-                character: location.start.column
+                line: message.start.line,
+                character: message.start.column
             },
             end: {
-                line: location.end.line,
-                character: location.end.column
+                line: message.end.line,
+                character: message.end.column
             }
         };
     }

@@ -1,0 +1,3 @@
+# ignore our test .kson files
+*.kson
+.vscode

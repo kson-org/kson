@@ -321,16 +321,10 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             KsonValueNodeError(it, marker.getLocation())
                         }
 
-                        val erroneousTrailingContent = if (childMarkers.size > 1) {
-                            val errorContent = childMarkers.subList(1, childMarkers.size)
-                                .joinToString("") { childMarker ->
-                                    childMarker.getRawText()
-                                }
-                            KsonValueNodeError(
-                                errorContent,
-                                marker.getLocation())
-                        } else {
-                            null
+                        val erroneousTrailingContent = childMarkers.drop(1).map {
+                            unsafeAstCreate<KsonValueNode>(it) {
+                                KsonValueNodeError(it, marker.getLocation())
+                            }
                         }
 
                         KsonRootImpl(rootNode,

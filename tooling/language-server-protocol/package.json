@@ -13,7 +13,12 @@
   "version": "0.0.1",
   "description": "Kson Language Server implementation in TypeScript",
   "type": "module",
-  "main": "./out/startKsonServer.js",
+  "exports": {
+    ".": {
+      "types": "./out/index.d.ts",
+      "default": "./out/index.js"
+    }
+  },
   "scripts": {
     "compile": "tsc",
     "test": "mocha 'out/test/**/*.test.js'"
@@ -28,7 +33,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "kson": "file:../../build/dist/js/productionLibrary",
+    "kson": "file:../../lib-kotlin/build/dist/js/productionLibrary",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.12"
   },

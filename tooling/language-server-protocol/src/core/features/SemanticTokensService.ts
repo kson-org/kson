@@ -2,7 +2,6 @@ import {SemanticTokens, SemanticTokensBuilder, SemanticTokensLegend, SemanticTok
 import {KsonDocument} from '../document/KsonDocument';
 import {Token, TokenType} from 'kson';
 
-
 export const KSON_LEGEND: SemanticTokensLegend = {
     tokenTypes: [
         // Strings and quotes
@@ -46,7 +45,7 @@ export class SemanticTokensService {
     private tokenizeKsonDocument(document: KsonDocument): SemanticTokens {
         const semanticTokenBuilder = new SemanticTokensBuilder()
 
-        const parsedTokens = document.getParseResult().lexedTokens.asJsReadonlyArrayView();
+        const parsedTokens = document.getAnalysisResult().tokens.asJsReadonlyArrayView();
         if (parsedTokens) {
             for (let i = 0; i < parsedTokens.length; i++) {
                 const token = parsedTokens[i];
@@ -56,19 +55,51 @@ export class SemanticTokensService {
                 const nextTokens = parsedTokens.slice(i + 1, i + 4);
                 const tokenType = this.mapTokenToSemantic(token, nextTokens);
 
-                const tokenLocation = token.lexeme.location;
-                semanticTokenBuilder.push(
-                    tokenLocation.start.line,
-                    tokenLocation.start.column,
-                    tokenLocation.endOffset - tokenLocation.startOffset,
-                    KSON_LEGEND.tokenTypes.indexOf(tokenType),
-                    0
-                )
+                this.addSemanticToken(semanticTokenBuilder, token, tokenType);
             }
         }
         return semanticTokenBuilder.build();
     }
 
+    /**
+     * Add the semantic tokens to the {@link semanticTokenBuilder}. The LSP does not support multi-line semantic tokens,
+     * so in case we have an `EMBED_CONTENT` tokentype we need to split up the lines and add them one-by-one.
+     * @param semanticTokenBuilder
+     * @param token
+     * @param tokenType
+     * @private
+     */
+    private addSemanticToken(
+        semanticTokenBuilder: SemanticTokensBuilder,
+        token: Token,
+        tokenType: string | undefined
+    ): void {
+        if (token.tokenType === TokenType.EMBED_CONTENT) {
+            // Split multi-line embed content into separate tokens
+            const lines = token.text.split('\n');
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                const line = lines[lineIndex];
+
+                if (line.length > 0) { // Only create token for non-empty lines
+                    semanticTokenBuilder.push(
+                        token.start.line + lineIndex,
+                        token.start.column,
+                        line.length,
+                        KSON_LEGEND.tokenTypes.indexOf(tokenType),
+                        0
+                    );
+                }
+            }
+        } else {
+            semanticTokenBuilder.push(
+                token.start.line,
+                token.start.column,
+                token.text.length,
+                KSON_LEGEND.tokenTypes.indexOf(tokenType),
+                0
+            );
+        }
+    }
 
     /**
      * Map the {@link Token}s to vscode supported {@link SemanticTokenTypes}.
@@ -91,11 +122,6 @@ export class SemanticTokensService {
                 } else {
                     semanticType = SemanticTokenTypes.string;
                 }
-                break;
-            case TokenType.STRING_ESCAPE:
-            case TokenType.STRING_UNICODE_ESCAPE:
-            case TokenType.STRING_ILLEGAL_CONTROL_CHARACTER:
-                semanticType = SemanticTokenTypes.string;
                 break;
 
             // Numbers
