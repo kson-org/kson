@@ -9,7 +9,9 @@
     "monaco"
   ],
   "scripts": {
-    "buildPlugins": "npm run compile && npm run build -w monaco && npm run packagePlugin -w vscode",
+    "buildMonaco": "npm run compile && npm run build -w monaco",
+    "buildVSCode": "npm run compile && npm run packagePlugin -w vscode",
+    "buildPlugins": "npm run buildMonaco && npm run buildVSCode",
     "compile": "npm run compile -w shared && npm run compile -w vscode",
     "clean": "npm run clean --workspaces --if-present",
     "test": "npm run compile && npm run test --workspaces --if-present",

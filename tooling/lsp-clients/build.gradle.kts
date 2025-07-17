@@ -19,6 +19,10 @@ tasks {
 
     named("check") {
         dependsOn("npm_run_test")
-        dependsOn("npm_run_buildPlugins")
+        /**
+         * TODO - Ideally this task is "npm_run_buildPlugins" building both plugins, however, for now the Monaco Vite build
+         * is too unpredictable in CI
+         */
+        dependsOn("npm_run_buildVSCode")
     }
 }

@@ -70,14 +70,7 @@ jobs:
 
       - run:
           name: Verify Kson project
-          # This check excludes `:tooling:lsp-clients:check` since that consistently resulted
-          # in OOM-errors during the vite build.
-          command: ./gradlew -x :tooling:lsp-clients:check check
-
-      - run:
-          name: Verify Kson tooling
-          # This check is run separately and without daemon to prevent OOM-errors during the vite build in Monaco
-          command: ./gradlew :tooling:lsp-clients:check --no-daemon
+          command: ./gradlew check
 
       - save_cache:
           paths:
