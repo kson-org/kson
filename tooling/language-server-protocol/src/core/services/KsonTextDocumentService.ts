@@ -11,6 +11,7 @@ import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
 import {DiagnosticService} from '../features/DiagnosticService.js';
 import {SemanticTokensService} from '../features/SemanticTokensService.js';
+import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 
 /**
  * This is the coordinator for all the service classes.
@@ -21,11 +22,15 @@ export class KsonTextDocumentService {
     private formattingService: FormattingService;
     private diagnosticService: DiagnosticService;
     private semanticTokensService: SemanticTokensService;
+    private configuration: Required<KsonSettings>;
 
     constructor(private documentManager: KsonDocumentsManager) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService();
         this.semanticTokensService = new SemanticTokensService();
+        
+        // Default configuration
+        this.configuration = ksonSettingsWithDefaults();
     }
 
     /**
@@ -43,6 +48,15 @@ export class KsonTextDocumentService {
         this.connection = connection;
 
         this.setupLanguageFeatures();
+    }
+
+    /**
+     * Updates the configuration for the text document service.
+     * @param config - The new configuration to apply
+     */
+    updateConfiguration(config: Required<KsonSettings>): void {
+        this.configuration = config;
+        this.connection.console.info('Text document service configuration updated');
     }
 
     private setupLanguageFeatures(): void {
@@ -74,7 +88,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.formattingService.formatDocument(document, params.options);
+            return this.formattingService.formatDocument(document, this.configuration.kson.formatOptions);
         } catch (error) {
             this.connection.console.error(`Error formatting document: ${error}`);
             return [];

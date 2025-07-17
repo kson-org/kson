@@ -7,7 +7,6 @@ import {
 
 // Create shared client options
 export const createClientOptions = (outputChannel: vscode.OutputChannel): LanguageClientOptions => {
-    const config = vscode.workspace.getConfiguration('kson');
 
     return {
         documentSelector: [
@@ -15,17 +14,12 @@ export const createClientOptions = (outputChannel: vscode.OutputChannel): Langua
             {scheme: 'untitled', language: 'kson'}
         ],
         synchronize: {
+            /**
+             * TODO - Even though this setting is deprecated it is the easiest way to get configuration going.
+             * We should find a way in the future to replace this with the /pull model.
+             */
+            configurationSection: 'kson',
             fileEvents: vscode.workspace.createFileSystemWatcher('**/*.kson')
-        },
-        initializationOptions: {
-            settings: {
-                kson: {
-                    format: {
-                        indentSize: config.get('editor.indentSize', 2),
-                        insertSpaces: config.get('editor.insertSpaces', true),
-                    }
-                }
-            }
         },
         outputChannel,
         errorHandler: {
