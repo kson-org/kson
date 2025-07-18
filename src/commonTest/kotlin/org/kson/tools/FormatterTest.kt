@@ -1363,7 +1363,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testDelimitedFormattingStyleEmbed(){
+    fun testDelimitedFormattingStyleEmbed() {
         assertFormatting(
             """
                 $
@@ -1392,6 +1392,250 @@ class FormatterTest {
                 }
             """.trimIndent(),
             formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleSimpleObject() {
+        assertFormatting(
+            """
+                {
+                  key: value
+                  key: value
+                }
+            """.trimIndent(),
+            """
+                key:value key:value
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                {
+                  key: "quoted value"
+                  key: value
+                }
+            """.trimIndent(),
+            """
+                key:'quoted value'key:value
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                key: 1
+                another: key
+            """.trimIndent(),
+            """
+                key:1 another:key
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleList() {
+        assertFormatting(
+            """
+                list: <
+                 - 1
+                 - 2
+                 - 3
+                 >
+            """.trimIndent(),
+            """
+                list:[1 2 3]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleNestedStructures() {
+        assertFormatting(
+            """
+                list:
+                 - 1
+                 - 2
+                 -
+                   - 3
+                   - 4
+                   =
+                 key: value
+
+            """.trimIndent(),
+            """
+                list:[1 2 [3 4]]key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                list:
+                 - 1
+                 - 2
+                 -
+                   - 3
+                   - 4
+                   =
+                 key:
+                   nestedkey: value
+                   .
+                 anotherkey: value
+
+            """.trimIndent(),
+            """
+                list:[1 2 [3 4]]key:nestedkey:value.anotherkey:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: value
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:value}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: true
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:true}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: 3
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:3}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+            nested:
+                - [key:value]
+                - key: value
+            """.trimIndent(),
+            """
+                nested:[[key:value]key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key11:
+                   key12: value1
+                - key21: value2
+            """.trimIndent(),
+            """
+                [{key11:key12:value1}key21:value2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key11:
+                   key12: 
+                    key13: value1
+                - key21: value2
+            """.trimIndent(),
+            """
+                [{key11:key12:key13:value1}key21:value2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleWithComments() {
+        assertFormatting(
+            """
+                # comment
+                key: value
+                key: value
+            """.trimIndent(),
+            """
+                # comment
+                key:value key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                key: value
+                # comment
+                key: value
+            """.trimIndent(),
+            """
+                key:value
+                # comment
+                key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                list: [1,2,3]
+                # comment
+            """.trimIndent(),
+            """
+                list:[1 2 3]
+                # comment
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleEmbedBlock() {
+        assertFormatting(
+            """
+                embed: ${'$'}tag
+                  content
+                  $$
+                key: value  
+            """.trimIndent(),
+            """
+                embed:%tag
+                content
+                %%key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleReservedKeywords() {
+        assertFormatting(
+            """
+                key: true
+                key: false
+                key: null
+            """.trimIndent(),
+            """
+                key:true key:false key:null
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
         )
     }
 }

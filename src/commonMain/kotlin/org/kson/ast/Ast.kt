@@ -194,7 +194,11 @@ class KsonRootImpl(
                         // endComments are already embedded in the document, likely as part of a trailing error
                         ""
                     } else {
-                        "\n\n" + endComments
+                        if(compileTarget is Kson && compileTarget.formatConfig.formattingStyle == FormattingStyle.COMPACT){
+                            "\n" + endComments
+                        }else{
+                            "\n\n" + endComments
+                        }
                     }
                 }
 
@@ -215,6 +219,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
                 when (compileTarget.formatConfig.formattingStyle) {
                     FormattingStyle.DELIMITED -> formatDelimitedObject(indent, nextNode, compileTarget)
                     FormattingStyle.PLAIN -> formatUndelimitedObject(indent, nextNode, compileTarget)
+                    FormattingStyle.COMPACT -> formatCompactObject(indent, nextNode, compileTarget)
                 }
             }
             is Yaml -> formatUndelimitedObject(indent, nextNode, compileTarget)
@@ -238,6 +243,33 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
             |${indent.bodyLinesIndent()}}
             """.trimMargin()
 
+    }
+
+    private fun formatCompactObject(indent: Indent , nextNode: AstNode?, compileTarget: CompileTarget): String {
+        val outputObject = properties.withIndex().joinToString(""){ (index, property) ->
+            val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
+            val result = property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+
+            // Only add space after this property if not using a space could result in ambiguity with the next node
+            val needsSpace = index < properties.size - 1 &&
+                    property is ObjectPropertyNodeImpl &&
+                    result.last() != '\n' &&
+                    when (property.value) {
+                        is UnquotedStringNode,
+                        is NumberNode,
+                        is TrueNode,
+                        is FalseNode,
+                        is NullNode -> true
+                        else -> false
+                    }
+
+            if (needsSpace) "$result " else result
+        }
+        return if (nextNode is ObjectPropertyNode) {
+            // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
+            val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
+            outputObject + if(needsSpace) " ." else "."
+        } else outputObject
     }
 
     private fun formatUndelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -278,6 +310,7 @@ class ObjectPropertyNodeImpl(
             is Kson -> {
                 when (compileTarget.formatConfig.formattingStyle){
                     FormattingStyle.DELIMITED -> delimitedObjectProperty(indent, nextNode, compileTarget)
+                    FormattingStyle.COMPACT  -> compactObjectProperty(indent, nextNode, compileTarget)
                     FormattingStyle.PLAIN -> undelimitedObjectProperty(indent, nextNode, compileTarget)
                 }
             }
@@ -308,6 +341,25 @@ class ObjectPropertyNodeImpl(
                     value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
         }
     }
+
+    private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+        // A comment always needs to start on a new line. This can happen either when the first property or the next
+        // node are commented.
+        val firstObjectPropertyHasComments =
+            (value is ObjectNode) && (value.properties.first() is ObjectPropertyNodeImpl)
+                    && ((value.properties.first() as ObjectPropertyNodeImpl).comments.isNotEmpty())
+
+
+        val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
+        return name.toSourceWithNext(indent, value, compileTarget) + ":" +
+                if (firstObjectPropertyHasComments) {
+                    "\n"
+                } else {
+                    ""
+                } +
+                value.toSourceWithNext(indent, nextNode, compileTarget) +
+                if (nextNodeHasComments) "\n" else ""
+    }
 }
 
 class ListNode(
@@ -329,20 +381,21 @@ class ListNode(
         }
         return when (compileTarget) {
             is Kson -> {
-                if (compileTarget.formatConfig.formattingStyle == FormattingStyle.DELIMITED) {
-                    formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
-                } else {
-                    val outputList = formatUndelimitedList(indent, nextNode, compileTarget)
-
-                    /**
-                     * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
-                     * thing in this document is a [ListElementNode] that does not belong to this list
-                     */
-                    if (nextNode is ListElementNode) {
-                        "$outputList\n${indent.bodyLinesIndent()}="
-                    } else {
-                        outputList
+                when(compileTarget.formatConfig.formattingStyle) {
+                    FormattingStyle.PLAIN -> {
+                        val outputList = formatUndelimitedList(indent, nextNode, compileTarget)
+                        /**
+                         * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
+                         * thing in this document is a [ListElementNode] that does not belong to this list
+                         */
+                        if (nextNode is ListElementNode) {
+                            "$outputList\n${indent.bodyLinesIndent()}="
+                        } else {
+                            outputList
+                        }
                     }
+                    FormattingStyle.DELIMITED -> formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
+                    FormattingStyle.COMPACT -> formatCompactList(indent, nextNode, compileTarget, ListDelimiters.SquareBrackets)
                 }
             }
             is Yaml -> formatUndelimitedList(indent, nextNode, compileTarget)
@@ -364,13 +417,49 @@ class ListNode(
 
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = "\n"
-        val endBraceIndent = indent.bodyLinesIndent()
         return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
                 elements.withIndex().joinToString(seperator) { (index, element) ->
                     val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
                     element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
                 } +
-                bracketPadding + endBraceIndent + listDelimiters.close
+                bracketPadding +
+                indent.bodyLinesIndent() + listDelimiters.close
+    }
+
+    private fun formatCompactList(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget, listDelimiters: ListDelimiters): String {
+        return elements.withIndex().joinToString(
+            "",
+            prefix = listDelimiters.open.toString(),
+            postfix = listDelimiters.close.toString()
+        ) { (index, element) ->
+            val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
+            val elementString = if (element is Documented && element.comments.isNotEmpty()) {
+                "\n"
+            } else {
+                ""
+            } + element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
+
+
+            val isNotLastElement = index < elements.size - 1
+            
+            // Extract current and next element values for type checking
+            val currentValue = (element as? ListElementNodeImpl)?.value
+            val currentIsObject = currentValue is ObjectNode
+            val nextIsObject = (nodeAfterThisChild as? ListElementNodeImpl)?.value is ObjectNode
+
+            // Determine formatting based on context
+            when {
+                // Both objects need a dot separator, with space if current ends with number
+                isNotLastElement && currentIsObject && nextIsObject -> "{$elementString}"
+
+                // Add space between elements in a list, except when the element is a list
+                isNotLastElement && element is ListElementNodeImpl && element.value !is ListNode -> {
+                    "$elementString "
+                }
+
+                else -> elementString
+            }
+        }
     }
 
     private fun formatUndelimitedList(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -392,6 +481,7 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
                 when (compileTarget.formatConfig.formattingStyle) {
                     FormattingStyle.PLAIN -> formatWithDash(indent, nextNode, compileTarget)
                     FormattingStyle.DELIMITED -> formatWithDash(indent, nextNode, compileTarget, isDelimited = true)
+                    FormattingStyle.COMPACT -> value.toSourceWithNext(indent, nextNode, compileTarget)
                 }
             }
 
@@ -598,6 +688,13 @@ class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: Emb
                         indent.firstLineIndent() + delimiter.openDelimiter + embedTag + "\n" +
                                 indent.bodyLinesIndent() + content.split("\n")
                             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                delimiter.closeDelimiter
+                    }
+                    FormattingStyle.COMPACT -> {
+                        // Format the embed block
+                        delimiter.openDelimiter + embedTag + "\n" +
+                                content.split("\n")
+                            .joinToString("\n") { it } +
                                 delimiter.closeDelimiter
                     }
                 }

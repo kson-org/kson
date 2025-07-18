@@ -162,6 +162,7 @@ data class FormatOptions(
         val formattingStyle = when (formattingStyle){
             FormattingStyle.PLAIN -> InternalFormattingStyle.PLAIN
             FormattingStyle.DELIMITED -> InternalFormattingStyle.DELIMITED
+            FormattingStyle.COMPACT -> InternalFormattingStyle.COMPACT
         }
         return KsonFormatterConfig(indentType = indentType, formattingStyle)
     }
@@ -175,7 +176,8 @@ enum class FormattingStyle{
      * These values map to [InternalFormattingStyle]
      */
     PLAIN,
-    DELIMITED
+    DELIMITED,
+    COMPACT
 }
 
 /**
