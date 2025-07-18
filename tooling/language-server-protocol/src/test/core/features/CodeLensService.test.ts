@@ -18,9 +18,9 @@ describe('CodeLensService', () => {
 
         const lenses = service.getCodeLenses(document);
 
-        assert.strictEqual(lenses.length, 2);
+        assert.strictEqual(lenses.length, 3);
 
-        // First lens should be "plain format"
+        // First lens should be "plain"
         assert.strictEqual(lenses[0].command?.title, 'plain');
         assert.strictEqual(lenses[0].command?.command, CommandType.PLAIN_FORMAT);
         assert.deepStrictEqual(lenses[0].command?.arguments, [{
@@ -30,7 +30,7 @@ describe('CodeLensService', () => {
         assert.deepStrictEqual(lenses[0].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[0].range.end, { line: 0, character: 0 });
 
-        // Second lens should be "delimited format"
+        // Second lens should be "delimited"
         assert.strictEqual(lenses[1].command?.title, 'delimited');
         assert.strictEqual(lenses[1].command?.command, CommandType.DELIMITED_FORMAT);
         assert.deepStrictEqual(lenses[1].command?.arguments, [{
@@ -39,5 +39,15 @@ describe('CodeLensService', () => {
         }]);
         assert.deepStrictEqual(lenses[1].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[1].range.end, { line: 0, character: 0 });
+
+        // Second lens should be "compact"
+        assert.strictEqual(lenses[2].command?.title, 'compact');
+        assert.strictEqual(lenses[2].command?.command, CommandType.COMPACT_FORMAT);
+        assert.deepStrictEqual(lenses[2].command?.arguments, [{
+            documentUri: 'file:///test.kson',
+            formattingStyle: FormattingStyle.COMPACT
+        }]);
+        assert.deepStrictEqual(lenses[2].range.start, { line: 0, character: 0 });
+        assert.deepStrictEqual(lenses[2].range.end, { line: 0, character: 0 });
     });
 });
