@@ -1,10 +1,10 @@
 package org.kson.schema
 
-import org.kson.ast.KsonList
-import org.kson.ast.KsonNumber
-import org.kson.ast.KsonObject
-import org.kson.ast.KsonString
-import org.kson.ast.KsonValue
+import org.kson.KsonList
+import org.kson.KsonNumber
+import org.kson.KsonObject
+import org.kson.KsonString
+import org.kson.KsonValue
 import org.kson.parser.MessageSink
 
 // schema todo capture file/location info from schema to link back to schema def?

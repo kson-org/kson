@@ -1,7 +1,7 @@
 package org.kson.schema.validators
 
-import org.kson.ast.KsonList
-import org.kson.ast.KsonValue
+import org.kson.KsonList
+import org.kson.KsonValue
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
@@ -27,11 +27,11 @@ data class LeadingItemsTupleValidator(private val schemas: List<JsonSchema>) : L
             if (i >= list.elements.size) {
                 break
             }
-            schemas[i].validate(list.elements[i].ksonValue, messageSink)
+            schemas[i].validate(list.elements[i], messageSink)
             index = i + 1
         }
         return if (index < list.elements.size) {
-            list.elements.subList(index, list.elements.size).map { it.ksonValue }
+            list.elements.subList(index, list.elements.size)
         } else {
             emptyList()
         }
@@ -41,7 +41,7 @@ data class LeadingItemsTupleValidator(private val schemas: List<JsonSchema>) : L
 data class LeadingItemsSchemaValidator(private val jsonSchema: JsonSchema): LeadingItemsValidator {
     override fun validateArray(list: KsonList, messageSink: MessageSink): List<KsonValue> {
         list.elements.forEach {
-            jsonSchema.validate(it.ksonValue, messageSink)
+            jsonSchema.validate(it, messageSink)
         }
         return emptyList()
     }

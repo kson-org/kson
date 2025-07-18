@@ -1,6 +1,6 @@
 package org.kson.schema.validators
 
-import org.kson.ast.KsonList
+import org.kson.KsonList
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonArrayValidator
@@ -10,7 +10,7 @@ class ContainsValidator(private val containsSchema: JsonSchema) : JsonArrayValid
     override fun validateArray(node: KsonList, messageSink: MessageSink) {
         val foundMatchingElement = node.elements.any { element ->
             val containsMessageSink = MessageSink()
-            containsSchema.validate(element.ksonValue, containsMessageSink)
+            containsSchema.validate(element, containsMessageSink)
             !containsMessageSink.hasErrors()
         }
         if (!foundMatchingElement) {

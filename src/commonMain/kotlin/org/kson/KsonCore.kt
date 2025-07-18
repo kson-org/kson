@@ -18,8 +18,8 @@ import org.kson.tools.KsonFormatterConfig
 object KsonCore {
     /**
      * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
-     * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]
-     * from [AstParseResult.api]
+     * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonValue]
+     * from [AstParseResult.ksonValue]
      *
      * @param source The Kson source to parse
      * @param coreCompileConfig the [CoreCompileConfig] for this parse
@@ -46,7 +46,7 @@ object KsonCore {
         } else {
             val jsonSchema = coreCompileConfig.schemaJson
             // validate against our schema, logging any errors to our message sink
-            jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+            jsonSchema.validate(ast?.toKsonValue() as KsonValue, messageSink)
             return AstParseResult(ast, tokens, messageSink)
         }
     }
@@ -63,13 +63,13 @@ object KsonCore {
         if (firstToken.tokenType == TokenType.EOF) {
             return SchemaParseResult(null, listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create())))
         }
-        val ksonApi = astParseResult.api
-        if (ksonApi == null || astParseResult.hasErrors()) {
+        val ksonValue = astParseResult.ksonValue
+        if (ksonValue == null || astParseResult.hasErrors()) {
             return SchemaParseResult(null, astParseResult.messages)
         }
 
         val messageSink = MessageSink()
-        val jsonSchema = SchemaParser.parseSchemaElement(ksonApi as KsonValue, messageSink)
+        val jsonSchema = SchemaParser.parseSchemaElement(ksonValue, messageSink)
         return SchemaParseResult(jsonSchema, messageSink.loggedMessages())
     }
 
@@ -146,14 +146,14 @@ data class AstParseResult(
     override val messages = messageSink.loggedMessages()
 
     /**
-     * A [KsonApi] on the AST constructed here, or null if there were errors trying to parse
+     * A [KsonValue] on the AST constructed here, or null if there were errors trying to parse
      * (consult [messageSink] for information on any errors)
      */
-    val api: KsonApi? by lazy {
+    val ksonValue: KsonValue? by lazy {
         if (ast == null || hasErrors()) {
             null
         } else {
-            ast.toKsonApi()
+            ast.toKsonValue()
         }
     }
 
