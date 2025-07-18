@@ -12,12 +12,10 @@ import {
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, WillSaveTextDocumentParams, DidSaveTextDocumentParams,
     CodeLensParams,
     CodeLens,
-    ExecuteCommandParams, WorkspaceEdit, ApplyWorkspaceEditResult, ApplyWorkspaceEditParams
+    ExecuteCommandParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
-import {Languages, RemoteWorkspace} from "vscode-languageserver/lib/common/server";
-import {TextDocument} from "vscode-languageserver-textdocument";
-import {KsonDocumentsManager} from "../core/document/KsonDocumentsManager";
+import {Languages} from "vscode-languageserver/lib/common/server";
 
 /**
  * A stub implementation of the `Connection` interface for testing purposes.
@@ -46,8 +44,6 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public executeCommandHandler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>;
 
     languages: Languages;
-    workspace: RemoteWorkspace;
-    private documentsManager?: KsonDocumentsManager;
 
     constructor() {
         super();
@@ -65,36 +61,6 @@ export class ConnectionStub extends BoilerplateConnectionStub {
                 }
             }
         } as Languages;
-        this.workspace = {
-            applyEdit: async (paramOrEdit: ApplyWorkspaceEditParams | WorkspaceEdit) => {
-                // Extract the WorkspaceEdit - it could be passed directly or wrapped in params
-                const edit: WorkspaceEdit = 'edit' in paramOrEdit ? paramOrEdit.edit : paramOrEdit;
-                // Apply edits to documents in the test environment
-                if (this.documentsManager && edit.changes) {
-                    for (const [uri, edits] of Object.entries(edit.changes)) {
-                        const document = this.documentsManager.get(uri);
-                        if (document && edits.length > 0) {
-                            // Apply edits to the document
-                            const updatedText = TextDocument.applyEdits(document.textDocument, edits);
-                            // Simulate a document change event
-                            const changeEvent: DidChangeTextDocumentParams = {
-                                textDocument: {
-                                    uri: document.uri,
-                                    version: document.version + 1
-                                },
-                                contentChanges: [{
-                                    text: updatedText
-                                }]
-                            };
-                            if (this.didChangeHandler) {
-                                this.didChangeHandler(changeEvent);
-                            }
-                        }
-                    }
-                }
-                return Promise.resolve({ applied: true } as ApplyWorkspaceEditResult);
-            }
-        } as RemoteWorkspace;
     }
 
     override onDocumentFormatting(handler: ServerRequestHandler<DocumentFormattingParams, TextEdit[] | undefined | null, never, void>): Disposable {
@@ -140,10 +106,6 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     override onExecuteCommand(handler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>): Disposable {
         this.executeCommandHandler = handler;
         return NOOP_DISPOSABLE;
-    }
-
-    setDocumentsManager(documentsManager: KsonDocumentsManager): void {
-        this.documentsManager = documentsManager;
     }
 }
 
