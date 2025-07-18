@@ -80,10 +80,10 @@
     "node": "^20.18.1"
   },
   "scripts": {
-    "package": "npm run check-types && node esbuild.js --production",
+    "package": "npm run check-types && tsx esbuild.ts --production",
     "packagePlugin": "rimraf ./dist && npm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
-    "compile": "npm run check-types && node esbuild.js --tests",
-    "compile-tests": "node esbuild.js --tests",
+    "compile": "npm run check-types && tsx esbuild.ts --tests",
+    "compile-tests": "tsx esbuild.ts --tests",
     "check-types": "tsc --noEmit",
     "vscode": "npm run packagePlugin && tsx test/runExtension.ts",
     "testDesktop": "npm run compile-tests && RUN_MODE=test-node node dist/runTests.js",
@@ -104,7 +104,6 @@
     "@vscode/test-electron": "^2.5.2",
     "@vscode/test-web": "^0.0.71",
     "@vscode/vsce": "^3.6.0",
-    "assert": "^2.1.0",
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
     "process": "^0.11.10",
