@@ -1,6 +1,7 @@
 package org.kson.schema
-import org.kson.ast.KsonNumber
-import org.kson.ast.KsonValue
+import org.kson.KsonNumber
+import org.kson.KsonString
+import org.kson.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
@@ -26,7 +27,7 @@ class JsonObjectSchema(
   val title: String?,
   val description: String?,
   val default: KsonValue?,
-  val definitions: Map<String, JsonSchema?>?,
+  val definitions: Map<KsonString, JsonSchema?>?,
 
   private val typeValidator: TypeValidator?,
   private val schemaValidators: List<JsonSchemaValidator>

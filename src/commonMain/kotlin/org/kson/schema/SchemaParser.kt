@@ -1,6 +1,6 @@
 package org.kson.schema
 
-import org.kson.ast.*
+import org.kson.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
@@ -21,7 +21,7 @@ object SchemaParser {
   }
 
   private fun parseObjectSchema(schemaObject: KsonObject, messageSink: MessageSink): JsonSchema {
-    val schemaProperties = schemaObject.propertyMap
+    val schemaProperties = schemaObject.propertyLookup
 
     val title = schemaProperties["title"] ?.let { title ->
       if (title is KsonString) {
@@ -57,8 +57,8 @@ object SchemaParser {
         is KsonList -> {
           val typeArrayEntries = ArrayList<String>()
           for (element in typeValue.elements) {
-            if (element.ksonValue is KsonString) {
-              typeArrayEntries.add(element.ksonValue.value)
+            if (element is KsonString) {
+              typeArrayEntries.add(element.value)
             } else {
               messageSink.error(element.location, SCHEMA_TYPE_ARRAY_ENTRY_ERROR.create())
             }
@@ -160,7 +160,7 @@ object SchemaParser {
       when (itemsValue) {
         is KsonList -> {
           val leadingItemsValidator = LeadingItemsTupleValidator(itemsValue.elements.mapNotNull {
-            parseSchemaElement(it.ksonValue, messageSink)
+            parseSchemaElement(it, messageSink)
           })
           validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
         }
@@ -245,10 +245,10 @@ object SchemaParser {
 
     schemaProperties["required"] ?.let { required ->
       if (required is KsonList) {
-        val requiredArrayEntries = ArrayList<String>()
+        val requiredArrayEntries = ArrayList<KsonString>()
         for (element in required.elements) {
-          if (element.ksonValue is KsonString) {
-            requiredArrayEntries.add(element.ksonValue.value)
+          if (element is KsonString) {
+            requiredArrayEntries.add(element)
           } else {
             messageSink.error(element.location, SCHEMA_STRING_ARRAY_ENTRY_ERROR.create("required"))
           }
@@ -287,7 +287,7 @@ object SchemaParser {
       if (allOf is KsonList) {
         val allOfArrayEntries = ArrayList<JsonSchema>()
         for (element in allOf.elements) {
-          allOfArrayEntries.add(parseSchemaElement(element.ksonValue, messageSink) ?: continue)
+          allOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
         }
         validators.add(AllOfValidator(allOfArrayEntries))
       } else {
@@ -299,7 +299,7 @@ object SchemaParser {
       if (anyOf is KsonList) {
         val anyOfArrayEntries = ArrayList<JsonSchema>()
         for (element in anyOf.elements) {
-          anyOfArrayEntries.add(parseSchemaElement(element.ksonValue, messageSink) ?: continue)
+          anyOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
         }
         validators.add(AnyOfValidator(anyOfArrayEntries))
       } else {
@@ -311,7 +311,7 @@ object SchemaParser {
       if (oneOf is KsonList) {
         val oneOfArrayEntries = ArrayList<JsonSchema>()
         for (element in oneOf.elements) {
-          oneOfArrayEntries.add(parseSchemaElement(element.ksonValue, messageSink) ?: continue)
+          oneOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
         }
         validators.add(OneOfValidator(oneOfArrayEntries))
       } else {
@@ -338,10 +338,10 @@ object SchemaParser {
 
       val dependencyMap = dependencies.propertyMap.mapValues { (_, value) ->
         if (value is KsonList) {
-          val dependencyArrayEntries = mutableSetOf<String>()
+          val dependencyArrayEntries = mutableSetOf<KsonString>()
           for (element in value.elements) {
-            if (element.ksonValue is KsonString) {
-              dependencyArrayEntries.add(element.ksonValue.value)
+            if (element is KsonString) {
+              dependencyArrayEntries.add(element)
             } else {
               messageSink.error(element.location, SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED.create())
             }

@@ -1,15 +1,14 @@
-package org.kson.ast
+package org.kson
 
-import org.kson.KsonCore
 import org.kson.parser.NumberParser.ParsedNumber
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class KsonCoreApiTest {
+class KsonValueTest {
     @Test
-    fun testKsonApiBasicUsage() {
+    fun testksonValueBasicUsage() {
         val source = """
           host: "0.0.0.0"
           port: 8080
@@ -19,19 +18,19 @@ class KsonCoreApiTest {
         val ast = parseResult.ast
         assertNotNull(ast, "should not be null for this test's valid Kson")
 
-        val serverConfig = ast.toKsonApi()
+        val serverConfig = ast.toKsonValue()
         assertTrue(serverConfig is KsonObject)
 
-        assertTrue(serverConfig.propertyMap["host"] is KsonString)
-        assertTrue(serverConfig.propertyMap["port"] is KsonNumber)
+        assertTrue(serverConfig.propertyLookup["host"] is KsonString)
+        assertTrue(serverConfig.propertyLookup["port"] is KsonNumber)
     }
 
     /**
-     * Exercise all [KsonApi] classes by parsing and inspecting a document featuring all [KsonValue]s
+     * Exercise all [KsonValue] classes by parsing and inspecting a document featuring all [KsonValue]s
      * with some non-trivial nesting
      */
     @Test
-    fun testKsonApiComprehensive() {
+    fun testksonValueComprehensive() {
         val source = """
             {
               stringVal: "hello world"
@@ -68,10 +67,10 @@ class KsonCoreApiTest {
         val parseResult = KsonCore.parseToAst(source)
         assertTrue(!parseResult.hasErrors(), "Parse should succeed without errors")
 
-        val objectNode = parseResult.ast!!.toKsonApi()
+        val objectNode = parseResult.ast!!.toKsonValue()
         assertTrue(objectNode is KsonObject, "Root node should be ObjectNodeApi")
 
-        val properties = objectNode.propertyMap
+        val properties = objectNode.propertyLookup
 
         // Verify string value
         val stringProp = properties["stringVal"]!!
@@ -107,18 +106,18 @@ class KsonCoreApiTest {
         // Verify nested object
         val nestedObjectProp = properties["nestedObject"]!!
         assertTrue(nestedObjectProp is KsonObject)
-        val nestedProps = nestedObjectProp.propertyMap
+        val nestedProps = nestedObjectProp.propertyLookup
 
         assertEquals("value1", (nestedProps["key1"]!! as KsonString).value)
 
         val deepObject = nestedProps["key2"]!! as KsonObject
-        val deepProps = deepObject.propertyMap
+        val deepProps = deepObject.propertyLookup
         assertEquals("deep value", (deepProps["deepKey"]!! as KsonString).value)
 
         // Verify nested list
         val nestedListProp = properties["nestedList"]!!
         assertTrue(nestedListProp is KsonList)
-        val elements = nestedListProp.elements.map { it.ksonValue }
+        val elements = nestedListProp.elements
 
         assertEquals(6, elements.size)
         assertTrue(elements[0] is KsonString)
@@ -134,12 +133,12 @@ class KsonCoreApiTest {
 
         assertTrue(elements[4] is KsonObject)
         val objectInList = elements[4] as KsonObject
-        val objectInListProps = objectInList.propertyMap
+        val objectInListProps = objectInList.propertyLookup
         assertEquals("value", (objectInListProps["objectInList"] as KsonString).value)
 
         assertTrue(elements[5] is KsonList)
         val nestedListInList = elements[5] as KsonList
-        val nestedListElements = nestedListInList.elements.map { it.ksonValue }
+        val nestedListElements = nestedListInList.elements
         assertEquals(3, nestedListElements.size)
         assertTrue(nestedListElements.all { it is KsonString })
         assertEquals(
@@ -149,7 +148,7 @@ class KsonCoreApiTest {
     }
 
     @Test
-    fun testKsonApiStringProcessing() {
+    fun testksonValueStringProcessing() {
         // Test various escape sequences to ensure KsonString returns properly unescaped content
         val source = """
             {
@@ -168,8 +167,8 @@ class KsonCoreApiTest {
         val ast = parseResult.ast
         assertNotNull(ast, "should not be null for this test's valid Kson")
 
-        val rootObject = ast.toKsonApi() as KsonObject
-        val properties = rootObject.propertyMap
+        val rootObject = ast.toKsonValue() as KsonObject
+        val properties = rootObject.propertyLookup
 
         // Test basic escapes - newline, tab, and quotes should be unescaped
         assertEquals("Hello\nWorld\tTabbed\"Quote\"", (properties["basicEscapes"] as KsonString).value)

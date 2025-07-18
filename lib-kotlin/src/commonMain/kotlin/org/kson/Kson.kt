@@ -5,7 +5,6 @@ package org.kson
 
 import org.kson.Kson.parseSchema
 import org.kson.Kson.publishMessages
-import org.kson.ast.KsonValue
 import org.kson.parser.*
 import org.kson.schema.JsonSchema
 import org.kson.tools.FormattingStyle as InternalFormattingStyle
@@ -135,9 +134,9 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
         }
 
         val messageSink = MessageSink()
-        val ksonApi = astParseResult.api
-        if (ksonApi != null) {
-            schema.validate(ksonApi as KsonValue, messageSink)
+        val ksonValue = astParseResult.ksonValue
+        if (ksonValue != null) {
+            schema.validate(ksonValue, messageSink)
         }
 
         return publishMessages(messageSink.loggedMessages())
