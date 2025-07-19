@@ -32,6 +32,20 @@ class FormatterTest {
     }
 
     @Test
+    fun testColonWithWhitespace(){
+        assertFormatting(
+            """
+            {
+            key : value
+            }
+            """.trimIndent(),
+            """
+            key: value
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testSimpleObject() {
         assertFormatting(
             """
