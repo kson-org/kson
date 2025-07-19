@@ -415,3 +415,18 @@ private fun createPublicToken(publicTokenType: TokenType, internalToken: Interna
         Position(internalToken.lexeme.location.end)
     )
 }
+
+/**
+ * Helper class to let FFI users iterate through the elements of a [List]
+ */
+sealed class SimpleListIterator(list: List<Any>) {
+    private val inner = list.iterator()
+
+    fun next(): Any? {
+        return if (inner.hasNext()) {
+            inner.next()
+        } else {
+            null
+        }
+    }
+}
