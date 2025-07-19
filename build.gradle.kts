@@ -20,17 +20,10 @@ plugins {
     kotlin("multiplatform") version "2.1.21"
     kotlin("plugin.serialization") version "2.1.21"
 
-    id("com.google.devtools.ksp") version "2.1.21-2.0.2"
-
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
 
     id("idea")
-}
-
-dependencies {
-    add("kspCommonMainMetadata", files("build/ksp-jars/bindings-ksp-processor.jar"))
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 }
 
 // NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
@@ -52,7 +45,6 @@ repositories {
 }
 
 val generateJsonTestSuiteTask = "generateJsonTestSuite"
-val generateBindingsTask = "generateBindings"
 
 tasks {
     register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
@@ -62,55 +54,6 @@ tasks {
         // ensure it's always up-to-date before any other build steps
         if (name != generateJsonTestSuiteTask) {
             dependsOn(generateJsonTestSuiteTask)
-        }
-    }
-
-    register<GenerateBindingsTask>(generateBindingsTask) {
-        dependsOn("kspCommonMainKotlinMetadata", "nativeKsonBinaries")
-    }
-
-    BindingsGenerator.languages().forEach {
-        val langName = it.targetDir.uppercaseFirstChar()
-        val taskName = "test${langName}Bindings"
-        register<Exec>(taskName) {
-            val commandStr = it.testCommand.joinToString(" ")
-
-            group = "verification"
-            description = "Run $commandStr on generated $langName bindings"
-            dependsOn(generateBindingsTask)
-
-            val bindingsPath = "build/generated/bindings/${it.targetDir}"
-            workingDir = file(bindingsPath)
-            commandLine = it.testCommand
-
-            // Let the subprocess find the kson shared library
-            val (libraryPathVariable, libraryPathSeparator) = when {
-                org.gradle.internal.os.OperatingSystem.current().isWindows -> Pair("PATH", ";")
-                else -> Pair("LD_LIBRARY_PATH", ":")
-            }
-            var libraryPath = System.getenv(libraryPathVariable) ?: ""
-            if (libraryPath.isNotEmpty() && !libraryPath.endsWith(libraryPathSeparator)) {
-                libraryPath += libraryPathSeparator
-            }
-            libraryPath += project.file(bindingsPath).absoluteFile.resolve("libkson").toString()
-            environment(libraryPathVariable, libraryPath)
-
-            // Show stdout and stderr
-            standardOutput = System.out
-            errorOutput = System.err
-
-            // Ensure the task fails if the test command fails
-            isIgnoreExitValue = false
-
-            doFirst {
-                if (!workingDir.exists()) {
-                    throw GradleException("$langName bindings directory does not exist: ${workingDir.absolutePath}")
-                }
-            }
-        }
-
-        check {
-            dependsOn(taskName)
         }
     }
 

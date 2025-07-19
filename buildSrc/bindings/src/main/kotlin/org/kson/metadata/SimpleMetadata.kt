@@ -3,7 +3,11 @@ package org.kson.metadata
 import kotlinx.serialization.Serializable
 
 @Serializable
-class SimplePackageMetadata(val classes: HashMap<String, SimpleClassMetadata>, val nestedClasses: HashMap<String, ArrayList<String>>, val externalTypes: List<String>) {
+class SimplePackageMetadata(
+    val classes: HashMap<String, SimpleClassMetadata>,
+    val nestedClasses: HashMap<String, ArrayList<String>>,
+    val externalTypes: List<SimpleType>) {
+
     companion object {
         fun empty(): SimplePackageMetadata {
             return SimplePackageMetadata(HashMap(), HashMap(), ArrayList())
@@ -12,7 +16,21 @@ class SimplePackageMetadata(val classes: HashMap<String, SimpleClassMetadata>, v
 }
 
 @Serializable
-class SimpleClassMetadata(val name: FullyQualifiedClassName, val supertypes: Array<FullyQualifiedClassName>, val constructors: Array<SimpleConstructorMetadata>, val functions: Array<SimpleFunctionMetadata>, val enumConstants: Array<String>, val docString: String?)
+class SimpleClassMetadata(
+    val kind: SimpleClassKind,
+    val name: FullyQualifiedClassName,
+    val supertypes: Array<FullyQualifiedClassName>,
+    val constructors: Array<SimpleConstructorMetadata>,
+    val functions: Array<SimpleFunctionMetadata>,
+    val docString: String?,
+)
+
+@Serializable
+enum class SimpleClassKind {
+    OBJECT,
+    ENUM_ENTRY,
+    OTHER
+}
 
 @Serializable
 class SimpleConstructorMetadata(val params: List<SimpleParamMetadata>, val docString: String?)
@@ -56,10 +74,10 @@ class FullyQualifiedClassName(private val name: String) {
 }
 
 @Serializable
-class SimpleType(val classifier: String) {
+data class SimpleType(val classifier: String, val params: List<SimpleType> = emptyList(), val isStackAllocated: Boolean = false) {
     companion object {
         fun fromClassName(className: FullyQualifiedClassName): SimpleType {
-            return SimpleType(className.fullyQualifiedName())
+            return SimpleType(className.fullyQualifiedName(), listOf(), isStackAllocated = false)
         }
     }
 }

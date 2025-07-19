@@ -57,7 +57,6 @@ class TopLevelClassDeclarationVisitor() : KSTopDownVisitor<Unit, Unit>() {
     companion object {
         val allowedTopLevelClasses: HashSet<String> = HashSet(listOf(
             "org.kson.Kson",
-            "org.kson.ast.AstNode"
         ))
     }
 

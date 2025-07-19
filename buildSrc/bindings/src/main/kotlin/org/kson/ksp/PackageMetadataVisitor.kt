@@ -10,9 +10,12 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Nullability
+import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import org.kson.metadata.FullyQualifiedClassName
 import org.kson.metadata.FunctionKind
+import org.kson.metadata.SimpleClassKind
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
 import org.kson.metadata.SimpleFunctionMetadata
@@ -26,7 +29,7 @@ class PackageMetadataVisitor {
     val pendingClassDecls: Queue<KSClassDeclaration> = LinkedList()
     val classes: HashMap<String, SimpleClassMetadata> = HashMap()
     val nestedClasses: HashMap<String, ArrayList<String>> = HashMap()
-    val seenExternalTypes: HashSet<String> = HashSet()
+    val seenExternalTypes: HashSet<SimpleType> = HashSet()
     val ignoredFunctions: HashSet<String> = HashSet(listOf(
         "component1",
         "component2",
@@ -40,6 +43,11 @@ class PackageMetadataVisitor {
         "copy",
         "equals",
         "hashCode",
+    ))
+
+    val stackAllocatedTypes: HashSet<String> = HashSet(listOf(
+        "kotlin.Int",
+        "kotlin.Boolean",
     ))
 
     constructor(topLevelClassDecl: List<KSClassDeclaration>) {
@@ -98,6 +106,8 @@ class PackageMetadataVisitor {
             // Public functions
             if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
                 if (it.isConstructor()) {
+                    // Objects also have constructors, but those aren't exposed in the FFI (objects are singletons, so
+                    // creation is handled by kotlin itself)
                     if (classDecl.classKind != ClassKind.OBJECT) {
                         constructors.add(SimpleConstructorMetadata(it.parameters.map { parameter ->
                             SimpleParamMetadata(
@@ -109,7 +119,6 @@ class PackageMetadataVisitor {
                             this.visitType(param.type.resolve())
                         }
                     }
-
                 } else {
                     val kind = if (classDecl.classKind == ClassKind.OBJECT) {
                         FunctionKind.StaticTopLevel
@@ -121,7 +130,7 @@ class PackageMetadataVisitor {
             }
 
             // Properties
-            if (it is KSPropertyDeclaration && it.getVisibility() == Visibility.PUBLIC && it.simpleName.asString() == "ast") {
+            if (it is KSPropertyDeclaration && it.getVisibility() == Visibility.PUBLIC && it.origin != Origin.SYNTHETIC) {
                 functions.add(
                     SimpleFunctionMetadata(
                         "get_${it.simpleName.asString()}", FunctionKind.NonStatic, arrayListOf(),
@@ -132,13 +141,18 @@ class PackageMetadataVisitor {
             }
         }
 
+        val kind = when (classDecl.classKind) {
+            ClassKind.OBJECT -> SimpleClassKind.OBJECT
+            ClassKind.ENUM_ENTRY -> SimpleClassKind.ENUM_ENTRY
+            else -> SimpleClassKind.OTHER
+        }
         val classMetadata = SimpleClassMetadata(
+            kind,
             FullyQualifiedClassName(className),
             supertypes.toTypedArray(),
             constructors.toTypedArray(),
             functions.toTypedArray(),
-            arrayOf(),
-            classDecl.docString
+            classDecl.docString,
         )
         val classParent = classDecl.parentDeclaration
         if (classParent is KSClassDeclaration) {
@@ -151,7 +165,10 @@ class PackageMetadataVisitor {
     }
 
     fun visitFunction(functions: ArrayList<SimpleFunctionMetadata>, function: KSFunctionDeclaration, kind: FunctionKind) {
-        if (function.getVisibility() == Visibility.PUBLIC && function.typeParameters.isEmpty() && !this.ignoredFunctions.contains(function.simpleName.asString())) {
+        if (function.getVisibility() == Visibility.PUBLIC
+            && function.typeParameters.isEmpty()
+            && function.origin != Origin.SYNTHETIC
+            && !this.ignoredFunctions.contains(function.simpleName.asString())) {
             functions.add(
                 SimpleFunctionMetadata(
                     function.simpleName.asString(),
@@ -182,7 +199,7 @@ class PackageMetadataVisitor {
                 this.pendingClassDecls.add(typeDecl)
             }
         } else {
-            this.seenExternalTypes.add(simplifyType(it).classifier)
+            this.seenExternalTypes.add(simplifyType(it))
         }
 
         // Also visit concrete types that instantiate generics
@@ -190,26 +207,17 @@ class PackageMetadataVisitor {
             visitType(it.type!!.resolve())
         }
     }
-}
 
-fun simplifyType(type: KSType?): SimpleType {
-    val builder = StringBuilder()
-    builder.append(type!!.declaration.qualifiedName!!.asString())
+    fun simplifyType(type: KSType?): SimpleType {
+        val name = type!!.declaration.qualifiedName!!.asString()
 
-    // Format generics
-    if (type.arguments.isNotEmpty()) {
-        builder.append("<")
-    }
-    type.arguments.forEach {
-        builder.append(simplifyType(it.type?.resolve()).classifier)
-        builder.append(", ")
-    }
-    if (builder.endsWith(", ")) {
-        builder.delete(builder.length - 2, builder.length)
-    }
-    if (type.arguments.isNotEmpty()) {
-        builder.append(">")
-    }
+        // Generics
+        val params = mutableListOf<SimpleType>()
+        type.arguments.forEach {
+            params.add(simplifyType(it.type?.resolve()))
+        }
 
-    return SimpleType(builder.toString())
+        val isStackAllocated = stackAllocatedTypes.contains(name)
+        return SimpleType(name, params.toList(), isStackAllocated)
+    }
 }

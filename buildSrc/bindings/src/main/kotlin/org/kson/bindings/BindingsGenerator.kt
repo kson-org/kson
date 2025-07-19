@@ -43,7 +43,7 @@ class BindingsGenerator(val binaryDir: Path, val sourceBinaryDir: Path, val meta
                 BindGenLanguage(PythonGen(), "python", "lib.py", listOf("uv", "run", "pytest")),
 
                 // See `bindings/src/main/rust` for the related non-generated files
-                BindGenLanguage(RustGen(), "rust", "src/lib.rs", listOf("cargo", "test"))
+                BindGenLanguage(RustGen(), "rust", "src/generated.rs", listOf("cargo", "test"))
             )
         }
 
