@@ -11,10 +11,7 @@ export class CodeLensService {
     
     /**
      * Get code lenses for a Kson document.
-     * Returns two code lenses at the top of the file:
-     * - "format" to format the document as Kson
-     * - "to Json" to convert the document to JSON
-     */
+    */
     getCodeLenses(document: KsonDocument): CodeLens[] {
         const formatCommand = createTypedCommand(
             CommandType.PLAIN_FORMAT,
