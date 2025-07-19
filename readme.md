@@ -1,4 +1,4 @@
-# Kson: Kson Structured Object Notion
+# Kson: Kson Structured Object Notation
 
 <img src="assets/logo/kson_logo_blue.svg" alt="drawing" width="150"/>
 
