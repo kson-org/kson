@@ -106,16 +106,20 @@ object Kson {
  * Result of a Kson conversion operation
  */
 sealed class Result {
-    data class Success(val output: String) : Result()
-    data class Failure(val errors: List<Message>) : Result()
+    @ConsistentCopyVisibility
+    data class Success internal constructor(val output: String) : Result()
+    @ConsistentCopyVisibility
+    data class Failure internal constructor(val errors: List<Message>) : Result()
 }
 
 /**
  * A [parseSchema] result
  */
 sealed class SchemaResult {
-    data class Success(val schemaValidator: SchemaValidator) : SchemaResult()
-    data class Failure(val errors: List<Message>) : SchemaResult()
+    @ConsistentCopyVisibility
+    data class Success internal constructor(val schemaValidator: SchemaValidator) : SchemaResult()
+    @ConsistentCopyVisibility
+    data class Failure internal constructor(val errors: List<Message>) : SchemaResult()
 }
 
 /**
@@ -193,11 +197,13 @@ sealed class IndentType {
 /**
  * The result of statically analyzing a Kson document
  */
+@ConsistentCopyVisibility
 data class Analysis internal constructor(val errors: List<Message>, val tokens: List<Token>)
 
 /**
  * [Token] produced by the lexing phase of a Kson parse
  */
+@ConsistentCopyVisibility
 data class Token internal constructor(
     val tokenType: TokenType,
     val text: String,
@@ -241,6 +247,7 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
+@ConsistentCopyVisibility
 data class Message internal constructor(val message: String, val start: Position, val end: Position)
 
 /**
