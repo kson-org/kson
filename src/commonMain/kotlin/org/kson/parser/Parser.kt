@@ -31,9 +31,9 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * bracketList -> "[" "," ( ksonValue ","? )+ "]"
  *              | "[" ( ","? ksonValue )* "]"
  *              | "[" ( ksonValue ","? )* "]"
- * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
- * keyword -> ( UNQUOTED_STRING | string ) ":"
- * string -> STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE
+ * literal -> string | NUMBER | "true" | "false" | "null"
+ * keyword -> string ":"
+ * string -> (STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE) | UNQUOTED_STRING
  * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
  * ```
  *
@@ -451,7 +451,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
+     * literal -> string | NUMBER | "true" | "false" | "null"
      */
     private fun literal(): Boolean {
         if (string()) {
@@ -482,7 +482,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val terminalElementMark = builder.mark()
         if (elementType != null && setOf(
-                UNQUOTED_STRING,
                 TRUE,
                 FALSE,
                 NULL
@@ -499,15 +498,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * keyword -> ( UNQUOTED_STRING | string ) ":"
+     * keyword -> string ":"
      */
     private fun keyword(): Boolean {
+        val keywordMark = builder.mark()
+
         // helpful errors for keywords that clash with reserved words
         if ((builder.getTokenType() == NULL
                     || builder.getTokenType() == TRUE
                     || builder.getTokenType() == FALSE
                 ) && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
             val reservedWord = builder.getTokenText()
             builder.advanceLexer()
             keywordMark.error(OBJECT_KEYWORD_RESERVED_WORD.create(reservedWord))
@@ -517,21 +517,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
-        // try to parse a keyword in the style of "UNQUOTED_STRING followed by :"
-        if (builder.getTokenType() == UNQUOTED_STRING && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
-            val unquotedStringMark = builder.mark()
-            builder.advanceLexer()
-            unquotedStringMark.done(UNQUOTED_STRING)
-            keywordMark.done(STRING)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        }
-
         // try to parse a keyword in the style of "string followed by :"
-        val keywordMark = builder.mark()
         if (string() && builder.getTokenType() == COLON) {
             keywordMark.done(OBJECT_KEY)
 
@@ -547,9 +533,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
+     * string -> (STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE) | UNQUOTED_STRING
      */
     private fun string(): Boolean {
+        if (builder.getTokenType() == UNQUOTED_STRING) {
+            val unquotedStringMark = builder.mark()
+            builder.advanceLexer()
+            unquotedStringMark.done(UNQUOTED_STRING)
+            return true
+        }
+
         if (builder.getTokenType() != STRING_OPEN_QUOTE) {
             // not a string
             return false
