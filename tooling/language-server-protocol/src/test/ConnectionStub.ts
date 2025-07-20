@@ -9,7 +9,10 @@ import {
     SemanticTokens,
     DocumentDiagnosticParams,
     DocumentDiagnosticReport,
-    DidChangeTextDocumentParams, DidCloseTextDocumentParams, WillSaveTextDocumentParams, DidSaveTextDocumentParams
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, WillSaveTextDocumentParams, DidSaveTextDocumentParams,
+    CodeLensParams,
+    CodeLens,
+    ExecuteCommandParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
@@ -37,6 +40,8 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public didSaveHandler: NotificationHandler<DidSaveTextDocumentParams>;
     public semanticTokensHandler: ServerRequestHandler<SemanticTokensParams, SemanticTokens, any, void>;
     public diagnosticsHandler: ServerRequestHandler<DocumentDiagnosticParams, DocumentDiagnosticReport, any, void>;
+    public codeLensHandler: ServerRequestHandler<CodeLensParams, CodeLens[] | null | undefined, never, void>;
+    public executeCommandHandler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>;
 
     languages: Languages;
 
@@ -90,6 +95,16 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     onDidSaveTextDocument(handler: NotificationHandler<DidSaveTextDocumentParams>): Disposable {
         this.didSaveHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onCodeLens(handler: ServerRequestHandler<CodeLensParams, CodeLens[] | null | undefined, never, void>): Disposable {
+        this.codeLensHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onExecuteCommand(handler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>): Disposable {
+        this.executeCommandHandler = handler;
         return NOOP_DISPOSABLE;
     }
 }
