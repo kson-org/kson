@@ -61,24 +61,15 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val rootMarker = builder.mark()
         try {
-            if (ksonValue()) {
-                handleUnexpectedTrailingContent()
-                if (!builder.eof()) {
-                    /**
-                     * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
-                     */
-                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
-                }
-                rootMarker.drop()
-            } else {
-                if (!builder.eof()) {
-                    /**
-                     * [ksonValue] must either parse something valid or mark the entire invalid Kson string
-                     * with a helpful error
-                     */
-                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
-                }
+            val containsKsonValue = ksonValue()
+            handleUnexpectedTrailingContent(containsKsonValue)
+            if (!builder.eof()) {
+                /**
+                 * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
+                 */
+                throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
             }
+            rootMarker.drop()
         } catch (nestingException: ExcessiveNestingException) {
             // the value described by this kson document is too deeply nested, so we
             // reset all parsing and mark the whole document with our nesting error
@@ -727,7 +718,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * Handle any un-parsed content in [builder], marking it in error if found.
      * Should only be called to validate the state of [builder] after a successful parse
      */
-    private fun handleUnexpectedTrailingContent() {
+    private fun handleUnexpectedTrailingContent(containsKsonValue: Boolean) {
         // get a sequence of all unexpectedTrailingContent until the end of the file.
         generateSequence { builder.takeIf { !it.eof() } }
             .forEachIndexed { index, _ ->
@@ -741,7 +732,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
                 // only mark first element in error
                 when (index) {
-                    0 -> unexpectedContentMark.error(EOF_NOT_REACHED.create())
+                    0 -> {
+                        val errorMessage = if (containsKsonValue) EOF_NOT_REACHED else ONLY_UNEXPECTED_CONTENT
+                        unexpectedContentMark.error(errorMessage.create())
+                    }
                     else -> unexpectedContentMark.drop()
                 }
             }

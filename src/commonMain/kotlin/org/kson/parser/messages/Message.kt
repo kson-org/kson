@@ -57,6 +57,15 @@ enum class MessageType {
             return "Unexpected trailing content. The previous content parsed as a complete Kson document."
         }
     },
+    ONLY_UNEXPECTED_CONTENT {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unexpected content. No content can be parsed as a Kson document."
+        }
+    },
     LIST_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return emptyList()
