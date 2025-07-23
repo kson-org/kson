@@ -125,7 +125,6 @@ enum class ParsedElementType : ElementType {
     DASH_DELIMITED_LIST,
     BRACKET_LIST,
     LIST_ELEMENT,
-    OBJECT_DEFINITION,
     OBJECT,
     OBJECT_PROPERTY,
     QUOTED_STRING,
