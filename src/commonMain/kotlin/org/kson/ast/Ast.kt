@@ -255,6 +255,9 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
                     property is ObjectPropertyNodeImpl &&
                     result.last() != '\n' &&
                     when (property.value) {
+                        is QuotedStringNode -> {
+                            StringUnquoted.isUnquotable(property.value.stringContent)
+                        }
                         is UnquotedStringNode,
                         is NumberNode,
                         is TrueNode,
@@ -348,9 +351,8 @@ class ObjectPropertyNodeImpl(
         val firstObjectPropertyHasComments =
             (value is ObjectNode) && (value.properties.first() is ObjectPropertyNodeImpl)
                     && ((value.properties.first() as ObjectPropertyNodeImpl).comments.isNotEmpty())
-
-
         val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
+
         return name.toSourceWithNext(indent, value, compileTarget) + ":" +
                 if (firstObjectPropertyHasComments) {
                     "\n"
