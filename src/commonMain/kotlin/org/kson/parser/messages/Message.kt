@@ -651,6 +651,26 @@ enum class MessageType {
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Missing required dependencies"
         }
+    },
+    OBJECT_PROPERTIES_MISALIGNED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This property's indentation must properly reflect its nesting. " +
+                    "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
+        }
+    },
+    DASH_LIST_ITEMS_MISALIGNED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This list item's indentation must properly reflect its nesting. " +
+                    "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
+        }
     };
 
     /**
