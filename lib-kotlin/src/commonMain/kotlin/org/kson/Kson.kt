@@ -274,7 +274,8 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
                 var contentEnd: Coordinates? = null
 
                 while (i++ < internalTokens.size &&
-                    internalTokens[i].tokenType != InternalTokenType.STRING_CLOSE_QUOTE) {
+                    internalTokens[i].tokenType !in setOf(InternalTokenType.STRING_CLOSE_QUOTE, InternalTokenType.EOF)) {
+
                     val contentToken = internalTokens[i]
                     if (contentStart == null) {
                         contentStart = contentToken.lexeme.location.start
@@ -301,7 +302,7 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
                     if (internalTokens[i].tokenType == InternalTokenType.STRING_CLOSE_QUOTE) {
                         val closeQuoteToken = internalTokens[i]
                         tokens.add(createPublicToken(TokenType.STRING_CLOSE_QUOTE, closeQuoteToken))
-                    } else {
+                    } else if (internalTokens[i].tokenType != InternalTokenType.EOF) {
                         throw IllegalStateException("Bug: a string must end with a closing quote token or EOF")
                     }
                 }
