@@ -20,9 +20,30 @@ class IndentValidator {
     }
 
     private fun validateNode(node: KsonValueNode, previousNodeLine: Int, messageSink: MessageSink) {
+        /**
+         * If an object or list does not start at the first element, it is delimited,
+         * so we must account for that in order to no consider something like the following as mis-aligned:
+         *
+         * ```
+         * {x:1
+         * y:2}
+         * ```
+         */
+        val previousLine = if (node is ObjectNode && node.properties.isNotEmpty()
+            && node.location.start.column != node.properties.first().location.start.column
+        ) {
+            node.location.start.line
+        } else if (node is ListNode && node.elements.isNotEmpty()
+            && node.location.start.column != node.elements.first().location.start.column
+        ) {
+            node.location.start.line
+        } else {
+            previousNodeLine
+        }
+
         when (node) {
-            is ObjectNode -> validateObject(node, previousNodeLine, messageSink)
-            is ListNode -> validateList(node, previousNodeLine, messageSink)
+            is ObjectNode -> validateObject(node, previousLine, messageSink)
+            is ListNode -> validateList(node, previousLine, messageSink)
             is EmbedBlockNode, is UnquotedStringNode, is QuotedStringNode,
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
             is KsonValueNodeError -> {
@@ -52,14 +73,13 @@ class IndentValidator {
             messageSink
         ) { element, lineBeforeElem ->
             if (element is ListElementNodeImpl) {
-                val prevLineNum = if (element.value is ObjectNode || element.value is ListNode) {
-                    // for objects and lists nested inside this list element, ensure they consider the list
-                    // element's start (i.e. its dash) to be the line of the previous element
+                val value = element.value
+                val prevLineNum = if (value is ObjectNode || value is ListNode) {
                     element.location.start.line
                 } else {
                     lineBeforeElem
                 }
-                validateNode(element.value, prevLineNum, messageSink)
+                validateNode(value, prevLineNum, messageSink)
             }
         }
     }

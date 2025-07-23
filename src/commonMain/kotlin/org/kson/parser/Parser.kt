@@ -120,7 +120,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // prohibit the empty-ISH objects internals containing just commas
             if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
-                objectMark.done(OBJECT)
+                if (isDelimited) {
+                    objectMark.drop()
+                } else {
+                    objectMark.done(OBJECT)
+                }
                 return@nest true
             } else {
                 leadingCommaMark.drop()
@@ -175,7 +179,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         if (foundProperties) {
-            objectMark.done(OBJECT)
+            if (isDelimited) {
+                objectMark.drop()
+            } else {
+                objectMark.done(OBJECT)
+            }
             return@nest true
         } else {
             // otherwise we're not a valid object internals
@@ -344,7 +352,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         if (builder.getTokenType() == CURLY_BRACE_R) {
             // advance past our CURLY_BRACE_R
             builder.advanceLexer()
-            delimitedObjectMark.drop()
+            delimitedObjectMark.done(OBJECT)
         } else {
             delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
         }

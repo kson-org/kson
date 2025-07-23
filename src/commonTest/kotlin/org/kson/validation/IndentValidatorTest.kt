@@ -166,9 +166,9 @@ class IndentValidatorTest {
         assertTrue(
             KsonCore.parseToAst(
                 """
-            key1: value1 key2: value2
-            key3: value3 key3: value3
-        """.trimIndent()
+                    key1: value1 key2: value2
+                    key3: value3 key3: value3
+                """.trimIndent()
             )
                 .messages.isEmpty(), message
         )
@@ -176,9 +176,9 @@ class IndentValidatorTest {
         assertTrue(
             KsonCore.parseToAst(
                 """
-            - - 1
-                   - 2
-        """.trimIndent()
+                    - - 1
+                           - 2
+                """.trimIndent()
             )
                 .messages.isEmpty(), message
         )
@@ -315,5 +315,74 @@ class IndentValidatorTest {
 
         val error = result.messages.first()
         assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+    }
+
+    /**
+     * Regression test for a special case where delimited items hanging off a list dash were tripping up
+     * our alignment detection
+     */
+    @Test
+    fun testAlignmentWithDelimiters() {
+        val message = "Should have no errors for things misaligned by their opening delimiter"
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    {one:1
+                    two:2}
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    {one:1
+                    two:2}
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    <- 1
+                    - 2>
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    - # object hanging off dash
+                    {key1: x
+                    # this should not be considered mis-aligned
+                    key2: y}
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    - # list hanging off dash
+                    [x
+                    # this should not be considered mis-aligned
+                    y]
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
+
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    - # list hanging off dash
+                    < - x
+                    # this should not be considered mis-aligned
+                    - y>
+                """.trimIndent()
+            ).messages.isEmpty(), message
+        )
     }
 }
