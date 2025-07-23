@@ -8,7 +8,8 @@ class FormatterTest {
         source: String,
         expected: String,
         indentType: IndentType = IndentType.Space(2),
-        formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+        formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
+        roundTrip: Boolean = true
     ) {
         val formattedKson = format(source, KsonFormatterConfig(indentType, formattingStyle))
         assertEquals(
@@ -16,10 +17,22 @@ class FormatterTest {
             formattedKson
         )
 
+        // Roundtrip: each format should preserve the semantics of a kson document
+        /**
+         * TODO There are two test cases that currently can't roundtrip. After we handled these corner cases we should
+         * roundtrip for every test.
+        **/
+        var roundtripKson = formattedKson
+        if(roundTrip){
+            FormattingStyle.entries.filter { it != formattingStyle }.forEach { intermediateStyle ->
+                roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle))
+            }
+        }
+
         assertEquals(
             expected,
-            format(formattedKson, KsonFormatterConfig(indentType, formattingStyle)),
-            "formatting should be idempotent, but this reformat changed the result"
+            format(roundtripKson, KsonFormatterConfig(indentType, formattingStyle)),
+            "Formatting with same style should be idempotent"
         )
     }
 
@@ -325,7 +338,7 @@ class FormatterTest {
             key:
             # a value
             value
-              
+
               # a property
               key2: value
             """.trimIndent(),
@@ -781,7 +794,8 @@ class FormatterTest {
             "key: {\n",
             """
             key: {
-            """.trimIndent()
+            """.trimIndent(),
+            roundTrip = false
         )
     }
 
@@ -1207,7 +1221,8 @@ class FormatterTest {
             -
 
             # trailing comment
-        """.trimIndent()
+        """.trimIndent(),
+            roundTrip = false
         )
     }
 
