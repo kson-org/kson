@@ -140,4 +140,12 @@ describe('KSON Command Executor', () => {
         await executeAndAssertCommand(content, expected, commandParams);
     });
 
+    it('should execute compact formatting', async () => {
+        const content = '{"x" : 1, "y" : 2}';
+        const expected = buildWorkspaceEdit(TEST_URI, Range.create(0, 0, 0, 18), 'x:1 y:2');
+        const commandParams = buildCommandParams(CommandType.COMPACT_FORMAT, TEST_URI, FormattingStyle.COMPACT);
+        
+        await executeAndAssertCommand(content, expected, commandParams);
+    });
+
 });

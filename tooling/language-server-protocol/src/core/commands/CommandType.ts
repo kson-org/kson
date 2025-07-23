@@ -11,6 +11,11 @@ export enum CommandType {
      * Format the document as delimited Kson
      */
     DELIMITED_FORMAT = 'kson.delimitedFormat',
+
+    /**
+     * Format the document as compact Kson
+     */
+    COMPACT_FORMAT = 'kson.compactFormat'
 }
 
 /**

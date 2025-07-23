@@ -6,7 +6,11 @@ import { FormattingStyle } from 'kson';
  * Type-safe mapping of command types to their expected parameter structures
  */
 export interface CommandParameters {
-    [CommandType.PLAIN_FORMAT]: {
+    [CommandType.PLAIN_FORMAT ]: {
+        documentUri: string;
+        formattingStyle: FormattingStyle;
+    };
+    [CommandType.COMPACT_FORMAT ]: {
         documentUri: string;
         formattingStyle: FormattingStyle;
     };
