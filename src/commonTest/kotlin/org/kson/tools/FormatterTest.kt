@@ -1414,6 +1414,19 @@ class FormatterTest {
     fun testCompactFormattingStyleSimpleObject() {
         assertFormatting(
             """
+                "type": "object",
+                "properties": {
+                x: w
+                }
+            """.trimIndent(),
+            """
+                type:object properties:x:w
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
                 {
                   key: value
                   key: value
