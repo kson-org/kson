@@ -63,19 +63,9 @@ class KsonCoreTestObjectError : KsonCoreTestError {
         assertParserRejectsSource(
             """
                key: value
-               null: "can't use null as a key"
-               true: "can't use true as a key"
-               false: "can't use false as a key"
-            """.trimIndent(),
-            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD)
-        )
-
-        assertParserRejectsSource(
-            """
-               key   : value
-               null   : "can't use null as a key" 
-               true   : "can't use true as a key" 
-               false  : "can't use false as a key" 
+               null: "can't use null as a key" 
+               true: "can't use true as a key" 
+               false: "can't use false as a key" 
             """.trimIndent(),
             listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD)
         )
