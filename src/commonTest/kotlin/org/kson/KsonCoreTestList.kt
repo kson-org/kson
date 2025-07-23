@@ -158,32 +158,6 @@ class KsonCoreTestList : KsonCoreTest {
                 ]
             """.trimIndent()
         )
-
-        // note that the indentation isn't significant in kson dash-delimited lists (unlike yaml)
-        assertParsesTo(
-            """
-                - true
-                  - false
-                    - null
-            """,
-            """
-                - true
-                - false
-                - null
-            """.trimIndent(),
-            """
-                - true
-                - false
-                - null
-            """.trimIndent(),
-            """
-                [
-                  true,
-                  false,
-                  null
-                ]
-            """.trimIndent()
-        )
     }
 
     @Test

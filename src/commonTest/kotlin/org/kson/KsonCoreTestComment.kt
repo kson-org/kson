@@ -519,7 +519,7 @@ class KsonCoreTestComment : KsonCoreTest {
             """
                 # leading
                 [one, # trailing "one"
-                two # trailing "two"
+                 two # trailing "two"
                 ] # trailing list brace
             """,
             """

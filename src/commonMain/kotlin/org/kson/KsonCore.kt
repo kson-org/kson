@@ -9,6 +9,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
+import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
 
 /**
@@ -40,6 +41,10 @@ object KsonCore {
         val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
         Parser(builder, coreCompileConfig.maxNestingLevel).parse()
         val ast = builder.buildTree(messageSink)
+
+        if (ast != null && !messageSink.hasErrors()) {
+            IndentValidator().validate(ast, messageSink)
+        }
 
         if (coreCompileConfig.schemaJson == NO_SCHEMA) {
             return AstParseResult(ast, tokens, messageSink)

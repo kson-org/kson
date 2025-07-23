@@ -155,6 +155,22 @@ data class Location(
      */
     val endOffset: Int
 ) {
+    /**
+     * Trim this [Location] to its first line.  Useful when it's more clear to highlight the beginning
+     * of an error rather than the whole span of the offending syntactic chunk.
+     */
+    fun trimToFirstLine(): Location {
+        val maxLength = endOffset - startOffset
+        val trimmedLength = 5.coerceAtMost(maxLength)
+        val trimmedStart = Coordinates(start.line, start.column)
+        val trimmedEnd = Coordinates(start.line, start.column + trimmedLength)
+        return Location(
+            trimmedStart,
+            trimmedEnd,
+            startOffset,
+            startOffset + trimmedLength
+        )
+    }
     companion object {
         /**
          * Creates a new [Location] instance using line and column positions directly.
