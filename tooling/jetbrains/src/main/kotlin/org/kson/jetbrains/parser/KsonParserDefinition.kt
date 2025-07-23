@@ -57,5 +57,4 @@ class KsonParserDefinition : ParserDefinition {
 
 private val commentTokenSet = TokenSet.create(elem(TokenType.COMMENT))
 private val whitespaceTokenSet = TokenSet.create(elem(TokenType.WHITESPACE))
-private val stringTokenSet =
-    TokenSet.create(elem(ParsedElementType.OBJECT_KEY), elem(TokenType.STRING_CONTENT), elem(TokenType.UNQUOTED_STRING))
+private val stringTokenSet = TokenSet.create(elem(ParsedElementType.STRING))

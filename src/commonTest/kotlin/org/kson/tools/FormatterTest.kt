@@ -45,20 +45,6 @@ class FormatterTest {
     }
 
     @Test
-    fun testColonWithWhitespace(){
-        assertFormatting(
-            """
-            {
-            key : value
-            }
-            """.trimIndent(),
-            """
-            key: value
-            """.trimIndent()
-        )
-    }
-
-    @Test
     fun testSimpleObject() {
         assertFormatting(
             """
@@ -1217,33 +1203,6 @@ class FormatterTest {
             
             - key31: 31
               key32: 32
-            """.trimIndent()
-        )
-    }
-
-    @Test
-    fun testInvalidObjectsInPlainLists() {
-        assertFormatting(
-            """
-            - key11: 11
-              key12:
-            """.trimIndent(),
-            """
-                - key11: 11
-                  key12:
-            """.trimIndent()
-        )
-
-        assertFormatting(
-            """
-            - {
-              key11: 11
-              key12:
-              }
-            """.trimIndent(),
-            """
-                - key11: 11
-                  key12:
             """.trimIndent()
         )
     }

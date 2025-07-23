@@ -299,21 +299,10 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
     }
 }
 
-interface ObjectKeyNode : StringNode
-class ObjectKeyNodeError(content: String, location: Location) : ObjectKeyNode, AstNodeError(content, location)
-class ObjectKeyNodeImpl(
-    val key: StringNode
-) : ObjectKeyNode, AstNodeImpl(key.location) {
-    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val keyOutput = key.toSourceWithNext(indent, null, compileTarget)
-        return "$keyOutput:"
-    }
-}
-
 interface ObjectPropertyNode : AstNode
 class ObjectPropertyNodeError(content: String, location: Location) : ObjectPropertyNode, AstNodeError(content, location)
 class ObjectPropertyNodeImpl(
-    val key: ObjectKeyNode,
+    val name: StringNode,
     val value: KsonValueNode,
     override val comments: List<String>,
     location: Location
@@ -341,17 +330,17 @@ class ObjectPropertyNodeImpl(
             // otherwise, increase the indent
             indent.next(true)
         }
-        return key.toSourceWithNext(indent, value, compileTarget) + " " +
+        return name.toSourceWithNext(indent, value, compileTarget) + ": " +
                     value.toSourceWithNext(delimitedPropertyIndent, nextNode, compileTarget)
     }
 
     private fun undelimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return if (value is ListNode || value is ObjectNode) {
             // For lists and objects, put the value on the next line
-            key.toSourceWithNext(indent, value, compileTarget) + "\n" +
+            name.toSourceWithNext(indent, value, compileTarget) + ":\n" +
                     value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
         } else {
-            key.toSourceWithNext(indent, value, compileTarget) + " " +
+            name.toSourceWithNext(indent, value, compileTarget) + ": " +
                     value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
         }
     }
@@ -527,6 +516,7 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
 }
 
 interface StringNode : KsonValueNode
+class StringNodeError(content: String, location: Location) : StringNode, AstNodeError(content, location)
 abstract class StringNodeImpl(location: Location) : StringNode, KsonValueNodeImpl(location) {
     abstract val stringContent: String
 

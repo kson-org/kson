@@ -148,9 +148,9 @@ fun AstNode.toKsonValue(): KsonValue {
             KsonObject(properties.associate { prop ->
                 val propImpl = prop as? ObjectPropertyNodeImpl
                     ?: throw ShouldNotHappenException("this AST if fully valid")
-                val propKey = propImpl.key as? ObjectKeyNodeImpl
+                val propName = propImpl.name as? StringNodeImpl
                     ?: throw ShouldNotHappenException("this AST if fully valid")
-                propKey.key.toKsonValue() as KsonString to propImpl.value.toKsonValue()
+                propName.toKsonValue() as KsonString to propImpl.value.toKsonValue()
             },
                 location)
         }
@@ -167,9 +167,6 @@ fun AstNode.toKsonValue(): KsonValue {
         is FalseNode -> KsonBoolean(false, location)
         is NullNode -> KsonNull(location)
         is KsonValueNodeImpl -> this.toKsonValue()
-        is ObjectKeyNodeImpl -> {
-            throw ShouldNotHappenException("these properties are processed above in the ${ObjectNode::class.simpleName} case")
-        }
         is ObjectPropertyNodeImpl -> {
             throw ShouldNotHappenException("these properties are processed above in the ${ObjectNode::class.simpleName} case")
         }
