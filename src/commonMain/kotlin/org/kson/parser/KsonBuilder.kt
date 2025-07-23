@@ -181,7 +181,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     EMBED_CLOSE_DELIM,
                     EMBED_TAG,
                     EMBED_CONTENT,
-                    STRING,
+                    OBJECT_KEY,
                     ILLEGAL_CHAR,
                     WHITESPACE -> {
                         throw RuntimeException("These tokens do not generate their own AST nodes")
@@ -227,22 +227,20 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                             EmbedDelim.fromString(embedDelimChar),
                             marker.getLocation())
                     }
-                    STRING -> {
+                    OBJECT_KEY -> {
                         /**
-                         * We assume [Parser.keyword] still structures a [STRING] as wrapping either
+                         * We assume [Parser.keyword] still structures a [OBJECT_KEY] as wrapping either
                          * an [UNQUOTED_STRING] mark or a [QUOTED_STRING] mark
                          */
-                        val stringContentMark = if (childMarkers.size == 1) {
-                            childMarkers[0]
-                        } else {
-                            throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                        val stringContentMark = childMarkers.first()
+                        val objectKey = when (stringContentMark.element) {
+                            UNQUOTED_STRING -> UnquotedStringNode(stringContentMark.getValue(), marker.getLocation())
+                            QUOTED_STRING -> quoteStringToStringNode(stringContentMark)
+                            else -> {
+                                throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                            }
                         }
-
-                        if (stringContentMark.element == UNQUOTED_STRING) {
-                            UnquotedStringNode(stringContentMark.getValue(), marker.getLocation())
-                        } else {
-                            quoteStringToStringNode(stringContentMark)
-                        }
+                        return ObjectKeyNodeImpl(objectKey)
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
@@ -283,8 +281,8 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
-                        val stringNode: StringNode = unsafeAstCreate(keywordMark) {
-                            StringNodeError(it, marker.getLocation())
+                        val keyNode: ObjectKeyNode = unsafeAstCreate(keywordMark) {
+                            ObjectKeyNodeError(it, keywordMark.getLocation())
                         }
                         val valueMark = childMarkers.getOrNull(1)
                         val ksonValueNode: KsonValueNode = if (valueMark == null) {
@@ -294,12 +292,16 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                                 KsonValueNodeError(it, marker.getLocation())
                             }
                         }
-                        ObjectPropertyNodeImpl(
-                            stringNode,
-                            ksonValueNode,
-                            comments,
-                            marker.getLocation()
-                        )
+                        if (keyNode is ObjectKeyNodeError || ksonValueNode is KsonValueNodeError) {
+                            ObjectPropertyNodeError(marker.getRawText().trim(), marker.getLocation())
+                        } else {
+                            ObjectPropertyNodeImpl(
+                                keyNode,
+                                ksonValueNode,
+                                comments,
+                                marker.getLocation()
+                            )
+                        }
                     }
                     QUOTED_STRING -> {
                         quoteStringToStringNode(marker)
