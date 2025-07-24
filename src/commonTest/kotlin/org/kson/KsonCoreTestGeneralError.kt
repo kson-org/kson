@@ -42,6 +42,11 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
     }
 
     @Test
+    fun testOnlyUnexpectedContent() {
+        assertParserRejectsSource(",K", listOf(ONLY_UNEXPECTED_CONTENT))
+    }
+
+    @Test
     fun testEmptyCommas() {
         assertParserRejectsSource("[,]", listOf(EMPTY_COMMAS))
         assertParserRejectsSource("{,}", listOf(EMPTY_COMMAS))

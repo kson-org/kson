@@ -33,7 +33,16 @@ object KsonCore {
             // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
             gapFree = coreCompileConfig.errorTolerant
         ).tokenize()
-        if (tokens[0].tokenType == TokenType.EOF) {
+
+        var initialTokenIndex = 0
+        // if our tokens are gapFree we may have an "empty" file with some comments or whitespace in it
+        while (initialTokenIndex < tokens.size &&
+            (tokens[initialTokenIndex].tokenType == TokenType.WHITESPACE ||
+                    tokens[initialTokenIndex].tokenType == TokenType.COMMENT)
+        ) {
+            initialTokenIndex++
+        }
+        if (tokens[initialTokenIndex].tokenType == TokenType.EOF) {
             messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
             return AstParseResult(null, tokens, messageSink)
         }
