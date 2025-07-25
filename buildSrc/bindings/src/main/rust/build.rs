@@ -1,11 +1,25 @@
+use bindgen::callbacks::ParseCallbacks;
 use std::env;
 use std::path::PathBuf;
+
+#[derive(Debug)]
+struct CustomRenamer;
+
+impl ParseCallbacks for CustomRenamer {
+    // Necessary to get rid of the `libkson` vs. `kson` difference depending on the target OS
+    fn item_name(&self, original_item_name: &str) -> Option<String> {
+        if original_item_name.starts_with("libkson_") {
+            Some(original_item_name.strip_prefix("lib").unwrap().to_string())
+        } else {
+            None
+        }
+    }
+}
 
 fn main() {
     let bindings = bindgen::Builder::default()
         .header("libkson/kson.h")
-        // Tell cargo to invalidate the built crate if any of the included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .parse_callbacks(Box::new(CustomRenamer))
         .generate()
         .expect("Unable to generate bindings");
 
