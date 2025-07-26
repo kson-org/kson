@@ -6,6 +6,7 @@ import org.kson.metadata.IncludeParentClass
 import org.kson.metadata.SimpleClassKind
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleEnumMetadata
 import org.kson.metadata.SimpleFunctionMetadata
 import org.kson.metadata.SimplePackageMetadata
 import org.kson.metadata.SimpleParamMetadata
@@ -33,6 +34,7 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
 
         builder.append(
             """
+            |from enum import Enum
             |from cffi import FFI
             |ffi = FFI()
             |
@@ -57,11 +59,24 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             |def cast(targetTypeName, arg):
             |    addr = ffi.addressof(arg)
             |    return ffi.cast(f"{targetTypeName} *", addr)[0]
-            |    
+            |
             |def init_wrapper(target_type, ptr):
+            |    ptr.pinned = ffi.gc(ptr.pinned, symbols.DisposeStablePointer)
             |    result = object.__new__(target_type)
             |    result.ptr = ptr
             |    return result
+            |
+            |def init_enum_wrapper(target_type, ptr):
+            |    enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
+            |    ordinal = symbols.kotlin.root.org.kson.EnumHelper.ordinal(enum_helper_instance, cast("${Platform.symbolPrefix}kson_kref_kotlin_Enum", ptr))
+            |    instance = target_type(ordinal)
+            |    symbols.DisposeStablePointer(ptr.pinned)
+            |    return instance
+            |
+            |def from_kotlin_string(ptr):
+            |    python_string = ffi.string(ptr).decode('utf-8')
+            |    symbols.DisposeString(ptr)
+            |    return python_string
             |
             |def from_kotlin_list(list, item_type, wrap_as):
             |    python_list = []
@@ -70,14 +85,14 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             |        item = symbols.kotlin.root.org.kson.SimpleListIterator.next(iterator)
             |        if item.pinned == ffi.NULL:
             |            break
-            |   
+            |
             |        if wrap_as is not None:
             |            tmp = object.__new__(wrap_as)
             |            tmp.ptr = item
             |            item = tmp
-            |           
+            |
             |        python_list.append(item)
-            |   
+            |
             |    symbols.DisposeStablePointer(iterator.pinned)
             |    return python_list
             |
@@ -91,7 +106,51 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             }
         }
 
+        metadata.enums.forEach {
+            generateEnum(it.value)
+        }
+
         return builder.toString()
+    }
+
+    fun generateEnum(metadata: SimpleEnumMetadata) {
+        val unqualifiedClassName = metadata.name.unqualifiedName()
+        builder.append("\nclass ${unqualifiedClassName}(Enum):\n")
+        builder.append(PythonDocStringFormatter.format("    ", metadata.docString))
+
+        // Mapping from Python enum to Kotlin enum
+        builder.append("""
+            |    def to_kotlin_enum(self):
+            |        enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
+            |        match self:
+            |
+            """.trimMargin()
+        )
+        for (entry in metadata.entries) {
+            val entryUnqualifiedName = entry.unqualifiedName()
+            val fnCall = "symbols.kotlin.root.${metadata.name.javaClassName()}.${entryUnqualifiedName}.get()"
+            builder.append("""
+                |            case ${entry.unqualifiedName(IncludeParentClass.Yes())}:
+                |                result = $fnCall
+                |                result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
+                |                return result
+                |
+            """.trimMargin())
+        }
+
+        // Name function corresponding to the `Enum.name` property
+        builder.append("""
+            |    def name(self):
+            |        enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
+            |        kotlin_enum = self.to_kotlin_enum()
+            |        return from_kotlin_string(symbols.kotlin.root.org.kson.EnumHelper.name(enum_helper_instance, cast("${Platform.symbolPrefix}kson_kref_kotlin_Enum", kotlin_enum)))
+            |
+            """.trimMargin()
+        )
+
+        metadata.entries.forEachIndexed { index, entry ->
+            builder.append("    ${entry.unqualifiedName()} = $index\n")
+        }
     }
 
     fun generateClass(metadata: SimpleClassMetadata, nesting: Int) {
@@ -109,10 +168,8 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             generateWrapperConstructor(indent, metadata.name, it)
         }
 
-        when (metadata.kind) {
-            SimpleClassKind.OBJECT -> generateInstanceFunction(indent, metadata.name, "_instance")
-            SimpleClassKind.ENUM_ENTRY -> generateInstanceFunction(indent, metadata.name, "get")
-            else -> {}
+        if (metadata.kind == SimpleClassKind.OBJECT) {
+            generateInstanceFunction(indent, metadata.name)
         }
 
         // Wrapper functions
@@ -136,9 +193,12 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             subclasses.forEach { subclass ->
                 val subclassName = FullyQualifiedClassName(subclass.classifier)
                 val subclassGetType = "symbols.kotlin.root.${subclassName.javaClassName()}._type"
-                builder.append("$indent        subclassType = $subclassGetType()\n")
-                builder.append("$indent        if symbols.IsInstance(self.ptr.pinned, subclassType):\n")
-                builder.append("$indent            return init_wrapper(${subclassName.unqualifiedName(IncludeParentClass.Yes())}, self.ptr)\n")
+                builder.append("""
+                    |$indent        subclassType = $subclassGetType()
+                    |$indent        if symbols.IsInstance(self.ptr.pinned, subclassType):
+                    |$indent            return init_wrapper(${subclassName.unqualifiedName(IncludeParentClass.Yes())}, self.ptr)
+                    |
+                """.trimMargin())
             }
         }
 
@@ -170,12 +230,12 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
         builder.append("$declarationIndent    self.ptr = result\n")
     }
 
-    private fun generateInstanceFunction(classIndent: String, className: FullyQualifiedClassName, functionName: String) {
+    private fun generateInstanceFunction(classIndent: String, className: FullyQualifiedClassName) {
         val declarationIndent = "$classIndent    "
         builder.append("$declarationIndent@staticmethod\n")
         builder.append("${declarationIndent}def get():\n")
 
-        val fnName = "symbols.kotlin.root.${className.javaClassName()}.${functionName}"
+        val fnName = "symbols.kotlin.root.${className.javaClassName()}._instance"
         generateFunctionCall("$declarationIndent    ", fnName, "", emptyList(), SimpleType(className.fullyQualifiedName(), emptyList(), false))
 
         val className = FullyQualifiedClassName(className.fullyQualifiedName())
@@ -237,6 +297,8 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
                 ".encode('utf-8')"
             } else if (this.metadata.externalTypes.contains(param.type)) {
                 ""
+            } else if (this.metadata.enums.contains(param.type.classifier)) {
+                ".to_kotlin_enum()"
             } else {
                 ".ptr"
             }
@@ -244,20 +306,12 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             builder.append("${param.name}$modifyArg, ")
         }
         builder.append("])\n")
-
-        if (returnType != null) {
-            if (returnType.classifier == "kotlin.String") {
-                builder.append("${indent}result = ffi.gc(result, symbols.DisposeString)\n")
-            } else if (!this.metadata.externalTypes.contains(returnType)) {
-                builder.append("${indent}result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)\n")
-            }
-        }
     }
 
     fun translateReturnExpr(indent: String, returnType: SimpleType) {
         val returnTypeClassifier = returnType.classifier
         val translateFn = when (returnTypeClassifier) {
-            "kotlin.String" -> "ffi.string(result).decode('utf-8')"
+            "kotlin.String" -> "from_kotlin_string(result)"
             "kotlin.collections.List" -> {
                 val itemType = returnType.params[0]
                 val itemCType = "kson_kref_${itemType.classifier.replace('.', '_')}"
@@ -276,6 +330,10 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
 
         if (translateFn != null) {
             builder.append("${indent}result = $translateFn")
+        } else if (this.metadata.enums.containsKey(returnTypeClassifier)) {
+            val className = FullyQualifiedClassName(returnTypeClassifier)
+            builder.append("${indent}result = init_enum_wrapper(${className.unqualifiedName(
+                IncludeParentClass.Yes())}, result)\n")
         } else if (this.metadata.classes.containsKey(returnTypeClassifier)) {
             val className = FullyQualifiedClassName(returnTypeClassifier)
             builder.append("${indent}result = init_wrapper(${className.unqualifiedName(
