@@ -5,6 +5,30 @@ pub(crate) trait FromKotlinObject {
     fn from_kotlin_object(obj: kson_KNativePtr) -> Self;
 }
 
+pub(crate) trait ToKotlinObject {
+    fn to_kotlin_object(&self) -> kson_KNativePtr;
+}
+
+pub(crate) fn enum_name<T: ToKotlinObject>(value: T) -> String {
+    let ptr = value.to_kotlin_object();
+    let helper_instance = unsafe { KSON_SYMBOLS.kotlin.root.org.kson.EnumHelper._instance.unwrap()() };
+    let value = kson_kref_kotlin_Enum { pinned: ptr };
+    let name = unsafe { KSON_SYMBOLS.kotlin.root.org.kson.EnumHelper.name.unwrap()(helper_instance, value) };
+
+    unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(ptr) };
+    from_kotlin_string(name)
+}
+
+pub(crate) fn enum_ordinal<T: ToKotlinObject>(value: T) -> i32 {
+    let ptr = value.to_kotlin_object();
+    let helper_instance = unsafe { KSON_SYMBOLS.kotlin.root.org.kson.EnumHelper._instance.unwrap()() };
+    let value = kson_kref_kotlin_Enum { pinned: ptr };
+    let ordinal = unsafe { KSON_SYMBOLS.kotlin.root.org.kson.EnumHelper.ordinal.unwrap()(helper_instance, value) };
+
+    unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(ptr) };
+    ordinal
+}
+
 pub(crate) fn to_kotlin_string(s: &str) -> std::ffi::CString {
     // Note: we are responsible for deallocating the string
     std::ffi::CString::new(s).unwrap()

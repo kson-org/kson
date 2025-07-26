@@ -5,15 +5,29 @@ import kotlinx.serialization.Serializable
 @Serializable
 class SimplePackageMetadata(
     val classes: HashMap<String, SimpleClassMetadata>,
+    val enums: HashMap<String, SimpleEnumMetadata>,
     val nestedClasses: HashMap<String, ArrayList<String>>,
     val externalTypes: List<SimpleType>) {
 
     companion object {
         fun empty(): SimplePackageMetadata {
-            return SimplePackageMetadata(HashMap(), HashMap(), ArrayList())
+            return SimplePackageMetadata(HashMap(), HashMap(), HashMap(), ArrayList())
         }
     }
 }
+
+@Serializable
+class SimpleEnumMetadata(
+    val name: FullyQualifiedClassName,
+    val entries: MutableList<FullyQualifiedClassName>,
+    val docString: String?,
+)
+
+@Serializable
+class SimpleEnumEntry(
+    val name: FullyQualifiedClassName,
+    val docString: String?,
+)
 
 @Serializable
 class SimpleClassMetadata(
@@ -28,7 +42,6 @@ class SimpleClassMetadata(
 @Serializable
 enum class SimpleClassKind {
     OBJECT,
-    ENUM_ENTRY,
     OTHER
 }
 

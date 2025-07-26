@@ -10,7 +10,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import org.kson.metadata.FullyQualifiedClassName
@@ -18,6 +17,7 @@ import org.kson.metadata.FunctionKind
 import org.kson.metadata.SimpleClassKind
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleEnumMetadata
 import org.kson.metadata.SimpleFunctionMetadata
 import org.kson.metadata.SimplePackageMetadata
 import org.kson.metadata.SimpleParamMetadata
@@ -28,6 +28,7 @@ import java.util.Queue
 class PackageMetadataVisitor {
     val pendingClassDecls: Queue<KSClassDeclaration> = LinkedList()
     val classes: HashMap<String, SimpleClassMetadata> = HashMap()
+    val enums: HashMap<String, SimpleEnumMetadata> = HashMap()
     val nestedClasses: HashMap<String, ArrayList<String>> = HashMap()
     val seenExternalTypes: HashSet<SimpleType> = HashSet()
     val ignoredFunctions: HashSet<String> = HashSet(listOf(
@@ -55,9 +56,10 @@ class PackageMetadataVisitor {
     }
 
     fun getPackageMetadata(): SimplePackageMetadata {
-        return SimplePackageMetadata(classes, nestedClasses, seenExternalTypes.toList())
+        return SimplePackageMetadata(classes, enums, nestedClasses, seenExternalTypes.toList())
     }
 
+    // Returns false when there are no more classes to visit
     fun visitNextClass(): Boolean {
         val classDecl = pendingClassDecls.poll()
         if (classDecl == null) {
@@ -70,7 +72,7 @@ class PackageMetadataVisitor {
         }
 
         val className = classDecl.qualifiedName!!.asString()
-        if (this.classes.containsKey(className)) {
+        if (this.classes.containsKey(className) || this.enums.containsKey(className)) {
             // Already handled, move on to the next one
             return true
         }
@@ -141,26 +143,59 @@ class PackageMetadataVisitor {
             }
         }
 
-        val kind = when (classDecl.classKind) {
-            ClassKind.OBJECT -> SimpleClassKind.OBJECT
-            ClassKind.ENUM_ENTRY -> SimpleClassKind.ENUM_ENTRY
-            else -> SimpleClassKind.OTHER
-        }
-        val classMetadata = SimpleClassMetadata(
-            kind,
-            FullyQualifiedClassName(className),
-            supertypes.toTypedArray(),
-            constructors.toTypedArray(),
-            functions.toTypedArray(),
-            classDecl.docString,
-        )
-        val classParent = classDecl.parentDeclaration
-        if (classParent is KSClassDeclaration) {
-            val list = this.nestedClasses.getOrPut(classParent.qualifiedName!!.asString()) { arrayListOf() }
-            list.add(classDecl.simpleName.asString())
+        val name = FullyQualifiedClassName(className)
+        when (classDecl.classKind) {
+            ClassKind.ENUM_CLASS -> {
+                // An enum should have none of these
+                assert(constructors.isEmpty())
+                assert(functions.isEmpty())
+
+                // Entries will be populated later (see `ClassKind.ENUM_ENTRY` branch of this `when`)
+                val enumMetadata = SimpleEnumMetadata(
+                    name,
+                    entries = mutableListOf(),
+                    classDecl.docString
+                )
+                this.enums[className] = enumMetadata
+            }
+            ClassKind.ENUM_ENTRY -> {
+                // An enum entry should have none of these
+                assert(constructors.isEmpty())
+                assert(functions.isEmpty())
+
+                val classParent = classDecl.parentDeclaration
+                if (classParent !is KSClassDeclaration) {
+                    throw RuntimeException("parent of enum entry should always be a class declaration")
+                }
+
+                val enumName = classParent.qualifiedName!!.asString()
+                val enumMetadata = this.enums[enumName]!!
+
+                val enumEntryName = FullyQualifiedClassName(classDecl.qualifiedName!!.asString())
+                enumMetadata.entries.add(enumEntryName)
+            }
+            else -> {
+                val classMetadata = SimpleClassMetadata(
+                    if (classDecl.classKind == ClassKind.OBJECT) {
+                        SimpleClassKind.OBJECT
+                    } else {
+                        SimpleClassKind.OTHER
+                    },
+                    name,
+                    supertypes.toTypedArray(),
+                    constructors.toTypedArray(),
+                    functions.toTypedArray(),
+                    classDecl.docString,
+                )
+                val classParent = classDecl.parentDeclaration
+                if (classParent is KSClassDeclaration) {
+                    val list = this.nestedClasses.getOrPut(classParent.qualifiedName!!.asString()) { arrayListOf() }
+                    list.add(classDecl.simpleName.asString())
+                }
+                this.classes[className] = classMetadata
+            }
         }
 
-        this.classes[className] = classMetadata
         return true
     }
 

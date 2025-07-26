@@ -430,3 +430,12 @@ sealed class SimpleListIterator(list: List<Any>) {
         }
     }
 }
+
+
+/**
+ * Helper object to let FFI users access enum properties
+ */
+object EnumHelper {
+    fun name(value: Enum<*>): String = value.name
+    fun ordinal(value: Enum<*>): Int = value.ordinal
+}
