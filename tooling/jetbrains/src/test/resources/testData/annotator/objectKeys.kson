@@ -1,0 +1,7 @@
+{
+    <info textAttributesKey="KSON_OBJECT_KEY">simpleKey</info>: "value"
+    <info textAttributesKey="KSON_OBJECT_KEY">"quotedKey"</info>: "another value"
+    <info textAttributesKey="KSON_OBJECT_KEY">nested</info>: {
+        <info textAttributesKey="KSON_OBJECT_KEY">innerKey</info>: true
+    }
+}

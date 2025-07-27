@@ -45,5 +45,7 @@
         <enterHandlerDelegate implementation="org.kson.jetbrains.editor.KsonEnterHandlerDelegate"/>
         <lang.foldingBuilder language="kson"
                              implementationClass="org.kson.jetbrains.folding.KsonFoldingBuilder"/>
+        <annotator language="kson"
+                   implementationClass="org.kson.jetbrains.highlighter.KsonAnnotator"/>
     </extensions>
 </idea-plugin>
