@@ -34,6 +34,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.EMBED_OPEN_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_CLOSE_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_TAG -> getPackedTextAttributes(KSON_EMBED_TAG)
+                TokenType.EMBED_TAG_STOP -> getPackedTextAttributes(KSON_EMBED_TAG)
+                TokenType.EMBED_METADATA -> getPackedTextAttributes(KSON_EMBED_TAG)
                 TokenType.EMBED_PREAMBLE_NEWLINE -> TextAttributesKey.EMPTY_ARRAY
                 TokenType.EMBED_CONTENT -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.FALSE -> getPackedTextAttributes(KSON_KEYWORD)

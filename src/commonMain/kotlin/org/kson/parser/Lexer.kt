@@ -486,10 +486,18 @@ class Lexer(source: String, gapFree: Boolean = false) {
         } else if (sourceScanner.eof()) {
             return
         } else {
+            /**
+             * Our source scanner is still in the embed preamble so long as this condition holds
+             */
+            val stillInEmbedPreamble:(delimChar: Char) -> Boolean = {
+                !sourceScanner.eof()
+                        && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
+                        && sourceScanner.peek() != '\n'
+            }
+
             // we have an embed tag, let's scan it
-            while (!sourceScanner.eof()
-                && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
-                && sourceScanner.peek() != '\n') {
+            while (stillInEmbedPreamble(delimChar)
+                && sourceScanner.peek() != ':') {
                 sourceScanner.advance()
             }
 
@@ -500,6 +508,24 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 // trim any trailing whitespace from the embed tag's value
                 embedTagLexeme.text.trim()
             )
+
+            if(sourceScanner.peek() == ':') {
+                sourceScanner.advance()
+                addLiteralToken(EMBED_TAG_STOP)
+
+                // scan any metadata given in the preamble
+                while (stillInEmbedPreamble(delimChar)) {
+                    sourceScanner.advance()
+                }
+
+                // extract our embed metadata (note: may be empty, that's supported)
+                val embedMetadataLexeme = sourceScanner.extractLexeme()
+                addToken(
+                    EMBED_METADATA, embedMetadataLexeme,
+                    // trim any trailing whitespace from the embed tag's value
+                    embedMetadataLexeme.text.trim()
+                )
+            }
 
             // lex this premature embed end
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
