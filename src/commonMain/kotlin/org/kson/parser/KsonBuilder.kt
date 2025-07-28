@@ -5,6 +5,7 @@ import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
@@ -270,6 +271,13 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                                 ObjectPropertyNodeError(it, marker.getLocation())
                             }
                         }
+
+                        val embedBlockNode = decodeEmbedBlock(propertyNodes, marker.getLocation())
+
+                        if (embedBlockNode != null) {
+                            return embedBlockNode
+                        }
+
                         ObjectNode(propertyNodes, marker.getLocation())
                     }
                     OBJECT_PROPERTY -> {
@@ -351,6 +359,49 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 )
             }
         }
+    }
+
+    /**
+     * This method attempts to decode the [propertyNodes] as an [EmbedBlockNode]. An [ObjectNode] can be decoded if it
+     * follows the rules specified in [EmbedObjectKeys]
+     *
+     * @return an embed block representation of the given properties if possible, and null otherwise
+     */
+    private fun decodeEmbedBlock(
+        propertyNodes: List<ObjectPropertyNode>,
+        location: Location
+    ): EmbedBlockNode? {
+        if (propertyNodes.size > 3){ return null }
+
+        // Create a map of property keys to string values (if possible)
+        val propertiesMap = propertyNodes.mapNotNull { prop ->
+            (prop as? ObjectPropertyNodeImpl)?.let { property ->
+                val keyString = (property.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
+                keyString?.stringContent?.let { key ->
+                    key to (property.value as? StringNodeImpl)
+                }
+            }
+        }.toMap()
+
+        /**
+         * Check whether this object follows all the rules for decoding specified in [EmbedObjectKeys]
+         */
+        if (!EmbedObjectKeys.canBeDecoded(propertiesMap)) { return null }
+
+        val embedMetadataValue =
+            propertiesMap[EmbedObjectKeys.EMBED_METADATA.key]?.stringContent ?: ""
+        val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]?.stringContent ?: ""
+        val embedContentValue =
+            propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key]?.processedStringContent
+                ?: throw ShouldNotHappenException("should have been validated for nullability above")
+
+        return EmbedBlockNode(
+                embedTagValue,
+                embedMetadataValue,
+                embedContentValue,
+                EmbedDelim.Percent,
+                location
+            )
     }
 
     /**

@@ -229,4 +229,173 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testEmbedBlockTagsRetainment() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+        )
+        assertParsesTo(
+            """
+                %
+                content%%
+            """.trimIndent(),
+            """
+                %
+                content%%
+            """.trimIndent(),
+            """
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+                %sql
+                content%%
+            """.trimIndent(),
+            """
+                %sql
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "sql"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "sql",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+                %:meta
+                content%%
+            """.trimIndent(),
+            """
+                %: meta
+                content%%
+            """.trimIndent(),
+            """
+                embedMetadata: "meta"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedMetadata": "meta",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockFromObject() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "content\n"
+            """.trimIndent(),
+            """
+                embedBlock: %
+                  content
+                  %%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: |
+                    content
+                    
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "content\n"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "content\n"
+                 "unrelatedKey": "is not an embed block"
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: 'content\n'
+                  unrelatedKey: 'is not an embed block'
+            """.trimIndent(),
+            """
+                embedBlock:
+                  "embedContent": "content\n"
+                  "unrelatedKey": "is not an embed block"
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "content\n",
+                    "unrelatedKey": "is not an embed block"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockFromObjectWithoutStrings(){
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": {not: content}
+                 "unrelatedKey": "is not an embed block"
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent:
+                    not: content
+                    .
+                  unrelatedKey: 'is not an embed block'
+            """.trimIndent(),
+            """
+                embedBlock:
+                  "embedContent":
+                    not: content
+                  "unrelatedKey": "is not an embed block"
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": {
+                      "not": "content"
+                    },
+                    "unrelatedKey": "is not an embed block"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
 } 

@@ -13,6 +13,7 @@ import org.kson.parser.Parser
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 interface AstNode {
@@ -334,7 +335,9 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun delimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val delimitedPropertyIndent = if (value is ListNode || value is ObjectNode) {
+        val delimitedPropertyIndent = if (value is ListNode || value is ObjectNode ||
+            // check if we're compiling an embed block to an object
+            (compileTarget is Json && value is EmbedBlockNode && compileTarget.retainEmbedTags)) {
             // For delimited lists and objects, don't increase their indent here - they provide their own indent nest
             indent.clone(true)
         } else {
@@ -346,7 +349,9 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun undelimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return if (value is ListNode || value is ObjectNode) {
+        return if (value is ListNode || value is ObjectNode ||
+            // check if we're compiling an embed block to an object
+            (compileTarget is Yaml && value is EmbedBlockNode && compileTarget.retainEmbedTags)) {
             // For lists and objects, put the value on the next line
             key.toSourceWithNext(indent, value, compileTarget) + "\n" +
                     value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
@@ -661,16 +666,6 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
 
     val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
 
-    companion object {
-        /**
-         * If we are asked to compile with [CompileTarget.Yaml.retainEmbedTags], we compile
-         * embed blocks to a Yaml object with these two properties: one for the tag string,
-         * and one for the content multiline string
-         */
-        const val EMBED_TAG_KEYWORD = "embedTag"
-        const val EMBED_CONTENT_KEYWORD = "embedContent"
-    }
-
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
@@ -721,7 +716,6 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
                     encodeEmbedBlock(compileTarget, indent)
                 }
             }
-
             is Json -> {
                 if (!compileTarget.retainEmbedTags) {
                     indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
@@ -733,23 +727,48 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
     }
 
     /**
-     * Encode the [EmbedBlockNode] to a Json or Yaml object with [EMBED_TAG_KEYWORD] and [EMBED_CONTENT_KEYWORD]
+     * Encode the [EmbedBlockNode] to a Json or Yaml object with the [EmbedObjectKeys]
      */
     private fun encodeEmbedBlock(compileTarget: CompileTarget, indent: Indent): String {
-        return when(compileTarget) {
+        return when (compileTarget) {
             is Json -> {
                 val nextIndent = indent.next(false)
-                return """
-                        |${indent.firstLineIndent()}{
-                        |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
-                        |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
-                        |}
+                val embedTag = if (embedTag.isNotEmpty()) {
+                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\"," + "\n"
+                } else {
+                    ""
+                }
+                val metadataTag = if (metadataTag.isNotEmpty()) {
+                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\"," + "\n"
+                } else {
+                    ""
+                }
+
+                """
+                |${indent.firstLineIndent()}{
+                |$embedTag$metadataTag${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${
+                    renderForJsonString(
+                        embedContent
+                    )
+                }"
+                |${indent.bodyLinesIndent()}}
                         """.trimMargin()
+
             }
+
             is Yaml -> {
-                indent.firstLineIndent() + "$EMBED_TAG_KEYWORD: \"" + embedTag + "\"\n" +
-                        indent.bodyLinesIndent() + "$EMBED_CONTENT_KEYWORD: " +
-                        renderMultilineYamlString(embedContent, indent, indent.next(false))
+                if (embedTag.isNotEmpty()) {
+                    indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_TAG.key}: \"" + embedTag + "\"\n"
+                } else {
+                    ""
+                } +
+                        if (metadataTag.isNotEmpty()) {
+                            indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_METADATA.key}: \"" + metadataTag + "\"\n"
+                        } else {
+                            ""
+                        } +
+                        indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_CONTENT.key}: " +
+                        renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
             }
             is Kson -> throw ShouldNotHappenException("should not encode embed block as ${compileTarget::class.simpleName}")
         }
