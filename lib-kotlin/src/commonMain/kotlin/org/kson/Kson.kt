@@ -223,6 +223,8 @@ enum class TokenType {
     EMBED_OPEN_DELIM,
     EMBED_CLOSE_DELIM,
     EMBED_TAG,
+    EMBED_TAG_STOP,
+    EMBED_METADATA,
     EMBED_PREAMBLE_NEWLINE,
     EMBED_CONTENT,
     FALSE,
@@ -391,6 +393,12 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
             }
             InternalTokenType.EOF -> {
                 tokens.add(createPublicToken(TokenType.EOF, currentToken))
+            }
+            InternalTokenType.EMBED_METADATA -> {
+                tokens.add(createPublicToken(TokenType.EMBED_METADATA, currentToken))
+            }
+            InternalTokenType.EMBED_TAG_STOP -> {
+                tokens.add(createPublicToken(TokenType.EMBED_TAG_STOP, currentToken))
             }
         }
         i++

@@ -656,7 +656,7 @@ class NullNode(location: Location) : KsonValueNodeImpl(location) {
     }
 }
 
-class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: EmbedDelim, location: Location) :
+class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embedContent: String, embedDelim: EmbedDelim, location: Location) :
     KsonValueNodeImpl(location) {
 
     val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
@@ -694,17 +694,19 @@ class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: Emb
                         chosenDelimiter to chosenDelimiter.escapeEmbedContent(embedContent)
                     }
                 }
+
+                val embedPreamble = embedTag + if(metadataTag.isNotEmpty()) ": $metadataTag" else ""
                 when (compileTarget.formatConfig.formattingStyle){
                     FormattingStyle.PLAIN, FormattingStyle.DELIMITED -> {
                         // Format the embed block
-                        indent.firstLineIndent() + delimiter.openDelimiter + embedTag + "\n" +
+                        indent.firstLineIndent() + delimiter.openDelimiter + embedPreamble + "\n" +
                                 indent.bodyLinesIndent() + content.split("\n")
                             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                                 delimiter.closeDelimiter
                     }
                     FormattingStyle.COMPACT -> {
                         // Format the embed block
-                        delimiter.openDelimiter + embedTag + "\n" +
+                        delimiter.openDelimiter + embedPreamble + "\n" +
                                 content.split("\n")
                             .joinToString("\n") { it } +
                                 delimiter.closeDelimiter

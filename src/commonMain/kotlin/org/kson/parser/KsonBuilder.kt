@@ -219,10 +219,12 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         val embedDelimChar = childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getValue()
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
                         val embedTag = childMarkers.find { it.element == EMBED_TAG }?.getValue() ?: ""
+                        val metadataTag = childMarkers.find { it.element == EMBED_METADATA }?.getValue() ?: ""
                         val embedContent = childMarkers.find { it.element == EMBED_CONTENT }?.getValue() ?: ""
 
                         EmbedBlockNode(
                             embedTag,
+                            metadataTag,
                             embedContent,
                             EmbedDelim.fromString(embedDelimChar),
                             marker.getLocation())

@@ -46,6 +46,49 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 "    select * from something\n"
             """.trimIndent()
         )
+
+
+        assertParsesTo(
+            """
+                %sql: database
+                    select * from something
+                %%
+            """,
+            """
+                %sql: database
+                    select * from something
+                %%
+            """.trimIndent(),
+            """
+                |2
+                      select * from something
+                  
+            """.trimIndent(),
+            """
+                "    select * from something\n"
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                %sql: ::::::::::::database:::::: 
+                    select * from something
+                %%
+            """,
+            """
+                %sql: ::::::::::::database::::::
+                    select * from something
+                %%
+            """.trimIndent(),
+            """
+                |2
+                      select * from something
+                  
+            """.trimIndent(),
+            """
+                "    select * from something\n"
+            """.trimIndent()
+        )
     }
 
     @Test
