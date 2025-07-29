@@ -1,13 +1,50 @@
-# Kson: Kson Structured Object Notion
+# KSON: Kson Structured Object Notation
 
 <img src="assets/logo/kson_logo_blue.svg" alt="drawing" width="150"/>
 
-TODO document the language, remembering to clearly note:
-- string parsing: we base our string parsing closely on [Json's rules for strings](https://www.rfc-editor.org/rfc/rfc8259.html#section-7), except we allow whitespace control characters to be embedded in our strings
-- embed block escapes
-- list semantics: list may be written in either bracket or dash style.  Dash-style lists nested in within dash lists must be wrapped in `<>`, but otherwise the angle brackets may be omitted
-- commas are optional between elements in objects and lists and may be leading or trailing.  The formatter is likely to encourage leading commas for bracket lists and no commas for objects (so we'll always have either a comma or a list dash or a keyword starting/denoting an entry in these compound elements, so each has a leading indicator of what type of element it is)
-- ... todo other stuff
+KSON combines the best aspects of JSON and YAML&mdash;robust and efficient like JSON, clean and readable like YAML. KSON
+is designed to be [toolable](tooling/readme.md) and has a [flexible syntax](docs/readme.md#formatting-styles) that is
+usually auto-formatted to look like this:
+
+```kson
+# Kson syntax note: whitespace is NOT significant!
+person:
+  name: 'Leonardo Bonacci'
+  nickname: Fibonacci
+  favorite_books:
+    - title: Elements
+      author: Euclid
+
+    - title: Metaphysics
+      author: Aristotle
+      .
+  favorite_numbers:
+    - - 0
+      - 1
+      - 1
+      - 2
+      - '...'
+      =
+    - '(1 + √5)/2'
+    - π
+  # A Kson "embed block" containing Kotlin code
+  favorite_function: %kotlin
+    /**
+     * Calculates the nth number in the Fibonacci sequence using recursion
+     */
+    fun fibonacci(n:
+      Int): Long {
+              if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+              return when (n) {
+              0 -> 0
+              1 -> 1
+              else -> fibonacci(n - 1) + fibonacci(n - 2)
+      }
+  }
+  %%
+```
+
+Learn more [in the docs](docs/readme.md)
 
 ### Development setup
 
