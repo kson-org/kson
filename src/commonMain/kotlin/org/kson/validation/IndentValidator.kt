@@ -111,6 +111,7 @@ class IndentValidator {
         for (item in items) {
             // this item is not indented (it's trailing another value), so it has no indent to align
             if (item.location.start.line == prevLine) {
+                prevLine = item.location.end.line
                 continue
             } else {
                 prevLine = item.location.end.line

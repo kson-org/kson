@@ -385,4 +385,22 @@ class IndentValidatorTest {
             ).messages.isEmpty(), message
         )
     }
+
+    @Test
+    fun testNonLeadingMultilineStrutures() {
+        /**
+         * Regression test for a bug in the validator where alignment tracking was incorrect in the case that
+         * a non-leading item spanned multiple lines, like the `non_leading:` property in this test.  In this
+         * case, we were incorrectly marking `should_not_error:` as a deceptive indent
+         */
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    x:y non_leading:{
+                    } should_not_error: 0
+                """.trimIndent()
+            ).messages.isEmpty(),
+            "should never consider a non-leading item on a line to mis-aligned"
+        )
+    }
 }
