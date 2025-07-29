@@ -718,9 +718,7 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
                 if (!compileTarget.retainEmbedTags) {
                     renderMultilineYamlString(embedContent, indent, indent.next(false))
                 } else {
-                    indent.firstLineIndent() + "$EMBED_TAG_KEYWORD: \"" + embedTag + "\"\n" +
-                    indent.bodyLinesIndent() + "$EMBED_CONTENT_KEYWORD: " +
-                    renderMultilineYamlString(embedContent, indent, indent.next(false))
+                    encodeEmbedBlock(compileTarget, indent)
                 }
             }
 
@@ -728,45 +726,63 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
                 if (!compileTarget.retainEmbedTags) {
                     indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
                 } else {
-                    val nextIndent = indent.next(false)
-                    """
-                    |${indent.firstLineIndent()}{
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
-                    |}
-                    """.trimMargin()
+                    encodeEmbedBlock(compileTarget, indent)
                 }
             }
         }
     }
-}
 
-/**
- * Formats a string as a Yaml multiline string, preserving indentation
- *
- * @param content The string content to format
- * @param indent The base indentation level
- * @param contentIndent Additional indentation to apply to the content
- * @return a Yaml-formatted multiline string with any needed indentation markers
- */
-private fun renderMultilineYamlString(
-    content: String,
-    indent: Indent,
-    contentIndent: Indent
-): String {
-    // Find minimum leading whitespace across non-empty lines
-    val contentIndentSize = content.split("\n")
-        .filter { it.isNotEmpty() }
-        .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
+    /**
+     * Encode the [EmbedBlockNode] to a Json or Yaml object with [EMBED_TAG_KEYWORD] and [EMBED_CONTENT_KEYWORD]
+     */
+    private fun encodeEmbedBlock(compileTarget: CompileTarget, indent: Indent): String {
+        return when(compileTarget) {
+            is Json -> {
+                val nextIndent = indent.next(false)
+                return """
+                        |${indent.firstLineIndent()}{
+                        |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
+                        |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
+                        |}
+                        """.trimMargin()
+            }
+            is Yaml -> {
+                indent.firstLineIndent() + "$EMBED_TAG_KEYWORD: \"" + embedTag + "\"\n" +
+                        indent.bodyLinesIndent() + "$EMBED_CONTENT_KEYWORD: " +
+                        renderMultilineYamlString(embedContent, indent, indent.next(false))
+            }
+            is Kson -> throw ShouldNotHappenException("should not encode embed block as ${compileTarget::class.simpleName}")
+        }
 
-    // The user's content has an indent we must maintain, so we must tell Yaml how much indent
-    // we are giving it on our multiline string to ensure it does not eat up the content's indent too
-    val indentSize = contentIndent.bodyLinesIndent().length
-    val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
+    }
 
-    return indent.firstLineIndent() + multilineLineIndicator + "\n" +
-            content.split("\n")
-                .joinToString("\n") { line ->
-                    contentIndent.bodyLinesIndent() + line
-                }
+    /**
+     * Formats a string as a Yaml multiline string, preserving indentation
+     *
+     * @param content The string content to format
+     * @param indent The base indentation level
+     * @param contentIndent Additional indentation to apply to the content
+     * @return a Yaml-formatted multiline string with any needed indentation markers
+     */
+    private fun renderMultilineYamlString(
+        content: String,
+        indent: Indent,
+        contentIndent: Indent
+    ): String {
+        // Find minimum leading whitespace across non-empty lines
+        val contentIndentSize = content.split("\n")
+            .filter { it.isNotEmpty() }
+            .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
+
+        // The user's content has an indent we must maintain, so we must tell Yaml how much indent
+        // we are giving it on our multiline string to ensure it does not eat up the content's indent too
+        val indentSize = contentIndent.bodyLinesIndent().length
+        val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
+
+        return indent.firstLineIndent() + multilineLineIndicator + "\n" +
+                content.split("\n")
+                    .joinToString("\n") { line ->
+                        contentIndent.bodyLinesIndent() + line
+                    }
+    }
 }
