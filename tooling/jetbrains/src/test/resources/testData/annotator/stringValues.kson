@@ -1,0 +1,4 @@
+{
+    <info textAttributesKey="KSON_OBJECT_KEY">list</info>: ["not a key", "also not a key"]
+    <info textAttributesKey="KSON_OBJECT_KEY">value</info>: "this is a value, not a key"
+}
