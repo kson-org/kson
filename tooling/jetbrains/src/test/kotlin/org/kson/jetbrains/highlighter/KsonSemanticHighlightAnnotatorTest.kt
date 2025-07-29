@@ -2,7 +2,7 @@ package org.kson.jetbrains.highlighter
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
-class KsonAnnotatorTest : BasePlatformTestCase() {
+class KsonSemanticHighlightAnnotatorTest : BasePlatformTestCase() {
     
     override fun getTestDataPath(): String {
         return "src/test/resources/testData/annotator"
