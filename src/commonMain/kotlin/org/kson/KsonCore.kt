@@ -247,7 +247,7 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      */
     class Yaml(
         override val preserveComments: Boolean = true,
-        val retainEmbedTags: Boolean = false,
+        val retainEmbedTags: Boolean = true,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
 
@@ -258,7 +258,7 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     class Json(
-        val retainEmbedTags: Boolean = false,
+        val retainEmbedTags: Boolean = true,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig) {
         // Json does not support comments

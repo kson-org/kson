@@ -45,7 +45,10 @@ interface KsonCoreTest {
         expectedYaml: String,
         expectedJson: String,
         message: String? = null,
-        compileSettings: CompileSettings = CompileSettings(),
+        compileSettings: CompileSettings = CompileSettings(
+            jsonSettings = Json(retainEmbedTags = false),
+            yamlSettings = Yaml(retainEmbedTags = false)
+        ),
     ) {
         try {
             validateYaml(expectedYaml)
