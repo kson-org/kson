@@ -11,7 +11,11 @@ class RequiredValidator(private val required: List<KsonString>) : JsonObjectVali
         val propertyNames = node.propertyMap.keys
         val missingProperties = required.filter { !propertyNames.contains(it) }
         if (missingProperties.isNotEmpty()) {
-            messageSink.error(node.location, MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING.create(missingProperties.joinToString(", ")))
+            val missingPropertyNames = missingProperties.joinToString(", ") { it.value }
+            messageSink.error(
+                node.location.trimToFirstLine(),
+                MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING.create(missingPropertyNames)
+            )
         }
     }
 }
