@@ -141,13 +141,7 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // $
             {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
             {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // \n
-            // line 1 - first line of embed content
-            {deltaLine: 1, deltaStart: 0, length: 14, type: SemanticTokenTypes.macro, modifiers: []}, // "    multi-line\n"
-            // line 2 - second line of embed content
-            {deltaLine: 1, deltaStart: 0, length: 16, type: SemanticTokenTypes.macro, modifiers: []}, // "   embed content\n"
-            // Line 3 - third line (whitespace)
-            {deltaLine: 1, deltaStart: 0, length: 3, type: SemanticTokenTypes.macro, modifiers: []}, // "   "
-            {deltaLine: 0, deltaStart: 3, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
+            {deltaLine: 3, deltaStart: 3, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
             {deltaLine: 0, deltaStart: 2, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 

@@ -88,7 +88,7 @@ async function build() {
             ) : {})
         },
         platform: 'browser',
-        external: ['vscode', 'path'],
+        external: ['vscode', 'path', 'crypto'],
         define: {
             'global': 'globalThis'
         },

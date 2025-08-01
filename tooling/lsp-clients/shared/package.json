@@ -21,7 +21,8 @@
   },
   "scripts": {
     "compile": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "generate:tmlanguage": "tsx scripts/generate-tm-embed-block.ts"
   },
   "keywords": [
     "kson",
@@ -29,12 +30,13 @@
     "shared"
   ],
   "dependencies": {
+    "kson-language-server": "file:../../language-server-protocol",
     "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1",
-    "kson-language-server": "file:../../language-server-protocol"
+    "vscode-languageserver": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.0.0"
   }
 }

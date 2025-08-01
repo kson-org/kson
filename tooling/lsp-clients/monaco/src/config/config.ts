@@ -11,6 +11,11 @@ import { MessageTransports } from 'vscode-languageclient';
 import type { WrapperConfig } from 'monaco-editor-wrapper';
 import { configureDefaultWorkerFactory } from 'monaco-editor-wrapper/workers/workerLoaders';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
+// Import language extensions for embedded language support
+import '@codingame/monaco-vscode-typescript-basics-default-extension';
+import '@codingame/monaco-vscode-javascript-default-extension';
+import '@codingame/monaco-vscode-sql-default-extension';
+import '@codingame/monaco-vscode-python-default-extension';
 import exampleText from '../../resources/kson/example.kson?raw';
 
 import { languageConfigurationString, tmLanguageString, KSON_LANGUAGE_ID, KSON_EXTENSIONS, KSON_ALIASES, KSON_SCOPE_NAME } from '@kson/lsp-shared';
@@ -62,7 +67,13 @@ export const setupKsonClientExtended = async (params: {
                     grammars: [{
                         language: KSON_LANGUAGE_ID,
                         scopeName: KSON_SCOPE_NAME,
-                        path: './kson-grammar.json'
+                        path: './kson-grammar.json',
+                        embeddedLanguages: {
+                            'meta.embedded.typescript': 'typescript',
+                            'meta.embedded.javascript': 'javascript',
+                            'meta.embedded.sql': 'sql',
+                            'meta.embedded.python': 'python'
+                        }
                     }]
                 }
             },

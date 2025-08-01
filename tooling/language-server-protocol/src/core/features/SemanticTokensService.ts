@@ -75,21 +75,8 @@ export class SemanticTokensService {
         tokenType: string | undefined
     ): void {
         if (token.tokenType === TokenType.EMBED_CONTENT) {
-            // Split multi-line embed content into separate tokens
-            const lines = token.text.split('\n');
-            for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-                const line = lines[lineIndex];
-
-                if (line.length > 0) { // Only create token for non-empty lines
-                    semanticTokenBuilder.push(
-                        token.start.line + lineIndex,
-                        token.start.column,
-                        line.length,
-                        KSON_LEGEND.tokenTypes.indexOf(tokenType),
-                        0
-                    );
-                }
-            }
+            // Skip EMBED_CONTENT tokens - let TextMate grammars handle embedded language highlighting
+            return;
         } else {
             semanticTokenBuilder.push(
                 token.start.line,

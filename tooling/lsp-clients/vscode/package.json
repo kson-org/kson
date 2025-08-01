@@ -42,7 +42,26 @@
       {
         "language": "kson",
         "scopeName": "source.kson",
-        "path": "./dist/extension/config/kson.tmLanguage.json"
+        "path": "./dist/extension/config/kson.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.typescript": "typescript",
+          "meta.embedded.javascript": "javascript",
+          "meta.embedded.sql": "sql",
+          "meta.embedded.python": "python",
+          "meta.embedded.json": "json",
+          "meta.embedded.html": "html",
+          "meta.embedded.css": "css",
+          "meta.embedded.java": "java",
+          "meta.embedded.cpp": "cpp",
+          "meta.embedded.csharp": "csharp",
+          "meta.embedded.go": "go",
+          "meta.embedded.rust": "rust",
+          "meta.embedded.ruby": "ruby",
+          "meta.embedded.yaml": "yaml",
+          "meta.embedded.xml": "xml",
+          "meta.embedded.markdown": "markdown",
+          "meta.embedded.shell": "shellscript"
+        }
       }
     ],
     "configuration": {
@@ -106,11 +125,13 @@
     "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
+    "oniguruma": "^7.2.3",
     "process": "^0.11.10",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.3",
     "typescript": "^5.5.4",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vscode-textmate-languageservice": "^4.0.0"
   },
   "files": [
     "LICENSE",
