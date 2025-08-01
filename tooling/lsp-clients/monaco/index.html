@@ -6,54 +6,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-        
-        .header {
-            background-color: #2d2d30;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 300;
-        }
-        
-        .controls {
-            padding: 20px;
-            background-color: #252526;
-            border-bottom: 1px solid #3e3e42;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .controls button {
-            background-color: #0e639c;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-        
-        .controls button:hover {
-            background-color: #1177bb;
-        }
-        
-        .controls button:active {
-            background-color: #0d5a8f;
-        }
-        
         #monaco-editor-root {
             position: absolute;
             top: 140px;
@@ -68,18 +20,44 @@
     <div class="header">
         <h1>KSON Monaco Editor</h1>
     </div>
-    
-    <div class="controls">
-        <button id="button-start">Start Editor</button>
-        <button id="button-dispose">Dispose Editor</button>
-    </div>
-    
+
     <div id="monaco-editor-root"></div>
     
     <script type="module">
-        import { runKsonWrapper } from './src/wrapperKson.js';
-        
-        runKsonWrapper(true);
+        import { createKsonEditor, } from './src/index.js';
+
+        let currentWrapper = null;
+
+        async function startEditor() {
+            if (currentWrapper) {
+                console.log('Editor already started');
+                return;
+            }
+
+            const rootElement = document.getElementById('monaco-editor-root');
+
+            currentWrapper = await createKsonEditor(
+                {
+                    rootElement,
+                    editorAppConfig: {
+                        codeResources: {
+                            modified: {
+                                text: '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}',
+                                uri: '/test.kson'
+                            }
+                        }
+                    }
+                });
+
+
+            currentWrapper.start(rootElement).then(() => {
+                console.log(`${currentLanguage.toUpperCase()} editor started successfully`);
+            }).catch((error) => {
+                console.error(`Failed to start ${currentLanguage} editor:`, error);
+            });
+        }
+        // Start the editor automatically
+        startEditor();
     </script>
 </body>
 

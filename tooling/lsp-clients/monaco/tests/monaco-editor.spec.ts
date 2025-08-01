@@ -9,8 +9,8 @@ const __dirname = dirname(__filename);
  * Smoke test for the Monaco KSON Editor
  *
  * This test verifies the basic functionality:
- * 1. The editor loads when clicking "Start Editor"
- * 2. The example KSON file content is displayed
+ * 1. The editor loads automatically on page load
+ * 2. The default KSON content is displayed
  * 3. Syntax highlighting is applied
  * 4. Line numbers are visible
  *
@@ -23,11 +23,8 @@ test.describe('Monaco KSON Editor - Smoke Test', () => {
         await page.goto('http://localhost:5173');
         await expect(page).toHaveTitle('KSON Editor');
 
-        // Step 2: Initialize the editor
-        await page.getByRole('button', {name: 'Start Editor'}).click();
-
-        // Step 3: Wait for editor components to load
-        await page.waitForSelector('.monaco-editor', {state: 'visible'});
+        // Step 2: Wait for editor to auto-load
+        await page.waitForSelector('.monaco-editor', {state: 'visible', timeout: 10000});
         await page.waitForSelector('.line-numbers', {state: 'visible'});
         await page.waitForTimeout(1000); // Allow time for content rendering
 
@@ -39,22 +36,17 @@ test.describe('Monaco KSON Editor - Smoke Test', () => {
                 .map(line => line.textContent || '')
                 .join('\n');
         });
-        // Read the source KSON file content
-        const sourceFileContent = readFileSync(
-            join(__dirname, '../resources/kson/example.kson'),
-            'utf-8'
-        );
 
-        // Normalize both strings by replacing NBSP (U+00A0) with regular spaces. Note: the string
-        // we read from disk may have OS-specific line endings, which we normalize too.
-        const normalizedActualContent = actualEditorContent.replace(/\u00A0/g, ' ');
-        const normalizedSourceContent = sourceFileContent
-            .replace(/\u00A0/g, ' ')
-            .replace(/\r\n/g, '\n');
+        // The default content from index.html
+        const expectedContent = '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}';
 
-        // Verify the editor displays the source file content
+        // Normalize both strings by replacing NBSP (U+00A0) with regular spaces
+        const normalizedActualContent = actualEditorContent.replace(/\u00A0/g, ' ').trim();
+        const normalizedExpectedContent = expectedContent.replace(/\u00A0/g, ' ').trim();
+
+        // Verify the editor displays the expected content
         expect(normalizedActualContent).toBeTruthy();
-        expect(normalizedSourceContent).toContain(normalizedActualContent);
+        expect(normalizedActualContent).toBe(normalizedExpectedContent);
 
         // Step 5: Verify syntax highlighting
         // Monaco applies syntax highlighting through span elements with classes

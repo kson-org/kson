@@ -1,9 +1,8 @@
 {
-  "name": "monaco-editor",
+  "name": "@kson/monaco-editor",
   "version": "1.0.0",
-  "description": "",
+  "description": "Monaco editor with KSON language support and LSP integration",
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
