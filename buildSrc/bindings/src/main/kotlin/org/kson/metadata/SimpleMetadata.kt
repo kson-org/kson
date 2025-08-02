@@ -7,11 +7,12 @@ class SimplePackageMetadata(
     val classes: HashMap<String, SimpleClassMetadata>,
     val enums: HashMap<String, SimpleEnumMetadata>,
     val nestedClasses: HashMap<String, ArrayList<String>>,
+    val sealedSubclasses: HashSet<String>,
     val externalTypes: List<SimpleType>) {
 
     companion object {
         fun empty(): SimplePackageMetadata {
-            return SimplePackageMetadata(HashMap(), HashMap(), HashMap(), ArrayList())
+            return SimplePackageMetadata(HashMap(), HashMap(), HashMap(), HashSet(), ArrayList())
         }
     }
 }
@@ -33,12 +34,17 @@ class SimpleEnumEntry(
 class SimpleClassMetadata(
     val kind: SimpleClassKind,
     val name: FullyQualifiedClassName,
+    val sealedSubclasses: Array<FullyQualifiedClassName>,
     val supertypes: Array<FullyQualifiedClassName>,
     val constructors: Array<SimpleConstructorMetadata>,
     val functions: Array<SimpleFunctionMetadata>,
     val properties: Array<SimplePropertyMetadata>,
     val docString: String?,
-)
+) {
+    fun isSealed(): Boolean {
+        return sealedSubclasses.isNotEmpty()
+    }
+}
 
 @Serializable
 enum class SimpleClassKind {
@@ -87,6 +93,10 @@ class FullyQualifiedClassName(private val name: String) {
 
     fun javaClassName(): String {
         return name.replace('/', '.')
+    }
+
+    fun join(simpleName: String): FullyQualifiedClassName {
+        return FullyQualifiedClassName("${this.name}.$simpleName")
     }
 }
 

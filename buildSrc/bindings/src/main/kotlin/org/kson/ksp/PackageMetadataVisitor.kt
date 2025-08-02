@@ -32,6 +32,7 @@ class PackageMetadataVisitor {
     val classes: HashMap<String, SimpleClassMetadata> = HashMap()
     val enums: HashMap<String, SimpleEnumMetadata> = HashMap()
     val nestedClasses: HashMap<String, ArrayList<String>> = HashMap()
+    val sealedSubclasses: HashSet<String> = HashSet()
     val seenExternalTypes: HashSet<SimpleType> = HashSet()
     val ignoredFunctions: HashSet<String> = HashSet(listOf(
         "component1",
@@ -58,7 +59,7 @@ class PackageMetadataVisitor {
     }
 
     fun getPackageMetadata(): SimplePackageMetadata {
-        return SimplePackageMetadata(classes, enums, nestedClasses, seenExternalTypes.toList())
+        return SimplePackageMetadata(classes, enums, nestedClasses, sealedSubclasses, seenExternalTypes.toList())
     }
 
     // Returns false when there are no more classes to visit
@@ -178,6 +179,13 @@ class PackageMetadataVisitor {
                 enumMetadata.entries.add(SimpleEnumEntry(enumEntryName, classDecl.docString))
             }
             else -> {
+                val sealedSubclassesForThisClass = arrayListOf<FullyQualifiedClassName>()
+                classDecl.getSealedSubclasses().forEach {
+                    val subclassName = name.join(it.simpleName.asString())
+                    sealedSubclassesForThisClass.add(subclassName)
+                    sealedSubclasses.add(subclassName.fullyQualifiedName())
+                }
+
                 val classMetadata = SimpleClassMetadata(
                     if (classDecl.classKind == ClassKind.OBJECT) {
                         SimpleClassKind.OBJECT
@@ -185,6 +193,7 @@ class PackageMetadataVisitor {
                         SimpleClassKind.OTHER
                     },
                     name,
+                    sealedSubclassesForThisClass.toTypedArray(),
                     supertypes.toTypedArray(),
                     constructors.toTypedArray(),
                     functions.toTypedArray(),

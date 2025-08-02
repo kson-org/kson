@@ -1,6 +1,13 @@
 use crate::kson_ffi::*;
 use crate::KSON_SYMBOLS;
 
+pub(crate) struct KotlinType {
+    pub(crate) inner: *const kson_KType
+}
+
+unsafe impl Send for KotlinType {}
+unsafe impl Sync for KotlinType {}
+
 pub(crate) trait FromKotlinObject {
     fn from_kotlin_object(obj: kson_KNativePtr) -> Self;
 }

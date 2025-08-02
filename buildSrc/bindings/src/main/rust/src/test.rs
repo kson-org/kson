@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn test_kson_format() {
-    let indent = IndentTypeSpaces::new(2).upcast();
+    let indent = IndentType::Spaces(IndentTypeSpaces::new(2));
     let result = Kson::format("key: [1, 2, 3, 4]", &FormatOptions::new(&indent, &FormattingStyle::PLAIN));
     insta::assert_snapshot!(result, @r"
     key:
@@ -16,31 +16,33 @@ fn test_kson_format() {
 #[test]
 fn test_kson_to_json_success() {
     let result = Kson::toJson("key: [1, 2, 3, 4]");
-    let Ok(success) = result.downcastToSuccess() else {
-      panic!("expected success, found failure")
-    };
-
-    insta::assert_snapshot!(success.output(), @r#"
-    {
-      "key": [
-        1,
-        2,
-        3,
-        4
-      ]
+    match result {
+        Result::Failure(_) => panic!("expected success, found failure"),
+        Result::Success(success) => {
+            insta::assert_snapshot!(success.output(), @r#"
+            {
+              "key": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+            "#);
+        }
     }
-    "#);
 }
 
 #[test]
 fn test_kson_to_json_failure() {
     let result = Kson::toJson("key: [1, 2, 3, 4");
-    let Ok(failure) = result.downcastToFailure() else {
-      panic!("expected failure, found success")
-    };
-
-    let output = messages_to_string(&failure.errors());
-    insta::assert_snapshot!(output, @"0,5 to 0,16 - Unclosed list\n");
+    match result {
+        Result::Success(_) => panic!("expected failure, found success"),
+        Result::Failure(failure) => {
+            let output = messages_to_string(&failure.errors());
+            insta::assert_snapshot!(output, @"0,5 to 0,16 - Unclosed list\n");
+        }
+    }
 }
 
 #[test]
@@ -76,7 +78,7 @@ fn test_kson_analysis() {
 #[test]
 fn test_kson_validate_schema() {
     let result = Kson::parseSchema(r#"{ "type": "string" }"#);
-    let Ok(success) = result.downcastToSuccess() else {
+    let SchemaResult::Success(success) = result else {
       panic!("expected success, found failure")
     };
 
