@@ -22,6 +22,7 @@ import org.kson.metadata.SimpleEnumMetadata
 import org.kson.metadata.SimpleFunctionMetadata
 import org.kson.metadata.SimplePackageMetadata
 import org.kson.metadata.SimpleParamMetadata
+import org.kson.metadata.SimplePropertyMetadata
 import org.kson.metadata.SimpleType
 import java.util.LinkedList
 import java.util.Queue
@@ -91,6 +92,7 @@ class PackageMetadataVisitor {
 
         val constructors = arrayListOf<SimpleConstructorMetadata>()
         val functions = arrayListOf<SimpleFunctionMetadata>()
+        val properties = arrayListOf<SimplePropertyMetadata>()
         classDecl.declarations.forEach {
             if (it is KSClassDeclaration) {
                 if (it.isCompanionObject) {
@@ -134,13 +136,13 @@ class PackageMetadataVisitor {
 
             // Properties
             if (it is KSPropertyDeclaration && it.getVisibility() == Visibility.PUBLIC && it.origin != Origin.SYNTHETIC) {
-                functions.add(
-                    SimpleFunctionMetadata(
-                        "get_${it.simpleName.asString()}", FunctionKind.NonStatic, arrayListOf(),
-                        simplifyType(it.type.resolve()), it.docString
-                    )
+                val type = it.type.resolve()
+                val getter = SimpleFunctionMetadata(
+                    "get_${it.simpleName.asString()}", FunctionKind.NonStatic, arrayListOf(),
+                    simplifyType(type), it.docString
                 )
-                this.visitType(it.type.resolve())
+                properties.add(SimplePropertyMetadata(it.simpleName.asString(), getter))
+                this.visitType(type)
             }
         }
 
@@ -186,6 +188,7 @@ class PackageMetadataVisitor {
                     supertypes.toTypedArray(),
                     constructors.toTypedArray(),
                     functions.toTypedArray(),
+                    properties.toTypedArray(),
                     classDecl.docString,
                 )
                 val classParent = classDecl.parentDeclaration

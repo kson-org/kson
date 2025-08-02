@@ -3,9 +3,9 @@ from lib import *
 def messages_to_string(msgs):
     output = ""
     for msg in msgs:
-        p1 = msg.get_start()
-        p2 = msg.get_end()
-        line = f"{p1.get_line()},{p1.get_column()} to {p2.get_line()},{p2.get_column()} - {msg.get_message()}"
+        p1 = msg.start()
+        p2 = msg.end()
+        line = f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {msg.message()}"
         output += line.strip()
         output += "\n"
     return output
@@ -28,7 +28,7 @@ def test_kson_format():
 def test_kson_to_json_success():
     result = Kson.toJson("key: [1, 2, 3, 4]")
     assert isinstance(result, Result.Success)
-    assert result.get_output() == """{
+    assert result.output() == """{
   "key": [
     1,
     2,
@@ -41,19 +41,19 @@ def test_kson_to_json_success():
 def test_kson_to_json_failure():
     result = Kson.toJson("key: [1, 2, 3, 4")
     assert isinstance(result, Result.Failure)
-    output = messages_to_string(result.get_errors())
+    output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"
 
 def test_kson_analysis():
     analysis = Kson.analyze("key: [1, 2, 3, 4]")
-    assert analysis.get_errors() == []
+    assert analysis.errors() == []
 
     # Transform tokens to strings, so we can snapshot them
     output = ""
-    for token in analysis.get_tokens():
-        p1 = token.get_start()
-        p2 = token.get_end()
-        line = f"{p1.get_line()},{p1.get_column()} to {p2.get_line()},{p2.get_column()} - {token.get_tokenType().name()}: {token.get_text()}"
+    for token in analysis.tokens():
+        p1 = token.start()
+        p2 = token.end()
+        line = f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {token.tokenType().name()}: {token.text()}"
         output += line.strip()
         output += "\n"
 

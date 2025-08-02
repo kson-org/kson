@@ -172,7 +172,12 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             generateInstanceFunction(indent, metadata.name)
         }
 
-        // Wrapper functions
+        // Property wrappers
+        metadata.properties.forEach {
+            generateWrapperFunction(indent, metadata.name, it.getter, it.name)
+        }
+
+        // Function wrappers
         metadata.functions.forEach {
             generateWrapperFunction(indent, metadata.name, it)
         }
@@ -245,39 +250,40 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
         builder.append("$declarationIndent    return resultObj\n")
     }
 
-    fun generateWrapperFunction(classIndent: String, className: FullyQualifiedClassName, metadata: SimpleFunctionMetadata) {
+    fun generateWrapperFunction(classIndent: String, className: FullyQualifiedClassName, fnMetadata: SimpleFunctionMetadata, overrideName: String? = null) {
         // Wrapper function signature
         val declarationIndent = "$classIndent    "
-        if (metadata.isStatic) {
+        if (fnMetadata.isStatic) {
             builder.append("$declarationIndent@staticmethod\n")
         }
-        builder.append("${declarationIndent}def ${metadata.name}(")
-        if (!metadata.isStatic) {
+        val userFacingName = overrideName ?: fnMetadata.name
+        builder.append("${declarationIndent}def ${userFacingName}(")
+        if (!fnMetadata.isStatic) {
             builder.append("self, ")
         }
-        metadata.params.forEach {
+        fnMetadata.params.forEach {
             builder.append("${it.name}, ")
         }
         builder.append("):\n")
-        builder.append(PythonDocStringFormatter.format(declarationIndent + "    ", metadata.docString))
+        builder.append(PythonDocStringFormatter.format("$declarationIndent    ", fnMetadata.docString))
 
-        val maybeCompanion = if (metadata.kind == FunctionKind.StaticCompanion) {
+        val maybeCompanion = if (fnMetadata.kind == FunctionKind.StaticCompanion) {
             ".Companion"
         } else {
             ""
         }
 
         // FFI call
-        val self = if (metadata.isStatic) {
+        val self = if (fnMetadata.isStatic) {
             "symbols.kotlin.root.${className.javaClassName()}${maybeCompanion}._instance(), "
         } else {
             "self.ptr, "
         }
-        val fnName = "symbols.kotlin.root.${className.javaClassName()}${maybeCompanion}.${metadata.name}"
-        generateFunctionCall("$declarationIndent    ", fnName, self, metadata.params, metadata.returnType)
+        val fnName = "symbols.kotlin.root.${className.javaClassName()}${maybeCompanion}.${fnMetadata.name}"
+        generateFunctionCall("$declarationIndent    ", fnName, self, fnMetadata.params, fnMetadata.returnType)
 
-        if (metadata.returnType != null) {
-            translateReturnExpr("$declarationIndent    ", metadata.returnType)
+        if (fnMetadata.returnType != null) {
+            translateReturnExpr("$declarationIndent    ", fnMetadata.returnType)
             builder.append("\n$declarationIndent    return result")
         }
 

@@ -36,6 +36,7 @@ class SimpleClassMetadata(
     val supertypes: Array<FullyQualifiedClassName>,
     val constructors: Array<SimpleConstructorMetadata>,
     val functions: Array<SimpleFunctionMetadata>,
+    val properties: Array<SimplePropertyMetadata>,
     val docString: String?,
 )
 
@@ -44,6 +45,9 @@ enum class SimpleClassKind {
     OBJECT,
     OTHER
 }
+
+@Serializable
+class SimplePropertyMetadata(val name: String, val getter: SimpleFunctionMetadata)
 
 @Serializable
 class SimpleConstructorMetadata(val params: List<SimpleParamMetadata>, val docString: String?)

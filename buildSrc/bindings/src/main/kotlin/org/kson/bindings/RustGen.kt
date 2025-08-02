@@ -194,6 +194,11 @@ class RustGen : LanguageSpecificBindingsGenerator {
             generateInstanceFunction(metadata.name)
         }
 
+        // Property wrappers
+        metadata.properties.forEach {
+            generateWrapperFunction(metadata.name, it.getter, it.name)
+        }
+
         // Function wrappers
         metadata.functions.forEach {
             generateWrapperFunction(metadata.name, it)
@@ -231,38 +236,39 @@ class RustGen : LanguageSpecificBindingsGenerator {
         builder.append("  }\n")
     }
 
-    private fun generateWrapperFunction(className: FullyQualifiedClassName, metadata: SimpleFunctionMetadata) {
+    private fun generateWrapperFunction(className: FullyQualifiedClassName, fnMetadata: SimpleFunctionMetadata, overrideName: String? = null) {
         // Wrapper function signature
-        val docString = RustDocStringFormatter.format("  ", metadata.docString)
-        builder.append("$docString  pub fn ${metadata.name}(")
-        if (!metadata.isStatic) {
+        val docString = RustDocStringFormatter.format("  ", fnMetadata.docString)
+        val userFacingName = overrideName ?: fnMetadata.name
+        builder.append("$docString  pub fn ${userFacingName}(")
+        if (!fnMetadata.isStatic) {
             builder.append("&self, ")
         }
-        metadata.params.forEach {
+        fnMetadata.params.forEach {
             builder.append("${it.name}: ${translateType(it.type, false)}, ")
         }
         builder.append(")")
 
-        if (metadata.returnType != null && metadata.returnType.classifier != "kotlin.Unit") {
-            builder.append(" -> ${translateType(metadata.returnType, true)}")
+        if (fnMetadata.returnType != null && fnMetadata.returnType.classifier != "kotlin.Unit") {
+            builder.append(" -> ${translateType(fnMetadata.returnType, true)}")
         }
 
         builder.append(" {\n")
 
-        val maybeCompanion = if (metadata.kind == FunctionKind.StaticCompanion) {
+        val maybeCompanion = if (fnMetadata.kind == FunctionKind.StaticCompanion) {
             ".Companion"
         } else {
             ""
         }
 
         // FFI call
-        val self = if (metadata.isStatic) {
+        val self = if (fnMetadata.isStatic) {
             "KSON_SYMBOLS.kotlin.root.${className.javaClassName()}${maybeCompanion}._instance.unwrap()(), "
         } else {
             "${bindgenStructName(className)} { pinned: self.kson_ref.inner.inner }, "
         }
-        val fnName = "kotlin.root.${className.javaClassName()}${maybeCompanion}.${metadata.name}"
-        generateFunctionCall(fnName, self, metadata.params, metadata.returnType)
+        val fnName = "kotlin.root.${className.javaClassName()}${maybeCompanion}.${fnMetadata.name}"
+        generateFunctionCall(fnName, self, fnMetadata.params, fnMetadata.returnType)
         builder.append("  }\n")
     }
 

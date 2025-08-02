@@ -20,7 +20,7 @@ fn test_kson_to_json_success() {
       panic!("expected success, found failure")
     };
 
-    insta::assert_snapshot!(success.get_output(), @r#"
+    insta::assert_snapshot!(success.output(), @r#"
     {
       "key": [
         1,
@@ -39,21 +39,21 @@ fn test_kson_to_json_failure() {
       panic!("expected failure, found success")
     };
 
-    let output = messages_to_string(&failure.get_errors());
+    let output = messages_to_string(&failure.errors());
     insta::assert_snapshot!(output, @"0,5 to 0,16 - Unclosed list\n");
 }
 
 #[test]
 fn test_kson_analysis() {
     let analysis = Kson::analyze("key: [1, 2, 3, 4]");
-    assert!(analysis.get_errors().is_empty());
+    assert!(analysis.errors().is_empty());
 
     // Transform tokens to strings, so we can snapshot them
     let mut output = String::new();
-    for token in analysis.get_tokens() {
-      let p1 = token.get_start();
-      let p2 = token.get_end();
-      let line = format!("{},{} to {},{} - {}: {}\n", p1.get_line(), p1.get_column(), p2.get_line(), p2.get_column(), token.get_tokenType().name(), token.get_text());
+    for token in analysis.tokens() {
+      let p1 = token.start();
+      let p2 = token.end();
+      let line = format!("{},{} to {},{} - {}: {}\n", p1.line(), p1.column(), p2.line(), p2.column(), token.tokenType().name(), token.text());
       output.push_str(&line);
     }
 
@@ -80,7 +80,7 @@ fn test_kson_validate_schema() {
       panic!("expected success, found failure")
     };
 
-    let validator = success.get_schemaValidator();
+    let validator = success.schemaValidator();
     let errors = validator.validate(r#""a good old JSON string""#);
     assert!(errors.is_empty());
 
@@ -102,7 +102,7 @@ fn messages_to_string(msgs: &[Message]) -> String {
 }
 
 fn message_to_string(msg: &Message) -> String {
-  let p1 = msg.get_start();
-  let p2 = msg.get_end();
-  format!("{},{} to {},{} - {}\n", p1.get_line(), p1.get_column(), p2.get_line(), p2.get_column(), msg.get_message())
+  let p1 = msg.start();
+  let p2 = msg.end();
+  format!("{},{} to {},{} - {}\n", p1.line(), p1.column(), p2.line(), p2.column(), msg.message())
 }
