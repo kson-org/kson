@@ -9,6 +9,12 @@ pub(crate) trait ToKotlinObject {
     fn to_kotlin_object(&self) -> kson_KNativePtr;
 }
 
+impl ToKotlinObject for kson_KNativePtr {
+    fn to_kotlin_object(&self) -> kson_KNativePtr {
+        *self
+    }
+}
+
 pub(crate) fn enum_name<T: ToKotlinObject>(value: T) -> String {
     let ptr = value.to_kotlin_object();
     let helper_instance = unsafe { KSON_SYMBOLS.kotlin.root.org.kson.EnumHelper._instance.unwrap()() };

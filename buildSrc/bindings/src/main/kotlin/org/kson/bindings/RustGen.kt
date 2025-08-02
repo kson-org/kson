@@ -29,7 +29,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
 
         builder.append(
             """
-            |#![allow(non_snake_case)]
+            |#![allow(non_snake_case, non_camel_case_types)]
             |
             |use crate::{kson_ffi, util};
             |use crate::util::{FromKotlinObject, ToKotlinObject};
@@ -128,9 +128,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
         builder.append("""|
             |impl util::FromKotlinObject for $unqualifiedName {
             |  fn from_kotlin_object(ptr: kson_ffi::kson_KNativePtr) -> Self {
-            |    let helper_instance = unsafe { KSON_SYMBOLS.kotlin.root.${ENUM_HELPER_NAME.fullyQualifiedName()}._instance.unwrap()() };
-            |    let ordinal = unsafe { KSON_SYMBOLS.kotlin.root.${ENUM_HELPER_NAME.fullyQualifiedName()}.ordinal.unwrap()(helper_instance, ${bindgenStructName(ENUM_TYPE)} { pinned: ptr }) };
-            |    let variant = match ordinal {
+            |    match util::enum_ordinal(ptr) {
             |
             """.trimMargin())
         metadata.entries.forEachIndexed { index, entry ->
@@ -138,10 +136,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
         }
         builder.append("""
             |      _ => unreachable!(),
-            |    };
-            |
-            |    unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(ptr) };
-            |    variant
+            |    }
             |  }
             |}
             |
