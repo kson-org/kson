@@ -85,7 +85,9 @@ class RustGen : LanguageSpecificBindingsGenerator {
         """.trimMargin())
 
         for (entry in metadata.entries) {
-            builder.append("  ${entry.unqualifiedName()},\n")
+            val entryDocString = RustDocStringFormatter.format("  ", entry.docString)
+            builder.append(entryDocString)
+            builder.append("  ${entry.name.unqualifiedName()},\n")
         }
 
         builder.append("}\n")
@@ -107,7 +109,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
             """.trimMargin()
         )
         for (entry in metadata.entries) {
-            val entryUnqualifiedName = entry.unqualifiedName()
+            val entryUnqualifiedName = entry.name.unqualifiedName()
             val fnName = "kotlin.root.${metadata.name.javaClassName()}.${entryUnqualifiedName}.get"
             builder.append("""
                 |      $unqualifiedName::${entryUnqualifiedName} => unsafe { KSON_SYMBOLS.$fnName.unwrap()() }.pinned,
@@ -132,7 +134,7 @@ class RustGen : LanguageSpecificBindingsGenerator {
             |
             """.trimMargin())
         metadata.entries.forEachIndexed { index, entry ->
-            builder.append("      $index => ${metadata.name.unqualifiedName()}::${entry.unqualifiedName()},\n")
+            builder.append("      $index => ${metadata.name.unqualifiedName()}::${entry.name.unqualifiedName()},\n")
         }
         builder.append("""
             |      _ => unreachable!(),

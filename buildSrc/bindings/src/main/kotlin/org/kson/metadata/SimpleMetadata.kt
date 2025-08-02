@@ -19,7 +19,7 @@ class SimplePackageMetadata(
 @Serializable
 class SimpleEnumMetadata(
     val name: FullyQualifiedClassName,
-    val entries: MutableList<FullyQualifiedClassName>,
+    val entries: MutableList<SimpleEnumEntry>,
     val docString: String?,
 )
 

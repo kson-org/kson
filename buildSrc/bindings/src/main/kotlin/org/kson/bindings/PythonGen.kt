@@ -127,10 +127,10 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
             """.trimMargin()
         )
         for (entry in metadata.entries) {
-            val entryUnqualifiedName = entry.unqualifiedName()
+            val entryUnqualifiedName = entry.name.unqualifiedName()
             val fnCall = "symbols.kotlin.root.${metadata.name.javaClassName()}.${entryUnqualifiedName}.get()"
             builder.append("""
-                |            case ${entry.unqualifiedName(IncludeParentClass.Yes())}:
+                |            case ${entry.name.unqualifiedName(IncludeParentClass.Yes())}:
                 |                result = $fnCall
                 |                result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 |                return result
@@ -149,7 +149,7 @@ class PythonGen() : LanguageSpecificBindingsGenerator {
         )
 
         metadata.entries.forEachIndexed { index, entry ->
-            builder.append("    ${entry.unqualifiedName()} = $index\n")
+            builder.append("    ${entry.name.unqualifiedName()} = $index\n")
         }
     }
 

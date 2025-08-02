@@ -17,6 +17,7 @@ import org.kson.metadata.FunctionKind
 import org.kson.metadata.SimpleClassKind
 import org.kson.metadata.SimpleClassMetadata
 import org.kson.metadata.SimpleConstructorMetadata
+import org.kson.metadata.SimpleEnumEntry
 import org.kson.metadata.SimpleEnumMetadata
 import org.kson.metadata.SimpleFunctionMetadata
 import org.kson.metadata.SimplePackageMetadata
@@ -172,7 +173,7 @@ class PackageMetadataVisitor {
                 val enumMetadata = this.enums[enumName]!!
 
                 val enumEntryName = FullyQualifiedClassName(classDecl.qualifiedName!!.asString())
-                enumMetadata.entries.add(enumEntryName)
+                enumMetadata.entries.add(SimpleEnumEntry(enumEntryName, classDecl.docString))
             }
             else -> {
                 val classMetadata = SimpleClassMetadata(
