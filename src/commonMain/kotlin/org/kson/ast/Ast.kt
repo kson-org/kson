@@ -13,6 +13,7 @@ import org.kson.parser.Parser
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 interface AstNode {
@@ -194,7 +195,11 @@ class KsonRootImpl(
                         // endComments are already embedded in the document, likely as part of a trailing error
                         ""
                     } else {
-                        "\n\n" + endComments
+                        if(compileTarget is Kson && compileTarget.formatConfig.formattingStyle == FormattingStyle.COMPACT){
+                            "\n" + endComments
+                        }else{
+                            "\n\n" + endComments
+                        }
                     }
                 }
 
@@ -215,6 +220,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
                 when (compileTarget.formatConfig.formattingStyle) {
                     FormattingStyle.DELIMITED -> formatDelimitedObject(indent, nextNode, compileTarget)
                     FormattingStyle.PLAIN -> formatUndelimitedObject(indent, nextNode, compileTarget)
+                    FormattingStyle.COMPACT -> formatCompactObject(indent, nextNode, compileTarget)
                 }
             }
             is Yaml -> formatUndelimitedObject(indent, nextNode, compileTarget)
@@ -238,6 +244,36 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
             |${indent.bodyLinesIndent()}}
             """.trimMargin()
 
+    }
+
+    private fun formatCompactObject(indent: Indent , nextNode: AstNode?, compileTarget: CompileTarget): String {
+        val outputObject = properties.withIndex().joinToString(""){ (index, property) ->
+            val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
+            val result = property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+
+            // Only add space after this property if not using a space could result in ambiguity with the next node
+            val needsSpace = index < properties.size - 1 &&
+                    property is ObjectPropertyNodeImpl &&
+                    result.last() != '\n' &&
+                    when (property.value) {
+                        is QuotedStringNode -> {
+                            StringUnquoted.isUnquotable(property.value.stringContent)
+                        }
+                        is UnquotedStringNode,
+                        is NumberNode,
+                        is TrueNode,
+                        is FalseNode,
+                        is NullNode -> true
+                        else -> false
+                    }
+
+            if (needsSpace) "$result " else result
+        }
+        return if (nextNode is ObjectPropertyNode) {
+            // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
+            val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
+            outputObject + if(needsSpace) " ." else "."
+        } else outputObject
     }
 
     private fun formatUndelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -264,10 +300,21 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
     }
 }
 
+interface ObjectKeyNode : StringNode
+class ObjectKeyNodeError(content: String, location: Location) : ObjectKeyNode, AstNodeError(content, location)
+class ObjectKeyNodeImpl(
+    val key: StringNode
+) : ObjectKeyNode, AstNodeImpl(key.location) {
+    override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+        val keyOutput = key.toSourceWithNext(indent, null, compileTarget)
+        return "$keyOutput:"
+    }
+}
+
 interface ObjectPropertyNode : AstNode
 class ObjectPropertyNodeError(content: String, location: Location) : ObjectPropertyNode, AstNodeError(content, location)
 class ObjectPropertyNodeImpl(
-    val name: StringNode,
+    val key: ObjectKeyNode,
     val value: KsonValueNode,
     override val comments: List<String>,
     location: Location
@@ -278,6 +325,7 @@ class ObjectPropertyNodeImpl(
             is Kson -> {
                 when (compileTarget.formatConfig.formattingStyle){
                     FormattingStyle.DELIMITED -> delimitedObjectProperty(indent, nextNode, compileTarget)
+                    FormattingStyle.COMPACT  -> compactObjectProperty(indent, nextNode, compileTarget)
                     FormattingStyle.PLAIN -> undelimitedObjectProperty(indent, nextNode, compileTarget)
                 }
             }
@@ -287,26 +335,48 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun delimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val delimitedPropertyIndent = if (value is ListNode || value is ObjectNode) {
+        val delimitedPropertyIndent = if (value is ListNode || value is ObjectNode ||
+            // check if we're compiling an embed block to an object
+            (compileTarget is Json && value is EmbedBlockNode && compileTarget.retainEmbedTags)) {
             // For delimited lists and objects, don't increase their indent here - they provide their own indent nest
             indent.clone(true)
         } else {
             // otherwise, increase the indent
             indent.next(true)
         }
-        return name.toSourceWithNext(indent, value, compileTarget) + ": " +
+        return key.toSourceWithNext(indent, value, compileTarget) + " " +
                     value.toSourceWithNext(delimitedPropertyIndent, nextNode, compileTarget)
     }
 
     private fun undelimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return if (value is ListNode || value is ObjectNode) {
+        return if (value is ListNode || value is ObjectNode ||
+            // check if we're compiling an embed block to an object
+            (compileTarget is Yaml && value is EmbedBlockNode && compileTarget.retainEmbedTags)) {
             // For lists and objects, put the value on the next line
-            name.toSourceWithNext(indent, value, compileTarget) + ":\n" +
+            key.toSourceWithNext(indent, value, compileTarget) + "\n" +
                     value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
         } else {
-            name.toSourceWithNext(indent, value, compileTarget) + ": " +
+            key.toSourceWithNext(indent, value, compileTarget) + " " +
                     value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
         }
+    }
+
+    private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+        // A comment always needs to start on a new line. This can happen either when the first property or the next
+        // node are commented.
+        val firstObjectPropertyHasComments =
+            (value is ObjectNode) && (value.properties.first() is ObjectPropertyNodeImpl)
+                    && ((value.properties.first() as ObjectPropertyNodeImpl).comments.isNotEmpty())
+        val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
+
+        return key.toSourceWithNext(indent, value, compileTarget) +
+                if (firstObjectPropertyHasComments) {
+                    "\n"
+                } else {
+                    ""
+                } +
+                value.toSourceWithNext(indent, nextNode, compileTarget) +
+                if (nextNodeHasComments) "\n" else ""
     }
 }
 
@@ -329,20 +399,21 @@ class ListNode(
         }
         return when (compileTarget) {
             is Kson -> {
-                if (compileTarget.formatConfig.formattingStyle == FormattingStyle.DELIMITED) {
-                    formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
-                } else {
-                    val outputList = formatUndelimitedList(indent, nextNode, compileTarget)
-
-                    /**
-                     * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
-                     * thing in this document is a [ListElementNode] that does not belong to this list
-                     */
-                    if (nextNode is ListElementNode) {
-                        "$outputList\n${indent.bodyLinesIndent()}="
-                    } else {
-                        outputList
+                when(compileTarget.formatConfig.formattingStyle) {
+                    FormattingStyle.PLAIN -> {
+                        val outputList = formatUndelimitedList(indent, nextNode, compileTarget)
+                        /**
+                         * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
+                         * thing in this document is a [ListElementNode] that does not belong to this list
+                         */
+                        if (nextNode is ListElementNode) {
+                            "$outputList\n${indent.bodyLinesIndent()}="
+                        } else {
+                            outputList
+                        }
                     }
+                    FormattingStyle.DELIMITED -> formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
+                    FormattingStyle.COMPACT -> formatCompactList(indent, nextNode, compileTarget, ListDelimiters.SquareBrackets)
                 }
             }
             is Yaml -> formatUndelimitedList(indent, nextNode, compileTarget)
@@ -364,13 +435,49 @@ class ListNode(
 
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = "\n"
-        val endBraceIndent = indent.bodyLinesIndent()
         return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
                 elements.withIndex().joinToString(seperator) { (index, element) ->
                     val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
                     element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
                 } +
-                bracketPadding + endBraceIndent + listDelimiters.close
+                bracketPadding +
+                indent.bodyLinesIndent() + listDelimiters.close
+    }
+
+    private fun formatCompactList(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget, listDelimiters: ListDelimiters): String {
+        return elements.withIndex().joinToString(
+            "",
+            prefix = listDelimiters.open.toString(),
+            postfix = listDelimiters.close.toString()
+        ) { (index, element) ->
+            val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
+            val elementString = if (element is Documented && element.comments.isNotEmpty()) {
+                "\n"
+            } else {
+                ""
+            } + element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
+
+
+            val isNotLastElement = index < elements.size - 1
+            
+            // Extract current and next element values for type checking
+            val currentValue = (element as? ListElementNodeImpl)?.value
+            val currentIsObject = currentValue is ObjectNode
+            val nextIsObject = (nodeAfterThisChild as? ListElementNodeImpl)?.value is ObjectNode
+
+            // Determine formatting based on context
+            when {
+                // Both objects need a dot separator, with space if current ends with number
+                (isNotLastElement && currentIsObject && nextIsObject) -> "{$elementString}"
+
+                // Add space between elements in a list, except when the element is a list
+                isNotLastElement && element is ListElementNodeImpl && element.value !is ListNode -> {
+                    "$elementString "
+                }
+
+                else -> elementString
+            }
+        }
     }
 
     private fun formatUndelimitedList(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -392,6 +499,7 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
                 when (compileTarget.formatConfig.formattingStyle) {
                     FormattingStyle.PLAIN -> formatWithDash(indent, nextNode, compileTarget)
                     FormattingStyle.DELIMITED -> formatWithDash(indent, nextNode, compileTarget, isDelimited = true)
+                    FormattingStyle.COMPACT -> value.toSourceWithNext(indent, nextNode, compileTarget)
                 }
             }
 
@@ -424,7 +532,6 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
 }
 
 interface StringNode : KsonValueNode
-class StringNodeError(content: String, location: Location) : StringNode, AstNodeError(content, location)
 abstract class StringNodeImpl(location: Location) : StringNode, KsonValueNodeImpl(location) {
     abstract val stringContent: String
 
@@ -554,55 +661,50 @@ class NullNode(location: Location) : KsonValueNodeImpl(location) {
     }
 }
 
-class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: EmbedDelim, location: Location) :
+class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embedContent: String, embedDelim: EmbedDelim, location: Location) :
     KsonValueNodeImpl(location) {
 
     val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
 
-    companion object {
-        /**
-         * If we are asked to compile with [CompileTarget.Yaml.retainEmbedTags], we compile
-         * embed blocks to a Yaml object with these two properties: one for the tag string,
-         * and one for the content multiline string
-         */
-        const val EMBED_TAG_KEYWORD = "embedTag"
-        const val EMBED_CONTENT_KEYWORD = "embedContent"
-    }
-
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
-                val defaultDelimCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
-                if (defaultDelimCount == 0) {
+                val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
+                val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
+
+                // Choose delimiter that requires least escaping
+                val (delimiter, content) = when {
                     // The primary delimiter is not in the content, so we can use the default delimiter
                     // without any escaping needed
-                    indent.firstLineIndent() + EmbedDelim.Percent.openDelimiter + embedTag + "\n" +
-                            indent.bodyLinesIndent() + embedContent.split("\n")
-                                .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                            EmbedDelim.Percent.closeDelimiter
-                } else {
+                    percentCount == 0 ->
+                        EmbedDelim.Percent to embedContent
+                    
                     // Otherwise, check if we can use the alternate delimiter without escaping
-                    val altDelimCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
-                    if (altDelimCount == 0) {
-                        // We can use the alternate delimiter, but must handle default delimiter escapes
-                        val escapedContent = EmbedDelim.Dollar.escapeEmbedContent(embedContent)
-                        indent.firstLineIndent() + EmbedDelim.Dollar.openDelimiter + embedTag + "\n" +
-                                indent.bodyLinesIndent() + escapedContent.split("\n")
-                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                                EmbedDelim.Dollar.closeDelimiter
-                    } else {
-                        // We'll choose the delimiter that requires less escaping
-                        val chosenDelimiter = if (altDelimCount < defaultDelimCount) {
-                            EmbedDelim.Dollar
-                        } else {
-                            EmbedDelim.Percent
-                        }
+                    dollarCount == 0 ->
+                        EmbedDelim.Dollar to EmbedDelim.Dollar.escapeEmbedContent(embedContent)
+                    
+                    // We'll choose the delimiter that requires less escaping
+                    else -> {
+                        val chosenDelimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
+                        chosenDelimiter to chosenDelimiter.escapeEmbedContent(embedContent)
+                    }
+                }
 
-                        val escapedContent = chosenDelimiter.escapeEmbedContent(embedContent)
-                        indent.firstLineIndent() + chosenDelimiter.openDelimiter + embedTag + "\n" +
-                                indent.bodyLinesIndent() + escapedContent.split("\n")
-                                    .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                                chosenDelimiter.closeDelimiter
+                val embedPreamble = embedTag + if(metadataTag.isNotEmpty()) ": $metadataTag" else ""
+                when (compileTarget.formatConfig.formattingStyle){
+                    FormattingStyle.PLAIN, FormattingStyle.DELIMITED -> {
+                        // Format the embed block
+                        indent.firstLineIndent() + delimiter.openDelimiter + embedPreamble + "\n" +
+                                indent.bodyLinesIndent() + content.split("\n")
+                            .joinToString("\n${indent.bodyLinesIndent()}") { it } +
+                                delimiter.closeDelimiter
+                    }
+                    FormattingStyle.COMPACT -> {
+                        // Format the embed block
+                        delimiter.openDelimiter + embedPreamble + "\n" +
+                                content.split("\n")
+                            .joinToString("\n") { it } +
+                                delimiter.closeDelimiter
                     }
                 }
             }
@@ -611,55 +713,95 @@ class EmbedBlockNode(val embedTag: String, embedContent: String, embedDelim: Emb
                 if (!compileTarget.retainEmbedTags) {
                     renderMultilineYamlString(embedContent, indent, indent.next(false))
                 } else {
-                    indent.firstLineIndent() + "$EMBED_TAG_KEYWORD: \"" + embedTag + "\"\n" +
-                    indent.bodyLinesIndent() + "$EMBED_CONTENT_KEYWORD: " +
-                    renderMultilineYamlString(embedContent, indent, indent.next(false))
+                    encodeEmbedBlock(compileTarget, indent)
                 }
             }
-
             is Json -> {
                 if (!compileTarget.retainEmbedTags) {
                     indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
                 } else {
-                    val nextIndent = indent.next(false)
-                    """
-                    |${indent.firstLineIndent()}{
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_TAG_KEYWORD": "$embedTag",
-                    |${nextIndent.bodyLinesIndent()}"$EMBED_CONTENT_KEYWORD": "${renderForJsonString(embedContent)}"
-                    |}
-                    """.trimMargin()
+                    encodeEmbedBlock(compileTarget, indent)
                 }
             }
         }
     }
-}
 
-/**
- * Formats a string as a Yaml multiline string, preserving indentation
- *
- * @param content The string content to format
- * @param indent The base indentation level
- * @param contentIndent Additional indentation to apply to the content
- * @return a Yaml-formatted multiline string with any needed indentation markers
- */
-private fun renderMultilineYamlString(
-    content: String,
-    indent: Indent,
-    contentIndent: Indent
-): String {
-    // Find minimum leading whitespace across non-empty lines
-    val contentIndentSize = content.split("\n")
-        .filter { it.isNotEmpty() }
-        .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
-
-    // The user's content has an indent we must maintain, so we must tell Yaml how much indent
-    // we are giving it on our multiline string to ensure it does not eat up the content's indent too
-    val indentSize = contentIndent.bodyLinesIndent().length
-    val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
-
-    return indent.firstLineIndent() + multilineLineIndicator + "\n" +
-            content.split("\n")
-                .joinToString("\n") { line ->
-                    contentIndent.bodyLinesIndent() + line
+    /**
+     * Encode the [EmbedBlockNode] to a Json or Yaml object with the [EmbedObjectKeys]
+     */
+    private fun encodeEmbedBlock(compileTarget: CompileTarget, indent: Indent): String {
+        return when (compileTarget) {
+            is Json -> {
+                val nextIndent = indent.next(false)
+                val embedTag = if (embedTag.isNotEmpty()) {
+                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\"," + "\n"
+                } else {
+                    ""
                 }
+                val metadataTag = if (metadataTag.isNotEmpty()) {
+                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\"," + "\n"
+                } else {
+                    ""
+                }
+
+                """
+                |${indent.firstLineIndent()}{
+                |$embedTag$metadataTag${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${
+                    renderForJsonString(
+                        embedContent
+                    )
+                }"
+                |${indent.bodyLinesIndent()}}
+                        """.trimMargin()
+
+            }
+
+            is Yaml -> {
+                if (embedTag.isNotEmpty()) {
+                    indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_TAG.key}: \"" + embedTag + "\"\n"
+                } else {
+                    ""
+                } +
+                        if (metadataTag.isNotEmpty()) {
+                            indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_METADATA.key}: \"" + metadataTag + "\"\n"
+                        } else {
+                            ""
+                        } +
+                        indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_CONTENT.key}: " +
+                        renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
+            }
+            is Kson -> throw ShouldNotHappenException("should not encode embed block as ${compileTarget::class.simpleName}")
+        }
+
+    }
+
+    /**
+     * Formats a string as a Yaml multiline string, preserving indentation
+     *
+     * @param content The string content to format
+     * @param indent The base indentation level
+     * @param contentIndent Additional indentation to apply to the content
+     * @return a Yaml-formatted multiline string with any needed indentation markers
+     */
+    private fun renderMultilineYamlString(
+        content: String,
+        indent: Indent,
+        contentIndent: Indent
+    ): String {
+        // Find minimum leading whitespace across non-empty lines
+        val contentIndentSize = content.split("\n")
+            .filter { it.isNotEmpty() }
+            .minOfOrNull { line -> line.takeWhile { it.isWhitespace() }.length } ?: 0
+
+        // The user's content has an indent we must maintain, so we must tell Yaml how much indent
+        // we are giving it on our multiline string to ensure it does not eat up the content's indent too
+        val indentSize = contentIndent.bodyLinesIndent().length
+        val multilineLineIndicator = if (contentIndentSize > 0) "|$indentSize" else "|"
+
+        return indent.firstLineIndent() + multilineLineIndicator + "\n" +
+                content.split("\n")
+                    .joinToString("\n") { line ->
+                        contentIndent.bodyLinesIndent() + line
+                    }
+    }
 }

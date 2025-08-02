@@ -5,6 +5,7 @@ import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
@@ -181,7 +182,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     EMBED_CLOSE_DELIM,
                     EMBED_TAG,
                     EMBED_CONTENT,
-                    STRING,
+                    OBJECT_KEY,
                     ILLEGAL_CHAR,
                     WHITESPACE -> {
                         throw RuntimeException("These tokens do not generate their own AST nodes")
@@ -219,30 +220,30 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         val embedDelimChar = childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getValue()
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
                         val embedTag = childMarkers.find { it.element == EMBED_TAG }?.getValue() ?: ""
+                        val metadataTag = childMarkers.find { it.element == EMBED_METADATA }?.getValue() ?: ""
                         val embedContent = childMarkers.find { it.element == EMBED_CONTENT }?.getValue() ?: ""
 
                         EmbedBlockNode(
                             embedTag,
+                            metadataTag,
                             embedContent,
                             EmbedDelim.fromString(embedDelimChar),
                             marker.getLocation())
                     }
-                    STRING -> {
+                    OBJECT_KEY -> {
                         /**
-                         * We assume [Parser.keyword] still structures a [STRING] as wrapping either
+                         * We assume [Parser.keyword] still structures a [OBJECT_KEY] as wrapping either
                          * an [UNQUOTED_STRING] mark or a [QUOTED_STRING] mark
                          */
-                        val stringContentMark = if (childMarkers.size == 1) {
-                            childMarkers[0]
-                        } else {
-                            throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                        val stringContentMark = childMarkers.first()
+                        val objectKey = when (stringContentMark.element) {
+                            UNQUOTED_STRING -> UnquotedStringNode(stringContentMark.getValue(), marker.getLocation())
+                            QUOTED_STRING -> quoteStringToStringNode(stringContentMark)
+                            else -> {
+                                throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                            }
                         }
-
-                        if (stringContentMark.element == UNQUOTED_STRING) {
-                            UnquotedStringNode(stringContentMark.getValue(), marker.getLocation())
-                        } else {
-                            quoteStringToStringNode(stringContentMark)
-                        }
+                        return ObjectKeyNodeImpl(objectKey)
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
@@ -270,6 +271,13 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                                 ObjectPropertyNodeError(it, marker.getLocation())
                             }
                         }
+
+                        val embedBlockNode = decodeEmbedBlock(propertyNodes, marker.getLocation())
+
+                        if (embedBlockNode != null) {
+                            return embedBlockNode
+                        }
+
                         ObjectNode(propertyNodes, marker.getLocation())
                     }
                     OBJECT_PROPERTY -> {
@@ -283,8 +291,8 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
-                        val stringNode: StringNode = unsafeAstCreate(keywordMark) {
-                            StringNodeError(it, marker.getLocation())
+                        val keyNode: ObjectKeyNode = unsafeAstCreate(keywordMark) {
+                            ObjectKeyNodeError(it, keywordMark.getLocation())
                         }
                         val valueMark = childMarkers.getOrNull(1)
                         val ksonValueNode: KsonValueNode = if (valueMark == null) {
@@ -294,12 +302,16 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                                 KsonValueNodeError(it, marker.getLocation())
                             }
                         }
-                        ObjectPropertyNodeImpl(
-                            stringNode,
-                            ksonValueNode,
-                            comments,
-                            marker.getLocation()
-                        )
+                        if (keyNode is ObjectKeyNodeError || ksonValueNode is KsonValueNodeError) {
+                            ObjectPropertyNodeError(marker.getRawText().trim(), marker.getLocation())
+                        } else {
+                            ObjectPropertyNodeImpl(
+                                keyNode,
+                                ksonValueNode,
+                                comments,
+                                marker.getLocation()
+                            )
+                        }
                     }
                     QUOTED_STRING -> {
                         quoteStringToStringNode(marker)
@@ -347,6 +359,49 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 )
             }
         }
+    }
+
+    /**
+     * This method attempts to decode the [propertyNodes] as an [EmbedBlockNode]. An [ObjectNode] can be decoded if it
+     * follows the rules specified in [EmbedObjectKeys]
+     *
+     * @return an embed block representation of the given properties if possible, and null otherwise
+     */
+    private fun decodeEmbedBlock(
+        propertyNodes: List<ObjectPropertyNode>,
+        location: Location
+    ): EmbedBlockNode? {
+        if (propertyNodes.size > 3){ return null }
+
+        // Create a map of property keys to string values (if possible)
+        val propertiesMap = propertyNodes.mapNotNull { prop ->
+            (prop as? ObjectPropertyNodeImpl)?.let { property ->
+                val keyString = (property.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
+                keyString?.stringContent?.let { key ->
+                    key to (property.value as? StringNodeImpl)
+                }
+            }
+        }.toMap()
+
+        /**
+         * Check whether this object follows all the rules for decoding specified in [EmbedObjectKeys]
+         */
+        if (!EmbedObjectKeys.canBeDecoded(propertiesMap)) { return null }
+
+        val embedMetadataValue =
+            propertiesMap[EmbedObjectKeys.EMBED_METADATA.key]?.stringContent ?: ""
+        val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]?.stringContent ?: ""
+        val embedContentValue =
+            propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key]?.processedStringContent
+                ?: throw ShouldNotHappenException("should have been validated for nullability above")
+
+        return EmbedBlockNode(
+                embedTagValue,
+                embedMetadataValue,
+                embedContentValue,
+                EmbedDelim.Percent,
+                location
+            )
     }
 
     /**

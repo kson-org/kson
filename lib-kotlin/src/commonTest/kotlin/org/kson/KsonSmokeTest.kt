@@ -113,6 +113,21 @@ class KsonSmokeTest {
     }
 
     @Test
+    fun testAnalysisUnclosedString() {
+        val analysis = Kson.analyze("'unclosed string")
+        assertIs<Analysis>(analysis)
+        assertIs<List<Message>>(analysis.errors)
+        assertIs<List<Token>>(analysis.tokens)
+        assertTrue(analysis.tokens.isNotEmpty())
+
+        val token = analysis.tokens.first()
+        assertIs<TokenType>(token.tokenType)
+        assertIs<String>(token.text)
+        assertIs<Position>(token.start)
+        assertIs<Position>(token.end)
+    }
+
+    @Test
     fun testAnalyze_tokens() {
         val input = """name: test, complexString: "this has legal \n and illegal \x escapes and \u3456 unicode""""
         val tokens = Kson.analyze(input).tokens

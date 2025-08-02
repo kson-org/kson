@@ -31,10 +31,11 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * bracketList -> "[" "," ( ksonValue ","? )+ "]"
  *              | "[" ( ","? ksonValue )* "]"
  *              | "[" ( ksonValue ","? )* "]"
- * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
- * keyword -> ( UNQUOTED_STRING | string ) ":"
- * string -> STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE
- * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
+ * literal -> string | NUMBER | "true" | "false" | "null"
+ * keyword -> string ":"
+ * string -> (STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE) | UNQUOTED_STRING
+ * embedBlock -> EMBED_OPEN_DELIM EMBED_PREAMBLE EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
+ * EMBED_PREAMBLE -> EMBED_TAG (":" EMBED_METADATA)?
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -61,24 +62,15 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val rootMarker = builder.mark()
         try {
-            if (ksonValue()) {
-                handleUnexpectedTrailingContent()
-                if (!builder.eof()) {
-                    /**
-                     * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
-                     */
-                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
-                }
-                rootMarker.drop()
-            } else {
-                if (!builder.eof()) {
-                    /**
-                     * [ksonValue] must either parse something valid or mark the entire invalid Kson string
-                     * with a helpful error
-                     */
-                    throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
-                }
+            val containsKsonValue = ksonValue()
+            handleUnexpectedTrailingContent(containsKsonValue)
+            if (!builder.eof()) {
+                /**
+                 * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
+                 */
+                throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
             }
+            rootMarker.drop()
         } catch (nestingException: ExcessiveNestingException) {
             // the value described by this kson document is too deeply nested, so we
             // reset all parsing and mark the whole document with our nesting error
@@ -120,7 +112,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // prohibit the empty-ISH objects internals containing just commas
             if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
-                objectMark.done(OBJECT)
+                if (isDelimited) {
+                    objectMark.drop()
+                } else {
+                    objectMark.done(OBJECT)
+                }
                 return@nest true
             } else {
                 leadingCommaMark.drop()
@@ -175,7 +171,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         if (foundProperties) {
-            objectMark.done(OBJECT)
+            if (isDelimited) {
+                objectMark.drop()
+            } else {
+                objectMark.done(OBJECT)
+            }
             return@nest true
         } else {
             // otherwise we're not a valid object internals
@@ -344,7 +344,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         if (builder.getTokenType() == CURLY_BRACE_R) {
             // advance past our CURLY_BRACE_R
             builder.advanceLexer()
-            delimitedObjectMark.drop()
+            delimitedObjectMark.done(OBJECT)
         } else {
             delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
         }
@@ -451,7 +451,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * literal -> string | NUMBER | UNQUOTED_STRING | "true" | "false" | "null"
+     * literal -> string | NUMBER | "true" | "false" | "null"
      */
     private fun literal(): Boolean {
         if (string()) {
@@ -482,7 +482,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val terminalElementMark = builder.mark()
         if (elementType != null && setOf(
-                UNQUOTED_STRING,
                 TRUE,
                 FALSE,
                 NULL
@@ -499,15 +498,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * keyword -> ( UNQUOTED_STRING | string ) ":"
+     * keyword -> string ":"
      */
     private fun keyword(): Boolean {
+        val keywordMark = builder.mark()
+
         // helpful errors for keywords that clash with reserved words
         if ((builder.getTokenType() == NULL
                     || builder.getTokenType() == TRUE
                     || builder.getTokenType() == FALSE
                 ) && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
             val reservedWord = builder.getTokenText()
             builder.advanceLexer()
             keywordMark.error(OBJECT_KEYWORD_RESERVED_WORD.create(reservedWord))
@@ -517,23 +517,9 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
-        // try to parse a keyword in the style of "UNQUOTED_STRING followed by :"
-        if (builder.getTokenType() == UNQUOTED_STRING && builder.lookAhead(1) == COLON) {
-            val keywordMark = builder.mark()
-            val unquotedStringMark = builder.mark()
-            builder.advanceLexer()
-            unquotedStringMark.done(UNQUOTED_STRING)
-            keywordMark.done(STRING)
-
-            // advance past the COLON
-            builder.advanceLexer()
-            return true
-        }
-
         // try to parse a keyword in the style of "string followed by :"
-        val keywordMark = builder.mark()
         if (string() && builder.getTokenType() == COLON) {
-            keywordMark.done(STRING)
+            keywordMark.done(OBJECT_KEY)
 
             // advance past the COLON
             builder.advanceLexer()
@@ -547,9 +533,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * string -> STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE
+     * string -> (STRING_OPEN_QUOTE STRING STRING_CLOSE_QUOTE) | UNQUOTED_STRING
      */
     private fun string(): Boolean {
+        if (builder.getTokenType() == UNQUOTED_STRING) {
+            val unquotedStringMark = builder.mark()
+            builder.advanceLexer()
+            unquotedStringMark.done(UNQUOTED_STRING)
+            return true
+        }
+
         if (builder.getTokenType() != STRING_OPEN_QUOTE) {
             // not a string
             return false
@@ -626,6 +619,48 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         return validStringEscapes.contains(escapedChar)
     }
 
+    /**
+     * EMBED_PREAMBLE -> EMBED_TAG (":" EMBED_METADATA)?
+     *
+     * Note: the preamble may be empty, so this always "succeeds" in parsing its rule
+     * @return the text of the parsed embed preamble (possibly empty)
+     */
+    private fun embedPreamble(): String {
+        val embedTagMark = builder.mark()
+        val embedTag = if (builder.getTokenType() == EMBED_TAG) {
+            val tagText = builder.getTokenText()
+            builder.advanceLexer()
+            embedTagMark.done(EMBED_TAG)
+            
+            // Check for optional meta tag
+            val embedMeta = if (builder.getTokenType() == EMBED_TAG_STOP) {
+                val embedTagDelim = builder.mark()
+                builder.advanceLexer()
+                embedTagDelim.done(EMBED_TAG_STOP)
+
+                val metaTagMark = builder.mark()
+                val metaText = builder.getTokenText()
+                builder.advanceLexer()
+                metaTagMark.done(EMBED_METADATA)
+                metaText
+            } else {
+                ""
+            }
+            
+            // Combine tags if both present
+            if (embedMeta.isNotEmpty()) {
+                "$tagText:$embedMeta"
+            } else {
+                tagText
+            }
+        } else {
+            embedTagMark.drop()
+            ""
+        }
+        
+        return embedTag
+    }
+
     private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
         if (!unicodeEscapeText.startsWith("\\u")) {
             throw RuntimeException("Should only be asked to validate unicode escapes")
@@ -660,18 +695,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             builder.advanceLexer()
             embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
 
-            val embedTagMark = builder.mark()
-            val embedTagText = if (builder.getTokenType() == EMBED_TAG) {
-                val tagText = builder.getTokenText()
-                // advance past our optional embed tag
-                builder.advanceLexer()
-                embedTagMark.done(EMBED_TAG)
-                tagText
-            } else {
-                // no embed tag
-                embedTagMark.drop()
-                ""
-            }
+            val embedPreambleText = embedPreamble()
 
             val prematureEndMark = builder.mark()
             if (builder.getTokenType() == EMBED_CLOSE_DELIM) {
@@ -680,7 +704,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                  * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
                  * so give an error to help the user fix this construct
                  */
-                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
+                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedPreambleText))
                 embedBlockMark.done(EMBED_BLOCK)
                 return true
             } else {
@@ -726,7 +750,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * Handle any un-parsed content in [builder], marking it in error if found.
      * Should only be called to validate the state of [builder] after a successful parse
      */
-    private fun handleUnexpectedTrailingContent() {
+    private fun handleUnexpectedTrailingContent(containsKsonValue: Boolean) {
         // get a sequence of all unexpectedTrailingContent until the end of the file.
         generateSequence { builder.takeIf { !it.eof() } }
             .forEachIndexed { index, _ ->
@@ -740,7 +764,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
                 // only mark first element in error
                 when (index) {
-                    0 -> unexpectedContentMark.error(EOF_NOT_REACHED.create())
+                    0 -> {
+                        val errorMessage = if (containsKsonValue) EOF_NOT_REACHED else ONLY_UNEXPECTED_CONTENT
+                        unexpectedContentMark.error(errorMessage.create())
+                    }
                     else -> unexpectedContentMark.drop()
                 }
             }

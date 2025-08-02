@@ -420,6 +420,32 @@ class LexerTest {
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
+
+        assertTokenizesTo(
+            """
+                %:empty embed tag
+                    select * from something
+                %%
+            """,
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+        )
+
+        assertTokenizesTo(
+            """
+                %sql: metaTag
+                    select * from something
+                %%
+            """,
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+        )
+        assertTokenizesTo(
+            """
+                %sql: metaTag
+                    select * from something
+                %%
+            """,
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+        )
     }
 
     @Test
@@ -570,11 +596,29 @@ class LexerTest {
     fun testComplexEmbedTagWithWhitespace() {
         assertTokenizesTo(
             """
-            %%   this tag has spaces and funky characters ~!@#$%^&*()_+
+            %   this tag has spaces and funky characters ~!@#$%^&*()_+
             some sweet content
             %%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+        )
+
+        assertTokenizesTo(
+            """
+            %   this tag has spaces and funky characters ~!@#$%^&*()_+: followed by a meta tag
+            some sweet content
+            %%
+            """,
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+        )
+
+        assertTokenizesTo(
+            """
+            % tag: meta with escaped and unescaped: colon \:
+            some sweet content
+            %%
+            """,
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
     }
 

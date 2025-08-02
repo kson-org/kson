@@ -5,7 +5,6 @@ package org.kson
 
 import org.kson.Kson.parseSchema
 import org.kson.Kson.publishMessages
-import org.kson.ast.KsonValue
 import org.kson.parser.*
 import org.kson.schema.JsonSchema
 import org.kson.tools.FormattingStyle as InternalFormattingStyle
@@ -139,9 +138,9 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
         }
 
         val messageSink = MessageSink()
-        val ksonApi = astParseResult.api
-        if (ksonApi != null) {
-            schema.validate(ksonApi as KsonValue, messageSink)
+        val ksonValue = astParseResult.ksonValue
+        if (ksonValue != null) {
+            schema.validate(ksonValue, messageSink)
         }
 
         return publishMessages(messageSink.loggedMessages())
@@ -167,6 +166,7 @@ data class FormatOptions(
         val formattingStyle = when (formattingStyle){
             FormattingStyle.PLAIN -> InternalFormattingStyle.PLAIN
             FormattingStyle.DELIMITED -> InternalFormattingStyle.DELIMITED
+            FormattingStyle.COMPACT -> InternalFormattingStyle.COMPACT
         }
         return KsonFormatterConfig(indentType = indentType, formattingStyle)
     }
@@ -180,7 +180,8 @@ enum class FormattingStyle{
      * These values map to [InternalFormattingStyle]
      */
     PLAIN,
-    DELIMITED
+    DELIMITED,
+    COMPACT
 }
 
 /**
@@ -228,6 +229,8 @@ enum class TokenType {
     EMBED_OPEN_DELIM,
     EMBED_CLOSE_DELIM,
     EMBED_TAG,
+    EMBED_TAG_STOP,
+    EMBED_METADATA,
     EMBED_PREAMBLE_NEWLINE,
     EMBED_CONTENT,
     FALSE,
@@ -280,7 +283,8 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
                 var contentEnd: Coordinates? = null
 
                 while (i++ < internalTokens.size &&
-                    internalTokens[i].tokenType != InternalTokenType.STRING_CLOSE_QUOTE) {
+                    internalTokens[i].tokenType !in setOf(InternalTokenType.STRING_CLOSE_QUOTE, InternalTokenType.EOF)) {
+
                     val contentToken = internalTokens[i]
                     if (contentStart == null) {
                         contentStart = contentToken.lexeme.location.start
@@ -307,7 +311,7 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
                     if (internalTokens[i].tokenType == InternalTokenType.STRING_CLOSE_QUOTE) {
                         val closeQuoteToken = internalTokens[i]
                         tokens.add(createPublicToken(TokenType.STRING_CLOSE_QUOTE, closeQuoteToken))
-                    } else {
+                    } else if (internalTokens[i].tokenType != InternalTokenType.EOF) {
                         throw IllegalStateException("Bug: a string must end with a closing quote token or EOF")
                     }
                 }
@@ -396,6 +400,12 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
             }
             InternalTokenType.EOF -> {
                 tokens.add(createPublicToken(TokenType.EOF, currentToken))
+            }
+            InternalTokenType.EMBED_METADATA -> {
+                tokens.add(createPublicToken(TokenType.EMBED_METADATA, currentToken))
+            }
+            InternalTokenType.EMBED_TAG_STOP -> {
+                tokens.add(createPublicToken(TokenType.EMBED_TAG_STOP, currentToken))
             }
         }
         i++

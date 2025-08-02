@@ -57,6 +57,15 @@ enum class MessageType {
             return "Unexpected trailing content. The previous content parsed as a complete Kson document."
         }
     },
+    ONLY_UNEXPECTED_CONTENT {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Unexpected content. No content can be parsed as a Kson document."
+        }
+    },
     LIST_NO_CLOSE {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -650,6 +659,26 @@ enum class MessageType {
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Missing required dependencies"
+        }
+    },
+    OBJECT_PROPERTIES_MISALIGNED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This property's indentation must properly reflect its nesting. " +
+                    "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
+        }
+    },
+    DASH_LIST_ITEMS_MISALIGNED {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This list item's indentation must properly reflect its nesting. " +
+                    "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
         }
     };
 

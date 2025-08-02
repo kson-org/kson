@@ -8,7 +8,8 @@ class FormatterTest {
         source: String,
         expected: String,
         indentType: IndentType = IndentType.Space(2),
-        formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+        formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
+        roundTrip: Boolean = true
     ) {
         val formattedKson = format(source, KsonFormatterConfig(indentType, formattingStyle))
         assertEquals(
@@ -16,10 +17,22 @@ class FormatterTest {
             formattedKson
         )
 
+        // Roundtrip: each format should preserve the semantics of a kson document
+        /**
+         * TODO There are two test cases that currently can't roundtrip. After we handled these corner cases we should
+         * roundtrip for every test.
+        **/
+        var roundtripKson = formattedKson
+        if(roundTrip){
+            FormattingStyle.entries.filter { it != formattingStyle }.forEach { intermediateStyle ->
+                roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle))
+            }
+        }
+
         assertEquals(
             expected,
-            format(formattedKson, KsonFormatterConfig(indentType, formattingStyle)),
-            "formatting should be idempotent, but this reformat changed the result"
+            format(roundtripKson, KsonFormatterConfig(indentType, formattingStyle)),
+            "Formatting with same style should be idempotent"
         )
     }
 
@@ -29,6 +42,20 @@ class FormatterTest {
         assertFormatting("  ", "")
         assertFormatting("\n\n", "")
         assertFormatting("    \n   \n\n       \n", "")
+    }
+
+    @Test
+    fun testColonWithWhitespace(){
+        assertFormatting(
+            """
+            {
+            key : value
+            }
+            """.trimIndent(),
+            """
+            key: value
+            """.trimIndent()
+        )
     }
 
     @Test
@@ -325,7 +352,7 @@ class FormatterTest {
             key:
             # a value
             value
-              
+
               # a property
               key2: value
             """.trimIndent(),
@@ -781,7 +808,8 @@ class FormatterTest {
             "key: {\n",
             """
             key: {
-            """.trimIndent()
+            """.trimIndent(),
+            roundTrip = false
         )
     }
 
@@ -1194,6 +1222,35 @@ class FormatterTest {
     }
 
     @Test
+    fun testInvalidObjectsInPlainLists() {
+        assertFormatting(
+            """
+            - key11: 11
+              key12:
+            """.trimIndent(),
+            """
+                - key11: 11
+                  key12:
+            """.trimIndent(),
+            roundTrip = false
+        )
+
+        assertFormatting(
+            """
+            - {
+              key11: 11
+              key12:
+              }
+            """.trimIndent(),
+            """
+                - key11: 11
+                  key12:
+            """.trimIndent(),
+            roundTrip = false
+        )
+    }
+
+    @Test
     fun testInvalidKsonWithTrailingComments() {
         assertFormatting(
             """
@@ -1207,7 +1264,8 @@ class FormatterTest {
             -
 
             # trailing comment
-        """.trimIndent()
+        """.trimIndent(),
+            roundTrip = false
         )
     }
 
@@ -1363,7 +1421,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testDelimitedFormattingStyleEmbed(){
+    fun testDelimitedFormattingStyleEmbed() {
         assertFormatting(
             """
                 $
@@ -1392,6 +1450,287 @@ class FormatterTest {
                 }
             """.trimIndent(),
             formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleSimpleObject() {
+        assertFormatting(
+            """
+                "type": "object",
+                "properties": {
+                x: w
+                }
+            """.trimIndent(),
+            """
+                type:object properties:x:w
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                {
+                  key: value
+                  key: value
+                }
+            """.trimIndent(),
+            """
+                key:value key:value
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                {
+                  key: "quoted value"
+                  key: value
+                }
+            """.trimIndent(),
+            """
+                key:'quoted value'key:value
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                key: 1
+                another: key
+            """.trimIndent(),
+            """
+                key:1 another:key
+                """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleList() {
+        assertFormatting(
+            """
+                list: <
+                 - 1
+                 - 2
+                 - 3
+                 >
+            """.trimIndent(),
+            """
+                list:[1 2 3]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleNestedStructures() {
+        assertFormatting(
+            """
+                list:
+                 - 1
+                 - 2
+                 -
+                   - 3
+                   - 4
+                   =
+                 key: value
+
+            """.trimIndent(),
+            """
+                list:[1 2 [3 4]]key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                list:
+                 - 1
+                 - 2
+                 -
+                   - 3
+                   - 4
+                   =
+                 key:
+                   nestedkey: value
+                   .
+                 anotherkey: value
+
+            """.trimIndent(),
+            """
+                list:[1 2 [3 4]]key:nestedkey:value.anotherkey:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: value
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:value}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: true
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:true}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key: 3
+                - key: value
+            """.trimIndent(),
+            """
+                [{key:3}key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+            nested:
+                - [key:value]
+                - key: value
+            """.trimIndent(),
+            """
+                nested:[[key:value]key:value]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key11:
+                   key12: value1
+                - key21: value2
+            """.trimIndent(),
+            """
+                [{key11:key12:value1}key21:value2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                - key11:
+                   key12: 
+                    key13: value1
+                - key21: value2
+            """.trimIndent(),
+            """
+                [{key11:key12:key13:value1}key21:value2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleWithComments() {
+        assertFormatting(
+            """
+                # comment
+                key: value
+                key: value
+            """.trimIndent(),
+            """
+                # comment
+                key:value key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                key: value
+                # comment
+                key: value
+            """.trimIndent(),
+            """
+                key:value
+                # comment
+                key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                list: [1,2,3]
+                # comment
+            """.trimIndent(),
+            """
+                list:[1 2 3]
+                # comment
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleEmbedBlock() {
+        assertFormatting(
+            """
+                embed: ${'$'}tag
+                  content
+                  $$
+                key: value  
+            """.trimIndent(),
+            """
+                embed:%tag
+                content
+                %%key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleReservedKeywords() {
+        assertFormatting(
+            """
+                key: true
+                key: false
+                key: null
+            """.trimIndent(),
+            """
+                key:true key:false key:null
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testEmptyDocumentWithComment() {
+        assertFormatting(
+            """
+                # just a comment
+            """.trimIndent(),
+            """
+                # just a comment
+            """.trimIndent()
+        )
+
+
+        assertFormatting(
+            """
+                # comment
+                
+            """.trimIndent(),
+            """
+                # comment
+                
+            """.trimIndent()
         )
     }
 }

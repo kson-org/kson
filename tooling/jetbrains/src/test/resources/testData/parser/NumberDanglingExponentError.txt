@@ -1,7 +1,7 @@
 FILE(0,8)
   KsonPsiElement([Kson-parsed] OBJECT)(0,8)
     KsonPsiElement([Kson-parsed] OBJECT_PROPERTY)(0,8)
-      KsonPsiElement([Kson-parsed] STRING)(0,3)
+      KsonPsiElement([Kson-parsed] OBJECT_KEY)(0,3)
         KsonPsiElement(IElementTokenType(tokenType=UNQUOTED_STRING))(0,3)
           PsiElement(IElementTokenType(tokenType=UNQUOTED_STRING))('key')(0,3)
       PsiElement(IElementTokenType(tokenType=COLON))(':')(3,4)

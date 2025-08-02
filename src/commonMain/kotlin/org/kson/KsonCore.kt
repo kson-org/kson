@@ -9,6 +9,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
+import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
 
 /**
@@ -18,8 +19,8 @@ import org.kson.tools.KsonFormatterConfig
 object KsonCore {
     /**
      * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
-     * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonApi]
-     * from [AstParseResult.api]
+     * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonValue]
+     * from [AstParseResult.ksonValue]
      *
      * @param source The Kson source to parse
      * @param coreCompileConfig the [CoreCompileConfig] for this parse
@@ -32,7 +33,16 @@ object KsonCore {
             // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
             gapFree = coreCompileConfig.errorTolerant
         ).tokenize()
-        if (tokens[0].tokenType == TokenType.EOF) {
+
+        var initialTokenIndex = 0
+        // if our tokens are gapFree we may have an "empty" file with some comments or whitespace in it
+        while (initialTokenIndex < tokens.size &&
+            (tokens[initialTokenIndex].tokenType == TokenType.WHITESPACE ||
+                    tokens[initialTokenIndex].tokenType == TokenType.COMMENT)
+        ) {
+            initialTokenIndex++
+        }
+        if (tokens[initialTokenIndex].tokenType == TokenType.EOF) {
             messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
             return AstParseResult(null, tokens, messageSink)
         }
@@ -41,12 +51,16 @@ object KsonCore {
         Parser(builder, coreCompileConfig.maxNestingLevel).parse()
         val ast = builder.buildTree(messageSink)
 
+        if (ast != null && !messageSink.hasErrors()) {
+            IndentValidator().validate(ast, messageSink)
+        }
+
         if (coreCompileConfig.schemaJson == NO_SCHEMA) {
             return AstParseResult(ast, tokens, messageSink)
         } else {
             val jsonSchema = coreCompileConfig.schemaJson
             // validate against our schema, logging any errors to our message sink
-            jsonSchema.validate(ast?.toKsonApi() as KsonValue, messageSink)
+            jsonSchema.validate(ast?.toKsonValue() as KsonValue, messageSink)
             return AstParseResult(ast, tokens, messageSink)
         }
     }
@@ -63,13 +77,13 @@ object KsonCore {
         if (firstToken.tokenType == TokenType.EOF) {
             return SchemaParseResult(null, listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create())))
         }
-        val ksonApi = astParseResult.api
-        if (ksonApi == null || astParseResult.hasErrors()) {
+        val ksonValue = astParseResult.ksonValue
+        if (ksonValue == null || astParseResult.hasErrors()) {
             return SchemaParseResult(null, astParseResult.messages)
         }
 
         val messageSink = MessageSink()
-        val jsonSchema = SchemaParser.parseSchemaElement(ksonApi as KsonValue, messageSink)
+        val jsonSchema = SchemaParser.parseSchemaElement(ksonValue, messageSink)
         return SchemaParseResult(jsonSchema, messageSink.loggedMessages())
     }
 
@@ -147,14 +161,14 @@ data class AstParseResult internal constructor(
     override val messages = messageSink.loggedMessages()
 
     /**
-     * A [KsonApi] on the AST constructed here, or null if there were errors trying to parse
+     * A [KsonValue] on the AST constructed here, or null if there were errors trying to parse
      * (consult [messageSink] for information on any errors)
      */
-    val api: KsonApi? by lazy {
+    val ksonValue: KsonValue? by lazy {
         if (ast == null || hasErrors()) {
             null
         } else {
-            ast.toKsonApi()
+            ast.toKsonValue()
         }
     }
 

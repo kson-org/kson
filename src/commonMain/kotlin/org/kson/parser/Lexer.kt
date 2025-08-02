@@ -155,6 +155,22 @@ data class Location(
      */
     val endOffset: Int
 ) {
+    /**
+     * Trim this [Location] to its first line.  Useful when it's more clear to highlight the beginning
+     * of an error rather than the whole span of the offending syntactic chunk.
+     */
+    fun trimToFirstLine(): Location {
+        val maxLength = endOffset - startOffset
+        val trimmedLength = 5.coerceAtMost(maxLength)
+        val trimmedStart = Coordinates(start.line, start.column)
+        val trimmedEnd = Coordinates(start.line, start.column + trimmedLength)
+        return Location(
+            trimmedStart,
+            trimmedEnd,
+            startOffset,
+            startOffset + trimmedLength
+        )
+    }
     companion object {
         /**
          * Creates a new [Location] instance using line and column positions directly.
@@ -470,10 +486,18 @@ class Lexer(source: String, gapFree: Boolean = false) {
         } else if (sourceScanner.eof()) {
             return
         } else {
+            /**
+             * Our source scanner is still in the embed preamble so long as this condition holds
+             */
+            val stillInEmbedPreamble:(delimChar: Char) -> Boolean = {
+                !sourceScanner.eof()
+                        && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
+                        && sourceScanner.peek() != '\n'
+            }
+
             // we have an embed tag, let's scan it
-            while (!sourceScanner.eof()
-                && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
-                && sourceScanner.peek() != '\n') {
+            while (stillInEmbedPreamble(delimChar)
+                && sourceScanner.peek() != ':') {
                 sourceScanner.advance()
             }
 
@@ -484,6 +508,24 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 // trim any trailing whitespace from the embed tag's value
                 embedTagLexeme.text.trim()
             )
+
+            if(sourceScanner.peek() == ':') {
+                sourceScanner.advance()
+                addLiteralToken(EMBED_TAG_STOP)
+
+                // scan any metadata given in the preamble
+                while (stillInEmbedPreamble(delimChar)) {
+                    sourceScanner.advance()
+                }
+
+                // extract our embed metadata (note: may be empty, that's supported)
+                val embedMetadataLexeme = sourceScanner.extractLexeme()
+                addToken(
+                    EMBED_METADATA, embedMetadataLexeme,
+                    // trim any trailing whitespace from the embed tag's value
+                    embedMetadataLexeme.text.trim()
+                )
+            }
 
             // lex this premature embed end
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {

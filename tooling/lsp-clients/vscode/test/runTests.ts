@@ -29,7 +29,7 @@ async function main() {
         async function testBrowser() {
             console.log('Starting web extension tests...');
 
-            const extensionBrowserTestsPath = path.resolve(__dirname, './index.browser.js');
+            const extensionBrowserTestsPath = path.resolve(__dirname, './test/index.browser.js');
             console.log('Test path:', extensionBrowserTestsPath);
             await runBrowserTests({
                 browserType: 'chromium',
@@ -45,7 +45,7 @@ async function main() {
          * Runs node tests
          */
         async function testNode() {
-            const extensionNodeTestsPath = path.resolve(__dirname, './index.node.js');
+            const extensionNodeTestsPath = path.resolve(__dirname, './test/index.node.js');
 
             console.log('Downloading VS Code...');
             const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');

@@ -1,12 +1,13 @@
 package org.kson.schema.validators
 
-import org.kson.ast.KsonObject
+import org.kson.KsonObject
+import org.kson.KsonString
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
 
-class DependenciesValidator(private val dependencies: Map<String, DependencyValidator>)
+class DependenciesValidator(private val dependencies: Map<KsonString, DependencyValidator>)
     : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val properties = node.propertyMap
@@ -21,7 +22,7 @@ class DependenciesValidator(private val dependencies: Map<String, DependencyVali
 sealed interface DependencyValidator {
     fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean
 }
-data class DependencyValidatorArray(val dependency: Set<String>) : DependencyValidator {
+data class DependencyValidatorArray(val dependency: Set<KsonString>) : DependencyValidator {
     override fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean {
         val propertyNames = ksonObject.propertyMap.keys
         val allPresent = dependency.all {

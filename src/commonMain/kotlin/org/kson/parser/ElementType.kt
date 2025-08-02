@@ -51,6 +51,14 @@ enum class TokenType : ElementType {
      */
     EMBED_TAG,
     /**
+     * The divider between the [EMBED_TAG] and [EMBED_METADATA]
+     */
+    EMBED_TAG_STOP,
+    /**
+     * The part of the [EMBED_TAG] which can be used as metadata
+     */
+    EMBED_METADATA,
+    /**
      * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
@@ -120,13 +128,11 @@ enum class ParsedElementType : ElementType {
     INCOMPLETE,
     ERROR,
     EMBED_BLOCK,
-    STRING,
-    KEYWORD,
+    OBJECT_KEY,
     DASH_LIST,
     DASH_DELIMITED_LIST,
     BRACKET_LIST,
     LIST_ELEMENT,
-    OBJECT_DEFINITION,
     OBJECT,
     OBJECT_PROPERTY,
     QUOTED_STRING,

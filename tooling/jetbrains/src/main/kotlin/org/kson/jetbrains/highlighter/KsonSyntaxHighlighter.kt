@@ -34,6 +34,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
                 TokenType.EMBED_OPEN_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_CLOSE_DELIM -> getPackedTextAttributes(KSON_DELIMITER)
                 TokenType.EMBED_TAG -> getPackedTextAttributes(KSON_EMBED_TAG)
+                TokenType.EMBED_TAG_STOP -> getPackedTextAttributes(KSON_EMBED_TAG)
+                TokenType.EMBED_METADATA -> getPackedTextAttributes(KSON_EMBED_TAG)
                 TokenType.EMBED_PREAMBLE_NEWLINE -> TextAttributesKey.EMPTY_ARRAY
                 TokenType.EMBED_CONTENT -> getPackedTextAttributes(KSON_CONTENT)
                 TokenType.FALSE -> getPackedTextAttributes(KSON_KEYWORD)
@@ -71,7 +73,8 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         KSON_KEYWORD(KsonBundle.message("kson.syntaxHighlighter.keyword")),
         KSON_INVALID(KsonBundle.message("kson.syntaxHighlighter.invalid")),
         KSON_NUMBER(KsonBundle.message("kson.syntaxHighlighter.number")),
-        KSON_CONTENT(KsonBundle.message("kson.syntaxHighlighter.content"));
+        KSON_CONTENT(KsonBundle.message("kson.syntaxHighlighter.content")),
+        KSON_OBJECT_KEY(KsonBundle.message("kson.syntaxHighlighter.key"));
     }
 
     companion object {
@@ -85,11 +88,12 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
             KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
             KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
             KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
-            KSON_UNQUOTED_STRING to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
+            KSON_UNQUOTED_STRING to DefaultLanguageHighlighterColors.STRING,
             KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,
             KSON_INVALID to HighlighterColors.BAD_CHARACTER,
             KSON_NUMBER to DefaultLanguageHighlighterColors.NUMBER,
             KSON_CONTENT to DefaultLanguageHighlighterColors.STRING,
+            KSON_OBJECT_KEY to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
         )
 
         private val textAttributesMap = keyToColorMap.entries.associate {

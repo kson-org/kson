@@ -24,7 +24,8 @@ fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormat
 
 enum class FormattingStyle {
     PLAIN,
-    DELIMITED
+    DELIMITED,
+    COMPACT
 }
 
 data class KsonFormatterConfig(
