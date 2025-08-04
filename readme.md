@@ -87,8 +87,15 @@ Learn more [in the docs](docs/readme.md)
 * **Ubuntu setup:** if an error is reported by gradle similar to `error while loading shared libraries: libtinfo.so.5`, install `libncurses-dev` with `apt install libncurses-dev`. See also [Kotlin/Native Setup instructions](https://github.com/JetBrains/kotlin-native/blob/27232bca5f2fb0164f1aa465d38e5042c6d7d55b/README.md), and [this similar issue in the Ktor project](https://youtrack.jetbrains.com/issue/KTOR-7909/Contribution-Installation-Instructions-Replace-libncurses5-with-libncurses6-for-Ubuntu-20.04-and-Later) along with [its fix, here](https://github.com/ktorio/ktor/pull/4529)
 
 ### Kson Editors and Tooling
+KSON can be used in VS Code or IntelliJ with a simple gradle command.
 
-See [tooling/](tooling/readme.md)
+To run either IDE you can run the following gradlew task from the root directory: 
+```shell
+./gradlew :tooling:lsp_clients:npm_run_vscode # starts VS Code IDE
+./gradlew runIde # starts IntelliJ IDE 
+```
+
+For more information on our tooling see [tooling/](tooling/readme.md)
 
 ### Notes
 Many thanks to [@munificent](https://github.com/munificent) for making all of this more accessible by writing the wonderful [**Crafting Interpeters**](https://craftinginterpreters.com/) &mdash; [Part I](https://craftinginterpreters.com/welcome.html) and [Part II](https://craftinginterpreters.com/a-tree-walk-interpreter.html) in particular are strongly recommended reading for anyone exploring this code
