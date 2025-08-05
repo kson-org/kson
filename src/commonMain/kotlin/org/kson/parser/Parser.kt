@@ -12,8 +12,8 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * (Note: UPPERCASE names are terminals, and correspond to [TokenType]s produced by [Lexer])
  * ```
  * root -> ksonValue <end-of-file>
- * ksonValue -> plainObject
- *            | dashList
+ * ksonValue -> dashList
+ *            | plainObject
  *            | delimitedValue
  * plainObject -> objectInternals "."?
  * objectInternals -> "," ( keyword ksonValue ","? )+
@@ -192,43 +192,43 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
      */
     private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() == LIST_DASH) {
-            val listMark = builder.mark()
-
-            // parse the dash delimited list elements
-            do {
-                val listElementMark = builder.mark()
-                // advance past the LIST_DASH
-                builder.advanceLexer()
-
-                if (ksonValue()) {
-                    // this LIST_DASH is not dangling
-                    listElementMark.done(LIST_ELEMENT)
-                } else {
-                    listElementMark.error(DANGLING_LIST_DASH.create())
-                }
-
-                if (builder.getTokenType() == END_DASH) {
-                    val endDashMark = builder.mark()
-                    builder.advanceLexer()
-                    if (!isDelimited) {
-                        endDashMark.drop()
-                        break
-                    } else {
-                        endDashMark.error(IGNORED_DASH_LIST_END_DASH.create())
-                    }
-                }
-            } while (builder.getTokenType() == LIST_DASH)
-
-            if (!isDelimited) {
-                listMark.done(DASH_LIST)
-            } else {
-                listMark.drop()
-            }
-            return@nest true
-        } else {
+        if (builder.getTokenType() != LIST_DASH) {
             return@nest false
         }
+
+        val listMark = builder.mark()
+
+        // parse the dash delimited list elements
+        do {
+            val listElementMark = builder.mark()
+            // advance past the LIST_DASH
+            builder.advanceLexer()
+
+            if (ksonValue()) {
+                // this LIST_DASH is not dangling
+                listElementMark.done(LIST_ELEMENT)
+            } else {
+                listElementMark.error(DANGLING_LIST_DASH.create())
+            }
+
+            if (builder.getTokenType() == END_DASH) {
+                val endDashMark = builder.mark()
+                builder.advanceLexer()
+                if (!isDelimited) {
+                    endDashMark.drop()
+                    break
+                } else {
+                    endDashMark.error(IGNORED_DASH_LIST_END_DASH.create())
+                }
+            }
+        } while (builder.getTokenType() == LIST_DASH)
+
+        if (!isDelimited) {
+            listMark.done(DASH_LIST)
+        } else {
+            listMark.drop()
+        }
+        return@nest true
     }
 
     private fun processComma(builder: AstBuilder) {
