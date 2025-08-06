@@ -307,12 +307,14 @@ class KsonCoreTestComment : KsonCoreTest {
     fun testCommentsPreservationOnCommas() {
         assertParsesTo(
             """
-                key1:val1
-                # this comment should be preserved on this property
-                ,
-                key2:val2
-                # as should this one
-                ,
+                {
+                    key1:val1
+                    # this comment should be preserved on this property
+                    ,
+                    key2:val2
+                    # as should this one
+                    ,
+                }
             """,
             """
                 # this comment should be preserved on this property

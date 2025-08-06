@@ -74,8 +74,6 @@ class KsonCoreTestObject : KsonCoreTest {
                     nested1:v,
                     nested2:v,
                     nested3:v,
-                    .,
-                    alsoNested:v,
                   ],
                   ObjA3: 3,
                   
@@ -86,45 +84,44 @@ class KsonCoreTestObject : KsonCoreTest {
             """.trimIndent(),
             """
                 - ObjA1: 1
-                  ObjA2:
+                - ObjA2:
                     - nested1: v
-                      nested2: v
-                      nested3: v
-                
-                    - alsoNested: v
-                      .
-                  ObjA3: 3
-
+                    - nested2: v
+                    - nested3: v
+                    =
+                - ObjA3: 3
                 - 'A string'
                 - ObjB4: 4
             """.trimIndent(),
             """
                 - ObjA1: 1
-                  ObjA2:
+                - ObjA2:
                     - nested1: v
-                      nested2: v
-                      nested3: v
-                
-                    - alsoNested: v
-                  ObjA3: 3
-
+                    - nested2: v
+                    - nested3: v
+                - ObjA3: 3
                 - "A string"
                 - ObjB4: 4
             """.trimIndent(),
             """
                 [
                   {
-                    "ObjA1": 1,
+                    "ObjA1": 1
+                  },
+                  {
                     "ObjA2": [
                       {
-                        "nested1": "v",
-                        "nested2": "v",
-                        "nested3": "v"
+                        "nested1": "v"
                       },
                       {
-                        "alsoNested": "v"
+                        "nested2": "v"
+                      },
+                      {
+                        "nested3": "v"
                       }
-                    ],
+                    ]
+                  },
+                  {
                     "ObjA3": 3
                   },
                   "A string",
@@ -247,28 +244,6 @@ class KsonCoreTestObject : KsonCoreTest {
                }
             """.trimIndent(),
             "should parse object ignoring optional commas, even trailing"
-        )
-
-        assertParsesTo(
-            """
-                key: val
-                "string key": 66.3,
-                hello: "y'all"
-            """,
-            expectKsonForRootObjectAst,
-            """
-               key: val
-               "string key": 66.3
-               hello: "y'all"
-            """.trimIndent(),
-            """
-               {
-                 "key": "val",
-                 "string key": 66.3,
-                 "hello": "y'all"
-               }
-            """.trimIndent(),
-            "should parse ignoring optional commas, even in brace-free root objects"
         )
     }
 

@@ -50,22 +50,17 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
     fun testEmptyCommas() {
         assertParserRejectsSource("[,]", listOf(EMPTY_COMMAS))
         assertParserRejectsSource("{,}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource(",", listOf(EMPTY_COMMAS))
 
         assertParserRejectsSource("[,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
         assertParserRejectsSource("{,,}", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
-        assertParserRejectsSource(",,", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
 
         assertParserRejectsSource("[1,,3]", listOf(EMPTY_COMMAS))
         assertParserRejectsSource("{one: 1 ,, three: 3}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("one: 1 ,, three: 3", listOf(EMPTY_COMMAS))
 
         assertParserRejectsSource("[1,2,3,,,,,,]", listOf(EMPTY_COMMAS))
         assertParserRejectsSource("{one: 1, two: 2, three: 3,,,,,,}", listOf(EMPTY_COMMAS))
-        assertParserRejectsSource("one: 1 ,two: 2, three: 3,,,,,,", listOf(EMPTY_COMMAS))
 
         assertParserRejectsSource("[,,,, x ,, y ,,,,,,, z ,,,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
-        assertParserRejectsSource(",,,, x:1 ,, y:2 ,,,,,,, z:3 ,,,,", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
     }
 
     @Test

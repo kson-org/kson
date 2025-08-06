@@ -15,19 +15,19 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * ksonValue -> dashList
  *            | plainObject
  *            | delimitedValue
- * plainObject -> objectInternals "."?
- * objectInternals -> "," ( keyword ksonValue ","? )+
- *                  | ( ","? keyword ksonValue )*
- *                  | ( keyword ksonValue ","? )*
- * dashList -> dashListInternals "="?
- * dashListInternals -> ( LIST_DASH ksonValue )*
+ * dashList -> ( LIST_DASH ksonValue )+ "="?
+ * plainObject -> ( keyword ksonValue )+ "."?
  * delimitedValue -> delimitedObject
  *                 | delimitedDashList
  *                 | bracketList
  *                 | literal
  *                 | embedBlock
- * delimitedObject -> "{" objectInternals "}"
  * delimitedDashList -> "<" dashListInternals ">"
+ * dashListInternals -> ( LIST_DASH ksonValue )*
+ * delimitedObject -> "{" objectInternals "}"
+ * objectInternals -> "," ( keyword ksonValue ","? )+
+ *                  | ( ","? keyword ksonValue )*
+ *                  | ( keyword ksonValue ","? )*
  * bracketList -> "[" "," ( ksonValue ","? )+ "]"
  *              | "[" ( ","? ksonValue )* "]"
  *              | "[" ( ksonValue ","? )* "]"
@@ -91,18 +91,48 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     private fun ksonValue(): Boolean = plainObject() || dashList() || delimitedValue()
 
     /**
-     * plainObject -> objectInternals "."+
+     * plainObject -> (keyword ksonValue)+ "."?
+     */
+    private fun plainObject(): Boolean = nestingTracker.nest {
+        val objectMark = builder.mark()
+        var foundProperties = false
+
+        while (true) {
+            val propertyMark = builder.mark()
+            val keywordMark = builder.mark()
+            if (keyword()) {
+                foundProperties = true
+                parseValueForKeyword(keywordMark)
+                propertyMark.done(OBJECT_PROPERTY)
+            } else {
+                keywordMark.drop()
+                propertyMark.rollbackTo()
+                break
+            }
+        }
+
+        // Check for an end-dot `.`
+        if (builder.getTokenType() == DOT) {
+            builder.advanceLexer()
+        }
+
+        if (foundProperties) {
+            objectMark.done(OBJECT)
+            return@nest true
+        } else {
+            // plain objects must have at least one property
+            objectMark.rollbackTo()
+            return@nest false
+        }
+    }
+
+    /**
      * objectInternals -> "," ( keyword ksonValue ","? )+
      *                  | ( ","? keyword ksonValue )*
      *                  | ( keyword ksonValue ","? )*
-     *
-     * Note: as in [dashList], we combine these two grammar rules here so it's clean/easy to implement
-     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
      */
-    private fun plainObject(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
+    private fun objectInternals(): Boolean = nestingTracker.nest {
         var foundProperties = false
-
-        val objectMark = builder.mark()
 
         // parse the optional leading comma
         if (builder.getTokenType() == COMMA) {
@@ -112,11 +142,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // prohibit the empty-ISH objects internals containing just commas
             if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
                 leadingCommaMark.error(EMPTY_COMMAS.create())
-                if (isDelimited) {
-                    objectMark.drop()
-                } else {
-                    objectMark.done(OBJECT)
-                }
                 return@nest true
             } else {
                 leadingCommaMark.drop()
@@ -127,27 +152,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val propertyMark = builder.mark()
             val keywordMark = builder.mark()
             if (keyword()) {
+                foundProperties = true
+
                 if (builder.getTokenType() == CURLY_BRACE_R) {
                     // object got closed before giving this keyword a value
                     keywordMark.error(OBJECT_KEY_NO_VALUE.create())
-                    // mark that we saw that near-property
-                    foundProperties = true
                     propertyMark.done(OBJECT_PROPERTY)
                     break
                 }
 
-                val valueMark = builder.mark()
-
-                if (!ksonValue()) {
-                    // if we don't have a value, we're malformed
-                    valueMark.rollbackTo()
-                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
-                } else {
-                    // otherwise we've a well-behaved key:value property
-                    valueMark.drop()
-                    keywordMark.drop()
-                }
-                foundProperties = true
+                parseValueForKeyword(keywordMark)
                 if (builder.getTokenType() == COMMA) {
                     processComma(builder)
                 }
@@ -156,12 +170,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 if (builder.getTokenType() == DOT) {
                     val dotMark = builder.mark()
                     builder.advanceLexer()
-                    if (!isDelimited) {
-                        dotMark.drop()
-                        break
-                    } else {
-                        dotMark.error(IGNORED_OBJECT_END_DOT.create())
-                    }
+                    dotMark.error(IGNORED_OBJECT_END_DOT.create())
                 }
             } else {
                 keywordMark.drop()
@@ -170,26 +179,33 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
         }
 
-        if (foundProperties) {
-            if (isDelimited) {
-                objectMark.drop()
-            } else {
-                objectMark.done(OBJECT)
-            }
-            return@nest true
+        return@nest foundProperties
+    }
+
+    /**
+     * Helper method to centralize parsing and errors reporting to object values.
+     *
+     * NOTE: this method resolves the given [keywordMark] [AstMarker]
+     */
+    private fun parseValueForKeyword(keywordMark: AstMarker) {
+        val valueMark = builder.mark()
+
+        if (!ksonValue()) {
+            // if we don't have a value, we're malformed
+            valueMark.rollbackTo()
+            keywordMark.error(OBJECT_KEY_NO_VALUE.create())
         } else {
-            // otherwise we're not a valid object internals
-            objectMark.rollbackTo()
-            return@nest false
+            // otherwise we've a well-behaved key:value property
+            valueMark.drop()
+            keywordMark.drop()
         }
     }
 
     /**
-     * dashList -> dashListInternals "="+
+     * dashList          -> ( LIST_DASH ksonValue )+ "="?
      * dashListInternals -> ( LIST_DASH ksonValue )*
      *
-     * Note: as in [plainObject], we combine these two grammar rules here so it's clean/easy to implement
-     *   make a more friendly parse for users by giving warnings when end-dots are used in a delimited list
+     * Note: we combine these two grammar rules here to minimize code duplication, disambiguating by [isDelimited]
      */
     private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         if (builder.getTokenType() != LIST_DASH) {
@@ -317,7 +333,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         // parse our object internals
-        plainObject(isDelimited = true)
+        objectInternals()
 
         // annotate anything unparsable within this object definition with an error
         while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
@@ -338,7 +354,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
             // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
             // on internals that are actually bad
-            plainObject(isDelimited = true)
+            objectInternals()
         }
 
         if (builder.getTokenType() == CURLY_BRACE_R) {
