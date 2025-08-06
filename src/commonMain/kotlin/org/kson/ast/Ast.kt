@@ -363,14 +363,20 @@ class ObjectPropertyNodeImpl(
 
     private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         // A comment always needs to start on a new line. This can happen either when the first property or the next
-        // node are commented.
-        val firstObjectPropertyHasComments =
-            (value is ObjectNode) && (value.properties.first() is ObjectPropertyNodeImpl)
-                    && ((value.properties.first() as ObjectPropertyNodeImpl).comments.isNotEmpty())
+        // node is commented.
+        val firstPropertyHasComments = if (value !is ObjectNode) {
+            false
+        } else {
+            when (val firstProperty = value.properties.firstOrNull()){
+                is ObjectPropertyNodeImpl -> firstProperty.comments.isNotEmpty()
+                null -> false
+                else -> false
+            }
+        }
         val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
 
         return key.toSourceWithNext(indent, value, compileTarget) +
-                if (firstObjectPropertyHasComments) {
+                if (firstPropertyHasComments) {
                     "\n"
                 } else {
                     ""

@@ -1711,6 +1711,19 @@ class FormatterTest {
     }
 
     @Test
+    fun testCompactFormattingEmptyObject(){
+        assertFormatting(
+            """
+                key: {}
+            """.trimIndent(),
+            """
+                key:{}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
     fun testEmptyDocumentWithComment() {
         assertFormatting(
             """
