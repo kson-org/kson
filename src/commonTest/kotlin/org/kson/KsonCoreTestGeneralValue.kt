@@ -27,7 +27,7 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
                   2,
                   3
                 ]
-              },
+              }
             "test_key": "value"
             """.trimIndent(), compileSettings)
 

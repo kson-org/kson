@@ -1457,7 +1457,7 @@ class FormatterTest {
     fun testCompactFormattingStyleSimpleObject() {
         assertFormatting(
             """
-                "type": "object",
+                "type": "object"
                 "properties": {
                 x: w
                 }
