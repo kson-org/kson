@@ -2,6 +2,10 @@ package org.kson
 
 import org.gradle.internal.os.OperatingSystem
 
+/**
+ * The artifacts produced by kotlin-multiplatform have different names depending on the platform.
+ * This object provides helper methods to obtain the file names with minimal hassle.
+ */
 object BinaryArtifactPaths {
     val os: OperatingSystem = OperatingSystem.current()
 
