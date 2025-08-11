@@ -4,18 +4,19 @@ import sys
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 from cffi import FFI
+
 CData = Any
 
 ffi = FFI()
 
-with open('kson_api.h', 'r') as f:
-   header = f.read()
+with open("kson_api.h", "r") as f:
+    header = f.read()
 ffi.cdef(header)
 
 LIBRARY_NAMES: Dict[str, str] = {
-    'win32': 'kson.dll',
-    'darwin': 'kson.dylib',
-    'linux': 'libkson.so',
+    "win32": "kson.dll",
+    "darwin": "kson.dylib",
+    "linux": "libkson.so",
 }
 
 lib_name = LIBRARY_NAMES.get(sys.platform)
@@ -23,14 +24,17 @@ if lib_name is None:
     raise RuntimeError(f"Unsupported platform: {sys.platform}")
 
 lib: Any = ffi.dlopen(lib_name)
-symbols: Any = lib.libkson_symbols() if sys.platform == 'linux' else lib.kson_symbols()
-kotlin_enum_type = "libkson_kref_kotlin_Enum" if sys.platform == 'linux' else "kson_kref_kotlin_Enum"
+symbols: Any = lib.libkson_symbols() if sys.platform == "linux" else lib.kson_symbols()
+kotlin_enum_type = (
+    "libkson_kref_kotlin_Enum" if sys.platform == "linux" else "kson_kref_kotlin_Enum"
+)
+
 
 def _cast_and_call(func: Any, args: List[Any]) -> Any:
     param_types = ffi.typeof(func).args
 
     casted_args: List[Any] = []
-    for (arg, param_type) in zip(args, param_types):
+    for arg, param_type in zip(args, param_types):
         if isinstance(arg, ffi.CData):
             casted_args.append(_cast(param_type.cname, arg))
         else:
@@ -38,9 +42,11 @@ def _cast_and_call(func: Any, args: List[Any]) -> Any:
 
     return func(*casted_args)
 
+
 def _cast(target_type_name: str, arg: CData) -> CData:
     addr = ffi.addressof(arg)
     return ffi.cast(f"{target_type_name} *", addr)[0]
+
 
 def _init_wrapper(target_type: Type, ptr: CData) -> Any:
     ptr.pinned = ffi.gc(ptr.pinned, symbols.DisposeStablePointer)
@@ -48,20 +54,27 @@ def _init_wrapper(target_type: Type, ptr: CData) -> Any:
     result.ptr = ptr
     return result
 
+
 def _init_enum_wrapper(target_type: Type, ptr: CData) -> Any:
     enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
-    ordinal = symbols.kotlin.root.org.kson.EnumHelper.ordinal(enum_helper_instance, _cast(kotlin_enum_type, ptr))
+    ordinal = symbols.kotlin.root.org.kson.EnumHelper.ordinal(
+        enum_helper_instance, _cast(kotlin_enum_type, ptr)
+    )
     instance = target_type(ordinal)
     symbols.DisposeStablePointer(ptr.pinned)
     return instance
 
+
 def _from_kotlin_string(ptr: CData) -> str:
     ffi_string: Any = ffi.string(ptr)
-    python_string = ffi_string.decode('utf-8')
+    python_string = ffi_string.decode("utf-8")
     symbols.DisposeString(ptr)
     return python_string
 
-def _from_kotlin_list(list: CData, item_type: str, wrap_as: Optional[Type]) -> List[Any]:
+
+def _from_kotlin_list(
+    list: CData, item_type: str, wrap_as: Optional[Type]
+) -> List[Any]:
     python_list: List[Any] = []
     iterator = symbols.kotlin.root.org.kson.SimpleListIterator.SimpleListIterator(list)
     while True:
@@ -79,20 +92,26 @@ def _from_kotlin_list(list: CData, item_type: str, wrap_as: Optional[Type]) -> L
     symbols.DisposeStablePointer(iterator.pinned)
     return python_list
 
+
 class Analysis:
     """The result of statically analyzing a Kson document."""
 
     ptr: CData
 
     def errors(self) -> List[Message]:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_errors, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Analysis.get_errors, [self.ptr]
+        )
         result = _from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
 
     def tokens(self) -> List[Token]:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_tokens, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Analysis.get_tokens, [self.ptr]
+        )
         result = _from_kotlin_list(result, "kson_kref_org_kson_Token", Token)
         return result
+
 
 class Position:
     """A zero-based line/column position in a document.
@@ -105,12 +124,17 @@ class Position:
     ptr: CData
 
     def line(self) -> int:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Position.get_line, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Position.get_line, [self.ptr]
+        )
         return result
 
     def column(self) -> int:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Position.get_column, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Position.get_column, [self.ptr]
+        )
         return result
+
 
 class Result:
     """Result of a Kson conversion operation."""
@@ -132,21 +156,30 @@ class Result:
             return _init_wrapper(Result.Failure, self.ptr)
         raise RuntimeError("Unknown Result subtype")
 
+
 class Success(Result):
     def output(self) -> str:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Result.Success.get_output, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Result.Success.get_output, [self.ptr]
+        )
         result = _from_kotlin_string(result)
         return result
 
+
 Result.Success = Success
+
 
 class Failure(Result):
     def errors(self) -> List[Message]:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Result.Failure.get_errors, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Result.Failure.get_errors, [self.ptr]
+        )
         result = _from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
 
+
 Result.Failure = Failure
+
 
 class SchemaResult:
     """A parse_schema result."""
@@ -156,7 +189,9 @@ class SchemaResult:
     Failure: Type
 
     def __init__(self) -> None:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.SchemaResult, [])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.SchemaResult.SchemaResult, []
+        )
         self.ptr = result
 
     def _translate(self) -> SchemaResult:
@@ -168,21 +203,31 @@ class SchemaResult:
             return _init_wrapper(SchemaResult.Success, self.ptr)
         raise RuntimeError("Unknown SchemaResult subtype")
 
+
 class SchemaResultSuccess(SchemaResult):
     def schema_validator(self) -> SchemaValidator:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Success.get_schemaValidator, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.SchemaResult.Success.get_schemaValidator,
+            [self.ptr],
+        )
         result = _init_wrapper(SchemaValidator, result)
         return result
 
+
 SchemaResult.Success = SchemaResultSuccess
+
 
 class SchemaResultFailure(SchemaResult):
     def errors(self) -> List[Message]:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Failure.get_errors, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.SchemaResult.Failure.get_errors, [self.ptr]
+        )
         result = _from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
 
+
 SchemaResult.Failure = SchemaResultFailure
+
 
 class Message:
     """Represents a message logged during Kson processing."""
@@ -190,19 +235,26 @@ class Message:
     ptr: CData
 
     def message(self) -> str:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Message.get_message, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Message.get_message, [self.ptr]
+        )
         result = _from_kotlin_string(result)
         return result
 
     def start(self) -> Position:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Message.get_start, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Message.get_start, [self.ptr]
+        )
         result = _init_wrapper(Position, result)
         return result
 
     def end(self) -> Position:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Message.get_end, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Message.get_end, [self.ptr]
+        )
         result = _init_wrapper(Position, result)
         return result
+
 
 class Token:
     """Token produced by the lexing phase of a Kson parse."""
@@ -210,7 +262,9 @@ class Token:
     ptr: CData
 
     def token_type(self) -> TokenType:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Token.get_tokenType, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Token.get_tokenType, [self.ptr]
+        )
         result = _init_enum_wrapper(TokenType, result)
         return result
 
@@ -220,7 +274,9 @@ class Token:
         return result
 
     def start(self) -> Position:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Token.get_start, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Token.get_start, [self.ptr]
+        )
         result = _init_wrapper(Position, result)
         return result
 
@@ -228,6 +284,7 @@ class Token:
         result = _cast_and_call(symbols.kotlin.root.org.kson.Token.get_end, [self.ptr])
         result = _init_wrapper(Position, result)
         return result
+
 
 class SchemaValidator:
     """A validator that can check if Kson source conforms to a schema."""
@@ -243,9 +300,13 @@ class SchemaValidator:
         Returns:
             A list of validation error messages, or empty list if valid.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.SchemaValidator.validate, [self.ptr, kson.encode('utf-8')])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.SchemaValidator.validate,
+            [self.ptr, kson.encode("utf-8")],
+        )
         result = _from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
+
 
 class IndentType:
     """Options for indenting Kson Output."""
@@ -267,20 +328,27 @@ class IndentType:
             return _init_wrapper(IndentType.Tabs, self.ptr)
         raise RuntimeError("Unknown IndentType subtype")
 
+
 class Spaces(IndentType):
     """Use spaces for indentation with the specified count."""
 
     ptr: CData
 
     def __init__(self, size: int) -> None:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.Spaces, [size])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.IndentType.Spaces.Spaces, [size]
+        )
         self.ptr = result
 
     def size(self) -> int:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.get_size, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.IndentType.Spaces.get_size, [self.ptr]
+        )
         return result
 
+
 IndentType.Spaces = Spaces
+
 
 class Tabs(IndentType):
     """Use tabs for indentation."""
@@ -289,12 +357,16 @@ class Tabs(IndentType):
 
     @staticmethod
     def get() -> Tabs:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.IndentType.Tabs._instance, [])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.IndentType.Tabs._instance, []
+        )
         result_obj = object.__new__(IndentType.Tabs)
         result_obj.ptr = result
         return result_obj
 
+
 IndentType.Tabs = Tabs
+
 
 class FormattingStyle(Enum):
     """FormattingStyle options for Kson Output."""
@@ -319,25 +391,36 @@ class FormattingStyle(Enum):
     DELIMITED = 1
     COMPACT = 2
 
+
 class FormatOptions:
     """Options for formatting Kson output."""
 
     ptr: CData
 
-    def __init__(self, indent_type: IndentType, formatting_style: FormattingStyle) -> None:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.FormatOptions, [indent_type.ptr, formatting_style._to_kotlin_enum()])
+    def __init__(
+        self, indent_type: IndentType, formatting_style: FormattingStyle
+    ) -> None:
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.FormatOptions.FormatOptions,
+            [indent_type.ptr, formatting_style._to_kotlin_enum()],
+        )
         self.ptr = result
 
     def indent_type(self) -> IndentType:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_indentType, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.FormatOptions.get_indentType, [self.ptr]
+        )
         result = _init_wrapper(IndentType, result)
         result = result._translate()
         return result
 
     def formatting_style(self) -> FormattingStyle:
-        result = _cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_formattingStyle, [self.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.FormatOptions.get_formattingStyle, [self.ptr]
+        )
         result = _init_enum_wrapper(FormattingStyle, result)
         return result
+
 
 class TokenType(Enum):
     def _to_kotlin_enum(self) -> CData:
@@ -408,7 +491,9 @@ class TokenType(Enum):
                 result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 return result
             case TokenType.EMBED_PREAMBLE_NEWLINE:
-                result = symbols.kotlin.root.org.kson.TokenType.EMBED_PREAMBLE_NEWLINE.get()
+                result = (
+                    symbols.kotlin.root.org.kson.TokenType.EMBED_PREAMBLE_NEWLINE.get()
+                )
                 result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 return result
             case TokenType.EMBED_CONTENT:
@@ -495,6 +580,7 @@ class TokenType(Enum):
     WHITESPACE = 28
     EOF = 29
 
+
 class Kson:
     """The Kson language (https://kson.org)."""
 
@@ -518,7 +604,14 @@ class Kson:
         Returns:
             The formatted Kson source.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Kson.format, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), format_options.ptr])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Kson.format,
+            [
+                symbols.kotlin.root.org.kson.Kson._instance(),
+                kson.encode("utf-8"),
+                format_options.ptr,
+            ],
+        )
         result = _from_kotlin_string(result)
         return result
 
@@ -532,7 +625,10 @@ class Kson:
         Returns:
             A Result containing either the Json output or error messages.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Kson.toJson, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Kson.toJson,
+            [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode("utf-8")],
+        )
         result = _init_wrapper(Result, result)
         result = result._translate()
         return result
@@ -547,7 +643,10 @@ class Kson:
         Returns:
             A Result containing either the Yaml output or error messages.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Kson.toYaml, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Kson.toYaml,
+            [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode("utf-8")],
+        )
         result = _init_wrapper(Result, result)
         result = result._translate()
         return result
@@ -565,7 +664,10 @@ class Kson:
         Returns:
             An Analysis object containing messages and tokens.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Kson.analyze, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Kson.analyze,
+            [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode("utf-8")],
+        )
         result = _init_wrapper(Analysis, result)
         return result
 
@@ -579,7 +681,13 @@ class Kson:
         Returns:
             A SchemaValidator that can validate Kson documents against the schema.
         """
-        result = _cast_and_call(symbols.kotlin.root.org.kson.Kson.parseSchema, [symbols.kotlin.root.org.kson.Kson._instance(), schema_kson.encode('utf-8')])
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.Kson.parseSchema,
+            [
+                symbols.kotlin.root.org.kson.Kson._instance(),
+                schema_kson.encode("utf-8"),
+            ],
+        )
         result = _init_wrapper(SchemaResult, result)
         result = result._translate()
         return result

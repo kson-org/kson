@@ -1,14 +1,18 @@
 from lib import *
 
+
 def messages_to_string(msgs):
     output = ""
     for msg in msgs:
         p1 = msg.start()
         p2 = msg.end()
-        line = f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {msg.message()}"
+        line = (
+            f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {msg.message()}"
+        )
         output += line.strip()
         output += "\n"
     return output
+
 
 def test_kson_format():
     indent = IndentType.Spaces(2)
@@ -18,17 +22,22 @@ def test_kson_format():
         FormatOptions(indent, formatting),
     )
 
-    assert result == """key:
+    assert (
+        result
+        == """key:
   - 1
   - 2
   - 3
   - 4"""
+    )
 
 
 def test_kson_to_json_success():
     result = Kson.to_json("key: [1, 2, 3, 4]")
     assert isinstance(result, Success)
-    assert result.output() == """{
+    assert (
+        result.output()
+        == """{
   "key": [
     1,
     2,
@@ -36,6 +45,7 @@ def test_kson_to_json_success():
     4
   ]
 }"""
+    )
 
 
 def test_kson_to_json_failure():
@@ -43,6 +53,7 @@ def test_kson_to_json_failure():
     assert isinstance(result, Failure)
     output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"
+
 
 def test_kson_analysis():
     analysis = Kson.analyze("key: [1, 2, 3, 4]")
@@ -57,7 +68,9 @@ def test_kson_analysis():
         output += line.strip()
         output += "\n"
 
-    assert output == """0,0 to 0,3 - UNQUOTED_STRING: key
+    assert (
+        output
+        == """0,0 to 0,3 - UNQUOTED_STRING: key
 0,3 to 0,4 - COLON: :
 0,5 to 0,6 - SQUARE_BRACKET_L: [
 0,6 to 0,7 - NUMBER: 1
@@ -70,3 +83,4 @@ def test_kson_analysis():
 0,16 to 0,17 - SQUARE_BRACKET_R: ]
 0,17 to 0,17 - EOF:
 """
+    )
