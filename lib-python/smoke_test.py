@@ -27,7 +27,7 @@ def test_kson_format():
 
 def test_kson_to_json_success():
     result = Kson.to_json("key: [1, 2, 3, 4]")
-    assert isinstance(result, Result.Success)
+    assert isinstance(result, Success)
     assert result.output() == """{
   "key": [
     1,
@@ -40,7 +40,7 @@ def test_kson_to_json_success():
 
 def test_kson_to_json_failure():
     result = Kson.to_json("key: [1, 2, 3, 4")
-    assert isinstance(result, Result.Failure)
+    assert isinstance(result, Failure)
     output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"
 
@@ -53,7 +53,7 @@ def test_kson_analysis():
     for token in analysis.tokens():
         p1 = token.start()
         p2 = token.end()
-        line = f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {token.token_type().name()}: {token.text()}"
+        line = f"{p1.line()},{p1.column()} to {p2.line()},{p2.column()} - {token.token_type().name}: {token.text()}"
         output += line.strip()
         output += "\n"
 

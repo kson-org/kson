@@ -105,9 +105,9 @@ tasks {
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
 
-    // Take bindings' tests into consideration in the main `check` task
+    // Take bindings into consideration in the main `check` task
     check {
-        dependsOn(":lib-python:test")
+        dependsOn(":lib-python:check")
     }
 
     /**

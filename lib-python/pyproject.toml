@@ -10,5 +10,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.403",
     "pytest>=8.4.1",
 ]

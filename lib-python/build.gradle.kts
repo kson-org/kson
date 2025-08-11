@@ -1,5 +1,6 @@
 val copyNativeArtifacts = "copyNativeArtifacts"
 val test = "test"
+val typeCheck = "typeCheck"
 
 tasks {
     register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
@@ -11,24 +12,29 @@ tasks {
 
         group = "verification"
         commandLine = "uv run pytest".split(" ")
-
-        // Ensure the subprocess can find the kson shared library
-        val (libraryPathVariable, libraryPathSeparator) = when {
-            org.gradle.internal.os.OperatingSystem.current().isWindows -> Pair("PATH", ";")
-            else -> Pair("LD_LIBRARY_PATH", ":")
-        }
-        var libraryPath = System.getenv(libraryPathVariable) ?: ""
-        if (libraryPath.isNotEmpty() && !libraryPath.endsWith(libraryPathSeparator)) {
-            libraryPath += libraryPathSeparator
-        }
-        libraryPath += project.file(project.projectDir)
-        environment(libraryPathVariable, libraryPath)
-
-        // Show stdout and stderr
         standardOutput = System.out
         errorOutput = System.err
-
-        // Ensure the task fails if the test command fails
         isIgnoreExitValue = false
+
+        // Ensure the subprocess can find the kson shared library
+        injectSharedLibraryPath()
+    }
+
+    register<Exec>(typeCheck) {
+        dependsOn(copyNativeArtifacts)
+
+        group = "verification"
+        commandLine = "uv run pyright".split(" ")
+        standardOutput = System.out
+        errorOutput = System.err
+        isIgnoreExitValue = false
+
+        // Ensure the subprocess can find the kson shared library
+        injectSharedLibraryPath()
+    }
+
+    register<Task>("check") {
+        dependsOn(test)
+        dependsOn(typeCheck)
     }
 }
