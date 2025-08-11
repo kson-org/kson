@@ -48,6 +48,9 @@ jobs:
           keys:
             - v1-vscode-tests
 
+      # Install `uv` (necessary for testing the bindings)
+      - run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
       # installed needed native dependency on Linux
       - run: sudo apt update
       - run: sudo apt install libncurses-dev
