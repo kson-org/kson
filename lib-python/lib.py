@@ -18,20 +18,20 @@ symbols = lib.libkson_symbols() if sys.platform == 'linux' else lib.kson_symbols
 kotlin_enum_type = "libkson_kref_kotlin_Enum" if sys.platform == 'linux' else "kson_kref_kotlin_Enum"
 
 def cast_and_call(func, args):
-    paramTypes = ffi.typeof(func).args
+    param_types = ffi.typeof(func).args
 
     casted_args = []
-    for (arg, paramType) in zip(args, paramTypes):
+    for (arg, param_type) in zip(args, param_types):
         if isinstance(arg, ffi.CData):
-            casted_args.append(cast(paramType.cname, arg))
+            casted_args.append(cast(param_type.cname, arg))
         else:
             casted_args.append(arg)
 
     return func(*casted_args)
 
-def cast(targetTypeName, arg):
+def cast(target_type_name, arg):
     addr = ffi.addressof(arg)
-    return ffi.cast(f"{targetTypeName} *", addr)[0]
+    return ffi.cast(f"{target_type_name} *", addr)[0]
 
 def init_wrapper(target_type, ptr):
     ptr.pinned = ffi.gc(ptr.pinned, symbols.DisposeStablePointer)
@@ -71,29 +71,30 @@ def from_kotlin_list(list, item_type, wrap_as):
 
 class FormatOptions:
     """Options for formatting Kson output."""
-    def __init__(self, indentType, formattingStyle, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.FormatOptions, [indentType.ptr, formattingStyle.to_kotlin_enum(), ])
+    def __init__(self, indent_type, formatting_style):
+        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.FormatOptions, [indent_type.ptr, formatting_style.to_kotlin_enum()])
         self.ptr = result
-    def indentType(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_indentType, [self.ptr, ])
+
+    def indent_type(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_indentType, [self.ptr])
         result = init_wrapper(IndentType, result)
         result = result._translate()
-
         return result
-    def formattingStyle(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_formattingStyle, [self.ptr, ])
-        result = init_enum_wrapper(FormattingStyle, result)
 
+    def formatting_style(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.FormatOptions.get_formattingStyle, [self.ptr])
+        result = init_enum_wrapper(FormattingStyle, result)
         return result
 
 class Analysis:
     """The result of statically analyzing a Kson document"""
-    def errors(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_errors, [self.ptr, ])
+    def errors(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_errors, [self.ptr])
         result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
-    def tokens(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_tokens, [self.ptr, ])
+
+    def tokens(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_tokens, [self.ptr])
         result = from_kotlin_list(result, "kson_kref_org_kson_Token", Token)
         return result
 
@@ -103,105 +104,105 @@ class Position:
     @param line The line number where the error occurred (0-based)
     @param column The column number where the error occurred (0-based)
     """
-    def line(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Position.get_line, [self.ptr, ])
-
+    def line(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Position.get_line, [self.ptr])
         return result
-    def column(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Position.get_column, [self.ptr, ])
 
+    def column(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Position.get_column, [self.ptr])
         return result
 
 class Result:
     """Result of a Kson conversion operation"""
-    def __init__(self, ):
+    def __init__(self):
         """Result of a Kson conversion operation"""
         result = cast_and_call(symbols.kotlin.root.org.kson.Result.Result, [])
         self.ptr = result
+
     def _translate(self):
-        subclassType = symbols.kotlin.root.org.kson.Result.Success._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.Result.Success._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(Result.Success, self.ptr)
-        subclassType = symbols.kotlin.root.org.kson.Result.Failure._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.Result.Failure._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(Result.Failure, self.ptr)
 
     class Success:
-        def output(self, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.Result.Success.get_output, [self.ptr, ])
+        def output(self):
+            result = cast_and_call(symbols.kotlin.root.org.kson.Result.Success.get_output, [self.ptr])
             result = from_kotlin_string(result)
             return result
 
     class Failure:
-        def errors(self, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.Result.Failure.get_errors, [self.ptr, ])
+        def errors(self):
+            result = cast_and_call(symbols.kotlin.root.org.kson.Result.Failure.get_errors, [self.ptr])
             result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
             return result
 
 class SchemaResult:
     """A [parseSchema] result"""
-    def __init__(self, ):
+    def __init__(self):
         """A [parseSchema] result"""
         result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.SchemaResult, [])
         self.ptr = result
+
     def _translate(self):
-        subclassType = symbols.kotlin.root.org.kson.SchemaResult.Failure._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.SchemaResult.Failure._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(SchemaResult.Failure, self.ptr)
-        subclassType = symbols.kotlin.root.org.kson.SchemaResult.Success._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.SchemaResult.Success._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(SchemaResult.Success, self.ptr)
 
     class Success:
-        def schemaValidator(self, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Success.get_schemaValidator, [self.ptr, ])
+        def schema_validator(self):
+            result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Success.get_schemaValidator, [self.ptr])
             result = init_wrapper(SchemaValidator, result)
-
             return result
 
     class Failure:
-        def errors(self, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Failure.get_errors, [self.ptr, ])
+        def errors(self):
+            result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.Failure.get_errors, [self.ptr])
             result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
             return result
 
 class Message:
     """Represents a message logged during Kson processing"""
-    def message(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_message, [self.ptr, ])
+    def message(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_message, [self.ptr])
         result = from_kotlin_string(result)
         return result
-    def start(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_start, [self.ptr, ])
-        result = init_wrapper(Position, result)
 
+    def start(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_start, [self.ptr])
+        result = init_wrapper(Position, result)
         return result
-    def end(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_end, [self.ptr, ])
-        result = init_wrapper(Position, result)
 
+    def end(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_end, [self.ptr])
+        result = init_wrapper(Position, result)
         return result
 
 class Token:
     """[Token] produced by the lexing phase of a Kson parse"""
-    def tokenType(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_tokenType, [self.ptr, ])
+    def token_type(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_tokenType, [self.ptr])
         result = init_enum_wrapper(TokenType, result)
-
         return result
-    def text(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_text, [self.ptr, ])
+
+    def text(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_text, [self.ptr])
         result = from_kotlin_string(result)
         return result
-    def start(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_start, [self.ptr, ])
-        result = init_wrapper(Position, result)
 
+    def start(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_start, [self.ptr])
+        result = init_wrapper(Position, result)
         return result
-    def end(self, ):
-        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_end, [self.ptr, ])
-        result = init_wrapper(Position, result)
 
+    def end(self):
+        result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_end, [self.ptr])
+        result = init_wrapper(Position, result)
         return result
 
 class Kson:
@@ -209,100 +210,102 @@ class Kson:
     @staticmethod
     def get():
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson._instance, [])
-        resultObj = object.__new__(Kson)
-        resultObj.ptr = result
-        return resultObj
+        result_obj = object.__new__(Kson)
+        result_obj.ptr = result
+        return result_obj
+
     @staticmethod
-    def format(kson, formatOptions, ):
+    def format(kson, format_options):
         """Formats Kson source with the specified formatting options.
 
         @param kson The Kson source to format
-        @param formatOptions The formatting options to apply
+        @param format_options The formatting options to apply
         @return The formatted Kson source
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.format, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), formatOptions.ptr, ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.format, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), format_options.ptr])
         result = from_kotlin_string(result)
         return result
+
     @staticmethod
-    def toJson(kson, ):
+    def to_json(kson):
         """Converts Kson to Json.
 
         @param kson The Kson source to convert
         @return A Result containing either the Json output or error messages
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toJson, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toJson, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Result, result)
         result = result._translate()
-
         return result
+
     @staticmethod
-    def toYaml(kson, ):
+    def to_yaml(kson):
         """Converts Kson to Yaml, preserving comments
 
         @param kson The Kson source to convert
         @return A Result containing either the Yaml output or error messages
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toYaml, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toYaml, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Result, result)
         result = result._translate()
-
         return result
+
     @staticmethod
-    def analyze(kson, ):
+    def analyze(kson):
         """Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
         tokenized version of the source.  Useful for tooling/editor support.
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.analyze, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.analyze, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Analysis, result)
-
         return result
+
     @staticmethod
-    def parseSchema(schemaKson, ):
+    def parse_schema(schema_kson):
         """Parses a Kson schema definition and returns a validator for that schema.
 
-        @param schemaKson The Kson source defining a Json Schema
+        @param schema_kson The Kson source defining a Json Schema
         @return A SchemaValidator that can validate Kson documents against the schema
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.parseSchema, [symbols.kotlin.root.org.kson.Kson._instance(), schemaKson.encode('utf-8'), ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.Kson.parseSchema, [symbols.kotlin.root.org.kson.Kson._instance(), schema_kson.encode('utf-8')])
         result = init_wrapper(SchemaResult, result)
         result = result._translate()
-
         return result
 
 class SchemaValidator:
     """A validator that can check if Kson source conforms to a schema."""
-    def validate(self, kson, ):
+    def validate(self, kson):
         """Validates the given Kson source against this validator's schema.
         @param kson The Kson source to validate
 
         @return A list of validation error messages, or empty list if valid
         """
-        result = cast_and_call(symbols.kotlin.root.org.kson.SchemaValidator.validate, [self.ptr, kson.encode('utf-8'), ])
+        result = cast_and_call(symbols.kotlin.root.org.kson.SchemaValidator.validate, [self.ptr, kson.encode('utf-8')])
         result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
 
 class IndentType:
     """Options for indenting Kson Output"""
-    def __init__(self, ):
+    def __init__(self):
         """Options for indenting Kson Output"""
         result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.IndentType, [])
         self.ptr = result
+
     def _translate(self):
-        subclassType = symbols.kotlin.root.org.kson.IndentType.Spaces._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.IndentType.Spaces._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(IndentType.Spaces, self.ptr)
-        subclassType = symbols.kotlin.root.org.kson.IndentType.Tabs._type()
-        if symbols.IsInstance(self.ptr.pinned, subclassType):
+        subclass_type = symbols.kotlin.root.org.kson.IndentType.Tabs._type()
+        if symbols.IsInstance(self.ptr.pinned, subclass_type):
             return init_wrapper(IndentType.Tabs, self.ptr)
 
     class Spaces:
         """Use spaces for indentation with the specified count"""
-        def __init__(self, size, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.Spaces, [size, ])
+        def __init__(self, size):
+            result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.Spaces, [size])
             self.ptr = result
-        def size(self, ):
-            result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.get_size, [self.ptr, ])
 
+        def size(self):
+            result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.get_size, [self.ptr])
             return result
 
     class Tabs:
@@ -310,9 +313,9 @@ class IndentType:
         @staticmethod
         def get():
             result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Tabs._instance, [])
-            resultObj = object.__new__(IndentType.Tabs)
-            resultObj.ptr = result
-            return resultObj
+            result_obj = object.__new__(IndentType.Tabs)
+            result_obj.ptr = result
+            return result_obj
 
 class FormattingStyle(Enum):
     """[FormattingStyle] options for Kson Output"""
@@ -331,10 +334,12 @@ class FormattingStyle(Enum):
                 result = symbols.kotlin.root.org.kson.FormattingStyle.COMPACT.get()
                 result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 return result
+
     def name(self):
         enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
         kotlin_enum = self.to_kotlin_enum()
         return from_kotlin_string(symbols.kotlin.root.org.kson.EnumHelper.name(enum_helper_instance, cast(kotlin_enum_type, kotlin_enum)))
+
     PLAIN = 0
     DELIMITED = 1
     COMPACT = 2
@@ -463,10 +468,12 @@ class TokenType(Enum):
                 result = symbols.kotlin.root.org.kson.TokenType.EOF.get()
                 result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 return result
+
     def name(self):
         enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
         kotlin_enum = self.to_kotlin_enum()
         return from_kotlin_string(symbols.kotlin.root.org.kson.EnumHelper.name(enum_helper_instance, cast(kotlin_enum_type, kotlin_enum)))
+
     CURLY_BRACE_L = 0
     CURLY_BRACE_R = 1
     SQUARE_BRACKET_L = 2
