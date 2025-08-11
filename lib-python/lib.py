@@ -87,7 +87,7 @@ class FormatOptions:
         return result
 
 class Analysis:
-    """The result of statically analyzing a Kson document"""
+    """The result of statically analyzing a Kson document."""
     def errors(self):
         result = cast_and_call(symbols.kotlin.root.org.kson.Analysis.get_errors, [self.ptr])
         result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
@@ -99,10 +99,11 @@ class Analysis:
         return result
 
 class Position:
-    """A zero-based line/column position in a document
+    """A zero-based line/column position in a document.
 
-    @param line The line number where the error occurred (0-based)
-    @param column The column number where the error occurred (0-based)
+    Args:
+        line: The line number where the error occurred (0-based).
+        column: The column number where the error occurred (0-based).
     """
     def line(self):
         result = cast_and_call(symbols.kotlin.root.org.kson.Position.get_line, [self.ptr])
@@ -113,9 +114,8 @@ class Position:
         return result
 
 class Result:
-    """Result of a Kson conversion operation"""
+    """Result of a Kson conversion operation."""
     def __init__(self):
-        """Result of a Kson conversion operation"""
         result = cast_and_call(symbols.kotlin.root.org.kson.Result.Result, [])
         self.ptr = result
 
@@ -140,9 +140,8 @@ class Result:
             return result
 
 class SchemaResult:
-    """A [parseSchema] result"""
+    """A parse_schema result."""
     def __init__(self):
-        """A [parseSchema] result"""
         result = cast_and_call(symbols.kotlin.root.org.kson.SchemaResult.SchemaResult, [])
         self.ptr = result
 
@@ -167,7 +166,7 @@ class SchemaResult:
             return result
 
 class Message:
-    """Represents a message logged during Kson processing"""
+    """Represents a message logged during Kson processing."""
     def message(self):
         result = cast_and_call(symbols.kotlin.root.org.kson.Message.get_message, [self.ptr])
         result = from_kotlin_string(result)
@@ -184,7 +183,7 @@ class Message:
         return result
 
 class Token:
-    """[Token] produced by the lexing phase of a Kson parse"""
+    """Token produced by the lexing phase of a Kson parse."""
     def token_type(self):
         result = cast_and_call(symbols.kotlin.root.org.kson.Token.get_tokenType, [self.ptr])
         result = init_enum_wrapper(TokenType, result)
@@ -206,7 +205,7 @@ class Token:
         return result
 
 class Kson:
-    """The [Kson](https://kson.org) language"""
+    """The Kson language (https://kson.org)."""
     @staticmethod
     def get():
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson._instance, [])
@@ -218,9 +217,12 @@ class Kson:
     def format(kson, format_options):
         """Formats Kson source with the specified formatting options.
 
-        @param kson The Kson source to format
-        @param format_options The formatting options to apply
-        @return The formatted Kson source
+        Args:
+            kson: The Kson source to format.
+            format_options: The formatting options to apply.
+
+        Returns:
+            The formatted Kson source.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson.format, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8'), format_options.ptr])
         result = from_kotlin_string(result)
@@ -230,8 +232,11 @@ class Kson:
     def to_json(kson):
         """Converts Kson to Json.
 
-        @param kson The Kson source to convert
-        @return A Result containing either the Json output or error messages
+        Args:
+            kson: The Kson source to convert.
+
+        Returns:
+            A Result containing either the Json output or error messages.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toJson, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Result, result)
@@ -240,10 +245,13 @@ class Kson:
 
     @staticmethod
     def to_yaml(kson):
-        """Converts Kson to Yaml, preserving comments
+        """Converts Kson to Yaml, preserving comments.
 
-        @param kson The Kson source to convert
-        @return A Result containing either the Yaml output or error messages
+        Args:
+            kson: The Kson source to convert.
+
+        Returns:
+            A Result containing either the Yaml output or error messages.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson.toYaml, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Result, result)
@@ -252,8 +260,16 @@ class Kson:
 
     @staticmethod
     def analyze(kson):
-        """Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
-        tokenized version of the source.  Useful for tooling/editor support.
+        """Statically analyze the given Kson and return an Analysis object.
+
+        Contains any messages generated along with a tokenized version of the source.
+        Useful for tooling/editor support.
+
+        Args:
+            kson: The Kson source to analyze.
+
+        Returns:
+            An Analysis object containing messages and tokens.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson.analyze, [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode('utf-8')])
         result = init_wrapper(Analysis, result)
@@ -263,8 +279,11 @@ class Kson:
     def parse_schema(schema_kson):
         """Parses a Kson schema definition and returns a validator for that schema.
 
-        @param schema_kson The Kson source defining a Json Schema
-        @return A SchemaValidator that can validate Kson documents against the schema
+        Args:
+            schema_kson: The Kson source defining a Json Schema.
+
+        Returns:
+            A SchemaValidator that can validate Kson documents against the schema.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.Kson.parseSchema, [symbols.kotlin.root.org.kson.Kson._instance(), schema_kson.encode('utf-8')])
         result = init_wrapper(SchemaResult, result)
@@ -275,18 +294,20 @@ class SchemaValidator:
     """A validator that can check if Kson source conforms to a schema."""
     def validate(self, kson):
         """Validates the given Kson source against this validator's schema.
-        @param kson The Kson source to validate
 
-        @return A list of validation error messages, or empty list if valid
+        Args:
+            kson: The Kson source to validate.
+
+        Returns:
+            A list of validation error messages, or empty list if valid.
         """
         result = cast_and_call(symbols.kotlin.root.org.kson.SchemaValidator.validate, [self.ptr, kson.encode('utf-8')])
         result = from_kotlin_list(result, "kson_kref_org_kson_Message", Message)
         return result
 
 class IndentType:
-    """Options for indenting Kson Output"""
+    """Options for indenting Kson Output."""
     def __init__(self):
-        """Options for indenting Kson Output"""
         result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.IndentType, [])
         self.ptr = result
 
@@ -299,7 +320,7 @@ class IndentType:
             return init_wrapper(IndentType.Tabs, self.ptr)
 
     class Spaces:
-        """Use spaces for indentation with the specified count"""
+        """Use spaces for indentation with the specified count."""
         def __init__(self, size):
             result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Spaces.Spaces, [size])
             self.ptr = result
@@ -309,7 +330,7 @@ class IndentType:
             return result
 
     class Tabs:
-        """Use tabs for indentation"""
+        """Use tabs for indentation."""
         @staticmethod
         def get():
             result = cast_and_call(symbols.kotlin.root.org.kson.IndentType.Tabs._instance, [])
@@ -318,7 +339,7 @@ class IndentType:
             return result_obj
 
 class FormattingStyle(Enum):
-    """[FormattingStyle] options for Kson Output"""
+    """FormattingStyle options for Kson Output."""
     def to_kotlin_enum(self):
         enum_helper_instance = symbols.kotlin.root.org.kson.EnumHelper._instance()
         match self:
