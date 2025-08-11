@@ -13,59 +13,6 @@ repositories {
 group = "org.kson"
 version = "1.0-SNAPSHOT"
 
-val copyNativeArtifactsToBindingsTask = "copyNativeArtifactsToBindings"
-
-tasks {
-    register<CopyNativeArtifactsToBindingsTask>(copyNativeArtifactsToBindingsTask) {
-        dependsOn("nativeKsonBinaries")
-    }
-
-    val projectRoot = project.projectDir.parentFile.toPath()
-    KsonBindings.ALL.forEach {
-        val taskName = "test-${it.dir}"
-        register<Exec>(taskName) {
-            dependsOn(copyNativeArtifactsToBindingsTask)
-
-            val commandStr = it.testCommand
-            val bindingsDir = projectRoot.resolve(it.dir)
-
-            group = "verification"
-            description = "Run $commandStr on generated ${it.dir}"
-            workingDir = file(bindingsDir)
-            commandLine = it.testCommand.split(" ")
-
-            // Let the subprocess find the kson shared library
-            val (libraryPathVariable, libraryPathSeparator) = when {
-                org.gradle.internal.os.OperatingSystem.current().isWindows -> Pair("PATH", ";")
-                else -> Pair("LD_LIBRARY_PATH", ":")
-            }
-            var libraryPath = System.getenv(libraryPathVariable) ?: ""
-            if (libraryPath.isNotEmpty() && !libraryPath.endsWith(libraryPathSeparator)) {
-                libraryPath += libraryPathSeparator
-            }
-            libraryPath += project.file(bindingsDir)
-            environment(libraryPathVariable, libraryPath)
-
-            // Show stdout and stderr
-            standardOutput = System.out
-            errorOutput = System.err
-
-            // Ensure the task fails if the test command fails
-            isIgnoreExitValue = false
-
-            doFirst {
-                if (!workingDir.exists()) {
-                    throw GradleException("$bindingsDir directory does not exist: ${workingDir.absolutePath}")
-                }
-            }
-        }
-
-        check {
-            dependsOn(taskName)
-        }
-    }
-}
-
 kotlin {
     jvm {
         testRuns["test"].executionTask.configure {
