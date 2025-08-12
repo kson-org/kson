@@ -339,15 +339,19 @@ $$
 Embed end-delimiters are escaped by putting a backslash inside them:
 
 ```kson
-# Input KSON:
-%% "I want to output: %\%" %% # -> I want to output %%
-
-# For multiple backslashes:
-%% "Output: %\\%" %%  # -> Output: %\%
-%% "Output: %\\\%" %%  # -> Output: %\\%
-
-# Works the same with $ delimiters:
-$ "Output: $\$" $$  # ->  Output: $$
+input: %kson
+ %\% 
+ %\\% 
+ %\\\%
+ $\$
+ %%
+ 
+output: "
+%%
+%\%
+%\\%
+$$
+" 
 ```
 
 ### The Embed Preamble
@@ -364,7 +368,7 @@ This is a sample block of type `text`
 %% 
 ```
 
-An empty [Embed Preamble](#the-embed-preamble) indicates dm todo
+An empty [Embed Preamble](#the-embed-preamble) simply indicates an embed of raw text. When appropriate, it's recommended to include a tag or metadata to provide context about the embedded content.
 
 #### Embed Tags
 
