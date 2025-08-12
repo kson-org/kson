@@ -336,9 +336,19 @@ $$
 
 #### Escaping Embed Delimiters
 
-Embed end-delimiters are escaped by putting a backslash inside them: `%\%`. This in turn needs to be escaped, of course,
-so when evaluating escaped embed delimiters, we allow arbitrary `\`s between `%`s, and consume one of them. Thus, `%\\%`
-gives `%\%` in the output, and so on. This naturally works the same for the alternative `$$` end-delimiter.
+Embed end-delimiters are escaped by putting a backslash inside them:
+
+```kson
+# Input KSON:
+%% "I want to output: %\%" %% # -> I want to output %%
+
+# For multiple backslashes:
+%% "Output: %\\%" %%  # -> Output: %\%
+%% "Output: %\\\%" %%  # -> Output: %\\%
+
+# Works the same with $ delimiters:
+$ "Output: $\$" $$  # ->  Output: $$
+```
 
 ### The Embed Preamble
 
