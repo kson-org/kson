@@ -12,7 +12,7 @@ enum class MessageSeverity {
  * Instances of [Message] are created with [MessageType.create]. [Message]s can be created during Parsing or
  * post-processing. Post-processing messages are created by any of the validators, for example
  * [org.kson.validation.IndentValidator] or [org.kson.schema.JsonSchemaValidator].
- * 
+ *
  * Core parse messages (created during lexing/parsing) are wrapped in [CoreParseMessage] when they pass through
  * [org.kson.parser.KsonMarker.error]. All other messages from validators and post-processors remain unwrapped.
  */
@@ -728,6 +728,46 @@ enum class MessageType(
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val keyName = parsedArgs.getArg("Key name")
             return "Duplicate key \"$keyName\" in object"
+        }
+    },
+    JSON_POINTER_BAD_START {
+        override fun expectedArgs(): List<String> {
+            return listOf("Bad Start Character")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val badStartChar = parsedArgs.getArg("Bad Start Character")
+            return "JSON Pointer must start with '/' but found '$badStartChar' at position 0"
+        }
+    },
+    JSON_POINTER_INVALID_CHARACTER {
+        override fun expectedArgs(): List<String> {
+            return listOf("Invalid Character")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val invalidChar = parsedArgs.getArg("Invalid Character")
+            return "Invalid character in reference token: '$invalidChar'"
+        }
+    },
+    JSON_POINTER_INVALID_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Invalid Escape Character")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val invalidEscapeChar = parsedArgs.getArg("Invalid Escape Character")
+            return "Invalid escape sequence: '~$invalidEscapeChar'. " +
+                    "Valid escape sequences are '~0' for '~' and '~1' for '/'"
+        }
+    },
+    JSON_POINTER_INCOMPLETE_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
         }
     };
 
