@@ -667,10 +667,20 @@ class NullNode(location: Location) : KsonValueNodeImpl(location) {
     }
 }
 
-class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embedContent: String, embedDelim: EmbedDelim, location: Location) :
+class EmbedBlockNode(
+    val embedTagNode: StringNodeImpl?,
+    val metadataTagNode: StringNodeImpl?,
+    val embedContentNode: StringNodeImpl,
+    embedDelim: EmbedDelim,
+    location: Location
+) :
     KsonValueNodeImpl(location) {
 
-    val embedContent: String by lazy { embedDelim.unescapeEmbedContent(embedContent) }
+    private val embedTag: String = embedTagNode?.stringContent ?: ""
+    private val metadataTag: String = metadataTagNode?.stringContent ?: ""
+    private val embedContent: String by lazy {
+        embedDelim.unescapeEmbedContent(embedContentNode.stringContent)
+    }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
@@ -701,14 +711,14 @@ class EmbedBlockNode(val embedTag: String, private val metadataTag: String, embe
                     FormattingStyle.PLAIN, FormattingStyle.DELIMITED -> {
                         // Format the embed block
                         indent.firstLineIndent() + delimiter.openDelimiter + embedPreamble + "\n" +
-                                indent.bodyLinesIndent() + content.split("\n")
+                                indent.bodyLinesIndent() + content.lines()
                             .joinToString("\n${indent.bodyLinesIndent()}") { it } +
                                 delimiter.closeDelimiter
                     }
                     FormattingStyle.COMPACT -> {
                         // Format the embed block
                         delimiter.openDelimiter + embedPreamble + "\n" +
-                                content.split("\n")
+                                content.lines()
                             .joinToString("\n") { it } +
                                 delimiter.closeDelimiter
                     }

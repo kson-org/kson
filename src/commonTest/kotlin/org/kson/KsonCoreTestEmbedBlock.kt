@@ -398,4 +398,70 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
     }
+
+    @Test
+    fun testEmbeddedEmbedBlockFromObject(){
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
+            """.trimIndent(),
+            """
+                embedBlock: $
+                  embeddedEmbed: %
+                  EMBED CONTENT
+                  %%
+                  $$
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: |
+                    embeddedEmbed: %
+                    EMBED CONTENT
+                    %%
+                    
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "embeddedEmbed: $\nEMBED WITH %\\% CONTENT\n$$\n"
+            """.trimIndent(),
+            """
+                embedBlock: %
+                  embeddedEmbed: $
+                  EMBED WITH %\% CONTENT
+                  $$
+                  %%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedContent: |
+                    embeddedEmbed: ${'$'}
+                    EMBED WITH %% CONTENT
+                    ${'$'}${'$'}
+                    
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %% CONTENT\n${'$'}${'$'}\n"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
 } 

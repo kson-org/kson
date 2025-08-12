@@ -94,13 +94,13 @@ class KsonValueTest {
         // Verify embed block
         val embedProp = properties["embedBlock"]!!
         assertTrue(embedProp is EmbedBlock)
-        assertEquals("", embedProp.embedTag)
+        assertEquals("", embedProp.embedTag?.value ?: "")
         assertEquals(
             """
             This is an embed block
             with multiple lines
             
-        """.trimIndent(), embedProp.embedContent
+        """.trimIndent(), embedProp.embedContent.value
         )
 
         // Verify nested object

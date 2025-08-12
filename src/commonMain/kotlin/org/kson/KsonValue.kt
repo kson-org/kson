@@ -56,8 +56,9 @@ class KsonList(val elements: List<KsonValue>, location: Location) : KsonValue(lo
     }
 }
 
-class EmbedBlock(val embedTag: String,
-                 val embedContent: String,
+class EmbedBlock(
+    val embedTag: KsonString?,
+    val embedContent: KsonString,
                  location: Location) : KsonValue(location) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -160,7 +161,11 @@ fun AstNode.toKsonValue(): KsonValue {
             listElementNode.value.toKsonValue()
 
         }, location)
-        is EmbedBlockNode -> EmbedBlock(embedTag, embedContent, location)
+        is EmbedBlockNode -> EmbedBlock(
+            embedTagNode?.toKsonValue() as? KsonString,
+            embedContentNode.toKsonValue() as KsonString,
+            location
+        )
         is StringNodeImpl -> KsonString(processedStringContent, location)
         is NumberNode -> KsonNumber(value, location)
         is TrueNode -> KsonBoolean(true, location)

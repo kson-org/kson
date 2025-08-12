@@ -219,14 +219,35 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                          */
                         val embedDelimChar = childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getValue()
                             ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
-                        val embedTag = childMarkers.find { it.element == EMBED_TAG }?.getValue() ?: ""
-                        val metadataTag = childMarkers.find { it.element == EMBED_METADATA }?.getValue() ?: ""
-                        val embedContent = childMarkers.find { it.element == EMBED_CONTENT }?.getValue() ?: ""
+
+                        val embedTagNode = childMarkers.find { it.element == EMBED_TAG }?.let{
+                            QuotedStringNode(
+                                StringQuote.SingleQuote.escapeQuotes(it.getValue()),
+                                StringQuote.SingleQuote,
+                                it.getLocation()
+                            )
+                        }
+
+                        val metadataNode = childMarkers.find { it.element == EMBED_METADATA }?.let{
+                            QuotedStringNode(
+                                StringQuote.SingleQuote.escapeQuotes(it.getValue()),
+                                StringQuote.SingleQuote,
+                                it.getLocation()
+                            )
+                        }
+
+                        val embedContentNode = childMarkers.find { it.element == EMBED_CONTENT }?.let{
+                            QuotedStringNode(
+                                StringQuote.SingleQuote.escapeQuotes(it.getValue()),
+                                StringQuote.SingleQuote,
+                                it.getLocation()
+                            )
+                        } ?: throw ShouldNotHappenException("Embed block should always have embed content")
 
                         EmbedBlockNode(
-                            embedTag,
-                            metadataTag,
-                            embedContent,
+                            embedTagNode,
+                            metadataNode,
+                            embedContentNode,
                             EmbedDelim.fromString(embedDelimChar),
                             marker.getLocation())
                     }
@@ -388,12 +409,16 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
          */
         if (!EmbedObjectKeys.canBeDecoded(propertiesMap)) { return null }
 
-        val embedMetadataValue =
-            propertiesMap[EmbedObjectKeys.EMBED_METADATA.key]?.stringContent ?: ""
-        val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]?.stringContent ?: ""
-        val embedContentValue =
-            propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key]?.processedStringContent
-                ?: throw ShouldNotHappenException("should have been validated for nullability above")
+        val embedMetadataValue = propertiesMap[EmbedObjectKeys.EMBED_METADATA.key]
+        val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]
+
+        val embedContentProperty = propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key] ?:
+            throw ShouldNotHappenException("should have been validated for nullability above")
+        val embedContentValue = QuotedStringNode(
+            StringQuote.SingleQuote.escapeQuotes(embedContentProperty.processedStringContent),
+            StringQuote.SingleQuote,
+            embedContentProperty.location
+        )
 
         return EmbedBlockNode(
                 embedTagValue,
