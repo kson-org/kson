@@ -19,8 +19,9 @@ open class CopyNativeArtifactsTask : DefaultTask() {
         sourceBinary = artifactsDir.resolve(binaryFileName)
         sourceHeader = artifactsDir.resolve(BinaryArtifactPaths.headerFileName())
 
-        outputBinary = project.projectDir.resolve(binaryFileName)
-        outputHeader = project.projectDir.resolve("kson_api.h")
+        val targetDirectory = project.projectDir.resolve("src/kson")
+        outputBinary = targetDirectory.resolve(binaryFileName)
+        outputHeader = targetDirectory.resolve("kson_api.h")
     }
 
     @InputFiles
