@@ -1,6 +1,7 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import junit.framework.TestCase
 import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
 
@@ -59,5 +60,17 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
         val invalidResult = annotator.doAnnotate(ValidationInfo("\"unclosed string"))
         assertNotNull("Invalid KSON should return messages", invalidResult)
         assertTrue("Invalid KSON should have error messages", invalidResult.isNotEmpty())
+    }
+
+    fun testCoreParseMessagesAreFiltered() {
+        val source = "3.0.9"
+        myFixture.configureByText(KsonFileType, source) as KsonPsiFile
+
+        // This should not show core parse messages as errors
+        val highlights = myFixture.doHighlighting()
+        assertEquals(
+            "Should only have one error and not duplicate error in parsing and annotating.",
+            highlights.size, 1
+        )
     }
 } 

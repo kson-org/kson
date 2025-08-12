@@ -30,15 +30,13 @@ class KsonValidationAnnotator : ExternalAnnotator<ValidationInfo?, List<LoggedMe
         if (file !is KsonPsiFile || annotationResult == null) return
 
         val documentLength = file.textLength
+        annotationResult.filter { !it.message.coreParseMessage }.forEach {
+            val startOffset = it.location.startOffset.coerceAtLeast(0)
+            val endOffset = it.location.endOffset.coerceAtMost(documentLength)
 
-        for (loggedMessage in annotationResult) {
-            val location = loggedMessage.location
-            val startOffset = location.startOffset.coerceAtLeast(0)
-            val endOffset = location.endOffset.coerceAtMost(documentLength)
+            if (startOffset >= endOffset || startOffset >= documentLength) return@forEach
 
-            if (startOffset >= endOffset || startOffset >= documentLength) continue
-
-            holder.newAnnotation(HighlightSeverity.ERROR, loggedMessage.message.toString())
+            holder.newAnnotation(HighlightSeverity.ERROR, it.message.toString())
                 .range(TextRange(startOffset, endOffset))
                 .create()
         }
