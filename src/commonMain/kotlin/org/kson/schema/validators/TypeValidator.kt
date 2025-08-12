@@ -31,7 +31,7 @@ class TypeValidator(private val allowedTypes: List<String>) {
       is KsonString -> "string"
       is KsonList -> "array"
       is KsonObject -> "object"
-      else -> "unknown"
+      is EmbedBlock -> "object"
     }
     
     if (!allowedTypes.contains(nodeType)

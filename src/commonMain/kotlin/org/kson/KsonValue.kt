@@ -3,6 +3,7 @@ package org.kson
 import org.kson.ast.*
 import org.kson.parser.Location
 import org.kson.parser.NumberParser
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -66,6 +67,17 @@ class EmbedBlock(
         if (other !is EmbedBlock) return false
         
         return embedTag == other.embedTag && metadataTag == other.metadataTag && embedContent == other.embedContent
+    }
+
+    fun asKsonObject(): KsonObject {
+        return KsonObject(
+            buildMap {
+                embedTag?.let { put(KsonString(EmbedObjectKeys.EMBED_TAG.key, embedTag.location), it) }
+                metadataTag?.let { put(KsonString(EmbedObjectKeys.EMBED_METADATA.key, metadataTag.location), it) }
+                put(KsonString(EmbedObjectKeys.EMBED_CONTENT.key, embedContent.location), embedContent)
+            },
+            location
+        )
     }
 
     override fun hashCode(): Int {
