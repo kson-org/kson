@@ -47,5 +47,7 @@
                              implementationClass="org.kson.jetbrains.folding.KsonFoldingBuilder"/>
         <annotator language="kson"
                    implementationClass="org.kson.jetbrains.highlighter.KsonSemanticHighlightAnnotator"/>
+        <externalAnnotator language="kson"
+                           implementationClass="org.kson.jetbrains.parser.KsonValidationAnnotator"/>
     </extensions>
 </idea-plugin>
