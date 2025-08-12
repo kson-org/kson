@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [tool.setuptools.package-data]
-kson = ["kson_api.h", "kson.dll", "kson.dylib", "libkson.so"]
+kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so"]
 
 [dependency-groups]
 dev = [

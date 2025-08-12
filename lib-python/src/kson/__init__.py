@@ -17,7 +17,7 @@ ffi.cdef(header)
 
 LIBRARY_NAMES: Dict[str, str] = {
     "win32": "kson.dll",
-    "darwin": "kson.dylib",
+    "darwin": "libkson.dylib",
     "linux": "libkson.so",
 }
 
@@ -26,9 +26,13 @@ if lib_name is None:
     raise RuntimeError(f"Unsupported platform: {sys.platform}")
 
 lib: Any = ffi.dlopen(str(package_dir / lib_name))
-symbols: Any = lib.libkson_symbols() if sys.platform == "linux" else lib.kson_symbols()
+symbols: Any = (
+    lib.libkson_symbols() if sys.platform in ["linux", "darwin"] else lib.kson_symbols()
+)
 kotlin_enum_type = (
-    "libkson_kref_kotlin_Enum" if sys.platform == "linux" else "kson_kref_kotlin_Enum"
+    "libkson_kref_kotlin_Enum"
+    if sys.platform in ["linux", "darwin"]
+    else "kson_kref_kotlin_Enum"
 )
 
 

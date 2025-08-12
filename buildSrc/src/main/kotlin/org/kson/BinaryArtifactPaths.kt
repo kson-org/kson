@@ -13,7 +13,7 @@ object BinaryArtifactPaths {
         return when {
             os.isWindows -> "kson.dll"
             os.isLinux -> "libkson.so"
-            os.isMacOsX -> "kson.dylib"
+            os.isMacOsX -> "libkson.dylib"
             else -> throw Exception("Unsupported OS")
         }
     }
@@ -22,7 +22,7 @@ object BinaryArtifactPaths {
         return when {
             os.isWindows -> "kson_api.h"
             os.isLinux -> "libkson_api.h"
-            os.isMacOsX -> "kson_api.h"
+            os.isMacOsX -> "libkson_api.h"
             else -> throw Exception("Unsupported OS")
         }
     }
