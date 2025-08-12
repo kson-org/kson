@@ -1,15 +1,20 @@
+val build = "build"
 val copyNativeArtifacts = "copyNativeArtifacts"
+val formattingCheck = "formattingCheck"
 val test = "test"
 val typeCheck = "typeCheck"
-val formattingCheck = "formattingCheck"
 
 tasks {
     register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
-        dependsOn(":nativeKsonBinaries")
+        dependsOn(":lib-kotlin:nativeKsonBinaries")
+    }
+
+    register<Task>(build) {
+        dependsOn(copyNativeArtifacts)
     }
 
     register<Exec>(test) {
-        dependsOn(copyNativeArtifacts)
+        dependsOn(build)
 
         group = "verification"
         commandLine = "uv run pytest".split(" ")
