@@ -14,7 +14,10 @@ class OneOfValidator(private val oneOf: List<JsonSchema>) : JsonSchemaValidator 
         } == 1
         if (!hasExactlyOneOf) {
             // schema todo maybe merge in some of the errors we found?
-            messageSink.error(ksonValue.location, MessageType.SCHEMA_ONE_OF_VALIDATION_FAILED.create())
+            messageSink.error(
+                ksonValue.location,
+                MessageType.SCHEMA_ONE_OF_VALIDATION_FAILED.create(coreParseMessage = false)
+            )
         }
      }
 }

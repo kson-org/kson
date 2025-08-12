@@ -33,11 +33,14 @@ class TypeValidator(private val allowedTypes: List<String>) {
       is KsonObject -> "object"
       else -> "unknown"
     }
-    
+
     if (!allowedTypes.contains(nodeType)
       // if our node is an integer, this type is valid if the more-general "number" is an allowedType
       && !(nodeType == "integer" && allowedTypes.contains("number"))) {
-      messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(allowedTypes.joinToString(), nodeType))
+      messageSink.error(
+        ksonValue.location,
+        MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(allowedTypes.joinToString(), nodeType, coreParseMessage = false)
+      )
       return false
     }
 

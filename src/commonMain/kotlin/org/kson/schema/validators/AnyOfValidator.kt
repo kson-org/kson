@@ -16,7 +16,10 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
         }
 
         if (!anyValid) {
-            messageSink.error(ksonValue.location, MessageType.SCHEMA_ANY_OF_VALIDATION_FAILED.create())
+            messageSink.error(
+                ksonValue.location,
+                MessageType.SCHEMA_ANY_OF_VALIDATION_FAILED.create(coreParseMessage = false)
+            )
         }
     }
 }

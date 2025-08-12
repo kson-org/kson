@@ -10,7 +10,10 @@ class PatternValidator(pattern: String) : JsonStringValidator() {
     override fun validateString(node: KsonString, messageSink: MessageSink) {
         val str = node.value
         if (!pattern.containsMatchIn(str)) {
-            messageSink.error(node.location, MessageType.SCHEMA_STRING_PATTERN_MISMATCH.create(pattern.pattern))
+            messageSink.error(
+                node.location,
+                MessageType.SCHEMA_STRING_PATTERN_MISMATCH.create(pattern.pattern, coreParseMessage = false)
+            )
         }
     }
 }

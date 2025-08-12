@@ -9,7 +9,13 @@ class ExclusiveMaximumValidator(private val exclusiveMaximum: Double) : JsonNumb
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (number >= exclusiveMaximum) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE.create(exclusiveMaximum.toString()))
+            messageSink.error(
+                node.location,
+                MessageType.SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE.create(
+                    exclusiveMaximum.toString(),
+                    coreParseMessage = false
+                )
+            )
         }
     }
 }

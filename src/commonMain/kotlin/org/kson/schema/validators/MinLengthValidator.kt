@@ -10,7 +10,10 @@ class MinLengthValidator(private val minLength: Long) : JsonStringValidator() {
         val str = node.value
         minLength.let { min ->
             if (countCodePoints(str) < min) {
-                messageSink.error(node.location, MessageType.SCHEMA_STRING_LENGTH_TOO_SHORT.create(min.toString()))
+                messageSink.error(
+                    node.location,
+                    MessageType.SCHEMA_STRING_LENGTH_TOO_SHORT.create(min.toString(), coreParseMessage = false)
+                )
             }
         }
     }

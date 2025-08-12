@@ -57,7 +57,10 @@ sealed interface AdditionalPropertiesValidator {
 data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<KsonString, KsonValue>, location: Location, messageSink: MessageSink) {
         if (!allowed && remainingProperties.isNotEmpty()) {
-            messageSink.error(location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create())
+            messageSink.error(
+                location,
+                MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(coreParseMessage = false)
+            )
         }
     }
 }

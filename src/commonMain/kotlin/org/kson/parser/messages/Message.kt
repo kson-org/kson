@@ -1,10 +1,14 @@
 package org.kson.parser.messages
 
 /**
- * Instances of [Message] are created with [MessageType.create]
+ * Instances of [Message] are created with [MessageType.create]. [Message]s can be created during Parsing or
+ * post-processing. Post-processing messages are created by any of the validators, for example
+ * [org.kson.validation.IndentValidator] or [org.kson.schema.JsonSchemaValidator].
+ * If the messages are created during parsing [coreParseMessage] is set to True.
  */
 interface Message {
     val type: MessageType
+    val coreParseMessage: Boolean
     override fun toString(): String
 }
 
@@ -684,9 +688,11 @@ enum class MessageType {
 
     /**
      * Create a [Message] instance from this [MessageType].  The [args] expected here are defined in this
-     * [MessageType]'s [expectedArgs]
+     * [MessageType]'s [expectedArgs].
+     *
+     * If the message is created during parsing [coreParseMessage] is `true`
      */
-    fun create(vararg args: String?): Message {
+    fun create(vararg args: String?, coreParseMessage: Boolean = true): Message {
         val givenArgs = ArrayList<String>()
         for ((index, value) in args.withIndex()) {
             if (value == null) {
@@ -709,6 +715,7 @@ enum class MessageType {
         val messageType = this
         return object: Message {
             override val type = messageType
+            override val coreParseMessage = coreParseMessage
             private val renderedMessage = type.doFormat(ParsedErrorArgs(messageType, givenArgs))
 
             override fun toString(): String {

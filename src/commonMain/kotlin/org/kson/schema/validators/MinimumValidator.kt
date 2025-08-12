@@ -9,7 +9,10 @@ class MinimumValidator(private val minimum: Double) : JsonNumberValidator() {
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (number < minimum) {
-            messageSink.error(node.location, MessageType.SCHEMA_VALUE_TOO_SMALL.create(minimum.toString()))
+            messageSink.error(
+                node.location,
+                MessageType.SCHEMA_VALUE_TOO_SMALL.create(minimum.toString(), coreParseMessage = false)
+            )
         }
     }
 }
