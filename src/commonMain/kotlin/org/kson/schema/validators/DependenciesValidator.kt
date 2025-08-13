@@ -29,10 +29,7 @@ data class DependencyValidatorArray(val dependency: Set<KsonString>) : Dependenc
             propertyNames.contains(it)
         }
         if (!allPresent) {
-            messageSink.error(
-                ksonObject.location,
-                MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES.create(coreParseMessage = false)
-            )
+            messageSink.error(ksonObject.location, MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES.create())
         }
         return allPresent
     }

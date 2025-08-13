@@ -122,7 +122,7 @@ class IndentValidator {
             }
             val itemColumn = item.location.start.column
             if (itemColumn != expectedColumn) {
-                messageSink.error(item.location.trimToFirstLine(), misalignmentMessage.create(coreParseMessage = false))
+                messageSink.error(item.location.trimToFirstLine(), misalignmentMessage.create())
             }
         }
     }

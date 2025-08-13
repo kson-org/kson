@@ -14,10 +14,7 @@ class AllOfValidator(val allOf: List<JsonSchema>) : JsonSchemaValidator {
             !allOfMessageSink.hasErrors()
         }
         if (!allValid) {
-            messageSink.error(
-                ksonValue.location,
-                MessageType.SCHEMA_ALL_OF_VALIDATION_FAILED.create(coreParseMessage = false)
-            )
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_ALL_OF_VALIDATION_FAILED.create())
         }
     }
 }

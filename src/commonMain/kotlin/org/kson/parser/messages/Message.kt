@@ -4,7 +4,9 @@ package org.kson.parser.messages
  * Instances of [Message] are created with [MessageType.create]. [Message]s can be created during Parsing or
  * post-processing. Post-processing messages are created by any of the validators, for example
  * [org.kson.validation.IndentValidator] or [org.kson.schema.JsonSchemaValidator].
- * If the messages are created during parsing [coreParseMessage] is set to True.
+ * 
+ * The [coreParseMessage] property is set to `true` only for messages that pass through [org.kson.parser.KsonMarker.error].
+ * All other messages, including those from validators and post-processors, have [coreParseMessage] set to `false`.
  */
 interface Message {
     val type: MessageType
@@ -689,10 +691,8 @@ enum class MessageType {
     /**
      * Create a [Message] instance from this [MessageType].  The [args] expected here are defined in this
      * [MessageType]'s [expectedArgs].
-     *
-     * If the message is created during parsing [coreParseMessage] is `true`
      */
-    fun create(vararg args: String?, coreParseMessage: Boolean = true): Message {
+    fun create(vararg args: String?): Message {
         val givenArgs = ArrayList<String>()
         for ((index, value) in args.withIndex()) {
             if (value == null) {
@@ -715,7 +715,12 @@ enum class MessageType {
         val messageType = this
         return object: Message {
             override val type = messageType
-            override val coreParseMessage = coreParseMessage
+
+            /**
+             * [coreParseMessage] is false by default. Only messages that pass through [org.kson.parser.KsonMarker.error]
+             * have this set to true.
+             */
+            override val coreParseMessage = false
             private val renderedMessage = type.doFormat(ParsedErrorArgs(messageType, givenArgs))
 
             override fun toString(): String {

@@ -13,10 +13,7 @@ class NotValidator(private val notSchema: JsonSchema?) : JsonSchemaValidator {
         }
         val notMessageSink = MessageSink()
         if(notSchema.isValid(ksonValue, notMessageSink)) {
-            messageSink.error(
-                ksonValue.location,
-                MessageType.SCHEMA_NOT_VALIDATION_FAILED.create(coreParseMessage = false)
-            )
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_NOT_VALIDATION_FAILED.create())
         }
     }
 }

@@ -9,11 +9,7 @@ class MaximumValidator(private val maximum: Double) : JsonNumberValidator() {
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (number > maximum) {
-            messageSink.error(
-                node.location, MessageType.SCHEMA_VALUE_TOO_LARGE.create(
-                    maximum.toString(), coreParseMessage = false
-                )
-            )
+            messageSink.error(node.location, MessageType.SCHEMA_VALUE_TOO_LARGE.create(maximum.toString()))
         }
     }
 }

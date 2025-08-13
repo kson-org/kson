@@ -8,10 +8,7 @@ import org.kson.schema.JsonObjectValidator
 class MaxPropertiesValidator(private val maxProperties: Long) : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         if (node.propertyMap.size > maxProperties) {
-            messageSink.error(
-                node.location,
-                MessageType.SCHEMA_OBJECT_TOO_MANY_PROPERTIES.create(maxProperties.toString(), coreParseMessage = false)
-            )
+            messageSink.error(node.location, MessageType.SCHEMA_OBJECT_TOO_MANY_PROPERTIES.create(maxProperties.toString()))
         }
     }
 }

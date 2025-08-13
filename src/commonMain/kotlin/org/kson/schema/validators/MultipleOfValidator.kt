@@ -16,7 +16,7 @@ class MultipleOfValidator(private val multipleOf: Double) : JsonNumberValidator(
             if (abs(remainder) > epsilon && abs(remainder - multipleOf) > epsilon) {
                 messageSink.error(
                     node.location,
-                    MessageType.SCHEMA_VALUE_MUST_BE_MULTIPLE_OF.create(multipleOf.toString(), coreParseMessage = false)
+                    MessageType.SCHEMA_VALUE_MUST_BE_MULTIPLE_OF.create(multipleOf.toString())
                 )
             }
         }

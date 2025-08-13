@@ -9,11 +9,7 @@ class ExclusiveMinimumValidator(private val exclusiveMinimum: Double) : JsonNumb
     override fun validateNumber(node: KsonNumber, messageSink: MessageSink) {
         val number = node.value.asDouble
         if (number <= exclusiveMinimum) {
-            messageSink.error(
-                node.location, MessageType.SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE.create(
-                    exclusiveMinimum.toString(), coreParseMessage = false
-                )
-            )
+            messageSink.error(node.location, MessageType.SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE.create(exclusiveMinimum.toString()))
         }
     }
 }
