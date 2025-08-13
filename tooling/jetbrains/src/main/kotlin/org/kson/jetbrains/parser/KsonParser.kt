@@ -8,7 +8,7 @@ import org.kson.parser.*
 import org.kson.parser.messages.Message
 
 /**
- * [PsiParser] for Kson, implemented by delegating to [Parser]
+ * [PsiParser] for Kson, implemented by delegating to the official Kson [Parser]
  */
 class KsonParser : PsiParser {
     override fun parse(root: IElementType, builder: PsiBuilder): ASTNode {
@@ -22,7 +22,7 @@ class KsonParser : PsiParser {
 }
 
 /**
- * Implements a PSI-compatible [AstBuilder] for [Parser] by delegating to the given [psiBuilder]
+ * Implements a PSI-compatible [AstBuilder] for [Parser] by delegating to the given [psiBuilder].
  */
 private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
     override fun getTokenType(): TokenType? {

@@ -9,11 +9,11 @@ import org.kson.jetbrains.parser.elem
 import org.kson.parser.ParsedElementType
 
 /**
- * [KsonAnnotator] provides semantic highlighting for Kson files.
+ * [KsonSemanticHighlightAnnotator] provides semantic highlighting for Kson files.
  *
  * Since we don't require any indices we can implement [DumbAware]
  */
-class KsonAnnotator : Annotator, DumbAware {
+class KsonSemanticHighlightAnnotator : Annotator, DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         // Implement syntax highlighter that distinguishes regular strings from object keys.
         if (elem(ParsedElementType.OBJECT_KEY) == element.node.elementType){

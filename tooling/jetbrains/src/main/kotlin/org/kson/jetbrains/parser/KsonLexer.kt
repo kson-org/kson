@@ -19,9 +19,11 @@ class KsonLexer : LexerBase() {
     private var ksonTokensIndex = 0
     private var buffer: CharSequence = ""
     private var bufferEnd: Int = 0
+    private var startOffset: Int = 0  // Add field to track the original startOffset
 
     override fun start(buffer: CharSequence, startOffset: Int, endOffset: Int, initialState: Int) {
         this.buffer = buffer
+        this.startOffset = startOffset  // Store the original startOffset
         bufferEnd = endOffset
         ksonTokens = Lexer(buffer.substring(startOffset, endOffset),
             // note that we demand a gap-free lex here to properly comply with Jetbrains' Lexer interface demands.
@@ -50,11 +52,11 @@ class KsonLexer : LexerBase() {
     }
 
     override fun getTokenStart(): Int {
-        return ksonTokens[ksonTokensIndex].lexeme.location.startOffset
+        return startOffset + ksonTokens[ksonTokensIndex].lexeme.location.startOffset
     }
 
     override fun getTokenEnd(): Int {
-        return ksonTokens[ksonTokensIndex].lexeme.location.endOffset
+        return startOffset + ksonTokens[ksonTokensIndex].lexeme.location.endOffset
     }
 
     override fun advance() {

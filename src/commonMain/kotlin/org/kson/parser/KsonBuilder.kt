@@ -7,6 +7,7 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.Message
+import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -672,8 +673,24 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun error(message: Message) {
-        markedError = message
+        markedError = message.asCoreParseMessage()
         context.errorEncountered()
         done(ERROR)
+    }
+}
+
+/**
+ * Converts a [Message] to a core parse message by copying it and setting [Message.coreParseMessage] to true.
+ *
+ * A message is considered a "core parse message" only if it passes through the [KsonBuilder]
+ * via the [KsonMarker.error] method. This happens when errors are created before or during the [Parser] parsing phase.
+ * Messages created by validators or other post-processing components do not pass through the builder and thus remain
+ * non-core messages with [Message.coreParseMessage] = false.
+ */
+private fun Message.asCoreParseMessage(): Message{
+    return object: Message{
+        override val coreParseMessage: Boolean = true
+        override val type: MessageType = this@asCoreParseMessage.type
+        override fun toString(): String = this@asCoreParseMessage.toString()
     }
 }
