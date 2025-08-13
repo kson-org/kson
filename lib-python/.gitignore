@@ -6,3 +6,6 @@ __pycache__
 *.so
 *.h
 *.egg-info
+
+# uvw generated files
+.uv

@@ -1,0 +1,153 @@
+#!/bin/sh
+
+##############################################################################
+#
+#   UV start up script for POSIX.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set
+APP_HOME=$( cd "${APP_HOME:-./}" > /dev/null && pwd -P ) || exit
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+# UV WRAPPER START MARKER
+BUILD_DIR="$APP_HOME/.uv"
+UV_VERSION="0.8.9"
+UV_ARCH=$(uname -m)
+UV_TEMP_FILE=$BUILD_DIR/uv-temp.tar.gz
+
+if [ "$darwin" = "true" ]; then
+    case $UV_ARCH in
+    x86_64)
+        UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-x86_64-apple-darwin.tar.gz
+        UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-x86_64-apple-darwin
+        ;;
+    arm64)
+        UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-aarch64-apple-darwin.tar.gz
+        UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-aarch64-apple-darwin
+        ;;
+    *)
+        die "Unknown architecture $UV_ARCH for macOS"
+        ;;
+    esac
+elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
+    # For Windows environments, use the .bat script instead
+    die "Use uvw.bat for Windows environments"
+else
+    # Linux
+    case $UV_ARCH in
+        x86_64)
+            UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-x86_64-unknown-linux-gnu.tar.gz
+            UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-x86_64-unknown-linux-gnu
+            ;;
+        aarch64)
+            UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-aarch64-unknown-linux-gnu.tar.gz
+            UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-aarch64-unknown-linux-gnu
+            ;;
+        armv7*)
+            UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-armv7-unknown-linux-gnueabihf.tar.gz
+            UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-armv7-unknown-linux-gnueabihf
+            ;;
+        i686)
+            UV_URL=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-i686-unknown-linux-gnu.tar.gz
+            UV_TARGET_DIR=$BUILD_DIR/uv-$UV_VERSION-i686-unknown-linux-gnu
+            ;;
+        *)
+            die "Unknown architecture $UV_ARCH for Linux"
+            ;;
+        esac
+fi
+
+set -e
+
+if [ -e "$UV_TARGET_DIR/.flag" ] && [ -n "$(ls "$UV_TARGET_DIR")" ] && [ "x$(cat "$UV_TARGET_DIR/.flag")" = "x${UV_URL}" ]; then
+    # Everything is up-to-date in $UV_TARGET_DIR, do nothing
+    true
+else
+  echo "Downloading $UV_URL to $UV_TEMP_FILE"
+
+  rm -f "$UV_TEMP_FILE"
+  mkdir -p "$BUILD_DIR"
+  if command -v curl >/dev/null 2>&1; then
+      if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--silent --show-error"; fi
+      # shellcheck disable=SC2086
+      curl $CURL_PROGRESS -L --output "${UV_TEMP_FILE}" "$UV_URL" 2>&1
+  elif command -v wget >/dev/null 2>&1; then
+      if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
+      wget $WGET_PROGRESS -O "${UV_TEMP_FILE}" "$UV_URL" 2>&1
+  else
+      die "ERROR: Please install wget or curl"
+  fi
+
+  echo "Extracting $UV_TEMP_FILE to $UV_TARGET_DIR"
+  rm -rf "$UV_TARGET_DIR"
+  mkdir -p "$UV_TARGET_DIR"
+
+  tar -x -f "$UV_TEMP_FILE" -C "$UV_TARGET_DIR" --strip-components=1
+
+  rm -f "$UV_TEMP_FILE"
+
+  echo "$UV_URL" >"$UV_TARGET_DIR/.flag"
+fi
+
+UV_EXE=
+for d in "$UV_TARGET_DIR" "$UV_TARGET_DIR"/*; do
+  if [ -e "$d/uv" ]; then
+    UV_EXE="$d/uv"
+    break
+  fi
+done
+
+if [ '!' -e "$UV_EXE" ]; then
+  die "Unable to find uv executable under $UV_TARGET_DIR"
+fi
+
+set +e
+
+# UV WRAPPER END MARKER
+
+# Execute UV with all passed arguments
+exec "$UV_EXE" "$@"
