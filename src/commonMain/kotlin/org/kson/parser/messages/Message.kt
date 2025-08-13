@@ -680,6 +680,16 @@ enum class MessageType {
             return "Deceptive indentation. This list item's indentation must properly reflect its nesting. " +
                     "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
         }
+    },
+    OBJECT_DUPLICATE_KEY {
+        override fun expectedArgs(): List<String> {
+            return listOf("Key name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val keyName = parsedArgs.getArg("Key name")
+            return "Duplicate key \"$keyName\" in object"
+        }
     };
 
     /**

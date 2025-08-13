@@ -9,6 +9,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
+import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
 
@@ -53,6 +54,7 @@ object KsonCore {
 
         if (ast != null && !messageSink.hasErrors()) {
             IndentValidator().validate(ast, messageSink)
+            DuplicateKeyValidator().validate(ast, messageSink)
         }
 
         if (coreCompileConfig.schemaJson == NO_SCHEMA) {
