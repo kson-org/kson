@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Simple uv wrapper that auto-installs uv locally if needed
+
+UV_DIR="$(pwd)/.uv"
+UV_BIN="$UV_DIR/uv"
+
+# Install uv locally if not present
+if [ ! -f "$UV_BIN" ]; then
+    echo "Installing uv locally to $UV_DIR..."
+
+    # Use uv's official installation script with custom install location
+    export UV_UNMANAGED_INSTALL="$UV_DIR"
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL https://astral.sh/uv/install.sh | bash
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://astral.sh/uv/install.sh | bash
+    else
+        echo "Please install curl or wget" >&2
+        exit 1
+    fi
+
+    if [ ! -f "$UV_BIN" ]; then
+        echo "Failed to install uv" >&2
+        exit 1
+    fi
+fi
+
+# Execute uv with all arguments
+exec "$UV_BIN" "$@"

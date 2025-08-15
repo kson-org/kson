@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem
+
 val build = "build"
 val copyNativeArtifacts = "copyNativeArtifacts"
 val formattingCheck = "formattingCheck"
@@ -5,6 +7,12 @@ val test = "test"
 val typeCheck = "typeCheck"
 
 tasks {
+    val uvwPath = if (OperatingSystem.current().isWindows) {
+        "uvw"
+    } else {
+        "./uvw"
+    }
+
     register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
         dependsOn(":lib-kotlin:nativeKsonBinaries")
     }
@@ -17,7 +25,7 @@ tasks {
         dependsOn(build)
 
         group = "verification"
-        commandLine = "uv run pytest".split(" ")
+        commandLine = "$uvwPath run pytest".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -28,7 +36,7 @@ tasks {
 
     register<Exec>(typeCheck) {
         group = "verification"
-        commandLine = "uv run pyright".split(" ")
+        commandLine = "$uvwPath run pyright".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -36,7 +44,7 @@ tasks {
 
     register<Exec>(formattingCheck) {
         group = "verification"
-        commandLine = "uv run ruff format --diff".split(" ")
+        commandLine = "$uvwPath run ruff format --diff".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false

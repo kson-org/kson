@@ -2,5 +2,10 @@ __pycache__
 .pytest_cache
 .venv
 *.dll
+*.dylib
+*.so
 *.h
 *.egg-info
+
+# uvw generated files
+.uv
