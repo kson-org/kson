@@ -10,36 +10,6 @@ package org.kson.jsonsuite
  */
 fun schemaTestSuiteExclusions() = setOf(
     // ========================================
-    // BASIC $REF HANDLING
-    // ========================================
-    // These tests require basic $ref support for resolving JSON Pointer references
-    // within the same document. This includes:
-    // - Simple JSON Pointer references (e.g., "#/definitions/foo")
-    // - References to boolean schemas (#/true, #/false)
-    // - Nested reference resolution
-    // - Root pointer references
-    // - Relative pointer references
-    // - Empty tokens in JSON pointers
-    
-    "items_itemsAndSubitems_wrongSub_item",
-    "items_itemsAndSubitems_wrongItem", 
-    "items_itemsAndSubitems_tooManySub_items",
-    "ref_uRNBaseURIWithQ_component_aNon_stringIsInvalid",
-    "ref_______idWithFileURIStillResolvesPointers__nix_non_numberIsInvalid",
-    "ref_emptyTokensIn______refJson_pointer_non_numberIsInvalid",
-    "ref_______idWithFileURIStillResolvesPointers_Windows_non_numberIsInvalid",
-    "ref_relativePointerRefToObject_mismatch",
-    "ref_nestedRefs_nestedRefInvalid",
-    "ref_rootPointerRef_recursiveMismatch",
-    "ref_______refToBooleanSchemaFalse_anyValueIsInvalid",
-    "ref_uRNBaseURIWithR_component_aNon_stringIsInvalid",
-    "infinite_loop_detection_evaluatingTheSameSchemaLocationAgainstTheSameDataLocationTwiceIsNotASignOfAnInfiniteLoop_failingCase",
-    "ref_simpleURNBaseURIWithJSONPointer_aNon_stringIsInvalid",
-    "ref_uRNBaseURIWithNSS_aNon_stringIsInvalid",
-    "ref_relativePointerRefToArray_mismatchArray",
-    "ref_propertyNamed______ref_ContainingAnActual______ref_propertyNamed______refInvalid",
-
-    // ========================================
     // ESCAPED CHARACTERS IN JSON POINTERS
     // ========================================
     // These tests require support for URL-encoded characters in JSON Pointer references.

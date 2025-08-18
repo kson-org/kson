@@ -205,4 +205,101 @@ class SchemaParserTest : JsonSchemaTest {
             listOf(MessageType.SCHEMA_INTEGER_REQUIRED)
         )
     }
+
+    @Test
+    fun testRefWithIgnoredProperties() {
+        // Test that properties other than $ref, title, and description generate errors
+        assertSchemaHasValidationErrors(
+            """
+            "properties": {
+                "myRef": {
+                    "${'$'}ref": "#/definitions/someType",
+                    "type": "string",
+                    "minLength": 5
+                }
+            }
+            """,
+            listOf(
+                MessageType.SCHEMA_REF_IGNORED_PROPERTY,
+                MessageType.SCHEMA_REF_IGNORED_PROPERTY,
+                MessageType.SCHEMA_REF_RESOLUTION_FAILED
+            )
+        )
+    }
+
+    @Test
+    fun testRefWithAllowedProperties() {
+        // Test that $ref with only title and description does not generate errors
+        assertValidObjectSchema(
+            """
+            {
+                "definitions": {
+                    "someType": {"type": "string"}
+                },
+                "properties": {
+                    "myRef": {
+                        "${'$'}ref": "#/definitions/someType",
+                        "title": "Reference with title",
+                        "description": "This is allowed alongside ${'$'}ref"
+                    }
+                }
+            }
+        """
+        )
+    }
+
+    @Test
+    fun testRefWithMixedPropertiesAllowedAndIgnored() {
+        // Test with a mix of allowed (title, description) and ignored properties
+        assertSchemaHasValidationErrors(
+            """
+            {
+                "definitions": {
+                    "address": {
+                        "type": "object",
+                        "properties": {
+                            "street": {"type": "string"},
+                            "city": {"type": "string"}
+                        }
+                    }
+                },
+                "properties": {
+                    "myAddress": {
+                        "${'$'}ref": "#/definitions/address",
+                        "title": "Address Reference",
+                        "description": "References an address schema",
+                        "required": ["street", "city"],
+                        "properties": {
+                            "street": {"type": "string"},
+                            "city": {"type": "string"}
+                        }
+                    }
+                }
+            }
+            """,
+            listOf(
+                MessageType.SCHEMA_REF_IGNORED_PROPERTY,
+                MessageType.SCHEMA_REF_IGNORED_PROPERTY
+            )
+        )
+    }
+
+    @Test
+    fun testRefOnlyWithNoOtherProperties() {
+        // Test that $ref alone works without errors
+        assertValidObjectSchema(
+            """
+            {
+                "definitions": {
+                    "simpleType": {"type": "string"}
+                },
+                "properties": {
+                    "myProperty": {
+                        "${'$'}ref": "#/definitions/simpleType"
+                    }
+                }
+            }
+        """
+        )
+    }
 }

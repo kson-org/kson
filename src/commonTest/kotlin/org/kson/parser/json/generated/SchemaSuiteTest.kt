@@ -7216,12 +7216,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun infinite_loop_detection_evaluatingTheSameSchemaLocationAgainstTheSameDataLocationTwiceIsNotASignOfAnInfiniteLoop_failingCase() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "infinite_loop_detection_evaluatingTheSameSchemaLocationAgainstTheSameDataLocationTwiceIsNotASignOfAnInfiniteLoop_failingCase" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -7581,12 +7575,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun items_itemsAndSubitems_tooManySub_items() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "items_itemsAndSubitems_tooManySub_items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -7605,12 +7593,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun items_itemsAndSubitems_wrongItem() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "items_itemsAndSubitems_wrongItem" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -7629,12 +7611,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun items_itemsAndSubitems_wrongSub_item() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "items_itemsAndSubitems_wrongSub_item" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11597,12 +11573,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_rootPointerRef_recursiveMismatch() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_rootPointerRef_recursiveMismatch" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11639,12 +11609,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_relativePointerRefToObject_mismatch() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_relativePointerRefToObject_mismatch" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11681,12 +11645,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_relativePointerRefToArray_mismatchArray() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_relativePointerRefToArray_mismatchArray" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11867,12 +11825,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_nestedRefs_nestedRefInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_nestedRefs_nestedRefInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12113,12 +12065,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_propertyNamed______ref_ContainingAnActual______ref_propertyNamed______refInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_propertyNamed______ref_ContainingAnActual______ref_propertyNamed______refInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12155,12 +12101,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______refToBooleanSchemaFalse_anyValueIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______refToBooleanSchemaFalse_anyValueIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12731,12 +12671,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_simpleURNBaseURIWithJSONPointer_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_simpleURNBaseURIWithJSONPointer_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12773,12 +12707,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithNSS_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithNSS_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12815,12 +12743,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithR_component_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithR_component_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -12857,12 +12779,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithQ_component_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithQ_component_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -13187,12 +13103,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______idWithFileURIStillResolvesPointers__nix_non_numberIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______idWithFileURIStillResolvesPointers__nix_non_numberIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -13229,12 +13139,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______idWithFileURIStillResolvesPointers_Windows_non_numberIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______idWithFileURIStillResolvesPointers_Windows_non_numberIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -13271,12 +13175,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_emptyTokensIn______refJson_pointer_non_numberIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_emptyTokensIn______refJson_pointer_non_numberIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

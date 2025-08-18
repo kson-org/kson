@@ -59,7 +59,10 @@ interface JsonSchemaTest {
 
         val jsonSchema = result.jsonSchema
         assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds")
-        assertTrue(result.messages.isEmpty(), "Should have no error messages when parsing succeeds")
+        assertTrue(
+            result.messages.isEmpty(), "Should have no error messages when parsing succeeds, got: " +
+                    result.messages.joinToString("\n")
+        )
 
         return jsonSchema
     }

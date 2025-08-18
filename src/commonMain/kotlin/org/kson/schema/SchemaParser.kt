@@ -9,10 +9,21 @@ import org.kson.schema.validators.*
  * Parses a JSON Schema string into our JsonSchema model.
  */
 object SchemaParser {
-  fun parseSchemaElement(schemaValue: KsonValue, messageSink: MessageSink): JsonSchema? {
+  /**
+   * Parse [schemaRootValue] as a JSON Schema root, i.e. a complete JSON Schema, not a sub-schema.
+   * See [parseSchemaElement] for sub-schema parsing.
+   */
+  fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
+    return parseSchemaElement(schemaRootValue, messageSink, schemaRootValue)
+  }
+
+  /**
+   *  Parse [schemaValue] as a JSON Sub-schema of [schemaRootValue]. See [parseSchemaRoot] for full schema parsing.
+   */
+  fun parseSchemaElement(schemaValue: KsonValue, messageSink: MessageSink, schemaRootValue: KsonValue): JsonSchema? {
     return when (schemaValue) {
       is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-      is KsonObject -> parseObjectSchema(schemaValue, messageSink)
+      is KsonObject -> parseObjectSchema(schemaValue, messageSink, schemaRootValue)
       else -> {
         messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
         null
@@ -20,7 +31,11 @@ object SchemaParser {
     }
   }
 
-  private fun parseObjectSchema(schemaObject: KsonObject, messageSink: MessageSink): JsonSchema {
+  private fun parseObjectSchema(
+    schemaObject: KsonObject,
+    messageSink: MessageSink,
+    schemaRootValue: KsonValue
+  ): JsonSchema? {
     val schemaProperties = schemaObject.propertyLookup
 
     val title = schemaProperties["title"] ?.let { title ->
@@ -39,11 +54,37 @@ object SchemaParser {
         null
       }
     }
+
+    schemaProperties["\$ref"]?.let { refString ->
+      // having a `$ref` means ignoring everything that's not '$ref', 'title', or 'description`
+      schemaObject.propertyMap.filterKeys {
+        it.value != "\$ref" && it.value != "title" && it.value != "description"
+      }.forEach { (name, _) ->
+        messageSink.error(name.location, SCHEMA_REF_IGNORED_PROPERTY.create())
+      }
+
+      if (refString is KsonString) {
+        val resolvedValue = resolveRef(refString.value, schemaRootValue)
+
+        if (resolvedValue == null) {
+          // Reference path could not be found
+          messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
+          return null
+        }
+
+        val refValidator = RefValidator(resolvedValue, schemaRootValue)
+
+        return JsonObjectSchema(title, description, null, null, null, listOf(refValidator))
+      } else {
+        messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
+      }
+    }
+
     val default = schemaProperties["default"]
     val definitions = schemaProperties["definitions"] ?.let { definitions ->
       if (definitions is KsonObject) {
         definitions.propertyMap.mapValues { (_, value) ->
-          parseSchemaElement(value, messageSink)
+          parseSchemaElement(value, messageSink, schemaRootValue)
         }
       } else {
         messageSink.error(definitions.location, SCHEMA_OBJECT_REQUIRED.create("definitions"))
@@ -153,19 +194,19 @@ object SchemaParser {
       val additionalItemsValidator = schemaProperties["additionalItems"]?.let { additionalItems ->
         when (additionalItems) {
           is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value)
-          else -> AdditionalItemsSchemaValidator(parseSchemaElement(additionalItems, messageSink))
+          else -> AdditionalItemsSchemaValidator(parseSchemaElement(additionalItems, messageSink, schemaRootValue))
         }
       }
 
       when (itemsValue) {
         is KsonList -> {
           val leadingItemsValidator = LeadingItemsTupleValidator(itemsValue.elements.mapNotNull {
-            parseSchemaElement(it, messageSink)
+            parseSchemaElement(it, messageSink, schemaRootValue)
           })
           validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
         }
         else -> {
-          val itemsSchema = parseSchemaElement(itemsValue, messageSink)
+          val itemsSchema = parseSchemaElement(itemsValue, messageSink, schemaRootValue)
           if (itemsSchema != null) {
             val leadingItemsValidator = LeadingItemsSchemaValidator(itemsSchema)
             validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
@@ -177,7 +218,7 @@ object SchemaParser {
     }
 
     schemaProperties["contains"]?.let { contains ->
-      parseSchemaElement(contains, messageSink) ?.let {
+      parseSchemaElement(contains, messageSink, schemaRootValue)?.let {
         validators.add(ContainsValidator(it))
       }
     }
@@ -213,7 +254,7 @@ object SchemaParser {
     val propertySchemas = schemaProperties["properties"] ?.let { properties ->
       if (properties is KsonObject) {
         properties.propertyMap.mapValues {
-          parseSchemaElement(it.value, messageSink)
+          parseSchemaElement(it.value, messageSink, schemaRootValue)
         }
       } else {
         messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))
@@ -224,7 +265,7 @@ object SchemaParser {
     val patternPropertySchemas = schemaProperties["patternProperties"] ?.let { patternProperties ->
       if (patternProperties is KsonObject) {
         patternProperties.propertyMap.mapValues {
-          parseSchemaElement(it.value, messageSink) ?: return@mapValues null
+          parseSchemaElement(it.value, messageSink, schemaRootValue) ?: return@mapValues null
         }
       } else {
         messageSink.error(patternProperties.location, SCHEMA_OBJECT_REQUIRED.create("patternProperties"))
@@ -235,7 +276,13 @@ object SchemaParser {
     val additionalPropertiesValidator = schemaProperties["additionalProperties"]?.let { additionalProperties ->
       when (additionalProperties) {
         is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value)
-        else -> AdditionalPropertiesSchemaValidator(parseSchemaElement(additionalProperties, messageSink))
+        else -> AdditionalPropertiesSchemaValidator(
+          parseSchemaElement(
+            additionalProperties,
+            messageSink,
+            schemaRootValue
+          )
+        )
       }
     }
 
@@ -287,7 +334,7 @@ object SchemaParser {
       if (allOf is KsonList) {
         val allOfArrayEntries = ArrayList<JsonSchema>()
         for (element in allOf.elements) {
-          allOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
+          allOfArrayEntries.add(parseSchemaElement(element, messageSink, schemaRootValue) ?: continue)
         }
         validators.add(AllOfValidator(allOfArrayEntries))
       } else {
@@ -299,7 +346,7 @@ object SchemaParser {
       if (anyOf is KsonList) {
         val anyOfArrayEntries = ArrayList<JsonSchema>()
         for (element in anyOf.elements) {
-          anyOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
+          anyOfArrayEntries.add(parseSchemaElement(element, messageSink, schemaRootValue) ?: continue)
         }
         validators.add(AnyOfValidator(anyOfArrayEntries))
       } else {
@@ -311,7 +358,7 @@ object SchemaParser {
       if (oneOf is KsonList) {
         val oneOfArrayEntries = ArrayList<JsonSchema>()
         for (element in oneOf.elements) {
-          oneOfArrayEntries.add(parseSchemaElement(element, messageSink) ?: continue)
+          oneOfArrayEntries.add(parseSchemaElement(element, messageSink, schemaRootValue) ?: continue)
         }
         validators.add(OneOfValidator(oneOfArrayEntries))
       } else {
@@ -320,13 +367,13 @@ object SchemaParser {
     }
 
     schemaProperties["not"]?.let { not ->
-      validators.add(NotValidator(parseSchemaElement(not, messageSink)))
+      validators.add(NotValidator(parseSchemaElement(not, messageSink, schemaRootValue)))
     }
 
     schemaProperties["if"]?.let { ifElement ->
-      val ifSchema = parseSchemaElement(ifElement, messageSink)
-      val thenSchema = schemaProperties["then"]?.let { parseSchemaElement(it, messageSink) }
-      val elseSchema = schemaProperties["else"]?.let { parseSchemaElement(it, messageSink) }
+      val ifSchema = parseSchemaElement(ifElement, messageSink, schemaRootValue)
+      val thenSchema = schemaProperties["then"]?.let { parseSchemaElement(it, messageSink, schemaRootValue) }
+      val elseSchema = schemaProperties["else"]?.let { parseSchemaElement(it, messageSink, schemaRootValue) }
       validators.add(IfValidator(ifSchema, thenSchema, elseSchema))
     }
 
@@ -348,14 +395,14 @@ object SchemaParser {
           }
           return@mapValues DependencyValidatorArray(dependencyArrayEntries)
         } else {
-          return@mapValues DependencyValidatorSchema(parseSchemaElement(value, messageSink))
+          return@mapValues DependencyValidatorSchema(parseSchemaElement(value, messageSink, schemaRootValue))
         }
       }
       validators.add(DependenciesValidator(dependencyMap))
     }
 
     schemaProperties["propertyNames"] ?.let { propertyNames ->
-      validators.add(PropertyNamesValidator(parseSchemaElement(propertyNames, messageSink)))
+      validators.add(PropertyNamesValidator(parseSchemaElement(propertyNames, messageSink, schemaRootValue)))
     }
 
     return JsonObjectSchema(title, description, default, definitions, typeValidator, validators)
