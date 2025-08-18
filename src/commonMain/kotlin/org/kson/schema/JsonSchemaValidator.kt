@@ -1,10 +1,6 @@
 package org.kson.schema
 
-import org.kson.KsonList
-import org.kson.KsonNumber
-import org.kson.KsonObject
-import org.kson.KsonString
-import org.kson.KsonValue
+import org.kson.*
 import org.kson.parser.MessageSink
 
 // schema todo capture file/location info from schema to link back to schema def?
@@ -42,11 +38,15 @@ abstract class JsonArrayValidator : JsonSchemaValidator {
 
 abstract class JsonObjectValidator : JsonSchemaValidator {
     final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
-        if (ksonValue !is KsonObject) {
+        val ksonObject = if (ksonValue is KsonObject)
+            ksonValue
+        else if (ksonValue is EmbedBlock) {
+            ksonValue.asKsonObject()
+        } else {
             return
         }
 
-        validateObject(ksonValue, messageSink)
+        validateObject(ksonObject, messageSink)
     }
 
     abstract fun validateObject(node: KsonObject, messageSink: MessageSink)

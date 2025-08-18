@@ -3,6 +3,7 @@ package org.kson
 import org.kson.ast.*
 import org.kson.parser.Location
 import org.kson.parser.NumberParser
+import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -56,18 +57,31 @@ class KsonList(val elements: List<KsonValue>, location: Location) : KsonValue(lo
     }
 }
 
-class EmbedBlock(val embedTag: String,
-                 val embedContent: String,
+class EmbedBlock(
+    val embedTag: KsonString?,
+    val metadataTag: KsonString?,
+    val embedContent: KsonString,
                  location: Location) : KsonValue(location) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is EmbedBlock) return false
         
-        return embedTag == other.embedTag && embedContent == other.embedContent
+        return embedTag == other.embedTag && metadataTag == other.metadataTag && embedContent == other.embedContent
+    }
+
+    fun asKsonObject(): KsonObject {
+        return KsonObject(
+            buildMap {
+                embedTag?.let { put(KsonString(EmbedObjectKeys.EMBED_TAG.key, embedTag.location), it) }
+                metadataTag?.let { put(KsonString(EmbedObjectKeys.EMBED_METADATA.key, metadataTag.location), it) }
+                put(KsonString(EmbedObjectKeys.EMBED_CONTENT.key, embedContent.location), embedContent)
+            },
+            location
+        )
     }
 
     override fun hashCode(): Int {
-        return 31 * embedTag.hashCode() + embedContent.hashCode()
+        return 31 * embedTag.hashCode() + metadataTag.hashCode() + embedContent.hashCode()
     }
 }
 
@@ -160,7 +174,12 @@ fun AstNode.toKsonValue(): KsonValue {
             listElementNode.value.toKsonValue()
 
         }, location)
-        is EmbedBlockNode -> EmbedBlock(embedTag, embedContent, location)
+        is EmbedBlockNode -> EmbedBlock(
+            embedTagNode?.toKsonValue() as? KsonString,
+            metadataTagNode?.toKsonValue() as? KsonString,
+            embedContentNode.toKsonValue() as KsonString,
+            location
+        )
         is StringNodeImpl -> KsonString(processedStringContent, location)
         is NumberNode -> KsonNumber(value, location)
         is TrueNode -> KsonBoolean(true, location)
