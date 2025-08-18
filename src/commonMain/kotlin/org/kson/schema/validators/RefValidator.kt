@@ -51,13 +51,15 @@ fun resolveRef(ref: String, rootSchemaValue: KsonValue): KsonValue? {
 
         ref.startsWith("#/") -> {
             // JSON Pointer reference within document
-            resolveJsonPointer(ref.substring(1), rootSchemaValue)
+            val decodedPointer = decodeUriEncoding(ref.substring(1))
+            resolveJsonPointer(decodedPointer, rootSchemaValue)
         }
 
         ref.startsWith("#") && ref.length > 1 -> {
             // Anchor reference or other fragment identifier
             // For now, treat as JSON Pointer without the leading slash
-            resolveJsonPointer("/" + ref.substring(1), rootSchemaValue)
+            val decodedFragment = decodeUriEncoding(ref.substring(1))
+            resolveJsonPointer("/$decodedFragment", rootSchemaValue)
         }
 
         !ref.contains("#") -> {
@@ -70,6 +72,42 @@ fun resolveRef(ref: String, rootSchemaValue: KsonValue): KsonValue? {
             null
         }
     }
+}
+
+/**
+ * Decodes percent-encoded characters in a URI. According to RFC 6901, percent-encoding must be decoded
+ * before JSON Pointer processing.
+ *
+ * @param encoded The percent-encoded string
+ * @return The decoded string
+ */
+private fun decodeUriEncoding(encoded: String): String {
+    if (!encoded.contains('%')) {
+        return encoded
+    }
+    
+    val result = StringBuilder()
+    var i = 0
+    while (i < encoded.length) {
+        val char = encoded[i]
+        if (char == '%' && i + 2 < encoded.length) {
+            // Try to decode the next two characters as hex
+            val hex = encoded.substring(i + 1, i + 3)
+            val decoded = try {
+                hex.toInt(16).toChar()
+            } catch (e: NumberFormatException) {
+                // Invalid hex sequence, keep the % and continue
+                i++
+                continue
+            }
+            result.append(decoded)
+            i += 3
+        } else {
+            result.append(char)
+            i++
+        }
+    }
+    return result.toString()
 }
 
 /**

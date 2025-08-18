@@ -9,22 +9,6 @@ package org.kson.jsonsuite
  *    as support is filled out
  */
 fun schemaTestSuiteExclusions() = setOf(
-    // ========================================
-    // ESCAPED CHARACTERS IN JSON POINTERS
-    // ========================================
-    // These tests require support for URL-encoded characters in JSON Pointer references.
-    // The JSON Pointer spec (RFC 6901) requires special handling of:
-    // - %25 (percent sign %)
-    // - %2F (forward slash /)
-    // - %7E (tilde ~)
-    // These encoded characters need to be decoded after parsing but before navigation.
-
-    "ref_escapedPointerRef_percentInvalid",
-    "ref_escapedPointerRef_percentValid",
-    "ref_escapedPointerRef_slashInvalid",
-    "ref_escapedPointerRef_slashValid",
-    "ref_escapedPointerRef_tildeInvalid",
-    "ref_escapedPointerRef_tildeValid",
 
     // ========================================
     // EXTERNAL SCHEMA REFERENCES

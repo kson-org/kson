@@ -11663,12 +11663,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_slashInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_slashInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11687,12 +11681,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_tildeInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_tildeInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11711,12 +11699,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_percentInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_percentInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11735,12 +11717,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_slashValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_slashValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11759,12 +11735,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_tildeValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_tildeValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -11783,12 +11753,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_escapedPointerRef_percentValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_escapedPointerRef_percentValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
