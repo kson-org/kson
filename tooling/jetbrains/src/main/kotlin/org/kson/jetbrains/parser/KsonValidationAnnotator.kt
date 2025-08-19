@@ -9,6 +9,7 @@ import com.intellij.psi.PsiFile
 import org.kson.KsonCore
 import org.kson.jetbrains.psi.KsonPsiFile
 import org.kson.parser.LoggedMessage
+import org.kson.parser.messages.MessageSeverity
 
 class KsonValidationAnnotator : ExternalAnnotator<ValidationInfo?, List<LoggedMessage>>() {
 
@@ -30,16 +31,28 @@ class KsonValidationAnnotator : ExternalAnnotator<ValidationInfo?, List<LoggedMe
         if (file !is KsonPsiFile || annotationResult == null) return
 
         val documentLength = file.textLength
-        annotationResult.filter { !it.message.coreParseMessage }.forEach {
-            val startOffset = it.location.startOffset.coerceAtLeast(0)
-            val endOffset = it.location.endOffset.coerceAtMost(documentLength)
+        /**
+         * Messages that have not been annotated yet are either:
+         * - Messages that are not collected during the parsing phase, i.e.
+         * [org.kson.parser.messages.Message.coreParseMessage] is false.
+         * - Messages that are not-fatal, and hence [org.kson.parser.messages.MessageType.severity] is not a
+         * [MessageSeverity.ERROR]. The [org.kson.parser.AstMarker.error] drops these, so they won't be annotated double.
+         */
+        annotationResult.filter { !it.message.coreParseMessage || it.message.type.severity != MessageSeverity.ERROR }
+            .forEach {
+                val startOffset = it.location.startOffset.coerceAtLeast(0)
+                val endOffset = it.location.endOffset.coerceAtMost(documentLength)
 
-            if (startOffset >= endOffset || startOffset >= documentLength) return@forEach
+                if (startOffset >= endOffset || startOffset >= documentLength) return@forEach
 
-            holder.newAnnotation(HighlightSeverity.ERROR, it.message.toString())
-                .range(TextRange(startOffset, endOffset))
-                .create()
-        }
+                val severity = when (it.message.type.severity) {
+                    MessageSeverity.ERROR -> HighlightSeverity.ERROR
+                    MessageSeverity.WARNING -> HighlightSeverity.WARNING
+                }
+                holder.newAnnotation(severity, it.message.toString())
+                    .range(TextRange(startOffset, endOffset))
+                    .create()
+            }
     }
 }
 

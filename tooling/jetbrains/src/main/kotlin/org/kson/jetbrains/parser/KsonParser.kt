@@ -6,6 +6,7 @@ import com.intellij.lang.PsiParser
 import com.intellij.psi.tree.IElementType
 import org.kson.parser.*
 import org.kson.parser.messages.Message
+import org.kson.parser.messages.MessageSeverity
 
 /**
  * [PsiParser] for Kson, implemented by delegating to the official Kson [Parser]
@@ -70,7 +71,17 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
             }
 
             override fun error(message: Message) {
-                psiMark.error(message.toString())
+                /**
+                 * Some of the [message]'s collected during the parsing phase don't result in fatal errors. In that case,
+                 * they are noted as [MessageSeverity.WARNING]. Because [error] will always highlight the errors with
+                 * [com.intellij.lang.annotation.HighlightSeverity], we cannot mark them as errors here but leave them
+                 * for [KsonValidationAnnotator.apply].
+                 */
+                if(message.type.severity == MessageSeverity.ERROR){
+                    psiMark.error(message.toString())
+                }else{
+                    psiMark.drop()
+                }
             }
         }
     }
