@@ -13,14 +13,34 @@ enum class MessageSeverity {
  * post-processing. Post-processing messages are created by any of the validators, for example
  * [org.kson.validation.IndentValidator] or [org.kson.schema.JsonSchemaValidator].
  * 
- * The [coreParseMessage] property is set to `true` only for messages that pass through [org.kson.parser.KsonMarker.error].
- * All other messages, including those from validators and post-processors, have [coreParseMessage] set to `false`.
+ * Core parse messages (created during lexing/parsing) are wrapped in [CoreParseMessage] when they pass through
+ * [org.kson.parser.KsonMarker.error]. All other messages from validators and post-processors remain unwrapped.
  */
 interface Message {
     val type: MessageType
-    val coreParseMessage: Boolean
+
     override fun toString(): String
+
+    companion object {
+        /**
+         * Returns true if this message results in a fatal parse error. If so it can be marked during
+         * [org.kson.parser.AstMarker.error], otherwise the message is annotated in
+         * [org.kson.jetbrains.parser.KsonValidationAnnotator.apply].
+         */
+        fun isFatalParseError(message: Message): Boolean =
+            message is CoreParseMessage && message.type.severity == MessageSeverity.ERROR
+    }
 }
+
+/**
+ * A [Message] wrapper that delegates all behavior to the underlying message
+ * but marks it as having been created during core parsing (lexing/parsing phase).
+ *
+ * This is only instantiated when messages pass through the parser,
+ * indicating they were created before or during the parsing phase.
+ */
+class CoreParseMessage(private val delegate: Message) : Message by delegate
+
 
 /**
  * Enum for all our user-facing messages.
@@ -739,11 +759,6 @@ enum class MessageType(
         return object: Message {
             override val type = messageType
 
-            /**
-             * [coreParseMessage] is false by default. Only messages that pass through [org.kson.parser.KsonMarker.error]
-             * have this set to true.
-             */
-            override val coreParseMessage = false
             private val renderedMessage = type.doFormat(ParsedErrorArgs(messageType, givenArgs))
 
             override fun toString(): String {

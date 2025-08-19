@@ -6,9 +6,8 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
+import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
-import org.kson.parser.messages.MessageSeverity
-import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -459,11 +458,11 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      */
     private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
         if (marker.element == ERROR ) {
-            val isErrorMessage = marker.markedError?.type?.severity == MessageSeverity.ERROR
-            if (!errorTolerant && isErrorMessage  ) {
+            val errorMessage = marker.markedError ?: throw ShouldNotHappenException("should have message with error")
+            if (!errorTolerant && Message.isFatalParseError(errorMessage)  ) {
                 /**
                  * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
-                 * never call [buildTree] when [hasErrors]
+                 * never call [buildTree] when [org.kson.parser.messages.Message.Companion.isFatalParseError] is true
                  */
                 throw RuntimeException("Should not find ERROR elements when not `errorTolerant`")
             }
@@ -700,24 +699,8 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun error(message: Message) {
-        markedError = message.asCoreParseMessage()
+        markedError = CoreParseMessage(message)
         context.errorEncountered()
         done(ERROR)
-    }
-}
-
-/**
- * Converts a [Message] to a core parse message by copying it and setting [Message.coreParseMessage] to true.
- *
- * A message is considered a "core parse message" only if it passes through the [KsonBuilder]
- * via the [KsonMarker.error] method. This happens when errors are created before or during the [Parser] parsing phase.
- * Messages created by validators or other post-processing components do not pass through the builder and thus remain
- * non-core messages with [Message.coreParseMessage] = false.
- */
-private fun Message.asCoreParseMessage(): Message{
-    return object: Message{
-        override val coreParseMessage: Boolean = true
-        override val type: MessageType = this@asCoreParseMessage.type
-        override fun toString(): String = this@asCoreParseMessage.toString()
     }
 }

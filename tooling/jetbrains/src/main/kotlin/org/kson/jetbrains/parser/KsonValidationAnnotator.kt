@@ -9,6 +9,7 @@ import com.intellij.psi.PsiFile
 import org.kson.KsonCore
 import org.kson.jetbrains.psi.KsonPsiFile
 import org.kson.parser.LoggedMessage
+import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageSeverity
 
 class KsonValidationAnnotator : ExternalAnnotator<ValidationInfo?, List<LoggedMessage>>() {
@@ -32,13 +33,11 @@ class KsonValidationAnnotator : ExternalAnnotator<ValidationInfo?, List<LoggedMe
 
         val documentLength = file.textLength
         /**
-         * Messages that have not been annotated yet are either:
-         * - Messages that are not collected during the parsing phase, i.e.
-         * [org.kson.parser.messages.Message.coreParseMessage] is false.
-         * - Messages that are not-fatal, and hence [org.kson.parser.messages.MessageType.severity] is not a
-         * [MessageSeverity.ERROR]. The [org.kson.parser.AstMarker.error] drops these, so they won't be annotated double.
+         * Only annotate messages that were NOT already annotated during the parsing phase.
+         * Core parse errors are annotated by the parser itself, so we skip them here to avoid duplication.
+         * All other messages (warnings, validation errors) are annotated here.
          */
-        annotationResult.filter { !it.message.coreParseMessage || it.message.type.severity != MessageSeverity.ERROR }
+        annotationResult.filter { !Message.isFatalParseError(it.message) }
             .forEach {
                 val startOffset = it.location.startOffset.coerceAtLeast(0)
                 val endOffset = it.location.endOffset.coerceAtMost(documentLength)
