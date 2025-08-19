@@ -11,7 +11,7 @@ class ContainsValidator(private val containsSchema: JsonSchema) : JsonArrayValid
         val foundMatchingElement = node.elements.any { element ->
             val containsMessageSink = MessageSink()
             containsSchema.validate(element, containsMessageSink)
-            !containsMessageSink.hasErrors()
+            !containsMessageSink.hasMessages()
         }
         if (!foundMatchingElement) {
             messageSink.error(node.location, MessageType.SCHEMA_CONTAINS_VALIDATION_FAILED.create())

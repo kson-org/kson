@@ -12,7 +12,7 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
             val anyOfMessageSink = MessageSink()
             it.validate(ksonValue, anyOfMessageSink)
             // were we valid
-            !anyOfMessageSink.hasErrors()
+            !anyOfMessageSink.hasMessages()
         }
 
         if (!anyValid) {

@@ -24,7 +24,7 @@ interface JsonSchemaTest {
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
         )
         // accepted as valid if and only if we parsed without error
-        val acceptedAsValid = !parseResult.hasErrors()
+        val acceptedAsValid = parseResult.messages.isEmpty()
 
         assertEquals(
             shouldAcceptAsValid,
@@ -45,7 +45,7 @@ interface JsonSchemaTest {
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
         )
         
-        assertTrue(parseResult.hasErrors(), "Expected schema validation errors but got none")
+        assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")
         assertEquals(expectedParseMessageLocation, parseResult.messages.map { it.location })
         assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type })
     }
