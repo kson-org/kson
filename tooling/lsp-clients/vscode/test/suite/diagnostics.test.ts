@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
 import {createTestFile, cleanUp} from './common';
+import {DiagnosticSeverity} from "vscode";
 
 
 describe('Diagnostic Tests', () => {
@@ -27,6 +28,20 @@ describe('Diagnostic Tests', () => {
 
         assert.ok(diagnostics.length == 1, `Diagnostic is reported for ${testFileUri}.`);
 
+        await cleanUp(testFileUri);
+    }).timeout(10000);
+
+    it('Should report both errors and warnings', async () => {
+        const errorContent = [
+            '- {key: }',
+            '- '
+        ].join('\n');
+        const [testFileUri, document] = await createTestFile(errorContent);
+
+        const diagnostics = await waitForDiagnostics(document.uri, 2);
+
+        assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error, `should have error diagnostic for invalid key value.`);
+        assert.strictEqual(diagnostics[1].severity, DiagnosticSeverity.Warning, `should have warning diagnostic for dangling list.`)
         await cleanUp(testFileUri);
     }).timeout(10000);
 
