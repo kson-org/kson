@@ -1,6 +1,14 @@
 package org.kson.parser.messages
 
 /**
+ * Severity levels for messages
+ */
+enum class MessageSeverity {
+    ERROR,
+    WARNING
+}
+
+/**
  * Instances of [Message] are created with [MessageType.create]. [Message]s can be created during Parsing or
  * post-processing. Post-processing messages are created by any of the validators, for example
  * [org.kson.validation.IndentValidator] or [org.kson.schema.JsonSchemaValidator].
@@ -21,7 +29,12 @@ interface Message {
  * and also facilitates easy/robust testing against [MessageType] types (rather than for instance brittle string
  * matches on error message content)
  */
-enum class MessageType {
+enum class MessageType(
+    /**
+     * The severity of this message type
+     */
+    val severity: MessageSeverity = MessageSeverity.ERROR
+) {
     BLANK_SOURCE {
         override fun expectedArgs(): List<String> {
             return emptyList()
@@ -264,7 +277,7 @@ enum class MessageType {
             return "A decimal must be followed by digits"
         }
     },
-    DANGLING_LIST_DASH {
+    DANGLING_LIST_DASH(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -667,7 +680,7 @@ enum class MessageType {
             return "Missing required dependencies"
         }
     },
-    OBJECT_PROPERTIES_MISALIGNED {
+    OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -677,7 +690,7 @@ enum class MessageType {
                     "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
         }
     },
-    DASH_LIST_ITEMS_MISALIGNED {
+    DASH_LIST_ITEMS_MISALIGNED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
@@ -687,7 +700,7 @@ enum class MessageType {
                     "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
         }
     },
-    OBJECT_DUPLICATE_KEY {
+    OBJECT_DUPLICATE_KEY(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return listOf("Key name")
         }

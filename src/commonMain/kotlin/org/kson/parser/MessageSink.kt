@@ -2,6 +2,7 @@ package org.kson.parser
 
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.parser.messages.Message
+import org.kson.parser.messages.MessageSeverity
 
 data class LoggedMessage(
     val location: Location,
@@ -18,7 +19,11 @@ data class LoggedMessage(
         fun print(loggedMessages: List<LoggedMessage>): String {
             return loggedMessages.joinToString("\n") { loggedMessage ->
                 val location = loggedMessage.location
-                "Error:${location.start}" +
+                val severityLabel = when (loggedMessage.message.type.severity) {
+                    MessageSeverity.ERROR -> "Error"
+                    MessageSeverity.WARNING -> "Warning"
+                }
+                "$severityLabel:${location.start}" +
                         " - ${location.end}, ${
                             loggedMessage.message
                         }"
@@ -28,7 +33,7 @@ data class LoggedMessage(
 }
 
 /**
- * todo currently assumes everything is an error.  We'll refactor if/when we support WARN/INFO/etc.
+ * Collects messages (errors and warnings) during parsing and validation
  */
 class MessageSink {
     private val messages = mutableListOf<LoggedMessage>()
@@ -38,6 +43,10 @@ class MessageSink {
     }
 
     fun hasErrors(): Boolean {
+        return messages.any { it.message.type.severity == MessageSeverity.ERROR }
+    }
+
+    fun hasMessages(): Boolean {
         return messages.isNotEmpty()
     }
 

@@ -150,7 +150,8 @@ interface ParseResult {
     val messages: List<LoggedMessage>
 
     /**
-     * True if the input source could not be parsed. [messages] will contain errors in this case.
+     * True if there are [messages] with severity [org.kson.parser.messages.MessageSeverity.ERROR]. Meaning that the
+     * input source could not be parsed.
      */
     fun hasErrors(): Boolean
 }

@@ -7,6 +7,7 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.Message
+import org.kson.parser.messages.MessageSeverity
 import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
@@ -129,16 +130,16 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 }
             } else {
                 // gather error info and return null
-                walkForErrors(rootMarker, messageSink)
+                walkForMessages(rootMarker, messageSink)
                 return null
             }
         }
     }
 
     /**
-     * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any error marks into [messageSink]
+     * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any messages (errors and warnings) into [messageSink]
      */
-    private fun walkForErrors(marker: KsonMarker, messageSink: MessageSink) {
+    private fun walkForMessages(marker: KsonMarker, messageSink: MessageSink) {
         val errorMessage = marker.markedError
         if (errorMessage != null) {
             messageSink.error(
@@ -151,7 +152,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
 
         if (marker.childMarkers.isNotEmpty()) {
             for (childMarker in marker.childMarkers) {
-                walkForErrors(childMarker, messageSink)
+                walkForMessages(childMarker, messageSink)
             }
         }
     }
@@ -457,8 +458,9 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      *   [AstNodeError] to be used in place of the node we can't create
      */
     private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
-        if (marker.element == ERROR) {
-            if (!errorTolerant) {
+        if (marker.element == ERROR ) {
+            val isErrorMessage = marker.markedError?.type?.severity == MessageSeverity.ERROR
+            if (!errorTolerant && isErrorMessage  ) {
                 /**
                  * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
                  * never call [buildTree] when [hasErrors]
