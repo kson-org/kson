@@ -6,6 +6,7 @@ package org.kson
 import org.kson.Kson.parseSchema
 import org.kson.Kson.publishMessages
 import org.kson.parser.*
+import org.kson.parser.messages.MessageSeverity as InternalMessageSeverity
 import org.kson.schema.JsonSchema
 import org.kson.tools.FormattingStyle as InternalFormattingStyle
 import org.kson.tools.IndentType as InternalIndentType
@@ -66,9 +67,7 @@ object Kson {
     fun analyze(kson: String) : Analysis {
         val parseResult = KsonCore.parseToAst(kson)
         val tokens = convertTokens(parseResult.lexedTokens)
-        val messages = parseResult.messages.map {
-            Message(it.message.toString(), Position(it.location.start), Position(it.location.end))
-        }
+        val messages = publishMessages(parseResult.messages)
         return Analysis(messages, tokens)
     }
 
@@ -91,8 +90,14 @@ object Kson {
      */
     internal fun publishMessages(loggedMessages: List<LoggedMessage>): List<Message> {
         return loggedMessages.map {
+            val severity = when(it.message.type.severity) {
+                InternalMessageSeverity.ERROR -> MessageSeverity.ERROR
+                InternalMessageSeverity.WARNING -> MessageSeverity.WARNING
+            }
+
             Message(
                 message = it.message.toString(),
+                severity = severity,
                 start = Position(it.location.start),
                 end = Position(it.location.end)
             )
@@ -244,7 +249,15 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
-data class Message internal constructor(val message: String, val start: Position, val end: Position)
+data class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
+
+/**
+ * Represents the severity of a [Message]
+ */
+enum class MessageSeverity{
+    ERROR,
+    WARNING,
+}
 
 /**
  * A zero-based line/column position in a document
