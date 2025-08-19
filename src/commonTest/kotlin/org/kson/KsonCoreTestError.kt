@@ -47,7 +47,14 @@ interface KsonCoreTestError {
                 parseResult.hasErrors(),
                 "Should set the hasErrors flag appropriate when there are errors"
             )
+
+            assertEquals(
+                null,
+                parseResult.ast,
+                "Should produce a null AST when there are errors"
+            )
         }
+
         if(expectedParseMessageTypes.map { it.severity }.contains(WARNING)){
             assertTrue(
                 parseResult.messages.map { it.message.type.severity }.contains(WARNING),
@@ -61,12 +68,6 @@ interface KsonCoreTestError {
                 "Should set the hasMessages flag appropriate when there are either errors or warnings"
             )
         }
-
-        assertEquals(
-            null,
-            parseResult.ast,
-            "Should produce a null AST when there are errors"
-        )
 
         return parseResult.messages
     }

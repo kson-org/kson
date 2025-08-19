@@ -39,7 +39,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
             throw RuntimeException("The root marker has no creator that needs to drop it")
         }
     })
-    var hasErrors = false
 
     override fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String {
         return tokens.subList(firstTokenIndex, lastTokenIndex + 1)
@@ -59,10 +58,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
 
     override fun getComments(tokenIndex: Int): List<String> {
         return tokens[tokenIndex].comments
-    }
-
-    override fun errorEncountered() {
-        hasErrors = true
     }
 
     override fun getTokenIndex(): Int {
@@ -123,13 +118,13 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
              */
             unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
         } else {
-            if (!hasErrors) {
+            walkForMessages(rootMarker, messageSink)
+
+            if (!messageSink.hasErrors()) {
                 unsafeAstCreate<KsonRoot>(rootMarker) {
                     throw ShouldNotHappenException("this should be the error-free code path")
                 }
             } else {
-                // gather error info and return null
-                walkForMessages(rootMarker, messageSink)
                 return null
             }
         }
@@ -506,11 +501,6 @@ private interface MarkerBuilderContext {
     fun getComments(tokenIndex: Int): List<String>
 
     /**
-     * Register that a parsing error has been encountered
-     */
-    fun errorEncountered()
-
-    /**
      * [KsonMarker]s mark token start and end indexes.  This returns the token index of the [KsonBuilder]
      * being marked
      */
@@ -700,7 +690,6 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
 
     override fun error(message: Message) {
         markedError = CoreParseMessage(message)
-        context.errorEncountered()
         done(ERROR)
     }
 }
