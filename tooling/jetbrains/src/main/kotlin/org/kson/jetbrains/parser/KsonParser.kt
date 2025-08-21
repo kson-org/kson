@@ -5,6 +5,7 @@ import com.intellij.lang.PsiBuilder
 import com.intellij.lang.PsiParser
 import com.intellij.psi.tree.IElementType
 import org.kson.parser.*
+import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
 
 /**
@@ -70,7 +71,17 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
             }
 
             override fun error(message: Message) {
-                psiMark.error(message.toString())
+                /**
+                 * Only annotate core parse errors here. Warnings and validation errors
+                 * are handled later by [KsonValidationAnnotator.apply] to avoid duplication.
+                 * Since we're in the parser, wrap the message as CoreParseMessage and check if it's fatal.
+                 */
+                val wrappedMessage = CoreParseMessage(message)
+                if(Message.isFatalParseError(wrappedMessage)){
+                    psiMark.error(message.toString())
+                }else{
+                    psiMark.drop()
+                }
             }
         }
     }

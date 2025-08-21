@@ -35,12 +35,26 @@ export class DiagnosticService {
     }
 
     /**
-     * Convert Kson {@link LoggedMessage} type to a to language server {@link Diagnostic} type.
+     * Convert Kson {@link Message} type to a to language server {@link Diagnostic} type.
      */
     private loggedMessageToDiagnostic(loggedMessage: Message): Diagnostic {
+        let diagnosticSeverity: DiagnosticSeverity;
+        switch (loggedMessage.severity.name) {
+            case 'ERROR':
+                diagnosticSeverity = DiagnosticSeverity.Error;
+                break;
+            case 'WARNING':
+                diagnosticSeverity = DiagnosticSeverity.Warning;
+                break;
+            default:
+                // Default to error if unknown severity
+                diagnosticSeverity = DiagnosticSeverity.Error;
+                break;
+        }
+        
         return {
             range: this.locationToRange(loggedMessage),
-            severity: DiagnosticSeverity.Error,
+            severity: diagnosticSeverity,
             source: 'kson',
             message: loggedMessage.message.toString(),
         };

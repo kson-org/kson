@@ -6,8 +6,8 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
+import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
-import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -39,7 +39,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
             throw RuntimeException("The root marker has no creator that needs to drop it")
         }
     })
-    var hasErrors = false
 
     override fun getValue(firstTokenIndex: Int, lastTokenIndex: Int): String {
         return tokens.subList(firstTokenIndex, lastTokenIndex + 1)
@@ -59,10 +58,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
 
     override fun getComments(tokenIndex: Int): List<String> {
         return tokens[tokenIndex].comments
-    }
-
-    override fun errorEncountered() {
-        hasErrors = true
     }
 
     override fun getTokenIndex(): Int {
@@ -123,22 +118,22 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
              */
             unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
         } else {
-            if (!hasErrors) {
+            walkForMessages(rootMarker, messageSink)
+
+            if (!messageSink.hasErrors()) {
                 unsafeAstCreate<KsonRoot>(rootMarker) {
                     throw ShouldNotHappenException("this should be the error-free code path")
                 }
             } else {
-                // gather error info and return null
-                walkForErrors(rootMarker, messageSink)
                 return null
             }
         }
     }
 
     /**
-     * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any error marks into [messageSink]
+     * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any messages (errors and warnings) into [messageSink]
      */
-    private fun walkForErrors(marker: KsonMarker, messageSink: MessageSink) {
+    private fun walkForMessages(marker: KsonMarker, messageSink: MessageSink) {
         val errorMessage = marker.markedError
         if (errorMessage != null) {
             messageSink.error(
@@ -151,7 +146,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
 
         if (marker.childMarkers.isNotEmpty()) {
             for (childMarker in marker.childMarkers) {
-                walkForErrors(childMarker, messageSink)
+                walkForMessages(childMarker, messageSink)
             }
         }
     }
@@ -457,11 +452,12 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      *   [AstNodeError] to be used in place of the node we can't create
      */
     private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
-        if (marker.element == ERROR) {
-            if (!errorTolerant) {
+        if (marker.element == ERROR ) {
+            val errorMessage = marker.markedError ?: throw ShouldNotHappenException("should have message with error")
+            if (!errorTolerant && Message.isFatalParseError(errorMessage)  ) {
                 /**
                  * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
-                 * never call [buildTree] when [hasErrors]
+                 * never call [buildTree] when [org.kson.parser.messages.Message.Companion.isFatalParseError] is true
                  */
                 throw RuntimeException("Should not find ERROR elements when not `errorTolerant`")
             }
@@ -503,11 +499,6 @@ private interface MarkerBuilderContext {
      * Get any comments associated with the token at [tokenIndex]
      */
     fun getComments(tokenIndex: Int): List<String>
-
-    /**
-     * Register that a parsing error has been encountered
-     */
-    fun errorEncountered()
 
     /**
      * [KsonMarker]s mark token start and end indexes.  This returns the token index of the [KsonBuilder]
@@ -698,24 +689,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun error(message: Message) {
-        markedError = message.asCoreParseMessage()
-        context.errorEncountered()
+        markedError = CoreParseMessage(message)
         done(ERROR)
-    }
-}
-
-/**
- * Converts a [Message] to a core parse message by copying it and setting [Message.coreParseMessage] to true.
- *
- * A message is considered a "core parse message" only if it passes through the [KsonBuilder]
- * via the [KsonMarker.error] method. This happens when errors are created before or during the [Parser] parsing phase.
- * Messages created by validators or other post-processing components do not pass through the builder and thus remain
- * non-core messages with [Message.coreParseMessage] = false.
- */
-private fun Message.asCoreParseMessage(): Message{
-    return object: Message{
-        override val coreParseMessage: Boolean = true
-        override val type: MessageType = this@asCoreParseMessage.type
-        override fun toString(): String = this@asCoreParseMessage.toString()
     }
 }

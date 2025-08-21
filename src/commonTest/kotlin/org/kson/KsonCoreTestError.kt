@@ -3,6 +3,7 @@ package org.kson
 import org.kson.ast.KsonRoot
 import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
+import org.kson.parser.messages.MessageSeverity.*
 import org.kson.parser.messages.MessageType
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,15 +42,32 @@ interface KsonCoreTestError {
             "Should have the expected parse errors."
         )
 
-        assertTrue(
-            parseResult.hasErrors(),
-            "Should set the hasErrors flag appropriate when there are errors"
-        )
-        assertEquals(
-            null,
-            parseResult.ast,
-            "Should produce a null AST when there are errors"
-        )
+        if(expectedParseMessageTypes.map { it.severity }.contains(ERROR)){
+            assertTrue(
+                parseResult.hasErrors(),
+                "Should set the hasErrors flag appropriate when there are errors"
+            )
+
+            assertEquals(
+                null,
+                parseResult.ast,
+                "Should produce a null AST when there are errors"
+            )
+        }
+
+        if(expectedParseMessageTypes.map { it.severity }.contains(WARNING)){
+            assertTrue(
+                parseResult.messages.map { it.message.type.severity }.contains(WARNING),
+                "Should set the hasWarnings flag appropriate when there are warnings"
+            )
+        }
+
+        if(expectedParseMessageTypes.isNotEmpty()){
+            assertTrue (
+                parseResult.messages.isNotEmpty(),
+                "Should set the hasMessages flag appropriate when there are either errors or warnings"
+            )
+        }
 
         return parseResult.messages
     }
