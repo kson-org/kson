@@ -323,36 +323,32 @@ function fibonacci(n: number): number {
 
 See [Embed Preamble](#the-embed-preamble) for full details on the metadata supported by [Embed Blocks](#embed-blocks)
 
-The alternative embed delimiter `$`/`$$` works identically to `%`/`%%` and can be used when convenient to minimize
-escaping&mdash;useful for instance when embedding KSON in KSON.
-
-```
-$kson
-  embedded_embed: %
-    This may have escaped end-delimiters $\$ inside it too!
-    %%
-$$
-```
-
-#### Escaping Embed Delimiters
-
-Embed end-delimiters are escaped by putting a backslash inside them:
-
+### Escaping Embed Delimiters
+The rules for escaping embed block delimiters are as follows:
 ```kson
-input: %kson
- %\% 
- %\\% 
- %\\\%
- $\$
- %%
- 
-output: "
-%%
-%\%
-%\\%
-$$
-" 
+embed_escapes: %
+  Embed end-delimiters are escaped by putting a slash inside them: %\%
+
+  Note that this moves the escaping goalpost since we also need to allow "%\%"
+  literally inside of embeds.  So: when evaluating escaped embed delimiters,
+  we allow arbitrary `\`s between `%`s, and consume one of them.  Thus, %\\%
+  gives %\% in the output, %\\\% gives %\\% in the output, etc forever until
+  we hit an uninterrupted end-delimiter:
+  %%
 ```
+
+### Alternative Embed Block Delimiter
+
+The alternative embed delimiter `$` works identically to `%` and can be used when convenient to minimize
+escaping
+
+```
+alternate_embed: $kson
+  This embed block is equivalent to a %/%%-delimited block, but here "$/$"
+  must be escaped rather than "%%"
+$$
+```
+
 
 ### The Embed Preamble
 
@@ -364,7 +360,7 @@ The Embed Preamble may be provided to annotate the embedded content. An Embed Pr
 
 ```
 %text: sample block
-This is a sample block of type `text`
+This is a sample block of type `text`, as noted in its Embed Preamble.
 %% 
 ```
 
