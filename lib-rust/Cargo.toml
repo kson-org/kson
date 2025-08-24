@@ -1,0 +1,13 @@
+[package]
+name = "kson"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libloading = "0.8.8"
+
+[build-dependencies]
+bindgen = "0.71.0"
+
+[dev-dependencies]
+insta = "1.43.1"
