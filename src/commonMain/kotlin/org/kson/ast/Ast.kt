@@ -349,10 +349,12 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun undelimitedObjectProperty(indent:Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return if (value is ListNode || value is ObjectNode ||
+        return if (
+            (value is ListNode && value.elements.isNotEmpty()) ||
+            (value is ObjectNode && value.properties.isNotEmpty()) ||
             // check if we're compiling an embed block to an object
             (compileTarget is Yaml && value is EmbedBlockNode && compileTarget.retainEmbedTags)) {
-            // For lists and objects, put the value on the next line
+            // For non-empty lists and objects, put the value on the next line
             key.toSourceWithNext(indent, value, compileTarget) + "\n" +
                     value.toSourceWithNext(indent.next(false), nextNode, compileTarget)
         } else {
@@ -521,7 +523,7 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
         compileTarget: CompileTarget,
         isDelimited: Boolean = false
     ): String {
-        return if (value is ListNode && !isDelimited) {
+        return if ((value is ListNode && value.elements.isNotEmpty()) && !isDelimited) {
             indent.bodyLinesIndent() + "- \n" + value.toSourceWithNext(
                 indent.next(false),
                 nextNode,

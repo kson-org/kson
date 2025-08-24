@@ -1711,6 +1711,36 @@ class FormatterTest {
     }
 
     @Test
+    fun testPlainFormattingEmptyObject(){
+        assertFormatting(
+            """
+                key:
+                {}
+            """.trimIndent(),
+            """
+                key: {}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.PLAIN
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingEmptyObject(){
+        assertFormatting(
+            """
+                key:
+                {}
+            """.trimIndent(),
+            """
+                {
+                  key: {}
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
     fun testCompactFormattingEmptyObject(){
         assertFormatting(
             """
@@ -1720,6 +1750,62 @@ class FormatterTest {
                 key:{}
             """.trimIndent(),
             formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testPlainFormattingEmptyList(){
+        assertFormatting(
+            """
+                key:
+                <>
+            """.trimIndent(),
+            """
+                key: <>
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.PLAIN
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingEmptyList(){
+        assertFormatting(
+            """
+                key:
+                <>
+            """.trimIndent(),
+            """
+                {
+                  key: <>
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testCompactFormattingEmptyList(){
+        assertFormatting(
+            """
+                key: <>
+            """.trimIndent(),
+            """
+                key:<>
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testFormatEmptyNestedList() {
+        assertFormatting(
+            """
+                -
+                  <>
+            """.trimIndent(),
+            """
+                - <>
+            """.trimIndent()
         )
     }
 

@@ -62,10 +62,8 @@ describe('KSON Formatter', () => {
     it('should format an object with no properties', () => {
         const content = '{"x" : {    },  "y" : {}}';
         const expected = [
-            'x:',
-            '  {}',
-            'y:',
-            '  {}'
+            'x: {}',
+            'y: {}'
         ].join('\n');
         assertFormatting(content, expected);
     });
@@ -75,8 +73,7 @@ describe('KSON Formatter', () => {
         const expected = [
             'x:',
             '  y:',
-            '    z:',
-            '      {}',
+            '    z: {}',
             '    .',
             '  a: true'
         ].join('\n');
@@ -111,8 +108,7 @@ describe('KSON Formatter', () => {
     it('should handle nested arrays', () => {
         const content = '[ [], [ [ {} ], "a" ]  ]';
         const expected = [
-            '- ',
-            '  <>',
+            '- <>',
             '- ',
             '  - ',
             '    - {}',

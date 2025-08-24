@@ -226,13 +226,11 @@ class KsonCoreTestList : KsonCoreTest {
         """.trimIndent(),
             """
                - 
-                 - 
-                   <>
+                 - <>
             """.trimIndent(),
             """
                - 
-                 - 
-                   []
+                 - []
             """.trimIndent(),
             """
                [
