@@ -19,9 +19,6 @@ open class CopyRepositoryFilesTask : DefaultTask() {
         val repositoryRoot = project.projectDir.parentFile
         val libRustDir = project.projectDir
 
-        // Make sure the output directory is empty
-        outputDir.mkdirs()
-
         // Copy all files tracked by git, except `excludedPath`
         val gitLsFilesProcess = ProcessBuilder("git", "ls-files")
             .directory(repositoryRoot)
@@ -34,6 +31,7 @@ open class CopyRepositoryFilesTask : DefaultTask() {
             throw RuntimeException("Failed to execute 'git ls-files'")
         }
 
+        outputDir.mkdirs()
         gitTrackedFiles.forEach { relativePath ->
             if (excludedPath.isEmpty() || !relativePath.startsWith(excludedPath)) {
                 val sourceFile = repositoryRoot.resolve(relativePath)
