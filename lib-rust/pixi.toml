@@ -15,3 +15,12 @@ version = "0.1.0"
 
 [dependencies]
 rust = "1.89.0.*"
+
+[target.win-64.dependencies]
+vc14_runtime = "14.44.*"
+
+[target.linux-64.dependencies]
+libclang = "20.*"
+
+[target.linux-aarch64.dependencies]
+libclang = "20.*"

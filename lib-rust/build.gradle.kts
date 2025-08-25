@@ -12,6 +12,20 @@ tasks {
         "./pixiw"
     }
 
+    register<CopyNativeHeaderTask>("copyHeaderFileDynamic") {
+        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        useDynamicLinking = true
+        sourceProjectDir = project.projectDir.resolve("kotlin")
+        outputDir = File("artifacts")
+    }
+
+    register<CopyNativeHeaderTask>("copyHeaderFileStatic") {
+        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        useDynamicLinking = false
+        sourceProjectDir = project.projectDir.resolve("kotlin")
+        outputDir = File("artifacts")
+    }
+
     register<CopyRepositoryFilesTask>(copyKotlinSource) {
         group = "build setup"
         description = "Copies all repository files (except git-ignored and lib-rust) to ./kotlin"
@@ -48,6 +62,7 @@ tasks {
     }
 
     register<Task>("check") {
+        group = "verification"
         dependsOn(testStatic)
         dependsOn(testDynamic)
         dependsOn(formattingCheck)

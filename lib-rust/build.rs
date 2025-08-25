@@ -21,26 +21,27 @@ impl ParseCallbacks for CustomRenamer {
 // Build kotlin-native artifacts and put them under `artifacts`
 fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let project_root = Path::new(&manifest_dir).join("kotlin");
+    let rust_root = Path::new(&manifest_dir);
+    let kotlin_root = rust_root.join("kotlin");
     let artifacts_dir = Path::new(&manifest_dir).join("artifacts");
 
     // Build kotlin-native artifacts
     let gradle_script = if cfg!(target_os = "windows") {
-        project_root.join("gradlew.bat")
+        kotlin_root.join("gradlew.bat")
     } else {
-        project_root.join("gradlew")
+        kotlin_root.join("gradlew")
     };
 
     let status = Command::new(&gradle_script)
         .arg(":lib-kotlin:nativeKsonMainBinaries")
         .arg("--no-daemon")
-        .current_dir(&project_root)
+        .current_dir(&kotlin_root)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()?;
 
     if !status.success() {
-        return Err(format!("Gradle command failed with exit code: {:?}", status.code()).into());
+        return Err(format!("Kotlin build failed with exit code: {:?}", status.code()).into());
     }
 
     // Copy built artifacts
@@ -50,7 +51,7 @@ fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::er
     } else {
         "lib-kotlin/build/bin/nativeKson/releaseStatic"
     };
-    let source_dir = project_root.join(release_path);
+    let source_dir = kotlin_root.join(release_path);
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
         let source_path = entry.path();
@@ -60,8 +61,27 @@ fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::er
         println!("cargo:rerun-if-changed={}", source_path.display());
     }
 
-    // The code expects `kson_api.h` to exist, but on some platforms it's called `libkson_api.h`
-    fs::rename("artifacts/libkson_api.h", "artifacts/kson_api.h")?;
+    // Copy the C headers, preprocessed (will overwrite existing header files)
+    let gradle_task = if use_dynamic_linking {
+        ":lib-rust:copyHeaderFileDynamic"
+    } else {
+        ":lib-rust:copyHeaderFileStatic"
+    };
+    let status = Command::new(&gradle_script)
+        .arg(gradle_task)
+        .arg("--no-daemon")
+        .current_dir(&rust_root)
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()?;
+
+    if !status.success() {
+        return Err(format!(
+            "gradle {gradle_task} failed with exit code: {:?}",
+            status.code()
+        )
+        .into());
+    }
 
     Ok(())
 }
