@@ -36,3 +36,5 @@ gradle/jdk
 .kotlin
 # node generated files
 node_modules
+# pixi files
+.pixi

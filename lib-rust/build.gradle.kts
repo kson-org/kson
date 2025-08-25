@@ -6,6 +6,12 @@ val testStatic = "testStaticallyLinked"
 val testDynamic = "testDynamicallyLinked"
 
 tasks {
+    val pixiwPath = if (OperatingSystem.current().isWindows) {
+        "pixiw"
+    } else {
+        "./pixiw"
+    }
+
     register<CopyRepositoryFilesTask>(copyKotlinSource) {
         group = "build setup"
         description = "Copies all repository files (except git-ignored and lib-rust) to ./kotlin"
@@ -16,7 +22,7 @@ tasks {
         dependsOn(copyKotlinSource)
 
         group = "verification"
-        commandLine = "cargo test".split(" ")
+        commandLine = "$pixiwPath run cargo test".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -27,7 +33,7 @@ tasks {
         dependsOn(copyKotlinSource)
 
         group = "verification"
-        commandLine = "cargo test --features dynamic-linking".split(" ")
+        commandLine = "$pixiwPath run cargo test --features dynamic-linking".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -35,7 +41,7 @@ tasks {
 
     register<Exec>(formattingCheck) {
         group = "verification"
-        commandLine = "cargo fmt --check".split(" ")
+        commandLine = "$pixiwPath run cargo fmt --check".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
