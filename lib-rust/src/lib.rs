@@ -8,17 +8,41 @@ mod test;
 mod macros;
 
 use crate::util::{FromKotlinObject, KsonPtr, OwnedKotlinPtr, ToKotlinObject};
+#[cfg(any(feature = "dynamic-linking", target_os = "windows"))]
+static KSON_LIB: std::sync::LazyLock<libloading::Library> = std::sync::LazyLock::new(|| unsafe {
+    #[cfg(target_os = "windows")]
+    let lib_name = "artifacts/kson.dll";
+    #[cfg(target_os = "linux")]
+    let lib_name = "artifacts/libkson.so";
+    #[cfg(target_os = "macos")]
+    let lib_name = "artifacts/libkson.dylib";
 
-static KSON_LIB: std::sync::LazyLock<libloading::Library> =
-    std::sync::LazyLock::new(|| unsafe { libloading::Library::new("artifacts/kson.dll").unwrap() });
+    libloading::Library::new(lib_name).unwrap()
+});
 
+#[cfg(any(feature = "dynamic-linking", target_os = "windows"))]
 pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbols> =
     std::sync::LazyLock::new(|| unsafe {
+        let kson_symbols: &[u8] = if cfg!(target_os = "windows") {
+            b"kson_symbols"
+        } else {
+            b"libkson_symbols"
+        };
+
         let func: libloading::Symbol<
             unsafe extern "C" fn() -> *mut kson_ffi::kson_ExportedSymbols,
-        > = KSON_LIB.get(b"kson_symbols").unwrap();
+        > = KSON_LIB.get(kson_symbols).unwrap();
         *func()
     });
+
+#[cfg(not(any(feature = "dynamic-linking", target_os = "windows")))]
+unsafe extern "C" {
+    fn libkson_symbols() -> *mut kson_ffi::kson_ExportedSymbols;
+}
+
+#[cfg(not(any(feature = "dynamic-linking", target_os = "windows")))]
+pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbols> =
+    std::sync::LazyLock::new(|| unsafe { *libkson_symbols() });
 
 declare_kotlin_object!(
     /// Options for formatting Kson output.

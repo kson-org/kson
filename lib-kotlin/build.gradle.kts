@@ -45,9 +45,13 @@ kotlin {
             sharedLib {
                 baseName = "kson"
             }
+
+            staticLib {
+                baseName = "kson"
+            }
         }
     }
-    
+
     sourceSets {
         val commonMain by getting {
             dependencies {

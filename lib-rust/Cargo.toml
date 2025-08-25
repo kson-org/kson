@@ -3,7 +3,14 @@ name = "kson"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
+[features]
+default = []
+dynamic-linking = ["dep:libloading"]
+
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+libloading = { version = "0.8.8", optional = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
 libloading = "0.8.8"
 
 [build-dependencies]

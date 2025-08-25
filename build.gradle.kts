@@ -108,6 +108,7 @@ tasks {
     // Take bindings into consideration in the main `check` task
     check {
         dependsOn(":lib-python:check")
+        dependsOn(":lib-rust:check")
     }
 
     /**
