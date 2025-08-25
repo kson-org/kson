@@ -48,8 +48,86 @@ def test_kson_to_json_success():
     )
 
 
+def test_kson_to_json_with_embed_tags():
+    kson_with_embed = """key: $embed
+This is embedded content
+embed$$"""
+
+    # Test with default retain_embed_tags=True
+    result = Kson.to_json(kson_with_embed)
+    assert isinstance(result, Success)
+    assert (
+        result.output()
+        == """{
+  "key": {
+    "embedTag": "embed",
+    "embedContent": "This is embedded content\\nembed"
+  }
+}"""
+    )
+    # The JSON output should contain the embed tag information
+
+    # Test with retain_embed_tags=False
+    result = Kson.to_json(kson_with_embed, retain_embed_tags=False)
+    assert isinstance(result, Success)
+    assert (
+        result.output()
+        == """{
+  "key": "This is embedded content\\nembed"
+}"""
+    )
+
+
 def test_kson_to_json_failure():
     result = Kson.to_json("key: [1, 2, 3, 4")
+    assert isinstance(result, Failure)
+    output = messages_to_string(result.errors())
+    assert output == "0,5 to 0,16 - Unclosed list\n"
+
+
+def test_kson_to_yaml_success():
+    result = Kson.to_yaml("key: [1, 2, 3, 4]")
+    assert isinstance(result, Success)
+    assert (
+        result.output()
+        == """key:
+  - 1
+  - 2
+  - 3
+  - 4"""
+    )
+
+
+def test_kson_to_yaml_with_embed_tags():
+    kson_with_embed = """key: $embed
+This is embedded content
+embed$$"""
+
+    # Test with default retain_embed_tags=True
+    result = Kson.to_yaml(kson_with_embed)
+    assert isinstance(result, Success)
+    assert (
+        result.output()
+        == """key:
+  embedTag: "embed"
+  embedContent: |
+    This is embedded content
+    embed"""
+    )
+
+    # Test with retain_embed_tags=False
+    result = Kson.to_yaml(kson_with_embed, retain_embed_tags=False)
+    assert isinstance(result, Success)
+    assert (
+        result.output()
+        == """key: |
+    This is embedded content
+    embed"""
+    )
+
+
+def test_kson_to_yaml_failure():
+    result = Kson.to_yaml("key: [1, 2, 3, 4")
     assert isinstance(result, Failure)
     output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"

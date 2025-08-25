@@ -34,10 +34,14 @@ object Kson {
      * Converts Kson to Json.
      *
      * @param kson The Kson source to convert
+     * @param retainEmbedTags Whether to retain the embed tags in the result
      * @return A Result containing either the Json output or error messages
      */
-    fun toJson(kson: String): Result {
-        val jsonParseResult = KsonCore.parseToJson(kson)
+    fun toJson(kson: String, retainEmbedTags: Boolean = true): Result {
+        val compileConfig = CompileTarget.Json(
+            retainEmbedTags = retainEmbedTags,
+        )
+        val jsonParseResult = KsonCore.parseToJson(kson, compileConfig)
         return if (jsonParseResult.hasErrors()) {
             Result.Failure(publishMessages(jsonParseResult.messages))
         } else {
@@ -49,10 +53,14 @@ object Kson {
      * Converts Kson to Yaml, preserving comments
      *
      * @param kson The Kson source to convert
+     * @param retainEmbedTags Whether to retain the embed tags in the result
      * @return A Result containing either the Yaml output or error messages
      */
-    fun toYaml(kson: String): Result {
-        val yamlParseResult = KsonCore.parseToYaml(kson)
+    fun toYaml(kson: String, retainEmbedTags: Boolean = true): Result {
+        val compileConfig = CompileTarget.Yaml(
+            retainEmbedTags = retainEmbedTags,
+        )
+        val yamlParseResult = KsonCore.parseToYaml(kson, compileConfig)
         return if (yamlParseResult.hasErrors()) {
             Result.Failure(publishMessages(yamlParseResult.messages))
         } else {

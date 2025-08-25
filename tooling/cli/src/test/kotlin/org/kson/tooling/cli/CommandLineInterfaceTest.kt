@@ -26,7 +26,7 @@ class CommandLineInterfaceTest {
         
         val commandArgs = when (target) {
             "json", "yaml" -> {
-                // For json and yaml, they are direct commands
+                // For json and yaml, they are direct subcommands
                 val list = mutableListOf(target)
                 list.addAll(listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
                 list.addAll(args)
@@ -35,8 +35,8 @@ class CommandLineInterfaceTest {
             else -> {
                 // For kson formatting, use the format command
                 val list = mutableListOf("format")
-                list.addAll(args)
                 list.addAll(listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
+                list.addAll(args)
                 list
             }
         }
@@ -358,8 +358,8 @@ class CommandLineInterfaceTest {
     }
 
     @Test
-    fun testTranspileToJsonWithoutFormatOptions() {
-        // With groups, format options are not available for JSON target
+    fun testTranspileToJsonWithRetainTags() {
+        // Test the --retain-tags option for JSON transpilation
         assertCommand(
             target = "json",
             input = """
@@ -375,13 +375,14 @@ class CommandLineInterfaceTest {
                     "inner": 123
                   }
                 }
-            """.trimIndent()
+            """.trimIndent(),
+            "--retain-tags"
         )
     }
 
     @Test
-    fun testTranspileToYamlWithoutFormatOptions() {
-        // With groups, format options are not available for YAML target
+    fun testTranspileToYamlWithRetainTags() {
+        // Test the --retain-tags option for YAML transpilation
         assertCommand(
             target = "yaml",
             input = """
@@ -394,7 +395,70 @@ class CommandLineInterfaceTest {
                 key: "value"
                 nested:
                   inner: 123
-            """.trimIndent()
+            """.trimIndent(),
+            "--retain-tags"
         )
+    }
+
+    @Test
+    fun testTranspileToJsonFromStdin() {
+        // Test reading from stdin (when no input file is provided)
+        val outputFile = File.createTempFile("output", ".json")
+        outputFile.deleteOnExit()
+        
+        val input = """
+            key: "value"
+            number: 42
+        """.trimIndent()
+        
+        val inputStream = input.byteInputStream()
+        val originalIn = System.`in`
+        System.setIn(inputStream)
+        
+        try {
+            main(arrayOf("json", "-o", outputFile.absolutePath))
+            assertEquals(
+                """
+                {
+                  "key": "value",
+                  "number": 42
+                }
+                """.trimIndent(),
+                outputFile.readText()
+            )
+        } finally {
+            System.setIn(originalIn)
+            outputFile.delete()
+        }
+    }
+
+    @Test
+    fun testTranspileToYamlFromStdin() {
+        // Test reading from stdin for YAML conversion
+        val outputFile = File.createTempFile("output", ".yaml")
+        outputFile.deleteOnExit()
+        
+        val input = """
+            key: "value"
+            number: 42
+        """.trimIndent()
+        
+        val inputStream = input.byteInputStream()
+        val originalIn = System.`in`
+        System.setIn(inputStream)
+        
+        try {
+            main(arrayOf("yaml", "-o", outputFile.absolutePath))
+            assertEquals(
+                """
+                key: "value"
+                number: 42
+                """.trimIndent(),
+                outputFile.readText()
+            )
+        } finally {
+            System.setIn(originalIn)
+            outputFile.delete()
+        }
     }
 }
