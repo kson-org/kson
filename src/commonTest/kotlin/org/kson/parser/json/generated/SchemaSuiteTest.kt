@@ -22,10 +22,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null,2,3,4]
+                [
+                    null,
+                    2,
+                    3,
+                    4
+                ]
             """,
             """
-                {"items":[{}],"additionalItems":{"type":"integer"}}
+                {
+                    "items": [
+                        {
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """additionalItems as schema -> additional items match schema""")
@@ -40,10 +53,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null,2,3,"foo"]
+                [
+                    null,
+                    2,
+                    3,
+                    "foo"
+                ]
             """,
             """
-                {"items":[{}],"additionalItems":{"type":"integer"}}
+                {
+                    "items": [
+                        {
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """additionalItems as schema -> additional items do not match schema""")
@@ -58,10 +84,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"items":{"type":"integer"},"additionalItems":{"type":"string"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    },
+                    "additionalItems": {
+                        "type": "string"
+                    }
+                }
             """,
             true,
             """when items is schema, additionalItems does nothing -> valid with a array of type integers""")
@@ -76,10 +113,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"2","3"]
+                [
+                    1,
+                    "2",
+                    "3"
+                ]
             """,
             """
-                {"items":{"type":"integer"},"additionalItems":{"type":"string"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    },
+                    "additionalItems": {
+                        "type": "string"
+                    }
+                }
             """,
             false,
             """when items is schema, additionalItems does nothing -> invalid with a array of mixed types""")
@@ -94,10 +142,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3,4,5]
+                [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
             """,
             """
-                {"items":{},"additionalItems":false}
+                {
+                    "items": {
+                    },
+                    "additionalItems": false
+                }
             """,
             true,
             """when items is schema, boolean additionalItems does nothing -> all items match schema""")
@@ -112,10 +170,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"items":[{},{},{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        },
+                        {
+                        },
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             true,
             """array of items with no additionalItems permitted -> empty array""")
@@ -130,10 +199,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"items":[{},{},{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        },
+                        {
+                        },
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             true,
             """array of items with no additionalItems permitted -> fewer number of items present (1)""")
@@ -148,10 +229,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"items":[{},{},{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        },
+                        {
+                        },
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             true,
             """array of items with no additionalItems permitted -> fewer number of items present (2)""")
@@ -166,10 +260,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"items":[{},{},{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        },
+                        {
+                        },
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             true,
             """array of items with no additionalItems permitted -> equal number of items present""")
@@ -184,10 +292,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3,4]
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
             """,
             """
-                {"items":[{},{},{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        },
+                        {
+                        },
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             false,
             """array of items with no additionalItems permitted -> additional items are not permitted""")
@@ -202,10 +325,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3,4,5]
+                [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ]
             """,
             """
-                {"additionalItems":false}
+                {
+                    "additionalItems": false
+                }
             """,
             true,
             """additionalItems as false without items -> items defaults to empty schema so everything is valid""")
@@ -220,10 +351,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"additionalItems":false}
+                {
+                    "additionalItems": false
+                }
             """,
             true,
             """additionalItems as false without items -> ignores non-arrays""")
@@ -238,10 +373,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo",false]
+                [
+                    1,
+                    "foo",
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"integer"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                }
             """,
             true,
             """additionalItems are allowed by default -> only the first item is validated""")
@@ -256,10 +401,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,null]
+                [
+                    1,
+                    null
+                ]
             """,
             """
-                {"allOf":[{"items":[{"type":"integer"}]}],"additionalItems":{"type":"boolean"}}
+                {
+                    "allOf": [
+                        {
+                            "items": [
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "boolean"
+                    }
+                }
             """,
             true,
             """additionalItems does not look in applicators, valid case -> items defined in allOf are not examined""")
@@ -274,10 +435,34 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"hello"]
+                [
+                    1,
+                    "hello"
+                ]
             """,
             """
-                {"allOf":[{"items":[{"type":"integer"},{"type":"string"}]}],"items":[{"type":"integer"}],"additionalItems":{"type":"boolean"}}
+                {
+                    "allOf": [
+                        {
+                            "items": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    ],
+                    "items": [
+                        {
+                            "type": "integer"
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "boolean"
+                    }
+                }
             """,
             false,
             """additionalItems does not look in applicators, invalid case -> items defined in allOf are not examined""")
@@ -292,10 +477,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["x",2,3]
+                [
+                    "x",
+                    2,
+                    3
+                ]
             """,
             """
-                {"items":[{"type":"string"}],"additionalItems":{"type":"integer"}}
+                {
+                    "items": [
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """items validation adjusts the starting index for additionalItems -> valid items""")
@@ -310,10 +508,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["x","y"]
+                [
+                    "x",
+                    "y"
+                ]
             """,
             """
-                {"items":[{"type":"string"}],"additionalItems":{"type":"integer"}}
+                {
+                    "items": [
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "additionalItems": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """items validation adjusts the starting index for additionalItems -> wrong type of second item""")
@@ -328,10 +538,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo","bar",37]
+                [
+                    "foo",
+                    "bar",
+                    37
+                ]
             """,
             """
-                {"items":[{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             false,
             """additionalItems with heterogeneous array -> heterogeneous invalid instance""")
@@ -346,10 +566,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null]
+                [
+                    null
+                ]
             """,
             """
-                {"items":[{}],"additionalItems":false}
+                {
+                    "items": [
+                        {
+                        }
+                    ],
+                    "additionalItems": false
+                }
             """,
             true,
             """additionalItems with heterogeneous array -> valid instance""")
@@ -364,10 +592,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null]
+                [
+                    null
+                ]
             """,
             """
-                {"additionalItems":{"type":"null"}}
+                {
+                    "additionalItems": {
+                        "type": "null"
+                    }
+                }
             """,
             true,
             """additionalItems with null instance elements -> allows null elements""")
@@ -381,10 +615,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """additionalProperties being false does not allow other properties -> no additional properties is valid""")
@@ -399,10 +647,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"quux":"boom"}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "quux": "boom"
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             false,
             """additionalProperties being false does not allow other properties -> an additional property is invalid""")
@@ -417,10 +681,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """additionalProperties being false does not allow other properties -> ignores arrays""")
@@ -438,7 +718,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobarbaz"
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """additionalProperties being false does not allow other properties -> ignores strings""")
@@ -456,7 +748,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """additionalProperties being false does not allow other properties -> ignores other non-objects""")
@@ -471,10 +775,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"vroom":2}
+                {
+                    "foo": 1,
+                    "vroom": 2
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"patternProperties":{"^v":{}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "patternProperties": {
+                        "^v": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """additionalProperties being false does not allow other properties -> patternProperties are not additional properties""")
@@ -489,10 +808,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"ármányos":2}
+                {
+                    "ármányos": 2
+                }
             """,
             """
-                {"patternProperties":{"^á":{}},"additionalProperties":false}
+                {
+                    "patternProperties": {
+                        "^á": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """non-ASCII pattern with additionalProperties -> matching the pattern is valid""")
@@ -507,10 +834,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"élmény":2}
+                {
+                    "élmény": 2
+                }
             """,
             """
-                {"patternProperties":{"^á":{}},"additionalProperties":false}
+                {
+                    "patternProperties": {
+                        "^á": {
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             false,
             """non-ASCII pattern with additionalProperties -> not matching the pattern is invalid""")
@@ -525,10 +860,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"additionalProperties":{"type":"boolean"}}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             true,
             """additionalProperties with schema -> no additional properties is valid""")
@@ -543,10 +890,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"quux":true}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "quux": true
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"additionalProperties":{"type":"boolean"}}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             true,
             """additionalProperties with schema -> an additional valid property is valid""")
@@ -561,10 +922,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"quux":12}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "quux": 12
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"additionalProperties":{"type":"boolean"}}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             false,
             """additionalProperties with schema -> an additional invalid property is invalid""")
@@ -579,10 +954,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":true}
+                {
+                    "foo": true
+                }
             """,
             """
-                {"additionalProperties":{"type":"boolean"}}
+                {
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             true,
             """additionalProperties can exist by itself -> an additional valid property is valid""")
@@ -597,10 +978,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"additionalProperties":{"type":"boolean"}}
+                {
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             false,
             """additionalProperties can exist by itself -> an additional invalid property is invalid""")
@@ -615,10 +1002,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"quux":true}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "quux": true
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}}}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    }
+                }
             """,
             true,
             """additionalProperties are allowed by default -> additional properties are allowed""")
@@ -633,10 +1031,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":true}
+                {
+                    "foo": 1,
+                    "bar": true
+                }
             """,
             """
-                {"allOf":[{"properties":{"foo":{}}}],"additionalProperties":{"type":"boolean"}}
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                }
+                            }
+                        }
+                    ],
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                }
             """,
             false,
             """additionalProperties does not look in applicators -> properties defined in allOf are not examined""")
@@ -651,10 +1064,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":null}
+                {
+                    "foo": null
+                }
             """,
             """
-                {"additionalProperties":{"type":"null"}}
+                {
+                    "additionalProperties": {
+                        "type": "null"
+                    }
+                }
             """,
             true,
             """additionalProperties with null valued instance properties -> allows null values""")
@@ -668,10 +1087,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz","bar":2}
+                {
+                    "foo": "baz",
+                    "bar": 2
+                }
             """,
             """
-                {"allOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """allOf -> allOf""")
@@ -686,10 +1131,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz"}
+                {
+                    "foo": "baz"
+                }
             """,
             """
-                {"allOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf -> mismatch second""")
@@ -704,10 +1174,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"allOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf -> mismatch first""")
@@ -722,10 +1217,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz","bar":"quux"}
+                {
+                    "foo": "baz",
+                    "bar": "quux"
+                }
             """,
             """
-                {"allOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf -> wrong type""")
@@ -740,10 +1261,45 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux","bar":2,"baz":null}
+                {
+                    "foo": "quux",
+                    "bar": 2,
+                    "baz": null
+                }
             """,
             """
-                {"properties":{"bar":{"type":"integer"}},"required":["bar"],"allOf":[{"properties":{"foo":{"type":"string"}},"required":["foo"]},{"properties":{"baz":{"type":"null"}},"required":["baz"]}]}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ],
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "baz": {
+                                    "type": "null"
+                                }
+                            },
+                            "required": [
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """allOf with base schema -> valid""")
@@ -758,10 +1314,44 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux","baz":null}
+                {
+                    "foo": "quux",
+                    "baz": null
+                }
             """,
             """
-                {"properties":{"bar":{"type":"integer"}},"required":["bar"],"allOf":[{"properties":{"foo":{"type":"string"}},"required":["foo"]},{"properties":{"baz":{"type":"null"}},"required":["baz"]}]}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ],
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "baz": {
+                                    "type": "null"
+                                }
+                            },
+                            "required": [
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with base schema -> mismatch base schema""")
@@ -776,10 +1366,44 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2,"baz":null}
+                {
+                    "bar": 2,
+                    "baz": null
+                }
             """,
             """
-                {"properties":{"bar":{"type":"integer"}},"required":["bar"],"allOf":[{"properties":{"foo":{"type":"string"}},"required":["foo"]},{"properties":{"baz":{"type":"null"}},"required":["baz"]}]}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ],
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "baz": {
+                                    "type": "null"
+                                }
+                            },
+                            "required": [
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with base schema -> mismatch first allOf""")
@@ -794,10 +1418,44 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux","bar":2}
+                {
+                    "foo": "quux",
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"bar":{"type":"integer"}},"required":["bar"],"allOf":[{"properties":{"foo":{"type":"string"}},"required":["foo"]},{"properties":{"baz":{"type":"null"}},"required":["baz"]}]}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ],
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "baz": {
+                                    "type": "null"
+                                }
+                            },
+                            "required": [
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with base schema -> mismatch second allOf""")
@@ -812,10 +1470,43 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"bar":{"type":"integer"}},"required":["bar"],"allOf":[{"properties":{"foo":{"type":"string"}},"required":["foo"]},{"properties":{"baz":{"type":"null"}},"required":["baz"]}]}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ],
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "baz": {
+                                    "type": "null"
+                                }
+                            },
+                            "required": [
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with base schema -> mismatch both""")
@@ -833,7 +1524,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 25
             """,
             """
-                {"allOf":[{"maximum":30},{"minimum":20}]}
+                {
+                    "allOf": [
+                        {
+                            "maximum": 30
+                        },
+                        {
+                            "minimum": 20
+                        }
+                    ]
+                }
             """,
             true,
             """allOf simple types -> valid""")
@@ -851,7 +1551,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 35
             """,
             """
-                {"allOf":[{"maximum":30},{"minimum":20}]}
+                {
+                    "allOf": [
+                        {
+                            "maximum": 30
+                        },
+                        {
+                            "minimum": 20
+                        }
+                    ]
+                }
             """,
             false,
             """allOf simple types -> mismatch one""")
@@ -869,7 +1578,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[true,true]}
+                {
+                    "allOf": [
+                        true,
+                        true
+                    ]
+                }
             """,
             true,
             """allOf with boolean schemas, all true -> any value is valid""")
@@ -887,7 +1601,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[true,false]}
+                {
+                    "allOf": [
+                        true,
+                        false
+                    ]
+                }
             """,
             false,
             """allOf with boolean schemas, some false -> any value is invalid""")
@@ -905,7 +1624,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[false,false]}
+                {
+                    "allOf": [
+                        false,
+                        false
+                    ]
+                }
             """,
             false,
             """allOf with boolean schemas, all false -> any value is invalid""")
@@ -923,7 +1647,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{}]}
+                {
+                    "allOf": [
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """allOf with one empty schema -> any data is valid""")
@@ -941,7 +1670,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{},{}]}
+                {
+                    "allOf": [
+                        {
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """allOf with two empty schemas -> any data is valid""")
@@ -959,7 +1695,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{},{"type":"number"}]}
+                {
+                    "allOf": [
+                        {
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
             """,
             true,
             """allOf with the first empty schema -> number is valid""")
@@ -977,7 +1721,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{},{"type":"number"}]}
+                {
+                    "allOf": [
+                        {
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with the first empty schema -> string is invalid""")
@@ -995,7 +1747,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{"type":"number"},{}]}
+                {
+                    "allOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """allOf with the last empty schema -> number is valid""")
@@ -1013,7 +1773,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"type":"number"},{}]}
+                {
+                    "allOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             false,
             """allOf with the last empty schema -> string is invalid""")
@@ -1031,7 +1799,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"allOf":[{"allOf":[{"type":"null"}]}]}
+                {
+                    "allOf": [
+                        {
+                            "allOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """nested allOf, to check validation semantics -> null is valid""")
@@ -1049,7 +1827,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"allOf":[{"allOf":[{"type":"null"}]}]}
+                {
+                    "allOf": [
+                        {
+                            "allOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """nested allOf, to check validation semantics -> anything non-null is invalid""")
@@ -1067,7 +1855,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: false, anyOf: false, oneOf: false""")
@@ -1085,7 +1889,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 5
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: false, anyOf: false, oneOf: true""")
@@ -1103,7 +1923,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: false, anyOf: true, oneOf: false""")
@@ -1121,7 +1957,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 15
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: false, anyOf: true, oneOf: true""")
@@ -1139,7 +1991,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: true, anyOf: false, oneOf: false""")
@@ -1157,7 +2025,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 10
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: true, anyOf: false, oneOf: true""")
@@ -1175,7 +2059,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 6
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             false,
             """allOf combined with anyOf, oneOf -> allOf: true, anyOf: true, oneOf: false""")
@@ -1193,7 +2093,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 30
             """,
             """
-                {"allOf":[{"multipleOf":2}],"anyOf":[{"multipleOf":3}],"oneOf":[{"multipleOf":5}]}
+                {
+                    "allOf": [
+                        {
+                            "multipleOf": 2
+                        }
+                    ],
+                    "anyOf": [
+                        {
+                            "multipleOf": 3
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "multipleOf": 5
+                        }
+                    ]
+                }
             """,
             true,
             """allOf combined with anyOf, oneOf -> allOf: true, anyOf: true, oneOf: true""")
@@ -1210,7 +2126,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"anyOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf -> first anyOf valid""")
@@ -1228,7 +2153,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.5
             """,
             """
-                {"anyOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf -> second anyOf valid""")
@@ -1246,7 +2180,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"anyOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf -> both anyOf valid""")
@@ -1264,7 +2207,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.5
             """,
             """
-                {"anyOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             false,
             """anyOf -> neither anyOf valid""")
@@ -1282,7 +2234,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"type":"string","anyOf":[{"maxLength":2},{"minLength":4}]}
+                {
+                    "type": "string",
+                    "anyOf": [
+                        {
+                            "maxLength": 2
+                        },
+                        {
+                            "minLength": 4
+                        }
+                    ]
+                }
             """,
             false,
             """anyOf with base schema -> mismatch base schema""")
@@ -1300,7 +2262,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"type":"string","anyOf":[{"maxLength":2},{"minLength":4}]}
+                {
+                    "type": "string",
+                    "anyOf": [
+                        {
+                            "maxLength": 2
+                        },
+                        {
+                            "minLength": 4
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf with base schema -> one anyOf valid""")
@@ -1318,7 +2290,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"string","anyOf":[{"maxLength":2},{"minLength":4}]}
+                {
+                    "type": "string",
+                    "anyOf": [
+                        {
+                            "maxLength": 2
+                        },
+                        {
+                            "minLength": 4
+                        }
+                    ]
+                }
             """,
             false,
             """anyOf with base schema -> both anyOf invalid""")
@@ -1336,7 +2318,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"anyOf":[true,true]}
+                {
+                    "anyOf": [
+                        true,
+                        true
+                    ]
+                }
             """,
             true,
             """anyOf with boolean schemas, all true -> any value is valid""")
@@ -1354,7 +2341,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"anyOf":[true,false]}
+                {
+                    "anyOf": [
+                        true,
+                        false
+                    ]
+                }
             """,
             true,
             """anyOf with boolean schemas, some true -> any value is valid""")
@@ -1372,7 +2364,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"anyOf":[false,false]}
+                {
+                    "anyOf": [
+                        false,
+                        false
+                    ]
+                }
             """,
             false,
             """anyOf with boolean schemas, all false -> any value is invalid""")
@@ -1387,10 +2384,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"anyOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf complex types -> first anyOf valid (complex)""")
@@ -1405,10 +2427,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz"}
+                {
+                    "foo": "baz"
+                }
             """,
             """
-                {"anyOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf complex types -> second anyOf valid (complex)""")
@@ -1423,10 +2470,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz","bar":2}
+                {
+                    "foo": "baz",
+                    "bar": 2
+                }
             """,
             """
-                {"anyOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf complex types -> both anyOf valid (complex)""")
@@ -1441,10 +2514,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":2,"bar":"quux"}
+                {
+                    "foo": 2,
+                    "bar": "quux"
+                }
             """,
             """
-                {"anyOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "anyOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """anyOf complex types -> neither anyOf valid (complex)""")
@@ -1462,7 +2561,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"anyOf":[{"type":"number"},{}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf with one empty schema -> string is valid""")
@@ -1480,7 +2587,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"anyOf":[{"type":"number"},{}]}
+                {
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """anyOf with one empty schema -> number is valid""")
@@ -1498,7 +2613,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"anyOf":[{"anyOf":[{"type":"null"}]}]}
+                {
+                    "anyOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """nested anyOf, to check validation semantics -> null is valid""")
@@ -1516,7 +2641,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"anyOf":[{"anyOf":[{"type":"null"}]}]}
+                {
+                    "anyOf": [
+                        {
+                            "anyOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """nested anyOf, to check validation semantics -> anything non-null is invalid""")
@@ -1620,7 +2755,9 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
                 true
@@ -1638,7 +2775,8 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
                 true
@@ -1656,7 +2794,9 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
                 true
@@ -1674,7 +2814,8 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
                 true
@@ -1782,7 +2923,9 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
                 false
@@ -1800,7 +2943,8 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
                 false
@@ -1818,7 +2962,9 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
                 false
@@ -1836,7 +2982,8 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
                 false
@@ -1856,7 +3003,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2
             """,
             """
-                {"const":2}
+                {
+                    "const": 2
+                }
             """,
             true,
             """const validation -> same value is valid""")
@@ -1874,7 +3023,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 5
             """,
             """
-                {"const":2}
+                {
+                    "const": 2
+                }
             """,
             false,
             """const validation -> another value is invalid""")
@@ -1892,7 +3043,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"const":2}
+                {
+                    "const": 2
+                }
             """,
             false,
             """const validation -> another type is invalid""")
@@ -1907,10 +3060,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar","baz":"bax"}
+                {
+                    "foo": "bar",
+                    "baz": "bax"
+                }
             """,
             """
-                {"const":{"foo":"bar","baz":"bax"}}
+                {
+                    "const": {
+                        "foo": "bar",
+                        "baz": "bax"
+                    }
+                }
             """,
             true,
             """const with object -> same object is valid""")
@@ -1925,10 +3086,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"baz":"bax","foo":"bar"}
+                {
+                    "baz": "bax",
+                    "foo": "bar"
+                }
             """,
             """
-                {"const":{"foo":"bar","baz":"bax"}}
+                {
+                    "const": {
+                        "foo": "bar",
+                        "baz": "bax"
+                    }
+                }
             """,
             true,
             """const with object -> same object with different property order is valid""")
@@ -1943,10 +3112,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"const":{"foo":"bar","baz":"bax"}}
+                {
+                    "const": {
+                        "foo": "bar",
+                        "baz": "bax"
+                    }
+                }
             """,
             false,
             """const with object -> another object is invalid""")
@@ -1961,10 +3137,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"const":{"foo":"bar","baz":"bax"}}
+                {
+                    "const": {
+                        "foo": "bar",
+                        "baz": "bax"
+                    }
+                }
             """,
             false,
             """const with object -> another type is invalid""")
@@ -1979,10 +3163,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar"}]
+                [
+                    {
+                        "foo": "bar"
+                    }
+                ]
             """,
             """
-                {"const":[{"foo":"bar"}]}
+                {
+                    "const": [
+                        {
+                            "foo": "bar"
+                        }
+                    ]
+                }
             """,
             true,
             """const with array -> same array is valid""")
@@ -1997,10 +3191,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [2]
+                [
+                    2
+                ]
             """,
             """
-                {"const":[{"foo":"bar"}]}
+                {
+                    "const": [
+                        {
+                            "foo": "bar"
+                        }
+                    ]
+                }
             """,
             false,
             """const with array -> another array item is invalid""")
@@ -2015,10 +3217,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"const":[{"foo":"bar"}]}
+                {
+                    "const": [
+                        {
+                            "foo": "bar"
+                        }
+                    ]
+                }
             """,
             false,
             """const with array -> array with additional items is invalid""")
@@ -2036,7 +3248,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"const":null}
+                {
+                    "const": null
+                }
             """,
             true,
             """const with null -> null is valid""")
@@ -2054,7 +3268,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"const":null}
+                {
+                    "const": null
+                }
             """,
             false,
             """const with null -> not null is invalid""")
@@ -2072,7 +3288,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"const":false}
+                {
+                    "const": false
+                }
             """,
             true,
             """const with false does not match 0 -> false is valid""")
@@ -2090,7 +3308,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"const":false}
+                {
+                    "const": false
+                }
             """,
             false,
             """const with false does not match 0 -> integer zero is invalid""")
@@ -2108,7 +3328,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.0
             """,
             """
-                {"const":false}
+                {
+                    "const": false
+                }
             """,
             false,
             """const with false does not match 0 -> float zero is invalid""")
@@ -2126,7 +3348,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"const":true}
+                {
+                    "const": true
+                }
             """,
             true,
             """const with true does not match 1 -> true is valid""")
@@ -2144,7 +3368,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"const":true}
+                {
+                    "const": true
+                }
             """,
             false,
             """const with true does not match 1 -> integer one is invalid""")
@@ -2162,7 +3388,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"const":true}
+                {
+                    "const": true
+                }
             """,
             false,
             """const with true does not match 1 -> float one is invalid""")
@@ -2177,10 +3405,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false]
+                [
+                    false
+                ]
             """,
             """
-                {"const":[false]}
+                {
+                    "const": [
+                        false
+                    ]
+                }
             """,
             true,
             """const with [false] does not match [0] -> [false] is valid""")
@@ -2195,10 +3429,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0]
+                [
+                    0
+                ]
             """,
             """
-                {"const":[false]}
+                {
+                    "const": [
+                        false
+                    ]
+                }
             """,
             false,
             """const with [false] does not match [0] -> [0] is invalid""")
@@ -2213,10 +3453,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0.0]
+                [
+                    0.0
+                ]
             """,
             """
-                {"const":[false]}
+                {
+                    "const": [
+                        false
+                    ]
+                }
             """,
             false,
             """const with [false] does not match [0] -> [0.0] is invalid""")
@@ -2231,10 +3477,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true]
+                [
+                    true
+                ]
             """,
             """
-                {"const":[true]}
+                {
+                    "const": [
+                        true
+                    ]
+                }
             """,
             true,
             """const with [true] does not match [1] -> [true] is valid""")
@@ -2249,10 +3501,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"const":[true]}
+                {
+                    "const": [
+                        true
+                    ]
+                }
             """,
             false,
             """const with [true] does not match [1] -> [1] is invalid""")
@@ -2267,10 +3525,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1.0]
+                [
+                    1.0
+                ]
             """,
             """
-                {"const":[true]}
+                {
+                    "const": [
+                        true
+                    ]
+                }
             """,
             false,
             """const with [true] does not match [1] -> [1.0] is invalid""")
@@ -2285,10 +3549,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":false}
+                {
+                    "a": false
+                }
             """,
             """
-                {"const":{"a":false}}
+                {
+                    "const": {
+                        "a": false
+                    }
+                }
             """,
             true,
             """const with {"a": false} does not match {"a": 0} -> {"a": false} is valid""")
@@ -2303,10 +3573,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":0}
+                {
+                    "a": 0
+                }
             """,
             """
-                {"const":{"a":false}}
+                {
+                    "const": {
+                        "a": false
+                    }
+                }
             """,
             false,
             """const with {"a": false} does not match {"a": 0} -> {"a": 0} is invalid""")
@@ -2321,10 +3597,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":0.0}
+                {
+                    "a": 0.0
+                }
             """,
             """
-                {"const":{"a":false}}
+                {
+                    "const": {
+                        "a": false
+                    }
+                }
             """,
             false,
             """const with {"a": false} does not match {"a": 0} -> {"a": 0.0} is invalid""")
@@ -2339,10 +3621,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":true}
+                {
+                    "a": true
+                }
             """,
             """
-                {"const":{"a":true}}
+                {
+                    "const": {
+                        "a": true
+                    }
+                }
             """,
             true,
             """const with {"a": true} does not match {"a": 1} -> {"a": true} is valid""")
@@ -2357,10 +3645,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":1}
+                {
+                    "a": 1
+                }
             """,
             """
-                {"const":{"a":true}}
+                {
+                    "const": {
+                        "a": true
+                    }
+                }
             """,
             false,
             """const with {"a": true} does not match {"a": 1} -> {"a": 1} is invalid""")
@@ -2375,10 +3669,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":1.0}
+                {
+                    "a": 1.0
+                }
             """,
             """
-                {"const":{"a":true}}
+                {
+                    "const": {
+                        "a": true
+                    }
+                }
             """,
             false,
             """const with {"a": true} does not match {"a": 1} -> {"a": 1.0} is invalid""")
@@ -2396,7 +3696,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             false,
             """const with 0 does not match other zero-like types -> false is invalid""")
@@ -2414,7 +3716,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             true,
             """const with 0 does not match other zero-like types -> integer zero is valid""")
@@ -2432,7 +3736,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.0
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             true,
             """const with 0 does not match other zero-like types -> float zero is valid""")
@@ -2447,10 +3753,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             false,
             """const with 0 does not match other zero-like types -> empty object is invalid""")
@@ -2465,10 +3774,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             false,
             """const with 0 does not match other zero-like types -> empty array is invalid""")
@@ -2486,7 +3798,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"const":0}
+                {
+                    "const": 0
+                }
             """,
             false,
             """const with 0 does not match other zero-like types -> empty string is invalid""")
@@ -2504,7 +3818,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"const":1}
+                {
+                    "const": 1
+                }
             """,
             false,
             """const with 1 does not match true -> true is invalid""")
@@ -2522,7 +3838,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"const":1}
+                {
+                    "const": 1
+                }
             """,
             true,
             """const with 1 does not match true -> integer one is valid""")
@@ -2540,7 +3858,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"const":1}
+                {
+                    "const": 1
+                }
             """,
             true,
             """const with 1 does not match true -> float one is valid""")
@@ -2558,7 +3878,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2
             """,
             """
-                {"const":-2.0}
+                {
+                    "const": -2.0
+                }
             """,
             true,
             """const with -2.0 matches integer and float types -> integer -2 is valid""")
@@ -2576,7 +3898,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2
             """,
             """
-                {"const":-2.0}
+                {
+                    "const": -2.0
+                }
             """,
             false,
             """const with -2.0 matches integer and float types -> integer 2 is invalid""")
@@ -2594,7 +3918,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2.0
             """,
             """
-                {"const":-2.0}
+                {
+                    "const": -2.0
+                }
             """,
             true,
             """const with -2.0 matches integer and float types -> float -2.0 is valid""")
@@ -2612,7 +3938,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.0
             """,
             """
-                {"const":-2.0}
+                {
+                    "const": -2.0
+                }
             """,
             false,
             """const with -2.0 matches integer and float types -> float 2.0 is invalid""")
@@ -2630,7 +3958,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2.00001
             """,
             """
-                {"const":-2.0}
+                {
+                    "const": -2.0
+                }
             """,
             false,
             """const with -2.0 matches integer and float types -> float -2.00001 is invalid""")
@@ -2648,7 +3978,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 9007199254740992
             """,
             """
-                {"const":9007199254740992}
+                {
+                    "const": 9007199254740992
+                }
             """,
             true,
             """float and integers are equal up to 64-bit representation limits -> integer is valid""")
@@ -2666,7 +3998,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 9007199254740991
             """,
             """
-                {"const":9007199254740992}
+                {
+                    "const": 9007199254740992
+                }
             """,
             false,
             """float and integers are equal up to 64-bit representation limits -> integer minus one is invalid""")
@@ -2681,10 +4015,12 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                9007199254740992.0
+                9.007199254740992E15
             """,
             """
-                {"const":9007199254740992}
+                {
+                    "const": 9007199254740992
+                }
             """,
             true,
             """float and integers are equal up to 64-bit representation limits -> float is valid""")
@@ -2699,10 +4035,12 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                9007199254740991.0
+                9.007199254740991E15
             """,
             """
-                {"const":9007199254740992}
+                {
+                    "const": 9007199254740992
+                }
             """,
             false,
             """float and integers are equal up to 64-bit representation limits -> float minus one is invalid""")
@@ -2720,7 +4058,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hello\u0000there"
             """,
             """
-                {"const":"hello\u0000there"}
+                {
+                    "const": "hello\u0000there"
+                }
             """,
             true,
             """nul characters in strings -> match string with nul""")
@@ -2738,7 +4078,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hellothere"
             """,
             """
-                {"const":"hello\u0000there"}
+                {
+                    "const": "hello\u0000there"
+                }
             """,
             false,
             """nul characters in strings -> do not match string lacking nul""")
@@ -2752,10 +4094,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,4,5]
+                [
+                    3,
+                    4,
+                    5
+                ]
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             true,
             """contains keyword validation -> array with item matching schema (5) is valid""")
@@ -2770,10 +4120,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,4,6]
+                [
+                    3,
+                    4,
+                    6
+                ]
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             true,
             """contains keyword validation -> array with item matching schema (6) is valid""")
@@ -2788,10 +4146,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,4,5,6]
+                [
+                    3,
+                    4,
+                    5,
+                    6
+                ]
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             true,
             """contains keyword validation -> array with two items matching schema (5, 6) is valid""")
@@ -2806,10 +4173,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [2,3,4]
+                [
+                    2,
+                    3,
+                    4
+                ]
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             false,
             """contains keyword validation -> array without items matching schema is invalid""")
@@ -2824,10 +4199,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             false,
             """contains keyword validation -> empty array is invalid""")
@@ -2842,10 +4222,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"contains":{"minimum":5}}
+                {
+                    "contains": {
+                        "minimum": 5
+                    }
+                }
             """,
             true,
             """contains keyword validation -> not array is valid""")
@@ -2860,10 +4245,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,4,5]
+                [
+                    3,
+                    4,
+                    5
+                ]
             """,
             """
-                {"contains":{"const":5}}
+                {
+                    "contains": {
+                        "const": 5
+                    }
+                }
             """,
             true,
             """contains keyword with const keyword -> array with item 5 is valid""")
@@ -2878,10 +4271,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,4,5,5]
+                [
+                    3,
+                    4,
+                    5,
+                    5
+                ]
             """,
             """
-                {"contains":{"const":5}}
+                {
+                    "contains": {
+                        "const": 5
+                    }
+                }
             """,
             true,
             """contains keyword with const keyword -> array with two items 5 is valid""")
@@ -2896,10 +4298,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3,4]
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
             """,
             """
-                {"contains":{"const":5}}
+                {
+                    "contains": {
+                        "const": 5
+                    }
+                }
             """,
             false,
             """contains keyword with const keyword -> array without item 5 is invalid""")
@@ -2914,10 +4325,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"contains":true}
+                {
+                    "contains": true
+                }
             """,
             true,
             """contains keyword with boolean schema true -> any non-empty array is valid""")
@@ -2932,10 +4347,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"contains":true}
+                {
+                    "contains": true
+                }
             """,
             false,
             """contains keyword with boolean schema true -> empty array is invalid""")
@@ -2950,10 +4368,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"contains":false}
+                {
+                    "contains": false
+                }
             """,
             false,
             """contains keyword with boolean schema false -> any non-empty array is invalid""")
@@ -2968,10 +4390,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"contains":false}
+                {
+                    "contains": false
+                }
             """,
             false,
             """contains keyword with boolean schema false -> empty array is invalid""")
@@ -2989,7 +4414,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "contains does not apply to strings"
             """,
             """
-                {"contains":false}
+                {
+                    "contains": false
+                }
             """,
             true,
             """contains keyword with boolean schema false -> non-arrays are valid""")
@@ -3004,10 +4431,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [2,4,8]
+                [
+                    2,
+                    4,
+                    8
+                ]
             """,
             """
-                {"items":{"multipleOf":2},"contains":{"multipleOf":3}}
+                {
+                    "items": {
+                        "multipleOf": 2
+                    },
+                    "contains": {
+                        "multipleOf": 3
+                    }
+                }
             """,
             false,
             """items + contains -> matches items, does not match contains""")
@@ -3022,10 +4460,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [3,6,9]
+                [
+                    3,
+                    6,
+                    9
+                ]
             """,
             """
-                {"items":{"multipleOf":2},"contains":{"multipleOf":3}}
+                {
+                    "items": {
+                        "multipleOf": 2
+                    },
+                    "contains": {
+                        "multipleOf": 3
+                    }
+                }
             """,
             false,
             """items + contains -> does not match items, matches contains""")
@@ -3040,10 +4489,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [6,12]
+                [
+                    6,
+                    12
+                ]
             """,
             """
-                {"items":{"multipleOf":2},"contains":{"multipleOf":3}}
+                {
+                    "items": {
+                        "multipleOf": 2
+                    },
+                    "contains": {
+                        "multipleOf": 3
+                    }
+                }
             """,
             true,
             """items + contains -> matches both items and contains""")
@@ -3058,10 +4517,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,5]
+                [
+                    1,
+                    5
+                ]
             """,
             """
-                {"items":{"multipleOf":2},"contains":{"multipleOf":3}}
+                {
+                    "items": {
+                        "multipleOf": 2
+                    },
+                    "contains": {
+                        "multipleOf": 3
+                    }
+                }
             """,
             false,
             """items + contains -> matches neither items nor contains""")
@@ -3076,10 +4545,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"contains":{"if":false,"else":true}}
+                {
+                    "contains": {
+                        "if": false,
+                        "else": true
+                    }
+                }
             """,
             true,
             """contains with false if subschema -> any non-empty array is valid""")
@@ -3094,10 +4570,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"contains":{"if":false,"else":true}}
+                {
+                    "contains": {
+                        "if": false,
+                        "else": true
+                    }
+                }
             """,
             false,
             """contains with false if subschema -> empty array is invalid""")
@@ -3112,10 +4594,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null]
+                [
+                    null
+                ]
             """,
             """
-                {"contains":{"type":"null"}}
+                {
+                    "contains": {
+                        "type": "null"
+                    }
+                }
             """,
             true,
             """contains with null instance elements -> allows null items""")
@@ -3129,10 +4617,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":13}
+                {
+                    "foo": 13
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer","default":[]}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer",
+                            "default": [
+                            ]
+                        }
+                    }
+                }
             """,
             true,
             """invalid type for default -> valid when property is specified""")
@@ -3147,10 +4645,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer","default":[]}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer",
+                            "default": [
+                            ]
+                        }
+                    }
+                }
             """,
             true,
             """invalid type for default -> still valid when the invalid default is used""")
@@ -3165,10 +4672,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":"good"}
+                {
+                    "bar": "good"
+                }
             """,
             """
-                {"properties":{"bar":{"type":"string","minLength":4,"default":"bad"}}}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "string",
+                            "minLength": 4,
+                            "default": "bad"
+                        }
+                    }
+                }
             """,
             true,
             """invalid string value for default -> valid when property is specified""")
@@ -3183,10 +4700,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"bar":{"type":"string","minLength":4,"default":"bad"}}}
+                {
+                    "properties": {
+                        "bar": {
+                            "type": "string",
+                            "minLength": 4,
+                            "default": "bad"
+                        }
+                    }
+                }
             """,
             true,
             """invalid string value for default -> still valid when the invalid default is used""")
@@ -3201,10 +4727,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"alpha":1}
+                {
+                    "alpha": 1
+                }
             """,
             """
-                {"type":"object","properties":{"alpha":{"type":"number","maximum":3,"default":5}}}
+                {
+                    "type": "object",
+                    "properties": {
+                        "alpha": {
+                            "type": "number",
+                            "maximum": 3,
+                            "default": 5
+                        }
+                    }
+                }
             """,
             true,
             """the default keyword does not do anything if the property is missing -> an explicit property value is checked against maximum (passing)""")
@@ -3219,10 +4756,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"alpha":5}
+                {
+                    "alpha": 5
+                }
             """,
             """
-                {"type":"object","properties":{"alpha":{"type":"number","maximum":3,"default":5}}}
+                {
+                    "type": "object",
+                    "properties": {
+                        "alpha": {
+                            "type": "number",
+                            "maximum": 3,
+                            "default": 5
+                        }
+                    }
+                }
             """,
             false,
             """the default keyword does not do anything if the property is missing -> an explicit property value is checked against maximum (failing)""")
@@ -3237,10 +4785,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"object","properties":{"alpha":{"type":"number","maximum":3,"default":5}}}
+                {
+                    "type": "object",
+                    "properties": {
+                        "alpha": {
+                            "type": "number",
+                            "maximum": 3,
+                            "default": 5
+                        }
+                    }
+                }
             """,
             true,
             """the default keyword does not do anything if the property is missing -> missing properties are not filled in with the default""")
@@ -3260,10 +4818,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"definitions":{"foo":{"type":"integer"}}}
+                {
+                    "definitions": {
+                        "foo": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             """
-                {"${'$'}ref":"http://json-schema.org/draft-07/schema#"}
+                {
+                    "${'$'}ref": "http://json-schema.org/draft-07/schema#"
+                }
             """,
             true,
             """validate definition against metaschema -> valid definition schema""")
@@ -3284,10 +4850,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"definitions":{"foo":{"type":1}}}
+                {
+                    "definitions": {
+                        "foo": {
+                            "type": 1
+                        }
+                    }
+                }
             """,
             """
-                {"${'$'}ref":"http://json-schema.org/draft-07/schema#"}
+                {
+                    "${'$'}ref": "http://json-schema.org/draft-07/schema#"
+                }
             """,
             false,
             """validate definition against metaschema -> invalid definition schema""")
@@ -3301,10 +4875,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> neither""")
@@ -3319,10 +4900,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> nondependant""")
@@ -3337,10 +4926,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> with dependency""")
@@ -3355,10 +4953,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             false,
             """dependencies -> missing dependency""")
@@ -3373,10 +4979,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["bar"]
+                [
+                    "bar"
+                ]
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> ignores arrays""")
@@ -3394,7 +5008,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> ignores strings""")
@@ -3412,7 +5032,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"dependencies":{"bar":["foo"]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                            "foo"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies -> ignores other non-objects""")
@@ -3427,10 +5053,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"dependencies":{"bar":[]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with empty array -> empty object""")
@@ -3445,10 +5077,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"bar":[]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with empty array -> object with one property""")
@@ -3466,7 +5105,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"dependencies":{"bar":[]}}
+                {
+                    "dependencies": {
+                        "bar": [
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with empty array -> non-object is valid""")
@@ -3481,10 +5125,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             true,
             """multiple dependencies -> neither""")
@@ -3499,10 +5151,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             true,
             """multiple dependencies -> nondependants""")
@@ -3517,10 +5179,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"quux":3}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "quux": 3
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             true,
             """multiple dependencies -> with dependencies""")
@@ -3535,10 +5208,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"quux":2}
+                {
+                    "foo": 1,
+                    "quux": 2
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             false,
             """multiple dependencies -> missing dependency""")
@@ -3553,10 +5236,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":1,"quux":2}
+                {
+                    "bar": 1,
+                    "quux": 2
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             false,
             """multiple dependencies -> missing other dependency""")
@@ -3571,10 +5264,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"quux":1}
+                {
+                    "quux": 1
+                }
             """,
             """
-                {"dependencies":{"quux":["foo","bar"]}}
+                {
+                    "dependencies": {
+                        "quux": [
+                            "foo",
+                            "bar"
+                        ]
+                    }
+                }
             """,
             false,
             """multiple dependencies -> missing both dependencies""")
@@ -3589,10 +5291,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"bar":{"properties":{"foo":{"type":"integer"},"bar":{"type":"integer"}}}}}
+                {
+                    "dependencies": {
+                        "bar": {
+                            "properties": {
+                                "foo": {
+                                    "type": "integer"
+                                },
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """multiple dependencies subschema -> valid""")
@@ -3607,10 +5325,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux"}
+                {
+                    "foo": "quux"
+                }
             """,
             """
-                {"dependencies":{"bar":{"properties":{"foo":{"type":"integer"},"bar":{"type":"integer"}}}}}
+                {
+                    "dependencies": {
+                        "bar": {
+                            "properties": {
+                                "foo": {
+                                    "type": "integer"
+                                },
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """multiple dependencies subschema -> no dependency""")
@@ -3625,10 +5358,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux","bar":2}
+                {
+                    "foo": "quux",
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"bar":{"properties":{"foo":{"type":"integer"},"bar":{"type":"integer"}}}}}
+                {
+                    "dependencies": {
+                        "bar": {
+                            "properties": {
+                                "foo": {
+                                    "type": "integer"
+                                },
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """multiple dependencies subschema -> wrong type""")
@@ -3643,10 +5392,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":2,"bar":"quux"}
+                {
+                    "foo": 2,
+                    "bar": "quux"
+                }
             """,
             """
-                {"dependencies":{"bar":{"properties":{"foo":{"type":"integer"},"bar":{"type":"integer"}}}}}
+                {
+                    "dependencies": {
+                        "bar": {
+                            "properties": {
+                                "foo": {
+                                    "type": "integer"
+                                },
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """multiple dependencies subschema -> wrong type other""")
@@ -3661,10 +5426,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"quux","bar":"quux"}
+                {
+                    "foo": "quux",
+                    "bar": "quux"
+                }
             """,
             """
-                {"dependencies":{"bar":{"properties":{"foo":{"type":"integer"},"bar":{"type":"integer"}}}}}
+                {
+                    "dependencies": {
+                        "bar": {
+                            "properties": {
+                                "foo": {
+                                    "type": "integer"
+                                },
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """multiple dependencies subschema -> wrong type both""")
@@ -3679,10 +5460,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"dependencies":{"foo":true,"bar":false}}
+                {
+                    "dependencies": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             true,
             """dependencies with boolean subschemas -> object with property having schema true is valid""")
@@ -3697,10 +5485,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"foo":true,"bar":false}}
+                {
+                    "dependencies": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             false,
             """dependencies with boolean subschemas -> object with property having schema false is invalid""")
@@ -3715,10 +5510,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"dependencies":{"foo":true,"bar":false}}
+                {
+                    "dependencies": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             false,
             """dependencies with boolean subschemas -> object with both properties is invalid""")
@@ -3733,10 +5536,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"dependencies":{"foo":true,"bar":false}}
+                {
+                    "dependencies": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             true,
             """dependencies with boolean subschemas -> empty object is valid""")
@@ -3751,10 +5560,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":1,"foo\rbar":2}
+                {
+                    "foo\nbar": 1,
+                    "foo\rbar": 2
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with escaped characters -> valid object 1""")
@@ -3769,10 +5598,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\tbar":1,"a":2,"b":3,"c":4}
+                {
+                    "foo\tbar": 1,
+                    "a": 2,
+                    "b": 3,
+                    "c": 4
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with escaped characters -> valid object 2""")
@@ -3787,10 +5638,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo'bar":1,"foo\"bar":2}
+                {
+                    "foo'bar": 1,
+                    "foo\"bar": 2
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             true,
             """dependencies with escaped characters -> valid object 3""")
@@ -3805,10 +5676,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":1,"foo":2}
+                {
+                    "foo\nbar": 1,
+                    "foo": 2
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             false,
             """dependencies with escaped characters -> invalid object 1""")
@@ -3823,10 +5714,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\tbar":1,"a":2}
+                {
+                    "foo\tbar": 1,
+                    "a": 2
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             false,
             """dependencies with escaped characters -> invalid object 2""")
@@ -3841,10 +5752,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo'bar":1}
+                {
+                    "foo'bar": 1
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             false,
             """dependencies with escaped characters -> invalid object 3""")
@@ -3859,10 +5789,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\"bar":2}
+                {
+                    "foo\"bar": 2
+                }
             """,
             """
-                {"dependencies":{"foo\nbar":["foo\rbar"],"foo\tbar":{"minProperties":4},"foo'bar":{"required":["foo\"bar"]},"foo\"bar":["foo'bar"]}}
+                {
+                    "dependencies": {
+                        "foo\nbar": [
+                            "foo\rbar"
+                        ],
+                        "foo\tbar": {
+                            "minProperties": 4
+                        },
+                        "foo'bar": {
+                            "required": [
+                                "foo\"bar"
+                            ]
+                        },
+                        "foo\"bar": [
+                            "foo'bar"
+                        ]
+                    }
+                }
             """,
             false,
             """dependencies with escaped characters -> invalid object 4""")
@@ -3877,10 +5826,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"properties":{"foo":{}},"dependencies":{"foo":{"properties":{"bar":{}},"additionalProperties":false}}}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    },
+                    "dependencies": {
+                        "foo": {
+                            "properties": {
+                                "bar": {
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
             """,
             false,
             """dependent subschema incompatible with root -> matches root""")
@@ -3895,10 +5860,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":1}
+                {
+                    "bar": 1
+                }
             """,
             """
-                {"properties":{"foo":{}},"dependencies":{"foo":{"properties":{"bar":{}},"additionalProperties":false}}}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    },
+                    "dependencies": {
+                        "foo": {
+                            "properties": {
+                                "bar": {
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
             """,
             true,
             """dependent subschema incompatible with root -> matches dependency""")
@@ -3913,10 +5894,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"foo":{}},"dependencies":{"foo":{"properties":{"bar":{}},"additionalProperties":false}}}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    },
+                    "dependencies": {
+                        "foo": {
+                            "properties": {
+                                "bar": {
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
             """,
             false,
             """dependent subschema incompatible with root -> matches both""")
@@ -3931,10 +5929,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"baz":1}
+                {
+                    "baz": 1
+                }
             """,
             """
-                {"properties":{"foo":{}},"dependencies":{"foo":{"properties":{"bar":{}},"additionalProperties":false}}}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    },
+                    "dependencies": {
+                        "foo": {
+                            "properties": {
+                                "bar": {
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                }
             """,
             true,
             """dependent subschema incompatible with root -> no dependency""")
@@ -3951,7 +5965,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"enum":[1,2,3]}
+                {
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
+                }
             """,
             true,
             """simple enum validation -> one of the enum is valid""")
@@ -3969,7 +5989,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 4
             """,
             """
-                {"enum":[1,2,3]}
+                {
+                    "enum": [
+                        1,
+                        2,
+                        3
+                    ]
+                }
             """,
             false,
             """simple enum validation -> something else is invalid""")
@@ -3984,10 +6010,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"enum":[6,"foo",[],true,{"foo":12}]}
+                {
+                    "enum": [
+                        6,
+                        "foo",
+                        [
+                        ],
+                        true,
+                        {
+                            "foo": 12
+                        }
+                    ]
+                }
             """,
             true,
             """heterogeneous enum validation -> one of the enum is valid""")
@@ -4005,7 +6043,18 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"enum":[6,"foo",[],true,{"foo":12}]}
+                {
+                    "enum": [
+                        6,
+                        "foo",
+                        [
+                        ],
+                        true,
+                        {
+                            "foo": 12
+                        }
+                    ]
+                }
             """,
             false,
             """heterogeneous enum validation -> something else is invalid""")
@@ -4020,10 +6069,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":false}
+                {
+                    "foo": false
+                }
             """,
             """
-                {"enum":[6,"foo",[],true,{"foo":12}]}
+                {
+                    "enum": [
+                        6,
+                        "foo",
+                        [
+                        ],
+                        true,
+                        {
+                            "foo": 12
+                        }
+                    ]
+                }
             """,
             false,
             """heterogeneous enum validation -> objects are deep compared""")
@@ -4038,10 +6100,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"enum":[6,"foo",[],true,{"foo":12}]}
+                {
+                    "enum": [
+                        6,
+                        "foo",
+                        [
+                        ],
+                        true,
+                        {
+                            "foo": 12
+                        }
+                    ]
+                }
             """,
             true,
             """heterogeneous enum validation -> valid object matches""")
@@ -4056,10 +6131,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12,"boo":42}
+                {
+                    "foo": 12,
+                    "boo": 42
+                }
             """,
             """
-                {"enum":[6,"foo",[],true,{"foo":12}]}
+                {
+                    "enum": [
+                        6,
+                        "foo",
+                        [
+                        ],
+                        true,
+                        {
+                            "foo": 12
+                        }
+                    ]
+                }
             """,
             false,
             """heterogeneous enum validation -> extra properties in object is invalid""")
@@ -4077,7 +6166,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"enum":[6,null]}
+                {
+                    "enum": [
+                        6,
+                        null
+                    ]
+                }
             """,
             true,
             """heterogeneous enum-with-null validation -> null is valid""")
@@ -4095,7 +6189,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 6
             """,
             """
-                {"enum":[6,null]}
+                {
+                    "enum": [
+                        6,
+                        null
+                    ]
+                }
             """,
             true,
             """heterogeneous enum-with-null validation -> number is valid""")
@@ -4113,7 +6212,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "test"
             """,
             """
-                {"enum":[6,null]}
+                {
+                    "enum": [
+                        6,
+                        null
+                    ]
+                }
             """,
             false,
             """heterogeneous enum-with-null validation -> something else is invalid""")
@@ -4128,10 +6232,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foo","bar":"bar"}
+                {
+                    "foo": "foo",
+                    "bar": "bar"
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             true,
             """enums in properties -> both properties are valid""")
@@ -4146,10 +6270,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foot","bar":"bar"}
+                {
+                    "foo": "foot",
+                    "bar": "bar"
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             false,
             """enums in properties -> wrong foo value""")
@@ -4164,10 +6308,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foo","bar":"bart"}
+                {
+                    "foo": "foo",
+                    "bar": "bart"
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             false,
             """enums in properties -> wrong bar value""")
@@ -4182,10 +6346,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":"bar"}
+                {
+                    "bar": "bar"
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             true,
             """enums in properties -> missing optional property is valid""")
@@ -4200,10 +6383,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foo"}
+                {
+                    "foo": "foo"
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             false,
             """enums in properties -> missing required property is invalid""")
@@ -4218,10 +6420,28 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"object","properties":{"foo":{"enum":["foo"]},"bar":{"enum":["bar"]}},"required":["bar"]}
+                {
+                    "type": "object",
+                    "properties": {
+                        "foo": {
+                            "enum": [
+                                "foo"
+                            ]
+                        },
+                        "bar": {
+                            "enum": [
+                                "bar"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "bar"
+                    ]
+                }
             """,
             false,
             """enums in properties -> missing all properties is invalid""")
@@ -4239,7 +6459,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo\nbar"
             """,
             """
-                {"enum":["foo\nbar","foo\rbar"]}
+                {
+                    "enum": [
+                        "foo\nbar",
+                        "foo\rbar"
+                    ]
+                }
             """,
             true,
             """enum with escaped characters -> member 1 is valid""")
@@ -4257,7 +6482,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo\rbar"
             """,
             """
-                {"enum":["foo\nbar","foo\rbar"]}
+                {
+                    "enum": [
+                        "foo\nbar",
+                        "foo\rbar"
+                    ]
+                }
             """,
             true,
             """enum with escaped characters -> member 2 is valid""")
@@ -4275,7 +6505,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "abc"
             """,
             """
-                {"enum":["foo\nbar","foo\rbar"]}
+                {
+                    "enum": [
+                        "foo\nbar",
+                        "foo\rbar"
+                    ]
+                }
             """,
             false,
             """enum with escaped characters -> another string is invalid""")
@@ -4293,7 +6528,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"enum":[false]}
+                {
+                    "enum": [
+                        false
+                    ]
+                }
             """,
             true,
             """enum with false does not match 0 -> false is valid""")
@@ -4311,7 +6550,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"enum":[false]}
+                {
+                    "enum": [
+                        false
+                    ]
+                }
             """,
             false,
             """enum with false does not match 0 -> integer zero is invalid""")
@@ -4329,7 +6572,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.0
             """,
             """
-                {"enum":[false]}
+                {
+                    "enum": [
+                        false
+                    ]
+                }
             """,
             false,
             """enum with false does not match 0 -> float zero is invalid""")
@@ -4344,10 +6591,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false]
+                [
+                    false
+                ]
             """,
             """
-                {"enum":[[false]]}
+                {
+                    "enum": [
+                        [
+                            false
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [false] does not match [0] -> [false] is valid""")
@@ -4362,10 +6617,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0]
+                [
+                    0
+                ]
             """,
             """
-                {"enum":[[false]]}
+                {
+                    "enum": [
+                        [
+                            false
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [false] does not match [0] -> [0] is invalid""")
@@ -4380,10 +6643,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0.0]
+                [
+                    0.0
+                ]
             """,
             """
-                {"enum":[[false]]}
+                {
+                    "enum": [
+                        [
+                            false
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [false] does not match [0] -> [0.0] is invalid""")
@@ -4401,7 +6672,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"enum":[true]}
+                {
+                    "enum": [
+                        true
+                    ]
+                }
             """,
             true,
             """enum with true does not match 1 -> true is valid""")
@@ -4419,7 +6694,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"enum":[true]}
+                {
+                    "enum": [
+                        true
+                    ]
+                }
             """,
             false,
             """enum with true does not match 1 -> integer one is invalid""")
@@ -4437,7 +6716,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"enum":[true]}
+                {
+                    "enum": [
+                        true
+                    ]
+                }
             """,
             false,
             """enum with true does not match 1 -> float one is invalid""")
@@ -4452,10 +6735,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true]
+                [
+                    true
+                ]
             """,
             """
-                {"enum":[[true]]}
+                {
+                    "enum": [
+                        [
+                            true
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [true] does not match [1] -> [true] is valid""")
@@ -4470,10 +6761,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"enum":[[true]]}
+                {
+                    "enum": [
+                        [
+                            true
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [true] does not match [1] -> [1] is invalid""")
@@ -4488,10 +6787,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1.0]
+                [
+                    1.0
+                ]
             """,
             """
-                {"enum":[[true]]}
+                {
+                    "enum": [
+                        [
+                            true
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [true] does not match [1] -> [1.0] is invalid""")
@@ -4509,7 +6816,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"enum":[0]}
+                {
+                    "enum": [
+                        0
+                    ]
+                }
             """,
             false,
             """enum with 0 does not match false -> false is invalid""")
@@ -4527,7 +6838,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"enum":[0]}
+                {
+                    "enum": [
+                        0
+                    ]
+                }
             """,
             true,
             """enum with 0 does not match false -> integer zero is valid""")
@@ -4545,7 +6860,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.0
             """,
             """
-                {"enum":[0]}
+                {
+                    "enum": [
+                        0
+                    ]
+                }
             """,
             true,
             """enum with 0 does not match false -> float zero is valid""")
@@ -4560,10 +6879,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false]
+                [
+                    false
+                ]
             """,
             """
-                {"enum":[[0]]}
+                {
+                    "enum": [
+                        [
+                            0
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [0] does not match [false] -> [false] is invalid""")
@@ -4578,10 +6905,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0]
+                [
+                    0
+                ]
             """,
             """
-                {"enum":[[0]]}
+                {
+                    "enum": [
+                        [
+                            0
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [0] does not match [false] -> [0] is valid""")
@@ -4596,10 +6931,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0.0]
+                [
+                    0.0
+                ]
             """,
             """
-                {"enum":[[0]]}
+                {
+                    "enum": [
+                        [
+                            0
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [0] does not match [false] -> [0.0] is valid""")
@@ -4617,7 +6960,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"enum":[1]}
+                {
+                    "enum": [
+                        1
+                    ]
+                }
             """,
             false,
             """enum with 1 does not match true -> true is invalid""")
@@ -4635,7 +6982,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"enum":[1]}
+                {
+                    "enum": [
+                        1
+                    ]
+                }
             """,
             true,
             """enum with 1 does not match true -> integer one is valid""")
@@ -4653,7 +7004,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"enum":[1]}
+                {
+                    "enum": [
+                        1
+                    ]
+                }
             """,
             true,
             """enum with 1 does not match true -> float one is valid""")
@@ -4668,10 +7023,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true]
+                [
+                    true
+                ]
             """,
             """
-                {"enum":[[1]]}
+                {
+                    "enum": [
+                        [
+                            1
+                        ]
+                    ]
+                }
             """,
             false,
             """enum with [1] does not match [true] -> [true] is invalid""")
@@ -4686,10 +7049,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"enum":[[1]]}
+                {
+                    "enum": [
+                        [
+                            1
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [1] does not match [true] -> [1] is valid""")
@@ -4704,10 +7075,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1.0]
+                [
+                    1.0
+                ]
             """,
             """
-                {"enum":[[1]]}
+                {
+                    "enum": [
+                        [
+                            1
+                        ]
+                    ]
+                }
             """,
             true,
             """enum with [1] does not match [true] -> [1.0] is valid""")
@@ -4725,7 +7104,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hello\u0000there"
             """,
             """
-                {"enum":["hello\u0000there"]}
+                {
+                    "enum": [
+                        "hello\u0000there"
+                    ]
+                }
             """,
             true,
             """nul characters in strings -> match string with nul""")
@@ -4743,7 +7126,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hellothere"
             """,
             """
-                {"enum":["hello\u0000there"]}
+                {
+                    "enum": [
+                        "hello\u0000there"
+                    ]
+                }
             """,
             false,
             """nul characters in strings -> do not match string lacking nul""")
@@ -4760,7 +7147,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.2
             """,
             """
-                {"exclusiveMaximum":3.0}
+                {
+                    "exclusiveMaximum": 3.0
+                }
             """,
             true,
             """exclusiveMaximum validation -> below the exclusiveMaximum is valid""")
@@ -4778,7 +7167,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3.0
             """,
             """
-                {"exclusiveMaximum":3.0}
+                {
+                    "exclusiveMaximum": 3.0
+                }
             """,
             false,
             """exclusiveMaximum validation -> boundary point is invalid""")
@@ -4796,7 +7187,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3.5
             """,
             """
-                {"exclusiveMaximum":3.0}
+                {
+                    "exclusiveMaximum": 3.0
+                }
             """,
             false,
             """exclusiveMaximum validation -> above the exclusiveMaximum is invalid""")
@@ -4814,7 +7207,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "x"
             """,
             """
-                {"exclusiveMaximum":3.0}
+                {
+                    "exclusiveMaximum": 3.0
+                }
             """,
             true,
             """exclusiveMaximum validation -> ignores non-numbers""")
@@ -4831,7 +7226,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.2
             """,
             """
-                {"exclusiveMinimum":1.1}
+                {
+                    "exclusiveMinimum": 1.1
+                }
             """,
             true,
             """exclusiveMinimum validation -> above the exclusiveMinimum is valid""")
@@ -4849,7 +7246,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"exclusiveMinimum":1.1}
+                {
+                    "exclusiveMinimum": 1.1
+                }
             """,
             false,
             """exclusiveMinimum validation -> boundary point is invalid""")
@@ -4867,7 +7266,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.6
             """,
             """
-                {"exclusiveMinimum":1.1}
+                {
+                    "exclusiveMinimum": 1.1
+                }
             """,
             false,
             """exclusiveMinimum validation -> below the exclusiveMinimum is invalid""")
@@ -4885,7 +7286,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "x"
             """,
             """
-                {"exclusiveMinimum":1.1}
+                {
+                    "exclusiveMinimum": 1.1
+                }
             """,
             true,
             """exclusiveMinimum validation -> ignores non-numbers""")
@@ -4902,7 +7305,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore integers""")
@@ -4920,7 +7325,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore floats""")
@@ -4935,10 +7342,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore objects""")
@@ -4953,10 +7363,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore arrays""")
@@ -4974,7 +7387,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore booleans""")
@@ -4992,7 +7407,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"email"}
+                {
+                    "format": "email"
+                }
             """,
             true,
             """email format -> all string formats ignore nulls""")
@@ -5010,7 +7427,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore integers""")
@@ -5028,7 +7447,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore floats""")
@@ -5043,10 +7464,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore objects""")
@@ -5061,10 +7485,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore arrays""")
@@ -5082,7 +7509,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore booleans""")
@@ -5100,7 +7529,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"idn-email"}
+                {
+                    "format": "idn-email"
+                }
             """,
             true,
             """idn-email format -> all string formats ignore nulls""")
@@ -5118,7 +7549,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore integers""")
@@ -5136,7 +7569,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore floats""")
@@ -5151,10 +7586,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore objects""")
@@ -5169,10 +7607,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore arrays""")
@@ -5190,7 +7631,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore booleans""")
@@ -5208,7 +7651,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"regex"}
+                {
+                    "format": "regex"
+                }
             """,
             true,
             """regex format -> all string formats ignore nulls""")
@@ -5226,7 +7671,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore integers""")
@@ -5244,7 +7691,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore floats""")
@@ -5259,10 +7708,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore objects""")
@@ -5277,10 +7729,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore arrays""")
@@ -5298,7 +7753,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore booleans""")
@@ -5316,7 +7773,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"ipv4"}
+                {
+                    "format": "ipv4"
+                }
             """,
             true,
             """ipv4 format -> all string formats ignore nulls""")
@@ -5334,7 +7793,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore integers""")
@@ -5352,7 +7813,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore floats""")
@@ -5367,10 +7830,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore objects""")
@@ -5385,10 +7851,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore arrays""")
@@ -5406,7 +7875,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore booleans""")
@@ -5424,7 +7895,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"ipv6"}
+                {
+                    "format": "ipv6"
+                }
             """,
             true,
             """ipv6 format -> all string formats ignore nulls""")
@@ -5442,7 +7915,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore integers""")
@@ -5460,7 +7935,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore floats""")
@@ -5475,10 +7952,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore objects""")
@@ -5493,10 +7973,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore arrays""")
@@ -5514,7 +7997,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore booleans""")
@@ -5532,7 +8017,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"idn-hostname"}
+                {
+                    "format": "idn-hostname"
+                }
             """,
             true,
             """idn-hostname format -> all string formats ignore nulls""")
@@ -5550,7 +8037,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore integers""")
@@ -5568,7 +8057,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore floats""")
@@ -5583,10 +8074,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore objects""")
@@ -5601,10 +8095,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore arrays""")
@@ -5622,7 +8119,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore booleans""")
@@ -5640,7 +8139,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"hostname"}
+                {
+                    "format": "hostname"
+                }
             """,
             true,
             """hostname format -> all string formats ignore nulls""")
@@ -5658,7 +8159,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore integers""")
@@ -5676,7 +8179,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore floats""")
@@ -5691,10 +8196,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore objects""")
@@ -5709,10 +8217,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore arrays""")
@@ -5730,7 +8241,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore booleans""")
@@ -5748,7 +8261,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"date"}
+                {
+                    "format": "date"
+                }
             """,
             true,
             """date format -> all string formats ignore nulls""")
@@ -5766,7 +8281,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore integers""")
@@ -5784,7 +8301,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore floats""")
@@ -5799,10 +8318,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore objects""")
@@ -5817,10 +8339,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore arrays""")
@@ -5838,7 +8363,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore booleans""")
@@ -5856,7 +8383,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"date-time"}
+                {
+                    "format": "date-time"
+                }
             """,
             true,
             """date-time format -> all string formats ignore nulls""")
@@ -5874,7 +8403,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore integers""")
@@ -5892,7 +8423,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore floats""")
@@ -5907,10 +8440,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore objects""")
@@ -5925,10 +8461,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore arrays""")
@@ -5946,7 +8485,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore booleans""")
@@ -5964,7 +8505,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"time"}
+                {
+                    "format": "time"
+                }
             """,
             true,
             """time format -> all string formats ignore nulls""")
@@ -5982,7 +8525,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore integers""")
@@ -6000,7 +8545,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore floats""")
@@ -6015,10 +8562,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore objects""")
@@ -6033,10 +8583,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore arrays""")
@@ -6054,7 +8607,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore booleans""")
@@ -6072,7 +8627,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"json-pointer"}
+                {
+                    "format": "json-pointer"
+                }
             """,
             true,
             """json-pointer format -> all string formats ignore nulls""")
@@ -6090,7 +8647,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore integers""")
@@ -6108,7 +8667,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore floats""")
@@ -6123,10 +8684,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore objects""")
@@ -6141,10 +8705,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore arrays""")
@@ -6162,7 +8729,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore booleans""")
@@ -6180,7 +8749,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"relative-json-pointer"}
+                {
+                    "format": "relative-json-pointer"
+                }
             """,
             true,
             """relative-json-pointer format -> all string formats ignore nulls""")
@@ -6198,7 +8769,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore integers""")
@@ -6216,7 +8789,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore floats""")
@@ -6231,10 +8806,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore objects""")
@@ -6249,10 +8827,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore arrays""")
@@ -6270,7 +8851,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore booleans""")
@@ -6288,7 +8871,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"iri"}
+                {
+                    "format": "iri"
+                }
             """,
             true,
             """iri format -> all string formats ignore nulls""")
@@ -6306,7 +8891,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore integers""")
@@ -6324,7 +8911,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore floats""")
@@ -6339,10 +8928,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore objects""")
@@ -6357,10 +8949,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore arrays""")
@@ -6378,7 +8973,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore booleans""")
@@ -6396,7 +8993,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"iri-reference"}
+                {
+                    "format": "iri-reference"
+                }
             """,
             true,
             """iri-reference format -> all string formats ignore nulls""")
@@ -6414,7 +9013,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore integers""")
@@ -6432,7 +9033,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore floats""")
@@ -6447,10 +9050,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore objects""")
@@ -6465,10 +9071,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore arrays""")
@@ -6486,7 +9095,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore booleans""")
@@ -6504,7 +9115,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"uri"}
+                {
+                    "format": "uri"
+                }
             """,
             true,
             """uri format -> all string formats ignore nulls""")
@@ -6522,7 +9135,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore integers""")
@@ -6540,7 +9155,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore floats""")
@@ -6555,10 +9172,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore objects""")
@@ -6573,10 +9193,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore arrays""")
@@ -6594,7 +9217,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore booleans""")
@@ -6612,7 +9237,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"uri-reference"}
+                {
+                    "format": "uri-reference"
+                }
             """,
             true,
             """uri-reference format -> all string formats ignore nulls""")
@@ -6630,7 +9257,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore integers""")
@@ -6648,7 +9277,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 13.7
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore floats""")
@@ -6663,10 +9294,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore objects""")
@@ -6681,10 +9315,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore arrays""")
@@ -6702,7 +9339,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore booleans""")
@@ -6720,7 +9359,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"format":"uri-template"}
+                {
+                    "format": "uri-template"
+                }
             """,
             true,
             """uri-template format -> all string formats ignore nulls""")
@@ -6737,7 +9378,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"if":{"const":0}}
+                {
+                    "if": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore if without then or else -> valid when valid against lone if""")
@@ -6755,7 +9400,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hello"
             """,
             """
-                {"if":{"const":0}}
+                {
+                    "if": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore if without then or else -> valid when invalid against lone if""")
@@ -6773,7 +9422,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"then":{"const":0}}
+                {
+                    "then": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore then without if -> valid when valid against lone then""")
@@ -6791,7 +9444,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hello"
             """,
             """
-                {"then":{"const":0}}
+                {
+                    "then": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore then without if -> valid when invalid against lone then""")
@@ -6809,7 +9466,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"else":{"const":0}}
+                {
+                    "else": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore else without if -> valid when valid against lone else""")
@@ -6827,7 +9488,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "hello"
             """,
             """
-                {"else":{"const":0}}
+                {
+                    "else": {
+                        "const": 0
+                    }
+                }
             """,
             true,
             """ignore else without if -> valid when invalid against lone else""")
@@ -6845,7 +9510,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -1
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    }
+                }
             """,
             true,
             """if and then without else -> valid through then""")
@@ -6863,7 +9535,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -100
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    }
+                }
             """,
             false,
             """if and then without else -> invalid through then""")
@@ -6881,7 +9560,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    }
+                }
             """,
             true,
             """if and then without else -> valid when if test fails""")
@@ -6899,7 +9585,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -1
             """,
             """
-                {"if":{"exclusiveMaximum":0},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             true,
             """if and else without then -> valid when if test passes""")
@@ -6917,7 +9610,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 4
             """,
             """
-                {"if":{"exclusiveMaximum":0},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             true,
             """if and else without then -> valid through else""")
@@ -6935,7 +9635,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"if":{"exclusiveMaximum":0},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             false,
             """if and else without then -> invalid through else""")
@@ -6953,7 +9660,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -1
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             true,
             """validate against correct branch, then vs else -> valid through then""")
@@ -6971,7 +9688,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -100
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             false,
             """validate against correct branch, then vs else -> invalid through then""")
@@ -6989,7 +9716,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 4
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             true,
             """validate against correct branch, then vs else -> valid through else""")
@@ -7007,7 +9744,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"if":{"exclusiveMaximum":0},"then":{"minimum":-10},"else":{"multipleOf":2}}
+                {
+                    "if": {
+                        "exclusiveMaximum": 0
+                    },
+                    "then": {
+                        "minimum": -10
+                    },
+                    "else": {
+                        "multipleOf": 2
+                    }
+                }
             """,
             false,
             """validate against correct branch, then vs else -> invalid through else""")
@@ -7025,7 +9772,25 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -100
             """,
             """
-                {"allOf":[{"if":{"exclusiveMaximum":0}},{"then":{"minimum":-10}},{"else":{"multipleOf":2}}]}
+                {
+                    "allOf": [
+                        {
+                            "if": {
+                                "exclusiveMaximum": 0
+                            }
+                        },
+                        {
+                            "then": {
+                                "minimum": -10
+                            }
+                        },
+                        {
+                            "else": {
+                                "multipleOf": 2
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """non-interference across combined schemas -> valid, but would have been invalid through then""")
@@ -7043,7 +9808,25 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"allOf":[{"if":{"exclusiveMaximum":0}},{"then":{"minimum":-10}},{"else":{"multipleOf":2}}]}
+                {
+                    "allOf": [
+                        {
+                            "if": {
+                                "exclusiveMaximum": 0
+                            }
+                        },
+                        {
+                            "then": {
+                                "minimum": -10
+                            }
+                        },
+                        {
+                            "else": {
+                                "multipleOf": 2
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """non-interference across combined schemas -> valid, but would have been invalid through else""")
@@ -7061,7 +9844,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "then"
             """,
             """
-                {"if":true,"then":{"const":"then"},"else":{"const":"else"}}
+                {
+                    "if": true,
+                    "then": {
+                        "const": "then"
+                    },
+                    "else": {
+                        "const": "else"
+                    }
+                }
             """,
             true,
             """if with boolean schema true -> boolean schema true in if always chooses the then path (valid)""")
@@ -7079,7 +9870,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "else"
             """,
             """
-                {"if":true,"then":{"const":"then"},"else":{"const":"else"}}
+                {
+                    "if": true,
+                    "then": {
+                        "const": "then"
+                    },
+                    "else": {
+                        "const": "else"
+                    }
+                }
             """,
             false,
             """if with boolean schema true -> boolean schema true in if always chooses the then path (invalid)""")
@@ -7097,7 +9896,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "then"
             """,
             """
-                {"if":false,"then":{"const":"then"},"else":{"const":"else"}}
+                {
+                    "if": false,
+                    "then": {
+                        "const": "then"
+                    },
+                    "else": {
+                        "const": "else"
+                    }
+                }
             """,
             false,
             """if with boolean schema false -> boolean schema false in if always chooses the else path (invalid)""")
@@ -7115,7 +9922,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "else"
             """,
             """
-                {"if":false,"then":{"const":"then"},"else":{"const":"else"}}
+                {
+                    "if": false,
+                    "then": {
+                        "const": "then"
+                    },
+                    "else": {
+                        "const": "else"
+                    }
+                }
             """,
             true,
             """if with boolean schema false -> boolean schema false in if always chooses the else path (valid)""")
@@ -7133,7 +9948,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "yes"
             """,
             """
-                {"then":{"const":"yes"},"else":{"const":"other"},"if":{"maxLength":4}}
+                {
+                    "then": {
+                        "const": "yes"
+                    },
+                    "else": {
+                        "const": "other"
+                    },
+                    "if": {
+                        "maxLength": 4
+                    }
+                }
             """,
             true,
             """if appears at the end when serialized (keyword processing sequence) -> yes redirects to then and passes""")
@@ -7151,7 +9976,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "other"
             """,
             """
-                {"then":{"const":"yes"},"else":{"const":"other"},"if":{"maxLength":4}}
+                {
+                    "then": {
+                        "const": "yes"
+                    },
+                    "else": {
+                        "const": "other"
+                    },
+                    "if": {
+                        "maxLength": 4
+                    }
+                }
             """,
             true,
             """if appears at the end when serialized (keyword processing sequence) -> other redirects to else and passes""")
@@ -7169,7 +10004,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "no"
             """,
             """
-                {"then":{"const":"yes"},"else":{"const":"other"},"if":{"maxLength":4}}
+                {
+                    "then": {
+                        "const": "yes"
+                    },
+                    "else": {
+                        "const": "other"
+                    },
+                    "if": {
+                        "maxLength": 4
+                    }
+                }
             """,
             false,
             """if appears at the end when serialized (keyword processing sequence) -> no redirects to then and fails""")
@@ -7187,7 +10032,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "invalid"
             """,
             """
-                {"then":{"const":"yes"},"else":{"const":"other"},"if":{"maxLength":4}}
+                {
+                    "then": {
+                        "const": "yes"
+                    },
+                    "else": {
+                        "const": "other"
+                    },
+                    "if": {
+                        "maxLength": 4
+                    }
+                }
             """,
             false,
             """if appears at the end when serialized (keyword processing sequence) -> invalid redirects to else and fails""")
@@ -7201,10 +10056,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"definitions":{"int":{"type":"integer"}},"allOf":[{"properties":{"foo":{"${'$'}ref":"#/definitions/int"}}},{"additionalProperties":{"${'$'}ref":"#/definitions/int"}}]}
+                {
+                    "definitions": {
+                        "int": {
+                            "type": "integer"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "${'$'}ref": "#/definitions/int"
+                                }
+                            }
+                        },
+                        {
+                            "additionalProperties": {
+                                "${'$'}ref": "#/definitions/int"
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """evaluating the same schema location against the same data location twice is not a sign of an infinite loop -> passing case""")
@@ -7219,10 +10096,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"a string"}
+                {
+                    "foo": "a string"
+                }
             """,
             """
-                {"definitions":{"int":{"type":"integer"}},"allOf":[{"properties":{"foo":{"${'$'}ref":"#/definitions/int"}}},{"additionalProperties":{"${'$'}ref":"#/definitions/int"}}]}
+                {
+                    "definitions": {
+                        "int": {
+                            "type": "integer"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "properties": {
+                                "foo": {
+                                    "${'$'}ref": "#/definitions/int"
+                                }
+                            }
+                        },
+                        {
+                            "additionalProperties": {
+                                "${'$'}ref": "#/definitions/int"
+                            }
+                        }
+                    ]
+                }
             """,
             false,
             """evaluating the same schema location against the same data location twice is not a sign of an infinite loop -> failing case""")
@@ -7236,10 +10135,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"items":{"type":"integer"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """a schema given for items -> valid items""")
@@ -7254,10 +10161,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"x"]
+                [
+                    1,
+                    "x"
+                ]
             """,
             """
-                {"items":{"type":"integer"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """a schema given for items -> wrong type of items""")
@@ -7272,10 +10186,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"items":{"type":"integer"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """a schema given for items -> ignores non-arrays""")
@@ -7290,10 +10210,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"0":"invalid","length":1}
+                {
+                    "0": "invalid",
+                    "length": 1
+                }
             """,
             """
-                {"items":{"type":"integer"}}
+                {
+                    "items": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """a schema given for items -> JavaScript pseudo-array is valid""")
@@ -7308,10 +10235,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo"]
+                [
+                    1,
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             true,
             """an array of schemas for items -> correct types""")
@@ -7326,10 +10265,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo",1]
+                [
+                    "foo",
+                    1
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             false,
             """an array of schemas for items -> wrong types""")
@@ -7344,10 +10295,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             true,
             """an array of schemas for items -> incomplete array of items""")
@@ -7362,10 +10324,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo",true]
+                [
+                    1,
+                    "foo",
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             true,
             """an array of schemas for items -> array with additional items""")
@@ -7380,10 +10355,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             true,
             """an array of schemas for items -> empty array""")
@@ -7398,10 +10383,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"0":"invalid","1":"valid","length":2}
+                {
+                    "0": "invalid",
+                    "1": "valid",
+                    "length": 2
+                }
             """,
             """
-                {"items":[{"type":"integer"},{"type":"string"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
             """,
             true,
             """an array of schemas for items -> JavaScript pseudo-array is valid""")
@@ -7416,10 +10414,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo",true]
+                [
+                    1,
+                    "foo",
+                    true
+                ]
             """,
             """
-                {"items":true}
+                {
+                    "items": true
+                }
             """,
             true,
             """items with boolean schema (true) -> any array is valid""")
@@ -7434,10 +10438,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"items":true}
+                {
+                    "items": true
+                }
             """,
             true,
             """items with boolean schema (true) -> empty array is valid""")
@@ -7452,10 +10459,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo",true]
+                [
+                    1,
+                    "foo",
+                    true
+                ]
             """,
             """
-                {"items":false}
+                {
+                    "items": false
+                }
             """,
             false,
             """items with boolean schema (false) -> any non-empty array is invalid""")
@@ -7470,10 +10483,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"items":false}
+                {
+                    "items": false
+                }
             """,
             true,
             """items with boolean schema (false) -> empty array is valid""")
@@ -7488,10 +10504,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"items":[true,false]}
+                {
+                    "items": [
+                        true,
+                        false
+                    ]
+                }
             """,
             true,
             """items with boolean schemas -> array with one item is valid""")
@@ -7506,10 +10529,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo"]
+                [
+                    1,
+                    "foo"
+                ]
             """,
             """
-                {"items":[true,false]}
+                {
+                    "items": [
+                        true,
+                        false
+                    ]
+                }
             """,
             false,
             """items with boolean schemas -> array with two items is invalid""")
@@ -7524,10 +10555,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"items":[true,false]}
+                {
+                    "items": [
+                        true,
+                        false
+                    ]
+                }
             """,
             true,
             """items with boolean schemas -> empty array is valid""")
@@ -7542,10 +10579,69 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
+                [
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             true,
             """items and subitems -> valid items""")
@@ -7560,10 +10656,77 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
+                [
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             false,
             """items and subitems -> too many items""")
@@ -7578,10 +10741,72 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[{"foo":null},{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
+                [
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             false,
             """items and subitems -> too many sub-items""")
@@ -7596,10 +10821,64 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":null},[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
+                [
+                    {
+                        "foo": null
+                    },
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             false,
             """items and subitems -> wrong item""")
@@ -7614,10 +10893,68 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[{},{"foo":null}],[{"foo":null},{"foo":null}],[{"foo":null},{"foo":null}]]
+                [
+                    [
+                        {
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        },
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             false,
             """items and subitems -> wrong sub-item""")
@@ -7632,10 +10969,55 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[{"foo":null}],[{"foo":null}]]
+                [
+                    [
+                        {
+                            "foo": null
+                        }
+                    ],
+                    [
+                        {
+                            "foo": null
+                        }
+                    ]
+                ]
             """,
             """
-                {"definitions":{"item":{"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/sub-item"},{"${'$'}ref":"#/definitions/sub-item"}]},"sub-item":{"type":"object","required":["foo"]}},"type":"array","additionalItems":false,"items":[{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"},{"${'$'}ref":"#/definitions/item"}]}
+                {
+                    "definitions": {
+                        "item": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": [
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                },
+                                {
+                                    "${'$'}ref": "#/definitions/sub-item"
+                                }
+                            ]
+                        },
+                        "sub-item": {
+                            "type": "object",
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    },
+                    "type": "array",
+                    "additionalItems": false,
+                    "items": [
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        },
+                        {
+                            "${'$'}ref": "#/definitions/item"
+                        }
+                    ]
+                }
             """,
             true,
             """items and subitems -> fewer items is valid""")
@@ -7650,10 +11032,53 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[[[1]],[[2],[3]]],[[[4],[5],[6]]]]
+                [
+                    [
+                        [
+                            [
+                                1
+                            ]
+                        ],
+                        [
+                            [
+                                2
+                            ],
+                            [
+                                3
+                            ]
+                        ]
+                    ],
+                    [
+                        [
+                            [
+                                4
+                            ],
+                            [
+                                5
+                            ],
+                            [
+                                6
+                            ]
+                        ]
+                    ]
+                ]
             """,
             """
-                {"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"number"}}}}}
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """nested items -> valid nested array""")
@@ -7668,10 +11093,53 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[[["1"]],[[2],[3]]],[[[4],[5],[6]]]]
+                [
+                    [
+                        [
+                            [
+                                "1"
+                            ]
+                        ],
+                        [
+                            [
+                                2
+                            ],
+                            [
+                                3
+                            ]
+                        ]
+                    ],
+                    [
+                        [
+                            [
+                                4
+                            ],
+                            [
+                                5
+                            ],
+                            [
+                                6
+                            ]
+                        ]
+                    ]
+                ]
             """,
             """
-                {"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"number"}}}}}
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """nested items -> nested array with invalid type""")
@@ -7686,10 +11154,47 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[[1],[2],[3]],[[4],[5],[6]]]
+                [
+                    [
+                        [
+                            1
+                        ],
+                        [
+                            2
+                        ],
+                        [
+                            3
+                        ]
+                    ],
+                    [
+                        [
+                            4
+                        ],
+                        [
+                            5
+                        ],
+                        [
+                            6
+                        ]
+                    ]
+                ]
             """,
             """
-                {"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"array","items":{"type":"number"}}}}}
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """nested items -> not deep enough""")
@@ -7704,10 +11209,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null]
+                [
+                    null
+                ]
             """,
             """
-                {"items":{"type":"null"}}
+                {
+                    "items": {
+                        "type": "null"
+                    }
+                }
             """,
             true,
             """single-form items with null instance elements -> allows null elements""")
@@ -7722,10 +11233,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [null]
+                [
+                    null
+                ]
             """,
             """
-                {"items":[{"type":"null"}]}
+                {
+                    "items": [
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
             """,
             true,
             """array-form items with null instance elements -> allows null elements""")
@@ -7739,10 +11258,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"maxItems":2}
+                {
+                    "maxItems": 2
+                }
             """,
             true,
             """maxItems validation -> shorter is valid""")
@@ -7757,10 +11280,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"maxItems":2}
+                {
+                    "maxItems": 2
+                }
             """,
             true,
             """maxItems validation -> exact length is valid""")
@@ -7775,10 +11303,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"maxItems":2}
+                {
+                    "maxItems": 2
+                }
             """,
             false,
             """maxItems validation -> too long is invalid""")
@@ -7796,7 +11330,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"maxItems":2}
+                {
+                    "maxItems": 2
+                }
             """,
             true,
             """maxItems validation -> ignores non-arrays""")
@@ -7811,10 +11347,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"maxItems":2.0}
+                {
+                    "maxItems": 2.0
+                }
             """,
             true,
             """maxItems validation with a decimal -> shorter is valid""")
@@ -7829,10 +11369,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"maxItems":2.0}
+                {
+                    "maxItems": 2.0
+                }
             """,
             false,
             """maxItems validation with a decimal -> too long is invalid""")
@@ -7849,7 +11395,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "f"
             """,
             """
-                {"maxLength":2}
+                {
+                    "maxLength": 2
+                }
             """,
             true,
             """maxLength validation -> shorter is valid""")
@@ -7867,7 +11415,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "fo"
             """,
             """
-                {"maxLength":2}
+                {
+                    "maxLength": 2
+                }
             """,
             true,
             """maxLength validation -> exact length is valid""")
@@ -7885,7 +11435,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"maxLength":2}
+                {
+                    "maxLength": 2
+                }
             """,
             false,
             """maxLength validation -> too long is invalid""")
@@ -7903,7 +11455,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 100
             """,
             """
-                {"maxLength":2}
+                {
+                    "maxLength": 2
+                }
             """,
             true,
             """maxLength validation -> ignores non-strings""")
@@ -7921,7 +11475,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "💩💩"
             """,
             """
-                {"maxLength":2}
+                {
+                    "maxLength": 2
+                }
             """,
             true,
             """maxLength validation -> two graphemes is long enough""")
@@ -7939,7 +11495,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "f"
             """,
             """
-                {"maxLength":2.0}
+                {
+                    "maxLength": 2.0
+                }
             """,
             true,
             """maxLength validation with a decimal -> shorter is valid""")
@@ -7957,7 +11515,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"maxLength":2.0}
+                {
+                    "maxLength": 2.0
+                }
             """,
             false,
             """maxLength validation with a decimal -> too long is invalid""")
@@ -7971,10 +11531,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             true,
             """maxProperties validation -> shorter is valid""")
@@ -7989,10 +11553,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             true,
             """maxProperties validation -> exact length is valid""")
@@ -8007,10 +11576,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"baz":3}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "baz": 3
+                }
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             false,
             """maxProperties validation -> too long is invalid""")
@@ -8025,10 +11600,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             true,
             """maxProperties validation -> ignores arrays""")
@@ -8046,7 +11627,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             true,
             """maxProperties validation -> ignores strings""")
@@ -8064,7 +11647,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"maxProperties":2}
+                {
+                    "maxProperties": 2
+                }
             """,
             true,
             """maxProperties validation -> ignores other non-objects""")
@@ -8079,10 +11664,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"maxProperties":2.0}
+                {
+                    "maxProperties": 2.0
+                }
             """,
             true,
             """maxProperties validation with a decimal -> shorter is valid""")
@@ -8097,10 +11686,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"baz":3}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "baz": 3
+                }
             """,
             """
-                {"maxProperties":2.0}
+                {
+                    "maxProperties": 2.0
+                }
             """,
             false,
             """maxProperties validation with a decimal -> too long is invalid""")
@@ -8115,10 +11710,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"maxProperties":0}
+                {
+                    "maxProperties": 0
+                }
             """,
             true,
             """maxProperties = 0 means the object is empty -> no properties is valid""")
@@ -8133,10 +11731,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"maxProperties":0}
+                {
+                    "maxProperties": 0
+                }
             """,
             false,
             """maxProperties = 0 means the object is empty -> one property is invalid""")
@@ -8153,7 +11755,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.6
             """,
             """
-                {"maximum":3.0}
+                {
+                    "maximum": 3.0
+                }
             """,
             true,
             """maximum validation -> below the maximum is valid""")
@@ -8171,7 +11775,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3.0
             """,
             """
-                {"maximum":3.0}
+                {
+                    "maximum": 3.0
+                }
             """,
             true,
             """maximum validation -> boundary point is valid""")
@@ -8189,7 +11795,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3.5
             """,
             """
-                {"maximum":3.0}
+                {
+                    "maximum": 3.0
+                }
             """,
             false,
             """maximum validation -> above the maximum is invalid""")
@@ -8207,7 +11815,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "x"
             """,
             """
-                {"maximum":3.0}
+                {
+                    "maximum": 3.0
+                }
             """,
             true,
             """maximum validation -> ignores non-numbers""")
@@ -8225,7 +11835,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 299.97
             """,
             """
-                {"maximum":300}
+                {
+                    "maximum": 300
+                }
             """,
             true,
             """maximum validation with unsigned integer -> below the maximum is invalid""")
@@ -8243,7 +11855,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 300
             """,
             """
-                {"maximum":300}
+                {
+                    "maximum": 300
+                }
             """,
             true,
             """maximum validation with unsigned integer -> boundary point integer is valid""")
@@ -8258,10 +11872,12 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                300.00
+                300.0
             """,
             """
-                {"maximum":300}
+                {
+                    "maximum": 300
+                }
             """,
             true,
             """maximum validation with unsigned integer -> boundary point float is valid""")
@@ -8279,7 +11895,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 300.5
             """,
             """
-                {"maximum":300}
+                {
+                    "maximum": 300
+                }
             """,
             false,
             """maximum validation with unsigned integer -> above the maximum is invalid""")
@@ -8293,10 +11911,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"minItems":1}
+                {
+                    "minItems": 1
+                }
             """,
             true,
             """minItems validation -> longer is valid""")
@@ -8311,10 +11934,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1]
+                [
+                    1
+                ]
             """,
             """
-                {"minItems":1}
+                {
+                    "minItems": 1
+                }
             """,
             true,
             """minItems validation -> exact length is valid""")
@@ -8329,10 +11956,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"minItems":1}
+                {
+                    "minItems": 1
+                }
             """,
             false,
             """minItems validation -> too short is invalid""")
@@ -8350,7 +11980,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"minItems":1}
+                {
+                    "minItems": 1
+                }
             """,
             true,
             """minItems validation -> ignores non-arrays""")
@@ -8365,10 +11997,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"minItems":1.0}
+                {
+                    "minItems": 1.0
+                }
             """,
             true,
             """minItems validation with a decimal -> longer is valid""")
@@ -8383,10 +12020,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"minItems":1.0}
+                {
+                    "minItems": 1.0
+                }
             """,
             false,
             """minItems validation with a decimal -> too short is invalid""")
@@ -8403,7 +12043,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"minLength":2}
+                {
+                    "minLength": 2
+                }
             """,
             true,
             """minLength validation -> longer is valid""")
@@ -8421,7 +12063,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "fo"
             """,
             """
-                {"minLength":2}
+                {
+                    "minLength": 2
+                }
             """,
             true,
             """minLength validation -> exact length is valid""")
@@ -8439,7 +12083,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "f"
             """,
             """
-                {"minLength":2}
+                {
+                    "minLength": 2
+                }
             """,
             false,
             """minLength validation -> too short is invalid""")
@@ -8457,7 +12103,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"minLength":2}
+                {
+                    "minLength": 2
+                }
             """,
             true,
             """minLength validation -> ignores non-strings""")
@@ -8475,7 +12123,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "💩"
             """,
             """
-                {"minLength":2}
+                {
+                    "minLength": 2
+                }
             """,
             false,
             """minLength validation -> one grapheme is not long enough""")
@@ -8493,7 +12143,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"minLength":2.0}
+                {
+                    "minLength": 2.0
+                }
             """,
             true,
             """minLength validation with a decimal -> longer is valid""")
@@ -8511,7 +12163,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "f"
             """,
             """
-                {"minLength":2.0}
+                {
+                    "minLength": 2.0
+                }
             """,
             false,
             """minLength validation with a decimal -> too short is invalid""")
@@ -8525,10 +12179,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             true,
             """minProperties validation -> longer is valid""")
@@ -8543,10 +12202,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             true,
             """minProperties validation -> exact length is valid""")
@@ -8561,10 +12224,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             false,
             """minProperties validation -> too short is invalid""")
@@ -8579,10 +12245,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             true,
             """minProperties validation -> ignores arrays""")
@@ -8600,7 +12269,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             true,
             """minProperties validation -> ignores strings""")
@@ -8618,7 +12289,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"minProperties":1}
+                {
+                    "minProperties": 1
+                }
             """,
             true,
             """minProperties validation -> ignores other non-objects""")
@@ -8633,10 +12306,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"minProperties":1.0}
+                {
+                    "minProperties": 1.0
+                }
             """,
             true,
             """minProperties validation with a decimal -> longer is valid""")
@@ -8651,10 +12329,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"minProperties":1.0}
+                {
+                    "minProperties": 1.0
+                }
             """,
             false,
             """minProperties validation with a decimal -> too short is invalid""")
@@ -8671,7 +12352,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.6
             """,
             """
-                {"minimum":1.1}
+                {
+                    "minimum": 1.1
+                }
             """,
             true,
             """minimum validation -> above the minimum is valid""")
@@ -8689,7 +12372,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"minimum":1.1}
+                {
+                    "minimum": 1.1
+                }
             """,
             true,
             """minimum validation -> boundary point is valid""")
@@ -8707,7 +12392,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.6
             """,
             """
-                {"minimum":1.1}
+                {
+                    "minimum": 1.1
+                }
             """,
             false,
             """minimum validation -> below the minimum is invalid""")
@@ -8725,7 +12412,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "x"
             """,
             """
-                {"minimum":1.1}
+                {
+                    "minimum": 1.1
+                }
             """,
             true,
             """minimum validation -> ignores non-numbers""")
@@ -8743,7 +12432,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -1
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             true,
             """minimum validation with signed integer -> negative above the minimum is valid""")
@@ -8761,7 +12452,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             true,
             """minimum validation with signed integer -> positive above the minimum is valid""")
@@ -8779,7 +12472,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             true,
             """minimum validation with signed integer -> boundary point is valid""")
@@ -8797,7 +12492,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2.0
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             true,
             """minimum validation with signed integer -> boundary point with float is valid""")
@@ -8815,7 +12512,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -2.0001
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             false,
             """minimum validation with signed integer -> float below the minimum is invalid""")
@@ -8833,7 +12532,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 -3
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             false,
             """minimum validation with signed integer -> int below the minimum is invalid""")
@@ -8851,7 +12552,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "x"
             """,
             """
-                {"minimum":-2}
+                {
+                    "minimum": -2
+                }
             """,
             true,
             """minimum validation with signed integer -> ignores non-numbers""")
@@ -8868,7 +12571,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 10
             """,
             """
-                {"multipleOf":2}
+                {
+                    "multipleOf": 2
+                }
             """,
             true,
             """by int -> int by int""")
@@ -8886,7 +12591,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 7
             """,
             """
-                {"multipleOf":2}
+                {
+                    "multipleOf": 2
+                }
             """,
             false,
             """by int -> int by int fail""")
@@ -8904,7 +12611,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"multipleOf":2}
+                {
+                    "multipleOf": 2
+                }
             """,
             true,
             """by int -> ignores non-numbers""")
@@ -8922,7 +12631,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"multipleOf":1.5}
+                {
+                    "multipleOf": 1.5
+                }
             """,
             true,
             """by number -> zero is multiple of anything""")
@@ -8940,7 +12651,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 4.5
             """,
             """
-                {"multipleOf":1.5}
+                {
+                    "multipleOf": 1.5
+                }
             """,
             true,
             """by number -> 4.5 is multiple of 1.5""")
@@ -8958,7 +12671,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 35
             """,
             """
-                {"multipleOf":1.5}
+                {
+                    "multipleOf": 1.5
+                }
             """,
             false,
             """by number -> 35 is not multiple of 1.5""")
@@ -8976,7 +12691,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.0075
             """,
             """
-                {"multipleOf":0.0001}
+                {
+                    "multipleOf": 1.0E-4
+                }
             """,
             true,
             """by small number -> 0.0075 is multiple of 0.0001""")
@@ -8994,7 +12711,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0.00751
             """,
             """
-                {"multipleOf":0.0001}
+                {
+                    "multipleOf": 1.0E-4
+                }
             """,
             false,
             """by small number -> 0.00751 is not multiple of 0.0001""")
@@ -9009,10 +12728,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                1e308
+                1.0E308
             """,
             """
-                {"type":"integer","multipleOf":0.123456789}
+                {
+                    "type": "integer",
+                    "multipleOf": 0.123456789
+                }
             """,
             false,
             """float division = inf -> always invalid, but naive implementations may raise an overflow error""")
@@ -9030,7 +12752,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12391239123
             """,
             """
-                {"type":"integer","multipleOf":1e-8}
+                {
+                    "type": "integer",
+                    "multipleOf": 1.0E-8
+                }
             """,
             true,
             """small multiple of large integer -> any integer is a multiple of 1e-8""")
@@ -9047,7 +12772,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":{"type":"integer"}}
+                {
+                    "not": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """not -> allowed""")
@@ -9065,7 +12794,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":{"type":"integer"}}
+                {
+                    "not": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """not -> disallowed""")
@@ -9083,7 +12816,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":{"type":["integer","boolean"]}}
+                {
+                    "not": {
+                        "type": [
+                            "integer",
+                            "boolean"
+                        ]
+                    }
+                }
             """,
             true,
             """not multiple types -> valid""")
@@ -9101,7 +12841,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":{"type":["integer","boolean"]}}
+                {
+                    "not": {
+                        "type": [
+                            "integer",
+                            "boolean"
+                        ]
+                    }
+                }
             """,
             false,
             """not multiple types -> mismatch""")
@@ -9119,7 +12866,14 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"not":{"type":["integer","boolean"]}}
+                {
+                    "not": {
+                        "type": [
+                            "integer",
+                            "boolean"
+                        ]
+                    }
+                }
             """,
             false,
             """not multiple types -> other mismatch""")
@@ -9137,7 +12891,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":{"type":"object","properties":{"foo":{"type":"string"}}}}
+                {
+                    "not": {
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """not more complex schema -> match""")
@@ -9152,10 +12915,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"not":{"type":"object","properties":{"foo":{"type":"string"}}}}
+                {
+                    "not": {
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """not more complex schema -> other match""")
@@ -9170,10 +12944,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"not":{"type":"object","properties":{"foo":{"type":"string"}}}}
+                {
+                    "not": {
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """not more complex schema -> mismatch""")
@@ -9188,10 +12973,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"foo":{"not":{}}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "not": {
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """forbidden property -> property present""")
@@ -9206,10 +13001,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":1,"baz":2}
+                {
+                    "bar": 1,
+                    "baz": 2
+                }
             """,
             """
-                {"properties":{"foo":{"not":{}}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "not": {
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """forbidden property -> property absent""")
@@ -9227,7 +13032,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> number is invalid""")
@@ -9245,7 +13053,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> string is invalid""")
@@ -9263,7 +13074,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> boolean true is invalid""")
@@ -9281,7 +13095,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> boolean false is invalid""")
@@ -9299,7 +13116,10 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> null is invalid""")
@@ -9314,10 +13134,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> object is invalid""")
@@ -9332,10 +13157,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> empty object is invalid""")
@@ -9350,10 +13179,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> array is invalid""")
@@ -9368,10 +13202,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"not":{}}
+                {
+                    "not": {
+                    }
+                }
             """,
             false,
             """forbid everything with empty schema -> empty array is invalid""")
@@ -9389,7 +13227,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> number is invalid""")
@@ -9407,7 +13247,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> string is invalid""")
@@ -9425,7 +13267,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> boolean true is invalid""")
@@ -9443,7 +13287,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> boolean false is invalid""")
@@ -9461,7 +13307,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> null is invalid""")
@@ -9476,10 +13324,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> object is invalid""")
@@ -9494,10 +13346,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> empty object is invalid""")
@@ -9512,10 +13367,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> array is invalid""")
@@ -9530,10 +13389,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"not":true}
+                {
+                    "not": true
+                }
             """,
             false,
             """forbid everything with boolean schema true -> empty array is invalid""")
@@ -9551,7 +13413,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> number is valid""")
@@ -9569,7 +13433,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> string is valid""")
@@ -9587,7 +13453,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> boolean true is valid""")
@@ -9605,7 +13473,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> boolean false is valid""")
@@ -9623,7 +13493,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> null is valid""")
@@ -9638,10 +13510,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> object is valid""")
@@ -9656,10 +13532,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> empty object is valid""")
@@ -9674,10 +13553,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> array is valid""")
@@ -9692,10 +13575,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"not":false}
+                {
+                    "not": false
+                }
             """,
             true,
             """allow everything with boolean schema false -> empty array is valid""")
@@ -9713,7 +13599,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"not":{"not":{}}}
+                {
+                    "not": {
+                        "not": {
+                        }
+                    }
+                }
             """,
             true,
             """double negation -> any value is valid""")
@@ -9730,7 +13621,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"oneOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf -> first oneOf valid""")
@@ -9748,7 +13648,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 2.5
             """,
             """
-                {"oneOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf -> second oneOf valid""")
@@ -9766,7 +13675,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"oneOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf -> both oneOf valid""")
@@ -9784,7 +13702,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.5
             """,
             """
-                {"oneOf":[{"type":"integer"},{"minimum":2}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "minimum": 2
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf -> neither oneOf valid""")
@@ -9802,7 +13729,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 3
             """,
             """
-                {"type":"string","oneOf":[{"minLength":2},{"maxLength":4}]}
+                {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "minLength": 2
+                        },
+                        {
+                            "maxLength": 4
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with base schema -> mismatch base schema""")
@@ -9820,7 +13757,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"type":"string","oneOf":[{"minLength":2},{"maxLength":4}]}
+                {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "minLength": 2
+                        },
+                        {
+                            "maxLength": 4
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with base schema -> one oneOf valid""")
@@ -9838,7 +13785,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"string","oneOf":[{"minLength":2},{"maxLength":4}]}
+                {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "minLength": 2
+                        },
+                        {
+                            "maxLength": 4
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with base schema -> both oneOf valid""")
@@ -9856,7 +13813,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"oneOf":[true,true,true]}
+                {
+                    "oneOf": [
+                        true,
+                        true,
+                        true
+                    ]
+                }
             """,
             false,
             """oneOf with boolean schemas, all true -> any value is invalid""")
@@ -9874,7 +13837,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"oneOf":[true,false,false]}
+                {
+                    "oneOf": [
+                        true,
+                        false,
+                        false
+                    ]
+                }
             """,
             true,
             """oneOf with boolean schemas, one true -> any value is valid""")
@@ -9892,7 +13861,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"oneOf":[true,true,false]}
+                {
+                    "oneOf": [
+                        true,
+                        true,
+                        false
+                    ]
+                }
             """,
             false,
             """oneOf with boolean schemas, more than one true -> any value is invalid""")
@@ -9910,7 +13885,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"oneOf":[false,false,false]}
+                {
+                    "oneOf": [
+                        false,
+                        false,
+                        false
+                    ]
+                }
             """,
             false,
             """oneOf with boolean schemas, all false -> any value is invalid""")
@@ -9925,10 +13906,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf complex types -> first oneOf valid (complex)""")
@@ -9943,10 +13949,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz"}
+                {
+                    "foo": "baz"
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf complex types -> second oneOf valid (complex)""")
@@ -9961,10 +13992,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"baz","bar":2}
+                {
+                    "foo": "baz",
+                    "bar": 2
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf complex types -> both oneOf valid (complex)""")
@@ -9979,10 +14036,36 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":2,"bar":"quux"}
+                {
+                    "foo": 2,
+                    "bar": "quux"
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":{"type":"integer"}},"required":["bar"]},{"properties":{"foo":{"type":"string"}},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf complex types -> neither oneOf valid (complex)""")
@@ -10000,7 +14083,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"oneOf":[{"type":"number"},{}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with empty schema -> one valid - valid""")
@@ -10018,7 +14109,15 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"oneOf":[{"type":"number"},{}]}
+                {
+                    "oneOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with empty schema -> both valid - invalid""")
@@ -10033,10 +14132,28 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"type":"object","oneOf":[{"required":["foo","bar"]},{"required":["foo","baz"]}]}
+                {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "required": [
+                                "foo",
+                                "bar"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "foo",
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with required -> both invalid - invalid""")
@@ -10051,10 +14168,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"type":"object","oneOf":[{"required":["foo","bar"]},{"required":["foo","baz"]}]}
+                {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "required": [
+                                "foo",
+                                "bar"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "foo",
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with required -> first valid - valid""")
@@ -10069,10 +14205,29 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"baz":3}
+                {
+                    "foo": 1,
+                    "baz": 3
+                }
             """,
             """
-                {"type":"object","oneOf":[{"required":["foo","bar"]},{"required":["foo","baz"]}]}
+                {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "required": [
+                                "foo",
+                                "bar"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "foo",
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with required -> second valid - valid""")
@@ -10087,10 +14242,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2,"baz":3}
+                {
+                    "foo": 1,
+                    "bar": 2,
+                    "baz": 3
+                }
             """,
             """
-                {"type":"object","oneOf":[{"required":["foo","bar"]},{"required":["foo","baz"]}]}
+                {
+                    "type": "object",
+                    "oneOf": [
+                        {
+                            "required": [
+                                "foo",
+                                "bar"
+                            ]
+                        },
+                        {
+                            "required": [
+                                "foo",
+                                "baz"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with required -> both valid - invalid""")
@@ -10105,10 +14280,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":8}
+                {
+                    "bar": 8
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":true,"baz":true},"required":["bar"]},{"properties":{"foo":true},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": true,
+                                "baz": true
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": true
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with missing optional property -> first oneOf valid""")
@@ -10123,10 +14320,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foo"}
+                {
+                    "foo": "foo"
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":true,"baz":true},"required":["bar"]},{"properties":{"foo":true},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": true,
+                                "baz": true
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": true
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """oneOf with missing optional property -> second oneOf valid""")
@@ -10141,10 +14360,33 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"foo","bar":8}
+                {
+                    "foo": "foo",
+                    "bar": 8
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":true,"baz":true},"required":["bar"]},{"properties":{"foo":true},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": true,
+                                "baz": true
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": true
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with missing optional property -> both oneOf valid""")
@@ -10159,10 +14401,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"baz":"quux"}
+                {
+                    "baz": "quux"
+                }
             """,
             """
-                {"oneOf":[{"properties":{"bar":true,"baz":true},"required":["bar"]},{"properties":{"foo":true},"required":["foo"]}]}
+                {
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "bar": true,
+                                "baz": true
+                            },
+                            "required": [
+                                "bar"
+                            ]
+                        },
+                        {
+                            "properties": {
+                                "foo": true
+                            },
+                            "required": [
+                                "foo"
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """oneOf with missing optional property -> neither oneOf valid""")
@@ -10180,7 +14444,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"oneOf":[{"oneOf":[{"type":"null"}]}]}
+                {
+                    "oneOf": [
+                        {
+                            "oneOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             true,
             """nested oneOf, to check validation semantics -> null is valid""")
@@ -10198,7 +14472,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"oneOf":[{"oneOf":[{"type":"null"}]}]}
+                {
+                    "oneOf": [
+                        {
+                            "oneOf": [
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    ]
+                }
             """,
             false,
             """nested oneOf, to check validation semantics -> anything non-null is invalid""")
@@ -10215,7 +14499,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "aaa"
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> a matching pattern is valid""")
@@ -10233,7 +14519,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "abc"
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             false,
             """pattern validation -> a non-matching pattern is invalid""")
@@ -10251,7 +14539,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores booleans""")
@@ -10269,7 +14559,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores integers""")
@@ -10287,7 +14579,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores floats""")
@@ -10302,10 +14596,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores objects""")
@@ -10320,10 +14617,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores arrays""")
@@ -10341,7 +14641,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"pattern":"^a*${'$'}"}
+                {
+                    "pattern": "^a*${'$'}"
+                }
             """,
             true,
             """pattern validation -> ignores null""")
@@ -10359,7 +14661,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "xxaayy"
             """,
             """
-                {"pattern":"a+"}
+                {
+                    "pattern": "a+"
+                }
             """,
             true,
             """pattern is not anchored -> matches a substring""")
@@ -10373,10 +14677,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties validates properties matching a regex -> a single valid match is valid""")
@@ -10391,10 +14703,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"foooooo":2}
+                {
+                    "foo": 1,
+                    "foooooo": 2
+                }
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties validates properties matching a regex -> multiple valid matches is valid""")
@@ -10409,10 +14730,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar","fooooo":2}
+                {
+                    "foo": "bar",
+                    "fooooo": 2
+                }
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             false,
             """patternProperties validates properties matching a regex -> a single invalid match is invalid""")
@@ -10427,10 +14757,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar","foooooo":"baz"}
+                {
+                    "foo": "bar",
+                    "foooooo": "baz"
+                }
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             false,
             """patternProperties validates properties matching a regex -> multiple invalid matches is invalid""")
@@ -10445,10 +14784,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo"]
+                [
+                    "foo"
+                ]
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties validates properties matching a regex -> ignores arrays""")
@@ -10466,7 +14813,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties validates properties matching a regex -> ignores strings""")
@@ -10484,7 +14837,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"patternProperties":{"f.*o":{"type":"integer"}}}
+                {
+                    "patternProperties": {
+                        "f.*o": {
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties validates properties matching a regex -> ignores other non-objects""")
@@ -10499,10 +14858,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":21}
+                {
+                    "a": 21
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             true,
             """multiple simultaneous patternProperties are validated -> a single valid match is valid""")
@@ -10517,10 +14887,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"aaaa":18}
+                {
+                    "aaaa": 18
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             true,
             """multiple simultaneous patternProperties are validated -> a simultaneous match is valid""")
@@ -10535,10 +14916,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":21,"aaaa":18}
+                {
+                    "a": 21,
+                    "aaaa": 18
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             true,
             """multiple simultaneous patternProperties are validated -> multiple matches is valid""")
@@ -10553,10 +14946,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":"bar"}
+                {
+                    "a": "bar"
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             false,
             """multiple simultaneous patternProperties are validated -> an invalid due to one is invalid""")
@@ -10571,10 +14975,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"aaaa":31}
+                {
+                    "aaaa": 31
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             false,
             """multiple simultaneous patternProperties are validated -> an invalid due to the other is invalid""")
@@ -10589,10 +15004,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"aaa":"foo","aaaa":31}
+                {
+                    "aaa": "foo",
+                    "aaaa": 31
+                }
             """,
             """
-                {"patternProperties":{"a*":{"type":"integer"},"aaa*":{"maximum":20}}}
+                {
+                    "patternProperties": {
+                        "a*": {
+                            "type": "integer"
+                        },
+                        "aaa*": {
+                            "maximum": 20
+                        }
+                    }
+                }
             """,
             false,
             """multiple simultaneous patternProperties are validated -> an invalid due to both is invalid""")
@@ -10607,10 +15034,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"answer 1":"42"}
+                {
+                    "answer 1": "42"
+                }
             """,
             """
-                {"patternProperties":{"[0-9]{2,}":{"type":"boolean"},"X_":{"type":"string"}}}
+                {
+                    "patternProperties": {
+                        "[0-9]{2,}": {
+                            "type": "boolean"
+                        },
+                        "X_": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """regexes are not anchored by default and are case sensitive -> non recognized members are ignored""")
@@ -10625,10 +15063,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a31b":null}
+                {
+                    "a31b": null
+                }
             """,
             """
-                {"patternProperties":{"[0-9]{2,}":{"type":"boolean"},"X_":{"type":"string"}}}
+                {
+                    "patternProperties": {
+                        "[0-9]{2,}": {
+                            "type": "boolean"
+                        },
+                        "X_": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """regexes are not anchored by default and are case sensitive -> recognized members are accounted for""")
@@ -10643,10 +15092,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a_x_3":3}
+                {
+                    "a_x_3": 3
+                }
             """,
             """
-                {"patternProperties":{"[0-9]{2,}":{"type":"boolean"},"X_":{"type":"string"}}}
+                {
+                    "patternProperties": {
+                        "[0-9]{2,}": {
+                            "type": "boolean"
+                        },
+                        "X_": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """regexes are not anchored by default and are case sensitive -> regexes are case sensitive""")
@@ -10661,10 +15121,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a_X_3":3}
+                {
+                    "a_X_3": 3
+                }
             """,
             """
-                {"patternProperties":{"[0-9]{2,}":{"type":"boolean"},"X_":{"type":"string"}}}
+                {
+                    "patternProperties": {
+                        "[0-9]{2,}": {
+                            "type": "boolean"
+                        },
+                        "X_": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """regexes are not anchored by default and are case sensitive -> regexes are case sensitive, 2""")
@@ -10679,10 +15150,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"patternProperties":{"f.*":true,"b.*":false}}
+                {
+                    "patternProperties": {
+                        "f.*": true,
+                        "b.*": false
+                    }
+                }
             """,
             true,
             """patternProperties with boolean schemas -> object with property matching schema true is valid""")
@@ -10697,10 +15175,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"patternProperties":{"f.*":true,"b.*":false}}
+                {
+                    "patternProperties": {
+                        "f.*": true,
+                        "b.*": false
+                    }
+                }
             """,
             false,
             """patternProperties with boolean schemas -> object with property matching schema false is invalid""")
@@ -10715,10 +15200,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"patternProperties":{"f.*":true,"b.*":false}}
+                {
+                    "patternProperties": {
+                        "f.*": true,
+                        "b.*": false
+                    }
+                }
             """,
             false,
             """patternProperties with boolean schemas -> object with both properties is invalid""")
@@ -10733,10 +15226,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foobar":1}
+                {
+                    "foobar": 1
+                }
             """,
             """
-                {"patternProperties":{"f.*":true,"b.*":false}}
+                {
+                    "patternProperties": {
+                        "f.*": true,
+                        "b.*": false
+                    }
+                }
             """,
             false,
             """patternProperties with boolean schemas -> object with a property matching both true and false is invalid""")
@@ -10751,10 +15251,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"patternProperties":{"f.*":true,"b.*":false}}
+                {
+                    "patternProperties": {
+                        "f.*": true,
+                        "b.*": false
+                    }
+                }
             """,
             true,
             """patternProperties with boolean schemas -> empty object is valid""")
@@ -10769,10 +15275,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foobar":null}
+                {
+                    "foobar": null
+                }
             """,
             """
-                {"patternProperties":{"^.*bar${'$'}":{"type":"null"}}}
+                {
+                    "patternProperties": {
+                        "^.*bar${'$'}": {
+                            "type": "null"
+                        }
+                    }
+                }
             """,
             true,
             """patternProperties with null valued instance properties -> allows null values""")
@@ -10786,10 +15300,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":"baz"}
+                {
+                    "foo": 1,
+                    "bar": "baz"
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """object properties validation -> both properties present and valid is valid""")
@@ -10804,10 +15330,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":{}}
+                {
+                    "foo": 1,
+                    "bar": {
+                    }
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """object properties validation -> one property invalid is invalid""")
@@ -10822,10 +15361,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[],"bar":{}}
+                {
+                    "foo": [
+                    ],
+                    "bar": {
+                    }
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """object properties validation -> both properties invalid is invalid""")
@@ -10840,10 +15393,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"quux":[]}
+                {
+                    "quux": [
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """object properties validation -> doesn't invalidate other properties""")
@@ -10858,10 +15423,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """object properties validation -> ignores arrays""")
@@ -10879,7 +15454,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"type":"string"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """object properties validation -> ignores other non-objects""")
@@ -10894,10 +15478,33 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[1,2]}
+                {
+                    "foo": [
+                        1,
+                        2
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """properties, patternProperties, additionalProperties interaction -> property validates property""")
@@ -10912,10 +15519,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[1,2,3,4]}
+                {
+                    "foo": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """properties, patternProperties, additionalProperties interaction -> property invalidates property""")
@@ -10930,10 +15562,31 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[]}
+                {
+                    "foo": [
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """properties, patternProperties, additionalProperties interaction -> patternProperty invalidates property""")
@@ -10948,10 +15601,33 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"fxo":[1,2]}
+                {
+                    "fxo": [
+                        1,
+                        2
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """properties, patternProperties, additionalProperties interaction -> patternProperty validates nonproperty""")
@@ -10966,10 +15642,31 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"fxo":[]}
+                {
+                    "fxo": [
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """properties, patternProperties, additionalProperties interaction -> patternProperty invalidates nonproperty""")
@@ -10984,10 +15681,31 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":[]}
+                {
+                    "bar": [
+                    ]
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """properties, patternProperties, additionalProperties interaction -> additionalProperty ignores property""")
@@ -11002,10 +15720,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"quux":3}
+                {
+                    "quux": 3
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             true,
             """properties, patternProperties, additionalProperties interaction -> additionalProperty validates others""")
@@ -11020,10 +15758,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"quux":"foo"}
+                {
+                    "quux": "foo"
+                }
             """,
             """
-                {"properties":{"foo":{"type":"array","maxItems":3},"bar":{"type":"array"}},"patternProperties":{"f.o":{"minItems":2}},"additionalProperties":{"type":"integer"}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "array",
+                            "maxItems": 3
+                        },
+                        "bar": {
+                            "type": "array"
+                        }
+                    },
+                    "patternProperties": {
+                        "f.o": {
+                            "minItems": 2
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                }
             """,
             false,
             """properties, patternProperties, additionalProperties interaction -> additionalProperty invalidates others""")
@@ -11038,10 +15796,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"foo":true,"bar":false}}
+                {
+                    "properties": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             true,
             """properties with boolean schema -> no property present is valid""")
@@ -11056,10 +15820,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"properties":{"foo":true,"bar":false}}
+                {
+                    "properties": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             true,
             """properties with boolean schema -> only 'true' property present is valid""")
@@ -11074,10 +15845,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":2}
+                {
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"foo":true,"bar":false}}
+                {
+                    "properties": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             false,
             """properties with boolean schema -> only 'false' property present is invalid""")
@@ -11092,10 +15870,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1,"bar":2}
+                {
+                    "foo": 1,
+                    "bar": 2
+                }
             """,
             """
-                {"properties":{"foo":true,"bar":false}}
+                {
+                    "properties": {
+                        "foo": true,
+                        "bar": false
+                    }
+                }
             """,
             false,
             """properties with boolean schema -> both properties present is invalid""")
@@ -11110,10 +15896,38 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":1,"foo\"bar":1,"foo\\bar":1,"foo\rbar":1,"foo\tbar":1,"foo\fbar":1}
+                {
+                    "foo\nbar": 1,
+                    "foo\"bar": 1,
+                    "foo\\bar": 1,
+                    "foo\rbar": 1,
+                    "foo\tbar": 1,
+                    "foo\fbar": 1
+                }
             """,
             """
-                {"properties":{"foo\nbar":{"type":"number"},"foo\"bar":{"type":"number"},"foo\\bar":{"type":"number"},"foo\rbar":{"type":"number"},"foo\tbar":{"type":"number"},"foo\fbar":{"type":"number"}}}
+                {
+                    "properties": {
+                        "foo\nbar": {
+                            "type": "number"
+                        },
+                        "foo\"bar": {
+                            "type": "number"
+                        },
+                        "foo\\bar": {
+                            "type": "number"
+                        },
+                        "foo\rbar": {
+                            "type": "number"
+                        },
+                        "foo\tbar": {
+                            "type": "number"
+                        },
+                        "foo\fbar": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """properties with escaped characters -> object with all numbers is valid""")
@@ -11128,10 +15942,38 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":"1","foo\"bar":"1","foo\\bar":"1","foo\rbar":"1","foo\tbar":"1","foo\fbar":"1"}
+                {
+                    "foo\nbar": "1",
+                    "foo\"bar": "1",
+                    "foo\\bar": "1",
+                    "foo\rbar": "1",
+                    "foo\tbar": "1",
+                    "foo\fbar": "1"
+                }
             """,
             """
-                {"properties":{"foo\nbar":{"type":"number"},"foo\"bar":{"type":"number"},"foo\\bar":{"type":"number"},"foo\rbar":{"type":"number"},"foo\tbar":{"type":"number"},"foo\fbar":{"type":"number"}}}
+                {
+                    "properties": {
+                        "foo\nbar": {
+                            "type": "number"
+                        },
+                        "foo\"bar": {
+                            "type": "number"
+                        },
+                        "foo\\bar": {
+                            "type": "number"
+                        },
+                        "foo\rbar": {
+                            "type": "number"
+                        },
+                        "foo\tbar": {
+                            "type": "number"
+                        },
+                        "foo\fbar": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             false,
             """properties with escaped characters -> object with strings is invalid""")
@@ -11146,10 +15988,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":null}
+                {
+                    "foo": null
+                }
             """,
             """
-                {"properties":{"foo":{"type":"null"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "null"
+                        }
+                    }
+                }
             """,
             true,
             """properties with null valued instance properties -> allows null values""")
@@ -11164,10 +16014,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """properties whose names are Javascript object property names -> ignores arrays""")
@@ -11185,7 +16052,23 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """properties whose names are Javascript object property names -> ignores other non-objects""")
@@ -11200,10 +16083,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """properties whose names are Javascript object property names -> none of the properties mentioned""")
@@ -11218,10 +16118,28 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"__proto__":"foo"}
+                {
+                    "__proto__": "foo"
+                }
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             false,
             """properties whose names are Javascript object property names -> __proto__ not valid""")
@@ -11236,10 +16154,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"toString":{"length":37}}
+                {
+                    "toString": {
+                        "length": 37
+                    }
+                }
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             false,
             """properties whose names are Javascript object property names -> toString not valid""")
@@ -11254,10 +16192,30 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"constructor":{"length":37}}
+                {
+                    "constructor": {
+                        "length": 37
+                    }
+                }
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             false,
             """properties whose names are Javascript object property names -> constructor not valid""")
@@ -11272,10 +16230,32 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"__proto__":12,"toString":{"length":"foo"},"constructor":37}
+                {
+                    "__proto__": 12,
+                    "toString": {
+                        "length": "foo"
+                    },
+                    "constructor": 37
+                }
             """,
             """
-                {"properties":{"__proto__":{"type":"number"},"toString":{"properties":{"length":{"type":"string"}}},"constructor":{"type":"number"}}}
+                {
+                    "properties": {
+                        "__proto__": {
+                            "type": "number"
+                        },
+                        "toString": {
+                            "properties": {
+                                "length": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "constructor": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """properties whose names are Javascript object property names -> all present and valid""")
@@ -11289,10 +16269,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"f":{},"foo":{}}
+                {
+                    "f": {
+                    },
+                    "foo": {
+                    }
+                }
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             true,
             """propertyNames validation -> all property names valid""")
@@ -11307,10 +16296,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{},"foobar":{}}
+                {
+                    "foo": {
+                    },
+                    "foobar": {
+                    }
+                }
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             false,
             """propertyNames validation -> some property names invalid""")
@@ -11325,10 +16323,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             true,
             """propertyNames validation -> object without properties is valid""")
@@ -11343,10 +16346,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3,4]
+                [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             true,
             """propertyNames validation -> ignores arrays""")
@@ -11364,7 +16376,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foobar"
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             true,
             """propertyNames validation -> ignores strings""")
@@ -11382,7 +16398,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"propertyNames":{"maxLength":3}}
+                {
+                    "propertyNames": {
+                        "maxLength": 3
+                    }
+                }
             """,
             true,
             """propertyNames validation -> ignores other non-objects""")
@@ -11397,10 +16417,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"a":{},"aa":{},"aaa":{}}
+                {
+                    "a": {
+                    },
+                    "aa": {
+                    },
+                    "aaa": {
+                    }
+                }
             """,
             """
-                {"propertyNames":{"pattern":"^a+${'$'}"}}
+                {
+                    "propertyNames": {
+                        "pattern": "^a+${'$'}"
+                    }
+                }
             """,
             true,
             """propertyNames validation with pattern -> matching property names valid""")
@@ -11415,10 +16446,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"aaA":{}}
+                {
+                    "aaA": {
+                    }
+                }
             """,
             """
-                {"propertyNames":{"pattern":"^a+${'$'}"}}
+                {
+                    "propertyNames": {
+                        "pattern": "^a+${'$'}"
+                    }
+                }
             """,
             false,
             """propertyNames validation with pattern -> non-matching property name is invalid""")
@@ -11433,10 +16471,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"propertyNames":{"pattern":"^a+${'$'}"}}
+                {
+                    "propertyNames": {
+                        "pattern": "^a+${'$'}"
+                    }
+                }
             """,
             true,
             """propertyNames validation with pattern -> object without properties is valid""")
@@ -11451,10 +16494,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"propertyNames":true}
+                {
+                    "propertyNames": true
+                }
             """,
             true,
             """propertyNames with boolean schema true -> object with any properties is valid""")
@@ -11469,10 +16516,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"propertyNames":true}
+                {
+                    "propertyNames": true
+                }
             """,
             true,
             """propertyNames with boolean schema true -> empty object is valid""")
@@ -11487,10 +16537,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"propertyNames":false}
+                {
+                    "propertyNames": false
+                }
             """,
             false,
             """propertyNames with boolean schema false -> object with any properties is invalid""")
@@ -11505,10 +16559,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"propertyNames":false}
+                {
+                    "propertyNames": false
+                }
             """,
             true,
             """propertyNames with boolean schema false -> empty object is valid""")
@@ -11522,10 +16579,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":false}
+                {
+                    "foo": false
+                }
             """,
             """
-                {"properties":{"foo":{"${'$'}ref":"#"}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """root pointer ref -> match""")
@@ -11540,10 +16606,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"foo":false}}
+                {
+                    "foo": {
+                        "foo": false
+                    }
+                }
             """,
             """
-                {"properties":{"foo":{"${'$'}ref":"#"}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             true,
             """root pointer ref -> recursive match""")
@@ -11558,10 +16635,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":false}
+                {
+                    "bar": false
+                }
             """,
             """
-                {"properties":{"foo":{"${'$'}ref":"#"}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             false,
             """root pointer ref -> mismatch""")
@@ -11576,10 +16662,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":false}}
+                {
+                    "foo": {
+                        "bar": false
+                    }
+                }
             """,
             """
-                {"properties":{"foo":{"${'$'}ref":"#"}},"additionalProperties":false}
+                {
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             """,
             false,
             """root pointer ref -> recursive mismatch""")
@@ -11594,10 +16691,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":3}
+                {
+                    "bar": 3
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"${'$'}ref":"#/properties/foo"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "${'$'}ref": "#/properties/foo"
+                        }
+                    }
+                }
             """,
             true,
             """relative pointer ref to object -> match""")
@@ -11612,10 +16720,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":true}
+                {
+                    "bar": true
+                }
             """,
             """
-                {"properties":{"foo":{"type":"integer"},"bar":{"${'$'}ref":"#/properties/foo"}}}
+                {
+                    "properties": {
+                        "foo": {
+                            "type": "integer"
+                        },
+                        "bar": {
+                            "${'$'}ref": "#/properties/foo"
+                        }
+                    }
+                }
             """,
             false,
             """relative pointer ref to object -> mismatch""")
@@ -11630,10 +16749,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"${'$'}ref":"#/items/0"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "${'$'}ref": "#/items/0"
+                        }
+                    ]
+                }
             """,
             true,
             """relative pointer ref to array -> match array""")
@@ -11648,10 +16779,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,"foo"]
+                [
+                    1,
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"integer"},{"${'$'}ref":"#/items/0"}]}
+                {
+                    "items": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "${'$'}ref": "#/items/0"
+                        }
+                    ]
+                }
             """,
             false,
             """relative pointer ref to array -> mismatch array""")
@@ -11666,10 +16809,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"slash":"aoeu"}
+                {
+                    "slash": "aoeu"
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             false,
             """escaped pointer ref -> slash invalid""")
@@ -11684,10 +16852,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"tilde":"aoeu"}
+                {
+                    "tilde": "aoeu"
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             false,
             """escaped pointer ref -> tilde invalid""")
@@ -11702,10 +16895,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"percent":"aoeu"}
+                {
+                    "percent": "aoeu"
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             false,
             """escaped pointer ref -> percent invalid""")
@@ -11720,10 +16938,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"slash":123}
+                {
+                    "slash": 123
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             true,
             """escaped pointer ref -> slash valid""")
@@ -11738,10 +16981,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"tilde":123}
+                {
+                    "tilde": 123
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             true,
             """escaped pointer ref -> tilde valid""")
@@ -11756,10 +17024,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"percent":123}
+                {
+                    "percent": 123
+                }
             """,
             """
-                {"definitions":{"tilde~field":{"type":"integer"},"slash/field":{"type":"integer"},"percent%field":{"type":"integer"}},"properties":{"tilde":{"${'$'}ref":"#/definitions/tilde~0field"},"slash":{"${'$'}ref":"#/definitions/slash~1field"},"percent":{"${'$'}ref":"#/definitions/percent%25field"}}}
+                {
+                    "definitions": {
+                        "tilde~field": {
+                            "type": "integer"
+                        },
+                        "slash/field": {
+                            "type": "integer"
+                        },
+                        "percent%field": {
+                            "type": "integer"
+                        }
+                    },
+                    "properties": {
+                        "tilde": {
+                            "${'$'}ref": "#/definitions/tilde~0field"
+                        },
+                        "slash": {
+                            "${'$'}ref": "#/definitions/slash~1field"
+                        },
+                        "percent": {
+                            "${'$'}ref": "#/definitions/percent%25field"
+                        }
+                    }
+                }
             """,
             true,
             """escaped pointer ref -> percent valid""")
@@ -11777,7 +17070,24 @@ class SchemaSuiteTest : JsonSchemaTest {
                 5
             """,
             """
-                {"definitions":{"a":{"type":"integer"},"b":{"${'$'}ref":"#/definitions/a"},"c":{"${'$'}ref":"#/definitions/b"}},"allOf":[{"${'$'}ref":"#/definitions/c"}]}
+                {
+                    "definitions": {
+                        "a": {
+                            "type": "integer"
+                        },
+                        "b": {
+                            "${'$'}ref": "#/definitions/a"
+                        },
+                        "c": {
+                            "${'$'}ref": "#/definitions/b"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/c"
+                        }
+                    ]
+                }
             """,
             true,
             """nested refs -> nested ref valid""")
@@ -11795,7 +17105,24 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"definitions":{"a":{"type":"integer"},"b":{"${'$'}ref":"#/definitions/a"},"c":{"${'$'}ref":"#/definitions/b"}},"allOf":[{"${'$'}ref":"#/definitions/c"}]}
+                {
+                    "definitions": {
+                        "a": {
+                            "type": "integer"
+                        },
+                        "b": {
+                            "${'$'}ref": "#/definitions/a"
+                        },
+                        "c": {
+                            "${'$'}ref": "#/definitions/b"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/c"
+                        }
+                    ]
+                }
             """,
             false,
             """nested refs -> nested ref invalid""")
@@ -11816,10 +17143,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[]}
+                {
+                    "foo": [
+                    ]
+                }
             """,
             """
-                {"definitions":{"reffed":{"type":"array"}},"properties":{"foo":{"${'$'}ref":"#/definitions/reffed","maxItems":2}}}
+                {
+                    "definitions": {
+                        "reffed": {
+                            "type": "array"
+                        }
+                    },
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/reffed",
+                            "maxItems": 2
+                        }
+                    }
+                }
             """,
             true,
             """ref overrides any sibling keywords -> ref valid""")
@@ -11840,10 +17182,28 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":[1,2,3]}
+                {
+                    "foo": [
+                        1,
+                        2,
+                        3
+                    ]
+                }
             """,
             """
-                {"definitions":{"reffed":{"type":"array"}},"properties":{"foo":{"${'$'}ref":"#/definitions/reffed","maxItems":2}}}
+                {
+                    "definitions": {
+                        "reffed": {
+                            "type": "array"
+                        }
+                    },
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/reffed",
+                            "maxItems": 2
+                        }
+                    }
+                }
             """,
             true,
             """ref overrides any sibling keywords -> ref valid, maxItems ignored""")
@@ -11864,10 +17224,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"string"}
+                {
+                    "foo": "string"
+                }
             """,
             """
-                {"definitions":{"reffed":{"type":"array"}},"properties":{"foo":{"${'$'}ref":"#/definitions/reffed","maxItems":2}}}
+                {
+                    "definitions": {
+                        "reffed": {
+                            "type": "array"
+                        }
+                    },
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/reffed",
+                            "maxItems": 2
+                        }
+                    }
+                }
             """,
             false,
             """ref overrides any sibling keywords -> ref invalid""")
@@ -11891,7 +17265,27 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"http://localhost:1234/sibling_id/base/","definitions":{"foo":{"${'$'}id":"http://localhost:1234/sibling_id/foo.json","type":"string"},"base_foo":{"${'$'}comment":"this canonical uri is http://localhost:1234/sibling_id/base/foo.json","${'$'}id":"foo.json","type":"number"}},"allOf":[{"${'$'}comment":"${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json","${'$'}id":"http://localhost:1234/sibling_id/","${'$'}ref":"foo.json"}]}
+                {
+                    "${'$'}id": "http://localhost:1234/sibling_id/base/",
+                    "definitions": {
+                        "foo": {
+                            "${'$'}id": "http://localhost:1234/sibling_id/foo.json",
+                            "type": "string"
+                        },
+                        "base_foo": {
+                            "${'$'}comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
+                            "${'$'}id": "foo.json",
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}comment": "${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
+                            "${'$'}id": "http://localhost:1234/sibling_id/",
+                            "${'$'}ref": "foo.json"
+                        }
+                    ]
+                }
             """,
             false,
             """${'$'}ref prevents a sibling ${'$'}id from changing the base uri -> ${'$'}ref resolves to /definitions/base_foo, data does not validate""")
@@ -11915,7 +17309,27 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"http://localhost:1234/sibling_id/base/","definitions":{"foo":{"${'$'}id":"http://localhost:1234/sibling_id/foo.json","type":"string"},"base_foo":{"${'$'}comment":"this canonical uri is http://localhost:1234/sibling_id/base/foo.json","${'$'}id":"foo.json","type":"number"}},"allOf":[{"${'$'}comment":"${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json","${'$'}id":"http://localhost:1234/sibling_id/","${'$'}ref":"foo.json"}]}
+                {
+                    "${'$'}id": "http://localhost:1234/sibling_id/base/",
+                    "definitions": {
+                        "foo": {
+                            "${'$'}id": "http://localhost:1234/sibling_id/foo.json",
+                            "type": "string"
+                        },
+                        "base_foo": {
+                            "${'$'}comment": "this canonical uri is http://localhost:1234/sibling_id/base/foo.json",
+                            "${'$'}id": "foo.json",
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}comment": "${'$'}ref resolves to http://localhost:1234/sibling_id/base/foo.json, not http://localhost:1234/sibling_id/foo.json",
+                            "${'$'}id": "http://localhost:1234/sibling_id/",
+                            "${'$'}ref": "foo.json"
+                        }
+                    ]
+                }
             """,
             true,
             """${'$'}ref prevents a sibling ${'$'}id from changing the base uri -> ${'$'}ref resolves to /definitions/base_foo, data validates""")
@@ -11936,10 +17350,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"minLength":1}
+                {
+                    "minLength": 1
+                }
             """,
             """
-                {"${'$'}ref":"http://json-schema.org/draft-07/schema#"}
+                {
+                    "${'$'}ref": "http://json-schema.org/draft-07/schema#"
+                }
             """,
             true,
             """remote ref, containing refs itself -> remote ref valid""")
@@ -11960,10 +17378,14 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"minLength":-1}
+                {
+                    "minLength": -1
+                }
             """,
             """
-                {"${'$'}ref":"http://json-schema.org/draft-07/schema#"}
+                {
+                    "${'$'}ref": "http://json-schema.org/draft-07/schema#"
+                }
             """,
             false,
             """remote ref, containing refs itself -> remote ref invalid""")
@@ -11978,10 +17400,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"${'$'}ref":"a"}
+                {
+                    "${'$'}ref": "a"
+                }
             """,
             """
-                {"properties":{"${'$'}ref":{"type":"string"}}}
+                {
+                    "properties": {
+                        "${'$'}ref": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """property named ${'$'}ref that is not a reference -> property named ${'$'}ref valid""")
@@ -11996,10 +17426,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"${'$'}ref":2}
+                {
+                    "${'$'}ref": 2
+                }
             """,
             """
-                {"properties":{"${'$'}ref":{"type":"string"}}}
+                {
+                    "properties": {
+                        "${'$'}ref": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """property named ${'$'}ref that is not a reference -> property named ${'$'}ref invalid""")
@@ -12014,10 +17452,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"${'$'}ref":"a"}
+                {
+                    "${'$'}ref": "a"
+                }
             """,
             """
-                {"properties":{"${'$'}ref":{"${'$'}ref":"#/definitions/is-string"}},"definitions":{"is-string":{"type":"string"}}}
+                {
+                    "properties": {
+                        "${'$'}ref": {
+                            "${'$'}ref": "#/definitions/is-string"
+                        }
+                    },
+                    "definitions": {
+                        "is-string": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """property named ${'$'}ref, containing an actual ${'$'}ref -> property named ${'$'}ref valid""")
@@ -12032,10 +17483,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"${'$'}ref":2}
+                {
+                    "${'$'}ref": 2
+                }
             """,
             """
-                {"properties":{"${'$'}ref":{"${'$'}ref":"#/definitions/is-string"}},"definitions":{"is-string":{"type":"string"}}}
+                {
+                    "properties": {
+                        "${'$'}ref": {
+                            "${'$'}ref": "#/definitions/is-string"
+                        }
+                    },
+                    "definitions": {
+                        "is-string": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """property named ${'$'}ref, containing an actual ${'$'}ref -> property named ${'$'}ref invalid""")
@@ -12053,7 +17517,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"${'$'}ref":"#/definitions/bool"}],"definitions":{"bool":true}}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/bool"
+                        }
+                    ],
+                    "definitions": {
+                        "bool": true
+                    }
+                }
             """,
             true,
             """${'$'}ref to boolean schema true -> any value is valid""")
@@ -12071,7 +17544,16 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"${'$'}ref":"#/definitions/bool"}],"definitions":{"bool":false}}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/bool"
+                        }
+                    ],
+                    "definitions": {
+                        "bool": false
+                    }
+                }
             """,
             false,
             """${'$'}ref to boolean schema false -> any value is invalid""")
@@ -12092,10 +17574,79 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"meta":"root","nodes":[{"value":1,"subtree":{"meta":"child","nodes":[{"value":1.1},{"value":1.2}]}},{"value":2,"subtree":{"meta":"child","nodes":[{"value":2.1},{"value":2.2}]}}]}
+                {
+                    "meta": "root",
+                    "nodes": [
+                        {
+                            "value": 1,
+                            "subtree": {
+                                "meta": "child",
+                                "nodes": [
+                                    {
+                                        "value": 1.1
+                                    },
+                                    {
+                                        "value": 1.2
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "value": 2,
+                            "subtree": {
+                                "meta": "child",
+                                "nodes": [
+                                    {
+                                        "value": 2.1
+                                    },
+                                    {
+                                        "value": 2.2
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/tree","description":"tree of nodes","type":"object","properties":{"meta":{"type":"string"},"nodes":{"type":"array","items":{"${'$'}ref":"node"}}},"required":["meta","nodes"],"definitions":{"node":{"${'$'}id":"http://localhost:1234/node","description":"node","type":"object","properties":{"value":{"type":"number"},"subtree":{"${'$'}ref":"tree"}},"required":["value"]}}}
+                {
+                    "${'$'}id": "http://localhost:1234/tree",
+                    "description": "tree of nodes",
+                    "type": "object",
+                    "properties": {
+                        "meta": {
+                            "type": "string"
+                        },
+                        "nodes": {
+                            "type": "array",
+                            "items": {
+                                "${'$'}ref": "node"
+                            }
+                        }
+                    },
+                    "required": [
+                        "meta",
+                        "nodes"
+                    ],
+                    "definitions": {
+                        "node": {
+                            "${'$'}id": "http://localhost:1234/node",
+                            "description": "node",
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "number"
+                                },
+                                "subtree": {
+                                    "${'$'}ref": "tree"
+                                }
+                            },
+                            "required": [
+                                "value"
+                            ]
+                        }
+                    }
+                }
             """,
             true,
             """Recursive references between schemas -> valid tree""")
@@ -12116,10 +17667,79 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"meta":"root","nodes":[{"value":1,"subtree":{"meta":"child","nodes":[{"value":"string is invalid"},{"value":1.2}]}},{"value":2,"subtree":{"meta":"child","nodes":[{"value":2.1},{"value":2.2}]}}]}
+                {
+                    "meta": "root",
+                    "nodes": [
+                        {
+                            "value": 1,
+                            "subtree": {
+                                "meta": "child",
+                                "nodes": [
+                                    {
+                                        "value": "string is invalid"
+                                    },
+                                    {
+                                        "value": 1.2
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "value": 2,
+                            "subtree": {
+                                "meta": "child",
+                                "nodes": [
+                                    {
+                                        "value": 2.1
+                                    },
+                                    {
+                                        "value": 2.2
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/tree","description":"tree of nodes","type":"object","properties":{"meta":{"type":"string"},"nodes":{"type":"array","items":{"${'$'}ref":"node"}}},"required":["meta","nodes"],"definitions":{"node":{"${'$'}id":"http://localhost:1234/node","description":"node","type":"object","properties":{"value":{"type":"number"},"subtree":{"${'$'}ref":"tree"}},"required":["value"]}}}
+                {
+                    "${'$'}id": "http://localhost:1234/tree",
+                    "description": "tree of nodes",
+                    "type": "object",
+                    "properties": {
+                        "meta": {
+                            "type": "string"
+                        },
+                        "nodes": {
+                            "type": "array",
+                            "items": {
+                                "${'$'}ref": "node"
+                            }
+                        }
+                    },
+                    "required": [
+                        "meta",
+                        "nodes"
+                    ],
+                    "definitions": {
+                        "node": {
+                            "${'$'}id": "http://localhost:1234/node",
+                            "description": "node",
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "number"
+                                },
+                                "subtree": {
+                                    "${'$'}ref": "tree"
+                                }
+                            },
+                            "required": [
+                                "value"
+                            ]
+                        }
+                    }
+                }
             """,
             false,
             """Recursive references between schemas -> invalid tree""")
@@ -12140,10 +17760,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\"bar":1}
+                {
+                    "foo\"bar": 1
+                }
             """,
             """
-                {"properties":{"foo\"bar":{"${'$'}ref":"#/definitions/foo%22bar"}},"definitions":{"foo\"bar":{"type":"number"}}}
+                {
+                    "properties": {
+                        "foo\"bar": {
+                            "${'$'}ref": "#/definitions/foo%22bar"
+                        }
+                    },
+                    "definitions": {
+                        "foo\"bar": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             true,
             """refs with quote -> object with numbers is valid""")
@@ -12164,10 +17797,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\"bar":"1"}
+                {
+                    "foo\"bar": "1"
+                }
             """,
             """
-                {"properties":{"foo\"bar":{"${'$'}ref":"#/definitions/foo%22bar"}},"definitions":{"foo\"bar":{"type":"number"}}}
+                {
+                    "properties": {
+                        "foo\"bar": {
+                            "${'$'}ref": "#/definitions/foo%22bar"
+                        }
+                    },
+                    "definitions": {
+                        "foo\"bar": {
+                            "type": "number"
+                        }
+                    }
+                }
             """,
             false,
             """refs with quote -> object with strings is invalid""")
@@ -12191,7 +17837,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"allOf":[{"${'$'}ref":"#foo"}],"definitions":{"A":{"${'$'}id":"#foo","type":"integer"}}}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "#foo",
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """Location-independent identifier -> match""")
@@ -12215,7 +17873,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"allOf":[{"${'$'}ref":"#foo"}],"definitions":{"A":{"${'$'}id":"#foo","type":"integer"}}}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "#foo",
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             false,
             """Location-independent identifier -> mismatch""")
@@ -12239,7 +17909,20 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"https://example.com/schema-with-anchor","allOf":[{"${'$'}ref":"https://example.com/schema-with-anchor#foo"}],"definitions":{"A":{"${'$'}id":"#foo","type":"integer"}}}
+                {
+                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "#foo",
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             true,
             """Reference an anchor with a non-relative URI -> match""")
@@ -12263,7 +17946,20 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"https://example.com/schema-with-anchor","allOf":[{"${'$'}ref":"https://example.com/schema-with-anchor#foo"}],"definitions":{"A":{"${'$'}id":"#foo","type":"integer"}}}
+                {
+                    "${'$'}id": "https://example.com/schema-with-anchor",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "https://example.com/schema-with-anchor#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "#foo",
+                            "type": "integer"
+                        }
+                    }
+                }
             """,
             false,
             """Reference an anchor with a non-relative URI -> mismatch""")
@@ -12287,7 +17983,25 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"http://localhost:1234/root","allOf":[{"${'$'}ref":"http://localhost:1234/nested.json#foo"}],"definitions":{"A":{"${'$'}id":"nested.json","definitions":{"B":{"${'$'}id":"#foo","type":"integer"}}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/root",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://localhost:1234/nested.json#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "nested.json",
+                            "definitions": {
+                                "B": {
+                                    "${'$'}id": "#foo",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """Location-independent identifier with base URI change in subschema -> match""")
@@ -12311,7 +18025,25 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"http://localhost:1234/root","allOf":[{"${'$'}ref":"http://localhost:1234/nested.json#foo"}],"definitions":{"A":{"${'$'}id":"nested.json","definitions":{"B":{"${'$'}id":"#foo","type":"integer"}}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/root",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://localhost:1234/nested.json#foo"
+                        }
+                    ],
+                    "definitions": {
+                        "A": {
+                            "${'$'}id": "nested.json",
+                            "definitions": {
+                                "B": {
+                                    "${'$'}id": "#foo",
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """Location-independent identifier with base URI change in subschema -> mismatch""")
@@ -12329,7 +18061,18 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "this is a string"
             """,
             """
-                {"definitions":{"a_string":{"type":"string"}},"enum":[{"${'$'}ref":"#/definitions/a_string"}]}
+                {
+                    "definitions": {
+                        "a_string": {
+                            "type": "string"
+                        }
+                    },
+                    "enum": [
+                        {
+                            "${'$'}ref": "#/definitions/a_string"
+                        }
+                    ]
+                }
             """,
             false,
             """naive replacement of ${'$'}ref with its destination is not correct -> do not evaluate the ${'$'}ref inside the enum, matching any string""")
@@ -12344,10 +18087,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             """
-                {"definitions":{"a_string":{"type":"string"}},"enum":[{"${'$'}ref":"#/definitions/a_string"}]}
+                {
+                    "definitions": {
+                        "a_string": {
+                            "type": "string"
+                        }
+                    },
+                    "enum": [
+                        {
+                            "${'$'}ref": "#/definitions/a_string"
+                        }
+                    ]
+                }
             """,
             false,
             """naive replacement of ${'$'}ref with its destination is not correct -> do not evaluate the ${'$'}ref inside the enum, definition exact match""")
@@ -12362,10 +18118,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"${'$'}ref":"#/definitions/a_string"}
+                {
+                    "${'$'}ref": "#/definitions/a_string"
+                }
             """,
             """
-                {"definitions":{"a_string":{"type":"string"}},"enum":[{"${'$'}ref":"#/definitions/a_string"}]}
+                {
+                    "definitions": {
+                        "a_string": {
+                            "type": "string"
+                        }
+                    },
+                    "enum": [
+                        {
+                            "${'$'}ref": "#/definitions/a_string"
+                        }
+                    ]
+                }
             """,
             true,
             """naive replacement of ${'$'}ref with its destination is not correct -> match the enum exactly""")
@@ -12386,10 +18155,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":1},"bar":"a"}
+                {
+                    "foo": {
+                        "bar": 1
+                    },
+                    "bar": "a"
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-relative-uri-defs1.json","properties":{"foo":{"${'$'}id":"schema-relative-uri-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-relative-uri-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                        }
+                    ]
+                }
             """,
             false,
             """refs with relative uris and defs -> invalid on inner field""")
@@ -12410,10 +18210,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":"a"},"bar":1}
+                {
+                    "foo": {
+                        "bar": "a"
+                    },
+                    "bar": 1
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-relative-uri-defs1.json","properties":{"foo":{"${'$'}id":"schema-relative-uri-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-relative-uri-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                        }
+                    ]
+                }
             """,
             false,
             """refs with relative uris and defs -> invalid on outer field""")
@@ -12434,10 +18265,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":"a"},"bar":"a"}
+                {
+                    "foo": {
+                        "bar": "a"
+                    },
+                    "bar": "a"
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-relative-uri-defs1.json","properties":{"foo":{"${'$'}id":"schema-relative-uri-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-relative-uri-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-relative-uri-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "schema-relative-uri-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-relative-uri-defs2.json"
+                        }
+                    ]
+                }
             """,
             true,
             """refs with relative uris and defs -> valid on both fields""")
@@ -12458,10 +18320,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":1},"bar":"a"}
+                {
+                    "foo": {
+                        "bar": 1
+                    },
+                    "bar": "a"
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs1.json","properties":{"foo":{"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-refs-absolute-uris-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                        }
+                    ]
+                }
             """,
             false,
             """relative refs with absolute uris and defs -> invalid on inner field""")
@@ -12482,10 +18375,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":"a"},"bar":1}
+                {
+                    "foo": {
+                        "bar": "a"
+                    },
+                    "bar": 1
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs1.json","properties":{"foo":{"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-refs-absolute-uris-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                        }
+                    ]
+                }
             """,
             false,
             """relative refs with absolute uris and defs -> invalid on outer field""")
@@ -12506,10 +18430,41 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":{"bar":"a"},"bar":"a"}
+                {
+                    "foo": {
+                        "bar": "a"
+                    },
+                    "bar": "a"
+                }
             """,
             """
-                {"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs1.json","properties":{"foo":{"${'$'}id":"http://example.com/schema-refs-absolute-uris-defs2.json","definitions":{"inner":{"properties":{"bar":{"type":"string"}}}},"allOf":[{"${'$'}ref":"#/definitions/inner"}]}},"allOf":[{"${'$'}ref":"schema-refs-absolute-uris-defs2.json"}]}
+                {
+                    "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+                    "properties": {
+                        "foo": {
+                            "${'$'}id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+                            "definitions": {
+                                "inner": {
+                                    "properties": {
+                                        "bar": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "allOf": [
+                                {
+                                    "${'$'}ref": "#/definitions/inner"
+                                }
+                            ]
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "schema-refs-absolute-uris-defs2.json"
+                        }
+                    ]
+                }
             """,
             true,
             """relative refs with absolute uris and defs -> valid on both fields""")
@@ -12533,7 +18488,27 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"http://example.com/a.json","definitions":{"x":{"${'$'}id":"http://example.com/b/c.json","not":{"definitions":{"y":{"${'$'}id":"d.json","type":"number"}}}}},"allOf":[{"${'$'}ref":"http://example.com/b/d.json"}]}
+                {
+                    "${'$'}id": "http://example.com/a.json",
+                    "definitions": {
+                        "x": {
+                            "${'$'}id": "http://example.com/b/c.json",
+                            "not": {
+                                "definitions": {
+                                    "y": {
+                                        "${'$'}id": "d.json",
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/b/d.json"
+                        }
+                    ]
+                }
             """,
             true,
             """${'$'}id must be resolved against nearest parent, not just immediate parent -> number is valid""")
@@ -12557,7 +18532,27 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"http://example.com/a.json","definitions":{"x":{"${'$'}id":"http://example.com/b/c.json","not":{"definitions":{"y":{"${'$'}id":"d.json","type":"number"}}}}},"allOf":[{"${'$'}ref":"http://example.com/b/d.json"}]}
+                {
+                    "${'$'}id": "http://example.com/a.json",
+                    "definitions": {
+                        "x": {
+                            "${'$'}id": "http://example.com/b/c.json",
+                            "not": {
+                                "definitions": {
+                                    "y": {
+                                        "${'$'}id": "d.json",
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/b/d.json"
+                        }
+                    ]
+                }
             """,
             false,
             """${'$'}id must be resolved against nearest parent, not just immediate parent -> non-number is invalid""")
@@ -12578,10 +18573,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":37}
+                {
+                    "foo": 37
+                }
             """,
             """
-                {"${'$'}comment":"URIs do not have to have HTTP(s) schemes","${'$'}id":"urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed","minimum":30,"properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"}}}
+                {
+                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
+                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "minimum": 30,
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                        }
+                    }
+                }
             """,
             true,
             """simple URN base URI with ${'$'}ref via the URN -> valid under the URN IDed schema""")
@@ -12602,10 +18608,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}comment":"URIs do not have to have HTTP(s) schemes","${'$'}id":"urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed","minimum":30,"properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"}}}
+                {
+                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
+                    "${'$'}id": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed",
+                    "minimum": 30,
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-ffff-ffff-4321feebdaed"
+                        }
+                    }
+                }
             """,
             false,
             """simple URN base URI with ${'$'}ref via the URN -> invalid under the URN IDed schema""")
@@ -12620,10 +18637,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}comment":"URIs do not have to have HTTP(s) schemes","${'$'}id":"urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
+                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """simple URN base URI with JSON pointer -> a string is valid""")
@@ -12638,10 +18670,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}comment":"URIs do not have to have HTTP(s) schemes","${'$'}id":"urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "URIs do not have to have HTTP(s) schemes",
+                    "${'$'}id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """simple URN base URI with JSON pointer -> a non-string is invalid""")
@@ -12656,10 +18703,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.2","${'$'}id":"urn:example:1/406/47452/2","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.2",
+                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """URN base URI with NSS -> a string is valid""")
@@ -12674,10 +18736,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.2","${'$'}id":"urn:example:1/406/47452/2","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.2",
+                    "${'$'}id": "urn:example:1/406/47452/2",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """URN base URI with NSS -> a non-string is invalid""")
@@ -12692,10 +18769,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.3.1","${'$'}id":"urn:example:foo-bar-baz-qux?+CCResolve:cc=uk","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.3.1",
+                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """URN base URI with r-component -> a string is valid""")
@@ -12710,10 +18802,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.3.1","${'$'}id":"urn:example:foo-bar-baz-qux?+CCResolve:cc=uk","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.3.1",
+                    "${'$'}id": "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """URN base URI with r-component -> a non-string is invalid""")
@@ -12728,10 +18835,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.3.2","${'$'}id":"urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.3.2",
+                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """URN base URI with q-component -> a string is valid""")
@@ -12746,10 +18868,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}comment":"RFC 8141 §2.3.2","${'$'}id":"urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z","properties":{"foo":{"${'$'}ref":"#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}comment": "RFC 8141 §2.3.2",
+                    "${'$'}id": "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """URN base URI with q-component -> a non-string is invalid""")
@@ -12770,10 +18907,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}id":"urn:uuid:deadbeef-1234-0000-0000-4321feebdaed","properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """URN base URI with URN and JSON pointer ref -> a string is valid""")
@@ -12794,10 +18945,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}id":"urn:uuid:deadbeef-1234-0000-0000-4321feebdaed","properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"}},"definitions":{"bar":{"type":"string"}}}
+                {
+                    "${'$'}id": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-0000-0000-4321feebdaed#/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """URN base URI with URN and JSON pointer ref -> a non-string is invalid""")
@@ -12818,10 +18983,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":"bar"}
+                {
+                    "foo": "bar"
+                }
             """,
             """
-                {"${'$'}id":"urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed","properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"}},"definitions":{"bar":{"${'$'}id":"#something","type":"string"}}}
+                {
+                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "${'$'}id": "#something",
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             true,
             """URN base URI with URN and anchor ref -> a string is valid""")
@@ -12842,10 +19022,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":12}
+                {
+                    "foo": 12
+                }
             """,
             """
-                {"${'$'}id":"urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed","properties":{"foo":{"${'$'}ref":"urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"}},"definitions":{"bar":{"${'$'}id":"#something","type":"string"}}}
+                {
+                    "${'$'}id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
+                    "properties": {
+                        "foo": {
+                            "${'$'}ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"
+                        }
+                    },
+                    "definitions": {
+                        "bar": {
+                            "${'$'}id": "#something",
+                            "type": "string"
+                        }
+                    }
+                }
             """,
             false,
             """URN base URI with URN and anchor ref -> a non-string is invalid""")
@@ -12869,7 +19064,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/if"},{"if":{"${'$'}id":"http://example.com/ref/if","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/if"
+                        },
+                        {
+                            "if": {
+                                "${'$'}id": "http://example.com/ref/if",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             false,
             """ref to if -> a non-integer is invalid due to the ${'$'}ref""")
@@ -12893,7 +19100,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/if"},{"if":{"${'$'}id":"http://example.com/ref/if","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/if"
+                        },
+                        {
+                            "if": {
+                                "${'$'}id": "http://example.com/ref/if",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """ref to if -> an integer is valid""")
@@ -12917,7 +19136,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/then"},{"then":{"${'$'}id":"http://example.com/ref/then","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/then"
+                        },
+                        {
+                            "then": {
+                                "${'$'}id": "http://example.com/ref/then",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             false,
             """ref to then -> a non-integer is invalid due to the ${'$'}ref""")
@@ -12941,7 +19172,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/then"},{"then":{"${'$'}id":"http://example.com/ref/then","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/then"
+                        },
+                        {
+                            "then": {
+                                "${'$'}id": "http://example.com/ref/then",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """ref to then -> an integer is valid""")
@@ -12965,7 +19208,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/else"},{"else":{"${'$'}id":"http://example.com/ref/else","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/else"
+                        },
+                        {
+                            "else": {
+                                "${'$'}id": "http://example.com/ref/else",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             false,
             """ref to else -> a non-integer is invalid due to the ${'$'}ref""")
@@ -12989,7 +19244,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"allOf":[{"${'$'}ref":"http://example.com/ref/else"},{"else":{"${'$'}id":"http://example.com/ref/else","type":"integer"}}]}
+                {
+                    "allOf": [
+                        {
+                            "${'$'}ref": "http://example.com/ref/else"
+                        },
+                        {
+                            "else": {
+                                "${'$'}id": "http://example.com/ref/else",
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                }
             """,
             true,
             """ref to else -> an integer is valid""")
@@ -13013,7 +19280,24 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"${'$'}id":"http://example.com/ref/absref.json","definitions":{"a":{"${'$'}id":"http://example.com/ref/absref/foobar.json","type":"number"},"b":{"${'$'}id":"http://example.com/absref/foobar.json","type":"string"}},"allOf":[{"${'$'}ref":"/absref/foobar.json"}]}
+                {
+                    "${'$'}id": "http://example.com/ref/absref.json",
+                    "definitions": {
+                        "a": {
+                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "type": "number"
+                        },
+                        "b": {
+                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "type": "string"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "/absref/foobar.json"
+                        }
+                    ]
+                }
             """,
             true,
             """ref with absolute-path-reference -> a string is valid""")
@@ -13037,7 +19321,24 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"${'$'}id":"http://example.com/ref/absref.json","definitions":{"a":{"${'$'}id":"http://example.com/ref/absref/foobar.json","type":"number"},"b":{"${'$'}id":"http://example.com/absref/foobar.json","type":"string"}},"allOf":[{"${'$'}ref":"/absref/foobar.json"}]}
+                {
+                    "${'$'}id": "http://example.com/ref/absref.json",
+                    "definitions": {
+                        "a": {
+                            "${'$'}id": "http://example.com/ref/absref/foobar.json",
+                            "type": "number"
+                        },
+                        "b": {
+                            "${'$'}id": "http://example.com/absref/foobar.json",
+                            "type": "string"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "/absref/foobar.json"
+                        }
+                    ]
+                }
             """,
             false,
             """ref with absolute-path-reference -> an integer is invalid""")
@@ -13055,7 +19356,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"file:///folder/file.json","definitions":{"foo":{"type":"number"}},"allOf":[{"${'$'}ref":"#/definitions/foo"}]}
+                {
+                    "${'$'}id": "file:///folder/file.json",
+                    "definitions": {
+                        "foo": {
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/foo"
+                        }
+                    ]
+                }
             """,
             true,
             """${'$'}id with file URI still resolves pointers - *nix -> number is valid""")
@@ -13073,7 +19386,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"file:///folder/file.json","definitions":{"foo":{"type":"number"}},"allOf":[{"${'$'}ref":"#/definitions/foo"}]}
+                {
+                    "${'$'}id": "file:///folder/file.json",
+                    "definitions": {
+                        "foo": {
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/foo"
+                        }
+                    ]
+                }
             """,
             false,
             """${'$'}id with file URI still resolves pointers - *nix -> non-number is invalid""")
@@ -13091,7 +19416,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}id":"file:///c:/folder/file.json","definitions":{"foo":{"type":"number"}},"allOf":[{"${'$'}ref":"#/definitions/foo"}]}
+                {
+                    "${'$'}id": "file:///c:/folder/file.json",
+                    "definitions": {
+                        "foo": {
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/foo"
+                        }
+                    ]
+                }
             """,
             true,
             """${'$'}id with file URI still resolves pointers - windows -> number is valid""")
@@ -13109,7 +19446,19 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}id":"file:///c:/folder/file.json","definitions":{"foo":{"type":"number"}},"allOf":[{"${'$'}ref":"#/definitions/foo"}]}
+                {
+                    "${'$'}id": "file:///c:/folder/file.json",
+                    "definitions": {
+                        "foo": {
+                            "type": "number"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions/foo"
+                        }
+                    ]
+                }
             """,
             false,
             """${'$'}id with file URI still resolves pointers - windows -> non-number is invalid""")
@@ -13127,7 +19476,22 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"definitions":{"":{"definitions":{"":{"type":"number"}}}},"allOf":[{"${'$'}ref":"#/definitions//definitions/"}]}
+                {
+                    "definitions": {
+                        "": {
+                            "definitions": {
+                                "": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions//definitions/"
+                        }
+                    ]
+                }
             """,
             true,
             """empty tokens in ${'$'}ref json-pointer -> number is valid""")
@@ -13145,7 +19509,22 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"definitions":{"":{"definitions":{"":{"type":"number"}}}},"allOf":[{"${'$'}ref":"#/definitions//definitions/"}]}
+                {
+                    "definitions": {
+                        "": {
+                            "definitions": {
+                                "": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "${'$'}ref": "#/definitions//definitions/"
+                        }
+                    ]
+                }
             """,
             false,
             """empty tokens in ${'$'}ref json-pointer -> non-number is invalid""")
@@ -13168,7 +19547,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/integer.json"}
+                {
+                    "${'$'}ref": "http://localhost:1234/integer.json"
+                }
             """,
             true,
             """remote ref -> remote ref valid""")
@@ -13192,7 +19573,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/integer.json"}
+                {
+                    "${'$'}ref": "http://localhost:1234/integer.json"
+                }
             """,
             false,
             """remote ref -> remote ref invalid""")
@@ -13216,7 +19599,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/subSchemas.json#/definitions/integer"}
+                {
+                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
+                }
             """,
             true,
             """fragment within remote ref -> remote fragment valid""")
@@ -13240,7 +19625,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/subSchemas.json#/definitions/integer"}
+                {
+                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/integer"
+                }
             """,
             false,
             """fragment within remote ref -> remote fragment invalid""")
@@ -13264,7 +19651,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/subSchemas.json#/definitions/refToInteger"}
+                {
+                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
+                }
             """,
             true,
             """ref within remote ref -> ref within ref valid""")
@@ -13288,7 +19677,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/subSchemas.json#/definitions/refToInteger"}
+                {
+                    "${'$'}ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger"
+                }
             """,
             false,
             """ref within remote ref -> ref within ref invalid""")
@@ -13309,10 +19700,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[1]]
+                [
+                    [
+                        1
+                    ]
+                ]
             """,
             """
-                {"${'$'}id":"http://localhost:1234/","items":{"${'$'}id":"baseUriChange/","items":{"${'$'}ref":"folderInteger.json"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/",
+                    "items": {
+                        "${'$'}id": "baseUriChange/",
+                        "items": {
+                            "${'$'}ref": "folderInteger.json"
+                        }
+                    }
+                }
             """,
             true,
             """base URI change -> base URI change ref valid""")
@@ -13333,10 +19736,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["a"]]
+                [
+                    [
+                        "a"
+                    ]
+                ]
             """,
             """
-                {"${'$'}id":"http://localhost:1234/","items":{"${'$'}id":"baseUriChange/","items":{"${'$'}ref":"folderInteger.json"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/",
+                    "items": {
+                        "${'$'}id": "baseUriChange/",
+                        "items": {
+                            "${'$'}ref": "folderInteger.json"
+                        }
+                    }
+                }
             """,
             false,
             """base URI change -> base URI change ref invalid""")
@@ -13357,10 +19772,31 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"list":[1]}
+                {
+                    "list": [
+                        1
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/scope_change_defs1.json","type":"object","properties":{"list":{"${'$'}ref":"#/definitions/baz"}},"definitions":{"baz":{"${'$'}id":"baseUriChangeFolder/","type":"array","items":{"${'$'}ref":"folderInteger.json"}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "type": "object",
+                    "properties": {
+                        "list": {
+                            "${'$'}ref": "#/definitions/baz"
+                        }
+                    },
+                    "definitions": {
+                        "baz": {
+                            "${'$'}id": "baseUriChangeFolder/",
+                            "type": "array",
+                            "items": {
+                                "${'$'}ref": "folderInteger.json"
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """base URI change - change folder -> number is valid""")
@@ -13381,10 +19817,31 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"list":["a"]}
+                {
+                    "list": [
+                        "a"
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/scope_change_defs1.json","type":"object","properties":{"list":{"${'$'}ref":"#/definitions/baz"}},"definitions":{"baz":{"${'$'}id":"baseUriChangeFolder/","type":"array","items":{"${'$'}ref":"folderInteger.json"}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/scope_change_defs1.json",
+                    "type": "object",
+                    "properties": {
+                        "list": {
+                            "${'$'}ref": "#/definitions/baz"
+                        }
+                    },
+                    "definitions": {
+                        "baz": {
+                            "${'$'}id": "baseUriChangeFolder/",
+                            "type": "array",
+                            "items": {
+                                "${'$'}ref": "folderInteger.json"
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """base URI change - change folder -> string is invalid""")
@@ -13405,10 +19862,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"list":[1]}
+                {
+                    "list": [
+                        1
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/scope_change_defs2.json","type":"object","properties":{"list":{"${'$'}ref":"#/definitions/baz/definitions/bar"}},"definitions":{"baz":{"${'$'}id":"baseUriChangeFolderInSubschema/","definitions":{"bar":{"type":"array","items":{"${'$'}ref":"folderInteger.json"}}}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "type": "object",
+                    "properties": {
+                        "list": {
+                            "${'$'}ref": "#/definitions/baz/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "baz": {
+                            "${'$'}id": "baseUriChangeFolderInSubschema/",
+                            "definitions": {
+                                "bar": {
+                                    "type": "array",
+                                    "items": {
+                                        "${'$'}ref": "folderInteger.json"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             true,
             """base URI change - change folder in subschema -> number is valid""")
@@ -13429,10 +19911,35 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"list":["a"]}
+                {
+                    "list": [
+                        "a"
+                    ]
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/scope_change_defs2.json","type":"object","properties":{"list":{"${'$'}ref":"#/definitions/baz/definitions/bar"}},"definitions":{"baz":{"${'$'}id":"baseUriChangeFolderInSubschema/","definitions":{"bar":{"type":"array","items":{"${'$'}ref":"folderInteger.json"}}}}}}
+                {
+                    "${'$'}id": "http://localhost:1234/scope_change_defs2.json",
+                    "type": "object",
+                    "properties": {
+                        "list": {
+                            "${'$'}ref": "#/definitions/baz/definitions/bar"
+                        }
+                    },
+                    "definitions": {
+                        "baz": {
+                            "${'$'}id": "baseUriChangeFolderInSubschema/",
+                            "definitions": {
+                                "bar": {
+                                    "type": "array",
+                                    "items": {
+                                        "${'$'}ref": "folderInteger.json"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             """,
             false,
             """base URI change - change folder in subschema -> string is invalid""")
@@ -13453,10 +19960,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"name":"foo"}
+                {
+                    "name": "foo"
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/object","type":"object","properties":{"name":{"${'$'}ref":"name.json#/definitions/orNull"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/object",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "${'$'}ref": "name.json#/definitions/orNull"
+                        }
+                    }
+                }
             """,
             true,
             """root ref in remote ref -> string is valid""")
@@ -13477,10 +19994,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"name":null}
+                {
+                    "name": null
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/object","type":"object","properties":{"name":{"${'$'}ref":"name.json#/definitions/orNull"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/object",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "${'$'}ref": "name.json#/definitions/orNull"
+                        }
+                    }
+                }
             """,
             true,
             """root ref in remote ref -> null is valid""")
@@ -13501,10 +20028,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"name":{"name":null}}
+                {
+                    "name": {
+                        "name": null
+                    }
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/object","type":"object","properties":{"name":{"${'$'}ref":"name.json#/definitions/orNull"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/object",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "${'$'}ref": "name.json#/definitions/orNull"
+                        }
+                    }
+                }
             """,
             false,
             """root ref in remote ref -> object is invalid""")
@@ -13525,10 +20064,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":1}
+                {
+                    "bar": 1
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/schema-remote-ref-ref-defs1.json","allOf":[{"${'$'}ref":"ref-and-definitions.json"}]}
+                {
+                    "${'$'}id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "ref-and-definitions.json"
+                        }
+                    ]
+                }
             """,
             false,
             """remote ref with ref to definitions -> invalid""")
@@ -13549,10 +20097,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":"a"}
+                {
+                    "bar": "a"
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/schema-remote-ref-ref-defs1.json","allOf":[{"${'$'}ref":"ref-and-definitions.json"}]}
+                {
+                    "${'$'}id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+                    "allOf": [
+                        {
+                            "${'$'}ref": "ref-and-definitions.json"
+                        }
+                    ]
+                }
             """,
             true,
             """remote ref with ref to definitions -> valid""")
@@ -13576,7 +20133,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger"}
+                {
+                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger"
+                }
             """,
             true,
             """Location-independent identifier in remote ref -> integer is valid""")
@@ -13600,7 +20159,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger"}
+                {
+                    "${'$'}ref": "http://localhost:1234/locationIndependentIdentifierPre2019.json#/definitions/refToInteger"
+                }
             """,
             false,
             """Location-independent identifier in remote ref -> string is invalid""")
@@ -13621,10 +20182,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"name":{"foo":1}}
+                {
+                    "name": {
+                        "foo": 1
+                    }
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/some-id","properties":{"name":{"${'$'}ref":"nested/foo-ref-string.json"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/some-id",
+                    "properties": {
+                        "name": {
+                            "${'$'}ref": "nested/foo-ref-string.json"
+                        }
+                    }
+                }
             """,
             false,
             """retrieved nested refs resolve relative to their URI not ${'$'}id -> number is invalid""")
@@ -13645,10 +20217,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"name":{"foo":"a"}}
+                {
+                    "name": {
+                        "foo": "a"
+                    }
+                }
             """,
             """
-                {"${'$'}id":"http://localhost:1234/some-id","properties":{"name":{"${'$'}ref":"nested/foo-ref-string.json"}}}
+                {
+                    "${'$'}id": "http://localhost:1234/some-id",
+                    "properties": {
+                        "name": {
+                            "${'$'}ref": "nested/foo-ref-string.json"
+                        }
+                    }
+                }
             """,
             true,
             """retrieved nested refs resolve relative to their URI not ${'$'}id -> string is valid""")
@@ -13672,7 +20255,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/draft7/detached-ref.json#/definitions/foo"}
+                {
+                    "${'$'}ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo"
+                }
             """,
             true,
             """${'$'}ref to ${'$'}ref finds location-independent ${'$'}id -> number is valid""")
@@ -13696,7 +20281,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "a"
             """,
             """
-                {"${'$'}ref":"http://localhost:1234/draft7/detached-ref.json#/definitions/foo"}
+                {
+                    "${'$'}ref": "http://localhost:1234/draft7/detached-ref.json#/definitions/foo"
+                }
             """,
             false,
             """${'$'}ref to ${'$'}ref finds location-independent ${'$'}id -> non-number is invalid""")
@@ -13710,10 +20297,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":1}
+                {
+                    "foo": 1
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"required":["foo"]}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "required": [
+                        "foo"
+                    ]
+                }
             """,
             true,
             """required validation -> present required property is valid""")
@@ -13728,10 +20327,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"bar":1}
+                {
+                    "bar": 1
+                }
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"required":["foo"]}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "required": [
+                        "foo"
+                    ]
+                }
             """,
             false,
             """required validation -> non-present required property is invalid""")
@@ -13746,10 +20357,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"required":["foo"]}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "required": [
+                        "foo"
+                    ]
+                }
             """,
             true,
             """required validation -> ignores arrays""")
@@ -13767,7 +20389,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"required":["foo"]}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "required": [
+                        "foo"
+                    ]
+                }
             """,
             true,
             """required validation -> ignores strings""")
@@ -13785,7 +20417,17 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"properties":{"foo":{},"bar":{}},"required":["foo"]}
+                {
+                    "properties": {
+                        "foo": {
+                        },
+                        "bar": {
+                        }
+                    },
+                    "required": [
+                        "foo"
+                    ]
+                }
             """,
             true,
             """required validation -> ignores other non-objects""")
@@ -13800,10 +20442,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"foo":{}}}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    }
+                }
             """,
             true,
             """required default validation -> not required by default""")
@@ -13818,10 +20466,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"properties":{"foo":{}},"required":[]}
+                {
+                    "properties": {
+                        "foo": {
+                        }
+                    },
+                    "required": [
+                    ]
+                }
             """,
             true,
             """required with empty array -> property not required""")
@@ -13836,10 +20492,26 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":1,"foo\"bar":1,"foo\\bar":1,"foo\rbar":1,"foo\tbar":1,"foo\fbar":1}
+                {
+                    "foo\nbar": 1,
+                    "foo\"bar": 1,
+                    "foo\\bar": 1,
+                    "foo\rbar": 1,
+                    "foo\tbar": 1,
+                    "foo\fbar": 1
+                }
             """,
             """
-                {"required":["foo\nbar","foo\"bar","foo\\bar","foo\rbar","foo\tbar","foo\fbar"]}
+                {
+                    "required": [
+                        "foo\nbar",
+                        "foo\"bar",
+                        "foo\\bar",
+                        "foo\rbar",
+                        "foo\tbar",
+                        "foo\fbar"
+                    ]
+                }
             """,
             true,
             """required with escaped characters -> object with all properties present is valid""")
@@ -13854,10 +20526,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo\nbar":"1","foo\"bar":"1"}
+                {
+                    "foo\nbar": "1",
+                    "foo\"bar": "1"
+                }
             """,
             """
-                {"required":["foo\nbar","foo\"bar","foo\\bar","foo\rbar","foo\tbar","foo\fbar"]}
+                {
+                    "required": [
+                        "foo\nbar",
+                        "foo\"bar",
+                        "foo\\bar",
+                        "foo\rbar",
+                        "foo\tbar",
+                        "foo\fbar"
+                    ]
+                }
             """,
             false,
             """required with escaped characters -> object with some properties missing is invalid""")
@@ -13872,10 +20556,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             true,
             """required properties whose names are Javascript object property names -> ignores arrays""")
@@ -13893,7 +20584,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 12
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             true,
             """required properties whose names are Javascript object property names -> ignores other non-objects""")
@@ -13908,10 +20605,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             false,
             """required properties whose names are Javascript object property names -> none of the properties mentioned""")
@@ -13926,10 +20630,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"__proto__":"foo"}
+                {
+                    "__proto__": "foo"
+                }
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             false,
             """required properties whose names are Javascript object property names -> __proto__ present""")
@@ -13944,10 +20656,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"toString":{"length":37}}
+                {
+                    "toString": {
+                        "length": 37
+                    }
+                }
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             false,
             """required properties whose names are Javascript object property names -> toString present""")
@@ -13962,10 +20684,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"constructor":{"length":37}}
+                {
+                    "constructor": {
+                        "length": 37
+                    }
+                }
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             false,
             """required properties whose names are Javascript object property names -> constructor present""")
@@ -13980,10 +20712,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {"__proto__":12,"toString":{"length":"foo"},"constructor":37}
+                {
+                    "__proto__": 12,
+                    "toString": {
+                        "length": "foo"
+                    },
+                    "constructor": 37
+                }
             """,
             """
-                {"required":["__proto__","toString","constructor"]}
+                {
+                    "required": [
+                        "__proto__",
+                        "toString",
+                        "constructor"
+                    ]
+                }
             """,
             true,
             """required properties whose names are Javascript object property names -> all present""")
@@ -14000,7 +20744,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             true,
             """integer type matches integers -> an integer is an integer""")
@@ -14018,7 +20764,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             true,
             """integer type matches integers -> a float with zero fractional part is an integer""")
@@ -14036,7 +20784,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> a float is not an integer""")
@@ -14054,7 +20804,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> a string is not an integer""")
@@ -14072,7 +20824,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "1"
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> a string is still not an integer, even if it looks like one""")
@@ -14087,10 +20841,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> an object is not an integer""")
@@ -14105,10 +20862,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> an array is not an integer""")
@@ -14126,7 +20886,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> a boolean is not an integer""")
@@ -14144,7 +20906,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"integer"}
+                {
+                    "type": "integer"
+                }
             """,
             false,
             """integer type matches integers -> null is not an integer""")
@@ -14162,7 +20926,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             true,
             """number type matches numbers -> an integer is a number""")
@@ -14180,7 +20946,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.0
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             true,
             """number type matches numbers -> a float with zero fractional part is a number (and an integer)""")
@@ -14198,7 +20966,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             true,
             """number type matches numbers -> a float is a number""")
@@ -14216,7 +20986,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> a string is not a number""")
@@ -14234,7 +21006,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "1"
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> a string is still not a number, even if it looks like one""")
@@ -14249,10 +21023,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> an object is not a number""")
@@ -14267,10 +21044,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> an array is not a number""")
@@ -14288,7 +21068,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> a boolean is not a number""")
@@ -14306,7 +21088,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"number"}
+                {
+                    "type": "number"
+                }
             """,
             false,
             """number type matches numbers -> null is not a number""")
@@ -14324,7 +21108,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> 1 is not a string""")
@@ -14342,7 +21128,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> a float is not a string""")
@@ -14360,7 +21148,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             true,
             """string type matches strings -> a string is a string""")
@@ -14378,7 +21168,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "1"
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             true,
             """string type matches strings -> a string is still a string, even if it looks like a number""")
@@ -14396,7 +21188,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             true,
             """string type matches strings -> an empty string is still a string""")
@@ -14411,10 +21205,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> an object is not a string""")
@@ -14429,10 +21226,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> an array is not a string""")
@@ -14450,7 +21250,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> a boolean is not a string""")
@@ -14468,7 +21270,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"string"}
+                {
+                    "type": "string"
+                }
             """,
             false,
             """string type matches strings -> null is not a string""")
@@ -14486,7 +21290,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> an integer is not an object""")
@@ -14504,7 +21310,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> a float is not an object""")
@@ -14522,7 +21330,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> a string is not an object""")
@@ -14537,10 +21347,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             true,
             """object type matches objects -> an object is an object""")
@@ -14555,10 +21368,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> an array is not an object""")
@@ -14576,7 +21392,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> a boolean is not an object""")
@@ -14594,7 +21412,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"object"}
+                {
+                    "type": "object"
+                }
             """,
             false,
             """object type matches objects -> null is not an object""")
@@ -14612,7 +21432,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> an integer is not an array""")
@@ -14630,7 +21452,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> a float is not an array""")
@@ -14648,7 +21472,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> a string is not an array""")
@@ -14663,10 +21489,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> an object is not an array""")
@@ -14681,10 +21510,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             true,
             """array type matches arrays -> an array is an array""")
@@ -14702,7 +21534,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> a boolean is not an array""")
@@ -14720,7 +21554,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"array"}
+                {
+                    "type": "array"
+                }
             """,
             false,
             """array type matches arrays -> null is not an array""")
@@ -14738,7 +21574,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> an integer is not a boolean""")
@@ -14756,7 +21594,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> zero is not a boolean""")
@@ -14774,7 +21614,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> a float is not a boolean""")
@@ -14792,7 +21634,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> a string is not a boolean""")
@@ -14810,7 +21654,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> an empty string is not a boolean""")
@@ -14825,10 +21671,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> an object is not a boolean""")
@@ -14843,10 +21692,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> an array is not a boolean""")
@@ -14864,7 +21716,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             true,
             """boolean type matches booleans -> true is a boolean""")
@@ -14882,7 +21736,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             true,
             """boolean type matches booleans -> false is a boolean""")
@@ -14900,7 +21756,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"boolean"}
+                {
+                    "type": "boolean"
+                }
             """,
             false,
             """boolean type matches booleans -> null is not a boolean""")
@@ -14918,7 +21776,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> an integer is not null""")
@@ -14936,7 +21796,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> a float is not null""")
@@ -14954,7 +21816,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 0
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> zero is not null""")
@@ -14972,7 +21836,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> a string is not null""")
@@ -14990,7 +21856,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 ""
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> an empty string is not null""")
@@ -15005,10 +21873,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> an object is not null""")
@@ -15023,10 +21894,13 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> an array is not null""")
@@ -15044,7 +21918,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> true is not null""")
@@ -15062,7 +21938,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 false
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             false,
             """null type matches only the null object -> false is not null""")
@@ -15080,7 +21958,9 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":"null"}
+                {
+                    "type": "null"
+                }
             """,
             true,
             """null type matches only the null object -> null is null""")
@@ -15098,7 +21978,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             true,
             """multiple types can be specified in an array -> an integer is valid""")
@@ -15116,7 +22001,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             true,
             """multiple types can be specified in an array -> a string is valid""")
@@ -15134,7 +22024,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 1.1
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             false,
             """multiple types can be specified in an array -> a float is invalid""")
@@ -15149,10 +22044,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {}
+                {
+                }
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             false,
             """multiple types can be specified in an array -> an object is invalid""")
@@ -15167,10 +22068,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                []
+                [
+                ]
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             false,
             """multiple types can be specified in an array -> an array is invalid""")
@@ -15188,7 +22095,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 true
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             false,
             """multiple types can be specified in an array -> a boolean is invalid""")
@@ -15206,7 +22118,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":["integer","string"]}
+                {
+                    "type": [
+                        "integer",
+                        "string"
+                    ]
+                }
             """,
             false,
             """multiple types can be specified in an array -> null is invalid""")
@@ -15224,7 +22141,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":["string"]}
+                {
+                    "type": [
+                        "string"
+                    ]
+                }
             """,
             true,
             """type as array with one item -> string is valid""")
@@ -15242,7 +22163,11 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"type":["string"]}
+                {
+                    "type": [
+                        "string"
+                    ]
+                }
             """,
             false,
             """type as array with one item -> number is invalid""")
@@ -15257,10 +22182,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"type":["array","object"]}
+                {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
             """,
             true,
             """type: array or object -> array is valid""")
@@ -15275,10 +22209,17 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":123}
+                {
+                    "foo": 123
+                }
             """,
             """
-                {"type":["array","object"]}
+                {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
             """,
             true,
             """type: array or object -> object is valid""")
@@ -15296,7 +22237,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"type":["array","object"]}
+                {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
             """,
             false,
             """type: array or object -> number is invalid""")
@@ -15314,7 +22260,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":["array","object"]}
+                {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
             """,
             false,
             """type: array or object -> string is invalid""")
@@ -15332,7 +22283,12 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":["array","object"]}
+                {
+                    "type": [
+                        "array",
+                        "object"
+                    ]
+                }
             """,
             false,
             """type: array or object -> null is invalid""")
@@ -15347,10 +22303,20 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,3]
+                [
+                    1,
+                    2,
+                    3
+                ]
             """,
             """
-                {"type":["array","object","null"]}
+                {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                }
             """,
             true,
             """type: array, object or null -> array is valid""")
@@ -15365,10 +22331,18 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {"foo":123}
+                {
+                    "foo": 123
+                }
             """,
             """
-                {"type":["array","object","null"]}
+                {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                }
             """,
             true,
             """type: array, object or null -> object is valid""")
@@ -15386,7 +22360,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 null
             """,
             """
-                {"type":["array","object","null"]}
+                {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                }
             """,
             true,
             """type: array, object or null -> null is valid""")
@@ -15404,7 +22384,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 123
             """,
             """
-                {"type":["array","object","null"]}
+                {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                }
             """,
             false,
             """type: array, object or null -> number is invalid""")
@@ -15422,7 +22408,13 @@ class SchemaSuiteTest : JsonSchemaTest {
                 "foo"
             """,
             """
-                {"type":["array","object","null"]}
+                {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                }
             """,
             false,
             """type: array, object or null -> string is invalid""")
@@ -15436,10 +22428,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique array of integers is valid""")
@@ -15454,10 +22451,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,1]
+                [
+                    1,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of integers is invalid""")
@@ -15472,10 +22474,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2,1]
+                [
+                    1,
+                    2,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of more than two integers is invalid""")
@@ -15490,10 +22498,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1.0,1.00,1]
+                [
+                    1.0,
+                    1.0,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> numbers are unique if mathematically unequal""")
@@ -15508,10 +22522,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0,false]
+                [
+                    0,
+                    false
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> false is not equal to zero""")
@@ -15526,10 +22545,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,true]
+                [
+                    1,
+                    true
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> true is not equal to one""")
@@ -15544,10 +22568,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo","bar","baz"]
+                [
+                    "foo",
+                    "bar",
+                    "baz"
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique array of strings is valid""")
@@ -15562,10 +22592,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                ["foo","bar","foo"]
+                [
+                    "foo",
+                    "bar",
+                    "foo"
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of strings is invalid""")
@@ -15580,10 +22616,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar"},{"foo":"baz"}]
+                [
+                    {
+                        "foo": "bar"
+                    },
+                    {
+                        "foo": "baz"
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique array of objects is valid""")
@@ -15598,10 +22643,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar"},{"foo":"bar"}]
+                [
+                    {
+                        "foo": "bar"
+                    },
+                    {
+                        "foo": "bar"
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of objects is invalid""")
@@ -15616,10 +22670,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar","bar":"foo"},{"bar":"foo","foo":"bar"}]
+                [
+                    {
+                        "foo": "bar",
+                        "bar": "foo"
+                    },
+                    {
+                        "bar": "foo",
+                        "foo": "bar"
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> property order of array of objects is ignored""")
@@ -15634,10 +22699,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":false}}}]
+                [
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    },
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": false
+                            }
+                        }
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique array of nested objects is valid""")
@@ -15652,10 +22734,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":true}}}]
+                [
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    },
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of nested objects is invalid""")
@@ -15670,10 +22769,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["foo"],["bar"]]
+                [
+                    [
+                        "foo"
+                    ],
+                    [
+                        "bar"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique array of arrays is valid""")
@@ -15688,10 +22796,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["foo"],["foo"]]
+                [
+                    [
+                        "foo"
+                    ],
+                    [
+                        "foo"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of arrays is invalid""")
@@ -15706,10 +22823,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["foo"],["bar"],["foo"]]
+                [
+                    [
+                        "foo"
+                    ],
+                    [
+                        "bar"
+                    ],
+                    [
+                        "foo"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique array of more than two arrays is invalid""")
@@ -15724,10 +22853,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,true]
+                [
+                    1,
+                    true
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> 1 and true are unique""")
@@ -15742,10 +22876,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0,false]
+                [
+                    0,
+                    false
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> 0 and false are unique""")
@@ -15760,10 +22899,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[1],[true]]
+                [
+                    [
+                        1
+                    ],
+                    [
+                        true
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> [1] and [true] are unique""")
@@ -15778,10 +22926,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[0],[false]]
+                [
+                    [
+                        0
+                    ],
+                    [
+                        false
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> [0] and [false] are unique""")
@@ -15796,10 +22953,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[[1],"foo"],[[true],"foo"]]
+                [
+                    [
+                        [
+                            1
+                        ],
+                        "foo"
+                    ],
+                    [
+                        [
+                            true
+                        ],
+                        "foo"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> nested [1] and [true] are unique""")
@@ -15814,10 +22986,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [[[0],"foo"],[[false],"foo"]]
+                [
+                    [
+                        [
+                            0
+                        ],
+                        "foo"
+                    ],
+                    [
+                        [
+                            false
+                        ],
+                        "foo"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> nested [0] and [false] are unique""")
@@ -15832,10 +23019,22 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{},[1],true,null,1,"{}"]
+                [
+                    {
+                    },
+                    [
+                        1
+                    ],
+                    true,
+                    null,
+                    1,
+                    "{}"
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> unique heterogeneous types are valid""")
@@ -15850,10 +23049,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{},[1],true,null,{},1]
+                [
+                    {
+                    },
+                    [
+                        1
+                    ],
+                    true,
+                    null,
+                    {
+                    },
+                    1
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> non-unique heterogeneous types are invalid""")
@@ -15868,10 +23080,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"a":1,"b":2},{"a":2,"b":1}]
+                [
+                    {
+                        "a": 1,
+                        "b": 2
+                    },
+                    {
+                        "a": 2,
+                        "b": 1
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> different objects are unique""")
@@ -15886,10 +23109,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"a":1,"b":2},{"b":2,"a":1}]
+                [
+                    {
+                        "a": 1,
+                        "b": 2
+                    },
+                    {
+                        "b": 2,
+                        "a": 1
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems validation -> objects are non-unique despite key order""")
@@ -15904,10 +23138,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"a":false},{"a":0}]
+                [
+                    {
+                        "a": false
+                    },
+                    {
+                        "a": 0
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> {"a": false} and {"a": 0} are unique""")
@@ -15922,10 +23165,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"a":true},{"a":1}]
+                [
+                    {
+                        "a": true
+                    },
+                    {
+                        "a": 1
+                    }
+                ]
             """,
             """
-                {"uniqueItems":true}
+                {
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems validation -> {"a": true} and {"a": 1} are unique""")
@@ -15940,10 +23192,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true]
+                [
+                    false,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems with an array of items -> [false, true] from items array is valid""")
@@ -15958,10 +23223,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false]
+                [
+                    true,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems with an array of items -> [true, false] from items array is valid""")
@@ -15976,10 +23254,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,false]
+                [
+                    false,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems with an array of items -> [false, false] from items array is not valid""")
@@ -15994,10 +23285,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,true]
+                [
+                    true,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems with an array of items -> [true, true] from items array is not valid""")
@@ -16012,10 +23316,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,"foo","bar"]
+                [
+                    false,
+                    true,
+                    "foo",
+                    "bar"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems with an array of items -> unique array extended from [false, true] is valid""")
@@ -16030,10 +23349,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false,"foo","bar"]
+                [
+                    true,
+                    false,
+                    "foo",
+                    "bar"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             true,
             """uniqueItems with an array of items -> unique array extended from [true, false] is valid""")
@@ -16048,10 +23382,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,"foo","foo"]
+                [
+                    false,
+                    true,
+                    "foo",
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems with an array of items -> non-unique array extended from [false, true] is not valid""")
@@ -16066,10 +23415,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false,"foo","foo"]
+                [
+                    true,
+                    false,
+                    "foo",
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true
+                }
             """,
             false,
             """uniqueItems with an array of items -> non-unique array extended from [true, false] is not valid""")
@@ -16084,10 +23448,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true]
+                [
+                    false,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems with an array of items and additionalItems=false -> [false, true] from items array is valid""")
@@ -16102,10 +23480,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false]
+                [
+                    true,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems with an array of items and additionalItems=false -> [true, false] from items array is valid""")
@@ -16120,10 +23512,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,false]
+                [
+                    false,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true,
+                    "additionalItems": false
+                }
             """,
             false,
             """uniqueItems with an array of items and additionalItems=false -> [false, false] from items array is not valid""")
@@ -16138,10 +23544,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,true]
+                [
+                    true,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true,
+                    "additionalItems": false
+                }
             """,
             false,
             """uniqueItems with an array of items and additionalItems=false -> [true, true] from items array is not valid""")
@@ -16156,10 +23576,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,null]
+                [
+                    false,
+                    true,
+                    null
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":true,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": true,
+                    "additionalItems": false
+                }
             """,
             false,
             """uniqueItems with an array of items and additionalItems=false -> extra items are invalid even if unique""")
@@ -16174,10 +23609,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,2]
+                [
+                    1,
+                    2
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> unique array of integers is valid""")
@@ -16192,10 +23632,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,1]
+                [
+                    1,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> non-unique array of integers is valid""")
@@ -16210,10 +23655,16 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1.0,1.00,1]
+                [
+                    1.0,
+                    1.0,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> numbers are unique if mathematically unequal""")
@@ -16228,10 +23679,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0,false]
+                [
+                    0,
+                    false
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> false is not equal to zero""")
@@ -16246,10 +23702,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,true]
+                [
+                    1,
+                    true
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> true is not equal to one""")
@@ -16264,10 +23725,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar"},{"foo":"baz"}]
+                [
+                    {
+                        "foo": "bar"
+                    },
+                    {
+                        "foo": "baz"
+                    }
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> unique array of objects is valid""")
@@ -16282,10 +23752,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":"bar"},{"foo":"bar"}]
+                [
+                    {
+                        "foo": "bar"
+                    },
+                    {
+                        "foo": "bar"
+                    }
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> non-unique array of objects is valid""")
@@ -16300,10 +23779,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":false}}}]
+                [
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    },
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": false
+                            }
+                        }
+                    }
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> unique array of nested objects is valid""")
@@ -16318,10 +23814,27 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{"foo":{"bar":{"baz":true}}},{"foo":{"bar":{"baz":true}}}]
+                [
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    },
+                    {
+                        "foo": {
+                            "bar": {
+                                "baz": true
+                            }
+                        }
+                    }
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> non-unique array of nested objects is valid""")
@@ -16336,10 +23849,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["foo"],["bar"]]
+                [
+                    [
+                        "foo"
+                    ],
+                    [
+                        "bar"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> unique array of arrays is valid""")
@@ -16354,10 +23876,19 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [["foo"],["foo"]]
+                [
+                    [
+                        "foo"
+                    ],
+                    [
+                        "foo"
+                    ]
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> non-unique array of arrays is valid""")
@@ -16372,10 +23903,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [1,true]
+                [
+                    1,
+                    true
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> 1 and true are unique""")
@@ -16390,10 +23926,15 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [0,false]
+                [
+                    0,
+                    false
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> 0 and false are unique""")
@@ -16408,10 +23949,21 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{},[1],true,null,1]
+                [
+                    {
+                    },
+                    [
+                        1
+                    ],
+                    true,
+                    null,
+                    1
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> unique heterogeneous types are valid""")
@@ -16426,10 +23978,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [{},[1],true,null,{},1]
+                [
+                    {
+                    },
+                    [
+                        1
+                    ],
+                    true,
+                    null,
+                    {
+                    },
+                    1
+                ]
             """,
             """
-                {"uniqueItems":false}
+                {
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false validation -> non-unique heterogeneous types are valid""")
@@ -16444,10 +24009,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true]
+                [
+                    false,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> [false, true] from items array is valid""")
@@ -16462,10 +24040,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false]
+                [
+                    true,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> [true, false] from items array is valid""")
@@ -16480,10 +24071,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,false]
+                [
+                    false,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> [false, false] from items array is valid""")
@@ -16498,10 +24102,23 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,true]
+                [
+                    true,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> [true, true] from items array is valid""")
@@ -16516,10 +24133,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,"foo","bar"]
+                [
+                    false,
+                    true,
+                    "foo",
+                    "bar"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> unique array extended from [false, true] is valid""")
@@ -16534,10 +24166,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false,"foo","bar"]
+                [
+                    true,
+                    false,
+                    "foo",
+                    "bar"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> unique array extended from [true, false] is valid""")
@@ -16552,10 +24199,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,"foo","foo"]
+                [
+                    false,
+                    true,
+                    "foo",
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> non-unique array extended from [false, true] is valid""")
@@ -16570,10 +24232,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false,"foo","foo"]
+                [
+                    true,
+                    false,
+                    "foo",
+                    "foo"
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items -> non-unique array extended from [true, false] is valid""")
@@ -16588,10 +24265,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true]
+                [
+                    false,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items and additionalItems=false -> [false, true] from items array is valid""")
@@ -16606,10 +24297,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,false]
+                [
+                    true,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items and additionalItems=false -> [true, false] from items array is valid""")
@@ -16624,10 +24329,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,false]
+                [
+                    false,
+                    false
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items and additionalItems=false -> [false, false] from items array is valid""")
@@ -16642,10 +24361,24 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [true,true]
+                [
+                    true,
+                    true
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false,
+                    "additionalItems": false
+                }
             """,
             true,
             """uniqueItems=false with an array of items and additionalItems=false -> [true, true] from items array is valid""")
@@ -16660,10 +24393,25 @@ class SchemaSuiteTest : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [false,true,null]
+                [
+                    false,
+                    true,
+                    null
+                ]
             """,
             """
-                {"items":[{"type":"boolean"},{"type":"boolean"}],"uniqueItems":false,"additionalItems":false}
+                {
+                    "items": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "uniqueItems": false,
+                    "additionalItems": false
+                }
             """,
             false,
             """uniqueItems=false with an array of items and additionalItems=false -> extra items are invalid even if unique""")

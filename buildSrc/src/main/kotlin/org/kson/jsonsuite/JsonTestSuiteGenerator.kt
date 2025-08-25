@@ -1,5 +1,6 @@
 package org.kson.jsonsuite
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -273,10 +274,10 @@ ${    tests.joinToString("\n") {
                     |        $schemaComment
                     |        assertKsonEnforcesSchema(
                     |            ${"\"\"\""}
-                    |                ${formatForTest(test.data)}
+                    |                ${formatForTest(test.data, "                ")}
                     |            ${"\"\"\""},
                     |            ${"\"\"\""}
-                    |                ${formatForTest(schema.schema)}
+                    |                ${formatForTest(schema.schema, "                ")}
                     |            ${"\"\"\""},
                     |            ${test.valid},
                     |            ${"\"\"\""}${formatForTest(schema.description)} -> ${formatForTest(test.description)}${"\"\"\""})
@@ -362,10 +363,16 @@ private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, pri
     }
 }
 
-private val prettyPrintingJson = Json { prettyPrint = true }
-
-private fun formatForTest(jsonElement: JsonElement): String {
-    return formatForTest(jsonElement.toString())
+@OptIn(ExperimentalSerializationApi::class)
+private val prettyPrintingJson = Json {
+    prettyPrint = true
+    // 4 spaces for indentation
+    prettyPrintIndent = "    "
+}
+private fun formatForTest(jsonElement: JsonElement, indent: String): String {
+    return formatForTest(prettyPrintingJson.encodeToString(JsonElement.serializer(), jsonElement))
+        .split("\n")
+        .joinToString(separator = "\n$indent")
 }
 
 private fun formatForTest(string: String): String {
