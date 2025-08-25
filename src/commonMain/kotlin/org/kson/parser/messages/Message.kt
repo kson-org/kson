@@ -215,7 +215,7 @@ enum class MessageType(
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badControlCharArg = parsedArgs.getArg("Control Character")
             if (badControlCharArg?.length != 1) {
-                throw RuntimeException("Expected arg to be a single control character")
+                throw IllegalArgumentException("Expected arg to be a single control character")
             }
             val badControlChar = badControlCharArg[0]
 
@@ -795,7 +795,7 @@ enum class MessageType(
                 return parsedArgs[argName]
             } else {
                 // someone's asking for an invalid or typo'ed arg name
-                throw RuntimeException(
+                throw IllegalArgumentException(
                     "Invalid arg name \"" + argName + "\" given for " + messageType::class.simpleName
                             + ".  \"" + argName + "\" is not defined in " + messageType::expectedArgs.name
                             + ": " + renderArgList(messageType.expectedArgs())

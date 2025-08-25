@@ -3,6 +3,7 @@ package org.kson.parser
 import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * Note that our number parsing closely follows JSON's grammar (see https://www.json.org), with one key difference:
@@ -124,7 +125,7 @@ class NumberParser(private val numberCandidate: String) {
                 /**
                  * A null `error` here indicates a bug in this [NumberParser]
                  */
-                throw RuntimeException("must always set `error` message for a failed parse")
+                throw ShouldNotHappenException("must always set `error` message for a failed parse")
             }
             NumberParseResult(null, error)
         }

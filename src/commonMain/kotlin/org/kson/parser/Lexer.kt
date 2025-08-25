@@ -7,6 +7,7 @@ import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
 import org.kson.parser.behavior.embedblock.EmbedBlockIndent
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 private val KEYWORDS =
     mapOf(
@@ -77,7 +78,7 @@ private class SourceScanner(private val source: String) {
      */
     fun extractLexeme(): Lexeme {
         if (selectionEndOffset > source.length) {
-            throw RuntimeException("Scanner has been advanced past end of source---missing some needed calls to peek()?")
+            throw ShouldNotHappenException("Scanner has been advanced past end of source---missing some needed calls to peek()?")
         }
 
         val lexeme = Lexeme(
@@ -208,7 +209,7 @@ data class Location(
          */
         fun merge(startLocation: Location, endLocation: Location): Location {
             if (startLocation.startOffset > endLocation.endOffset) {
-                throw RuntimeException("`startLocation` must be before `endLocation`")
+                throw ShouldNotHappenException("`startLocation` must be before `endLocation`")
             }
             return Location(
                 startLocation.start,

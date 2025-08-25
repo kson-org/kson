@@ -3,7 +3,7 @@ package org.kson.parser
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
 import org.kson.parser.messages.MessageType.*
-import org.kson.stdlibx.exceptions.ShouldNotHappenException
+import org.kson.stdlibx.exceptions.UnexpectedParseException
 
 /**
  * Defines the Kson parser, implemented as a recursive descent parser which directly implements
@@ -68,7 +68,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 /**
                  * [handleUnexpectedTrailingContent] should have ensured that all tokens are handled
                  */
-                throw ShouldNotHappenException("Bug: this parser must consume all tokens in all cases")
+                throw UnexpectedParseException("Bug: this parser must consume all tokens in all cases")
             }
             rootMarker.drop()
         } catch (nestingException: ExcessiveNestingException) {
@@ -623,7 +623,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
     private fun isValidStringEscape(stringEscapeText: String): Boolean {
         if (!stringEscapeText.startsWith('\\') || stringEscapeText.length > 2) {
-            throw RuntimeException("Should only be asked to validate one-char string escapes, but was passed: $stringEscapeText")
+            throw UnexpectedParseException("Should only be asked to validate one-char string escapes, but was passed: $stringEscapeText")
         }
 
         // detect incomplete escapes (perhaps this escape bumped up against EOF)
@@ -679,7 +679,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
     private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
         if (!unicodeEscapeText.startsWith("\\u")) {
-            throw RuntimeException("Should only be asked to validate unicode escapes")
+            throw UnexpectedParseException("Should only be asked to validate unicode escapes")
         }
 
         // clip off the `\u` to make this code point easier to inspect
