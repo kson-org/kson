@@ -1,7 +1,8 @@
 import org.gradle.internal.os.OperatingSystem
 
 val copyKotlinSource = "copyKotlinSource"
-val formattingCheck = "formattingCheck"
+val formattingCheck = "formattingCheckKson"
+val formattingCheckSys = "formattingCheckKsonSys"
 val testStatic = "testStaticallyLinked"
 val testDynamic = "testDynamicallyLinked"
 
@@ -12,31 +13,18 @@ tasks {
         "./pixiw"
     }
 
-    register<CopyNativeHeaderTask>("copyHeaderFileDynamic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
-        useDynamicLinking = true
-        sourceProjectDir = project.projectDir.resolve("kotlin")
-        outputDir = File("artifacts")
-    }
-
-    register<CopyNativeHeaderTask>("copyHeaderFileStatic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
-        useDynamicLinking = false
-        sourceProjectDir = project.projectDir.resolve("kotlin")
-        outputDir = File("artifacts")
-    }
-
     register<CopyRepositoryFilesTask>(copyKotlinSource) {
         group = "build setup"
         description = "Copies all repository files (except git-ignored and lib-rust) to ./kotlin"
-        excludedPath = "lib-rust/"
+        excludedPath = "lib-rust/kson-sys"
+        outputDir = project.projectDir.resolve("kson-sys/kotlin")
     }
 
     register<Exec>(testStatic) {
         dependsOn(copyKotlinSource)
 
         group = "verification"
-        commandLine = "$pixiwPath run cargo test".split(" ")
+        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -47,7 +35,7 @@ tasks {
         dependsOn(copyKotlinSource)
 
         group = "verification"
-        commandLine = "$pixiwPath run cargo test --features dynamic-linking".split(" ")
+        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml --features dynamic-linking".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
@@ -55,7 +43,15 @@ tasks {
 
     register<Exec>(formattingCheck) {
         group = "verification"
-        commandLine = "$pixiwPath run cargo fmt --check".split(" ")
+        commandLine = "$pixiwPath run cargo fmt --manifest-path kson/Cargo.toml --check".split(" ")
+        standardOutput = System.out
+        errorOutput = System.err
+        isIgnoreExitValue = false
+    }
+
+    register<Exec>(formattingCheckSys) {
+        group = "verification"
+        commandLine = "$pixiwPath run cargo fmt --manifest-path kson-sys/Cargo.toml --check".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false

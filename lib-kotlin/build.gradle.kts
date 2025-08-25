@@ -13,6 +13,20 @@ repositories {
 group = "org.kson"
 version = "1.0-SNAPSHOT"
 
+tasks {
+    register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
+        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        useDynamicLinking = true
+        outputDir = project.projectDir.resolve("build/nativeHeaders")
+    }
+
+    register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
+        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        useDynamicLinking = false
+        outputDir = project.projectDir.resolve("build/nativeHeaders")
+    }
+}
+
 kotlin {
     jvm {
         testRuns["test"].executionTask.configure {

@@ -2,6 +2,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -12,46 +13,48 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import org.kson.BinaryArtifactPaths
 import org.kson.TinyCPreprocessor
+import java.io.File
+import javax.inject.Inject
 
-abstract class CopyNativeHeaderTask : DefaultTask() {
-
-    @get:InputDirectory
-    abstract val sourceProjectDir: DirectoryProperty
+abstract class CopyNativeHeaderTask @Inject constructor(
+    private val objectFactory: ObjectFactory
+) : DefaultTask() {
 
     @get:Input
     abstract val useDynamicLinking: Property<Boolean>
 
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
+    @get:Input
+    abstract val outputDir: Property<File>
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputHeaderFile: RegularFileProperty
 
-    @get:OutputFile
-    abstract val outputHeaderFile: RegularFileProperty
-
     init {
         val artifactsDir: Provider<Directory> = useDynamicLinking.flatMap { dynamic ->
             val sub = if (dynamic) "releaseShared" else "releaseStatic"
-            sourceProjectDir.dir("lib-kotlin/build/bin/nativeKson/$sub")
+            val prop = objectFactory.directoryProperty()
+            prop.set(project.projectDir.resolve("build/bin/nativeKson/$sub"))
+            prop
         }
 
         inputHeaderFile.convention(
             artifactsDir.map { it.file(BinaryArtifactPaths.headerFileName()) }
         )
+    }
 
-        outputHeaderFile.convention(
-            outputDir.file("kson_api.h")
-        )
+    @Option(option = "outputDir", description = "Absolute path to the output directory")
+    fun overrideOutputDir(path: String) {
+        outputDir.set(File(path))
     }
 
     @TaskAction
     fun run() {
         val input = inputHeaderFile.get().asFile
-        val output = outputHeaderFile.get().asFile
+        val output = outputDir.get().resolve("kson_api.h")
 
         val preprocessedHeader = TinyCPreprocessor().preprocess(input.absolutePath)
 

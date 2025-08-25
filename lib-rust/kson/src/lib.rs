@@ -1,4 +1,3 @@
-mod kson_ffi;
 mod util;
 
 #[cfg(test)]
@@ -11,17 +10,17 @@ use crate::util::{FromKotlinObject, KsonPtr, OwnedKotlinPtr, ToKotlinObject};
 #[cfg(any(feature = "dynamic-linking", target_os = "windows"))]
 static KSON_LIB: std::sync::LazyLock<libloading::Library> = std::sync::LazyLock::new(|| unsafe {
     #[cfg(target_os = "windows")]
-    let lib_name = "artifacts/kson.dll";
+    let lib_name = "kson.dll";
     #[cfg(target_os = "linux")]
-    let lib_name = "artifacts/libkson.so";
+    let lib_name = "libkson.so";
     #[cfg(target_os = "macos")]
-    let lib_name = "artifacts/libkson.dylib";
+    let lib_name = "libkson.dylib";
 
     libloading::Library::new(lib_name).unwrap()
 });
 
 #[cfg(any(feature = "dynamic-linking", target_os = "windows"))]
-pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbols> =
+pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_sys::kson_ExportedSymbols> =
     std::sync::LazyLock::new(|| unsafe {
         let kson_symbols: &[u8] = if cfg!(target_os = "windows") {
             b"kson_symbols"
@@ -30,18 +29,18 @@ pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbo
         };
 
         let func: libloading::Symbol<
-            unsafe extern "C" fn() -> *mut kson_ffi::kson_ExportedSymbols,
+            unsafe extern "C" fn() -> *mut kson_sys::kson_ExportedSymbols,
         > = KSON_LIB.get(kson_symbols).unwrap();
         *func()
     });
 
 #[cfg(not(any(feature = "dynamic-linking", target_os = "windows")))]
 unsafe extern "C" {
-    fn libkson_symbols() -> *mut kson_ffi::kson_ExportedSymbols;
+    fn libkson_symbols() -> *mut kson_sys::kson_ExportedSymbols;
 }
 
 #[cfg(not(any(feature = "dynamic-linking", target_os = "windows")))]
-pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_ffi::kson_ExportedSymbols> =
+pub(crate) static KSON_SYMBOLS: std::sync::LazyLock<kson_sys::kson_ExportedSymbols> =
     std::sync::LazyLock::new(|| unsafe { *libkson_symbols() });
 
 declare_kotlin_object!(
@@ -59,10 +58,10 @@ impl FormatOptions {
             .FormatOptions
             .FormatOptions
             .unwrap();
-        let p0 = kson_ffi::kson_kref_org_kson_IndentType {
+        let p0 = kson_sys::kson_kref_org_kson_IndentType {
             pinned: indent_type.to_kotlin_object(),
         };
-        let p1 = kson_ffi::kson_kref_org_kson_FormattingStyle {
+        let p1 = kson_sys::kson_kref_org_kson_FormattingStyle {
             pinned: formatting_style.to_kotlin_object(),
         };
         let result = unsafe { f(p0, p1) };
@@ -85,7 +84,7 @@ impl FormatOptions {
             .get_indentType
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_FormatOptions {
+            f(kson_sys::kson_kref_org_kson_FormatOptions {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -102,7 +101,7 @@ impl FormatOptions {
             .get_formattingStyle
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_FormatOptions {
+            f(kson_sys::kson_kref_org_kson_FormatOptions {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -126,7 +125,7 @@ impl Analysis {
             .get_errors
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Analysis {
+            f(kson_sys::kson_kref_org_kson_Analysis {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -143,7 +142,7 @@ impl Analysis {
             .get_tokens
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Analysis {
+            f(kson_sys::kson_kref_org_kson_Analysis {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -164,7 +163,7 @@ impl Position {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Position.get_line.unwrap();
 
         unsafe {
-            f(kson_ffi::kson_kref_org_kson_Position {
+            f(kson_sys::kson_kref_org_kson_Position {
                 pinned: self.kson_ref.inner.inner,
             })
         }
@@ -180,7 +179,7 @@ impl Position {
             .unwrap();
 
         unsafe {
-            f(kson_ffi::kson_kref_org_kson_Position {
+            f(kson_sys::kson_kref_org_kson_Position {
                 pinned: self.kson_ref.inner.inner,
             })
         }
@@ -201,7 +200,7 @@ impl ResultFailure {
             .get_errors
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Result_Failure {
+            f(kson_sys::kson_kref_org_kson_Result_Failure {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -223,7 +222,7 @@ impl ResultSuccess {
             .get_output
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Result_Success {
+            f(kson_sys::kson_kref_org_kson_Result_Success {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -251,7 +250,7 @@ impl SchemaResultFailure {
             .get_errors
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_SchemaResult_Failure {
+            f(kson_sys::kson_kref_org_kson_SchemaResult_Failure {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -273,7 +272,7 @@ impl SchemaResultSuccess {
             .get_schemaValidator
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_SchemaResult_Success {
+            f(kson_sys::kson_kref_org_kson_SchemaResult_Success {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -309,7 +308,7 @@ impl Message {
             .get_message
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Message {
+            f(kson_sys::kson_kref_org_kson_Message {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -319,7 +318,7 @@ impl Message {
     pub fn start(&self) -> Position {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Message.get_start.unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Message {
+            f(kson_sys::kson_kref_org_kson_Message {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -335,7 +334,7 @@ impl Message {
     pub fn end(&self) -> Position {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Message.get_end.unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Message {
+            f(kson_sys::kson_kref_org_kson_Message {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -365,7 +364,7 @@ impl Token {
             .get_tokenType
             .unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Token {
+            f(kson_sys::kson_kref_org_kson_Token {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -375,7 +374,7 @@ impl Token {
     pub fn text(&self) -> String {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Token.get_text.unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Token {
+            f(kson_sys::kson_kref_org_kson_Token {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -385,7 +384,7 @@ impl Token {
     pub fn start(&self) -> Position {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Token.get_start.unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Token {
+            f(kson_sys::kson_kref_org_kson_Token {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -401,7 +400,7 @@ impl Token {
     pub fn end(&self) -> Position {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Token.get_end.unwrap();
         let result = unsafe {
-            f(kson_ffi::kson_kref_org_kson_Token {
+            f(kson_sys::kson_kref_org_kson_Token {
                 pinned: self.kson_ref.inner.inner,
             })
         };
@@ -442,7 +441,7 @@ impl Kson {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Kson.format.unwrap();
         let p0 = util::to_kotlin_string(kson);
         let p0 = p0.as_ptr();
-        let p1 = kson_ffi::kson_kref_org_kson_FormatOptions {
+        let p1 = kson_sys::kson_kref_org_kson_FormatOptions {
             pinned: format_options.to_kotlin_object(),
         };
         let result = unsafe {
@@ -553,7 +552,7 @@ impl SchemaValidator {
         let p0 = p0.as_ptr();
         let result = unsafe {
             f(
-                kson_ffi::kson_kref_org_kson_SchemaValidator {
+                kson_sys::kson_kref_org_kson_SchemaValidator {
                     pinned: self.kson_ref.inner.inner,
                 },
                 p0,
@@ -601,7 +600,7 @@ impl IndentTypeSpaces {
             .unwrap();
 
         unsafe {
-            f(kson_ffi::kson_kref_org_kson_IndentType_Spaces {
+            f(kson_sys::kson_kref_org_kson_IndentType_Spaces {
                 pinned: self.kson_ref.inner.inner,
             })
         }

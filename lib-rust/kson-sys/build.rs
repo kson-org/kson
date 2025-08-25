@@ -19,10 +19,13 @@ impl ParseCallbacks for CustomRenamer {
 }
 
 // Build kotlin-native artifacts and put them under `artifacts`
-fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::error::Error>> {
+fn get_kotlin_artifacts(
+    use_dynamic_linking: bool,
+    out_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let rust_root = Path::new(&manifest_dir);
-    let kotlin_root = rust_root.join("kotlin");
+    let rust_root = Path::new(&manifest_dir).parent().unwrap();
+    let kotlin_root = Path::new(&manifest_dir).join("kotlin");
     let artifacts_dir = Path::new(&manifest_dir).join("artifacts");
 
     // Build kotlin-native artifacts
@@ -63,14 +66,16 @@ fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::er
 
     // Copy the C headers, preprocessed (will overwrite existing header files)
     let gradle_task = if use_dynamic_linking {
-        ":lib-rust:copyHeaderFileDynamic"
+        ":lib-kotlin:copyNativeHeaderDynamic"
     } else {
-        ":lib-rust:copyHeaderFileStatic"
+        ":lib-kotlin:copyNativeHeaderStatic"
     };
     let status = Command::new(&gradle_script)
         .arg(gradle_task)
         .arg("--no-daemon")
-        .current_dir(&rust_root)
+        .current_dir(&kotlin_root)
+        .arg("--outputDir")
+        .arg(rust_root.join("kson-sys/artifacts"))
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()?;
@@ -83,29 +88,57 @@ fn get_kotlin_artifacts(use_dynamic_linking: bool) -> Result<(), Box<dyn std::er
         .into());
     }
 
+    // Copy artifacts to out dir
+    if use_dynamic_linking {
+        for entry in fs::read_dir(&artifacts_dir)? {
+            let entry = entry?;
+            let source_path = entry.path();
+            if source_path.extension() != Some(std::ffi::OsStr::new("h")) {
+                let file_name = source_path.file_name().unwrap();
+                let dest_path = out_dir.join(file_name);
+                fs::copy(&source_path, &dest_path)?;
+            }
+        }
+    }
+
     Ok(())
 }
 
 fn main() {
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let use_dynamic_linking = cfg!(feature = "dynamic-linking") || cfg!(target_os = "windows");
-    get_kotlin_artifacts(use_dynamic_linking).expect("Failed to copy Kotlin artifacts");
 
+    // Compile kotlin code
+    get_kotlin_artifacts(use_dynamic_linking, &out_dir).expect("Failed to copy Kotlin artifacts");
+
+    // Generate bindings
     let bindings = bindgen::Builder::default()
         .header("artifacts/kson_api.h")
         .parse_callbacks(Box::new(CustomRenamer))
         .generate()
         .expect("Unable to generate bindings");
 
-    // Write the bindings to $OUT_DIR/bindings.rs
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(out_dir.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 
-    // Configure static linking if enabled
-    if !use_dynamic_linking {
-        let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-        let artifacts = std::path::Path::new(&dir).join("artifacts");
+    // Deal with static vs. dynamic linking
+    let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let dir = std::path::Path::new(&dir);
+    if use_dynamic_linking {
+        // Let users of the library know the path to the compiled binary, so they can copy it
+        let shared_name = if cfg!(target_os = "windows") {
+            format!("kson.dll")
+        } else if cfg!(target_os = "macos") {
+            format!("libkson.dylib")
+        } else {
+            format!("libkson.so")
+        };
+        let built_lib = out_dir.join(&shared_name);
+        println!("cargo:lib-binary={}", built_lib.display());
+    } else {
+        // Tell the compiler where to find the static library
+        let artifacts = dir.join("artifacts");
         println!("cargo:rustc-link-search=native={}", artifacts.display());
         println!("cargo:rustc-link-lib=static=kson");
 
@@ -113,7 +146,6 @@ fn main() {
         // statically link. Below we explicitly configure the runtime to be dynamically linked.
         #[cfg(target_os = "linux")]
         println!("cargo:rustc-link-lib=dylib=stdc++");
-
         #[cfg(target_os = "macos")]
         println!("cargo:rustc-link-lib=dylib=c++");
     }

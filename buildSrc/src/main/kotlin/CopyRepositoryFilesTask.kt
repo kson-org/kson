@@ -12,12 +12,11 @@ open class CopyRepositoryFilesTask : DefaultTask() {
     var excludedPath: String = ""
 
     @OutputDirectory
-    val outputDir: File = project.projectDir.resolve("kotlin")
+    var outputDir: File = project.projectDir.resolve("kotlin")
 
     @TaskAction
     fun run() {
         val repositoryRoot = project.projectDir.parentFile
-        val libRustDir = project.projectDir
 
         // Copy all files tracked by git, except `excludedPath`
         val gitLsFilesProcess = ProcessBuilder("git", "ls-files")

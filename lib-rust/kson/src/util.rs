@@ -1,5 +1,5 @@
 use crate::KSON_SYMBOLS;
-use crate::kson_ffi::*;
+use kson_sys::*;
 
 pub(crate) struct OwnedKotlinPtr {
     pub(crate) inner: kson_KNativePtr,

@@ -13,7 +13,7 @@ git clone https://github.com/kson-org/kson.git
 Install `lib-rust` to an existing Rust project:
 
 ```bash
-cargo add --path ../kson/lib-rust
+cargo add --path ../kson/lib-rust/kson
 ```
 
 Write some code:
