@@ -56,13 +56,7 @@ object SchemaParser {
     }
 
     schemaProperties["\$ref"]?.let { refString ->
-      // having a `$ref` means ignoring everything that's not '$ref', 'title', or 'description`
-      schemaObject.propertyMap.filterKeys {
-        it.value != "\$ref" && it.value != "title" && it.value != "description"
-      }.forEach { (name, _) ->
-        messageSink.error(name.location, SCHEMA_REF_IGNORED_PROPERTY.create())
-      }
-
+      // having a `$ref` means ignoring everything that's not '$ref'
       if (refString is KsonString) {
         val resolvedValue = resolveRef(refString.value, schemaRootValue)
 
@@ -74,7 +68,7 @@ object SchemaParser {
 
         val refValidator = RefValidator(resolvedValue, schemaRootValue)
 
-        return JsonObjectSchema(title, description, null, null, null, listOf(refValidator))
+        return JsonObjectSchema(null, null, null, null, null, listOf(refValidator))
       } else {
         messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
       }

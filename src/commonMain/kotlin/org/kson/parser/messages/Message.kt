@@ -770,16 +770,6 @@ enum class MessageType(
             return "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
         }
     },
-    SCHEMA_REF_IGNORED_PROPERTY {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This property is ignored because objects with a ${'$'}ref ignore everything except 'title', " +
-                    "'description', and '${'$'}ref'"
-        }
-    },
     SCHEMA_REF_RESOLUTION_FAILED {
         override fun expectedArgs(): List<String> {
             return listOf("Reference")
