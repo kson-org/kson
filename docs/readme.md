@@ -323,22 +323,32 @@ function fibonacci(n: number): number {
 
 See [Embed Preamble](#the-embed-preamble) for full details on the metadata supported by [Embed Blocks](#embed-blocks)
 
-The alternative embed delimiter `$`/`$$` works identically to `%`/`%%` and can be used when convenient to minimize
-escaping&mdash;useful for instance when embedding KSON in KSON.
+### Escaping Embed Delimiters
+The rules for escaping embed block delimiters are as follows:
+```kson
+embed_escapes: %
+  Embed end-delimiters are escaped by putting a slash inside them: %\%
+
+  Note that this moves the escaping goalpost since we also need to allow "%\%"
+  literally inside of embeds.  So: when evaluating escaped embed delimiters,
+  we allow arbitrary `\`s between `%`s, and consume one of them.  Thus, %\\%
+  gives %\% in the output, %\\\% gives %\\% in the output, etc forever until
+  we hit an uninterrupted end-delimiter:
+  %%
+```
+
+### Alternative Embed Block Delimiter
+
+The alternative embed delimiter `$` works identically to `%` and can be used when convenient to minimize
+escaping
 
 ```
-$kson
-  embedded_embed: %
-    This may have escaped end-delimiters $\$ inside it too!
-    %%
+alternate_embed: $kson
+  This embed block is equivalent to a %/%%-delimited block, but here "$/$"
+  must be escaped rather than "%%"
 $$
 ```
 
-#### Escaping Embed Delimiters
-
-Embed end-delimiters are escaped by putting a backslash inside them: `%\%`. This in turn needs to be escaped, of course,
-so when evaluating escaped embed delimiters, we allow arbitrary `\`s between `%`s, and consume one of them. Thus, `%\\%`
-gives `%\%` in the output, and so on. This naturally works the same for the alternative `$$` end-delimiter.
 
 ### The Embed Preamble
 
@@ -350,11 +360,11 @@ The Embed Preamble may be provided to annotate the embedded content. An Embed Pr
 
 ```
 %text: sample block
-This is a sample block of type `text`
+This is a sample block of type `text`, as noted in its Embed Preamble.
 %% 
 ```
 
-An empty [Embed Preamble](#the-embed-preamble) indicates dm todo
+An empty [Embed Preamble](#the-embed-preamble) simply indicates an embed of raw text. When appropriate, it's recommended to include a tag or metadata to provide context about the embedded content.
 
 #### Embed Tags
 
