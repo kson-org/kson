@@ -10,4 +10,5 @@ As a love letter to humans maintaining computer configuration, [Kson](https://ks
 * [Implementation of the Language Server Protocol](./language-server-protocol)
   * [Monaco Editor](./lsp-clients/monaco)
   * [VS Code Plugin](./lsp-clients/vscode)
+* [Command Line Tool](./cli)
 * More to come...
