@@ -22,5 +22,11 @@ vc14_runtime = "14.44.*"
 [target.linux-64.dependencies]
 libclang = "20.*"
 
+[target.linux-64.activation.env]
+LIBCLANG_PATH = "$CONDA_PREFIX/lib"
+
 [target.linux-aarch64.dependencies]
 libclang = "20.*"
+
+[target.linux-aarch64.activation.env]
+LIBCLANG_PATH = "$CONDA_PREFIX/lib"

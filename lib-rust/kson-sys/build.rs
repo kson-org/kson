@@ -24,9 +24,7 @@ fn get_kotlin_artifacts(
     out_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let rust_root = Path::new(&manifest_dir).parent().unwrap();
     let kotlin_root = Path::new(&manifest_dir).join("kotlin");
-    let artifacts_dir = Path::new(&manifest_dir).join("artifacts");
 
     // Build kotlin-native artifacts
     let gradle_script = if cfg!(target_os = "windows") {
@@ -48,7 +46,6 @@ fn get_kotlin_artifacts(
     }
 
     // Copy built artifacts
-    fs::create_dir_all(&artifacts_dir)?;
     let release_path = if use_dynamic_linking {
         "lib-kotlin/build/bin/nativeKson/releaseShared"
     } else {
@@ -58,10 +55,12 @@ fn get_kotlin_artifacts(
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
         let source_path = entry.path();
-        let file_name = source_path.file_name().unwrap();
-        let dest_path = artifacts_dir.join(file_name);
-        fs::copy(&source_path, &dest_path)?;
-        println!("cargo:rerun-if-changed={}", source_path.display());
+        if source_path.extension() != Some(std::ffi::OsStr::new("h")) {
+            let file_name = source_path.file_name().unwrap();
+            let dest_path = out_dir.join(file_name);
+            fs::copy(&source_path, &dest_path)?;
+            println!("cargo:rerun-if-changed={}", source_path.display());
+        }
     }
 
     // Copy the C headers, preprocessed (will overwrite existing header files)
@@ -75,8 +74,8 @@ fn get_kotlin_artifacts(
         .arg("--no-daemon")
         .current_dir(&kotlin_root)
         .arg("--outputDir")
-        .arg(rust_root.join("kson-sys/artifacts"))
-        .stdout(Stdio::inherit())
+        .arg(out_dir.display().to_string())
+        .stdout(Stdio::null())
         .stderr(Stdio::inherit())
         .status()?;
 
@@ -86,19 +85,6 @@ fn get_kotlin_artifacts(
             status.code()
         )
         .into());
-    }
-
-    // Copy artifacts to out dir
-    if use_dynamic_linking {
-        for entry in fs::read_dir(&artifacts_dir)? {
-            let entry = entry?;
-            let source_path = entry.path();
-            if source_path.extension() != Some(std::ffi::OsStr::new("h")) {
-                let file_name = source_path.file_name().unwrap();
-                let dest_path = out_dir.join(file_name);
-                fs::copy(&source_path, &dest_path)?;
-            }
-        }
     }
 
     Ok(())
@@ -113,7 +99,7 @@ fn main() {
 
     // Generate bindings
     let bindings = bindgen::Builder::default()
-        .header("artifacts/kson_api.h")
+        .header(out_dir.join("kson_api.h").display().to_string())
         .parse_callbacks(Box::new(CustomRenamer))
         .generate()
         .expect("Unable to generate bindings");
@@ -123,8 +109,6 @@ fn main() {
         .expect("Couldn't write bindings!");
 
     // Deal with static vs. dynamic linking
-    let dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let dir = std::path::Path::new(&dir);
     if use_dynamic_linking {
         // Let users of the library know the path to the compiled binary, so they can copy it
         let shared_name = if cfg!(target_os = "windows") {
@@ -138,8 +122,7 @@ fn main() {
         println!("cargo:lib-binary={}", built_lib.display());
     } else {
         // Tell the compiler where to find the static library
-        let artifacts = dir.join("artifacts");
-        println!("cargo:rustc-link-search=native={}", artifacts.display());
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
         println!("cargo:rustc-link-lib=static=kson");
 
         // Note: our kotlin-native binary relies on the C++ runtime, which we don't want to
