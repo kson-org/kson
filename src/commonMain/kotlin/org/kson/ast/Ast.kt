@@ -14,7 +14,6 @@ import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
-import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 interface AstNode {
     /**
@@ -232,7 +231,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
             val seperator = when(compileTarget) {
                 is Kson -> "\n"
                 is Json -> ",\n"
-                is Yaml -> throw ShouldNotHappenException("We never format YAML objects as delimited")
+                is Yaml -> throw UnsupportedOperationException("We never format YAML objects as delimited")
             }
 
             return """
@@ -438,7 +437,7 @@ class ListNode(
         val seperator = when (compileTarget) {
             is Kson -> "\n"
             is Json -> ",\n"
-            else -> throw ShouldNotHappenException("We never format YAML objects as delimited")
+            else -> throw UnsupportedOperationException("We never format YAML objects as delimited")
         }
 
         // We pad our list bracket with newlines if our list is non-empty
@@ -626,7 +625,7 @@ class UnquotedStringNode(override val stringContent: String, location: Location)
 class NumberNode(stringValue: String, location: Location) : KsonValueNodeImpl(location) {
     val value: ParsedNumber by lazy {
         val parsedNumber = NumberParser(stringValue).parse()
-        parsedNumber.number ?: throw RuntimeException("Hitting this indicates a parser bug: unparseable " +
+        parsedNumber.number ?: throw IllegalStateException("Hitting this indicates a parser bug: unparseable " +
                 "strings should be passed here but we got: " + stringValue)
     }
 
@@ -788,7 +787,7 @@ class EmbedBlockNode(
                         indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                         renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
             }
-            is Kson -> throw ShouldNotHappenException("should not encode embed block as ${compileTarget::class.simpleName}")
+            is Kson -> throw UnsupportedOperationException("should not encode embed block as ${compileTarget::class.simpleName}")
         }
 
     }

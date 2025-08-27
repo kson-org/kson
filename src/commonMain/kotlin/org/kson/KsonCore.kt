@@ -9,6 +9,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
+import org.kson.stdlibx.exceptions.UnexpectedParseException
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
@@ -49,13 +50,21 @@ object KsonCore {
         }
 
         val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
-        Parser(builder, coreCompileConfig.maxNestingLevel).parse()
 
-        /**
-         * Construct an [AstNode] tree from the [KsonMarker] made with the `builder`, or if we fail, return an
-         * [AstParseResult] immediately.
-         */
-        val ast = builder.buildTree(messageSink) ?: return AstParseResult(null, tokens, messageSink)
+        val ast: KsonRoot?
+        try {
+            Parser(builder, coreCompileConfig.maxNestingLevel).parse()
+
+            /**
+             * Construct an [AstNode] tree from the [KsonMarker] made with the `builder`, or if we fail, return an
+             * [AstParseResult] immediately.
+             */
+            ast = builder.buildTree(messageSink) ?: return AstParseResult(null, tokens, messageSink)
+
+        } catch (ex: UnexpectedParseException) {
+            println("Fatal parsing error: ${ex.message}")
+            return AstParseResult(null, tokens, messageSink)
+        }
 
         if (!messageSink.hasErrors()) {
             IndentValidator().validate(ast, messageSink)

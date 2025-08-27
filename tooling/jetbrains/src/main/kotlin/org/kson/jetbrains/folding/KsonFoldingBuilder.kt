@@ -182,7 +182,7 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
             }
 
             else -> {
-                throw ShouldNotHappenException("did not expect element type ${node.elementType} to be foldable")
+                throw UnsupportedOperationException("did not expect element type ${node.elementType} to be foldable")
             }
         }
     }

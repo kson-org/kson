@@ -56,7 +56,7 @@ sealed class StringQuote(private val quoteChar: Char) {
             return when (delimString) {
                 '\'' -> SingleQuote
                 '"' -> DoubleQuote
-                else -> throw RuntimeException("Unknown string delimiter: $delimString")
+                else -> throw UnsupportedOperationException("Unknown string delimiter: $delimString")
             }
         }
     }

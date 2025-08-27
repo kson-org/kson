@@ -195,6 +195,6 @@ fun AstNode.toKsonValue(): KsonValue {
         is ListElementNodeImpl -> {
             throw ShouldNotHappenException("these elements are processed above in the ${ListNode::class.simpleName} case")
         }
-        is AstNodeError -> throw ShouldNotHappenException("Cannot create Valid Ast Node from ${this::class.simpleName}")
+        is AstNodeError -> throw UnsupportedOperationException("Cannot create Valid Ast Node from ${this::class.simpleName}")
     }
 }

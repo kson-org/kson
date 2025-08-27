@@ -32,11 +32,11 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
     }
     private var rootMarker = KsonMarker(this, object : MarkerCreator {
         override fun forgetMe(me: KsonMarker): KsonMarker {
-            throw RuntimeException("The root marker has no creator that needs to forget it")
+            throw ShouldNotHappenException("The root marker has no creator that needs to forget it")
         }
 
         override fun dropMe(me: KsonMarker) {
-            throw RuntimeException("The root marker has no creator that needs to drop it")
+            throw ShouldNotHappenException("The root marker has no creator that needs to drop it")
         }
     })
 
@@ -161,7 +161,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      */
     private fun toAst(marker: KsonMarker): AstNode {
         if (!marker.isDone()) {
-            throw RuntimeException("Should have a well-formed, all-done marker tree at this point")
+            throw ShouldNotHappenException("Should have a well-formed, all-done marker tree at this point")
         }
 
         return when (marker.element) {
@@ -181,7 +181,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     OBJECT_KEY,
                     ILLEGAL_CHAR,
                     WHITESPACE -> {
-                        throw RuntimeException("These tokens do not generate their own AST nodes")
+                        throw ShouldNotHappenException("These tokens do not generate their own AST nodes")
                     }
                     FALSE -> {
                         FalseNode(marker.getLocation())
@@ -343,7 +343,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                         val eofToken = tokens.last()
                         // sanity check this is the expected EOF token
                         if (eofToken.tokenType != EOF) {
-                            throw RuntimeException("Token list must end in EOF")
+                            throw ShouldNotHappenException("Token list must end in EOF")
                         }
 
                         val rootNode = unsafeAstCreate<KsonValueNode>(childMarkers[0]) {
@@ -370,7 +370,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                 }
             }
             else -> {
-                throw RuntimeException(
+                throw ShouldNotHappenException(
                     "Unexpected ${ElementType::class.simpleName}.  " +
                             "Should always be one of ${TokenType::class.simpleName} or ${ParsedElementType::class.simpleName}"
                 )
@@ -459,7 +459,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                  * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
                  * never call [buildTree] when [org.kson.parser.messages.Message.Companion.isFatalParseError] is true
                  */
-                throw RuntimeException("Should not find ERROR elements when not `errorTolerant`")
+                throw ShouldNotHappenException("Should not find ERROR elements when not `errorTolerant`")
             }
             return errorNodeGenerator(marker.getRawText())
         }
@@ -626,7 +626,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
          */
         val lastChild = childMarkers.removeLast()
         if (lastChild != me) {
-            throw RuntimeException(
+            throw ShouldNotHappenException(
                 "Bug: This should be an impossible `forgetMe` call since " +
                         "the order of resolving markers should ensure that calls to `forgetMe` are always " +
                         "on the last added marker"

@@ -105,7 +105,7 @@ sealed class EmbedDelim(val char: Char) {
             return when (delimString) {
                 "%" -> Percent
                 "$" -> Dollar
-                else -> throw RuntimeException("Unknown embed delimiter string: $delimString")
+                else -> throw UnsupportedOperationException("Unknown embed delimiter string: $delimString")
             }
         }
     }

@@ -22,7 +22,7 @@ class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
         private fun getDelim(host: KsonEmbedBlock): EmbedDelim {
             val embedDelimText =
                 host.children.find { it.elementType == elem(TokenType.EMBED_OPEN_DELIM) }?.text
-                    ?: throw ShouldNotHappenException("Embed delimiter not found")
+                    ?: throw ShouldNotHappenException("since this element got parsed as embed block we expect an EMBED_OPEN_DELIM")
             return EmbedDelim.fromString(embedDelimText)
         }
     }
