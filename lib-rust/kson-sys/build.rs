@@ -55,7 +55,7 @@ fn get_kotlin_artifacts(
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
         let source_path = entry.path();
-        if source_path.extension() != Some(std::ffi::OsStr::new("h")) {
+        if source_path.is_file() && source_path.extension() != Some(std::ffi::OsStr::new("h")) {
             let file_name = source_path.file_name().unwrap();
             let dest_path = out_dir.join(file_name);
             fs::copy(&source_path, &dest_path)?;
@@ -130,6 +130,10 @@ fn main() {
         #[cfg(target_os = "linux")]
         println!("cargo:rustc-link-lib=dylib=stdc++");
         #[cfg(target_os = "macos")]
-        println!("cargo:rustc-link-lib=dylib=c++");
+        {
+            println!("cargo:rustc-link-lib=dylib=c++");
+            println!("cargo:rustc-link-lib=framework=CoreFoundation");
+            println!("cargo:rustc-link-lib=framework=Foundation");
+        }
     }
 }
