@@ -19,7 +19,7 @@ abstract class BaseKsonCommand(
         .default(System.`in`)
 
     private val output by option("-o", "--output", help = "Output file (default: stdout)")
-        .outputStream()
+        .outputStream(truncateExisting = true)
         .default(System.out)
 
     private val schema by option("-s", "--schema", help = "Path to KSON schema file for validation")

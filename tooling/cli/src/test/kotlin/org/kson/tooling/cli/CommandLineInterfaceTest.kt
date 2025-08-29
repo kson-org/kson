@@ -461,4 +461,35 @@ class CommandLineInterfaceTest {
             outputFile.delete()
         }
     }
+
+    @Test
+    fun testKsonOutputFileIsOverwrittenNotAppended() {
+        // Test that format command also overwrites instead of appending
+        val inputFile = File.createTempFile("input", ".kson")
+        inputFile.deleteOnExit()
+        val outputFile = File.createTempFile("output", ".kson")
+        outputFile.deleteOnExit()
+
+        try {
+            // First run
+            inputFile.writeText("""key1: "value1"""")
+            main(arrayOf("format", "-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
+            val firstOutput = outputFile.readText()
+            assertEquals("""key1: value1""", firstOutput)
+
+            // Second run with different content
+            inputFile.writeText("""key2: "value2"""")
+            main(arrayOf("format", "-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
+            val secondOutput = outputFile.readText()
+            assertEquals("""key2: value2""", secondOutput)
+
+            // Verify overwrite behavior
+            assert(!secondOutput.contains("key1") && !secondOutput.contains("value1")) {
+                "Format output file was appended to instead of overwritten"
+            }
+        } finally {
+            inputFile.delete()
+            outputFile.delete()
+        }
+    }
 }
