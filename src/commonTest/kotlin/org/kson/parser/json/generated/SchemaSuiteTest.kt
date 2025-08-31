@@ -4809,12 +4809,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun definitions_validateDefinitionAgainstMetaschema_validDefinitionSchema() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "definitions_validateDefinitionAgainstMetaschema_validDefinitionSchema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -4841,12 +4835,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun definitions_validateDefinitionAgainstMetaschema_invalidDefinitionSchema() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "definitions_validateDefinitionAgainstMetaschema_invalidDefinitionSchema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17134,12 +17122,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refOverridesAnySiblingKeywords_refValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refOverridesAnySiblingKeywords_refValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17173,12 +17155,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refOverridesAnySiblingKeywords_refValid_MaxItemsIgnored() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refOverridesAnySiblingKeywords_refValid_MaxItemsIgnored" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17215,12 +17191,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refOverridesAnySiblingKeywords_refInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refOverridesAnySiblingKeywords_refInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17253,12 +17223,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______refPreventsASibling______idFromChangingTheBaseUri_______refResolvesTo_definitions_base_foo_DataDoesNotValidate() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______refPreventsASibling______idFromChangingTheBaseUri_______refResolvesTo_definitions_base_foo_DataDoesNotValidate" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17297,12 +17261,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______refPreventsASibling______idFromChangingTheBaseUri_______refResolvesTo_definitions_base_foo_DataValidates() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______refPreventsASibling______idFromChangingTheBaseUri_______refResolvesTo_definitions_base_foo_DataValidates" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17565,12 +17523,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_recursiveReferencesBetweenSchemas_validTree() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_recursiveReferencesBetweenSchemas_validTree" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17658,12 +17610,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_recursiveReferencesBetweenSchemas_invalidTree() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_recursiveReferencesBetweenSchemas_invalidTree" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17751,12 +17697,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refsWithQuote_objectWithNumbersIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refsWithQuote_objectWithNumbersIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17788,12 +17728,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refsWithQuote_objectWithStringsIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refsWithQuote_objectWithStringsIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17825,12 +17759,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_location_independentIdentifier_match() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_location_independentIdentifier_match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17861,12 +17789,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_location_independentIdentifier_mismatch() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_location_independentIdentifier_mismatch" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17897,12 +17819,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_referenceAnAnchorWithANon_relativeURI_match() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_referenceAnAnchorWithANon_relativeURI_match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17934,12 +17850,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_referenceAnAnchorWithANon_relativeURI_mismatch() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_referenceAnAnchorWithANon_relativeURI_mismatch" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -17971,12 +17881,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_location_independentIdentifierWithBaseURIChangeInSubschema_match() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_location_independentIdentifierWithBaseURIChangeInSubschema_match" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18013,12 +17917,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_location_independentIdentifierWithBaseURIChangeInSubschema_mismatch() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_location_independentIdentifierWithBaseURIChangeInSubschema_mismatch" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18146,12 +18044,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refsWithRelativeUrisAndDefs_invalidOnInnerField() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refsWithRelativeUrisAndDefs_invalidOnInnerField" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18201,12 +18093,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refsWithRelativeUrisAndDefs_invalidOnOuterField() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refsWithRelativeUrisAndDefs_invalidOnOuterField" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18256,12 +18142,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refsWithRelativeUrisAndDefs_validOnBothFields() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refsWithRelativeUrisAndDefs_validOnBothFields" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18311,12 +18191,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_relativeRefsWithAbsoluteUrisAndDefs_invalidOnInnerField() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_relativeRefsWithAbsoluteUrisAndDefs_invalidOnInnerField" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18366,12 +18240,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_relativeRefsWithAbsoluteUrisAndDefs_invalidOnOuterField() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_relativeRefsWithAbsoluteUrisAndDefs_invalidOnOuterField" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18421,12 +18289,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_relativeRefsWithAbsoluteUrisAndDefs_validOnBothFields() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_relativeRefsWithAbsoluteUrisAndDefs_validOnBothFields" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18476,12 +18338,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______idMustBeResolvedAgainstNearestParent_NotJustImmediateParent_numberIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______idMustBeResolvedAgainstNearestParent_NotJustImmediateParent_numberIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18520,12 +18376,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_______idMustBeResolvedAgainstNearestParent_NotJustImmediateParent_non_numberIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_______idMustBeResolvedAgainstNearestParent_NotJustImmediateParent_non_numberIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18564,12 +18414,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_simpleURNBaseURIWith______refViaTheURN_validUnderTheURNIDedSchema() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_simpleURNBaseURIWith______refViaTheURN_validUnderTheURNIDedSchema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18599,12 +18443,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_simpleURNBaseURIWith______refViaTheURN_invalidUnderTheURNIDedSchema() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_simpleURNBaseURIWith______refViaTheURN_invalidUnderTheURNIDedSchema" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18898,12 +18736,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithURNAndJSONPointerRef_aStringIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithURNAndJSONPointerRef_aStringIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18936,12 +18768,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithURNAndJSONPointerRef_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithURNAndJSONPointerRef_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -18974,12 +18800,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithURNAndAnchorRef_aStringIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithURNAndAnchorRef_aStringIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19013,12 +18833,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_uRNBaseURIWithURNAndAnchorRef_aNon_stringIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_uRNBaseURIWithURNAndAnchorRef_aNon_stringIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19052,12 +18866,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToIf_aNon_integerIsInvalidDueToThe______ref() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToIf_aNon_integerIsInvalidDueToThe______ref" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19088,12 +18896,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToIf_anIntegerIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToIf_anIntegerIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19124,12 +18926,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToThen_aNon_integerIsInvalidDueToThe______ref() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToThen_aNon_integerIsInvalidDueToThe______ref" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19160,12 +18956,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToThen_anIntegerIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToThen_anIntegerIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19196,12 +18986,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToElse_aNon_integerIsInvalidDueToThe______ref() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToElse_aNon_integerIsInvalidDueToThe______ref" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19232,12 +19016,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refToElse_anIntegerIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refToElse_anIntegerIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19268,12 +19046,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refWithAbsolute_path_reference_aStringIsValid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refWithAbsolute_path_reference_aStringIsValid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -19309,12 +19081,6 @@ class SchemaSuiteTest : JsonSchemaTest {
      */
     @Test
     fun ref_refWithAbsolute_path_reference_anIntegerIsInvalid() {
-       /**
-        * TODO implement the schema functionality under test here and remove this exclusion from
-        * "ref_refWithAbsolute_path_reference_anIntegerIsInvalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
