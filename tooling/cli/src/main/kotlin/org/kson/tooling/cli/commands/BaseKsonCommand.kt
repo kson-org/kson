@@ -1,6 +1,7 @@
 package org.kson.tooling.cli.commands
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
@@ -9,7 +10,6 @@ import com.github.ajalt.clikt.parameters.types.outputStream
 import org.kson.Kson
 import org.kson.Message
 import org.kson.SchemaResult
-import kotlin.system.exitProcess
 
 abstract class BaseKsonCommand(
     name: String? = null
@@ -41,7 +41,7 @@ abstract class BaseKsonCommand(
     override fun run() {
         if (input == System.`in` && System.`in`.available() == 0 && System.console() != null) {
             echo(getFormattedHelp())
-            exitProcess(0)
+            throw ProgramResult(0)
         }
     }
 
@@ -67,22 +67,22 @@ abstract class BaseKsonCommand(
                 val validationErrors = schemaResult.schemaValidator.validate(ksonContent)
 
                 if (validationErrors.isEmpty()) {
-                    println("✓ Document is valid according to the schema")
+                    echo("✓ Document is valid according to the schema")
                 } else {
-                    System.err.println("Validation errors:")
+                    echo("Validation errors:", err = true)
                     validationErrors.forEach { error ->
-                        System.err.println("  ${errorFormat(error)}")
+                        echo("  ${errorFormat(error)}", err = true)
                     }
-                    exitProcess(1)
+                    throw ProgramResult(1)
                 }
             }
 
             is SchemaResult.Failure -> {
-                System.err.println("Failed to parse schema:")
+                echo("Failed to parse schema:", err = true)
                 schemaResult.errors.forEach { error ->
-                    System.err.println("  ${errorFormat(error)}")
+                    echo("  ${errorFormat(error)}", err = true)
                 }
-                exitProcess(1)
+                throw ProgramResult(1)
             }
         }
         return true

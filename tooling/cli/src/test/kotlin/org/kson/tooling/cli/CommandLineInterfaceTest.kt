@@ -1,103 +1,101 @@
 package org.kson.tooling.cli
 
+import com.github.ajalt.clikt.testing.test
 import org.junit.Test
+import org.kson.tooling.cli.commands.JsonCommand
+import org.kson.tooling.cli.commands.KsonFormatCommand
+import org.kson.tooling.cli.commands.ValidateCommand
+import org.kson.tooling.cli.commands.YamlCommand
 import java.io.File
 import kotlin.test.assertEquals
+
+enum class SubCommands{
+    JSON,
+    YAML,
+    FORMAT,
+    VALIDATE
+}
+
+sealed class OutputExpectation {
+    data class Success(val message: String) : OutputExpectation()
+    data class Failure(val message: String) : OutputExpectation()
+}
 
 class CommandLineInterfaceTest {
     
     private fun assertCommand(
-       target: String,
+        subCommand: SubCommands,
         input: String,
-        expectedOutput: String,
+        expectedOutput: OutputExpectation,
         vararg args: String
     ) {
         val inputFile = File.createTempFile("input", ".kson")
         inputFile.deleteOnExit()
         inputFile.writeText(input)
-        
-        val outputExtension = when (target) {
-            "json" -> ".json"
-            "yaml" -> ".yaml"
-            else -> ".kson"
-        }
-        val outputFile = File.createTempFile("output", outputExtension)
+
+        val outputFile = File.createTempFile("output", ".txt")
         outputFile.deleteOnExit()
-        
-        val commandArgs = when (target) {
-            "json", "yaml" -> {
-                // For json and yaml, they are direct subcommands
-                val list = mutableListOf(target)
-                list.addAll(listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
-                list.addAll(args)
-                list
+
+        val commandArgs = listOf(
+            "-i", inputFile.absolutePath,
+            "-o", outputFile.absolutePath
+        ) + args
+
+        val mainCommand = when(subCommand) {
+            SubCommands.JSON -> JsonCommand()
+            SubCommands.YAML -> YamlCommand()
+            SubCommands.FORMAT -> KsonFormatCommand()
+            SubCommands.VALIDATE -> ValidateCommand()
+        }
+        val result = mainCommand.test(commandArgs)
+
+        when(expectedOutput){
+            is OutputExpectation.Failure -> {
+                assertEquals(result.statusCode, 1)
+                assertEquals(result.stderr, expectedOutput.message)
             }
-            else -> {
-                // For kson formatting, use the format command
-                val list = mutableListOf("format")
-                list.addAll(listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath))
-                list.addAll(args)
-                list
+            is OutputExpectation.Success -> {
+                assertEquals(outputFile.readText(), expectedOutput.message)
             }
         }
-        
-        main(commandArgs.toTypedArray())
-        
-        assertEquals(expectedOutput, outputFile.readText())
-        
+
         inputFile.delete()
         outputFile.delete()
     }
-    
-    private fun assertValidateCommand(input: String, vararg args: String) {
-        val inputFile = File.createTempFile("input", ".kson")
-        inputFile.deleteOnExit()
-        inputFile.writeText(input)
-        
-        val commandArgs = mutableListOf("validate")
-        commandArgs.addAll(listOf("-i", inputFile.absolutePath))
-        commandArgs.addAll(args)
-        
-        // For validate command, we just verify it doesn't throw
-        main(commandArgs.toTypedArray())
-        
-        inputFile.delete()
-    }
-    
 
     @Test
     fun testTranspileToKsonWithDefaultOptions() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 key: value
                 nested:
                   inner: 123
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToKsonWithTabIndentation() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 key: value
                 nested:
                 	inner: 123
-            """.trimIndent(),
+            """.trimIndent()),
             "--indent-tabs"
         )
     }
@@ -105,18 +103,18 @@ class CommandLineInterfaceTest {
     @Test
     fun testTranspileToKsonWithCustomIndentSpaces() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 key: value
                 nested:
                     inner: 123
-            """.trimIndent(),
+            """.trimIndent()),
             "--indent-spaces", "4"
         )
     }
@@ -124,24 +122,24 @@ class CommandLineInterfaceTest {
     @Test
     fun testTranspileToJsonWithSimpleObject() {
         assertCommand(
-            target = "json",
+            subCommand = SubCommands.JSON,
             input = """
                 key: "value"
                 number: 42
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 {
                   "key": "value",
                   "number": 42
                 }
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToJsonWithComplexTypes() {
         assertCommand(
-            target = "json",
+            subCommand = SubCommands.JSON,
             input = """
                 string: "value"
                 number: 42
@@ -152,7 +150,7 @@ class CommandLineInterfaceTest {
                   nested: "value"
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 {
                   "string": "value",
                   "number": 42,
@@ -167,29 +165,29 @@ class CommandLineInterfaceTest {
                     "nested": "value"
                   }
                 }
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToYamlWithSimpleObject() {
         assertCommand(
-            target = "yaml",
+            subCommand = SubCommands.YAML,
             input = """
                 key: "value"
                 number: 42
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 key: "value"
                 number: 42
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToYamlWithComplexTypes() {
         assertCommand(
-            target = "yaml",
+            subCommand = SubCommands.YAML,
             input = """
                 string: "value"
                 number: 42
@@ -200,7 +198,7 @@ class CommandLineInterfaceTest {
                   nested: "value"
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 string: "value"
                 number: 42
                 boolean: true
@@ -211,14 +209,14 @@ class CommandLineInterfaceTest {
                   - 3
                 object:
                   nested: "value"
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToKsonWithCompactStyle() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 key: "value"
                 nested: {
@@ -226,7 +224,7 @@ class CommandLineInterfaceTest {
                   another: "test"
                 }
             """.trimIndent(),
-            expectedOutput = """key:value nested:inner:123 another:test""",
+            expectedOutput = OutputExpectation.Success("""key:value nested:inner:123 another:test"""),
             "--style", "compact"
         )
     }
@@ -234,21 +232,21 @@ class CommandLineInterfaceTest {
     @Test
     fun testTranspileToKsonWithDelimitedStyle() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 {
                   key: value
                   nested: {
                     inner: 123
                   }
                 }
-            """.trimIndent(),
+            """.trimIndent()),
             "--style", "delimited"
         )
     }
@@ -256,12 +254,12 @@ class CommandLineInterfaceTest {
     @Test
     fun testTranspileToJsonWithArray() {
         assertCommand(
-            target = "json",
+            subCommand = SubCommands.JSON,
             input = """
                 items: ["apple", "banana", "cherry"]
                 count: 3
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 {
                   "items": [
                     "apple",
@@ -270,14 +268,14 @@ class CommandLineInterfaceTest {
                   ],
                   "count": 3
                 }
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testTranspileToYamlWithNestedStructure() {
         assertCommand(
-            target = "yaml",
+            subCommand = SubCommands.YAML,
             input = """
                 database: {
                   host: "localhost"
@@ -288,33 +286,57 @@ class CommandLineInterfaceTest {
                   }
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 database:
                   host: "localhost"
                   port: 5432
                   credentials:
                     username: "admin"
                     password: "secret"
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
     @Test
     fun testValidateCommandWithValidInput() {
-        assertValidateCommand(
+        assertCommand(
+            SubCommands.VALIDATE,
             input = """
                 key: "value"
-                number: 42
-            """.trimIndent()
+            """.trimIndent(),
+            expectedOutput = OutputExpectation.Success("""
+                ✓ No errors or warnings found
+
+                Tokens:
+                  UNQUOTED_STRING: 'key' at 0:0-0:3
+                  COLON: ':' at 0:3-0:4
+                  STRING_OPEN_QUOTE: '"' at 0:5-0:6
+                  STRING_CONTENT: 'value' at 0:6-0:11
+                  STRING_CLOSE_QUOTE: '"' at 0:11-0:12
+                  EOF: '' at 0:12-0:12
+                
+            """.trimIndent()),
+            "--show-tokens"
         )
     }
 
     @Test
-    fun testValidateCommandWithShowTokens() {
-        assertValidateCommand(
+    fun testValidateCommandWithInvalidInput() {
+        assertCommand(
+            SubCommands.VALIDATE,
             input = """
-                key: "value"
+                { {} 
             """.trimIndent(),
+            expectedOutput = OutputExpectation.Failure("""
+                [ERROR] Object properties must be `key: value` pairs at 0:2
+                
+                Tokens:
+                  CURLY_BRACE_L: '{' at 0:0-0:1
+                  CURLY_BRACE_L: '{' at 0:2-0:3
+                  CURLY_BRACE_R: '}' at 0:3-0:4
+                  EOF: '' at 0:5-0:5
+                
+            """.trimIndent()),
             "--show-tokens"
         )
     }
@@ -323,37 +345,37 @@ class CommandLineInterfaceTest {
     @Test
     fun testTranspileToJsonWithEmptyObject() {
         assertCommand(
-            target = "json",
+            subCommand = SubCommands.JSON,
             input = "{}",
-            expectedOutput = "{}"
+            expectedOutput = OutputExpectation.Success("{}")
         )
     }
 
     @Test
     fun testTranspileToYamlWithEmptyObject() {
         assertCommand(
-            target = "yaml",
+            subCommand = SubCommands.YAML,
             input = "{}",
-            expectedOutput = "{}"
+            expectedOutput = OutputExpectation.Success("{}")
         )
     }
 
     @Test
     fun testTranspileToKsonPreservesComments() {
         assertCommand(
-            target = "kson",
+            subCommand = SubCommands.FORMAT,
             input = """
                 # This is a comment
                 key: "value"
                 # Another comment
                 number: 42
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 # This is a comment
                 key: value
                 # Another comment
                 number: 42
-            """.trimIndent()
+            """.trimIndent())
         )
     }
 
@@ -361,21 +383,21 @@ class CommandLineInterfaceTest {
     fun testTranspileToJsonWithRetainTags() {
         // Test the --retain-tags option for JSON transpilation
         assertCommand(
-            target = "json",
+            subCommand = SubCommands.JSON,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 {
                   "key": "value",
                   "nested": {
                     "inner": 123
                   }
                 }
-            """.trimIndent(),
+            """.trimIndent()),
             "--retain-tags"
         )
     }
@@ -384,18 +406,18 @@ class CommandLineInterfaceTest {
     fun testTranspileToYamlWithRetainTags() {
         // Test the --retain-tags option for YAML transpilation
         assertCommand(
-            target = "yaml",
+            subCommand = SubCommands.YAML,
             input = """
                 key: "value"
                 nested: {
                   inner: 123
                 }
             """.trimIndent(),
-            expectedOutput = """
+            expectedOutput = OutputExpectation.Success("""
                 key: "value"
                 nested:
                   inner: 123
-            """.trimIndent(),
+            """.trimIndent()),
             "--retain-tags"
         )
     }

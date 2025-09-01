@@ -1,11 +1,11 @@
 package org.kson.tooling.cli.commands
 
 import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.kson.Kson
 import org.kson.Result
-import kotlin.system.exitProcess
 
 /**
  * Base class for transpile commands (JSON, YAML, etc.)
@@ -42,13 +42,13 @@ abstract class TranspileCommand(
         val ksonContent = try {
             readInput()
         } catch (e: Exception) {
-            System.err.println("Error reading input: ${e.message}")
-            exitProcess(1)
+            echo("Error reading input: ${e.message}", err = true)
+            throw ProgramResult(1)
         }
 
         if (ksonContent.isBlank()) {
-            System.err.println("Error: Input is empty. Provide a KSON document to convert.")
-            exitProcess(1)
+            echo("Error: Input is empty. Provide a KSON document to convert.", err = true)
+            throw ProgramResult(1)
         }
 
         // Validate against schema if provided
@@ -59,11 +59,11 @@ abstract class TranspileCommand(
                 writeOutput(result.output)
             }
             is Result.Failure -> {
-                System.err.println("Conversion failed with errors:")
+                echo("Conversion failed with errors:", err = true)
                 result.errors.forEach { error ->
-                    System.err.println("  ${errorFormat(error)}")
+                    echo("  ${errorFormat(error)}", err = true)
                 }
-                exitProcess(1)
+                throw ProgramResult(0)
             }
         }
     }

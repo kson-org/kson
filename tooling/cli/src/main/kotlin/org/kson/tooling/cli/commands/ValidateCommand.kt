@@ -1,10 +1,10 @@
 package org.kson.tooling.cli.commands
 
 import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.kson.Kson
-import kotlin.system.exitProcess
 
 class ValidateCommand : BaseKsonCommand() {
     override fun help(context: Context) = """
@@ -40,14 +40,14 @@ class ValidateCommand : BaseKsonCommand() {
         val ksonContent = try {
             readInput()
         } catch (e: Exception) {
-            System.err.println("Error reading input: ${e.message}")
-            exitProcess(1)
+            echo("Error reading input: ${e.message}", err = true)
+            throw ProgramResult(1)
         }
 
         if (ksonContent.isBlank()) {
-            System.err.println("Error: Input is empty. Provide a KSON document to validate.")
-            System.err.println("\nUse 'kson validate --help' for usage information.")
-            exitProcess(1)
+            echo("Error: Input is empty. Provide a KSON document to validate.", err = true)
+            echo("\nUse 'kson validate --help' for usage information.", err = true)
+            throw ProgramResult(1)
         }
 
         // Validate against schema if provided
@@ -55,19 +55,25 @@ class ValidateCommand : BaseKsonCommand() {
 
         // Perform analysis
         val analysis = Kson.analyze(ksonContent)
-
+        var outputString = ""
         if (analysis.errors.isEmpty()) {
-            println("✓ No errors or warnings found")
+            outputString += "✓ No errors or warnings found"
         } else {
-            analysis.errors.forEach { errorFormat(it) }
-            exitProcess(1)
+            analysis.errors.forEach { outputString += errorFormat(it) }
         }
 
         if (showTokens) {
-            println("\nTokens:")
+            outputString += "\n\nTokens:\n"
             analysis.tokens.forEach { token ->
-                println("  ${token.tokenType}: '${token.text}' at ${token.start.line}:${token.start.column}-${token.end.line}:${token.end.column}")
+                outputString += "  ${token.tokenType}: '${token.text}' at ${token.start.line}:${token.start.column}-${token.end.line}:${token.end.column}\n"
             }
+        }
+
+        if (analysis.errors.isEmpty()) {
+            writeOutput(outputString)
+        }else{
+            echo(outputString.trimEnd(), err = true)
+            throw ProgramResult(1)
         }
     }
 }

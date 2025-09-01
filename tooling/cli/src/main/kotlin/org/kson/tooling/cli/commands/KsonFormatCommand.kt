@@ -1,6 +1,7 @@
 package org.kson.tooling.cli.commands
 
 import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.groups.*
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
@@ -12,7 +13,6 @@ import org.kson.FormatOptions
 import org.kson.FormattingStyle
 import org.kson.IndentType
 import org.kson.Kson
-import kotlin.system.exitProcess
 
 // Default command for formatting KSON
 class KsonFormatCommand : BaseKsonCommand(name = "format") {
@@ -52,13 +52,13 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
         val ksonContent = try {
             readInput()
         } catch (e: Exception) {
-            System.err.println("Error reading input: ${e.message}")
-            exitProcess(1)
+            echo("Error reading input: ${e.message}", err = true)
+            throw ProgramResult(1)
         }
 
         if (ksonContent.isBlank()) {
-            System.err.println("Error: Input is empty. Provide a KSON document to format.")
-            exitProcess(1)
+            echo("Error: Input is empty. Provide a KSON document to format.", err = true)
+            throw ProgramResult(1)
         }
 
         // Validate against schema if provided
