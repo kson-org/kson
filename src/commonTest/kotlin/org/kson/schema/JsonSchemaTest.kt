@@ -2,9 +2,7 @@ package org.kson.schema
 
 import org.kson.CoreCompileConfig
 import org.kson.KsonCore
-import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -58,8 +56,11 @@ interface JsonSchemaTest {
         val result = KsonCore.parseSchema(source)
 
         val jsonSchema = result.jsonSchema
+        assertTrue(
+            result.messages.isEmpty(), "Should have no error messages when parsing succeeds, got: " +
+                    result.messages.joinToString("\n")
+        )
         assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds")
-        assertTrue(result.messages.isEmpty(), "Should have no error messages when parsing succeeds")
 
         return jsonSchema
     }

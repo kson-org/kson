@@ -79,8 +79,13 @@ object Kson {
      */
     fun parseSchema(schemaKson: String): SchemaResult {
         val schemaParseResult = KsonCore.parseSchema(schemaKson)
+        val messages = publishMessages(schemaParseResult.messages)
         val jsonSchema = schemaParseResult.jsonSchema
-            ?: return SchemaResult.Failure(publishMessages(schemaParseResult.messages))
+            ?: return SchemaResult.Failure(messages)
+
+        if (messages.isNotEmpty()) {
+            return SchemaResult.Failure(messages)
+        }
 
         return SchemaResult.Success(SchemaValidator(jsonSchema))
     }

@@ -205,4 +205,44 @@ class SchemaParserTest : JsonSchemaTest {
             listOf(MessageType.SCHEMA_INTEGER_REQUIRED)
         )
     }
+
+    @Test
+    fun testRefWithAllowedProperties() {
+        // Test that $ref with only title and description does not generate errors
+        assertValidObjectSchema(
+            """
+            {
+                "definitions": {
+                    "someType": {"type": "string"}
+                },
+                "properties": {
+                    "myRef": {
+                        "${'$'}ref": "#/definitions/someType",
+                        "title": "Reference with title",
+                        "description": "This is allowed alongside ${'$'}ref"
+                    }
+                }
+            }
+        """
+        )
+    }
+
+    @Test
+    fun testRefOnlyWithNoOtherProperties() {
+        // Test that $ref alone works without errors
+        assertValidObjectSchema(
+            """
+            {
+                "definitions": {
+                    "simpleType": {"type": "string"}
+                },
+                "properties": {
+                    "myProperty": {
+                        "${'$'}ref": "#/definitions/simpleType"
+                    }
+                }
+            }
+        """
+        )
+    }
 }
