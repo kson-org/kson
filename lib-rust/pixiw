@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Simple Pixi wrapper that auto-installs Pixi locally if needed
+
+PIXI_DIR="$(pwd)/../.pixi"
+PIXI_BIN="$PIXI_DIR/bin/pixi"
+
+# Install Pixi locally if not present
+if [ ! -f "$PIXI_BIN" ]; then
+    echo "Installing Pixi locally to $PIXI_DIR..."
+
+    # Use Pixi's official installation script with custom install location
+    export PIXI_HOME="$PIXI_DIR"
+    export PIXI_NO_PATH_UPDATE=1
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL https://pixi.sh/install.sh | bash
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://pixi.sh/install.sh | bash
+    else
+        echo "Please install curl or wget" >&2
+        exit 1
+    fi
+
+    if [ ! -f "$PIXI_BIN" ]; then
+        echo "Failed to install Pixi" >&2
+        exit 1
+    fi
+fi
+
+# Execute Pixi with all arguments
+exec "$PIXI_BIN" "$@"

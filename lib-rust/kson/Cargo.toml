@@ -1,0 +1,20 @@
+[package]
+name = "kson"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+dynamic-linking = ["kson-sys/dynamic-linking", "dep:libloading"]
+
+[dependencies]
+kson-sys = { version = "0.1.0", path = "../kson-sys" }
+
+[target.'cfg(not(target_os = "windows"))'.dependencies]
+libloading = { version = "0.8.8", optional = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+libloading = "0.8.8"
+
+[dev-dependencies]
+insta = "1.43.1"
