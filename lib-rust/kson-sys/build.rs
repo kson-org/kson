@@ -24,7 +24,9 @@ fn get_kotlin_artifacts(
     out_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let kotlin_root = Path::new(&manifest_dir).join("kotlin");
+    let kotlin_root = Path::new(&manifest_dir)
+        .parent().and_then(|p| p.parent())
+        .ok_or("kson-sys is not inside a kson source tree")?;
 
     // Build kotlin-native artifacts
     let gradle_script = if cfg!(target_os = "windows") {

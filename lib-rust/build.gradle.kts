@@ -1,6 +1,5 @@
 import org.gradle.internal.os.OperatingSystem
 
-val copyKotlinSource = "copyKotlinSource"
 val formattingCheck = "formattingCheckKson"
 val formattingCheckSys = "formattingCheckKsonSys"
 val testStatic = "testStaticallyLinked"
@@ -13,16 +12,7 @@ tasks {
         "./pixiw"
     }
 
-    register<CopyRepositoryFilesTask>(copyKotlinSource) {
-        group = "build setup"
-        description = "Copies all repository files (except git-ignored and lib-rust) to ./kotlin"
-        excludedPath = "lib-rust/kson-sys"
-        outputDir = project.projectDir.resolve("kson-sys/kotlin")
-    }
-
     register<Exec>(testStatic) {
-        dependsOn(copyKotlinSource)
-
         group = "verification"
         commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml".split(" ")
         standardOutput = System.out
@@ -32,8 +22,6 @@ tasks {
     }
 
     register<Exec>(testDynamic) {
-        dependsOn(copyKotlinSource)
-
         group = "verification"
         commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml --features dynamic-linking".split(" ")
         standardOutput = System.out
