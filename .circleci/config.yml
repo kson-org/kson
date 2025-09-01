@@ -4,11 +4,66 @@ orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
   browser-tools: circleci/browser-tools@1.1
+  # Make it possible to use Windows machines
+  # See https://circleci.com/developer/orbs/orb/circleci/windows
+  win: circleci/windows@5.1.0
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build:
+  build-windows-amd64:
+    executor: win/server-2022
+    resource_class: large
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+    steps:
+      # The `browser-tools` orb doesn't support windows, so we install Chrome manually
+      - run: choco install googlechrome
+      - restore_cache:
+          keys:
+            - v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-win-amd64-dependencies-
+
+      - restore_cache:
+          keys:
+            - v1-win-amd64-jdk-{{ checksum "jdk.properties" }}
+
+      - restore_cache:
+          keys:
+            - v1-win-amd64-vscode-tests
+
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
+
+      - run:
+          name: Verify `buildSrc/` project
+          command: |
+            cd buildSrc
+            ./gradlew check
+
+      - run:
+          name: Verify Kson project
+          command: ./gradlew check
+
+      - save_cache:
+          paths:
+            - ./tooling/lsp-clients/vscode/.vscode-test
+            - ./tooling/lsp-clients/vscode/.vscode-test-web
+          key: v1-win-amd64-vscode-tests
+
+      - save_cache:
+          paths:
+            - ./gradle/jdk
+            - ./buildSrc/gradle/jdk
+          key: v1-win-amd64-jdk-{{ checksum "jdk.properties" }}
+
+  build-linux-amd64:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
