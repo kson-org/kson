@@ -21,6 +21,11 @@ jobs:
 
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
       - run: choco install googlechrome
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
+          shell: powershell.exe
       - restore_cache:
           keys:
             - v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
