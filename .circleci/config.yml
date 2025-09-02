@@ -18,6 +18,10 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
 
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
       - run: choco install googlechrome
@@ -35,7 +39,7 @@ jobs:
           keys:
             - v1-win-amd64-vscode-tests
 
-      - run: ./gradlew dependencies
+      - run: ./gradlew --no-daemon dependencies
 
       - save_cache:
           paths:
@@ -46,11 +50,11 @@ jobs:
           name: Verify `buildSrc/` project
           command: |
             cd buildSrc
-            ./gradlew check
+            ./gradlew --no-daemon check
 
       - run:
           name: Verify Kson project
-          command: ./gradlew check
+          command: ./gradlew --no-daemon check
 
       - save_cache:
           paths:
@@ -111,7 +115,7 @@ jobs:
           name: Get rid of erroneous git config
           command: |
             rm -rf ~/.gitconfig
-      - run: ./gradlew dependencies
+      - run: ./gradlew --no-daemon dependencies
 
       - save_cache:
           paths:
@@ -122,11 +126,11 @@ jobs:
           name: Verify `buildSrc/` project
           command: |
             cd buildSrc
-            ./gradlew check
+            ./gradlew --no-daemon check
 
       - run:
           name: Verify Kson project
-          command: ./gradlew check
+          command: ./gradlew --no-daemon check
 
       - save_cache:
           paths:
