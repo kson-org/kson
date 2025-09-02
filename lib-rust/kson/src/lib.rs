@@ -457,9 +457,23 @@ impl Kson {
     /// Converts Kson to Json.
     ///
     /// @param kson The Kson source to convert
+    /// @param retain_embed_tags Whether to retain the embed tags in the result (default: true)
     /// @return A Result containing either the Json output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_json(kson: &str) -> Result<ResultSuccess, ResultFailure> {
+        Self::to_json_with_options(kson, true)
+    }
+
+    /// Converts Kson to Json with options.
+    ///
+    /// @param kson The Kson source to convert
+    /// @param retain_embed_tags Whether to retain the embed tags in the result
+    /// @return A Result containing either the Json output or error messages
+    #[allow(clippy::wrong_self_convention)]
+    pub fn to_json_with_options(
+        kson: &str,
+        retain_embed_tags: bool,
+    ) -> Result<ResultSuccess, ResultFailure> {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Kson.toJson.unwrap();
         let p0 = util::to_kotlin_string(kson);
         let p0 = p0.as_ptr();
@@ -467,6 +481,7 @@ impl Kson {
             f(
                 KSON_SYMBOLS.kotlin.root.org.kson.Kson._instance.unwrap()(),
                 p0,
+                retain_embed_tags,
             )
         };
         Result::from_kotlin_object(result.pinned)
@@ -475,9 +490,23 @@ impl Kson {
     /// Converts Kson to Yaml, preserving comments
     ///
     /// @param kson The Kson source to convert
+    /// @param retain_embed_tags Whether to retain the embed tags in the result (default: true)
     /// @return A Result containing either the Yaml output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_yaml(kson: &str) -> Result<ResultSuccess, ResultFailure> {
+        Self::to_yaml_with_options(kson, true)
+    }
+
+    /// Converts Kson to Yaml with options, preserving comments
+    ///
+    /// @param kson The Kson source to convert
+    /// @param retain_embed_tags Whether to retain the embed tags in the result
+    /// @return A Result containing either the Yaml output or error messages
+    #[allow(clippy::wrong_self_convention)]
+    pub fn to_yaml_with_options(
+        kson: &str,
+        retain_embed_tags: bool,
+    ) -> Result<ResultSuccess, ResultFailure> {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Kson.toYaml.unwrap();
         let p0 = util::to_kotlin_string(kson);
         let p0 = p0.as_ptr();
@@ -485,6 +514,7 @@ impl Kson {
             f(
                 KSON_SYMBOLS.kotlin.root.org.kson.Kson._instance.unwrap()(),
                 p0,
+                retain_embed_tags,
             )
         };
         Result::from_kotlin_object(result.pinned)
