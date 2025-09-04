@@ -37,8 +37,108 @@ fn test_kson_to_json_success() {
 }
 
 #[test]
+fn test_kson_to_json_with_embed_tags() {
+    let kson_with_embed = r#"key: $embed
+This is embedded content
+embed$$"#;
+
+    // Test with default retain_embed_tags=true
+    let result = Kson::to_json(kson_with_embed);
+    match result {
+        Err(_) => panic!("expected success, found failure"),
+        Ok(success) => {
+            insta::assert_snapshot!(success.output(), @r#"
+            {
+              "key": {
+                "embedTag": "embed",
+                "embedContent": "This is embedded content\nembed"
+              }
+            }
+            "#);
+        }
+    }
+
+    // Test with retain_embed_tags=false
+    let result = Kson::to_json_with_options(kson_with_embed, false);
+    match result {
+        Err(_) => panic!("expected success, found failure"),
+        Ok(success) => {
+            insta::assert_snapshot!(success.output(), @r#"
+            {
+              "key": "This is embedded content\nembed"
+            }
+            "#);
+        }
+    }
+}
+
+#[test]
 fn test_kson_to_json_failure() {
     let result = Kson::to_json("key: [1, 2, 3, 4");
+    match result {
+        Ok(_) => panic!("expected failure, found success"),
+        Err(failure) => {
+            let output = messages_to_string(&failure.errors());
+            insta::assert_snapshot!(output, @"0,5 to 0,16 - Unclosed list\n");
+        }
+    }
+}
+
+#[test]
+fn test_kson_to_yaml_success() {
+    let result = Kson::to_yaml("key: [1, 2, 3, 4]");
+    match result {
+        Err(_) => panic!("expected success, found failure"),
+        Ok(success) => {
+            insta::assert_snapshot!(success.output(), @r"
+            key:
+              - 1
+              - 2
+              - 3
+              - 4
+            ");
+        }
+    }
+}
+
+#[test]
+fn test_kson_to_yaml_with_embed_tags() {
+    let kson_with_embed = r#"key: $embed
+This is embedded content
+embed$$"#;
+
+    // Test with default retain_embed_tags=true
+    let result = Kson::to_yaml(kson_with_embed);
+    match result {
+        Err(_) => panic!("expected success, found failure"),
+        Ok(success) => {
+            insta::assert_snapshot!(success.output(), @r#"
+            key:
+              embedTag: "embed"
+              embedContent: |
+                This is embedded content
+                embed
+            "#);
+        }
+    }
+
+    // Test with retain_embed_tags=false
+    let result = Kson::to_yaml_with_options(kson_with_embed, false);
+    match result {
+        Err(_) => panic!("expected success, found failure"),
+        Ok(success) => {
+            insta::assert_snapshot!(success.output(), @r"
+            key: |
+                This is embedded content
+                embed
+            ");
+        }
+    }
+}
+
+#[test]
+fn test_kson_to_yaml_failure() {
+    let result = Kson::to_yaml("key: [1, 2, 3, 4");
     match result {
         Ok(_) => panic!("expected failure, found success"),
         Err(failure) => {
