@@ -7,7 +7,7 @@ val testDynamic = "testDynamicallyLinked"
 
 tasks {
     val pixiwPath = if (OperatingSystem.current().isWindows) {
-        "pixiw"
+        "cmd /c pixiw.bat"
     } else {
         "./pixiw"
     }
