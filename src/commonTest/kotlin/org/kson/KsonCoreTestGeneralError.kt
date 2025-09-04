@@ -2,6 +2,7 @@ package org.kson
 
 import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
+import org.kson.schema.JsonBooleanSchema
 import kotlin.test.Test
 
 /**
@@ -13,6 +14,19 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
         assertParserRejectsSource("", listOf(BLANK_SOURCE))
         assertParserRejectsSource("  ", listOf(BLANK_SOURCE))
         assertParserRejectsSource("\t", listOf(BLANK_SOURCE))
+    }
+
+    /**
+     * Regression test for an issue where we would throw an exception trying
+     * to validate invalid Kson against a schema
+     */
+    @Test
+    fun testSchemaValidationForIllegalKson() {
+        KsonCore.parseToAst("""
+            - 
+        """.trimIndent(),
+            CoreCompileConfig(schemaJson = JsonBooleanSchema(true))
+        )
     }
 
     @Test

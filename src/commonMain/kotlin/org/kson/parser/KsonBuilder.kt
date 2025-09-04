@@ -9,6 +9,7 @@ import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
+import org.kson.stdlibx.exceptions.UnexpectedParseException
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
@@ -107,27 +108,14 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      * Attempt to construct an [AstNode] tree from the [KsonMarker]s made in this builder
      *
      * @param messageSink a [MessageSink] to write any errors we encountered in parsing
-     * @return the [KsonRoot] of the resulting tree, or `null` if it could not be built
+     * @return the [KsonRoot] of the resulting tree.
      */
-    fun buildTree(messageSink: MessageSink): KsonRoot? {
+    fun buildTree(messageSink: MessageSink): KsonRoot {
         rootMarker.done(ROOT)
-
-        return if (errorTolerant) {
-            /**
-             * ignore errors and create an AST possibly patched with [AstNodeError]s
-             */
-            unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
-        } else {
+        if (!ignoreErrors) {
             walkForMessages(rootMarker, messageSink)
-
-            if (!messageSink.hasErrors()) {
-                unsafeAstCreate<KsonRoot>(rootMarker) {
-                    throw ShouldNotHappenException("this should be the error-free code path")
-                }
-            } else {
-                return null
-            }
         }
+        return unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
     }
 
     /**
@@ -275,7 +263,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                         val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
                             unsafeAstCreate(childMarkers.first()) { KsonValueNodeError(it, childMarkers.first().getLocation()) }
                         } else {
-                            throw ShouldNotHappenException("list element markers should mark exactly one value")
+                            throw UnexpectedParseException("list element markers should mark exactly one value")
                         }
                         ListElementNodeImpl(
                             listElementValue,
@@ -304,7 +292,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * pair OR a keyword with a missing value error
                          */
                         if (childMarkers.size > 2) {
-                            throw ShouldNotHappenException("unless object property parsing has changed significantly")
+                            throw UnexpectedParseException("unless object property parsing has changed significantly")
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
@@ -453,14 +441,6 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      */
     private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
         if (marker.element == ERROR ) {
-            val errorMessage = marker.markedError ?: throw ShouldNotHappenException("should have message with error")
-            if (!errorTolerant && Message.isFatalParseError(errorMessage)  ) {
-                /**
-                 * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
-                 * never call [buildTree] when [org.kson.parser.messages.Message.Companion.isFatalParseError] is true
-                 */
-                throw ShouldNotHappenException("Should not find ERROR elements when not `errorTolerant`")
-            }
             return errorNodeGenerator(marker.getRawText())
         }
         val nodeToCast = toAst(marker)

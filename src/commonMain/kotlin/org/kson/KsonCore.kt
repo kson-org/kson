@@ -59,7 +59,7 @@ object KsonCore {
              * Construct an [AstNode] tree from the [KsonMarker] made with the `builder`, or if we fail, return an
              * [AstParseResult] immediately.
              */
-            ast = builder.buildTree(messageSink) ?: return AstParseResult(null, tokens, messageSink)
+            ast = builder.buildTree(messageSink)
 
         } catch (ex: UnexpectedParseException) {
             println("Fatal parsing error: ${ex.message}")
@@ -72,14 +72,12 @@ object KsonCore {
             DuplicateKeyValidator().validate(ast, messageSink)
         }
 
-        if (coreCompileConfig.schemaJson == NO_SCHEMA) {
-            return AstParseResult(ast, tokens, messageSink)
-        } else {
-            val jsonSchema = coreCompileConfig.schemaJson
+        val jsonSchema = coreCompileConfig.schemaJson
+        if (jsonSchema != NO_SCHEMA && !coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
             // validate against our schema, logging any errors to our message sink
             jsonSchema.validate(ast.toKsonValue(), messageSink)
-            return AstParseResult(ast, tokens, messageSink)
         }
+        return AstParseResult(ast, tokens, messageSink)
     }
 
     /**
