@@ -11,7 +11,7 @@ val buildWheel = "buildWheel"
 
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
-        "cmd /c uvw.bat"
+       "cmd /c uvw.bat"
     } else {
         "./uvw"
     }
