@@ -265,7 +265,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
                             unsafeAstCreate<ListElementNode>(listElementMarker) {
-                                ListElementNodeError(it, marker.getLocation())
+                                ListElementNodeError(it, listElementMarker.getLocation())
                             }
                         }
                         ListNode(listElementNodes, marker.getLocation())
@@ -273,7 +273,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
                         val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
-                            unsafeAstCreate(childMarkers[0]) { KsonValueNodeError(it, marker.getLocation()) }
+                            unsafeAstCreate(childMarkers.first()) { KsonValueNodeError(it, childMarkers.first().getLocation()) }
                         } else {
                             throw ShouldNotHappenException("list element markers should mark exactly one value")
                         }
@@ -285,7 +285,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     OBJECT -> {
                         val propertyNodes = childMarkers.map { property ->
                             unsafeAstCreate<ObjectPropertyNode>(property) {
-                                ObjectPropertyNodeError(it, marker.getLocation())
+                                ObjectPropertyNodeError(it, property.getLocation())
                             }
                         }
 
@@ -436,7 +436,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
          */
         val quotedString = marker.getValue()
         val stringDelim = quotedString.first()
-        val stringContent = quotedString.substring(1, quotedString.length - 1)
+        val stringContent = quotedString.drop(1).dropLast(1)
 
         return QuotedStringNode(stringContent, StringQuote.fromChar(stringDelim), marker.getLocation())
     }
