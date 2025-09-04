@@ -14,9 +14,9 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
  *
  * @param tokens the [Token] stream to build into an AST
- * @param errorTolerant whether to ignore errors and build a partial AST patched with [AstNodeError] nodes
+ * @param ignoreErrors skip some of the work of collecting error if the caller tells us they are going to ignore them anyway
  */
-class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Boolean = false) :
+class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boolean = false) :
     AstBuilder,
     MarkerBuilderContext {
 
