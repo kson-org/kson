@@ -14,6 +14,7 @@ import org.kson.tools.KsonFormatterConfig
 import org.kson.parser.TokenType as InternalTokenType
 import org.kson.parser.Token as InternalToken
 import kotlin.js.JsExport
+import kotlin.ConsistentCopyVisibility
 
 /**
  * The [Kson](https://kson.org) language
@@ -204,11 +205,13 @@ sealed class IndentType {
 /**
  * The result of statically analyzing a Kson document
  */
+@ConsistentCopyVisibility
 data class Analysis internal constructor(val errors: List<Message>, val tokens: List<Token>)
 
 /**
  * [Token] produced by the lexing phase of a Kson parse
  */
+@ConsistentCopyVisibility
 data class Token internal constructor(
     val tokenType: TokenType,
     val text: String,
@@ -254,6 +257,7 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
+@ConsistentCopyVisibility
 data class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
 
 /**
