@@ -9,7 +9,7 @@ import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
-import org.kson.stdlibx.exceptions.UnexpectedParseException
+import org.kson.stdlibx.exceptions.FatalParseException
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
@@ -263,7 +263,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                         val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
                             unsafeAstCreate(childMarkers.first()) { KsonValueNodeError(it, childMarkers.first().getLocation()) }
                         } else {
-                            throw UnexpectedParseException("list element markers should mark exactly one value")
+                            throw FatalParseException("list element markers should mark exactly one value")
                         }
                         ListElementNodeImpl(
                             listElementValue,
@@ -292,7 +292,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * pair OR a keyword with a missing value error
                          */
                         if (childMarkers.size > 2) {
-                            throw UnexpectedParseException("unless object property parsing has changed significantly")
+                            throw FatalParseException("unless object property parsing has changed significantly")
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
