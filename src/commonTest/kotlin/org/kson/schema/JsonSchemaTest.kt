@@ -3,6 +3,7 @@ package org.kson.schema
 import org.kson.CoreCompileConfig
 import org.kson.KsonCore
 import org.kson.parser.Location
+import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -36,7 +37,7 @@ interface JsonSchemaTest {
         expectedParseMessageTypes: List<MessageType>,
         expectedParseMessageLocation: List<Location>,
         message: String? = null
-    ) {
+    ): List<LoggedMessage> {
         val jsonSchema = assertValidSchema(schemaJson)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
@@ -44,8 +45,9 @@ interface JsonSchemaTest {
         )
         
         assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")
-        assertEquals(expectedParseMessageLocation, parseResult.messages.map { it.location })
         assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type })
+        assertEquals(expectedParseMessageLocation, parseResult.messages.map { it.location })
+        return parseResult.messages
     }
 
     /**

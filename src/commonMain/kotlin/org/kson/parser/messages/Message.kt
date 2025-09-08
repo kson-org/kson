@@ -693,11 +693,13 @@ enum class MessageType(
     },
     SCHEMA_MISSING_REQUIRED_DEPENDENCIES(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Required by", "Missing property")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Missing required dependencies"
+            val requiredBy = parsedArgs.getArg("Required by")
+            val missingProperty = parsedArgs.getArg("Missing property")
+            return "Property `$missingProperty' is not provided, but it is required by '$requiredBy'"
         }
     },
     OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
