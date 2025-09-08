@@ -99,7 +99,7 @@ class SchemaIdLookup(schemaRootValue: KsonValue) {
 
                     // Recursively walk all property values with the updated context
                     schemaValue.propertyMap.values.forEach { propertyValue ->
-                        walkSchemaForIds(propertyValue, idMap, contextBaseUri)
+                        walkSchemaForIds(propertyValue.propValue, idMap, contextBaseUri)
                     }
                 }
 

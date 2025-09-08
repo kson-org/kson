@@ -104,8 +104,8 @@ object SchemaParser {
         val default = schemaProperties["default"]
         val definitions = schemaProperties["definitions"]?.let { definitions ->
             if (definitions is KsonObject) {
-                definitions.propertyMap.mapValues { (_, value) ->
-                    parseSchemaElement(value, messageSink, updatedBaseUri, idLookup)
+                definitions.propertyMap.entries.associate { (_, value) ->
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
                 }
             } else {
                 messageSink.error(definitions.location, SCHEMA_OBJECT_REQUIRED.create("definitions"))
@@ -283,8 +283,8 @@ object SchemaParser {
 
         val propertySchemas = schemaProperties["properties"]?.let { properties ->
             if (properties is KsonObject) {
-                properties.propertyMap.mapValues {
-                    parseSchemaElement(it.value, messageSink, updatedBaseUri, idLookup)
+                properties.propertyMap.entries.associate { (_, value) ->
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
                 }
             } else {
                 messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))
@@ -294,8 +294,8 @@ object SchemaParser {
 
         val patternPropertySchemas = schemaProperties["patternProperties"]?.let { patternProperties ->
             if (patternProperties is KsonObject) {
-                patternProperties.propertyMap.mapValues {
-                    parseSchemaElement(it.value, messageSink, updatedBaseUri, idLookup) ?: return@mapValues null
+                patternProperties.propertyMap.entries.associate { (_, value) ->
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
                 }
             } else {
                 messageSink.error(patternProperties.location, SCHEMA_OBJECT_REQUIRED.create("patternProperties"))
@@ -422,7 +422,7 @@ object SchemaParser {
                 return@let
             }
 
-            val dependencyMap = dependencies.propertyMap.mapValues { (_, value) ->
+            val dependencyMap = dependencies.propertyLookup.mapValues { (_, value) ->
                 if (value is KsonList) {
                     val dependencyArrayEntries = mutableSetOf<KsonString>()
                     for (element in value.elements) {

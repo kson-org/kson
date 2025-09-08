@@ -7,7 +7,7 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
 
-class DependenciesValidator(private val dependencies: Map<KsonString, DependencyValidator>)
+class DependenciesValidator(private val dependencies: Map<String, DependencyValidator>)
     : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val properties = node.propertyMap
@@ -26,7 +26,7 @@ data class DependencyValidatorArray(val dependency: Set<KsonString>) : Dependenc
     override fun validate(ksonObject: KsonObject, messageSink: MessageSink): Boolean {
         val propertyNames = ksonObject.propertyMap.keys
         val allPresent = dependency.all {
-            propertyNames.contains(it)
+            propertyNames.contains(it.value)
         }
         if (!allPresent) {
             messageSink.error(ksonObject.location, MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES.create())

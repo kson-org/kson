@@ -9,7 +9,7 @@ import org.kson.schema.JsonObjectValidator
 class RequiredValidator(private val required: List<KsonString>) : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val propertyNames = node.propertyMap.keys
-        val missingProperties = required.filter { !propertyNames.contains(it) }
+        val missingProperties = required.filter { !propertyNames.contains(it.value) }
         if (missingProperties.isNotEmpty()) {
             val missingPropertyNames = missingProperties.joinToString(", ") { it.value }
             messageSink.error(
