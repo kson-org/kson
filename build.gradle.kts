@@ -106,12 +106,6 @@ tasks {
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
 
-    // Take bindings into consideration in the main `check` task
-    check {
-        dependsOn(":lib-python:check")
-        dependsOn(":lib-rust:check")
-    }
-
     /**
      * Work around Gradle complaining about duplicate readmes in the mpp build.  Related context:
      * - https://github.com/gradle/gradle/issues/17236
@@ -123,11 +117,7 @@ tasks {
 }
 
 kotlin {
-    jvm {
-        testRuns["test"].executionTask.configure {
-            useJUnit()
-        }
-    }
+    jvm()
     js(IR) {
         browser {
             testTask {
