@@ -14,8 +14,8 @@ val jdkProperties = Properties().apply {
 val jdkVersion = jdkProperties.getProperty("JDK_VERSION")!!
 
 plugins {
-    kotlin("jvm") version "2.1.10"
-    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("jvm") version "2.2.10"
+    kotlin("plugin.serialization") version "2.2.10"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -105,4 +105,7 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+    
+    // Add Kotlin Gradle Plugin for multiplatform configuration
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
 }

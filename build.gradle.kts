@@ -15,8 +15,8 @@ val sharedProps = Properties().apply {
 }
 
 plugins {
-    kotlin("multiplatform") version "2.1.21"
-    kotlin("plugin.serialization") version "2.1.21"
+    kotlin("multiplatform")
+    kotlin("plugin.serialization")
     `maven-publish`
 
     // configured by `jvmWrapper` block below
