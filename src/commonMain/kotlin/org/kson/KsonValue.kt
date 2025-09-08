@@ -161,16 +161,16 @@ fun AstNode.toKsonValue(): KsonValue {
         is ObjectNode -> {
             KsonObject(properties.associate { prop ->
                 val propImpl = prop as? ObjectPropertyNodeImpl
-                    ?: throw ShouldNotHappenException("this AST if fully valid")
+                    ?: throw ShouldNotHappenException("this AST is fully valid")
                 val propKey = propImpl.key as? ObjectKeyNodeImpl
-                    ?: throw ShouldNotHappenException("this AST if fully valid")
+                    ?: throw ShouldNotHappenException("this AST is fully valid")
                 propKey.key.toKsonValue() as KsonString to propImpl.value.toKsonValue()
             },
                 location)
         }
         is ListNode -> KsonList(elements.map { elem ->
             val listElementNode = elem as? ListElementNodeImpl
-                ?: throw ShouldNotHappenException("this AST if fully valid")
+                ?: throw ShouldNotHappenException("this AST is fully valid")
             listElementNode.value.toKsonValue()
 
         }, location)

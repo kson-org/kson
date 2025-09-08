@@ -274,7 +274,7 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  * Tokenizes the given `source` into a list of [Token] by calling [tokenize]
  *
  * @param source the input Kson source to tokenize
- * @param gapFree whether to ensure _all_ source, including comments, whitespace, quotes and illegal chars, is precisely
+ * @param gapFree whether to ensure _all_ source, including comments and whitespace is precisely
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
  */

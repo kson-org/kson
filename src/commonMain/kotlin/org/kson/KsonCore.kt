@@ -9,7 +9,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
-import org.kson.stdlibx.exceptions.UnexpectedParseException
+import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
@@ -33,7 +33,7 @@ object KsonCore {
         val tokens = Lexer(
             source,
             // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
-            gapFree = coreCompileConfig.errorTolerant
+            gapFree = coreCompileConfig.ignoreErrors
         ).tokenize()
 
         var initialTokenIndex = 0
@@ -49,7 +49,7 @@ object KsonCore {
             return AstParseResult(null, tokens, messageSink)
         }
 
-        val builder = KsonBuilder(tokens, coreCompileConfig.errorTolerant)
+        val builder = KsonBuilder(tokens, coreCompileConfig.ignoreErrors)
 
         val ast: KsonRoot?
         try {
@@ -59,26 +59,25 @@ object KsonCore {
              * Construct an [AstNode] tree from the [KsonMarker] made with the `builder`, or if we fail, return an
              * [AstParseResult] immediately.
              */
-            ast = builder.buildTree(messageSink) ?: return AstParseResult(null, tokens, messageSink)
+            ast = builder.buildTree(messageSink)
 
-        } catch (ex: UnexpectedParseException) {
+        } catch (ex: FatalParseException) {
             println("Fatal parsing error: ${ex.message}")
             return AstParseResult(null, tokens, messageSink)
         }
 
-        if (!messageSink.hasErrors()) {
+        // If we are not interested in errors we don't have to run extra validations.
+        if (!coreCompileConfig.ignoreErrors) {
             IndentValidator().validate(ast, messageSink)
             DuplicateKeyValidator().validate(ast, messageSink)
         }
 
-        if (coreCompileConfig.schemaJson == NO_SCHEMA) {
-            return AstParseResult(ast, tokens, messageSink)
-        } else {
-            val jsonSchema = coreCompileConfig.schemaJson
+        val jsonSchema = coreCompileConfig.schemaJson
+        if (jsonSchema != NO_SCHEMA && !coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
             // validate against our schema, logging any errors to our message sink
             jsonSchema.validate(ast.toKsonValue(), messageSink)
-            return AstParseResult(ast, tokens, messageSink)
         }
+        return AstParseResult(ast, tokens, messageSink)
     }
 
     /**
@@ -292,9 +291,10 @@ data class CoreCompileConfig(
      */
     val schemaJson: JsonSchema = NO_SCHEMA,
     /**
-     * Whether to allow an AST to be built with errors (i.e. patched with [AstNodeError] nodes)
+     * Whether we do the extra work to build an AST patched with [AstNodeError]'s. This could be set to false when
+     * formatting for example, since we're only interested in collecting the error nodes and running validators.
      */
-    val errorTolerant: Boolean = false,
+    val ignoreErrors: Boolean = false,
     /**
      * The deep object/list nesting to allow in the parsed document.  See [DEFAULT_MAX_NESTING_LEVEL] for more details.
      */

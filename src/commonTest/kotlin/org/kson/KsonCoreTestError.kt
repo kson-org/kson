@@ -47,12 +47,6 @@ interface KsonCoreTestError {
                 parseResult.hasErrors(),
                 "Should set the hasErrors flag appropriate when there are errors"
             )
-
-            assertEquals(
-                null,
-                parseResult.ast,
-                "Should produce a null AST when there are errors"
-            )
         }
 
         if(expectedParseMessageTypes.map { it.severity }.contains(WARNING)){

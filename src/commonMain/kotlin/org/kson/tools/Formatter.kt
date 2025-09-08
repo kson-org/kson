@@ -17,7 +17,7 @@ import org.kson.parser.TokenType.*
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
     if (ksonSource.isBlank()) return ""
     return KsonParseResult(
-        parseToAst(ksonSource, CoreCompileConfig(errorTolerant = true)),
+        parseToAst(ksonSource, CoreCompileConfig(ignoreErrors = true)),
         CompileTarget.Kson(preserveComments = true, formatterConfig)
     ).kson ?: ksonSource
 }
