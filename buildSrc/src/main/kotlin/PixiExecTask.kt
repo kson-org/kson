@@ -52,7 +52,8 @@ abstract class PixiExecTask : DefaultTask() {
             throw IllegalStateException("Pixi wrapper not found at $pixiwPath. Either create it manually or enable autoGenerateWrapper.")
         }
 
-        val fullCommand = mutableListOf(pixiwPath, "run")
+        // Always use absolute path to ensure the wrapper is found regardless of working directory
+        val fullCommand = mutableListOf(pixiwFile.absolutePath, "run")
         fullCommand.addAll(command.get())
 
         logger.info("Executing: ${fullCommand.joinToString(" ")}")
