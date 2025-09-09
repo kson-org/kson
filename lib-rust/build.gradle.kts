@@ -1,33 +1,29 @@
-import org.gradle.internal.os.OperatingSystem
-
-val formattingCheck = "formattingCheckKson"
-val formattingCheckSys = "formattingCheckKsonSys"
-val testStatic = "testStaticallyLinked"
-val testDynamic = "testDynamicallyLinked"
-
 plugins{
     base
 }
 
-tasks {
-    pixiExec(testStatic, "cargo", "test", "--manifest-path", "kson/Cargo.toml") {
-        group = "verification"
-        onlyIf { !OperatingSystem.current().isWindows }
-    }
+val testStatic by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "test", "--manifest-path", "kson/Cargo.toml")
+}
 
-    pixiExec(testDynamic, "cargo", "test", "--manifest-path", "kson/Cargo.toml", "--features", "dynamic-linking") {
-        group = "verification"
-    }
+val testDynamic by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "test", "--manifest-path", "kson/Cargo.toml", "--features", "dynamic-linking")
+}
 
-    pixiExec(formattingCheck, "cargo", "fmt", "--manifest-path", "kson/Cargo.toml", "--check") {
-        group = "verification"
-    }
+val formattingCheck by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "fmt", "--manifest-path", "kson/Cargo.toml", "--check")
+}
 
-    pixiExec(formattingCheckSys, "cargo", "fmt", "--manifest-path", "kson-sys/Cargo.toml", "--check") {
-        group = "verification"
-    }
+val formattingCheckSys by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "fmt", "--manifest-path", "kson-sys/Cargo.toml", "--check")
+}
 
-    named("check") {
+tasks{
+    check {
         dependsOn(testStatic)
         dependsOn(testDynamic)
         dependsOn(formattingCheck)
