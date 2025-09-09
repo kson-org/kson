@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.dokka") version "2.0.0"
     `maven-publish`
 }
 
