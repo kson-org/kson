@@ -77,8 +77,8 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
     fun testWarningsAreMarkedAsWarnings() {
         // Test that warnings like ignored end-dots are properly marked
         val source = """
-            -
-            -
+            - list_item
+                - deceptive_indent_list_item
         """.trimIndent()
         myFixture.configureByText(KsonFileType, source) as KsonPsiFile
         
@@ -90,7 +90,7 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
         val listDashWarning = highlights.filter {
             it.severity.myVal == com.intellij.lang.annotation.HighlightSeverity.WARNING.myVal 
         }.find {
-            val listDashMessage = MessageType.DANGLING_LIST_DASH.create().toString()
+            val listDashMessage = MessageType.DASH_LIST_ITEMS_MISALIGNED.create().toString()
             it.description == listDashMessage
         }
 
@@ -107,7 +107,7 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
         // Test a case with both warnings and errors
         val source = """
             - {key:}
-            - 
+                - deceptive_indent_list_item
         """.trimIndent()
         myFixture.configureByText(KsonFileType, source) as KsonPsiFile
         
@@ -124,4 +124,4 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
         assertTrue("Should have at least one warning", warningHighlights.isNotEmpty())
         assertTrue("Should have at least one error", errorHighlights.isNotEmpty())
     }
-} 
+}

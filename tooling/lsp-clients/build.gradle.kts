@@ -17,7 +17,7 @@ tasks {
     named("npm_run_vscode") {}
     named("npm_run_monaco") {}
 
-    named("check") {
+    check {
         dependsOn("npm_run_test")
         /**
          * TODO - Ideally this task is "npm_run_buildPlugins" building both plugins, however, for now the Monaco Vite build

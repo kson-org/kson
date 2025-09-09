@@ -622,36 +622,46 @@ class Kson:
         return result
 
     @staticmethod
-    def to_json(kson: str) -> Result:
+    def to_json(kson: str, retain_embed_tags: bool = True) -> Result:
         """Converts Kson to Json.
 
         Args:
             kson: The Kson source to convert.
+            retain_embed_tags: Whether to retain the embed tags in the result.
 
         Returns:
             A Result containing either the Json output or error messages.
         """
         result = _cast_and_call(
             symbols.kotlin.root.org.kson.Kson.toJson,
-            [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode("utf-8")],
+            [
+                symbols.kotlin.root.org.kson.Kson._instance(),
+                kson.encode("utf-8"),
+                retain_embed_tags,
+            ],
         )
         result = _init_wrapper(Result, result)
         result = result._translate()
         return result
 
     @staticmethod
-    def to_yaml(kson: str) -> Result:
+    def to_yaml(kson: str, retain_embed_tags: bool = True) -> Result:
         """Converts Kson to Yaml, preserving comments.
 
         Args:
             kson: The Kson source to convert.
+            retain_embed_tags: Whether to retain the embed tags in the result.
 
         Returns:
             A Result containing either the Yaml output or error messages.
         """
         result = _cast_and_call(
             symbols.kotlin.root.org.kson.Kson.toYaml,
-            [symbols.kotlin.root.org.kson.Kson._instance(), kson.encode("utf-8")],
+            [
+                symbols.kotlin.root.org.kson.Kson._instance(),
+                kson.encode("utf-8"),
+                retain_embed_tags,
+            ],
         )
         result = _init_wrapper(Result, result)
         result = result._translate()

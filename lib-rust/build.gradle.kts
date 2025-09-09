@@ -1,52 +1,29 @@
-import org.gradle.internal.os.OperatingSystem
+plugins{
+    base
+}
 
-val formattingCheck = "formattingCheckKson"
-val formattingCheckSys = "formattingCheckKsonSys"
-val testStatic = "testStaticallyLinked"
-val testDynamic = "testDynamicallyLinked"
+val testStatic by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "test", "--manifest-path", "kson/Cargo.toml")
+}
 
-tasks {
-    val pixiwPath = if (OperatingSystem.current().isWindows) {
-        "cmd /c pixiw.bat"
-    } else {
-        "./pixiw"
-    }
+val testDynamic by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "test", "--manifest-path", "kson/Cargo.toml", "--features", "dynamic-linking")
+}
 
-    register<Exec>(testStatic) {
-        group = "verification"
-        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
-        onlyIf { !OperatingSystem.current().isWindows }
-    }
+val formattingCheck by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "fmt", "--manifest-path", "kson/Cargo.toml", "--check")
+}
 
-    register<Exec>(testDynamic) {
-        group = "verification"
-        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml --features dynamic-linking".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
-    }
+val formattingCheckSys by tasks.registering(PixiExecTask::class){
+    group="verification"
+    command=listOf("cargo", "fmt", "--manifest-path", "kson-sys/Cargo.toml", "--check")
+}
 
-    register<Exec>(formattingCheck) {
-        group = "verification"
-        commandLine = "$pixiwPath run cargo fmt --manifest-path kson/Cargo.toml --check".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
-    }
-
-    register<Exec>(formattingCheckSys) {
-        group = "verification"
-        commandLine = "$pixiwPath run cargo fmt --manifest-path kson-sys/Cargo.toml --check".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
-    }
-
-    register<Task>("check") {
-        group = "verification"
+tasks{
+    check {
         dependsOn(testStatic)
         dependsOn(testDynamic)
         dependsOn(formattingCheck)

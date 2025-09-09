@@ -1,7 +1,16 @@
+pluginManagement {
+    plugins {
+        kotlin("multiplatform") version "2.2.10"
+        kotlin("jvm") version "2.2.10"
+        kotlin("plugin.serialization") version "2.2.10"
+    }
+}
+
 rootProject.name = "kson"
 include("tooling:jetbrains")
 include("tooling:language-server-protocol")
 include("tooling:lsp-clients")
+include("tooling:cli")
 include("lib-kotlin")
 include("lib-python")
 include("lib-rust")

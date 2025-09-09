@@ -9,14 +9,15 @@ import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
+import org.kson.stdlibx.exceptions.FatalParseException
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
  *
  * @param tokens the [Token] stream to build into an AST
- * @param errorTolerant whether to ignore errors and build a partial AST patched with [AstNodeError] nodes
+ * @param ignoreErrors skip some of the work of collecting error if the caller tells us they are going to ignore them anyway
  */
-class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Boolean = false) :
+class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boolean = false) :
     AstBuilder,
     MarkerBuilderContext {
 
@@ -107,27 +108,14 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      * Attempt to construct an [AstNode] tree from the [KsonMarker]s made in this builder
      *
      * @param messageSink a [MessageSink] to write any errors we encountered in parsing
-     * @return the [KsonRoot] of the resulting tree, or `null` if it could not be built
+     * @return the [KsonRoot] of the resulting tree.
      */
-    fun buildTree(messageSink: MessageSink): KsonRoot? {
+    fun buildTree(messageSink: MessageSink): KsonRoot {
         rootMarker.done(ROOT)
-
-        return if (errorTolerant) {
-            /**
-             * ignore errors and create an AST possibly patched with [AstNodeError]s
-             */
-            unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
-        } else {
+        if (!ignoreErrors) {
             walkForMessages(rootMarker, messageSink)
-
-            if (!messageSink.hasErrors()) {
-                unsafeAstCreate<KsonRoot>(rootMarker) {
-                    throw ShouldNotHappenException("this should be the error-free code path")
-                }
-            } else {
-                return null
-            }
         }
+        return unsafeAstCreate<KsonRoot>(rootMarker) { KsonRootError(it, rootMarker.getLocation()) }
     }
 
     /**
@@ -265,7 +253,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
                         val listElementNodes = childMarkers.map { listElementMarker ->
                             unsafeAstCreate<ListElementNode>(listElementMarker) {
-                                ListElementNodeError(it, marker.getLocation())
+                                ListElementNodeError(it, listElementMarker.getLocation())
                             }
                         }
                         ListNode(listElementNodes, marker.getLocation())
@@ -273,9 +261,9 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
                         val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
-                            unsafeAstCreate(childMarkers[0]) { KsonValueNodeError(it, marker.getLocation()) }
+                            unsafeAstCreate(childMarkers.first()) { KsonValueNodeError(it, childMarkers.first().getLocation()) }
                         } else {
-                            throw ShouldNotHappenException("list element markers should mark exactly one value")
+                            throw FatalParseException("list element markers should mark exactly one value")
                         }
                         ListElementNodeImpl(
                             listElementValue,
@@ -285,7 +273,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                     OBJECT -> {
                         val propertyNodes = childMarkers.map { property ->
                             unsafeAstCreate<ObjectPropertyNode>(property) {
-                                ObjectPropertyNodeError(it, marker.getLocation())
+                                ObjectPropertyNodeError(it, property.getLocation())
                             }
                         }
 
@@ -304,7 +292,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
                          * pair OR a keyword with a missing value error
                          */
                         if (childMarkers.size > 2) {
-                            throw ShouldNotHappenException("unless object property parsing has changed significantly")
+                            throw FatalParseException("unless object property parsing has changed significantly")
                         }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
@@ -436,7 +424,7 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
          */
         val quotedString = marker.getValue()
         val stringDelim = quotedString.first()
-        val stringContent = quotedString.substring(1, quotedString.length - 1)
+        val stringContent = quotedString.drop(1).dropLast(1)
 
         return QuotedStringNode(stringContent, StringQuote.fromChar(stringDelim), marker.getLocation())
     }
@@ -453,14 +441,6 @@ class KsonBuilder(private val tokens: List<Token>, private val errorTolerant: Bo
      */
     private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: String) -> A): A {
         if (marker.element == ERROR ) {
-            val errorMessage = marker.markedError ?: throw ShouldNotHappenException("should have message with error")
-            if (!errorTolerant && Message.isFatalParseError(errorMessage)  ) {
-                /**
-                 * If we hit this, we've introduced a bug: unless we're [errorTolerant], we should
-                 * never call [buildTree] when [org.kson.parser.messages.Message.Companion.isFatalParseError] is true
-                 */
-                throw ShouldNotHappenException("Should not find ERROR elements when not `errorTolerant`")
-            }
             return errorNodeGenerator(marker.getRawText())
         }
         val nodeToCast = toAst(marker)

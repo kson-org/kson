@@ -1,0 +1,13 @@
+[workspace]
+authors = ["Adolfo Ochagavía <github@adolfo.ochagavia.nl>"]
+channels = ["conda-forge"]
+name = "cli"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+
+[target.win-64.dependencies]
+vs2022_win-64 = ">=19.44.35207,<20"

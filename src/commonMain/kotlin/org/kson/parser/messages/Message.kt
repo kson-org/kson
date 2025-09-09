@@ -297,7 +297,7 @@ enum class MessageType(
             return "A decimal must be followed by digits"
         }
     },
-    DANGLING_LIST_DASH(MessageSeverity.WARNING) {
+    DANGLING_LIST_DASH(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }

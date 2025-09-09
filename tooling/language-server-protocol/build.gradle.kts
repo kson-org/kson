@@ -19,7 +19,7 @@ tasks {
         dependsOn("npm_run_compile")
     }
 
-    named("check") {
+    check {
         dependsOn("npm_run_test")
     }
 }
