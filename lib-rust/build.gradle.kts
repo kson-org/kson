@@ -5,48 +5,29 @@ val formattingCheckSys = "formattingCheckKsonSys"
 val testStatic = "testStaticallyLinked"
 val testDynamic = "testDynamicallyLinked"
 
-tasks {
-    val pixiwPath = if (OperatingSystem.current().isWindows) {
-        "pixiw"
-    } else {
-        "./pixiw"
-    }
+plugins{
+    base
+}
 
-    register<Exec>(testStatic) {
+tasks {
+    pixiExec(testStatic, "cargo", "test", "--manifest-path", "kson/Cargo.toml") {
         group = "verification"
-        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
         onlyIf { !OperatingSystem.current().isWindows }
     }
 
-    register<Exec>(testDynamic) {
+    pixiExec(testDynamic, "cargo", "test", "--manifest-path", "kson/Cargo.toml", "--features", "dynamic-linking") {
         group = "verification"
-        commandLine = "$pixiwPath run cargo test --manifest-path kson/Cargo.toml --features dynamic-linking".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
     }
 
-    register<Exec>(formattingCheck) {
+    pixiExec(formattingCheck, "cargo", "fmt", "--manifest-path", "kson/Cargo.toml", "--check") {
         group = "verification"
-        commandLine = "$pixiwPath run cargo fmt --manifest-path kson/Cargo.toml --check".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
     }
 
-    register<Exec>(formattingCheckSys) {
+    pixiExec(formattingCheckSys, "cargo", "fmt", "--manifest-path", "kson-sys/Cargo.toml", "--check") {
         group = "verification"
-        commandLine = "$pixiwPath run cargo fmt --manifest-path kson-sys/Cargo.toml --check".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
     }
 
-    register<Task>("check") {
-        group = "verification"
+    named("check") {
         dependsOn(testStatic)
         dependsOn(testDynamic)
         dependsOn(formattingCheck)

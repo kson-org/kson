@@ -138,7 +138,7 @@ val downloadGraalVM by tasks.registering {
 }
 
 // Custom task to build native image using downloaded GraalVM
-val buildNativeImage by tasks.registering(Exec::class) {
+val buildNativeImage by tasks.registering(PixiExecTask::class) {
     group = "build"
     description = "Builds native executable using GraalVM $graalvmSemVer"
 
@@ -147,52 +147,35 @@ val buildNativeImage by tasks.registering(Exec::class) {
     val outputDir = layout.buildDirectory.dir("native/nativeCompile").get().asFile
     val outputFile = file("$outputDir/kson")
 
-    doFirst {
-        // Determine pixi wrapper path
-        val pixiwPath = if (System.getProperty("os.name").lowercase().contains("win")) {
-            "pixiw"
-        } else {
-            "./pixiw"
-        }
-        
-        // Check if pixi wrapper exists
-        val pixiwFile = file(pixiwPath)
-        val usePixi = pixiwFile.exists()
-
+    // Configure the command at configuration time using providers
+    command.set(provider {
         val graalHome = getGraalVMHome()
-        if (graalHome == null || !graalHome.exists()) {
-            throw GradleException("GraalVM not found! Please run './gradlew :tooling:cli:downloadGraalVM' first")
-        }
-
+            ?: throw GradleException("GraalVM not found! Please run './gradlew :tooling:cli:downloadGraalVM' first")
+        
         val nativeImageExe = file("${graalHome}/bin/native-image" + getGraalNativeImageExtension())
         if (!nativeImageExe.exists()) {
             throw GradleException("native-image not found at $nativeImageExe")
         }
-
-        // Build the classpath
+        
         val classpath = configurations.runtimeClasspath.get().asPath
         val jarFile = tasks.jar.get().archiveFile.get().asFile
+        
+        listOf(
+            nativeImageExe.absolutePath,
+            "-cp", "${jarFile.absolutePath}${File.pathSeparator}$classpath",
+            "-H:+ReportExceptionStackTraces",
+            "--no-fallback",
+            "-o", outputFile.absolutePath,
+            "org.kson.tooling.cli.CommandLineInterfaceKt"
+        )
+    })
 
+    doFirst {
         // Create output directory
         outputDir.mkdirs()
         
-        if (usePixi) {
-            println("Building native image with GraalVM using pixi")
-            println("Creating executable: $outputFile")
-            
-            // Use pixi to run native-image
-            commandLine = listOf(
-                pixiwPath, "run",
-                nativeImageExe.absolutePath,
-                "-cp", "${jarFile.absolutePath}${File.pathSeparator}$classpath",
-                "-H:+ReportExceptionStackTraces",
-                "--no-fallback",
-                "-o", outputFile.absolutePath,
-                "org.kson.tooling.cli.CommandLineInterfaceKt"
-            )
-        } else {
-            throw UnsupportedOperationException("Something is off. Did the installation install pixi to $pixiwFile? Or GraalVM to $graalvmDir?")
-        }
+        println("Building native image with GraalVM using pixi")
+        println("Creating executable: $outputFile")
     }
     
     doLast {

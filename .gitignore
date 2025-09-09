@@ -38,3 +38,5 @@ gradle/jdk
 node_modules
 # pixi files
 .pixi
+pixiw
+pixiw.bat
