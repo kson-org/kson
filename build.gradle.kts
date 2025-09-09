@@ -17,7 +17,6 @@ val sharedProps = Properties().apply {
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
-    `maven-publish`
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -190,24 +189,5 @@ kotlin {
         }
         val nativeKsonMain by getting
         val nativeKsonTest by getting
-    }
-}
-
-publishing {
-    publications {
-        withType<MavenPublication> {
-            // ensure our artifacts for each platform have a unique name
-            artifactId = when (name) {
-                "kotlinMultiplatform" -> "kson"
-                else -> "kson-$name"
-            }
-            pom {
-                name.set("KSON")
-                url.set("https://kson.org")
-            }
-        }
-    }
-    repositories {
-        mavenLocal()
     }
 }

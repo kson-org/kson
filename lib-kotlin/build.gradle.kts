@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     kotlin("multiplatform")
+    `maven-publish`
 }
 
 repositories {
@@ -77,5 +78,23 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+    }
+}
+
+publishing {
+    publications {
+        withType<MavenPublication> {
+            artifactId = when (name) {
+                "kotlinMultiplatform" -> "kson-lib-kotlin"
+                else -> "kson-lib-kotlin-$name"
+            }
+            pom {
+                name.set("KSON Kotlin Library")
+                url.set("https://kson.org")
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
     }
 }
