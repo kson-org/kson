@@ -24,7 +24,10 @@ jobs:
             Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
 
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
-      - run: choco install googlechrome
+      - run: choco install googlechrome --ignore-checksums
+      # We would ideally install libclang through pixi, but after _hours_ of fiddling we
+      # couldn't make the CI happy and decided to add it here instead
+      - run: choco install llvm
       - restore_cache:
           keys:
             - v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
