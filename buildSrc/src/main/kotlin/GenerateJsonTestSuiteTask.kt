@@ -50,7 +50,7 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
     @OutputFiles
     fun getGeneratedTestPath(): List<File> {
         return listOf(jsonTestSuiteGenerator.generatedJsonSuiteTestPath.toFile(),
-            jsonTestSuiteGenerator.generatedSchemaSuiteTestPath.toFile())
+            jsonTestSuiteGenerator.generatedSchemaDraft7SuiteTestPath.toFile())
     }
 
     @TaskAction
@@ -61,6 +61,6 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
     @Internal
     override fun getDescription(): String? {
         return "Generates ${jsonTestSuiteGenerator.generatedJsonSuiteTestPath} and " +
-                "${jsonTestSuiteGenerator.generatedSchemaSuiteTestPath}"
+                "${jsonTestSuiteGenerator.generatedSchemaDraft7SuiteTestPath}"
     }
 }
