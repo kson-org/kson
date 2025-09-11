@@ -482,7 +482,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
-            return "Schema property \"$schemaPropertyName\" must be a number"
+            return "Schema property \"$schemaPropertyName\" must be an object"
         }
     },
     SCHEMA_ONE_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
