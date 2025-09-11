@@ -17,7 +17,7 @@ interface JsonSchemaTest {
                                  schemaJson: String,
                                  shouldAcceptAsValid: Boolean,
                                  message: String? = null) {
-        val jsonSchema = assertValidSchema(schemaJson)
+        val jsonSchema = assertValidSchema(schemaJson, message)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
             coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
@@ -68,15 +68,15 @@ interface JsonSchemaTest {
      * Assertion helper for testing that [source] is successfully parsed by the schema parser
      * (produces non-null jsonSchema) with no error messages
      */
-    fun assertValidSchema(source: String): JsonSchema {
+    fun assertValidSchema(source: String, message: String? = null): JsonSchema {
         val result = KsonCore.parseSchema(source)
 
         val jsonSchema = result.jsonSchema
         assertTrue(
             result.messages.isEmpty(), "Should have no error messages when parsing succeeds, got: " +
-                    result.messages.joinToString("\n")
+                    result.messages.joinToString("\n") + message
         )
-        assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds")
+        assertNotNull(jsonSchema, "Should produce a non-null schema when parsing succeeds $message")
 
         return jsonSchema
     }
