@@ -361,15 +361,6 @@ enum class MessageType(
             return "Additional properties are not allowed"
         }
     },
-    SCHEMA_ALL_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match all of the specified schemas"
-        }
-    },
     SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
