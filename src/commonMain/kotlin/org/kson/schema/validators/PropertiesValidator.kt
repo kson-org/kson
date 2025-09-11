@@ -2,7 +2,7 @@ package org.kson.schema.validators
 
 import org.kson.KsonObject
 import org.kson.KsonString
-import org.kson.KsonValue
+import org.kson.KsonObjectProperty
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
@@ -45,30 +45,32 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         }
 
         // Finally, validate additional properties
-        val remainingProperties = node.propertyLookup.filter { !seenKeys.contains(it.key) }
+        val remainingProperties = node.propertyMap.filter { !seenKeys.contains(it.key) }
         additionalPropertiesValidator?.validateProperties(remainingProperties, node.location, messageSink)
     }
 }
 
 sealed interface AdditionalPropertiesValidator {
-    fun validateProperties(remainingProperties: Map<String, KsonValue>, location: Location, messageSink: MessageSink)
+    fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink)
 }
 
 data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonValue>, location: Location, messageSink: MessageSink) {
+    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
         if (!allowed && remainingProperties.isNotEmpty()) {
-            messageSink.error(location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create())
+            remainingProperties.forEach { (_, property) ->
+                messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create())
+            }
         }
     }
 }
 
 data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema?) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonValue>, location: Location, messageSink: MessageSink) {
+    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
         if (schema == null) {
             return
         }
-        remainingProperties.forEach {
-            schema.validate(it.value, messageSink)
+        remainingProperties.forEach { (_, property) ->
+            schema.validate(property.propValue, messageSink)
         }
     }
 }

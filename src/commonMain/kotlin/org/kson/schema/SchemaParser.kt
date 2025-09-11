@@ -70,7 +70,7 @@ object SchemaParser {
 
                 val refValidator = RefValidator(resolvedValue, idLookup)
 
-                return JsonObjectSchema(null, null, null, null, null, listOf(refValidator))
+                return JsonObjectSchema(null, refString.value, null, null, null, listOf(refValidator))
             } else {
                 messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             }

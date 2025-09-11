@@ -19,9 +19,18 @@ sealed class KsonValue(val location: Location) {
     abstract override fun hashCode(): Int
 }
 
-data class ObjectProperty(val propName: KsonString, val propValue: KsonValue)
+data class KsonObjectProperty(val propName: KsonString, val propValue: KsonValue)
 
-class KsonObject(val propertyMap: Map<String, ObjectProperty>, location: Location) : KsonValue(location) {
+class KsonObject(
+    /**
+     * [propertyMap] indexes the [KsonObjectProperty]s in this [KsonObject] by the raw [String]s from
+     * [KsonObjectProperty.propName].  This ensures that the full [KsonString] for the property key
+     * is easily accessible so its [Location] may be used to locate the key in the original KSON
+     * source.
+     *
+     * For a direct [String] key to [KsonValue] value lookup for this [KsonObject], so [propertyLookup]
+     */
+    val propertyMap: Map<String, KsonObjectProperty>, location: Location) : KsonValue(location) {
     /**
      * Convenience lookup with the [String] keys pointing directly to the regular [KsonValue] values
      */
@@ -76,14 +85,14 @@ class EmbedBlock(
             buildMap {
                 embedTag?.let {
                     val embedTagKey = KsonString(EmbedObjectKeys.EMBED_TAG.key, embedTag.location)
-                    put(embedTagKey.value, ObjectProperty(embedTagKey, it))
+                    put(embedTagKey.value, KsonObjectProperty(embedTagKey, it))
                 }
                 metadataTag?.let {
                     val embedMetadataKey = KsonString(EmbedObjectKeys.EMBED_METADATA.key, metadataTag.location)
-                    put(embedMetadataKey.value, ObjectProperty(embedMetadataKey, it))
+                    put(embedMetadataKey.value, KsonObjectProperty(embedMetadataKey, it))
                 }
                 val embedContentKey = KsonString(EmbedObjectKeys.EMBED_CONTENT.key, embedContent.location)
-                put(embedContentKey. value, ObjectProperty(embedContentKey, embedContent))
+                put(embedContentKey. value, KsonObjectProperty(embedContentKey, embedContent))
             },
             location
         )
@@ -174,7 +183,7 @@ fun AstNode.toKsonValue(): KsonValue {
                 val propKey = propImpl.key as? ObjectKeyNodeImpl
                     ?: throw ShouldNotHappenException("this AST is fully valid")
                 val keyName = propKey.key.toKsonValue() as KsonString
-                keyName.value to ObjectProperty(keyName, propImpl.value.toKsonValue())
+                keyName.value to KsonObjectProperty(keyName, propImpl.value.toKsonValue())
             },
                 location)
         }

@@ -2,7 +2,7 @@ package org.kson.schema.validators
 
 import org.kson.KsonObject
 import org.kson.KsonString
-import org.kson.ObjectProperty
+import org.kson.KsonObjectProperty
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
@@ -23,12 +23,12 @@ class DependenciesValidator(private val dependencies: Map<String, DependencyVali
 sealed interface DependencyValidator {
     /**
      * @param ksonObject the [KsonObject] to check for dependencies
-     * @param requiredBy the [ObjectProperty] of [KsonObject] that requires these dependencies
+     * @param requiredBy the [KsonObjectProperty] of [KsonObject] that requires these dependencies
      */
-    fun validate(ksonObject: KsonObject, requiredBy: ObjectProperty, messageSink: MessageSink): Boolean
+    fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean
 }
 data class DependencyValidatorArray(val dependency: Set<KsonString>) : DependencyValidator {
-    override fun validate(ksonObject: KsonObject, requiredBy: ObjectProperty, messageSink: MessageSink): Boolean {
+    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean {
         val propertyNames = ksonObject.propertyMap.keys
         var dependenciesMissing = false
         dependency.forEach {
@@ -45,7 +45,7 @@ data class DependencyValidatorArray(val dependency: Set<KsonString>) : Dependenc
     }
 }
 data class DependencyValidatorSchema(val dependency: JsonSchema?) : DependencyValidator {
-    override fun validate(ksonObject: KsonObject, requiredBy: ObjectProperty, messageSink: MessageSink): Boolean {
+    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean {
         if (dependency == null) {
             return true
         }

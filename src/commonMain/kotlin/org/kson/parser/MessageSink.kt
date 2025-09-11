@@ -36,7 +36,7 @@ data class LoggedMessage(
  * Collects messages (errors and warnings) during parsing and validation
  */
 class MessageSink {
-    private val messages = mutableListOf<LoggedMessage>()
+    private val messages = mutableSetOf<LoggedMessage>()
 
     fun error(location: Location, message: Message) {
         messages.add(LoggedMessage(location, message))

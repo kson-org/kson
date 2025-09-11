@@ -19,6 +19,13 @@ enum class MessageSeverity {
 interface Message {
     val type: MessageType
 
+    /**
+     * Ensure [Message] classes implement equals and hashcode so that messages behave well in collections
+     * (being able to de-dupe in a Set for instance is important)
+     */
+    override operator fun equals(other: Any?): Boolean
+    override fun hashCode(): Int
+
     override fun toString(): String
 
     companion object {
@@ -369,7 +376,17 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match at least one of the specified schemas"
+            return "Value must match at least one sub-schema"
+        }
+    },
+    SCHEMA_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Sub-schema error summary")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val subSchemaErrors = parsedArgs.getArg("Sub-schema error summary")
+            return "All sub-schemas reported validation errors. $subSchemaErrors"
         }
     },
     SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {
@@ -807,15 +824,16 @@ enum class MessageType(
             )
         }
 
-        val messageType = this
-        return object: Message {
-            override val type = messageType
+        return MessageImpl(this, this.doFormat(ParsedErrorArgs(this, givenArgs)))
+    }
 
-            private val renderedMessage = type.doFormat(ParsedErrorArgs(messageType, givenArgs))
-
-            override fun toString(): String {
-                return renderedMessage
-            }
+    /**
+     * Data class for messages ensures that
+     */
+    data class MessageImpl(override val type: MessageType,
+                           private val renderedMessage: String) : Message {
+        override fun toString(): String {
+            return renderedMessage
         }
     }
 

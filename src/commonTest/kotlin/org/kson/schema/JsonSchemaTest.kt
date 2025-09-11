@@ -31,6 +31,22 @@ interface JsonSchemaTest {
             message)
     }
 
+    fun assertKsonSchemaErrors(
+        ksonSource: String,
+        schemaJson: String,
+        expectedParseMessageTypes: List<MessageType>,
+        message: String? = null): List<LoggedMessage> {
+        val jsonSchema = assertValidSchema(schemaJson)
+        val parseResult = KsonCore.parseToAst(
+            ksonSource.trimIndent(),
+            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
+        )
+
+        assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")
+        assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type })
+        return parseResult.messages
+    }
+
     fun assertKsonSchemaErrorAtLocation(
         ksonSource: String,
         schemaJson: String,
@@ -38,16 +54,14 @@ interface JsonSchemaTest {
         expectedParseMessageLocation: List<Location>,
         message: String? = null
     ): List<LoggedMessage> {
-        val jsonSchema = assertValidSchema(schemaJson)
-        val parseResult = KsonCore.parseToAst(
-            ksonSource.trimIndent(),
-            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
+        val messages = assertKsonSchemaErrors(
+            ksonSource,
+            schemaJson,
+            expectedParseMessageTypes,
+            message
         )
-        
-        assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")
-        assertEquals(expectedParseMessageTypes, parseResult.messages.map { it.message.type })
-        assertEquals(expectedParseMessageLocation, parseResult.messages.map { it.location })
-        return parseResult.messages
+        assertEquals(expectedParseMessageLocation, messages.map { it.location })
+        return messages
     }
 
     /**
