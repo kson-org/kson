@@ -5,6 +5,8 @@ val copyNativeArtifacts = "copyNativeArtifacts"
 val formattingCheck = "formattingCheck"
 val test = "test"
 val typeCheck = "typeCheck"
+val prepareSdistBuildEnvironment = "prepareSdistBuildEnvironment"
+val createSdistBuildEnvironment = "createSdistBuildEnvironment"
 
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
@@ -54,5 +56,72 @@ tasks {
         dependsOn(test)
         dependsOn(typeCheck)
         dependsOn(formattingCheck)
+    }
+
+    register<Copy>(prepareSdistBuildEnvironment) {
+        group = "build"
+        description = "Prepare kson-sdist directory with necessary Gradle files for sdist"
+        
+        val ksonCopyDir = layout.projectDirectory.dir("kson-sdist")
+        
+        // Clear existing kson-sdist directory
+        doFirst {
+            delete(ksonCopyDir)
+        }
+        
+        // Copy gradlew scripts
+        from(rootProject.file("gradlew"))
+        from(rootProject.file("gradlew.bat"))
+        into(ksonCopyDir)
+        
+        // Make gradlew executable
+        filePermissions {
+            unix("755")
+        }
+        
+        // Copy gradle wrapper (excluding JDK)
+        from(rootProject.file("gradle/wrapper")) {
+            into("gradle/wrapper")
+        }
+        
+        // Copy build configuration files
+        from(rootProject.file("build.gradle.kts"))
+        from(rootProject.file("settings.gradle.kts"))
+        from(rootProject.file("gradle.properties"))
+        from(rootProject.file("jdk.properties"))
+
+        from(rootProject.file("src")){
+            into("src")
+        }
+        // Copy buildSrc (excluding build output and JDK)
+        from(rootProject.file("buildSrc")) {
+            into("buildSrc")
+            exclude("build/**")
+            exclude(".gradle/**")
+            exclude("gradle/jdk/**")
+            exclude(".kotlin/**")
+            exclude("support/**")
+            exclude("out/**")
+        }
+        
+        // Copy lib-kotlin source (needed for native artifact build)
+        from(rootProject.file("lib-kotlin")) {
+            into("lib-kotlin")
+            exclude("build/**")
+            exclude(".gradle/**")
+        }
+
+        // Copy lib-python (build files and source)
+        from(project.projectDir) {
+            into("lib-python")
+            include("build.gradle.kts")
+            include("src/**")
+        }
+    }
+
+    register<Exec>(createSdistBuildEnvironment){
+        dependsOn(prepareSdistBuildEnvironment)
+        group = "build"
+        commandLine = "$uvwPath build --sdist".split(" ")
     }
 }

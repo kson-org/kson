@@ -1,6 +1,7 @@
 __pycache__
 .pytest_cache
 .venv
+kson-sdist
 *.dll
 *.dylib
 *.so

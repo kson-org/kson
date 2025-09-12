@@ -1,3 +1,8 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "build_backend"
+backend-path = ["."]
+
 [project]
 name = "kson"
 version = "0.1.2.dev0"
@@ -7,6 +12,10 @@ requires-python = ">=3.10"
 dependencies = [
     "cffi>=1.17.1",
 ]
+
+[tool.setuptools]
+packages = ["kson"]
+package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
 kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so"]
