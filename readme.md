@@ -91,7 +91,7 @@ KSON can be used in VS Code or IntelliJ with a simple gradle command.
 
 To run either IDE you can run the following gradlew task from the root directory: 
 ```shell
-./gradlew :tooling:lsp_clients:npm_run_vscode # starts VS Code IDE
+./gradlew :tooling:lsp-clients:npm_run_vscode # starts VS Code IDE
 ./gradlew runIde # starts IntelliJ IDE 
 ```
 
