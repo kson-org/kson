@@ -26,3 +26,4 @@ class ImmutableMap<K, V> private constructor(private val inner: Map<K, V>) : Map
 
 fun <K, V> Map<K, V>.toImmutableMap(): ImmutableMap<K, V> = ImmutableMap.create(this)
 fun <T> List<T>.toImmutableList(): ImmutableList<T> = ImmutableList.create(this)
+fun <T> Set<T>.toImmutableList(): ImmutableList<T> = ImmutableList.create(this.toList())
