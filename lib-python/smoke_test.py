@@ -1,4 +1,4 @@
-from src.kson import *
+from kson import *
 
 
 def messages_to_string(msgs):
