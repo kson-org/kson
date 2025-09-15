@@ -24,7 +24,7 @@ import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 export class KsonTextDocumentService {
     private connection!: Connection;
 
-    private formattingService: FormattingService;
+    private readonly formattingService: FormattingService;
     private diagnosticService: DiagnosticService;
     private semanticTokensService: SemanticTokensService;
     private codeLensService: CodeLensService;
