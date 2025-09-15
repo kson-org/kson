@@ -32,11 +32,11 @@ class JsonTestSuiteGenerator(
     private val classPackage: String
 ) {
     val jsonTestSourceFilesDir: Path = jsonSuiteGitCheckout.checkoutDir.toPath().resolve("test_parsing")
-    private val testClassPackageDir = sourceRootDir.resolve(classPackage.replace('.', '/'))
+    val testClassPackageDir = sourceRootDir.resolve(classPackage.replace('.', '/'))
     val generatedJsonSuiteTestPath: Path =
         testClassPackageDir.resolve("JsonSuiteTest.kt")
-    val generatedSchemaSuiteTestPath: Path =
-        testClassPackageDir.resolve("SchemaSuiteTest.kt")
+    val draft7TestClassName = "SchemaDraft7SuiteTest"
+    val draft2020_12ClassName = "SchemaDraft2020_12SuiteTest"
 
     fun generate() {
         testClassPackageDir.toFile().mkdirs()
@@ -46,10 +46,30 @@ class JsonTestSuiteGenerator(
             .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, jsonTestDataList))
 
         val schemaTestSourceFilesDir: Path = schemaSuiteGitCheckout.checkoutDir.toPath().resolve("tests")
-        val schemaTestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, projectRoot).loadTestData()
 
-        generatedSchemaSuiteTestPath.toFile()
-            .writeText(generateSchemaSuiteTestClasses(this.javaClass.name, classPackage, schemaTestDataList))
+        val schemaDraft7TestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, "draft7", projectRoot).loadTestData()
+        schemaDraft7TestDataList.forEach { schemaTestFileData ->
+            val testClassName = draft7TestClassName + "_" + schemaTestFileData.testFileName.replace("-", "_")
+            val testFileName = testClassPackageDir.resolve("$testClassName.kt")
+            testFileName.toFile().writeText(
+                generateSchemaSuiteTestClass(
+                    this.javaClass.name,
+                    classPackage,
+                    testClassName,
+                    schemaTestFileData))
+        }
+
+        val schemaDraft2020_12TestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, "draft2020-12", projectRoot).loadTestData()
+        schemaDraft2020_12TestDataList.forEach { schemaTestFileData ->
+            val testClassName = draft2020_12ClassName + "_" + schemaTestFileData.testFileName.replace("-", "_")
+            val testFileName = testClassPackageDir.resolve("$testClassName.kt")
+            testFileName.toFile().writeText(
+                generateSchemaSuiteTestClass(
+                    this.javaClass.name,
+                    classPackage,
+                    testClassName,
+                    schemaTestFileData))
+        }
     }
 }
 
@@ -108,9 +128,10 @@ private class JsonTestData(
 private data class SchemaTestGroup(val description: String,
                                    val comment: String? = null,
                                    val schema: JsonElement,
-                                   val tests: List<SchemaTestSpec>)
+                                   val tests: List<SchemaTestSpec>,
+                                   val specification: JsonElement? = null)
 @Serializable
-private data class SchemaTestSpec(val description: String, val data: JsonElement, val valid: Boolean)
+private data class SchemaTestSpec(val description: String, val comment: String? = null, val data: JsonElement, val valid: Boolean)
 
 /**
  * The test data we parse out of the test files provided by [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
@@ -224,11 +245,13 @@ private fun assertParseResult(
 """
 }
 
-private fun generateSchemaSuiteTestClasses(
+private fun generateSchemaSuiteTestClass(
     generatorClassName: String,
     testClassPackage: String,
-    tests: List<SchemaTestData>
+    testClassName: String,
+    tests: SchemaTestData
 ): String {
+    var testNum = 1
     return """package $testClassPackage
 
 import org.kson.schema.JsonSchemaTest
@@ -241,29 +264,31 @@ import kotlin.test.Test
  * TODO expand the testing here as we implement Json Schema support by 
  *   removing exclusions from [org.kson.jsonsuite.schemaTestSuiteExclusions]
  */
-@Suppress("UNREACHABLE_CODE") // unreachable code is okay here until we complete the above TODO
-class SchemaSuiteTest : JsonSchemaTest {
+@Suppress("UNREACHABLE_CODE", "ClassName") // unreachable code is okay here until we complete the above TODO
+class $testClassName : JsonSchemaTest {
 
-${    tests.joinToString("\n") {
+${    run {
         val theTests = ArrayList<String>()
-        for (schema in it.schemaTestGroups) {
+        for (schema in tests.schemaTestGroups) {
             val schemaComment = if (schema.comment != null) "// " + schema.comment else ""
             for (test in schema.tests) {
-                // construct a legal and unique name for this test
-                val schemaTestName = "${formatForTestName(it.testFileName)}_${formatForTestName(schema.description)}_${formatForTestName(test.description)}"
+                // construct a unique ID for this test
+                val schemaTestId = "${tests.testFileName}::${schema.description}::${test.description}"
                 val testCode = """
                     |    /**
-                    |     * Test generated by [$generatorClassName] based on `${it.filePathFromProjectRoot}`:
+                    |     * Test generated by [$generatorClassName] based on `${tests.filePathFromProjectRoot}`:
                     |     *     "${schema.description} -> ${test.description}"
+                    |     *
+                    |     * Test ID: "$schemaTestId"
                     |     */
                     |    @Test
-                    |    fun $schemaTestName() {${
-                        if (schemaTestSuiteExclusions().contains(schemaTestName)) {
+                    |    fun jsonSchemaSuiteTest_${testNum++}() {${
+                        if (schemaTestSuiteExclusions().contains(schemaTestId)) {
                             """
                     |
                     |       /**
-                    |        * TODO implement the schema functionality under test here and remove this exclusion from
-                    |        * "$schemaTestName" from 
+                    |        * TODO implement the schema functionality under test here and remove the exclusion entry
+                    |        * "$schemaTestId" from 
                     |        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
                     |        */
                     |        return""".trimMargin()
@@ -280,7 +305,7 @@ ${    tests.joinToString("\n") {
                     |                ${formatForTest(schema.schema, "                ")}
                     |            ${"\"\"\""},
                     |            ${test.valid},
-                    |            ${"\"\"\""}${formatForTest(schema.description)} -> ${formatForTest(test.description)}${"\"\"\""})
+                    |            ${"\"\"\""}    schemaTestId: "${schemaTestId.replace("$", "\${'$'}")}"    ${"\"\"\""})
                     |    }
                     """.trimMargin()
                 theTests.add(testCode)
@@ -344,8 +369,8 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
  *                      machine-independent file paths relative to the project root
  */
-private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, private val projectRoot: Path) {
-    private val draftSevenTestSourceFiles = (testDefinitionFilesDir.resolve("draft7").toFile().listFiles()
+private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, draftTestFolderName: String, private val projectRoot: Path) {
+    private val draftSevenTestSourceFiles = (testDefinitionFilesDir.resolve(draftTestFolderName).toFile().listFiles()
         ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
 
     fun loadTestData(): List<SchemaTestData> {
@@ -377,17 +402,4 @@ private fun formatForTest(jsonElement: JsonElement, indent: String): String {
 
 private fun formatForTest(string: String): String {
     return string.replace("$", "\${'$'}")
-}
-
-private fun formatForTestName(string: String): String {
-    return formatForTest(string)
-        .replace(Regex("[.,()+\\-:'\\[\\]{}\"$/*=]"), "_")
-        .split(" ")
-        .mapIndexed { index, s ->
-            if (index > 0) {
-                s.replaceFirstChar { it.uppercase() }
-            } else {
-                s.replaceFirstChar { it.lowercase() }
-            }
-        }.joinToString("")
 }
