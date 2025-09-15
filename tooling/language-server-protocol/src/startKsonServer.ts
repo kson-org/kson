@@ -53,6 +53,9 @@ export function startKsonServer(connection: Connection): void {
                 commands: getAllCommandIds()
             },
 
+            // Document symbols
+            documentSymbolProvider: true,
+
             workspace: {
                 workspaceFolders: {
                     supported: true,
