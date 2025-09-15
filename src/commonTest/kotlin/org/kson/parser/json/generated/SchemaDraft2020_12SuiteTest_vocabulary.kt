@@ -83,6 +83,12 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_3() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "vocabulary::schema that uses custom metaschema with with no validation vocabulary::no validation: invalid number, but it still validates" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

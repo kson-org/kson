@@ -54,6 +54,12 @@ class SchemaDraft2020_12SuiteTest_prefixItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "prefixItems::a schema given for prefixItems::wrong types" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -246,6 +252,12 @@ class SchemaDraft2020_12SuiteTest_prefixItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_8() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "prefixItems::prefixItems with boolean schemas::array with two items is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

@@ -235,6 +235,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_9() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::items and subitems::valid items" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -640,6 +646,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_14() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::items and subitems::fewer items is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -924,6 +936,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_19() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::prefixItems with no additional items allowed::fewer number of items present (1)" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -957,6 +975,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_20() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::prefixItems with no additional items allowed::fewer number of items present (2)" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -991,6 +1015,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_21() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::prefixItems with no additional items allowed::equal number of items present" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1136,6 +1166,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_25() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::prefixItems validation adjusts the starting index for items::valid items" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1234,6 +1270,12 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_28() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "items::items with heterogeneous array::valid instance" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

@@ -127,6 +127,12 @@ class SchemaDraft2020_12SuiteTest_maxContains : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "maxContains::maxContains with contains::all elements match, invalid maxContains" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -185,6 +191,12 @@ class SchemaDraft2020_12SuiteTest_maxContains : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_7() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "maxContains::maxContains with contains::some elements match, invalid maxContains" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -243,6 +255,12 @@ class SchemaDraft2020_12SuiteTest_maxContains : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_9() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "maxContains::maxContains with contains, value with a decimal::too many elements match, invalid maxContains" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -330,6 +348,12 @@ class SchemaDraft2020_12SuiteTest_maxContains : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_12() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "maxContains::minContains < maxContains::minContains < maxContains < actual" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

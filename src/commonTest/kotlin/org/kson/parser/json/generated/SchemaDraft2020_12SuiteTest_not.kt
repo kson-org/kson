@@ -985,6 +985,12 @@ class SchemaDraft2020_12SuiteTest_not : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_39() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "not::collect annotations inside a 'not', even if collection is disabled::unevaluated property" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

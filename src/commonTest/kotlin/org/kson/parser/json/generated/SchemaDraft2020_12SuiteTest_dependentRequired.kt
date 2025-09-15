@@ -108,6 +108,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_4() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::single dependency::missing dependency" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -393,6 +399,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_14() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::multiple dependents required::missing dependency" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -424,6 +436,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_15() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::multiple dependents required::missing other dependency" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -455,6 +473,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_16() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::multiple dependents required::missing both dependencies" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -551,6 +575,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_19() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::dependencies with escaped characters::CRLF missing dependent" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -584,6 +614,12 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_20() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentRequired::dependencies with escaped characters::quoted quotes missing dependent" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

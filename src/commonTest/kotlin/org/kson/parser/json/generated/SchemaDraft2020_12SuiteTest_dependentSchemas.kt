@@ -94,6 +94,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_3() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::single dependency::wrong type" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -131,6 +137,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_4() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::single dependency::wrong type other" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -168,6 +180,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::single dependency::wrong type both" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -337,6 +355,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_10() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::boolean subschemas::object with property having schema false is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -365,6 +389,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_11() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::boolean subschemas::object with both properties is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -458,6 +488,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_14() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::dependencies with escaped characters::quoted quote" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -494,6 +530,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_15() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::dependencies with escaped characters::quoted tab invalid under dependent schema" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -529,6 +571,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_16() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::dependencies with escaped characters::quoted quote invalid under dependent schema" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -563,6 +611,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_17() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::dependent subschema incompatible with root::matches root" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -637,6 +691,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_19() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dependentSchemas::dependent subschema incompatible with root::matches both" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

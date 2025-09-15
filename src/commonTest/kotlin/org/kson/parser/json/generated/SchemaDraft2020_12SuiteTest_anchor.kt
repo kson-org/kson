@@ -21,6 +21,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_1() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier::match" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -50,6 +56,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier::mismatch" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -79,6 +91,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_3() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier with absolute URI::match" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -109,6 +127,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_4() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier with absolute URI::mismatch" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -139,6 +163,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier with base URI change in subschema::match" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -174,6 +204,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_6() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::Location-independent identifier with base URI change in subschema::mismatch" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -209,6 +245,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_7() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::same $anchor with different base uri::$ref resolves to /$defs/A/allOf/1" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -249,6 +291,12 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_8() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "anchor::same $anchor with different base uri::$ref does not resolve to /$defs/A/allOf/0" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

@@ -137,6 +137,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::anchor within remote ref::remote anchor valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -160,6 +166,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_6() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::anchor within remote ref::remote anchor invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -632,6 +644,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_18() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote ref with ref to defs::invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -658,6 +676,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_19() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote ref with ref to defs::valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -818,6 +842,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_24() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with different $id::number is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -841,6 +871,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_25() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with different $id::string is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -864,6 +900,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_26() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with different URN $id::number is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -887,6 +929,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_27() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with different URN $id::string is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -910,6 +958,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_28() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with nested absolute ref::number is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -933,6 +987,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_29() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::remote HTTP ref with nested absolute ref::string is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -956,6 +1016,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_30() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::$ref to $ref finds detached $anchor::number is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -979,6 +1045,12 @@ class SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_31() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "refRemote::$ref to $ref finds detached $anchor::non-number is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

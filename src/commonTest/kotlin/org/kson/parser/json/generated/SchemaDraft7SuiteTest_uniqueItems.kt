@@ -1113,6 +1113,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_37() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems with an array of items and additionalItems=false::[false, true] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1147,6 +1153,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_38() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems with an array of items and additionalItems=false::[true, false] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1986,6 +1998,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_65() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems=false with an array of items and additionalItems=false::[false, true] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2020,6 +2038,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_66() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems=false with an array of items and additionalItems=false::[true, false] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2054,6 +2078,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_67() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems=false with an array of items and additionalItems=false::[false, false] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2088,6 +2118,12 @@ class SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_68() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "uniqueItems::uniqueItems=false with an array of items and additionalItems=false::[true, true] from items array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

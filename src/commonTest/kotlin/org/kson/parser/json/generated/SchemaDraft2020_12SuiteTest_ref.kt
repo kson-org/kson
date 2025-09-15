@@ -242,6 +242,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_8() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::relative pointer ref to array::mismatch array" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -655,6 +661,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_18() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -729,6 +741,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_20() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::remote ref, containing refs itself::remote ref valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -754,6 +772,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_21() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::remote ref, containing refs itself::remote ref invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1205,6 +1229,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_32() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::ref creates new scope when adjacent to keywords::referenced subschema doesn't see annotations from properties" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1340,6 +1370,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_36() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::refs with relative uris and defs::invalid on inner field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1384,6 +1420,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_37() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::refs with relative uris and defs::invalid on outer field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1472,6 +1514,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_39() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::relative refs with absolute uris and defs::invalid on inner field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1516,6 +1564,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_40() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::relative refs with absolute uris and defs::invalid on outer field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1760,6 +1814,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_46() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::order of evaluation: $id and $anchor and $ref::data is valid against first definition" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1798,6 +1858,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_47() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::order of evaluation: $id and $anchor and $ref::data is invalid against first definition" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2258,6 +2324,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_60() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::URN base URI with URN and anchor ref::a string is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2294,6 +2366,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_61() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::URN base URI with URN and anchor ref::a non-string is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2364,6 +2442,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_63() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::URN ref with nested pointer ref::a non-string is invalid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

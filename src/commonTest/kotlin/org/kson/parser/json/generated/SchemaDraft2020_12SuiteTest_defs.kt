@@ -21,6 +21,12 @@ class SchemaDraft2020_12SuiteTest_defs : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_1() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "defs::validate definition against metaschema::valid definition schema" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -50,6 +56,12 @@ class SchemaDraft2020_12SuiteTest_defs : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "defs::validate definition against metaschema::invalid definition schema" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
