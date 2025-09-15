@@ -7,10 +7,10 @@ pluginManagement {
 }
 
 rootProject.name = "kson"
+include("kson-lib")
+include("lib-python")
+include("lib-rust")
 include("tooling:jetbrains")
 include("tooling:language-server-protocol")
 include("tooling:lsp-clients")
 include("tooling:cli")
-include("kson-lib")
-include("lib-python")
-include("lib-rust")
