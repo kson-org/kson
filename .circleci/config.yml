@@ -4,15 +4,15 @@ orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
   browser-tools: circleci/browser-tools@1.1
-  # Make it possible to use Windows machines
-  # See https://circleci.com/developer/orbs/orb/circleci/windows
-  win: circleci/windows@5.1.0
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   build-windows-amd64:
-    executor: win/server-2022
+    resource_class: 'windows.large'
+    machine:
+      image: 'windows-server-2022-gui:current'
+      shell: 'powershell.exe -ExecutionPolicy Bypass'
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
