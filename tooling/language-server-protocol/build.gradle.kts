@@ -11,7 +11,7 @@ node {
 
 tasks {
     named("npm_run_compile"){
-        dependsOn(":lib-kotlin:jsNodeProductionLibraryDistribution")
+        dependsOn(":kson-lib:jsNodeProductionLibraryDistribution")
         dependsOn(npmInstall)
     }
 

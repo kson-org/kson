@@ -13,17 +13,17 @@ repositories {
 }
 
 group = "org.kson"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 tasks {
     register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = true
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
 
     register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = false
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
@@ -86,11 +86,14 @@ publishing {
     publications {
         withType<MavenPublication> {
             artifactId = when (name) {
-                "kotlinMultiplatform" -> "kson-lib-kotlin"
-                else -> "kson-lib-kotlin-$name"
+                "kotlinMultiplatform" -> "kson"
+                "jvm" -> "kson-jvm"
+                "js" -> "kson-js"
+                "nativeKson" -> "kson-${HostManager.host.family.name.lowercase()}-${HostManager.host.architecture.name.lowercase()}"
+                else -> throw RuntimeException("Unexpected artifact name: $name. Do we need to add a case here?")
             }
             pom {
-                name.set("KSON Kotlin Library")
+                name.set("KSON")
                 url.set("https://kson.org")
             }
         }
