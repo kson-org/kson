@@ -1,6 +1,5 @@
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.kson.jsonsuite.JsonTestSuiteGenerator
 import org.kson.jsonsuite.JsonTestSuiteGeneratorTest
@@ -21,15 +20,9 @@ class GenerateJsonTestSuiteTaskTest {
         val jsonGenTask = project.getTasksByName("generateJsonTestSuite", false)
             .iterator().next()
         assertTrue(jsonGenTask is GenerateJsonTestSuiteTask)
-        assertEquals(2, jsonGenTask.getGeneratedTestPath().size, "Should have both our test file paths")
 
         assertTrue(
-            jsonGenTask.getGeneratedTestPath()[0].startsWith(project.projectDir),
-            "Should set the output test file path relative to the project directory"
-        )
-
-        assertTrue(
-            jsonGenTask.getGeneratedTestPath()[1].startsWith(project.projectDir),
+            jsonGenTask.getGeneratedClassDirectory().startsWith(project.projectDir),
             "Should set the output test file path relative to the project directory"
         )
     }

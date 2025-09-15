@@ -47,10 +47,9 @@ open class GenerateJsonTestSuiteTask : DefaultTask() {
         }
     }
 
-    @OutputFiles
-    fun getGeneratedTestPath(): List<File> {
-        return jsonTestSuiteGenerator.testClassPackageDir.toFile().listFiles().toList() +
-                jsonTestSuiteGenerator.generatedJsonSuiteTestPath.toFile()
+    @OutputDirectory
+    fun getGeneratedClassDirectory(): File {
+        return jsonTestSuiteGenerator.testClassPackageDir.toFile()
     }
 
     @TaskAction
