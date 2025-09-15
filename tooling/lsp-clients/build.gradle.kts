@@ -1,28 +1,40 @@
 plugins {
     base
-    id("com.github.node-gradle.node") version "7.1.0"
-}
-
-node {
-    version.set("20.19.0")
-    npmVersion.set("10.8.2")
-    download.set(true)
 }
 
 tasks {
-    npmInstall.configure {
+    val npmInstall = register<PixiExecTask>("npmInstall") {
+        command=listOf("npm", "install")
+        doNotTrackState("npm already tracks its own state")
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
 
-    named("npm_run_vscode") {}
-    named("npm_run_monaco") {}
+    register<PixiExecTask>("npm_run_vscode") {
+        command=listOf("npm", "run", "vscode")
+        dependsOn(npmInstall)
+    }
+
+    register<PixiExecTask>("npm_run_monaco") {
+        command=listOf("npm", "run", "monaco")
+        dependsOn(npmInstall)
+    }
+
+    val test = register<PixiExecTask>("npm_run_test") {
+        command=listOf("npm", "run", "test")
+        dependsOn(npmInstall)
+    }
+
+    val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {
+        command=listOf("npm", "run", "buildVSCode")
+        dependsOn(npmInstall)
+    }
 
     check {
-        dependsOn("npm_run_test")
+        dependsOn(test)
         /**
          * TODO - Ideally this task is "npm_run_buildPlugins" building both plugins, however, for now the Monaco Vite build
          * is too unpredictable in CI
          */
-        dependsOn("npm_run_buildVSCode")
+        dependsOn(buildVsCode)
     }
 }
