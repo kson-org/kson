@@ -534,9 +534,27 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
 }
 
 /**
+ * Type discriminator for KsonValue subclasses
+ */
+enum class KsonValueType {
+    OBJECT,
+    ARRAY,
+    STRING,
+    INTEGER,
+    DECIMAL,
+    BOOLEAN,
+    NULL,
+    EMBED
+}
+
+/**
  * Represents a parsed [InternalKsonValue] in the public API
  */
 sealed class KsonValue private constructor(val start: Position, val end: Position) {
+    /**
+     * Type discriminator for easier type checking in TypeScript/JavaScript
+     */
+    abstract val type: KsonValueType
     /**
      * A Kson object with key-value pairs
      */
@@ -545,7 +563,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val properties: Map<KsonString, KsonValue>,
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.OBJECT
+    }
 
     /**
      * A Kson array with elements
@@ -555,7 +575,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val elements: List<KsonValue>,
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.ARRAY
+    }
 
     /**
      * A Kson string value
@@ -565,7 +587,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val value: String,
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.STRING
+    }
 
     /**
      * A Kson number value.
@@ -575,13 +599,17 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
               val value: Int,
               private val internalStart: Position,
               private val internalEnd: Position
-          ) : KsonNumber(internalStart, internalEnd)
+          ) : KsonNumber(internalStart, internalEnd){
+              override val type = KsonValueType.INTEGER
+          }
 
-          data class Decimal internal constructor(
-              val value: Double,
-              private val internalStart: Position,
-              private val internalEnd: Position
-          ) : KsonNumber(internalStart, internalEnd)
+        data class Decimal internal constructor(
+            val value: Double,
+            private val internalStart: Position,
+            private val internalEnd: Position
+        ) : KsonNumber(internalStart, internalEnd) {
+            override val type = KsonValueType.DECIMAL
+        }
       }
 
 
@@ -593,7 +621,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val value: Boolean,
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.BOOLEAN
+    }
 
     /**
      * A Kson null value
@@ -602,7 +632,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     data class KsonNull internal constructor(
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.NULL
+    }
 
     /**
      * A Kson embed block
@@ -614,7 +646,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val content: String,
         private val internalStart: Position,
         private val internalEnd: Position
-    ) : KsonValue(internalStart, internalEnd)
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.EMBED
+    }
 }
 
 /**
