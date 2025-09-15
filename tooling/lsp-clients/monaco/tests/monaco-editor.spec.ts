@@ -45,9 +45,12 @@ test.describe('Monaco KSON Editor - Smoke Test', () => {
             'utf-8'
         );
 
-        // Normalize both strings by replacing NBSP (U+00A0) with regular spaces
+        // Normalize both strings by replacing NBSP (U+00A0) with regular spaces. Note: the string
+        // we read from disk may have OS-specific line endings, which we normalize too.
         const normalizedActualContent = actualEditorContent.replace(/\u00A0/g, ' ');
-        const normalizedSourceContent = sourceFileContent.replace(/\u00A0/g, ' ');
+        const normalizedSourceContent = sourceFileContent
+            .replace(/\u00A0/g, ' ')
+            .replace(/\r\n/g, '\n');
 
         // Verify the editor displays the source file content
         expect(normalizedActualContent).toBeTruthy();
