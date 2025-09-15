@@ -87,7 +87,10 @@ publishing {
         withType<MavenPublication> {
             artifactId = when (name) {
                 "kotlinMultiplatform" -> "kson"
-                else -> "kson-$name"
+                "jvm" -> "kson-jvm"
+                "js" -> "kson-js"
+                "nativeKson" -> "kson-${HostManager.host.family.name.lowercase()}-${HostManager.host.architecture.name.lowercase()}"
+                else -> throw RuntimeException("Unexpected artifact name: $name. Do we need to add a case here?")
             }
             pom {
                 name.set("KSON")
