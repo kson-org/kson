@@ -150,8 +150,65 @@ jobs:
     # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
     resource_class: large
 
+  build-macos-arm64:
+    macos:
+      xcode: 16.4.0
+    resource_class: m4pro.medium
+    working_directory: ~/repo
+    steps:
+      - run: brew install --cask google-chrome
+      - checkout
+      - run: '"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version'
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            rm -rf ~/.gitconfig
+      - restore_cache:
+          keys:
+            - v1-macos-arm64-dependencies-{{ checksum "build.gradle.kts" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-macos-arm64-dependencies-
+
+      - restore_cache:
+          keys:
+            - v1-macos-arm64-jdk-{{ checksum "jdk.properties" }}
+
+      - restore_cache:
+          keys:
+            - v1-macos-arm64-vscode-tests
+
+      - run: ./gradlew --no-daemon dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-macos-arm64-dependencies-{{ checksum "build.gradle.kts" }}
+
+      - run:
+          name: Verify `buildSrc/` project
+          command: |
+            cd buildSrc
+            ./gradlew --no-daemon check
+
+      - run:
+          name: Verify Kson project
+          command: ./gradlew --no-daemon check
+
+      - save_cache:
+          paths:
+            - ./tooling/lsp-clients/vscode/.vscode-test
+            - ./tooling/lsp-clients/vscode/.vscode-test-web
+          key: v1-macos-arm64-vscode-tests
+
+      - save_cache:
+          paths:
+            - ./gradle/jdk
+            - ./buildSrc/gradle/jdk
+          key: v1-macos-arm64-jdk-{{ checksum "jdk.properties" }}
+
 workflows:
   build-all:
     jobs:
       - build-linux-amd64
       - build-windows-amd64
+      - build-macos-arm64
