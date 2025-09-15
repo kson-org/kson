@@ -14,7 +14,7 @@ tasks {
     }
 
     register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
     }
 
     register<Task>(build) {

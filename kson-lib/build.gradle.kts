@@ -17,13 +17,13 @@ version = "1.0-SNAPSHOT"
 
 tasks {
     register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = true
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
 
     register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = false
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }

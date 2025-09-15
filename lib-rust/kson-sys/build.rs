@@ -36,7 +36,7 @@ fn get_kotlin_artifacts(
     };
 
     let status = Command::new(&gradle_script)
-        .arg(":lib-kotlin:nativeKsonMainBinaries")
+        .arg(":kson-lib:nativeKsonMainBinaries")
         .arg("--no-daemon")
         .current_dir(&kotlin_root)
         .stdout(Stdio::inherit())
@@ -49,9 +49,9 @@ fn get_kotlin_artifacts(
 
     // Copy built artifacts
     let release_path = if use_dynamic_linking {
-        "lib-kotlin/build/bin/nativeKson/releaseShared"
+        "kson-lib/build/bin/nativeKson/releaseShared"
     } else {
-        "lib-kotlin/build/bin/nativeKson/releaseStatic"
+        "kson-lib/build/bin/nativeKson/releaseStatic"
     };
     let source_dir = kotlin_root.join(release_path);
     for entry in fs::read_dir(&source_dir)? {
@@ -67,9 +67,9 @@ fn get_kotlin_artifacts(
 
     // Copy the C headers, preprocessed (will overwrite existing header files)
     let gradle_task = if use_dynamic_linking {
-        ":lib-kotlin:copyNativeHeaderDynamic"
+        ":kson-lib:copyNativeHeaderDynamic"
     } else {
-        ":lib-kotlin:copyNativeHeaderStatic"
+        ":kson-lib:copyNativeHeaderStatic"
     };
     let status = Command::new(&gradle_script)
         .arg(gradle_task)

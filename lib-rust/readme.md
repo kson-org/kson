@@ -59,10 +59,10 @@ After that, you can build `kson.dll` with the following command from the kson re
 directory:
 
 ```bash
-./gradlew :lib-kotlin:nativeKsonMainBinaries
+./gradlew :kson-lib:nativeKsonMainBinaries
 ```
 
-Once the build finishes, copy the file at `lib-kotlin/build/bin/nativeKson/releaseShared/kson.dll`
+Once the build finishes, copy the file at `kson-lib/build/bin/nativeKson/releaseShared/kson.dll`
 to a suitable place. For the purposes of this readme, we will copy `kson.dll` to the directory where
 our final Rust binary will be located: the Rust project's `target/debug` directory (sidenote:
 Windows automatically checks for `.dll` files next to the program you are running). If the

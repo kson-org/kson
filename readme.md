@@ -61,7 +61,7 @@ Learn more [in the docs](docs/readme.md)
 #### Project structure
 
 - The [root build](build.gradle.kts) of this project contains the **core Kson implementation**
-  - [lib-kotlin/]() defines the public Kson Kotlin Multiplatform interface  
+  - [kson-lib/](kson-lib) defines the public interface for the Kson project  
   - [tooling/](tooling) contains tooling/editor/IDE support for Kson
 - The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a seperate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
 
