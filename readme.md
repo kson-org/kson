@@ -61,9 +61,11 @@ Learn more [in the docs](docs/readme.md)
 #### Project structure
 
 - The [root build](build.gradle.kts) of this project contains the **core Kson implementation**
-  - [kson-lib/](kson-lib) defines the public interface for the Kson project  
+  - [kson-lib/](kson-lib) defines the public interface for the Kson project. This should be the only module that depends on the root build
+  - [lib-python/](lib-python) defines an idiomatic Python interface on [kson-lib/](kson-lib)
+  - [lib-rust/](lib-rust) defines an idiomatic Rust interface on [kson-lib/](kson-lib)
   - [tooling/](tooling) contains tooling/editor/IDE support for Kson
-- The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a seperate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
+- The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a separate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
 
 #### Some useful gradle commands:
 
