@@ -14,7 +14,7 @@ open class CopyNativeArtifactsTask : DefaultTask() {
     private val outputHeader: File
 
     init {
-        val artifactsDir = project.projectDir.parentFile.resolve("lib-kotlin/build/bin/nativeKson/releaseShared/")
+        val artifactsDir = project.projectDir.parentFile.resolve("kson-lib/build/bin/nativeKson/releaseShared/")
         val binaryFileName = BinaryArtifactPaths.binaryFileName()
         sourceBinary = artifactsDir.resolve(binaryFileName)
         sourceHeader = artifactsDir.resolve(BinaryArtifactPaths.headerFileName())

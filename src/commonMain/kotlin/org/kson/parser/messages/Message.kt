@@ -19,6 +19,13 @@ enum class MessageSeverity {
 interface Message {
     val type: MessageType
 
+    /**
+     * Ensure [Message] classes implement equals and hashcode so that messages behave well in collections
+     * (being able to de-dupe in a Set for instance is important)
+     */
+    override operator fun equals(other: Any?): Boolean
+    override fun hashCode(): Int
+
     override fun toString(): String
 
     companion object {
@@ -354,22 +361,23 @@ enum class MessageType(
             return "Additional properties are not allowed"
         }
     },
-    SCHEMA_ALL_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
-
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match all of the specified schemas"
-        }
-    },
     SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match at least one of the specified schemas"
+            return "Value must match at least one sub-schema"
+        }
+    },
+    SCHEMA_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Sub-schema error summary")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val subSchemaErrors = parsedArgs.getArg("Sub-schema error summary")
+            return "All sub-schemas reported validation errors. $subSchemaErrors"
         }
     },
     SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {
@@ -482,7 +490,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
-            return "Schema property \"$schemaPropertyName\" must be a number"
+            return "Schema property \"$schemaPropertyName\" must be an object"
         }
     },
     SCHEMA_ONE_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
@@ -693,11 +701,13 @@ enum class MessageType(
     },
     SCHEMA_MISSING_REQUIRED_DEPENDENCIES(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Required by", "Missing property")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Missing required dependencies"
+            val requiredBy = parsedArgs.getArg("Required by")
+            val missingProperty = parsedArgs.getArg("Missing property")
+            return "Property `$missingProperty' is not provided, but it is required by '$requiredBy'"
         }
     },
     OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
@@ -805,15 +815,16 @@ enum class MessageType(
             )
         }
 
-        val messageType = this
-        return object: Message {
-            override val type = messageType
+        return MessageImpl(this, this.doFormat(ParsedErrorArgs(this, givenArgs)))
+    }
 
-            private val renderedMessage = type.doFormat(ParsedErrorArgs(messageType, givenArgs))
-
-            override fun toString(): String {
-                return renderedMessage
-            }
+    /**
+     * Data class for messages ensures that
+     */
+    data class MessageImpl(override val type: MessageType,
+                           private val renderedMessage: String) : Message {
+        override fun toString(): String {
+            return renderedMessage
         }
     }
 

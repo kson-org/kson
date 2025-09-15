@@ -11,6 +11,11 @@ import org.kson.schema.validators.TypeValidator
  * Base [JsonSchema] type that [KsonValue]s may be validated against
  */
 sealed interface JsonSchema {
+  /**
+   * A guaranteed non-null description for this schema that may be used in user-facing messages.  Should be defaulted
+   * to something reasonable (if not as helpful) when the schema itself provides no description
+   */
+  fun descriptionWithDefault(): String
   fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 
   fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
@@ -32,6 +37,10 @@ class JsonObjectSchema(
   private val typeValidator: TypeValidator?,
   private val schemaValidators: List<JsonSchemaValidator>
 ) : JsonSchema {
+
+  override fun descriptionWithDefault(): String {
+    return description ?: "JSON Object Schema"
+  }
 
   /**
    * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]
@@ -55,6 +64,7 @@ class JsonObjectSchema(
  * The most basic valid JsonSchema: `true` accepts all Json, `false` accepts none.
  */
 class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
+  override fun descriptionWithDefault() = if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
     if (valid) {
       return

@@ -7,8 +7,8 @@ import org.kson.schema.JsonSchema
 
 class PropertyNamesValidator(private val propertyNamesSchema: JsonSchema?) : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
-        node.propertyMap.forEach { (name, _) ->
-            propertyNamesSchema?.validate(name, messageSink)
+        node.propertyMap.forEach { (_, property) ->
+            propertyNamesSchema?.validate(property.propName, messageSink)
         }
     }
 }

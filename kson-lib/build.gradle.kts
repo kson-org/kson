@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.dokka") version "2.0.0"
+    `maven-publish`
 }
 
 repositories {
@@ -11,17 +13,17 @@ repositories {
 }
 
 group = "org.kson"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 tasks {
     register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = true
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
 
     register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
-        dependsOn(":lib-kotlin:nativeKsonBinaries")
+        dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = false
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
@@ -77,5 +79,26 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+    }
+}
+
+publishing {
+    publications {
+        withType<MavenPublication> {
+            artifactId = when (name) {
+                "kotlinMultiplatform" -> "kson"
+                "jvm" -> "kson-jvm"
+                "js" -> "kson-js"
+                "nativeKson" -> "kson-${HostManager.host.family.name.lowercase()}-${HostManager.host.architecture.name.lowercase()}"
+                else -> throw RuntimeException("Unexpected artifact name: $name. Do we need to add a case here?")
+            }
+            pom {
+                name.set("KSON")
+                url.set("https://kson.org")
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
     }
 }

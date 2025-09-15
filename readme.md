@@ -61,9 +61,11 @@ Learn more [in the docs](docs/readme.md)
 #### Project structure
 
 - The [root build](build.gradle.kts) of this project contains the **core Kson implementation**
-  - [lib-kotlin/]() defines the public Kson Kotlin Multiplatform interface  
+  - [kson-lib/](kson-lib) defines the public interface for the Kson project. This should be the only module that depends on the root build
+  - [lib-python/](lib-python) defines an idiomatic Python interface on [kson-lib/](kson-lib)
+  - [lib-rust/](lib-rust) defines an idiomatic Rust interface on [kson-lib/](kson-lib)
   - [tooling/](tooling) contains tooling/editor/IDE support for Kson
-- The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a seperate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
+- The [buildSrc/](buildSrc/build.gradle.kts) project implements non-trivial custom build components needed by this project.  It is developed as a separate, independent project. See the [buildSrc readme](buildSrc/readme.md) for details.
 
 #### Some useful gradle commands:
 
@@ -91,7 +93,7 @@ KSON can be used in VS Code or IntelliJ with a simple gradle command.
 
 To run either IDE you can run the following gradlew task from the root directory: 
 ```shell
-./gradlew :tooling:lsp_clients:npm_run_vscode # starts VS Code IDE
+./gradlew :tooling:lsp-clients:npm_run_vscode # starts VS Code IDE
 ./gradlew runIde # starts IntelliJ IDE 
 ```
 
