@@ -57,22 +57,22 @@ export class DocumentSymbolService {
         const range = this.ksonValueToRange(value);
         switch (value.type){
             case KsonValueType.OBJECT:
-                return this.createObjectSymbol(value as KsonValue.Object, name, range, parent);
+                return this.createObjectSymbol(value as KsonValue.KsonObject, name, range, parent);
             case KsonValueType.ARRAY:
-                return this.createArraySymbol(value as KsonValue.Array, name, range, parent);
+                return this.createArraySymbol(value as KsonValue.KsonArray, name, range, parent);
             case KsonValueType.EMBED:
-                return this.createEmbedSymbol(value as KsonValue.Embed, name, range, parent);
+                return this.createEmbedSymbol(value as KsonValue.KsonEmbed, name, range, parent);
             case KsonValueType.STRING:
-                return this.createPrimitiveSymbol(name, range, SymbolKind.String, (value as KsonValue.String).value, parent);
+                return this.createPrimitiveSymbol(name, range, SymbolKind.String, (value as KsonValue.KsonString).value, parent);
             case KsonValueType.INTEGER:
                 return this.createPrimitiveSymbol(name, range, SymbolKind.Number,
-                    (value as KsonValue.Number.Integer).value.toString(), parent);
+                    (value as KsonValue.KsonNumber.Integer).value.toString(), parent);
             case KsonValueType.DECIMAL:
                 return this.createPrimitiveSymbol(name, range, SymbolKind.Number,
-                    (value as KsonValue.Number.Decimal).value.toString(), parent);
+                    (value as KsonValue.KsonNumber.Decimal).value.toString(), parent);
             case KsonValueType.BOOLEAN:
                 return this.createPrimitiveSymbol(name, range, SymbolKind.Boolean,
-                    (value as KsonValue.Boolean).value.toString(), parent);
+                    (value as KsonValue.KsonBoolean).value.toString(), parent);
             case KsonValueType.NULL:
                 return this.createPrimitiveSymbol(name, range, SymbolKind.Null,
                     'null', parent);
@@ -82,7 +82,7 @@ export class DocumentSymbolService {
     /**
      * Create a DocumentSymbol for an object
      */
-    private createObjectSymbol(obj: KsonValue.Object, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
+    private createObjectSymbol(obj: KsonValue.KsonObject, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
         const propertyMap = obj.properties.asJsReadonlyMapView();
 
         const symbol = new DocumentSymbolWithParent(
@@ -105,7 +105,7 @@ export class DocumentSymbolService {
         return symbol;
     }
 
-    private createObjectPropertySymbol(objectKey: KsonValue.String, objectValue: KsonValue, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
+    private createObjectPropertySymbol(objectKey: KsonValue.KsonString, objectValue: KsonValue, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
         // Get the range for the entire property (use value range for now)
 
         const keyRange = this.ksonValueToRange(objectKey)
@@ -129,7 +129,7 @@ export class DocumentSymbolService {
     /**
      * Create a DocumentSymbol for an array
      */
-    private createArraySymbol(array: KsonValue.Array, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
+    private createArraySymbol(array: KsonValue.KsonArray, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
         const elements = array.elements.asJsReadonlyArrayView();
 
         const symbol = new DocumentSymbolWithParent(
@@ -174,7 +174,7 @@ export class DocumentSymbolService {
     /**
      * Create a DocumentSymbol for an embed block
      */
-    private createEmbedSymbol(embed: KsonValue.Embed, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
+    private createEmbedSymbol(embed: KsonValue.KsonEmbed, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
         const tag = embed.tag || 'embed';
         const detail = embed.metadata ? `<<<${tag} ${embed.metadata}>>>` : `<<<${tag}>>>`;
 

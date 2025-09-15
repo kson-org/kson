@@ -53,6 +53,9 @@ export function startKsonServer(connection: Connection): void {
                 commands: getAllCommandIds()
             },
 
+            // Document highlight
+            documentHighlightProvider: true,
+
             // Document symbols
             documentSymbolProvider: true,
 
