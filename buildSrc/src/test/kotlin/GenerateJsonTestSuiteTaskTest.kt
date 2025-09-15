@@ -6,8 +6,8 @@ import org.kson.jsonsuite.JsonTestSuiteGeneratorTest
 
 /**
  * Note: most of the meat of [GenerateJsonTestSuiteTask]'s implementation lives in
- * [JsonTestSuiteGenerator].  See [JsonTestSuiteGeneratorTest.testPlaceholder] for
- * more notes on the testing of these classes
+ * [JsonTestSuiteGenerator], so the bulk of the tests for this task like in
+ * [JsonTestSuiteGeneratorTest]
  */
 class GenerateJsonTestSuiteTaskTest {
     /**
