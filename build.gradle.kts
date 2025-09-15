@@ -33,9 +33,6 @@ jvmWrapper {
     windowsX64JvmUrl = sharedProps.getProperty("windowsX64JvmUrl")
 }
 
-group = "org.kson"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }

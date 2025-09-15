@@ -13,7 +13,7 @@ repositories {
 }
 
 group = "org.kson"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
 
 tasks {
     register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
@@ -86,11 +86,11 @@ publishing {
     publications {
         withType<MavenPublication> {
             artifactId = when (name) {
-                "kotlinMultiplatform" -> "kson-lib-kotlin"
-                else -> "kson-lib-kotlin-$name"
+                "kotlinMultiplatform" -> "kson"
+                else -> "kson-$name"
             }
             pom {
-                name.set("KSON Kotlin Library")
+                name.set("KSON")
                 url.set("https://kson.org")
             }
         }
