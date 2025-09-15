@@ -1,6 +1,7 @@
 import {Analysis} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
+import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 
 /**
  * Kson Document Entry.
@@ -11,6 +12,7 @@ import {TextDocument} from "vscode-languageserver-textdocument";
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
     private readonly parseAnalysis: Analysis;
+    private indexedDocumentSymbols?: IndexedDocumentSymbols;
 
     constructor(textDocument: TextDocument, parseAnalysis:Analysis) {
         this.textDocument = textDocument;
@@ -67,5 +69,19 @@ export class KsonDocument implements TextDocument {
             start: {line: 0, character: 0},
             end: lastPosition
         };
+    }
+    
+    /**
+     * Get cached symbols with index, or undefined if not cached
+     */
+    getSymbolsWithIndex(): IndexedDocumentSymbols | undefined {
+        return this.indexedDocumentSymbols;
+    }
+    
+    /**
+     * Set cached symbols with index
+     */
+    setSymbolsWithIndex(symbolsWithIndex: IndexedDocumentSymbols): void {
+        this.indexedDocumentSymbols = symbolsWithIndex;
     }
 }

@@ -20,6 +20,7 @@ import {CodeLensService} from '../features/CodeLensService.js';
 import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
 import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
+import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 
 /**
  * This is the coordinator for all the service classes.
