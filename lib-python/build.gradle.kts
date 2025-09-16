@@ -93,6 +93,7 @@ tasks {
 
         from(rootProject.file("src")){
             into("src")
+            exclude("commonTest/**")
         }
         // Copy buildSrc (excluding build output and JDK)
         from(rootProject.file("buildSrc")) {
@@ -105,9 +106,9 @@ tasks {
             exclude("out/**")
         }
         
-        // Copy lib-kotlin source (needed for native artifact build)
-        from(rootProject.file("lib-kotlin")) {
-            into("lib-kotlin")
+        // Copy kson-lib source (needed for native artifact build)
+        from(rootProject.file("kson-lib")) {
+            into("kson-lib")
             exclude("build/**")
             exclude(".gradle/**")
         }
@@ -126,8 +127,13 @@ tasks {
         commandLine = "$uvwPath build --sdist".split(" ")
     }
 
+    register<Copy>("copyLicense") {
+        from(rootProject.file("LICENSE"))
+        into(project.projectDir)
+    }
+
     register<Exec>(buildWheel) {
-        dependsOn(copyNativeArtifacts)
+        dependsOn(copyNativeArtifacts, "copyLicense")
         group = "build"
         description = "Build platform-specific wheel distribution with cibuildwheel"
         commandLine = "$uvwPath run cibuildwheel --platform auto --output-dir dist .".split(" ")

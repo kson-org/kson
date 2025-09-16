@@ -1,17 +1,44 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "build_backend"
-backend-path = ["."]
-
 [project]
-name = "kson"
-version = "0.1.2.dev0"
-description = "A love letter to the humans maintaining computer configuration"
+name = "kson-py"
+version = "0.1.0"
+authors = [
+  { name="KSON", email="kson@kson.org" },
+]
+description = "KSON: a next-gen configuration language and love letter to the humans maintaining computer configuration"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "cffi>=1.17.1",
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: File Formats :: JSON",
+    "Topic :: File Formats :: JSON :: JSON Schema",
+    "Topic :: Text Processing :: Markup",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+license = "Apache-2.0"
+license-files = ["LICENSE*"]
+
+[project.urls]
+Homepage = "https://github.com/kson-org/kson"
+Issues = "https://github.com/kson-org/kson/issues"
+
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "build_backend"
+backend-path = ["."]
 
 [tool.setuptools]
 packages = ["kson"]
