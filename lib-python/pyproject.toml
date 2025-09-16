@@ -53,4 +53,5 @@ dev = [
     "pytest>=8.4.1",
     "ruff>=0.12.8",
     "cibuildwheel>=2.16.0",
+    "twine>=6.2.0",
 ]
