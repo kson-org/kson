@@ -1,8 +1,10 @@
 [package]
 name = "kson-sys"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 links = "kson"
+description = "Rust bindings to kson-lib"
+license = "Apache-2.0"
 
 [features]
 default = []
@@ -10,3 +12,6 @@ dynamic-linking = []
 
 [build-dependencies]
 bindgen = "0.71.0"
+flate2 = "1.1.2"
+tar = "0.4"
+ureq = "3.1.2"

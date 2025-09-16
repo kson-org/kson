@@ -1,6 +1,7 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -14,6 +15,10 @@ import java.io.ByteArrayOutputStream
 abstract class PixiExecTask : DefaultTask() {
     @get:Input
     abstract val command: ListProperty<String>
+
+    @get:Input
+    @get:Optional
+    abstract val envVars: MapProperty<String, String>
 
     @get:InputDirectory
     @get:Optional
@@ -64,6 +69,7 @@ abstract class PixiExecTask : DefaultTask() {
             }
             
             spec.commandLine = fullCommand
+            spec.environment(envVars.getOrElse(mapOf()))
 
             if (captureOutput.get()) {
                 spec.standardOutput = ByteArrayOutputStream()
