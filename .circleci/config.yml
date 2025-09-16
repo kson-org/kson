@@ -295,7 +295,7 @@ jobs:
       - run:
           name: Run smoke tests on sdist installation
           command: |
-            python3 -m pytest lib-python/smoke_test.py -v
+            python3 -m pytest lib-python -v
       - run:
           name: Build platform-specific wheel
           command: |
@@ -327,7 +327,7 @@ jobs:
       - run:
           name: Run smoke tests on sdist installation
           command: |
-            python3 -m pytest lib-python/smoke_test.py -v
+            python3 -m pytest lib-python -v
       - run:
           name: Build platform-specific wheel
           command: |
@@ -367,7 +367,7 @@ jobs:
       - run:
           name: Run smoke tests on sdist installation
           command: |
-            python -m pytest lib-python/smoke_test.py -v
+            python -m pytest lib-python -v
       - run:
           name: Build platform-specific wheel
           command: |

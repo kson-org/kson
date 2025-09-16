@@ -140,7 +140,7 @@ tasks {
         environment("CIBW_SKIP", "*-musllinux_*")  // Skip musl Linux builds
         environment("CIBW_ARCHS", "native")  // Build only for native architecture
         environment("CIBW_TEST_REQUIRES", "pytest")  // Install pytest for testing
-        environment("CIBW_TEST_COMMAND", "python -m pytest {project}/smoke_test.py -v")
+        environment("CIBW_TEST_COMMAND", "pytest -v {project}/tests")
 
         doLast {
             println("Successfully built platform-specific wheel using cibuildwheel")
