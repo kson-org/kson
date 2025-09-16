@@ -18,9 +18,9 @@ object BinaryArtifactPaths {
         }
     }
 
-    fun headerFileName() : String {
+    fun headerFileName(dynamic: Boolean = true) : String {
         return when {
-            os.isWindows -> "kson_api.h"
+            os.isWindows -> if (dynamic) { "kson_api.h" } else { "libkson_api.h" }
             os.isLinux -> "libkson_api.h"
             os.isMacOsX -> "libkson_api.h"
             else -> throw Exception("Unsupported OS")

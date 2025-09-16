@@ -1,7 +1,9 @@
 [package]
-name = "kson"
-version = "0.1.0"
+name = "kson-rs"
+version = "0.1.1"
 edition = "2024"
+description = "Idiomatic Rust bindings to kson-lib"
+license = "Apache-2.0"
 
 [features]
 default = []

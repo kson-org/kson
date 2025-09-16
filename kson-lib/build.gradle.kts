@@ -16,16 +16,20 @@ group = "org.kson"
 version = "0.1.0-SNAPSHOT"
 
 tasks {
-    register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
+    val copyHeaderDynamic = register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
         dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = true
         outputDir = project.projectDir.resolve("build/nativeHeaders")
     }
 
-    register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
+    val copyHeaderStatic = register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
         dependsOn(":kson-lib:nativeKsonBinaries")
         useDynamicLinking = false
         outputDir = project.projectDir.resolve("build/nativeHeaders")
+    }
+
+    register<Task>("nativeRelease") {
+        dependsOn(":kson-lib:nativeKsonBinaries", copyHeaderDynamic, copyHeaderStatic)
     }
 }
 
