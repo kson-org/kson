@@ -55,7 +55,7 @@ fn download_prebuilt_kson(
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
     let kson_lib_version = fs::read_to_string(Path::new(&manifest_dir).join("kson-lib-version"))?;
     let cpu_arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
-        "aarch" => "arm64",
+        "aarch64" => "arm64",
         "x86_64" => "amd64",
         arch => panic!("unsupported CPU architecture: {arch}"),
     };
