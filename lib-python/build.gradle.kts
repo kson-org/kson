@@ -7,6 +7,7 @@ val test = "test"
 val typeCheck = "typeCheck"
 val prepareSdistBuildEnvironment = "prepareSdistBuildEnvironment"
 val createSdistBuildEnvironment = "createSdistBuildEnvironment"
+val buildWheel = "buildWheel"
 
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
@@ -123,5 +124,26 @@ tasks {
         dependsOn(prepareSdistBuildEnvironment)
         group = "build"
         commandLine = "$uvwPath build --sdist".split(" ")
+    }
+
+    register<Exec>(buildWheel) {
+        dependsOn(copyNativeArtifacts)
+        group = "build"
+        description = "Build platform-specific wheel distribution with cibuildwheel"
+        commandLine = "$uvwPath run cibuildwheel --platform auto --output-dir dist .".split(" ")
+        standardOutput = System.out
+        errorOutput = System.err
+        isIgnoreExitValue = false
+
+        // Configure cibuildwheel
+        environment("CIBW_BUILD", "cp310-*")  // Build for Python 3.10+
+        environment("CIBW_SKIP", "*-musllinux_*")  // Skip musl Linux builds
+        environment("CIBW_ARCHS", "native")  // Build only for native architecture
+        environment("CIBW_TEST_REQUIRES", "pytest")  // Install pytest for testing
+        environment("CIBW_TEST_COMMAND", "python -m pytest {project}/smoke_test.py -v")
+
+        doLast {
+            println("Successfully built platform-specific wheel using cibuildwheel")
+        }
     }
 }

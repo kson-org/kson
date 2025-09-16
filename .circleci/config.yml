@@ -262,7 +262,7 @@ jobs:
           name: Verify sdist was created
           command: |
             ls -la lib-python/dist/
-            test -f lib-python/dist/kson-*.tar.gz
+            test -f lib-python/dist/ksonpy-*.tar.gz
       - persist_to_workspace:
           root: ~/repo
           paths:
@@ -277,6 +277,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Get rid of erroneous git config
           command: |
@@ -286,15 +287,22 @@ jobs:
       - run:
           name: Install kson from sdist
           command: |
-            python3 -m pip install lib-python/dist/kson-*.tar.gz
+            python3 -m pip install lib-python/dist/ksonpy-*.tar.gz
       - run:
           name: Install test dependencies
           command: |
             python3 -m pip install pytest
       - run:
-          name: Run smoke tests
+          name: Run smoke tests on sdist installation
           command: |
             python3 -m pytest lib-python/smoke_test.py -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            ./gradlew :lib-python:buildWheel
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-linux-amd64
 
   test-python-sdist-macos:
     macos:
@@ -311,15 +319,22 @@ jobs:
       - run:
           name: Install kson from sdist
           command: |
-            python3 -m pip install lib-python/dist/kson-*.tar.gz
+            python3 -m pip install lib-python/dist/ksonpy-*.tar.gz
       - run:
           name: Install test dependencies
           command: |
             python3 -m pip install pytest
       - run:
-          name: Run smoke tests
+          name: Run smoke tests on sdist installation
           command: |
             python3 -m pytest lib-python/smoke_test.py -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            ./gradlew :lib-python:buildWheel
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-macos
 
   test-python-sdist-windows:
     executor:
@@ -343,16 +358,23 @@ jobs:
       - run:
           name: Install kson from sdist
           command: |
-            python -m pip install (Get-ChildItem lib-python/dist/kson-*.tar.gz).FullName
+            python -m pip install (Get-ChildItem lib-python/dist/ksonpy-*.tar.gz).FullName
           shell: powershell.exe
       - run:
           name: Install test dependencies
           command: |
             python -m pip install pytest
       - run:
-          name: Run smoke tests
+          name: Run smoke tests on sdist installation
           command: |
             python -m pytest lib-python/smoke_test.py -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            .\gradlew.bat :lib-python:buildWheel
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-windows
 
 workflows:
   version: 2

@@ -45,8 +45,20 @@ def _ensure_native_artifacts():
             kson_copy_src = kson_copy_dir / "lib-python" / "src"
             if kson_copy_src.exists():
                 print("Replacing src directory with built artifacts...")
+                # Save _marker.c if it exists
+                marker_c = src_kson_dir / "_marker.c"
+                marker_c_content = None
+                if marker_c.exists():
+                    marker_c_content = marker_c.read_bytes()
+
                 shutil.rmtree(src_dir, ignore_errors=True)
                 shutil.copytree(kson_copy_src, src_dir)
+
+                # Restore _marker.c if it existed
+                if marker_c_content is not None:
+                    marker_c_new = src_kson_dir / "_marker.c"
+                    marker_c_new.parent.mkdir(parents=True, exist_ok=True)
+                    marker_c_new.write_bytes(marker_c_content)
 
         finally:
             os.chdir(original_dir)

@@ -2,6 +2,7 @@ include build_backend.py
 include pyproject.toml
 include README.md
 recursive-include src *.py
+recursive-include src *.c
 
 # Include necessary Gradle files from kson-sdist
 recursive-include kson-sdist *.kts *.kt *.properties *.md

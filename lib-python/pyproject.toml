@@ -25,4 +25,5 @@ dev = [
     "pyright>=1.1.403",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
+    "cibuildwheel>=2.16.0",
 ]
