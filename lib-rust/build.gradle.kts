@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 plugins{
     base
 }
@@ -6,6 +8,7 @@ val nativeKsonDir = project.projectDir.parentFile.resolve("kson-lib/build/bin/na
 
 val testStatic by tasks.registering(PixiExecTask::class) {
     dependsOn(":kson-lib:nativeRelease")
+    onlyIf { !DefaultNativePlatform.getCurrentOperatingSystem().isWindows }
 
     group="verification"
     command=listOf("cargo", "test", "--manifest-path", "kson/Cargo.toml")
