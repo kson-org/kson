@@ -105,8 +105,8 @@
     "compile-tests": "tsx esbuild.ts --tests",
     "check-types": "tsc --noEmit",
     "vscode": "npm run packagePlugin && tsx test/runExtension.ts",
-    "testDesktop": "npm run compile-tests && RUN_MODE=test-node node dist/runTests.js",
-    "testBrowser": "npm run compile-tests && RUN_MODE=test-browser node dist/runTests.js",
+    "testDesktop": "npm run compile-tests && node dist/runTests.js test-node",
+    "testBrowser": "npm run compile-tests && node dist/runTests.js test-browser",
     "test": "npm run testDesktop && npm run testBrowser"
   },
   "dependencies": {

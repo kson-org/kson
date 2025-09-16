@@ -1,21 +1,21 @@
 plugins {
     base
-    id("com.github.node-gradle.node") version "7.1.0"
-}
-
-node {
-     version.set("20.0.0")
-     npmVersion.set("9.6.4")
-     download.set(true)
 }
 
 tasks {
-    named("npm_run_compile"){
+    val npmInstall = register<PixiExecTask>("npmInstall") {
+        command=listOf("npm", "install")
+        doNotTrackState("npm already tracks its own state")
+    }
+
+    register<PixiExecTask>("npm_run_compile") {
+        command=listOf("npm", "run", "compile")
         dependsOn(":kson-lib:jsNodeProductionLibraryDistribution")
         dependsOn(npmInstall)
     }
 
-    named("npm_run_test"){
+    register<PixiExecTask>("npm_run_test") {
+        command=listOf("npm", "run", "test")
         dependsOn("npm_run_compile")
     }
 

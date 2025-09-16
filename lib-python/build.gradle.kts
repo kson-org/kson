@@ -8,7 +8,7 @@ val typeCheck = "typeCheck"
 
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
-        "uvw"
+        "cmd /c uvw.bat"
     } else {
         "./uvw"
     }

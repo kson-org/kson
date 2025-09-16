@@ -7,14 +7,14 @@ import {
 
 /**
  * Test runner script that runs the smoke tests by installing the kson plugin in a vscode instance.
- * With the environment variable `RUN_MODE`, one can specify whether all tests (`test-all`) needed to be
+ * With the first command-line argument, one can specify whether all tests (`test-all`) needed to be
  * run, just the node (`test-node`) or just the browser (`test-browser`) tests.
  *
  */
 async function main() {
     try {
         // test-browser or test-node or test-all
-        const runMode = process.env.RUN_MODE || 'test-all';
+        const runMode = process.argv[2] || 'test-all';
 
         const extensionDevelopmentPath = path.resolve(__dirname, '../');
         // Create test workspace path for KSON files

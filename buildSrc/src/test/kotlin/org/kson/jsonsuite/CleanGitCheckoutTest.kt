@@ -60,22 +60,13 @@ class CleanGitCheckoutTest {
     @Test
     fun testEnsureCleanGitCheckoutOnEmptyDir() {
         val testDestinationDir = Paths.get(createTempDirectory("EnsureSuiteSourceFiles").toString())
+        val cloneName = "GitFixture"
 
+        // create an empty dir where the repository would be cloned...
+        testDestinationDir.resolve(cloneName).toFile().mkdir()
+
+        // and try to check out the repository...
         val desiredCheckoutSHA = "3a7625fe9e30a63102afbe74b078851ba7b185e7"
-
-        // perform a checkout
-        val cleanGitCheckout = CleanGitCheckout(
-            gitTestFixturePath,
-            desiredCheckoutSHA,
-            testDestinationDir,
-            "GitFixture"
-        )
-
-        // clean out the files behind the checkout we just made
-        cleanGitCheckout.checkoutDir.deleteRecursively()
-        cleanGitCheckout.checkoutDir.mkdir()
-
-        // and try to check it out again...
         assertFailsWith<NoRepoException>("should error on non-git dir") {
             CleanGitCheckout(
                 gitTestFixturePath,
