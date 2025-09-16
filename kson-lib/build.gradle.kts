@@ -4,8 +4,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     kotlin("multiplatform")
-    id("org.jetbrains.dokka") version "2.0.0"
-    `maven-publish`
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 repositories {
@@ -82,23 +81,36 @@ kotlin {
     }
 }
 
-publishing {
-    publications {
-        withType<MavenPublication> {
-            artifactId = when (name) {
-                "kotlinMultiplatform" -> "kson"
-                "jvm" -> "kson-jvm"
-                "js" -> "kson-js"
-                "nativeKson" -> "kson-${HostManager.host.family.name.lowercase()}-${HostManager.host.architecture.name.lowercase()}"
-                else -> throw RuntimeException("Unexpected artifact name: $name. Do we need to add a case here?")
-            }
-            pom {
-                name.set("KSON")
-                url.set("https://kson.org")
+mavenPublishing {
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    signAllPublications()
+
+    coordinates("org.kson", "kson", version.toString())
+
+    pom {
+        name.set("KSON")
+        description.set("A 💌 to the humans maintaining computer configurations")
+        url.set("https://kson.org")
+
+        licenses {
+            license {
+                name.set("Apache-2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
-    }
-    repositories {
-        mavenLocal()
+
+        developers {
+            developer {
+                id.set("dmarcotte")
+                name.set("Daniel Marcotte")
+                email.set("kson@kson.org")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:https://github.com/kson-org/kson.git")
+            developerConnection.set("scm:git:git@github.com:kson-org/kson.git")
+            url.set("https://github.com/kson-org/kson")
+        }
     }
 }
