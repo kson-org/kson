@@ -33,6 +33,9 @@ abstract class CopyNativeHeaderTask @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputHeaderFile: RegularFileProperty
 
+    @get:OutputFile
+    abstract val outputHeaderFile: RegularFileProperty
+
     init {
         val artifactsDir: Provider<Directory> = useDynamicLinking.flatMap { dynamic ->
             val sub = if (dynamic) "releaseShared" else "releaseStatic"
@@ -42,19 +45,18 @@ abstract class CopyNativeHeaderTask @Inject constructor(
         }
 
         inputHeaderFile.convention(
-            artifactsDir.map { it.file(BinaryArtifactPaths.headerFileName()) }
+            useDynamicLinking.flatMap { dynamic -> artifactsDir.map { it.file(BinaryArtifactPaths.headerFileName(dynamic)) } }
         )
-    }
 
-    @Option(option = "outputDir", description = "Absolute path to the output directory")
-    fun overrideOutputDir(path: String) {
-        outputDir.set(File(path))
+        outputHeaderFile.convention(
+            artifactsDir.map { it.file("kson_api_preprocessed.h") }
+        )
     }
 
     @TaskAction
     fun run() {
         val input = inputHeaderFile.get().asFile
-        val output = outputDir.get().resolve("kson_api.h")
+        val output = outputHeaderFile.get().asFile
 
         val preprocessedHeader = TinyCPreprocessor().preprocess(input.absolutePath)
 

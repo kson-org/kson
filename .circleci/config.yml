@@ -59,6 +59,16 @@ jobs:
           name: Verify Kson project
           command: ./gradlew --no-daemon check
 
+      # Note: the verify step builds the native binaries for kson-lib, so we can upload them right
+      # away without building them again
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseShared
+          destination: kson-lib-shared
+
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseStatic
+          destination: kson-lib-static
+
       - save_cache:
           paths:
             - ./tooling/lsp-clients/vscode/.vscode-test
@@ -135,6 +145,16 @@ jobs:
           name: Verify Kson project
           command: ./gradlew --no-daemon check
 
+      # Note: the verify step builds the native binaries for kson-lib, so we can upload them right
+      # away without building them again
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseShared
+          destination: kson-lib-shared
+
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseStatic
+          destination: kson-lib-static
+
       - save_cache:
           paths:
             - ./tooling/lsp-clients/vscode/.vscode-test
@@ -193,6 +213,16 @@ jobs:
       - run:
           name: Verify Kson project
           command: ./gradlew --no-daemon check
+
+      # Note: the verify step builds the native binaries for kson-lib, so we can upload them right
+      # away without building them again
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseShared
+          destination: kson-lib-shared
+
+      - store_artifacts:
+          path: kson-lib/build/bin/nativeKson/releaseStatic
+          destination: kson-lib-static
 
       - save_cache:
           paths:

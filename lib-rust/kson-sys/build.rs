@@ -36,7 +36,7 @@ fn get_kotlin_artifacts(
     };
 
     let status = Command::new(&gradle_script)
-        .arg(":kson-lib:nativeKsonMainBinaries")
+        .arg(":kson-lib:nativeRelease")
         .arg("--no-daemon")
         .current_dir(&kotlin_root)
         .stdout(Stdio::inherit())
@@ -57,36 +57,12 @@ fn get_kotlin_artifacts(
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
         let source_path = entry.path();
-        if source_path.is_file() && source_path.extension() != Some(std::ffi::OsStr::new("h")) {
+        if source_path.is_file() {
             let file_name = source_path.file_name().unwrap();
             let dest_path = out_dir.join(file_name);
             fs::copy(&source_path, &dest_path)?;
             println!("cargo:rerun-if-changed={}", source_path.display());
         }
-    }
-
-    // Copy the C headers, preprocessed (will overwrite existing header files)
-    let gradle_task = if use_dynamic_linking {
-        ":kson-lib:copyNativeHeaderDynamic"
-    } else {
-        ":kson-lib:copyNativeHeaderStatic"
-    };
-    let status = Command::new(&gradle_script)
-        .arg(gradle_task)
-        .arg("--no-daemon")
-        .current_dir(&kotlin_root)
-        .arg("--outputDir")
-        .arg(out_dir.display().to_string())
-        .stdout(Stdio::null())
-        .stderr(Stdio::inherit())
-        .status()?;
-
-    if !status.success() {
-        return Err(format!(
-            "gradle {gradle_task} failed with exit code: {:?}",
-            status.code()
-        )
-        .into());
     }
 
     Ok(())
@@ -101,7 +77,7 @@ fn main() {
 
     // Generate bindings
     let bindings = bindgen::Builder::default()
-        .header(out_dir.join("kson_api.h").display().to_string())
+        .header(out_dir.join("kson_api_preprocessed.h").display().to_string())
         .parse_callbacks(Box::new(CustomRenamer))
         .generate()
         .expect("Unable to generate bindings");
@@ -127,8 +103,8 @@ fn main() {
         println!("cargo:rustc-link-search=native={}", out_dir.display());
         println!("cargo:rustc-link-lib=static=kson");
 
-        // Note: our kotlin-native binary relies on the C++ runtime, which we don't want to
-        // statically link. Below we explicitly configure the runtime to be dynamically linked.
+        // Note: our kotlin-native binary relies on platform-specific libraries, which we don't want
+        // to statically link. Below we explicitly configure them to be dynamically linked.
         #[cfg(target_os = "linux")]
         println!("cargo:rustc-link-lib=dylib=stdc++");
         #[cfg(target_os = "macos")]
