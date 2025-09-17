@@ -1,19 +1,16 @@
 {
-  "name": "kson-vscode-plugin",
-  "displayName": "Kson Language Support",
+  "name": "kson",
+  "displayName": "KSON",
   "description": "Provides language support for the Kson data format.",
   "authors": [
     {
-      "name": "Bart Dubbeldam",
-      "email": "bart.dubbeldam@dc-analytic.com"
-    },
-    {
-      "name": "Daniel Marcotte",
-      "email": "dmarcotte@gmail.com"
+      "name": "KSON",
+      "email": "kson@kson.org"
     }
   ],
-  "publisher": "kson-org",
-  "version": "0.1-0",
+  "publisher": "kson",
+  "version": "0.1.0",
+  "icon": "dist/extension/assets/kson-icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/kson-org/kson"
@@ -85,8 +82,7 @@
             "delimited"
           ],
           "enumDescriptions": [
-            "Plain formatting with minimal delimiters",
-            "Delimited formatting"
+            "Plain formatting with minimal delimiters", "Delimited formatting"
           ],
           "default": "plain",
           "description": "Formatting style for Kson documents"
@@ -119,7 +115,7 @@
     "@types/mocha": "^10.0.7",
     "@types/node": "20.0.0",
     "@types/uuid": "^9.0.8",
-    "@types/vscode": "1.101.0",
+    "@types/vscode": "1.99.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/test-web": "^0.0.71",
     "@vscode/vsce": "^3.6.0",

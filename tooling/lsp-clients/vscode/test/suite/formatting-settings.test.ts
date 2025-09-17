@@ -15,8 +15,10 @@ describe('Formatting Settings Test Suite', () => {
         document = doc;
 
         // Wait for the extension to be active
-        const extension = vscode.extensions.getExtension('kson-org.kson-vscode-plugin');
-        await extension.activate();
+        const extension = vscode.extensions.getExtension('kson.kson');
+        if (extension && !extension.isActive) {
+            await extension.activate();
+        }
     })
 
     afterEach(async () => {
