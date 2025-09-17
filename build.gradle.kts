@@ -119,7 +119,7 @@ group = "org.kson"
  *   This version number is both easy to increment and (hopefully) telegraphs well with the strange
  *   versioning that this should not be depended on
  */
-version = "x.1"
+version = "x.2-SNAPSHOT"
 
 kotlin {
     jvm()
