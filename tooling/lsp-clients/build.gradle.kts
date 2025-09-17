@@ -29,6 +29,11 @@ tasks {
         dependsOn(npmInstall)
     }
 
+    val buildMonaco = register<PixiExecTask>("npm_run_buildMonaco") {
+        command=listOf("npm", "run", "buildMonaco")
+        dependsOn(npmInstall)
+    }
+
     check {
         dependsOn(test)
         /**
