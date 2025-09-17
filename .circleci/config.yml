@@ -371,7 +371,7 @@ jobs:
       - run:
           name: Build platform-specific wheel
           command: |
-            .\gradlew.bat :lib-python:buildWheel
+            .\gradlew.bat :lib-python:buildWheel --no-daemon
       - store_artifacts:
           path: lib-python/dist
           destination: python-windows
