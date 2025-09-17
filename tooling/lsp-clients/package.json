@@ -1,6 +1,6 @@
 {
   "name": "kson-lsp-extensions",
-  "version": "0.0.1",
+  "version": "0.1.2-dev.0",
   "private": true,
   "description": "KSON Language Server Protocol Extensions",
   "workspaces": [
