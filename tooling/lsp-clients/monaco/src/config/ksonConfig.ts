@@ -6,47 +6,36 @@
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override';
 import getThemeServiceOverride from '@codingame/monaco-vscode-theme-service-override';
 import getTextmateServiceOverride from '@codingame/monaco-vscode-textmate-service-override';
-import { LogLevel } from '@codingame/monaco-vscode-api';
-import { MessageTransports } from 'vscode-languageclient';
 import type { WrapperConfig } from 'monaco-editor-wrapper';
-import { configureDefaultWorkerFactory } from 'monaco-editor-wrapper/workers/workerLoaders';
-import '@codingame/monaco-vscode-theme-defaults-default-extension';
+import { languageConfigurationString, tmLanguageString, KSON_LANGUAGE_ID, KSON_EXTENSIONS, KSON_ALIASES, KSON_SCOPE_NAME } from '@kson/lsp-shared';
+import {configureDefaultWorkerFactory} from "monaco-editor-wrapper/workers/workerLoaders";
+
 // Import language extensions for embedded language support
 import '@codingame/monaco-vscode-typescript-basics-default-extension';
 import '@codingame/monaco-vscode-javascript-default-extension';
 import '@codingame/monaco-vscode-sql-default-extension';
 import '@codingame/monaco-vscode-python-default-extension';
-import exampleText from '../../resources/kson/example.kson?raw';
 
-import { languageConfigurationString, tmLanguageString, KSON_LANGUAGE_ID, KSON_EXTENSIONS, KSON_ALIASES, KSON_SCOPE_NAME } from '@kson/lsp-shared';
-
-export const setupKsonClientExtended = async (params: {
-    worker: Worker
-    messageTransports?: MessageTransports,
-}): Promise<WrapperConfig> => {
-
-    const extensionFilesOrContents = new Map<string, string | URL>();
-    // vite build is easier with string content
+/**
+ * Creates the minimal WrapperConfig needed for Kson language support.
+ * All other configuration can be provided via overrides.
+ */
+export function createKsonLanguageConfig(params: {
+    worker: Worker;
+}): WrapperConfig {
+    const extensionFilesOrContents = new Map<string, string>();
     extensionFilesOrContents.set('/kson-configuration.json', languageConfigurationString);
     extensionFilesOrContents.set('/kson-grammar.json', tmLanguageString);
+
     return {
         $type: 'extended',
-        htmlContainer: document.getElementById('monaco-editor-root')!,
-        logLevel: LogLevel.Debug,
         vscodeApiConfig: {
+            // Each editor needs its own initialization to ensure proper formatter registration
+            vscodeApiInitPerformExternally: false,
             serviceOverrides: {
                 ...getKeybindingsServiceOverride(),
                 ...getThemeServiceOverride(),
                 ...getTextmateServiceOverride()
-            },
-            userConfiguration: {
-                json: JSON.stringify({
-                    'editor.guides.bracketPairsHorizontal': 'active',
-                    'editor.wordBasedSuggestions': 'off',
-                    'editor.experimental.asyncTokenization': true,
-                    'editor.semanticHighlighting.enabled': true,
-                    'vitest.disableWorkspaceWarning': true
-                })
             }
         },
         extensions: [{
@@ -80,12 +69,6 @@ export const setupKsonClientExtended = async (params: {
             filesOrContents: extensionFilesOrContents
         }],
         editorAppConfig: {
-            codeResources: {
-                modified: {
-                    text: exampleText,
-                    uri: '/workspace/example.kson'
-                }
-            },
             monacoWorkerFactory: configureDefaultWorkerFactory
         },
         languageClientConfigs: {
@@ -98,11 +81,10 @@ export const setupKsonClientExtended = async (params: {
                         options: {
                             $type: 'WorkerDirect',
                             worker: params.worker
-                        },
-                        messageTransports: params.messageTransports
+                        }
                     }
                 }
             }
         }
     };
-};
+}
