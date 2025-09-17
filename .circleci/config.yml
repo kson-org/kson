@@ -385,13 +385,33 @@ workflows:
       - build-macos-arm64
   build-python-and-test:
     jobs:
-      - build-python-sdist
+      - build-python-sdist:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - test-python-sdist-linux-amd64:
           requires:
             - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - test-python-sdist-macos:
           requires:
             - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
       - test-python-sdist-windows:
           requires:
             - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
