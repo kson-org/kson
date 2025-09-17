@@ -1,23 +1,23 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>kson</id>
-    <name>Kson</name>
-    <vendor>Kson.org</vendor>
+    <id>org.kson</id>
+    <name>KSON</name>
+    <vendor email="kson@kson.org" url="https://kson.org">kson.org</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>org.intellij.intelliLang</depends>
 
     <description><![CDATA[
         <p>
-            <a href="https://kson.org">Kson</a> language support
+            <a href="https://kson.org">KSON</a> language support
         </p>
         <p>
-            For issues, feature requests, and source code, please visit the <a href="https://github.com/kson-org/kson/tree/main/jetbrains">plugin project home</a>
+            For issues, feature requests, and source code, please visit the <a href="https://github.com/kson-org/kson/tree/main/tooling/jetbrains">plugin project home</a>
         </p>
     ]]></description>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="Kson"
+        <fileType name="KSON"
                   implementationClass="org.kson.jetbrains.file.KsonFileType"
                   fieldName="INSTANCE"
                   language="kson"
