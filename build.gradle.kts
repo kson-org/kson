@@ -17,6 +17,7 @@ val sharedProps = Properties().apply {
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    id("com.vanniktech.maven.publish") version "0.30.0"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -112,6 +113,14 @@ tasks {
     }
 }
 
+group = "org.kson"
+/**
+ * We use x.[incrementing number] version here since this in not intended for general consumption.
+ *   This version number is both easy to increment and (hopefully) telegraphs well with the strange
+ *   versioning that this should not be depended on
+ */
+version = "x.1-SNAPSHOT"
+
 kotlin {
     jvm()
     js(IR) {
@@ -176,5 +185,39 @@ kotlin {
         }
         val nativeKsonMain by getting
         val nativeKsonTest by getting
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    signAllPublications()
+
+    coordinates("org.kson", "kson-internals", version.toString())
+
+    pom {
+        name.set("KSON Internals")
+        description.set("Internal implementation details of KSON. This package is not intended for direct use. Please use the 'org.kson:kson' package instead for the stable public API.")
+        url.set("https://kson.org")
+
+        licenses {
+            license {
+                name.set("Apache-2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+
+        developers {
+            developer {
+                id.set("dmarcotte")
+                name.set("Daniel Marcotte")
+                email.set("daniel@kson.org")
+            }
+        }
+
+        scm {
+            connection.set("scm:git:https://github.com/kson-org/kson.git")
+            developerConnection.set("scm:git:git@github.com:kson-org/kson.git")
+            url.set("https://github.com/kson-org/kson")
+        }
     }
 }
