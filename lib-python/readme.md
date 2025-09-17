@@ -1,24 +1,25 @@
 # Python bindings for Kson's public API
 
-Only local installation is supported at the moment. PyPI packages for Linux, macOS and Windows are
-coming soon!
+[KSON](https://kson.org) is available on PyPI for Linux, macOS and Windows.
 
-## Example usage
+## Installation
 
-Build `lib-python` from source:
+Install from PyPI:
+
+```bash
+pip install kson
+```
+
+### Build from source
 
 ```bash
 git clone https://github.com/kson-org/kson.git
 cd kson && ./gradlew :lib-python:build
+pip install ./lib-python
 ```
 
-Install `lib-python` to an existing python project:
+## Example usage
 
-```bash
-pip install ../kson/lib-python
-```
-
-Write some code:
 
 ```python
 from kson import Kson, Success

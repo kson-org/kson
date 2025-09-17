@@ -1,0 +1,31 @@
+include build_backend.py
+include pyproject.toml
+include README.md
+recursive-include src *.py
+recursive-include src *.c
+
+# Include necessary Gradle files from kson-sdist
+recursive-include kson-sdist *.kts *.kt *.properties *.md
+# Include Python source files from kson-sdist
+recursive-include kson-sdist *.py
+include kson-sdist/gradlew
+include kson-sdist/gradlew.bat
+include kson-sdist/buildSrc/gradlew
+include kson-sdist/buildSrc/gradlew.bat
+include kson-sdist/gradle/wrapper/gradle-wrapper.jar
+include kson-sdist/gradle/wrapper/gradle-wrapper.properties
+include kson-sdist/buildSrc/gradle/wrapper/gradle-wrapper.jar
+include kson-sdist/buildSrc/gradle/wrapper/gradle-wrapper.properties
+
+# Explicitly exclude all build artifacts
+prune kson-sdist/**/.gradle
+prune kson-sdist/**/build
+prune kson-sdist/**/.kotlin
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude *.class
+global-exclude *.lock
+global-exclude *.bin
+global-exclude *.hprof
+global-exclude *.log

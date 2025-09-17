@@ -4,6 +4,8 @@ orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
   browser-tools: circleci/browser-tools@1.1
+  # Windows support for testing Python on Windows
+  windows: circleci/windows@5.0
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
@@ -242,9 +244,174 @@ jobs:
             - ./buildSrc/gradle/jdk
           key: v1-macos-arm64-jdk-{{ checksum "jdk.properties" }}
 
+  build-python-sdist:
+    docker:
+      - image: cimg/python:3.11
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            rm -rf ~/.gitconfig
+      - run:
+          name: Build Python source distribution
+          command: |
+            ./gradlew :lib-python:createSdistBuildEnvironment
+      - run:
+          name: Verify sdist was created
+          command: |
+            ls -la lib-python/dist/
+            test -f lib-python/dist/kson_lang-*.tar.gz
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - lib-python/dist/*.tar.gz
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-sdist
+
+  test-python-sdist-linux-amd64:
+    docker:
+      - image: cimg/python:3.11
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            rm -rf ~/.gitconfig
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Install kson from sdist
+          command: |
+            python3 -m pip install lib-python/dist/kson_lang-*.tar.gz
+      - run:
+          name: Install test dependencies
+          command: |
+            python3 -m pip install pytest
+      - run:
+          name: Run smoke tests on sdist installation
+          command: |
+            python3 -m pytest lib-python -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            ./gradlew :lib-python:buildWheel
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-linux-amd64
+
+  test-python-sdist-macos:
+    macos:
+      xcode: 14.2.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            rm -rf ~/.gitconfig
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Install kson from sdist
+          command: |
+            python3 -m pip install lib-python/dist/kson_lang-*.tar.gz
+      - run:
+          name: Install test dependencies
+          command: |
+            python3 -m pip install pytest
+      - run:
+          name: Run smoke tests on sdist installation
+          command: |
+            python3 -m pytest lib-python -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            ./gradlew :lib-python:buildWheel
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-macos
+
+  test-python-sdist-windows:
+    executor:
+      name: windows/default
+      size: medium
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
+          shell: powershell.exe
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Check Python version and upgrade if needed
+          command: |
+            python --version
+            python -m pip install --upgrade pip
+      - run:
+          name: Install kson from sdist
+          command: |
+            python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName
+          shell: powershell.exe
+      - run:
+          name: Install test dependencies
+          command: |
+            python -m pip install pytest
+      - run:
+          name: Run smoke tests on sdist installation
+          command: |
+            python -m pytest lib-python -v
+      - run:
+          name: Build platform-specific wheel
+          command: |
+            .\gradlew.bat :lib-python:buildWheel --no-daemon
+      - store_artifacts:
+          path: lib-python/dist
+          destination: python-windows
+
 workflows:
+  version: 2
   build-all:
     jobs:
       - build-linux-amd64
       - build-windows-amd64
       - build-macos-arm64
+  build-python-and-test:
+    jobs:
+      - build-python-sdist:
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - test-python-sdist-linux-amd64:
+          requires:
+            - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - test-python-sdist-macos:
+          requires:
+            - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - test-python-sdist-windows:
+          requires:
+            - build-python-sdist
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
