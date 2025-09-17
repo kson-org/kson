@@ -44,9 +44,19 @@ person:
   %%
 ```
 
-Learn more [in the docs](docs/readme.md)
+### Why KSON?
 
-### Development setup
+One of the key things KSON wants to say is: let's keep everything that's great about YAML and JSON as "Configuration User Interfaces", and let's make those interfaces more toolable, reliable, and fun.  Here are some of the ways we do that:
+
+- KSON is a [verified superset of JSON](https://github.com/kson-org/kson/pull/72), has [native JSON Schema support](https://github.com/kson-org/kson/pull/186), transpiles reliably to [YAML (with comments preserved!)](https://github.com/kson-org/kson/pull/80), and is likely available wherever you want it&mdash;current supported platforms: [JS](https://www.npmjs.com/package/@kson_org/kson), [Python](https://pypi.org/project/kson-lang/), [Rust](https://crates.io/crates/kson-rs), [JVM](https://central.sonatype.com/artifact/org.kson/kson-jvm), and [Kotlin Multiplatform](https://central.sonatype.com/artifact/org.kson/kson)
+
+- KSON is also widely available in developer tools, with support for [VS Code](https://marketplace.visualstudio.com/items?itemName=kson.kson), [Jetbrains IDEs](todo add link when publishing completes), and anywhere you can plug in an [LSP](https://github.com/kson-org/kson/tree/main/tooling/language-server-protocol).
+
+Learn more at _**[kson.org](https://kson.org)**_, try it out now in our [online playground](https://kson.org/playground/), and come join our community on [Zulip](https://kson-org.zulipchat.com/)
+
+### Developer setup
+
+We welcome you to dive in this project to explore, experiment, or contribute. A lot of care, craft, attention and joy went into making this project understandable and approachable. Hopefully some of that shines through when you dive in. Please feel free to ask questions on [Zulip](https://kson-org.zulipchat.com/) if you want any support finding your way around the code here.  
 
 * Clone this repo, then run `./gradlew check` in its root dir to validate everything builds and runs correctly.
   * There should be no other dependencies needed (even [the JDK is defined and managed by the build](jdk.properties)). See [Troubleshooting setup](#troubleshooting-setup) below if you run into any issues
