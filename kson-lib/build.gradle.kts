@@ -12,7 +12,7 @@ repositories {
 }
 
 group = "org.kson"
-version = "0.1.1-SNAPSHOT"
+version = "0.1.1"
 
 tasks {
     val copyHeaderDynamic = register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
