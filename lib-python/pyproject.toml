@@ -1,5 +1,5 @@
 [project]
-name = "kson-py"
+name = "kson-lang"
 version = "0.1.0"
 authors = [
   { name="KSON", email="kson@kson.org" },
