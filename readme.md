@@ -50,7 +50,7 @@ One of the key things KSON wants to say is: let's keep everything that's great a
 
 - KSON is a [verified superset of JSON](https://github.com/kson-org/kson/pull/72), has [native JSON Schema support](https://github.com/kson-org/kson/pull/186), transpiles reliably to [YAML (with comments preserved!)](https://github.com/kson-org/kson/pull/80), and is likely available wherever you want it&mdash;current supported platforms: [JS](https://www.npmjs.com/package/@kson_org/kson), [Python](https://pypi.org/project/kson-lang/), [Rust](https://crates.io/crates/kson-rs), [JVM](https://central.sonatype.com/artifact/org.kson/kson-jvm), and [Kotlin Multiplatform](https://central.sonatype.com/artifact/org.kson/kson)
 
-- KSON is also widely available in developer tools, with support for [VS Code](https://marketplace.visualstudio.com/items?itemName=kson.kson), [Jetbrains IDEs](todo add link when publishing completes), and anywhere you can plug in an [LSP](https://github.com/kson-org/kson/tree/main/tooling/language-server-protocol).
+- KSON is also widely available in developer tools, with support for [VS Code](https://marketplace.visualstudio.com/items?itemName=kson.kson), [Jetbrains IDEs](https://plugins.jetbrains.com/plugin/28510-kson-language), and anywhere you can plug in an [LSP](https://github.com/kson-org/kson/tree/main/tooling/language-server-protocol).
 
 Learn more at _**[kson.org](https://kson.org)**_, try it out now in our [online playground](https://kson.org/playground/), and come join our community on [Zulip](https://kson-org.zulipchat.com/)
 

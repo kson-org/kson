@@ -8,12 +8,9 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.*
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
 import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.psi.KsonEmbedBlock
 import org.kson.parser.ParsedElementType
-import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * Provides code folding support for Kson files.
@@ -100,7 +97,7 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
         val range = when (element.elementType) {
             elem(ParsedElementType.DASH_LIST), elem(ParsedElementType.BRACKET_LIST), elem(ParsedElementType.DASH_DELIMITED_LIST) -> {
                 if (element.prevSibling != null && element.prevSibling.text.contains("\n")) {
-                    TextRange(element.prevSibling.startOffset, element.endOffset)
+                    TextRange(element.prevSibling.textRange.startOffset, element.textRange.endOffset)
                 } else {
                     element.textRange
                 }
@@ -171,7 +168,7 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
             elem(ParsedElementType.OBJECT_PROPERTY) -> {
                 val keyWord = (node.psi.firstChild?.text) ?: return ""
                 val numKeys = countChildKeys(node.psi)
-                "${keyWord}: { ${numKeys} ${pluralize(numKeys, "key")} }"
+                "${keyWord}: { $numKeys ${pluralize(numKeys, "key")} }"
             }
 
             elem(ParsedElementType.EMBED_BLOCK) -> {
