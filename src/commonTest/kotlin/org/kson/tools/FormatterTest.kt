@@ -1921,4 +1921,223 @@ class FormatterTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testClassicFormattingStyleSimpleObject() {
+        assertFormatting(
+            """
+                key: value
+            """.trimIndent(),
+            """
+                {
+                  "key": "value"
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+
+        assertFormatting(
+            """
+                {
+                  key1: value1
+                  key2: value2
+                }
+            """.trimIndent(),
+            """
+                {
+                  "key1": "value1",
+                  "key2": "value2"
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleEmbedBlock() {
+        assertFormatting(
+            """
+                key: %tag
+                content
+                %%
+            """.trimIndent(),
+            """
+                {
+                  "key": %tag
+                    content
+                    %%
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleWithComments() {
+        assertFormatting(
+            """
+                # Header comment
+                
+                  key: value
+                
+            """.trimIndent(),
+            """
+                {
+                  # Header comment
+                  "key": "value"
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+
+        assertFormatting(
+            """
+                {
+                  # Property comment
+                  key: value
+                  # Another comment
+                  key2: value2
+                }
+            """.trimIndent(),
+            """
+                {
+                  # Property comment
+                  "key": "value",
+                  # Another comment
+                  "key2": "value2"
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleNestedObjects() {
+        assertFormatting(
+            """
+                outer:
+                  inner: value
+            """.trimIndent(),
+            """
+                {
+                  "outer": {
+                    "inner": "value"
+                  }
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+
+        assertFormatting(
+            """
+                {
+                  level1: {
+                    level2: {
+                      level3: value
+                    }
+                  }
+                }
+            """.trimIndent(),
+            """
+                {
+                  "level1": {
+                    "level2": {
+                      "level3": "value"
+                    }
+                  }
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleLists() {
+        assertFormatting(
+            """
+                - 1
+                - 2
+                - 3
+            """.trimIndent(),
+            """
+                [
+                  1,
+                  2,
+                  3
+                ]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+
+        assertFormatting(
+            """
+                items: [1, 2, 3]
+            """.trimIndent(),
+            """
+                {
+                  "items": [
+                    1,
+                    2,
+                    3
+                  ]
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleMixedStructures() {
+        assertFormatting(
+            """
+                users:
+                  - name: Alice
+                    age: 30
+                  - name: Bob
+                    age: 25
+            """.trimIndent(),
+            """
+                {
+                  "users": [
+                    {
+                      "name": "Alice",
+                      "age": 30
+                    },
+                    {
+                      "name": "Bob",
+                      "age": 25
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
+
+    @Test
+    fun testClassicFormattingStyleEmptyStructures() {
+        assertFormatting(
+            """
+                "key": {}
+            """.trimIndent(),
+            """
+                {
+                  "key": {}
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+
+        assertFormatting(
+            """
+                key: []
+            """.trimIndent(),
+            """
+                {
+                  "key": []
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+    }
 }
