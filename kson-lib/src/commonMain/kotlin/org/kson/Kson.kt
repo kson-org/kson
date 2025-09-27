@@ -666,6 +666,27 @@ class SimpleListIterator(list: List<Any>) {
     }
 }
 
+/**
+ * Helper class to represent a key-value pair from a Map with KsonValue keys for FFI users
+ */
+data class KsonValueMapEntry(val key: KsonValue, val value: KsonValue)
+
+/**
+ * Helper class to let FFI users iterate through the entries of a Map with KsonValue keys
+ */
+class KsonValueMapIterator(map: Map<out KsonValue, KsonValue>) {
+    private val inner = map.entries.iterator()
+
+    fun next(): KsonValueMapEntry? {
+        return if (inner.hasNext()) {
+            val entry = inner.next()
+            KsonValueMapEntry(entry.key, entry.value)
+        } else {
+            null
+        }
+    }
+}
+
 
 /**
  * Helper object to let FFI users access enum properties

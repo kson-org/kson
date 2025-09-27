@@ -143,6 +143,72 @@ pub(crate) fn from_kotlin_list<T: FromKotlinObject>(
     vec
 }
 
+pub(crate) fn from_kotlin_value_map<
+    K: FromKotlinObject + Eq + std::hash::Hash,
+    V: FromKotlinObject,
+>(
+    map: kson_kref_kotlin_collections_Map,
+) -> std::collections::HashMap<K, V> {
+    let mut hash_map = std::collections::HashMap::new();
+    let iterator = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValueMapIterator
+            .KsonValueMapIterator
+            .unwrap()(map)
+    };
+    loop {
+        let next = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .KsonValueMapIterator
+                .next
+                .unwrap()(iterator)
+        };
+        if next.pinned.is_null() {
+            break;
+        }
+
+        let key = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .KsonValueMapEntry
+                .get_key
+                .unwrap()(next)
+        };
+
+        let value = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .KsonValueMapEntry
+                .get_value
+                .unwrap()(next)
+        };
+
+        hash_map.insert(
+            FromKotlinObject::from_kotlin_object(key.pinned),
+            FromKotlinObject::from_kotlin_object(value.pinned),
+        );
+
+        unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(next.pinned) };
+    }
+
+    unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(iterator.pinned) };
+    hash_map
+}
+
 pub(crate) struct KsonPtr {
     pub(crate) inner: std::sync::Arc<OwnedKotlinPtr>,
 }

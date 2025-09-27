@@ -148,6 +148,33 @@ impl Analysis {
         };
         util::from_kotlin_list(result)
     }
+
+    pub fn kson_value(&self) -> Option<KsonValue> {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .Analysis
+            .get_ksonValue
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_Analysis {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        if result.pinned == std::ptr::null_mut() {
+            None
+        } else {
+            Some(KsonValue {
+                kson_ref: KsonPtr {
+                    inner: std::sync::Arc::new(OwnedKotlinPtr {
+                        inner: result.pinned,
+                    }),
+                },
+            })
+        }
+    }
 }
 
 declare_kotlin_object! {
@@ -796,3 +823,333 @@ impl_kotlin_object_for_c_enum!(
     28 = TokenType::Whitespace = KSON_SYMBOLS.kotlin.root.org.kson.TokenType.WHITESPACE,
     29 = TokenType::Eof = KSON_SYMBOLS.kotlin.root.org.kson.TokenType.EOF,
 );
+
+#[derive(Copy, Clone)]
+pub enum KsonValueType {
+    Object,
+    Array,
+    String,
+    Integer,
+    Decimal,
+    Boolean,
+    Null,
+    Embed,
+}
+
+impl_kotlin_object_for_c_enum!(
+    KsonValueType,
+    0 = KsonValueType::Object = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.OBJECT,
+    1 = KsonValueType::Array = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.ARRAY,
+    2 = KsonValueType::String = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.STRING,
+    3 = KsonValueType::Integer = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.INTEGER,
+    4 = KsonValueType::Decimal = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.DECIMAL,
+    5 = KsonValueType::Boolean = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.BOOLEAN,
+    6 = KsonValueType::Null = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.NULL,
+    7 = KsonValueType::Embed = KSON_SYMBOLS.kotlin.root.org.kson.KsonValueType.EMBED,
+);
+
+impl KsonValueType {
+    pub fn name(self) -> String {
+        util::enum_name(self)
+    }
+}
+
+declare_kotlin_object! {
+    /// Base class for parsed Kson values
+    KsonValue
+}
+
+impl PartialEq for KsonValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.kson_ref.inner.inner == other.kson_ref.inner.inner
+    }
+}
+
+impl Eq for KsonValue {}
+
+impl std::hash::Hash for KsonValue {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.kson_ref.inner.inner.hash(state);
+    }
+}
+
+impl KsonValue {
+    pub fn value_type(&self) -> KsonValueType {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .get_type
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        KsonValueType::from_kotlin_object(result.pinned)
+    }
+
+    pub fn start(&self) -> Position {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .get_start
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        Position {
+            kson_ref: KsonPtr {
+                inner: std::sync::Arc::new(OwnedKotlinPtr {
+                    inner: result.pinned,
+                }),
+            },
+        }
+    }
+
+    pub fn end(&self) -> Position {
+        let f = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.get_end.unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        Position {
+            kson_ref: KsonPtr {
+                inner: std::sync::Arc::new(OwnedKotlinPtr {
+                    inner: result.pinned,
+                }),
+            },
+        }
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson object with key-value pairs
+    KsonValueObject
+}
+
+impl KsonValueObject {
+    pub fn properties(&self) -> std::collections::HashMap<KsonValue, KsonValue> {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonObject
+            .get_properties
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        util::from_kotlin_value_map(result)
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson array with elements
+    KsonValueArray
+}
+
+impl KsonValueArray {
+    pub fn elements(&self) -> Vec<KsonValue> {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonArray
+            .get_elements
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonArray {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        util::from_kotlin_list(result)
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson string value
+    KsonValueString
+}
+
+impl KsonValueString {
+    pub fn value(&self) -> String {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonString
+            .get_value
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonString {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        util::from_kotlin_string(result)
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson integer number value
+    KsonValueInteger
+}
+
+impl KsonValueInteger {
+    pub fn value(&self) -> i32 {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonNumber
+            .Integer
+            .get_value
+            .unwrap();
+        unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Integer {
+                pinned: self.kson_ref.inner.inner,
+            })
+        }
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson decimal number value
+    KsonValueDecimal
+}
+
+impl KsonValueDecimal {
+    pub fn value(&self) -> f64 {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonNumber
+            .Decimal
+            .get_value
+            .unwrap();
+        unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Decimal {
+                pinned: self.kson_ref.inner.inner,
+            })
+        }
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson boolean value
+    KsonValueBoolean
+}
+
+impl KsonValueBoolean {
+    pub fn value(&self) -> bool {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonBoolean
+            .get_value
+            .unwrap();
+        unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonBoolean {
+                pinned: self.kson_ref.inner.inner,
+            })
+        }
+    }
+}
+
+declare_kotlin_object! {
+    /// A Kson null value
+    KsonValueNull
+}
+
+declare_kotlin_object! {
+    /// A Kson embed block
+    KsonValueEmbed
+}
+
+impl KsonValueEmbed {
+    pub fn tag(&self) -> Option<String> {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_tag
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        if result == std::ptr::null_mut() {
+            None
+        } else {
+            Some(util::from_kotlin_string(result))
+        }
+    }
+
+    pub fn metadata(&self) -> Option<String> {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_metadata
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        if result == std::ptr::null_mut() {
+            None
+        } else {
+            Some(util::from_kotlin_string(result))
+        }
+    }
+
+    pub fn content(&self) -> String {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_content
+            .unwrap();
+        let result = unsafe {
+            f(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.kson_ref.inner.inner,
+            })
+        };
+        util::from_kotlin_string(result)
+    }
+}

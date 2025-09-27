@@ -162,3 +162,82 @@ def test_kson_analysis():
 0,17 to 0,17 - EOF:
 """
     )
+
+
+def test_kson_value():
+    input = """key: value
+list:
+  - 1
+  - 2.1
+  - 3E5
+embed:%tag
+%%"""
+    analysis = Kson.analyze(input)
+    value = analysis.kson_value()
+    assert value is not None
+    assert isinstance(value, KsonValueObject)
+
+    properties = value.properties()
+    assert len(properties) == 3
+
+    mapped_properties = {key.value(): val for key, val in properties.items()}
+
+    # Check root object location (should span entire document)
+    assert value.start().line() == 0
+    assert value.start().column() == 0
+    assert value.end().line() == 6
+    assert value.end().column() == 2
+
+    # Check "key" property
+    key_value = mapped_properties["key"]
+    assert isinstance(key_value, KsonValueString)
+    assert key_value.value() == "value"
+    assert key_value.start().line() == 0
+    assert key_value.start().column() == 5
+    assert key_value.end().line() == 0
+    assert key_value.end().column() == 10
+
+    # Check "list" property
+    list_value = mapped_properties["list"]
+    assert isinstance(list_value, KsonValueArray)
+    elements = list_value.elements()
+    assert len(elements) == 3
+    assert list_value.start().line() == 2
+    assert list_value.start().column() == 2
+    assert list_value.end().line() == 4
+    assert list_value.end().column() == 7
+
+    # Check list elements
+    first_element = elements[0]
+    assert isinstance(first_element, KsonValueInteger)
+    assert first_element.value() == 1
+    assert first_element.start().line() == 2
+    assert first_element.start().column() == 4
+    assert first_element.end().line() == 2
+    assert first_element.end().column() == 5
+
+    second_element = elements[1]
+    assert isinstance(second_element, KsonValueDecimal)
+    assert second_element.value() == 2.1
+    assert second_element.start().line() == 3
+    assert second_element.start().column() == 4
+    assert second_element.end().line() == 3
+    assert second_element.end().column() == 7
+
+    third_element = elements[2]
+    assert isinstance(third_element, KsonValueDecimal)
+    assert third_element.value() == 3e5
+    assert third_element.start().line() == 4
+    assert third_element.start().column() == 4
+    assert third_element.end().line() == 4
+    assert third_element.end().column() == 7
+
+    # Check "embed" property
+    embed_value = mapped_properties["embed"]
+    assert isinstance(embed_value, KsonValueEmbed)
+    assert embed_value.tag() == "tag"
+    assert embed_value.content() == ""
+    assert embed_value.start().line() == 5
+    assert embed_value.start().column() == 6
+    assert embed_value.end().line() == 6
+    assert embed_value.end().column() == 2

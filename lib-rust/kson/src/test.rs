@@ -226,3 +226,101 @@ fn message_to_string(msg: &Message) -> String {
         msg.message()
     )
 }
+
+#[test]
+fn test_kson_value() {
+    let input = r#"key: value
+list:
+  - 1
+  - 2.1
+  - 3E5
+embed:%tag
+%%"#;
+    let analysis = Kson::analyze(input);
+    let kson_value = analysis.kson_value();
+    assert!(kson_value.is_some());
+
+    let value = kson_value.unwrap();
+    assert_eq!(value.value_type().name(), "OBJECT");
+
+    let obj = unsafe { std::mem::transmute::<KsonValue, KsonValueObject>(value) };
+    let properties = obj.properties();
+    assert_eq!(properties.len(), 3);
+
+    let mapped_properties: std::collections::HashMap<String, &KsonValue> = properties
+        .iter()
+        .map(|(key, value)| {
+            let key_string = unsafe { std::mem::transmute::<&KsonValue, &KsonValueString>(key) };
+            (key_string.value().to_string(), value)
+        })
+        .collect();
+
+    // Check root object location
+    let obj_as_value = unsafe { std::mem::transmute::<KsonValueObject, KsonValue>(obj) };
+    assert_eq!(obj_as_value.start().line(), 0);
+    assert_eq!(obj_as_value.start().column(), 0);
+    assert_eq!(obj_as_value.end().line(), 6);
+    assert_eq!(obj_as_value.end().column(), 2);
+
+    // Check "key" property
+    let key_value = mapped_properties.get("key").unwrap();
+    assert_eq!(key_value.value_type().name(), "STRING");
+    let key_string = unsafe { std::mem::transmute::<&KsonValue, &KsonValueString>(key_value) };
+    assert_eq!(key_string.value(), "value");
+    assert_eq!(key_value.start().line(), 0);
+    assert_eq!(key_value.start().column(), 5);
+    assert_eq!(key_value.end().line(), 0);
+    assert_eq!(key_value.end().column(), 10);
+
+    // Check "list" property
+    let list_value = mapped_properties.get("list").unwrap();
+    assert_eq!(list_value.value_type().name(), "ARRAY");
+    let list_array = unsafe { std::mem::transmute::<&KsonValue, &KsonValueArray>(list_value) };
+    let elements = list_array.elements();
+    assert_eq!(elements.len(), 3);
+    assert_eq!(list_value.start().line(), 2);
+    assert_eq!(list_value.start().column(), 2);
+    assert_eq!(list_value.end().line(), 4);
+    assert_eq!(list_value.end().column(), 7);
+
+    // Check list elements
+    let first_element = &elements[0];
+    assert_eq!(first_element.value_type().name(), "INTEGER");
+    let first_int = unsafe { std::mem::transmute::<&KsonValue, &KsonValueInteger>(first_element) };
+    assert_eq!(first_int.value(), 1);
+    assert_eq!(first_element.start().line(), 2);
+    assert_eq!(first_element.start().column(), 4);
+    assert_eq!(first_element.end().line(), 2);
+    assert_eq!(first_element.end().column(), 5);
+
+    let second_element = &elements[1];
+    assert_eq!(second_element.value_type().name(), "DECIMAL");
+    let second_decimal =
+        unsafe { std::mem::transmute::<&KsonValue, &KsonValueDecimal>(second_element) };
+    assert_eq!(second_decimal.value(), 2.1);
+    assert_eq!(second_element.start().line(), 3);
+    assert_eq!(second_element.start().column(), 4);
+    assert_eq!(second_element.end().line(), 3);
+    assert_eq!(second_element.end().column(), 7);
+
+    let third_element = &elements[2];
+    assert_eq!(third_element.value_type().name(), "DECIMAL");
+    let third_decimal =
+        unsafe { std::mem::transmute::<&KsonValue, &KsonValueDecimal>(third_element) };
+    assert_eq!(third_decimal.value(), 3e5);
+    assert_eq!(third_element.start().line(), 4);
+    assert_eq!(third_element.start().column(), 4);
+    assert_eq!(third_element.end().line(), 4);
+    assert_eq!(third_element.end().column(), 7);
+
+    // Check "embed" property
+    let embed_value = mapped_properties.get("embed").unwrap();
+    assert_eq!(embed_value.value_type().name(), "EMBED");
+    let embed_block = unsafe { std::mem::transmute::<&KsonValue, &KsonValueEmbed>(embed_value) };
+    assert_eq!(embed_block.tag(), Some("tag".to_string()));
+    assert_eq!(embed_block.content(), "");
+    assert_eq!(embed_value.start().line(), 5);
+    assert_eq!(embed_value.start().column(), 6);
+    assert_eq!(embed_value.end().line(), 6);
+    assert_eq!(embed_value.end().column(), 2);
+}
