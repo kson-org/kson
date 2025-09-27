@@ -322,40 +322,34 @@ jobs:
 
 workflows:
   version: 2
+
+  # Main build workflow - runs on version tags
   build-all:
     jobs:
       - build-linux-amd64
-      - build-windows-amd64
-      - build-macos-arm64
+      - build-windows-amd64:
+          filters: &version-tag-filter
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - build-macos-arm64:
+          filters: *version-tag-filter
+
+  # Python package workflow - also runs on version tags
   build-python-and-test:
     jobs:
       - build-python-sdist:
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
+          filters: *version-tag-filter
       - test-python-sdist-linux-amd64:
           requires:
             - build-python-sdist
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
+          filters: *version-tag-filter
       - test-python-sdist-macos:
           requires:
             - build-python-sdist
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
+          filters: *version-tag-filter
       - test-python-sdist-windows:
           requires:
             - build-python-sdist
-          filters:
-            tags:
-              only: /^v\d+\.\d+\.\d+$/
-            branches:
-              ignore: /.*/
+          filters: *version-tag-filter
