@@ -192,6 +192,7 @@ data class FormatOptions(
             FormattingStyle.PLAIN -> InternalFormattingStyle.PLAIN
             FormattingStyle.DELIMITED -> InternalFormattingStyle.DELIMITED
             FormattingStyle.COMPACT -> InternalFormattingStyle.COMPACT
+            FormattingStyle.CLASSIC -> InternalFormattingStyle.CLASSIC
         }
         return KsonFormatterConfig(indentType = indentType, formattingStyle)
     }
@@ -206,7 +207,8 @@ enum class FormattingStyle{
      */
     PLAIN,
     DELIMITED,
-    COMPACT
+    COMPACT,
+    CLASSIC
 }
 
 /**
