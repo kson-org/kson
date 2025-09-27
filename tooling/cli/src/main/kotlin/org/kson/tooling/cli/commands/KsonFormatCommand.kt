@@ -43,7 +43,7 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
     ).single().default(IndentType.Spaces(2))
 
     private val style by option("--style", help = "Formatting style")
-        .choice("plain", "delimited", "compact")
+        .choice("plain", "delimited", "compact", "classic")
         .default("plain")
 
     override fun run() {
@@ -70,6 +70,7 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
             "plain" -> FormattingStyle.PLAIN
             "delimited" -> FormattingStyle.DELIMITED
             "compact" -> FormattingStyle.COMPACT
+            "classic" -> FormattingStyle.CLASSIC
             else -> FormattingStyle.PLAIN
         }
 
