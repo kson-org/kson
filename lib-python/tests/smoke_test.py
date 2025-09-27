@@ -32,6 +32,27 @@ def test_kson_format():
     )
 
 
+def test_kson_formatting_classic():
+    indent = IndentType.Spaces(2)
+    formatting = FormattingStyle.CLASSIC
+    result = Kson.format(
+        "key: [1, 2, 3, 4]",
+        FormatOptions(indent, formatting),
+    )
+
+    assert (
+        result
+        == """{
+  "key": [
+    1,
+    2,
+    3,
+    4
+  ]
+}"""
+    )
+
+
 def test_kson_to_json_success():
     result = Kson.to_json("key: [1, 2, 3, 4]")
     assert isinstance(result, Success)

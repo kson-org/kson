@@ -17,6 +17,25 @@ fn test_kson_format() {
 }
 
 #[test]
+fn test_kson_format_classic() {
+    let indent = IndentType::Spaces(IndentTypeSpaces::new(2));
+    let result = Kson::format(
+        "key: [1, 2, 3, 4]",
+        &FormatOptions::new(&indent, &FormattingStyle::Classic),
+    );
+    insta::assert_snapshot!(result, @r#"
+      {
+        "key": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+      "#);
+}
+
+#[test]
 fn test_kson_to_json_success() {
     let result = Kson::to_json("key: [1, 2, 3, 4]");
     match result {
