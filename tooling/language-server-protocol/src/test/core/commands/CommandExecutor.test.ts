@@ -148,4 +148,18 @@ describe('KSON Command Executor', () => {
         await executeAndAssertCommand(content, expected, commandParams);
     });
 
+    it('should execute classic formatting', async () => {
+        const content = '{"x" : 1, "y" : 2}';
+        const expectedContent = [
+            '{',
+            '  "x": 1,',
+            '  "y": 2',
+            '}'
+        ].join('\n');
+        const expected = buildWorkspaceEdit(TEST_URI, Range.create(0, 0, 0, 18), expectedContent);
+        const commandParams = buildCommandParams(CommandType.CLASSIC_FORMAT, TEST_URI, FormattingStyle.CLASSIC);
+
+        await executeAndAssertCommand(content, expected, commandParams);
+    });
+
 });
