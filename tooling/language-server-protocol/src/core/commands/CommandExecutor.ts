@@ -54,7 +54,8 @@ export class CommandExecutor {
         switch (command) {
             case CommandType.PLAIN_FORMAT:
             case CommandType.DELIMITED_FORMAT:
-            case CommandType.COMPACT_FORMAT: {
+            case CommandType.COMPACT_FORMAT:
+            case CommandType.CLASSIC_FORMAT: {
                 const indentType = this.getConfiguration().kson.formatOptions.indentType;
 
                 return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
