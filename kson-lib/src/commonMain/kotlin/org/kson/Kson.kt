@@ -654,7 +654,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
 /**
  * Helper class to let FFI users iterate through the elements of a [List]
  */
-class SimpleListIterator(list: List<Any>) {
+sealed class SimpleListIterator(list: List<Any>) {
     private val inner = list.iterator()
 
     fun next(): Any? {
@@ -667,20 +667,20 @@ class SimpleListIterator(list: List<Any>) {
 }
 
 /**
- * Helper class to represent a key-value pair from a Map with KsonValue keys for FFI users
+ * Helper class to represent a key-value pair from a Map for FFI users
  */
-data class KsonValueMapEntry(val key: KsonValue, val value: KsonValue)
+data class SimpleMapEntry(val key: Any, val value: Any)
 
 /**
- * Helper class to let FFI users iterate through the entries of a Map with KsonValue keys
+ * Helper class to let FFI users iterate through the entries of a Map
  */
-class KsonValueMapIterator(map: Map<out KsonValue, KsonValue>) {
+sealed class SimpleMapIterator(map: Map<*, *>) {
     private val inner = map.entries.iterator()
 
-    fun next(): KsonValueMapEntry? {
+    fun next(): SimpleMapEntry? {
         return if (inner.hasNext()) {
             val entry = inner.next()
-            KsonValueMapEntry(entry.key, entry.value)
+            SimpleMapEntry(entry.key!!, entry.value!!)
         } else {
             null
         }

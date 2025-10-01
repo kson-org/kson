@@ -241,86 +241,120 @@ embed:%tag
     assert!(kson_value.is_some());
 
     let value = kson_value.unwrap();
-    assert_eq!(value.value_type().name(), "OBJECT");
 
-    let obj = unsafe { std::mem::transmute::<KsonValue, KsonValueObject>(value) };
-    let properties = obj.properties();
+    // Check root object location
+    assert_eq!(value.start().line(), 0);
+    assert_eq!(value.start().column(), 0);
+    assert_eq!(value.end().line(), 6);
+    assert_eq!(value.end().column(), 2);
+
+    let KsonValue::KsonObject { ref properties, .. } = value else {
+        panic!("expected object, found {:?}", value);
+    };
+
     assert_eq!(properties.len(), 3);
 
     let mapped_properties: std::collections::HashMap<String, &KsonValue> = properties
         .iter()
         .map(|(key, value)| {
-            let key_string = unsafe { std::mem::transmute::<&KsonValue, &KsonValueString>(key) };
-            (key_string.value().to_string(), value)
+            let KsonValue::KsonString { value: key_str, .. } = key else {
+                panic!("expected string key");
+            };
+            (key_str.clone(), value)
         })
         .collect();
 
-    // Check root object location
-    let obj_as_value = unsafe { std::mem::transmute::<KsonValueObject, KsonValue>(obj) };
-    assert_eq!(obj_as_value.start().line(), 0);
-    assert_eq!(obj_as_value.start().column(), 0);
-    assert_eq!(obj_as_value.end().line(), 6);
-    assert_eq!(obj_as_value.end().column(), 2);
-
     // Check "key" property
     let key_value = mapped_properties.get("key").unwrap();
-    assert_eq!(key_value.value_type().name(), "STRING");
-    let key_string = unsafe { std::mem::transmute::<&KsonValue, &KsonValueString>(key_value) };
-    assert_eq!(key_string.value(), "value");
-    assert_eq!(key_value.start().line(), 0);
-    assert_eq!(key_value.start().column(), 5);
-    assert_eq!(key_value.end().line(), 0);
-    assert_eq!(key_value.end().column(), 10);
+    let KsonValue::KsonString {
+        value: key_str,
+        start,
+        end,
+    } = key_value
+    else {
+        panic!("expected string");
+    };
+    assert_eq!(key_str, "value");
+    assert_eq!(start.line(), 0);
+    assert_eq!(start.column(), 5);
+    assert_eq!(end.line(), 0);
+    assert_eq!(end.column(), 10);
 
     // Check "list" property
     let list_value = mapped_properties.get("list").unwrap();
-    assert_eq!(list_value.value_type().name(), "ARRAY");
-    let list_array = unsafe { std::mem::transmute::<&KsonValue, &KsonValueArray>(list_value) };
-    let elements = list_array.elements();
+    let KsonValue::KsonArray {
+        elements,
+        start,
+        end,
+    } = list_value
+    else {
+        panic!("expected array");
+    };
     assert_eq!(elements.len(), 3);
-    assert_eq!(list_value.start().line(), 2);
-    assert_eq!(list_value.start().column(), 2);
-    assert_eq!(list_value.end().line(), 4);
-    assert_eq!(list_value.end().column(), 7);
+    assert_eq!(start.line(), 2);
+    assert_eq!(start.column(), 2);
+    assert_eq!(end.line(), 4);
+    assert_eq!(end.column(), 7);
 
     // Check list elements
-    let first_element = &elements[0];
-    assert_eq!(first_element.value_type().name(), "INTEGER");
-    let first_int = unsafe { std::mem::transmute::<&KsonValue, &KsonValueInteger>(first_element) };
-    assert_eq!(first_int.value(), 1);
-    assert_eq!(first_element.start().line(), 2);
-    assert_eq!(first_element.start().column(), 4);
-    assert_eq!(first_element.end().line(), 2);
-    assert_eq!(first_element.end().column(), 5);
+    let KsonValue::KsonInteger {
+        value: first_val,
+        start,
+        end,
+    } = &elements[0]
+    else {
+        panic!("expected integer");
+    };
+    assert_eq!(*first_val, 1);
+    assert_eq!(start.line(), 2);
+    assert_eq!(start.column(), 4);
+    assert_eq!(end.line(), 2);
+    assert_eq!(end.column(), 5);
 
-    let second_element = &elements[1];
-    assert_eq!(second_element.value_type().name(), "DECIMAL");
-    let second_decimal =
-        unsafe { std::mem::transmute::<&KsonValue, &KsonValueDecimal>(second_element) };
-    assert_eq!(second_decimal.value(), 2.1);
-    assert_eq!(second_element.start().line(), 3);
-    assert_eq!(second_element.start().column(), 4);
-    assert_eq!(second_element.end().line(), 3);
-    assert_eq!(second_element.end().column(), 7);
+    let KsonValue::KsonDecimal {
+        value: second_val,
+        start,
+        end,
+    } = &elements[1]
+    else {
+        panic!("expected decimal");
+    };
+    assert_eq!(*second_val, 2.1);
+    assert_eq!(start.line(), 3);
+    assert_eq!(start.column(), 4);
+    assert_eq!(end.line(), 3);
+    assert_eq!(end.column(), 7);
 
-    let third_element = &elements[2];
-    assert_eq!(third_element.value_type().name(), "DECIMAL");
-    let third_decimal =
-        unsafe { std::mem::transmute::<&KsonValue, &KsonValueDecimal>(third_element) };
-    assert_eq!(third_decimal.value(), 3e5);
-    assert_eq!(third_element.start().line(), 4);
-    assert_eq!(third_element.start().column(), 4);
-    assert_eq!(third_element.end().line(), 4);
-    assert_eq!(third_element.end().column(), 7);
+    let KsonValue::KsonDecimal {
+        value: third_val,
+        start,
+        end,
+    } = &elements[2]
+    else {
+        panic!("expected decimal");
+    };
+    assert_eq!(*third_val, 3e5);
+    assert_eq!(start.line(), 4);
+    assert_eq!(start.column(), 4);
+    assert_eq!(end.line(), 4);
+    assert_eq!(end.column(), 7);
 
     // Check "embed" property
     let embed_value = mapped_properties.get("embed").unwrap();
-    assert_eq!(embed_value.value_type().name(), "EMBED");
-    let embed_block = unsafe { std::mem::transmute::<&KsonValue, &KsonValueEmbed>(embed_value) };
-    assert_eq!(embed_block.tag(), Some("tag".to_string()));
-    assert_eq!(embed_block.content(), "");
-    assert_eq!(embed_value.start().line(), 5);
-    assert_eq!(embed_value.start().column(), 6);
-    assert_eq!(embed_value.end().line(), 6);
-    assert_eq!(embed_value.end().column(), 2);
+    let KsonValue::KsonEmbed {
+        tag,
+        content,
+        start,
+        end,
+        ..
+    } = embed_value
+    else {
+        panic!("expected embed");
+    };
+    assert_eq!(tag, &Some("tag".to_string()));
+    assert_eq!(content, "");
+    assert_eq!(start.line(), 5);
+    assert_eq!(start.column(), 6);
+    assert_eq!(end.line(), 6);
+    assert_eq!(end.column(), 2);
 }

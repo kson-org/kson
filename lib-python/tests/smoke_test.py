@@ -175,7 +175,7 @@ embed:%tag
     analysis = Kson.analyze(input)
     value = analysis.kson_value()
     assert value is not None
-    assert isinstance(value, KsonValueObject)
+    assert isinstance(value, KsonValue.KsonObject)
 
     properties = value.properties()
     assert len(properties) == 3
@@ -190,7 +190,7 @@ embed:%tag
 
     # Check "key" property
     key_value = mapped_properties["key"]
-    assert isinstance(key_value, KsonValueString)
+    assert isinstance(key_value, KsonValue.KsonString)
     assert key_value.value() == "value"
     assert key_value.start().line() == 0
     assert key_value.start().column() == 5
@@ -199,7 +199,7 @@ embed:%tag
 
     # Check "list" property
     list_value = mapped_properties["list"]
-    assert isinstance(list_value, KsonValueArray)
+    assert isinstance(list_value, KsonValue.KsonArray)
     elements = list_value.elements()
     assert len(elements) == 3
     assert list_value.start().line() == 2
@@ -209,7 +209,7 @@ embed:%tag
 
     # Check list elements
     first_element = elements[0]
-    assert isinstance(first_element, KsonValueInteger)
+    assert isinstance(first_element, KsonValue.KsonNumber.Integer)
     assert first_element.value() == 1
     assert first_element.start().line() == 2
     assert first_element.start().column() == 4
@@ -217,7 +217,7 @@ embed:%tag
     assert first_element.end().column() == 5
 
     second_element = elements[1]
-    assert isinstance(second_element, KsonValueDecimal)
+    assert isinstance(second_element, KsonValue.KsonNumber.Decimal)
     assert second_element.value() == 2.1
     assert second_element.start().line() == 3
     assert second_element.start().column() == 4
@@ -225,7 +225,7 @@ embed:%tag
     assert second_element.end().column() == 7
 
     third_element = elements[2]
-    assert isinstance(third_element, KsonValueDecimal)
+    assert isinstance(third_element, KsonValue.KsonNumber.Decimal)
     assert third_element.value() == 3e5
     assert third_element.start().line() == 4
     assert third_element.start().column() == 4
@@ -234,7 +234,7 @@ embed:%tag
 
     # Check "embed" property
     embed_value = mapped_properties["embed"]
-    assert isinstance(embed_value, KsonValueEmbed)
+    assert isinstance(embed_value, KsonValue.KsonEmbed)
     assert embed_value.tag() == "tag"
     assert embed_value.content() == ""
     assert embed_value.start().line() == 5

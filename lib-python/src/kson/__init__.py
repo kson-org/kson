@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type
 from cffi import FFI
 from pathlib import Path
 
@@ -99,8 +99,14 @@ def _from_kotlin_list(
     return python_list
 
 
-def _from_kotlin_map(map: CData, wrap_as: Optional[Type]) -> Dict[str, Any]:
-    python_dict: Dict[str, Any] = {}
+def _from_kotlin_map(
+    map: CData,
+    key_type: str,
+    value_type: str,
+    key_wrap_as: Optional[Type],
+    value_wrap_as: Optional[Type],
+) -> Dict[Any, Any]:
+    python_dict: Dict[Any, Any] = {}
     iterator = symbols.kotlin.root.org.kson.SimpleMapIterator.SimpleMapIterator(map)
     while True:
         entry = symbols.kotlin.root.org.kson.SimpleMapIterator.next(iterator)
@@ -108,40 +114,18 @@ def _from_kotlin_map(map: CData, wrap_as: Optional[Type]) -> Dict[str, Any]:
             break
 
         key = symbols.kotlin.root.org.kson.SimpleMapEntry.get_key(entry)
-        key_str = _from_kotlin_string(key)
+        if key_wrap_as is not None:
+            tmp = object.__new__(key_wrap_as)
+            tmp.ptr = key
+            key = tmp
 
         value = symbols.kotlin.root.org.kson.SimpleMapEntry.get_value(entry)
-        if wrap_as is not None:
-            tmp = object.__new__(wrap_as)
+        if value_wrap_as is not None:
+            tmp = object.__new__(value_wrap_as)
             tmp.ptr = value
             value = tmp
 
-        python_dict[key_str] = value
-        symbols.DisposeStablePointer(entry.pinned)
-
-    symbols.DisposeStablePointer(iterator.pinned)
-    return python_dict
-
-
-def _from_kotlin_value_map(map: CData) -> Dict[Any, Any]:
-    python_dict: Dict[Any, Any] = {}
-    iterator = symbols.kotlin.root.org.kson.KsonValueMapIterator.KsonValueMapIterator(
-        map
-    )
-    while True:
-        entry = symbols.kotlin.root.org.kson.KsonValueMapIterator.next(iterator)
-        if entry.pinned == ffi.NULL:
-            break
-
-        key = symbols.kotlin.root.org.kson.KsonValueMapEntry.get_key(entry)
-        key_obj = _init_wrapper(KsonValue, key)
-        key_obj = key_obj._translate()
-
-        value = symbols.kotlin.root.org.kson.KsonValueMapEntry.get_value(entry)
-        value_obj = _init_wrapper(KsonValue, value)
-        value_obj = value_obj._translate()
-
-        python_dict[key_obj] = value_obj
+        python_dict[key] = value
         symbols.DisposeStablePointer(entry.pinned)
 
     symbols.DisposeStablePointer(iterator.pinned)
@@ -662,14 +646,15 @@ class KsonValue:
     """Base class for parsed Kson values."""
 
     ptr: CData
-    Object: Type
-    Array: Type
-    String: Type
-    Integer: Type
-    Decimal: Type
-    Boolean: Type
-    Null: Type
-    Embed: Type
+
+    # Type hints for nested classes (assigned later)
+    KsonObject: Type["_KsonObject"]
+    KsonArray: Type["_KsonArray"]
+    KsonString: Type["_KsonString"]
+    KsonBoolean: Type["_KsonBoolean"]
+    KsonNull: Type["_KsonNull"]
+    KsonEmbed: Type["_KsonEmbed"]
+    KsonNumber: Type["_KsonNumber"]
 
     def value_type(self) -> KsonValueType:
         result = _cast_and_call(
@@ -697,70 +682,77 @@ class KsonValue:
         if value_type == KsonValueType.OBJECT:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonObject._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Object, self.ptr)
+                return _init_wrapper(KsonValue.KsonObject, self.ptr)
         elif value_type == KsonValueType.ARRAY:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonArray._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Array, self.ptr)
+                return _init_wrapper(KsonValue.KsonArray, self.ptr)
         elif value_type == KsonValueType.STRING:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonString._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.String, self.ptr)
+                return _init_wrapper(KsonValue.KsonString, self.ptr)
         elif value_type == KsonValueType.INTEGER:
             subclass_type = (
                 symbols.kotlin.root.org.kson.KsonValue.KsonNumber.Integer._type()
             )
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Integer, self.ptr)
+                return _init_wrapper(KsonValue.KsonNumber.Integer, self.ptr)
         elif value_type == KsonValueType.DECIMAL:
             subclass_type = (
                 symbols.kotlin.root.org.kson.KsonValue.KsonNumber.Decimal._type()
             )
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Decimal, self.ptr)
+                return _init_wrapper(KsonValue.KsonNumber.Decimal, self.ptr)
         elif value_type == KsonValueType.BOOLEAN:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonBoolean._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Boolean, self.ptr)
+                return _init_wrapper(KsonValue.KsonBoolean, self.ptr)
         elif value_type == KsonValueType.NULL:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonNull._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Null, self.ptr)
+                return _init_wrapper(KsonValue.KsonNull, self.ptr)
         elif value_type == KsonValueType.EMBED:
             subclass_type = symbols.kotlin.root.org.kson.KsonValue.KsonEmbed._type()
             if symbols.IsInstance(self.ptr.pinned, subclass_type):
-                return _init_wrapper(KsonValue.Embed, self.ptr)
+                return _init_wrapper(KsonValue.KsonEmbed, self.ptr)
         raise RuntimeError("Unknown KsonValue subtype")
 
+    pass
 
-class KsonValueObject(KsonValue):
+
+# Define nested classes after KsonValue is fully defined
+class _KsonObject(KsonValue):
     """A Kson object with key-value pairs."""
 
-    def properties(self) -> Dict[KsonValueString, KsonValue]:
+    def properties(self) -> Dict["_KsonString", "KsonValue"]:
         result = _cast_and_call(
-            symbols.kotlin.root.org.kson.KsonValue.KsonObject.get_properties, [self.ptr]
+            symbols.kotlin.root.org.kson.KsonValue.KsonObject.get_properties,
+            [self.ptr],
         )
-        return _from_kotlin_value_map(result)
+        raw_dict = _from_kotlin_map(
+            result,
+            "kson_kref_org_kson_KsonValue_KsonString",
+            "kson_kref_org_kson_KsonValue",
+            KsonValue.KsonString,
+            KsonValue,
+        )
+        # Translate values to their specific subtypes
+        return {k: v._translate() for k, v in raw_dict.items()}
 
 
-KsonValue.Object = KsonValueObject
-
-
-class KsonValueArray(KsonValue):
+class _KsonArray(KsonValue):
     """A Kson array with elements."""
 
-    def elements(self) -> List[KsonValue]:
+    def elements(self) -> List["KsonValue"]:
         result = _cast_and_call(
-            symbols.kotlin.root.org.kson.KsonValue.KsonArray.get_elements, [self.ptr]
+            symbols.kotlin.root.org.kson.KsonValue.KsonArray.get_elements,
+            [self.ptr],
         )
         result = _from_kotlin_list(result, "kson_kref_org_kson_KsonValue", KsonValue)
         return [item._translate() for item in result]
 
 
-KsonValue.Array = KsonValueArray
-
-
-class KsonValueString(KsonValue):
+class _KsonString(KsonValue):
     """A Kson string value."""
 
     def value(self) -> str:
@@ -771,10 +763,7 @@ class KsonValueString(KsonValue):
         return result
 
 
-KsonValue.String = KsonValueString
-
-
-class KsonValueInteger(KsonValue):
+class _KsonNumberInteger(KsonValue):
     """A Kson integer number value."""
 
     def value(self) -> int:
@@ -785,10 +774,7 @@ class KsonValueInteger(KsonValue):
         return result
 
 
-KsonValue.Integer = KsonValueInteger
-
-
-class KsonValueDecimal(KsonValue):
+class _KsonNumberDecimal(KsonValue):
     """A Kson decimal number value."""
 
     def value(self) -> float:
@@ -799,10 +785,7 @@ class KsonValueDecimal(KsonValue):
         return result
 
 
-KsonValue.Decimal = KsonValueDecimal
-
-
-class KsonValueBoolean(KsonValue):
+class _KsonBoolean(KsonValue):
     """A Kson boolean value."""
 
     def value(self) -> bool:
@@ -812,19 +795,13 @@ class KsonValueBoolean(KsonValue):
         return bool(result)
 
 
-KsonValue.Boolean = KsonValueBoolean
-
-
-class KsonValueNull(KsonValue):
+class _KsonNull(KsonValue):
     """A Kson null value."""
 
     pass
 
 
-KsonValue.Null = KsonValueNull
-
-
-class KsonValueEmbed(KsonValue):
+class _KsonEmbed(KsonValue):
     """A Kson embed block."""
 
     def tag(self) -> Optional[str]:
@@ -837,7 +814,8 @@ class KsonValueEmbed(KsonValue):
 
     def metadata(self) -> Optional[str]:
         result = _cast_and_call(
-            symbols.kotlin.root.org.kson.KsonValue.KsonEmbed.get_metadata, [self.ptr]
+            symbols.kotlin.root.org.kson.KsonValue.KsonEmbed.get_metadata,
+            [self.ptr],
         )
         if result == ffi.NULL:
             return None
@@ -851,7 +829,24 @@ class KsonValueEmbed(KsonValue):
         return result
 
 
-KsonValue.Embed = KsonValueEmbed
+# Attach as nested classes
+KsonValue.KsonObject = _KsonObject
+KsonValue.KsonArray = _KsonArray
+KsonValue.KsonString = _KsonString
+KsonValue.KsonBoolean = _KsonBoolean
+KsonValue.KsonNull = _KsonNull
+KsonValue.KsonEmbed = _KsonEmbed
+
+
+# Create KsonNumber namespace
+class _KsonNumber:
+    """Base class for Kson number values."""
+
+    Integer = _KsonNumberInteger
+    Decimal = _KsonNumberDecimal
+
+
+KsonValue.KsonNumber = _KsonNumber
 
 
 class Kson:

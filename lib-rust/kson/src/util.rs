@@ -156,8 +156,8 @@ pub(crate) fn from_kotlin_value_map<
             .root
             .org
             .kson
-            .KsonValueMapIterator
-            .KsonValueMapIterator
+            .SimpleMapIterator
+            .SimpleMapIterator
             .unwrap()(map)
     };
     loop {
@@ -167,7 +167,7 @@ pub(crate) fn from_kotlin_value_map<
                 .root
                 .org
                 .kson
-                .KsonValueMapIterator
+                .SimpleMapIterator
                 .next
                 .unwrap()(iterator)
         };
@@ -181,7 +181,7 @@ pub(crate) fn from_kotlin_value_map<
                 .root
                 .org
                 .kson
-                .KsonValueMapEntry
+                .SimpleMapEntry
                 .get_key
                 .unwrap()(next)
         };
@@ -192,7 +192,7 @@ pub(crate) fn from_kotlin_value_map<
                 .root
                 .org
                 .kson
-                .KsonValueMapEntry
+                .SimpleMapEntry
                 .get_value
                 .unwrap()(next)
         };
