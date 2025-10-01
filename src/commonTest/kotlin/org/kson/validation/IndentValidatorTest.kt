@@ -1,8 +1,7 @@
 package org.kson.validation
 
 import org.kson.KsonCore
-import org.kson.parser.messages.MessageType.DASH_LIST_ITEMS_MISALIGNED
-import org.kson.parser.messages.MessageType.OBJECT_PROPERTIES_MISALIGNED
+import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -317,6 +316,20 @@ class IndentValidatorTest {
         assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
+    @Test
+    fun testNestedDashedList() {
+        val badSource = """
+                - -
+                  - 1
+            """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(1, badResult.messages.size)
+
+        val error = badResult.messages.first()
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, error.message.type)
+    }
+
     /**
      * Regression test for a special case where delimited items hanging off a list dash were tripping up
      * our alignment detection
@@ -356,9 +369,9 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     - # object hanging off dash
-                    {key1: x
-                    # this should not be considered mis-aligned
-                    key2: y}
+                     {key1: x
+                     # this should not be considered mis-aligned
+                     key2: y}
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -367,9 +380,9 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     - # list hanging off dash
-                    [x
-                    # this should not be considered mis-aligned
-                    y]
+                     [x
+                     # this should not be considered mis-aligned
+                     y]
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -378,9 +391,9 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     - # list hanging off dash
-                    < - x
-                    # this should not be considered mis-aligned
-                    - y>
+                     < - x
+                     # this should not be considered mis-aligned
+                     - y>
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -402,5 +415,114 @@ class IndentValidatorTest {
             ).messages.isEmpty(),
             "should never consider a non-leading item on a line to mis-aligned"
         )
+    }
+
+    @Test
+    fun testDeceptivelyAlignedSubObject() {
+        val badSource = """
+                key:
+                   nested1: 80
+                   nested2: 80000 nested3: 10000
+                   nested4: 12000 nested5:
+                   doubleNested: 14000
+            """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(1, badResult.messages.size)
+
+        val error = badResult.messages.first()
+        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, error.message.type)
+
+        val goodSource = """
+                key:
+                   nested1: 80
+                   nested2: 80000 nested3: 10000
+                   nested4: 12000 nested5:
+                                    doubleNested: 14000
+            """.trimIndent()
+        val goodResult = KsonCore.parseToAst(goodSource)
+        assertEquals(0, goodResult.messages.size)
+    }
+
+    @Test
+    fun testDeceptivelyAlignedSubList() {
+        val badSource = """
+                ports:
+                   - 80
+                   - 8000 - 10000
+                   - 12000 -
+                   - 14000
+            """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(1, badResult.messages.size)
+
+        val error = badResult.messages.first()
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, error.message.type)
+
+        val goodSource = """
+                ports:
+                   - 80
+                   - 8000 - 10000
+                   - 12000 -
+                             - 14000
+            """.trimIndent()
+        val goodResult = KsonCore.parseToAst(goodSource)
+        assertEquals(0, goodResult.messages.size)
+    }
+
+    @Test
+    fun testMixedSubListsAndObjects() {
+        val badSource = """
+                deceptive_list:
+                  - 1
+                  - key:
+                  # deceptive indent: nested under `key:`
+                  - 9
+                # deceptive indent: sibling to `key:`
+                deceptive_object:
+                    key: x
+                    list: - 
+                    # deceptive indent: nested under `list: - ` list
+                    key: x
+            """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(3, badResult.messages.size)
+
+        val errors = badResult.messages
+        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, errors[0].message.type)
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[1].message.type)
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[2].message.type)
+
+        val goodSource = """
+                deceptive_list:
+                  - 1
+                  - key:
+                      - 9
+                    deceptive_object:
+                      key: x
+                      list: - 
+                             key: x
+            """.trimIndent()
+        val goodResult = KsonCore.parseToAst(goodSource)
+        assertEquals(0, goodResult.messages.size)
+    }
+
+    @Test
+    fun testSimpleListValueNesting() {
+        val badSource = """
+                    -
+                bad_nest
+                    -
+                   also_bad
+            """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(2, badResult.messages.size)
+
+        val errors = badResult.messages
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[0].message.type)
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[1].message.type)
     }
 }
