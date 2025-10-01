@@ -248,113 +248,83 @@ embed:%tag
     assert_eq!(value.end().line(), 6);
     assert_eq!(value.end().column(), 2);
 
-    let KsonValue::KsonObject { ref properties, .. } = value else {
+    let KsonValue::KsonObject(obj) = value else {
         panic!("expected object, found {:?}", value);
     };
 
+    let properties = obj.properties();
     assert_eq!(properties.len(), 3);
 
     let mapped_properties: std::collections::HashMap<String, &KsonValue> = properties
         .iter()
         .map(|(key, value)| {
-            let KsonValue::KsonString { value: key_str, .. } = key else {
+            let KsonValue::KsonString(s) = key else {
                 panic!("expected string key");
             };
-            (key_str.clone(), value)
+            (s.value().clone(), value)
         })
         .collect();
 
     // Check "key" property
     let key_value = mapped_properties.get("key").unwrap();
-    let KsonValue::KsonString {
-        value: key_str,
-        start,
-        end,
-    } = key_value
-    else {
+    let KsonValue::KsonString(string) = key_value else {
         panic!("expected string");
     };
-    assert_eq!(key_str, "value");
-    assert_eq!(start.line(), 0);
-    assert_eq!(start.column(), 5);
-    assert_eq!(end.line(), 0);
-    assert_eq!(end.column(), 10);
+    assert_eq!(string.value(), "value");
+    assert_eq!(string.start().line(), 0);
+    assert_eq!(string.start().column(), 5);
+    assert_eq!(string.end().line(), 0);
+    assert_eq!(string.end().column(), 10);
 
     // Check "list" property
     let list_value = mapped_properties.get("list").unwrap();
-    let KsonValue::KsonArray {
-        elements,
-        start,
-        end,
-    } = list_value
-    else {
-        panic!("expected array");
+    let KsonValue::KsonArray(array) = list_value else {
+        panic!("expected arrayay");
     };
+    let elements = array.elements();
     assert_eq!(elements.len(), 3);
-    assert_eq!(start.line(), 2);
-    assert_eq!(start.column(), 2);
-    assert_eq!(end.line(), 4);
-    assert_eq!(end.column(), 7);
+    assert_eq!(array.start().line(), 2);
+    assert_eq!(array.start().column(), 2);
+    assert_eq!(array.end().line(), 4);
+    assert_eq!(array.end().column(), 7);
 
     // Check list elements
-    let KsonValue::KsonInteger {
-        value: first_val,
-        start,
-        end,
-    } = &elements[0]
-    else {
+    let KsonValue::KsonInteger(integer) = &elements[0] else {
         panic!("expected integer");
     };
-    assert_eq!(*first_val, 1);
-    assert_eq!(start.line(), 2);
-    assert_eq!(start.column(), 4);
-    assert_eq!(end.line(), 2);
-    assert_eq!(end.column(), 5);
+    assert_eq!(integer.value(), 1);
+    assert_eq!(integer.start().line(), 2);
+    assert_eq!(integer.start().column(), 4);
+    assert_eq!(integer.end().line(), 2);
+    assert_eq!(integer.end().column(), 5);
 
-    let KsonValue::KsonDecimal {
-        value: second_val,
-        start,
-        end,
-    } = &elements[1]
-    else {
+    let KsonValue::KsonDecimal(decimal1) = &elements[1] else {
         panic!("expected decimal");
     };
-    assert_eq!(*second_val, 2.1);
-    assert_eq!(start.line(), 3);
-    assert_eq!(start.column(), 4);
-    assert_eq!(end.line(), 3);
-    assert_eq!(end.column(), 7);
+    assert_eq!(decimal1.value(), 2.1);
+    assert_eq!(decimal1.start().line(), 3);
+    assert_eq!(decimal1.start().column(), 4);
+    assert_eq!(decimal1.end().line(), 3);
+    assert_eq!(decimal1.end().column(), 7);
 
-    let KsonValue::KsonDecimal {
-        value: third_val,
-        start,
-        end,
-    } = &elements[2]
-    else {
+    let KsonValue::KsonDecimal(decimal2) = &elements[2] else {
         panic!("expected decimal");
     };
-    assert_eq!(*third_val, 3e5);
-    assert_eq!(start.line(), 4);
-    assert_eq!(start.column(), 4);
-    assert_eq!(end.line(), 4);
-    assert_eq!(end.column(), 7);
+    assert_eq!(decimal2.value(), 3e5);
+    assert_eq!(decimal2.start().line(), 4);
+    assert_eq!(decimal2.start().column(), 4);
+    assert_eq!(decimal2.end().line(), 4);
+    assert_eq!(decimal2.end().column(), 7);
 
     // Check "embed" property
     let embed_value = mapped_properties.get("embed").unwrap();
-    let KsonValue::KsonEmbed {
-        tag,
-        content,
-        start,
-        end,
-        ..
-    } = embed_value
-    else {
+    let KsonValue::KsonEmbed(embed) = embed_value else {
         panic!("expected embed");
     };
-    assert_eq!(tag, &Some("tag".to_string()));
-    assert_eq!(content, "");
-    assert_eq!(start.line(), 5);
-    assert_eq!(start.column(), 6);
-    assert_eq!(end.line(), 6);
-    assert_eq!(end.column(), 2);
+    assert_eq!(embed.tag(), Some("tag".to_string()));
+    assert_eq!(embed.content(), "");
+    assert_eq!(embed.start().line(), 5);
+    assert_eq!(embed.start().column(), 6);
+    assert_eq!(embed.end().line(), 6);
+    assert_eq!(embed.end().column(), 2);
 }

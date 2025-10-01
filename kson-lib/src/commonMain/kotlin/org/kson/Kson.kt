@@ -23,6 +23,7 @@ import org.kson.value.KsonNull as InternalKsonNull
 import org.kson.value.EmbedBlock as InternalEmbedBlock
 import kotlin.js.JsExport
 import kotlin.ConsistentCopyVisibility
+import kotlin.js.JsName
 
 /**
  * The [Kson](https://kson.org) language
@@ -595,6 +596,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      * A Kson number value.
      */
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
+          @ConsistentCopyVisibility
           data class Integer internal constructor(
               val value: Int,
               private val internalStart: Position,
@@ -603,6 +605,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
               override val type = KsonValueType.INTEGER
           }
 
+        @ConsistentCopyVisibility
         data class Decimal internal constructor(
             val value: Double,
             private val internalStart: Position,
@@ -694,4 +697,23 @@ sealed class SimpleMapIterator(map: Map<*, *>) {
 object EnumHelper {
     fun name(value: Enum<*>): String = value.name
     fun ordinal(value: Enum<*>): Int = value.ordinal
+}
+
+/**
+ * Helper object to let FFI users access functions for the `Any` type
+ */
+object AnyHelper {
+    @JsName("anyToString")
+    fun toString(x: Any): String {
+        return x.toString()
+    }
+
+    fun equals(x: Any, y: Any): Boolean {
+        return x == y
+    }
+
+    @JsName("anyHashCode")
+    fun hashCode(x: Any): Int {
+        return x.hashCode()
+    }
 }

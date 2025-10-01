@@ -47,6 +47,97 @@ impl ToKotlinObject for kson_KNativePtr {
     }
 }
 
+impl<T: ToKotlinObject> ToKotlinObject for &T {
+    fn to_kotlin_object(&self) -> kson_KNativePtr {
+        (*self).to_kotlin_object()
+    }
+}
+
+pub(crate) fn to_string<T: ToKotlinObject>(x: T) -> String {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS
+        .kotlin
+        .root
+        .org
+        .kson
+        .AnyHelper
+        .toString
+        .unwrap();
+    let result = unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+        )
+    };
+    from_kotlin_string(result)
+}
+
+pub(crate) fn equals<T: ToKotlinObject, U: ToKotlinObject>(x: T, y: U) -> bool {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS.kotlin.root.org.kson.AnyHelper.equals.unwrap();
+    unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: y.to_kotlin_object(),
+            },
+        )
+    }
+}
+
+pub(crate) fn apply_hash_code<T: ToKotlinObject, H: std::hash::Hasher>(x: T, hasher: &mut H) {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS
+        .kotlin
+        .root
+        .org
+        .kson
+        .AnyHelper
+        .hashCode
+        .unwrap();
+    let kotlin_hash = unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+        )
+    };
+    hasher.write_i32(kotlin_hash);
+}
+
 pub(crate) fn enum_name<T: ToKotlinObject>(value: T) -> String {
     let ptr = value.to_kotlin_object();
     let helper_instance = unsafe {
@@ -209,6 +300,7 @@ pub(crate) fn from_kotlin_value_map<
     hash_map
 }
 
+#[derive(Clone)]
 pub(crate) struct KsonPtr {
     pub(crate) inner: std::sync::Arc<OwnedKotlinPtr>,
 }

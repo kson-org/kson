@@ -7,7 +7,7 @@ mod test;
 mod macros;
 
 use crate::util::{FromKotlinObject, KsonPtr, OwnedKotlinPtr, ToKotlinObject};
-use kson_sys::kson_KNativePtr;
+
 #[cfg(any(feature = "dynamic-linking", target_os = "windows"))]
 static KSON_LIB: std::sync::LazyLock<libloading::Library> = std::sync::LazyLock::new(|| unsafe {
     #[cfg(target_os = "windows")]
@@ -189,28 +189,18 @@ impl std::fmt::Debug for Position {
     }
 }
 
-impl PartialEq for Position {
-    fn eq(&self, other: &Self) -> bool {
-        self.line() == other.line() && self.column() == other.column()
-    }
-}
-
 impl Eq for Position {}
-
-impl std::hash::Hash for Position {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.line().hash(state);
-        self.column().hash(state);
+impl PartialEq for Position {
+    fn eq(&self, other: &Position) -> bool {
+        util::equals(self, other)
     }
 }
-
-impl Clone for Position {
-    fn clone(&self) -> Self {
-        Position {
-            kson_ref: crate::util::KsonPtr {
-                inner: self.kson_ref.inner.clone(),
-            },
-        }
+impl std::hash::Hash for Position {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self, state)
     }
 }
 
@@ -883,27 +873,55 @@ impl KsonValueType {
     }
 }
 
-declare_kotlin_object! {
-    /// Internal base type for KsonValue
-    KsonValueBase
+/// A parsed Kson value
+#[derive(Clone)]
+pub enum KsonValue {
+    KsonObject(KsonValueObject),
+    KsonArray(KsonValueArray),
+    KsonString(KsonValueString),
+    KsonInteger(KsonValueInteger),
+    KsonDecimal(KsonValueDecimal),
+    KsonBoolean(KsonValueBoolean),
+    KsonNull(KsonValueNull),
+    KsonEmbed(KsonValueEmbed),
 }
 
-impl PartialEq for KsonValueBase {
-    fn eq(&self, other: &Self) -> bool {
-        self.kson_ref.inner.inner == other.kson_ref.inner.inner
+impl_kotlin_object_for_enum!(
+    KsonValue,
+    KsonValue::KsonObject where KsonValueObject = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonObject,
+    KsonValue::KsonArray where KsonValueArray = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonArray,
+    KsonValue::KsonString where KsonValueString = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonString,
+    KsonValue::KsonInteger where KsonValueInteger = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonNumber.Integer,
+    KsonValue::KsonDecimal where KsonValueDecimal = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonNumber.Decimal,
+    KsonValue::KsonBoolean where KsonValueBoolean = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonBoolean,
+    KsonValue::KsonNull where KsonValueNull = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonNull,
+    KsonValue::KsonEmbed where KsonValueEmbed = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.KsonEmbed,
+);
+
+impl std::fmt::Debug for KsonValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", util::to_string(self))
     }
 }
 
-impl Eq for KsonValueBase {}
-
-impl std::hash::Hash for KsonValueBase {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.kson_ref.inner.inner.hash(state);
+impl Eq for KsonValue {}
+impl PartialEq for KsonValue {
+    fn eq(&self, other: &KsonValue) -> bool {
+        util::equals(self, other)
+    }
+}
+impl std::hash::Hash for KsonValue {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self, state)
     }
 }
 
-impl KsonValueBase {
-    fn value_type(&self) -> KsonValueType {
+impl KsonValue {
+    pub fn value_type(&self) -> KsonValueType {
+        let ptr = self.to_kotlin_object();
         let f = KSON_SYMBOLS
             .kotlin
             .root
@@ -912,572 +930,259 @@ impl KsonValueBase {
             .KsonValue
             .get_type
             .unwrap();
-        let result = unsafe {
-            f(kson_sys::kson_kref_org_kson_KsonValue {
-                pinned: self.kson_ref.inner.inner,
-            })
-        };
+        let result = unsafe { f(kson_sys::kson_kref_org_kson_KsonValue { pinned: ptr }) };
         KsonValueType::from_kotlin_object(result.pinned)
     }
-}
 
-/// Represents a parsed Kson value
-#[derive(Clone)]
-pub enum KsonValue {
-    KsonObject {
-        properties: std::collections::HashMap<KsonValue, KsonValue>,
-        start: Position,
-        end: Position,
-    },
-    KsonArray {
-        elements: Vec<KsonValue>,
-        start: Position,
-        end: Position,
-    },
-    KsonString {
-        value: String,
-        start: Position,
-        end: Position,
-    },
-    KsonInteger {
-        value: i32,
-        start: Position,
-        end: Position,
-    },
-    KsonDecimal {
-        value: f64,
-        start: Position,
-        end: Position,
-    },
-    KsonBoolean {
-        value: bool,
-        start: Position,
-        end: Position,
-    },
-    KsonNull {
-        start: Position,
-        end: Position,
-    },
-    KsonEmbed {
-        tag: Option<String>,
-        metadata: Option<String>,
-        content: String,
-        start: Position,
-        end: Position,
-    },
-}
+    pub fn start(&self) -> Position {
+        Self::start_inner(self)
+    }
 
-impl std::fmt::Debug for KsonValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            KsonValue::KsonObject {
-                properties,
-                start,
-                end,
-            } => f
-                .debug_struct("KsonObject")
-                .field("properties", properties)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonArray {
-                elements,
-                start,
-                end,
-            } => f
-                .debug_struct("KsonArray")
-                .field("elements", elements)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonString { value, start, end } => f
-                .debug_struct("KsonString")
-                .field("value", value)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonInteger { value, start, end } => f
-                .debug_struct("KsonInteger")
-                .field("value", value)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonDecimal { value, start, end } => f
-                .debug_struct("KsonDecimal")
-                .field("value", value)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonBoolean { value, start, end } => f
-                .debug_struct("KsonBoolean")
-                .field("value", value)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonNull { start, end } => f
-                .debug_struct("KsonNull")
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-            KsonValue::KsonEmbed {
-                tag,
-                metadata,
-                content,
-                start,
-                end,
-            } => f
-                .debug_struct("KsonEmbed")
-                .field("tag", tag)
-                .field("metadata", metadata)
-                .field("content", content)
-                .field("start", start)
-                .field("end", end)
-                .finish(),
-        }
+    pub fn end(&self) -> Position {
+        Self::end_inner(self)
+    }
+
+    fn start_inner<T: ToKotlinObject>(obj: T) -> Position {
+        let ptr = obj.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .get_start
+            .unwrap();
+        let result = unsafe { f(kson_sys::kson_kref_org_kson_KsonValue { pinned: ptr }) };
+        Position::from_kotlin_object(result.pinned)
+    }
+
+    fn end_inner<T: ToKotlinObject>(obj: T) -> Position {
+        let ptr = obj.to_kotlin_object();
+        let f = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.get_end.unwrap();
+        let result = unsafe { f(kson_sys::kson_kref_org_kson_KsonValue { pinned: ptr }) };
+        Position::from_kotlin_object(result.pinned)
     }
 }
 
-impl PartialEq for KsonValue {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (
-                KsonValue::KsonObject {
-                    properties: p1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonObject {
-                    properties: p2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => p1 == p2 && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonArray {
-                    elements: el1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonArray {
-                    elements: el2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => el1 == el2 && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonString {
-                    value: v1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonString {
-                    value: v2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => v1 == v2 && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonInteger {
-                    value: v1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonInteger {
-                    value: v2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => v1 == v2 && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonDecimal {
-                    value: v1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonDecimal {
-                    value: v2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => v1.to_bits() == v2.to_bits() && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonBoolean {
-                    value: v1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonBoolean {
-                    value: v2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => v1 == v2 && s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonNull { start: s1, end: e1 },
-                KsonValue::KsonNull { start: s2, end: e2 },
-            ) => s1 == s2 && e1 == e2,
-            (
-                KsonValue::KsonEmbed {
-                    tag: t1,
-                    metadata: m1,
-                    content: c1,
-                    start: s1,
-                    end: e1,
-                },
-                KsonValue::KsonEmbed {
-                    tag: t2,
-                    metadata: m2,
-                    content: c2,
-                    start: s2,
-                    end: e2,
-                },
-            ) => t1 == t2 && m1 == m2 && c1 == c2 && s1 == s2 && e1 == e2,
-            _ => false,
-        }
+declare_kotlin_object! {
+    KsonValueObject
+}
+
+impl KsonValueObject {
+    pub fn properties(&self) -> std::collections::HashMap<KsonValue, KsonValue> {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonObject
+            .get_properties
+            .unwrap();
+        let result =
+            unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject { pinned: ptr }) };
+        util::from_kotlin_value_map(result)
     }
 }
 
-impl Eq for KsonValue {}
+declare_kotlin_object! {
+    KsonValueArray
+}
 
-impl std::hash::Hash for KsonValue {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        std::mem::discriminant(self).hash(state);
-        match self {
-            KsonValue::KsonObject {
-                properties,
-                start,
-                end,
-            } => {
-                for (k, v) in properties {
-                    k.hash(state);
-                    v.hash(state);
-                }
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonArray {
-                elements,
-                start,
-                end,
-            } => {
-                elements.hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonString { value, start, end } => {
-                value.hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonInteger { value, start, end } => {
-                value.hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonDecimal { value, start, end } => {
-                value.to_bits().hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonBoolean { value, start, end } => {
-                value.hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonNull { start, end } => {
-                start.hash(state);
-                end.hash(state);
-            }
-            KsonValue::KsonEmbed {
-                tag,
-                metadata,
-                content,
-                start,
-                end,
-            } => {
-                tag.hash(state);
-                metadata.hash(state);
-                content.hash(state);
-                start.hash(state);
-                end.hash(state);
-            }
-        }
+impl KsonValueArray {
+    pub fn elements(&self) -> Vec<KsonValue> {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonArray
+            .get_elements
+            .unwrap();
+        let result = unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonArray { pinned: ptr }) };
+        util::from_kotlin_list(result)
+    }
+
+    pub fn start(&self) -> Position {
+        KsonValue::start_inner(self)
+    }
+
+    pub fn end(&self) -> Position {
+        KsonValue::end_inner(self)
     }
 }
 
-impl KsonValue {
-    pub fn start(&self) -> &Position {
-        match self {
-            KsonValue::KsonObject { start, .. } => start,
-            KsonValue::KsonArray { start, .. } => start,
-            KsonValue::KsonString { start, .. } => start,
-            KsonValue::KsonInteger { start, .. } => start,
-            KsonValue::KsonDecimal { start, .. } => start,
-            KsonValue::KsonBoolean { start, .. } => start,
-            KsonValue::KsonNull { start, .. } => start,
-            KsonValue::KsonEmbed { start, .. } => start,
-        }
+declare_kotlin_object! {
+    KsonValueString
+}
+
+impl KsonValueString {
+    pub fn value(&self) -> String {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonString
+            .get_value
+            .unwrap();
+        let result =
+            unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonString { pinned: ptr }) };
+        util::from_kotlin_string(result)
     }
 
-    pub fn end(&self) -> &Position {
-        match self {
-            KsonValue::KsonObject { end, .. } => end,
-            KsonValue::KsonArray { end, .. } => end,
-            KsonValue::KsonString { end, .. } => end,
-            KsonValue::KsonInteger { end, .. } => end,
-            KsonValue::KsonDecimal { end, .. } => end,
-            KsonValue::KsonBoolean { end, .. } => end,
-            KsonValue::KsonNull { end, .. } => end,
-            KsonValue::KsonEmbed { end, .. } => end,
-        }
+    pub fn start(&self) -> Position {
+        KsonValue::start_inner(self)
+    }
+
+    pub fn end(&self) -> Position {
+        KsonValue::end_inner(self)
     }
 }
 
-impl util::FromKotlinObject for KsonValue {
-    fn from_kotlin_object(obj: kson_KNativePtr) -> Self {
-        let base = KsonValueBase {
-            kson_ref: KsonPtr {
-                inner: std::sync::Arc::new(OwnedKotlinPtr { inner: obj }),
-            },
+declare_kotlin_object! {
+    KsonValueInteger
+}
+
+impl KsonValueInteger {
+    pub fn value(&self) -> i32 {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonNumber
+            .Integer
+            .get_value
+            .unwrap();
+        unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Integer { pinned: ptr }) }
+    }
+
+    pub fn start(&self) -> Position {
+        KsonValue::start_inner(self)
+    }
+
+    pub fn end(&self) -> Position {
+        KsonValue::end_inner(self)
+    }
+}
+
+declare_kotlin_object! {
+    KsonValueDecimal
+}
+
+impl KsonValueDecimal {
+    pub fn value(&self) -> f64 {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonNumber
+            .Decimal
+            .get_value
+            .unwrap();
+        unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Decimal { pinned: ptr }) }
+    }
+
+    pub fn start(&self) -> Position {
+        KsonValue::start_inner(self)
+    }
+
+    pub fn end(&self) -> Position {
+        KsonValue::end_inner(self)
+    }
+}
+
+declare_kotlin_object! {
+    KsonValueBoolean
+}
+
+declare_kotlin_object! {
+    KsonValueNull
+}
+
+declare_kotlin_object! {
+    KsonValueEmbed
+}
+
+impl KsonValueEmbed {
+    pub fn tag(&self) -> Option<String> {
+        let get_tag = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_tag
+            .unwrap();
+        let tag_result = unsafe {
+            get_tag(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.to_kotlin_object(),
+            })
         };
-
-        let get_start = || {
-            let f = KSON_SYMBOLS
-                .kotlin
-                .root
-                .org
-                .kson
-                .KsonValue
-                .get_start
-                .unwrap();
-            let result = unsafe {
-                f(kson_sys::kson_kref_org_kson_KsonValue {
-                    pinned: base.kson_ref.inner.inner,
-                })
-            };
-            Position {
-                kson_ref: KsonPtr {
-                    inner: std::sync::Arc::new(OwnedKotlinPtr {
-                        inner: result.pinned,
-                    }),
-                },
-            }
-        };
-
-        let get_end = || {
-            let f = KSON_SYMBOLS.kotlin.root.org.kson.KsonValue.get_end.unwrap();
-            let result = unsafe {
-                f(kson_sys::kson_kref_org_kson_KsonValue {
-                    pinned: base.kson_ref.inner.inner,
-                })
-            };
-            Position {
-                kson_ref: KsonPtr {
-                    inner: std::sync::Arc::new(OwnedKotlinPtr {
-                        inner: result.pinned,
-                    }),
-                },
-            }
-        };
-
-        match base.value_type() {
-            KsonValueType::Object => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonObject
-                    .get_properties
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonObject {
-                    properties: util::from_kotlin_value_map(result),
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::Array => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonArray
-                    .get_elements
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonArray {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonArray {
-                    elements: util::from_kotlin_list(result),
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::String => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonString
-                    .get_value
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonString {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonString {
-                    value: util::from_kotlin_string(result),
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::Integer => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonNumber
-                    .Integer
-                    .get_value
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Integer {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonInteger {
-                    value: result,
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::Decimal => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonNumber
-                    .Decimal
-                    .get_value
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonNumber_Decimal {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonDecimal {
-                    value: result,
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::Boolean => {
-                let f = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonBoolean
-                    .get_value
-                    .unwrap();
-                let result = unsafe {
-                    f(kson_sys::kson_kref_org_kson_KsonValue_KsonBoolean {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                KsonValue::KsonBoolean {
-                    value: result,
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
-            KsonValueType::Null => KsonValue::KsonNull {
-                start: get_start(),
-                end: get_end(),
-            },
-            KsonValueType::Embed => {
-                let get_tag = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonEmbed
-                    .get_tag
-                    .unwrap();
-                let tag_result = unsafe {
-                    get_tag(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                let tag = if tag_result == std::ptr::null_mut() {
-                    None
-                } else {
-                    Some(util::from_kotlin_string(tag_result))
-                };
-
-                let get_metadata = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonEmbed
-                    .get_metadata
-                    .unwrap();
-                let metadata_result = unsafe {
-                    get_metadata(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                let metadata = if metadata_result == std::ptr::null_mut() {
-                    None
-                } else {
-                    Some(util::from_kotlin_string(metadata_result))
-                };
-
-                let get_content = KSON_SYMBOLS
-                    .kotlin
-                    .root
-                    .org
-                    .kson
-                    .KsonValue
-                    .KsonEmbed
-                    .get_content
-                    .unwrap();
-                let content_result = unsafe {
-                    get_content(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
-                        pinned: base.kson_ref.inner.inner,
-                    })
-                };
-                let content = util::from_kotlin_string(content_result);
-
-                KsonValue::KsonEmbed {
-                    tag,
-                    metadata,
-                    content,
-                    start: get_start(),
-                    end: get_end(),
-                }
-            }
+        if tag_result == std::ptr::null_mut() {
+            None
+        } else {
+            Some(util::from_kotlin_string(tag_result))
         }
+    }
+
+    pub fn metadata(&self) -> Option<String> {
+        let get_metadata = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_metadata
+            .unwrap();
+        let metadata_result = unsafe {
+            get_metadata(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.to_kotlin_object(),
+            })
+        };
+        if metadata_result == std::ptr::null_mut() {
+            None
+        } else {
+            Some(util::from_kotlin_string(metadata_result))
+        }
+    }
+
+    pub fn content(&self) -> String {
+        let get_content = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonEmbed
+            .get_content
+            .unwrap();
+        let content_result = unsafe {
+            get_content(kson_sys::kson_kref_org_kson_KsonValue_KsonEmbed {
+                pinned: self.to_kotlin_object(),
+            })
+        };
+        util::from_kotlin_string(content_result)
+    }
+
+    pub fn start(&self) -> Position {
+        KsonValue::start_inner(self)
+    }
+
+    pub fn end(&self) -> Position {
+        KsonValue::end_inner(self)
     }
 }
