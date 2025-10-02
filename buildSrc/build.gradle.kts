@@ -108,4 +108,6 @@ dependencies {
     
     // Add Kotlin Gradle Plugin for multiplatform configuration
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10")
+
+    implementation("org.kson:kson:0.1.1")
 }

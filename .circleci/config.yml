@@ -1,108 +1,126 @@
 version: 2.1
-
 orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
-  browser-tools: circleci/browser-tools@1.1
+  "browser-tools": "circleci/browser-tools@1.1"
   # Windows support for testing Python on Windows
-  windows: circleci/windows@5.0
+  windows: "circleci/windows@5.0"
 
 # Reusable command definitions - only for truly cross-platform operations
 commands:
-  gradle-core-tasks:
+  "gradle-core-tasks":
     description: "Run core Gradle build and verification tasks"
     steps:
       - run:
-          name: Download dependencies
-          command: ./gradlew --no-daemon dependencies
-      - run:
-          name: Verify buildSrc project
-          command: |
-            cd buildSrc
-            ./gradlew --no-daemon check
-      - run:
-          name: Verify Kson project
-          command: ./gradlew --no-daemon check
-      - run:
-          name: Build native kson-lib
-          command: ./gradlew --no-daemon :kson-lib:nativeRelease
+          name: "Download dependencies"
+          command: "./gradlew --no-daemon dependencies"
 
-  store-native-artifacts:
+      - run:
+          name: "Verify buildSrc project"
+          command: "cd buildSrc\n./gradlew --no-daemon check\n"
+
+      - run:
+          name: "Verify Kson project"
+          command: "./gradlew --no-daemon check"
+
+      - run:
+          name: "Build native kson-lib"
+          command: "./gradlew --no-daemon :kson-lib:nativeRelease"
+
+
+  "store-native-artifacts":
     description: "Store build artifacts in a consistent way"
     steps:
       - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseShared
-          destination: kson-lib-shared
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseStatic
-          destination: kson-lib-static
+          path: "kson-lib/build/bin/nativeKson/releaseShared"
+          destination: "kson-lib-shared"
 
-  restore-gradle-caches:
+      - store_artifacts:
+          path: "kson-lib/build/bin/nativeKson/releaseStatic"
+          destination: "kson-lib-static"
+
+
+  "restore-gradle-caches":
     description: "Restore Gradle and JDK caches"
     parameters:
       platform:
         type: string
         description: "Platform identifier for cache keys"
+
     steps:
       - restore_cache:
           keys:
-            - v1-<< parameters.platform >>-dependencies-{{ checksum "build.gradle.kts" }}
-            - v1-<< parameters.platform >>-dependencies-
+            - "v1-<< parameters.platform >>-dependencies-{{ checksum \"build.gradle.kts\" }}"
+            - "v1-<< parameters.platform >>-dependencies-"
       - restore_cache:
           keys:
-            - v1-<< parameters.platform >>-jdk-{{ checksum "jdk.properties" }}
+            - "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
       - restore_cache:
           keys:
-            - v1-<< parameters.platform >>-vscode-tests
+            - "v1-<< parameters.platform >>-vscode-tests"
 
-  save-gradle-caches:
+  "save-gradle-caches":
     description: "Save Gradle and JDK caches"
     parameters:
       platform:
         type: string
         description: "Platform identifier for cache keys"
+
     steps:
       - save_cache:
           paths:
-            - ~/.gradle
-          key: v1-<< parameters.platform >>-dependencies-{{ checksum "build.gradle.kts" }}
-      - save_cache:
-          paths:
-            - ./gradle/jdk
-            - ./buildSrc/gradle/jdk
-          key: v1-<< parameters.platform >>-jdk-{{ checksum "jdk.properties" }}
-      - save_cache:
-          paths:
-            - ./tooling/lsp-clients/vscode/.vscode-test
-            - ./tooling/lsp-clients/vscode/.vscode-test-web
-          key: v1-<< parameters.platform >>-vscode-tests
+            - "~/.gradle"
+          key: "v1-<< parameters.platform >>-dependencies-{{ checksum \"build.gradle.kts\" }}"
 
-  clean-git-config:
+      - save_cache:
+          paths:
+            - "./gradle/jdk"
+            - "./buildSrc/gradle/jdk"
+          key: "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
+
+      - save_cache:
+          paths:
+            - "./tooling/lsp-clients/vscode/.vscode-test"
+            - "./tooling/lsp-clients/vscode/.vscode-test-web"
+          key: "v1-<< parameters.platform >>-vscode-tests"
+
+
+  "clean-git-config":
     description: "Remove erroneous git config across platforms"
     parameters:
       shell:
         type: enum
-        enum: [bash, powershell]
+        enum:
+          - bash
+          - powershell
         default: bash
+
     steps:
       - when:
           condition:
-            equal: [<< parameters.shell >>, bash]
+            equal:
+              - "<< parameters.shell >>"
+              - bash
           steps:
             - run:
-                name: Clean git config
-                command: rm -rf ~/.gitconfig
+                name: "Clean git config"
+                command: "rm -rf ~/.gitconfig"
+
+
       - when:
           condition:
-            equal: [<< parameters.shell >>, powershell]
+            equal:
+              - "<< parameters.shell >>"
+              - powershell
           steps:
             - run:
-                name: Clean git config
-                command: |
-                  Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
-                shell: powershell.exe
+                name: "Clean git config"
+                command: "Remove-Item -Path \"$env:USERPROFILE\\.gitconfig\" -Force -ErrorAction SilentlyContinue\n"
+                shell: "powershell.exe"
 
-  setup-python-test:
+
+
+  "setup-python-test":
     description: "Common setup for Python sdist testing"
     parameters:
       platform:
@@ -111,245 +129,280 @@ commands:
       - checkout
       - when:
           condition:
-            equal: [<< parameters.platform >>, windows]
+            equal:
+              - "<< parameters.platform >>"
+              - windows
           steps:
-            - clean-git-config:
+            - "clean-git-config":
                 shell: powershell
+
       - when:
           condition:
             not:
-              equal: [<< parameters.platform >>, windows]
+              equal:
+                - "<< parameters.platform >>"
+                - windows
           steps:
-            - clean-git-config:
+            - "clean-git-config":
                 shell: bash
-      - attach_workspace:
-          at: ~/repo
 
-  run-python-tests-unix:
+      - attach_workspace:
+          at: "~/repo"
+
+  "run-python-tests-unix":
     description: "Run Python sdist tests and build wheel for Unix-like systems"
     steps:
       - run:
-          name: Install kson from sdist
-          command: python3 -m pip install lib-python/dist/kson_lang-*.tar.gz
+          name: "Install kson from sdist"
+          command: "python3 -m pip install lib-python/dist/kson_lang-*.tar.gz"
+
       - run:
-          name: Install test dependencies
-          command: python3 -m pip install pytest
+          name: "Install test dependencies"
+          command: "python3 -m pip install pytest"
+
       - run:
-          name: Run smoke tests on sdist installation
-          command: python3 -m pytest lib-python -v
+          name: "Run smoke tests on sdist installation"
+          command: "python3 -m pytest lib-python -v"
+
       - run:
-          name: Build platform-specific wheel
-          command: ./gradlew :lib-python:buildWheel
+          name: "Build platform-specific wheel"
+          command: "./gradlew :lib-python:buildWheel"
+
+
 
 # Job definitions
 jobs:
-  build-windows-amd64:
-    resource_class: 'windows.large'
+  "build-windows-amd64":
+    resource_class: "windows.large"
     machine:
-      image: 'windows-server-2022-gui:current'
-      shell: 'powershell.exe -ExecutionPolicy Bypass'
+      image: "windows-server-2022-gui:current"
+      shell: "powershell.exe -ExecutionPolicy Bypass"
+
     environment:
-      JVM_OPTS: -Xmx3200m
+      JVM_OPTS: "-Xmx3200m"
     steps:
       - checkout
-      - clean-git-config:
+      - "clean-git-config":
           shell: powershell
-
       # Windows-specific installations
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
       - run:
-          name: Install Chrome
-          command: choco install googlechrome --ignore-checksums
+          name: "Install Chrome"
+          command: "choco install googlechrome --ignore-checksums"
+
       # We would ideally install libclang through pixi, but after _hours_ of fiddling we
       # couldn't make the CI happy and decided to add it here instead
       - run:
-          name: Install LLVM
-          command: choco install llvm
+          name: "Install LLVM"
+          command: "choco install llvm"
 
-      - restore-gradle-caches:
-          platform: win-amd64
-
+      - "restore-gradle-caches":
+          platform: "win-amd64"
       # Cross-platform Gradle tasks
-      - gradle-core-tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "win-amd64"
 
-      - store-native-artifacts
-
-      - save-gradle-caches:
-          platform: win-amd64
-
-  build-linux-amd64:
+  "build-linux-amd64":
     docker:
-      - image: cimg/node:lts-browsers
-    working_directory: ~/repo
+      - image: "cimg/node:lts-browsers"
+    working_directory: "~/repo"
     environment:
-      JVM_OPTS: -Xmx3200m
+      JVM_OPTS: "-Xmx3200m"
       TERM: dumb
+
     resource_class: large
     steps:
-      - browser-tools/install-chrome
+      - "browser-tools/install-chrome"
       - checkout
       - run:
-          name: Verify Chrome installation
-          command: google-chrome --version
+          name: "Verify Chrome installation"
+          command: "google-chrome --version"
 
-      - restore-gradle-caches:
-          platform: linux-amd64
-
+      - "restore-gradle-caches":
+          platform: "linux-amd64"
       # Linux-specific installations
       - run:
-          name: Install system dependencies
-          command: |
-            sudo apt update
-            sudo apt install libncurses-dev
-      - clean-git-config:
+          name: "Install system dependencies"
+          command: "sudo apt update\nsudo apt install libncurses-dev\n"
+
+      - "clean-git-config":
           shell: bash
-
       # Cross-platform Gradle tasks
-      - gradle-core-tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "linux-amd64"
 
-      - store-native-artifacts
-
-      - save-gradle-caches:
-          platform: linux-amd64
-
-  build-macos-arm64:
+  "build-macos-arm64":
     macos:
-      xcode: 16.4.0
-    resource_class: m4pro.medium
-    working_directory: ~/repo
+      xcode: "16.4.0"
+    resource_class: "m4pro.medium"
+    working_directory: "~/repo"
     steps:
       - run:
-          name: Install Chrome
-          command: brew install --cask google-chrome
+          name: "Install Chrome"
+          command: "brew install --cask google-chrome"
+
       - checkout
       - run:
-          name: Verify Chrome installation
-          command: '"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version'
-      - clean-git-config:
+          name: "Verify Chrome installation"
+          command: "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --version"
+
+      - "clean-git-config":
           shell: bash
-
-      - restore-gradle-caches:
-          platform: macos-arm64
-
+      - "restore-gradle-caches":
+          platform: "macos-arm64"
       # Cross-platform Gradle tasks
-      - gradle-core-tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "macos-arm64"
 
-      - store-native-artifacts
-
-      - save-gradle-caches:
-          platform: macos-arm64
-
-  build-python-sdist:
+  "build-python-sdist":
     docker:
-      - image: cimg/python:3.11
-    working_directory: ~/repo
+      - image: "cimg/python:3.11"
+    working_directory: "~/repo"
     steps:
       - checkout
-      - clean-git-config:
+      - "clean-git-config":
           shell: bash
       - run:
-          name: Build Python source distribution
-          command: ./gradlew :lib-python:createSdistBuildEnvironment
-      - run:
-          name: Verify sdist was created
-          command: |
-            ls -la lib-python/dist/
-            test -f lib-python/dist/kson_lang-*.tar.gz
-      - persist_to_workspace:
-          root: ~/repo
-          paths:
-            - lib-python/dist/*.tar.gz
-      - store_artifacts:
-          path: lib-python/dist
-          destination: python-sdist
+          name: "Build Python source distribution"
+          command: "./gradlew :lib-python:createSdistBuildEnvironment"
 
-  test-python-sdist-linux-amd64:
+      - run:
+          name: "Verify sdist was created"
+          command: "ls -la lib-python/dist/\ntest -f lib-python/dist/kson_lang-*.tar.gz\n"
+
+      - persist_to_workspace:
+          root: "~/repo"
+          paths:
+            - "lib-python/dist/*.tar.gz"
+
+      - store_artifacts:
+          path: "lib-python/dist"
+          destination: "python-sdist"
+
+
+  "test-python-sdist-linux-amd64":
     docker:
-      - image: cimg/python:3.11
-    working_directory: ~/repo
+      - image: "cimg/python:3.11"
+    working_directory: "~/repo"
     steps:
-      - setup-python-test:
+      - "setup-python-test":
           platform: linux
       - setup_remote_docker
-      - run-python-tests-unix
+      - "run-python-tests-unix"
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-linux-amd64
+          path: "lib-python/dist"
+          destination: "python-linux-amd64"
 
-  test-python-sdist-macos:
+
+  "test-python-sdist-macos":
     macos:
-      xcode: 14.2.0
-    working_directory: ~/repo
+      xcode: "14.2.0"
+    working_directory: "~/repo"
     steps:
-      - setup-python-test:
+      - "setup-python-test":
           platform: macos
-      - run-python-tests-unix
+      - "run-python-tests-unix"
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-macos
+          path: "lib-python/dist"
+          destination: "python-macos"
 
-  test-python-sdist-windows:
+
+  "test-python-sdist-windows":
     executor:
-      name: windows/default
+      name: "windows/default"
       size: medium
-    working_directory: ~/repo
+
+    working_directory: "~/repo"
     steps:
-      - setup-python-test:
+      - "setup-python-test":
           platform: windows
       - run:
-          name: Check Python version and upgrade if needed
-          command: |
-            python --version
-            python -m pip install --upgrade pip
+          name: "Check Python version and upgrade if needed"
+          command: "python --version\npython -m pip install --upgrade pip\n"
+
       - run:
-          name: Install kson from sdist
-          command: |
-            python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName
-          shell: powershell.exe
+          name: "Install kson from sdist"
+          command: "python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName\n"
+          shell: "powershell.exe"
+
       - run:
-          name: Install test dependencies
-          command: python -m pip install pytest
+          name: "Install test dependencies"
+          command: "python -m pip install pytest"
+
       - run:
-          name: Run smoke tests on sdist installation
-          command: python -m pytest lib-python -v
+          name: "Run smoke tests on sdist installation"
+          command: "python -m pytest lib-python -v"
+
       - run:
-          name: Build platform-specific wheel
-          command: |
-            .\gradlew.bat :lib-python:buildWheel --no-daemon
+          name: "Build platform-specific wheel"
+          command: ".\\gradlew.bat :lib-python:buildWheel --no-daemon\n"
+
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-windows
+          path: "lib-python/dist"
+          destination: "python-windows"
+
+
 
 workflows:
   version: 2
-
   # Main build workflow - runs on version tags
-  build-all:
+  "build-all":
     jobs:
-      - build-linux-amd64
-      - build-windows-amd64:
-          filters: &version-tag-filter
+      - "build-linux-amd64"
+      - "build-windows-amd64":
+          filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
             branches:
-              ignore: /.*/
-      - build-macos-arm64:
-          filters: *version-tag-filter
+              ignore: "/.*/"
 
-  # Python package workflow - also runs on version tags
-  build-python-and-test:
+      - "build-macos-arm64":
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+  "build-python-and-test":
     jobs:
-      - build-python-sdist:
-          filters: *version-tag-filter
-      - test-python-sdist-linux-amd64:
+      - "build-python-sdist":
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+      - "test-python-sdist-linux-amd64":
           requires:
-            - build-python-sdist
-          filters: *version-tag-filter
-      - test-python-sdist-macos:
+            - "build-python-sdist"
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+
+      - "test-python-sdist-macos":
           requires:
-            - build-python-sdist
-          filters: *version-tag-filter
-      - test-python-sdist-windows:
+            - "build-python-sdist"
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+
+      - "test-python-sdist-windows":
           requires:
-            - build-python-sdist
-          filters: *version-tag-filter
+            - "build-python-sdist"
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
