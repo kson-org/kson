@@ -155,6 +155,17 @@ class IndentValidatorTest {
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for properly mixed nesting")
+
+        val badSource = """
+            - key:
+                - x
+                 # deceptive indentation: sibling of `key:`
+                 key_sibling: y
+        """.trimIndent()
+
+        val badResult = KsonCore.parseToAst(badSource)
+        assertEquals(1, badResult.messages.size)
+        assertEquals(OBJECT_PROPERTIES_MISALIGNED, badResult.messages[0].message.type)
     }
 
     @Test
@@ -176,10 +187,9 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     - - 1
-                           - 2
+                      - 2
                 """.trimIndent()
-            )
-                .messages.isEmpty(), message
+            ).messages.isEmpty(), message
         )
 
         val misalignedSource = """
@@ -201,8 +211,8 @@ class IndentValidatorTest {
     fun testValidateLeadingAlignment1() {
         val source = """
             key1: - 1 - 2
-               - 3
-               - 4
+                  - 3
+                  - 4
         """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
@@ -213,7 +223,7 @@ class IndentValidatorTest {
 
         val misalignedSource = """
             key1: - 1 - 2
-               - 3
+                  - 3
                     - 4
         """.trimIndent()
 
@@ -231,8 +241,8 @@ class IndentValidatorTest {
     fun testValidateLeadingAlignment2() {
         val source = """
             key1: - 1 - 2
-               - 3
-               - 4 key2: w key3: x
+                  - 3
+                  - 4 key2: w key3: x
             key4: y
             key5: z
         """.trimIndent()
@@ -254,12 +264,14 @@ class IndentValidatorTest {
 
         val misalignedResult = KsonCore.parseToAst(misalignedSource)
         assertEquals(
-            1, misalignedResult.messages.size, "Should have an error the mis-aligned " +
+            3, misalignedResult.messages.size, "Should have an error the mis-aligned " +
                     "end of this object"
         )
 
-        val error = misalignedResult.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        val errors = misalignedResult.messages
+        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
+        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[1].message.type)
+        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[2].message.type)
     }
 
     @Test
@@ -342,7 +354,7 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     {one:1
-                    two:2}
+                     two:2}
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -351,7 +363,7 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     {one:1
-                    two:2}
+                     two:2}
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -360,7 +372,7 @@ class IndentValidatorTest {
             KsonCore.parseToAst(
                 """
                     <- 1
-                    - 2>
+                     - 2>
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -370,8 +382,8 @@ class IndentValidatorTest {
                 """
                     - # object hanging off dash
                      {key1: x
-                     # this should not be considered mis-aligned
-                     key2: y}
+                      # this should not be considered mis-aligned
+                      key2: y}
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -381,8 +393,8 @@ class IndentValidatorTest {
                 """
                     - # list hanging off dash
                      [x
-                     # this should not be considered mis-aligned
-                     y]
+                      # this should not be considered mis-aligned
+                      y]
                 """.trimIndent()
             ).messages.isEmpty(), message
         )
@@ -392,10 +404,19 @@ class IndentValidatorTest {
                 """
                     - # list hanging off dash
                      < - x
-                     # this should not be considered mis-aligned
-                     - y>
+                       # this should not be considered mis-aligned
+                       - y>
                 """.trimIndent()
             ).messages.isEmpty(), message
+        )
+    }
+
+    @Test
+    fun testObjectNestedInBracketList() {
+        assertTrue(
+            KsonCore.parseToAst(
+                "[key: 1]"
+            ).messages.isEmpty()
         )
     }
 
@@ -479,7 +500,8 @@ class IndentValidatorTest {
                   - key:
                   # deceptive indent: nested under `key:`
                   - 9
-                # deceptive indent: sibling to `key:`
+                # deceptive indent: must be aligned `key:`
+                # deceptive indent: nested under list with `key:`
                 deceptive_object:
                     key: x
                     list: - 
@@ -488,19 +510,20 @@ class IndentValidatorTest {
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
-        assertEquals(3, badResult.messages.size)
+        assertEquals(4, badResult.messages.size)
 
         val errors = badResult.messages
-        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, errors[0].message.type)
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[1].message.type)
+        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
+        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, errors[1].message.type)
         assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[2].message.type)
+        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[3].message.type)
 
         val goodSource = """
-                deceptive_list:
+                honest_list:
                   - 1
                   - key:
                       - 9
-                    deceptive_object:
+                    honest_object:
                       key: x
                       list: - 
                              key: x

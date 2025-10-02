@@ -167,22 +167,17 @@ class IndentValidator {
             return
         }
 
-        var prevLine = previousNodeLine
-        var expectedColumn: Int? = null
+        var prevLine = items[0].location.end.line
+        var expectedColumn = items[0].location.start.column
 
         // Check alignment of the indentation of all other items
-        for (item in items) {
+        for (item in items.subList(1, items.size)) {
             // this item is not indented (it's trailing another value), so it has no indent to align
             if (item.location.start.line == prevLine) {
                 prevLine = item.location.end.line
                 continue
-            } else {
-                prevLine = item.location.end.line
-                if (expectedColumn == null) {
-                    // this is the first leading line we've seen, so it defines our target indent
-                    expectedColumn = item.location.start.column
-                }
             }
+            prevLine = item.location.end.line
             val itemColumn = item.location.start.column
             if (itemColumn != expectedColumn) {
                 messageSink.error(item.location.trimToFirstLine(), misalignmentMessage.create())
