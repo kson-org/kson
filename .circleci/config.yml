@@ -1,3 +1,5 @@
+# This file is automatically transpiled to config.yml by the transpileCircleCiConfigTask
+# during any ./gradlew task. ONLY edit this .kson file - the .yml file will be overridden.
 version: 2.1
 orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
