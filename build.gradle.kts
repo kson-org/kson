@@ -38,16 +38,19 @@ repositories {
     mavenCentral()
 }
 
-val generateJsonTestSuiteTask = "generateJsonTestSuite"
-
 tasks {
-    register<GenerateJsonTestSuiteTask>(generateJsonTestSuiteTask)
+    val generateJsonTestSuiteTask by register<GenerateJsonTestSuiteTask>("generateJsonTestSuite")
+
+    val transpileCircleCiConfigTask by register<TranspileKsonToYaml>("transpileCircleCiConfigTask") {
+        ksonFile.set(project.file(".circleci/config.kson"))
+        yamlFile.set(project.file(".circleci/config.yml"))
+    }
 
     withType<Task> {
-        // make every task except itself depend on generateJsonTestSuiteTask to
+        // make every task except itself depend on generateJsonTestSuiteTask and transpileCircleCIConfigTask to
         // ensure it's always up-to-date before any other build steps
-        if (name != generateJsonTestSuiteTask) {
-            dependsOn(generateJsonTestSuiteTask)
+        if (name != generateJsonTestSuiteTask.name && name != transpileCircleCiConfigTask.name ) {
+            dependsOn(generateJsonTestSuiteTask, transpileCircleCiConfigTask)
         }
     }
 
