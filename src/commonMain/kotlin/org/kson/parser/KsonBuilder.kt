@@ -398,8 +398,9 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
 
         val embedContentProperty = propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key] ?:
             throw ShouldNotHappenException("should have been validated for nullability above")
+        val escapedContent = EmbedDelim.Percent.escapeEmbedContent(embedContentProperty.processedStringContent)
         val embedContentValue = QuotedStringNode(
-            StringQuote.SingleQuote.escapeQuotes(embedContentProperty.processedStringContent),
+            StringQuote.SingleQuote.escapeQuotes(escapedContent),
             StringQuote.SingleQuote,
             embedContentProperty.location
         )

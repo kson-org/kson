@@ -443,7 +443,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 embedBlock: %
                   embeddedEmbed: $
-                  EMBED WITH %\% CONTENT
+                  EMBED WITH %\\% CONTENT
                   $$
                   %%
             """.trimIndent(),
@@ -451,14 +451,14 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 embedBlock:
                   embedContent: |
                     embeddedEmbed: ${'$'}
-                    EMBED WITH %% CONTENT
+                    EMBED WITH %\% CONTENT
                     ${'$'}${'$'}
                     
             """.trimIndent(),
             """
                 {
                   "embedBlock": {
-                    "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %% CONTENT\n${'$'}${'$'}\n"
+                    "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %\\% CONTENT\n${'$'}${'$'}\n"
                   }
                 }
             """.trimIndent(), compileSettings = compileSettings
