@@ -606,10 +606,31 @@ open class QuotedStringNode(private val ksonEscapedStringContent: String,
 }
 
 class UnquotedStringNode(override val stringContent: String, location: Location) : StringNodeImpl(location) {
+    val yamlReservedKeywords =  setOf(
+        // Boolean true values
+        "y","Y","yes","Yes","YES",
+        "true","True","TRUE",
+        "on","On","ON",
+        // Boolean false values
+        "n","N","no","No","NO",
+        "false","False","FALSE",
+        "off","Off","OFF",
+        // Null values
+        "null", "Null", "NULL"
+    )
+
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml -> {
+            is Kson -> {
                 indent.firstLineIndent() + stringContent
+            }
+
+            is Yaml -> {
+                indent.firstLineIndent() + if (yamlReservedKeywords.contains(stringContent)){
+                    "$DoubleQuote$stringContent$DoubleQuote"
+                }else{
+                    stringContent
+                }
             }
 
             is Json -> {

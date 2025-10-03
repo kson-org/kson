@@ -204,46 +204,61 @@ class KsonCoreTestString : KsonCoreTest {
         // Test that strings with reserved keyword content are properly quoted
         assertParsesTo(
             """
-                "true"
+                Y
             """.trimIndent(),
             """
-                'true'
+                Y
             """.trimIndent(),
             """
-                "true"
+                "Y"
             """.trimIndent(),
             """
-                "true"
+                "Y"
             """.trimIndent()
         )
 
         assertParsesTo(
             """
-                "false"
+                False
             """.trimIndent(),
             """
-                'false'
+                False
             """.trimIndent(),
             """
-                "false"
+                "False"
             """.trimIndent(),
             """
-                "false"
+                "False"
             """.trimIndent()
         )
 
         assertParsesTo(
             """
-                "null"
+                Null
             """.trimIndent(),
             """
-                'null'
+                Null
             """.trimIndent(),
             """
-                "null"
+                "Null"
             """.trimIndent(),
             """
-                "null"
+                "Null"
+            """.trimIndent()
+        )
+
+        assertParsesTo(
+            """
+                No
+            """.trimIndent(),
+            """
+                No
+            """.trimIndent(),
+            """
+                "No"
+            """.trimIndent(),
+            """
+                "No"
             """.trimIndent()
         )
     }
