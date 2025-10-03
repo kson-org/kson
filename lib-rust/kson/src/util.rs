@@ -47,6 +47,97 @@ impl ToKotlinObject for kson_KNativePtr {
     }
 }
 
+impl<T: ToKotlinObject> ToKotlinObject for &T {
+    fn to_kotlin_object(&self) -> kson_KNativePtr {
+        (*self).to_kotlin_object()
+    }
+}
+
+pub(crate) fn to_string<T: ToKotlinObject>(x: T) -> String {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS
+        .kotlin
+        .root
+        .org
+        .kson
+        .AnyHelper
+        .toString
+        .unwrap();
+    let result = unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+        )
+    };
+    from_kotlin_string(result)
+}
+
+pub(crate) fn equals<T: ToKotlinObject, U: ToKotlinObject>(x: T, y: U) -> bool {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS.kotlin.root.org.kson.AnyHelper.equals.unwrap();
+    unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: y.to_kotlin_object(),
+            },
+        )
+    }
+}
+
+pub(crate) fn apply_hash_code<T: ToKotlinObject, H: std::hash::Hasher>(x: T, hasher: &mut H) {
+    let helper_instance = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .AnyHelper
+            ._instance
+            .unwrap()()
+    };
+    let f = KSON_SYMBOLS
+        .kotlin
+        .root
+        .org
+        .kson
+        .AnyHelper
+        .hashCode
+        .unwrap();
+    let kotlin_hash = unsafe {
+        f(
+            helper_instance,
+            kson_sys::kson_kref_kotlin_Any {
+                pinned: x.to_kotlin_object(),
+            },
+        )
+    };
+    hasher.write_i32(kotlin_hash);
+}
+
 pub(crate) fn enum_name<T: ToKotlinObject>(value: T) -> String {
     let ptr = value.to_kotlin_object();
     let helper_instance = unsafe {
@@ -143,6 +234,73 @@ pub(crate) fn from_kotlin_list<T: FromKotlinObject>(
     vec
 }
 
+pub(crate) fn from_kotlin_value_map<
+    K: FromKotlinObject + Eq + std::hash::Hash,
+    V: FromKotlinObject,
+>(
+    map: kson_kref_kotlin_collections_Map,
+) -> std::collections::HashMap<K, V> {
+    let mut hash_map = std::collections::HashMap::new();
+    let iterator = unsafe {
+        KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .SimpleMapIterator
+            .SimpleMapIterator
+            .unwrap()(map)
+    };
+    loop {
+        let next = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .SimpleMapIterator
+                .next
+                .unwrap()(iterator)
+        };
+        if next.pinned.is_null() {
+            break;
+        }
+
+        let key = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .SimpleMapEntry
+                .get_key
+                .unwrap()(next)
+        };
+
+        let value = unsafe {
+            KSON_SYMBOLS
+                .kotlin
+                .root
+                .org
+                .kson
+                .SimpleMapEntry
+                .get_value
+                .unwrap()(next)
+        };
+
+        hash_map.insert(
+            FromKotlinObject::from_kotlin_object(key.pinned),
+            FromKotlinObject::from_kotlin_object(value.pinned),
+        );
+
+        unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(next.pinned) };
+    }
+
+    unsafe { KSON_SYMBOLS.DisposeStablePointer.unwrap()(iterator.pinned) };
+    hash_map
+}
+
+#[derive(Clone)]
 pub(crate) struct KsonPtr {
     pub(crate) inner: std::sync::Arc<OwnedKotlinPtr>,
 }

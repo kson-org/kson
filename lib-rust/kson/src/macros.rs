@@ -1,9 +1,10 @@
 macro_rules! declare_kotlin_object {
     (
-        $(#[doc = $doc:literal])*
+        $(#[$attr:meta])*
         $type_name:ident
     ) => {
-        $(#[doc = $doc])*
+        $(#[$attr])*
+        #[derive(Clone)]
         pub struct $type_name {
             kson_ref: KsonPtr,
         }
@@ -29,8 +30,9 @@ macro_rules! declare_kotlin_object {
 macro_rules! impl_kotlin_object_for_enum {
     (
         $enum_type:ty,
-        $variant1:path where $ty1:ty = $ty1_kotlin:expr,
-        $variant2:path where $ty2:ty = $ty2_kotlin:expr,
+        $(
+            $variant1:path where $ty1:ty = $ty1_kotlin:expr
+        ),* $(,)?
     ) => {
         impl FromKotlinObject for $enum_type {
             fn from_kotlin_object(ptr: kson_sys::kson_KNativePtr) -> Self {
@@ -42,18 +44,14 @@ macro_rules! impl_kotlin_object_for_enum {
                     )>,
                 > = std::sync::LazyLock::new(|| {
                     vec![
-                        (
-                            util::KotlinType {
-                                inner: unsafe { $ty1_kotlin._type.unwrap()() },
-                            },
-                            |p| $variant1(<$ty1>::from_kotlin_object(p)),
-                        ),
-                        (
-                            util::KotlinType {
-                                inner: unsafe { $ty2_kotlin._type.unwrap()() },
-                            },
-                            |p| $variant2(<$ty2>::from_kotlin_object(p)),
-                        ),
+                        $(
+                            (
+                                util::KotlinType {
+                                    inner: unsafe { $ty1_kotlin._type.unwrap()() },
+                                },
+                                |p| $variant1(<$ty1>::from_kotlin_object(p)),
+                            ),
+                        )*
                     ]
                 });
 
@@ -71,8 +69,9 @@ macro_rules! impl_kotlin_object_for_enum {
         impl ToKotlinObject for $enum_type {
             fn to_kotlin_object(&self) -> kson_sys::kson_KNativePtr {
                 match self {
-                    $variant1(inner) => inner.to_kotlin_object(),
-                    $variant2(inner) => inner.to_kotlin_object(),
+                    $(
+                        $variant1(inner) => inner.to_kotlin_object(),
+                    )*
                 }
             }
         }

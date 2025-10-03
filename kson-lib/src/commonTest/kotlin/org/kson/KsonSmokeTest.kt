@@ -144,6 +144,83 @@ class KsonSmokeTest {
                 TokenType.EOF),
             tokens.map { it.tokenType })
     }
+
+    @Test
+    fun testAnalyze_value() {
+        val input = """
+            key: value
+            list:
+              - 1
+              - 2.1
+              - 3E5
+            embed:%tag
+            %%""".trimIndent()
+        val value = Kson.analyze(input).ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        assertEquals(3, value.properties.size)
+
+        // Check root object location (should span entire document)
+        assertEquals(0, value.start.line)
+        assertEquals(0, value.start.column)
+        assertEquals(6, value.end.line)
+        assertEquals(2, value.end.column)
+
+        val mappedProperties = value.properties.map { it.key.value to it.value }.toMap()
+        // Check "key" property
+        val keyValue = mappedProperties["key"]
+        assertTrue(keyValue is KsonValue.KsonString)
+        assertEquals("value", keyValue.value)
+        assertEquals(0, keyValue.start.line)
+        assertEquals(5, keyValue.start.column)
+        assertEquals(0, keyValue.end.line)
+        assertEquals(10, keyValue.end.column)
+
+        // Check "list" property
+        val listValue = mappedProperties["list"]
+        assertTrue(listValue is KsonValue.KsonArray)
+        assertEquals(3, listValue.elements.size)
+        assertEquals(2, listValue.start.line)
+        assertEquals(2, listValue.start.column)
+        assertEquals(4, listValue.end.line)
+        assertEquals(7, listValue.end.column)
+
+        // Check list elements
+        val firstElement = listValue.elements[0]
+        assertTrue(firstElement is KsonValue.KsonNumber.Integer)
+        assertEquals(1, firstElement.value)
+        assertEquals(2, firstElement.start.line)
+        assertEquals(4, firstElement.start.column)
+        assertEquals(2, firstElement.end.line)
+        assertEquals(5, firstElement.end.column)
+
+        val secondElement = listValue.elements[1]
+        assertTrue(secondElement is KsonValue.KsonNumber.Decimal)
+        assertEquals(2.1, secondElement.value)
+        assertEquals(3, secondElement.start.line)
+        assertEquals(4, secondElement.start.column)
+        assertEquals(3, secondElement.end.line)
+        assertEquals(7, secondElement.end.column)
+
+        val thirdElement = listValue.elements[2]
+        assertTrue(thirdElement is KsonValue.KsonNumber.Decimal)
+        assertEquals(3e5, thirdElement.value)
+        assertEquals(4, thirdElement.start.line)
+        assertEquals(4, thirdElement.start.column)
+        assertEquals(4, thirdElement.end.line)
+        assertEquals(7, thirdElement.end.column)
+
+        // Check "embed" property
+        val embedValue = mappedProperties["embed"]
+        assertTrue(embedValue is KsonValue.KsonEmbed)
+        assertEquals("tag", embedValue.tag)
+        assertEquals("", embedValue.content)
+        assertEquals(5, embedValue.start.line)
+        assertEquals(6, embedValue.start.column)
+        assertEquals(6, embedValue.end.line)
+        assertEquals(2, embedValue.end.column)
+    }
     
     @Test
     fun testParseSchema_success() {

@@ -1,6 +1,6 @@
 package org.kson.schema.validators
 
-import org.kson.KsonValue
+import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType.SCHEMA_ANY_OF_VALIDATION_FAILED
 import org.kson.parser.messages.MessageType.SCHEMA_SUB_SCHEMA_ERRORS

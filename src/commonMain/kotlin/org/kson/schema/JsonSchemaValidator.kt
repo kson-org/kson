@@ -1,7 +1,7 @@
 package org.kson.schema
 
-import org.kson.*
 import org.kson.parser.MessageSink
+import org.kson.value.*
 
 // schema todo capture file/location info from schema to link back to schema def?
 interface JsonSchemaValidator {
