@@ -1,7 +1,7 @@
 package org.kson.schema
-import org.kson.KsonNumber
-import org.kson.KsonString
-import org.kson.KsonValue
+import org.kson.value.KsonNumber
+import org.kson.value.KsonString
+import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
@@ -29,13 +29,13 @@ sealed interface JsonSchema {
  * The main [JsonSchema] object representation
  */
 class JsonObjectSchema(
-  val title: String?,
-  val description: String?,
-  val default: KsonValue?,
-  val definitions: Map<KsonString, JsonSchema?>?,
+    val title: String?,
+    val description: String?,
+    val default: KsonValue?,
+    val definitions: Map<KsonString, JsonSchema?>?,
 
-  private val typeValidator: TypeValidator?,
-  private val schemaValidators: List<JsonSchemaValidator>
+    private val typeValidator: TypeValidator?,
+    private val schemaValidators: List<JsonSchemaValidator>
 ) : JsonSchema {
 
   override fun descriptionWithDefault(): String {

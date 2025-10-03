@@ -1,4 +1,4 @@
-package org.kson
+package org.kson.value
 
 import org.kson.ast.*
 import org.kson.parser.Location

@@ -1,10 +1,10 @@
 package org.kson.schema
 
-import org.kson.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
 import org.kson.schema.SchemaIdLookup.Companion.resolveUri
+import org.kson.value.*
 
 /**
  * Parses a JSON Schema string into our JsonSchema model.

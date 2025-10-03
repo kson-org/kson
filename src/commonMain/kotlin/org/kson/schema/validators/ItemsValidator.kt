@@ -1,7 +1,7 @@
 package org.kson.schema.validators
 
-import org.kson.KsonList
-import org.kson.KsonValue
+import org.kson.value.KsonList
+import org.kson.value.KsonValue
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType

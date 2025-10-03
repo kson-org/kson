@@ -1,6 +1,6 @@
 package org.kson.schema.validators
 
-import org.kson.KsonObject
+import org.kson.value.KsonObject
 import org.kson.parser.MessageSink
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema

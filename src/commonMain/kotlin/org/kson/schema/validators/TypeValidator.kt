@@ -1,9 +1,9 @@
 package org.kson.schema.validators
 
-import org.kson.*
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.asSchemaInteger
+import org.kson.value.*
 
 /**
  * Json Schema `type:` validator

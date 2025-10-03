@@ -13,8 +13,17 @@ import org.kson.tools.IndentType as InternalIndentType
 import org.kson.tools.KsonFormatterConfig
 import org.kson.parser.TokenType as InternalTokenType
 import org.kson.parser.Token as InternalToken
+import org.kson.value.KsonValue as InternalKsonValue
+import org.kson.value.KsonObject as InternalKsonObject
+import org.kson.value.KsonList as InternalKsonList
+import org.kson.value.KsonString as InternalKsonString
+import org.kson.value.KsonNumber as InternalKsonNumber
+import org.kson.value.KsonBoolean as InternalKsonBoolean
+import org.kson.value.KsonNull as InternalKsonNull
+import org.kson.value.EmbedBlock as InternalEmbedBlock
 import kotlin.js.JsExport
 import kotlin.ConsistentCopyVisibility
+import kotlin.js.JsName
 
 /**
  * The [Kson](https://kson.org) language
@@ -77,7 +86,8 @@ object Kson {
         val parseResult = KsonCore.parseToAst(kson)
         val tokens = convertTokens(parseResult.lexedTokens)
         val messages = publishMessages(parseResult.messages)
-        return Analysis(messages, tokens)
+        val value = parseResult.ksonValue?.let { convertValue(it) }
+        return Analysis(messages, tokens, value)
     }
 
     /**
@@ -214,7 +224,11 @@ sealed class IndentType {
  * The result of statically analyzing a Kson document
  */
 @ConsistentCopyVisibility
-data class Analysis internal constructor(val errors: List<Message>, val tokens: List<Token>)
+data class Analysis internal constructor(
+    val errors: List<Message>,
+    val tokens: List<Token>,
+    val ksonValue: KsonValue?
+)
 
 /**
  * [Token] produced by the lexing phase of a Kson parse
@@ -450,6 +464,197 @@ private fun createPublicToken(publicTokenType: TokenType, internalToken: Interna
 }
 
 /**
+ * Convert internal KsonValue types to public Value types
+ */
+internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
+    return when (ksonValue) {
+        is InternalKsonObject -> {
+            KsonValue.KsonObject(
+                properties = ksonValue.propertyMap.map {
+                    (convertValue(it.value.propName) as KsonValue.KsonString) to convertValue(
+                        it.value.propValue
+                    )
+                }.toMap(),
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+        is InternalKsonList -> {
+            KsonValue.KsonArray(
+                elements = ksonValue.elements.map { convertValue(it) },
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+        is InternalKsonString -> {
+            KsonValue.KsonString(
+                value = ksonValue.value,
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+        is InternalKsonNumber -> {
+            val isInteger = ksonValue.value is NumberParser.ParsedNumber.Integer
+            if (isInteger) {
+                KsonValue.KsonNumber.Integer(
+                    value = ksonValue.value.asString.toInt(),
+                    internalStart = Position(ksonValue.location.start),
+                    internalEnd = Position(ksonValue.location.end)
+                )
+            } else {
+                KsonValue.KsonNumber.Decimal(
+                    value = ksonValue.value.asString.toDouble(),
+                    internalStart = Position(ksonValue.location.start),
+                    internalEnd = Position(ksonValue.location.end)
+                )
+            }
+        }
+        is InternalKsonBoolean -> {
+            KsonValue.KsonBoolean(
+                value = ksonValue.value,
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+        is InternalKsonNull -> {
+            KsonValue.KsonNull(
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+        is InternalEmbedBlock -> {
+            KsonValue.KsonEmbed(
+                tag = ksonValue.embedTag?.value,
+                metadata = ksonValue.metadataTag?.value,
+                content = ksonValue.embedContent.value,
+                internalStart = Position(ksonValue.location.start),
+                internalEnd = Position(ksonValue.location.end)
+            )
+        }
+    }
+}
+
+/**
+ * Type discriminator for KsonValue subclasses
+ */
+enum class KsonValueType {
+    OBJECT,
+    ARRAY,
+    STRING,
+    INTEGER,
+    DECIMAL,
+    BOOLEAN,
+    NULL,
+    EMBED
+}
+
+/**
+ * Represents a parsed [InternalKsonValue] in the public API
+ */
+sealed class KsonValue private constructor(val start: Position, val end: Position) {
+    /**
+     * Type discriminator for easier type checking in TypeScript/JavaScript
+     */
+    abstract val type: KsonValueType
+    /**
+     * A Kson object with key-value pairs
+     */
+    @ConsistentCopyVisibility
+    data class KsonObject internal constructor(
+        val properties: Map<KsonString, KsonValue>,
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.OBJECT
+    }
+
+    /**
+     * A Kson array with elements
+     */
+    @ConsistentCopyVisibility
+    data class KsonArray internal constructor(
+        val elements: List<KsonValue>,
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.ARRAY
+    }
+
+    /**
+     * A Kson string value
+     */
+    @ConsistentCopyVisibility
+    data class KsonString internal constructor(
+        val value: String,
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.STRING
+    }
+
+    /**
+     * A Kson number value.
+     */
+    sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
+          @ConsistentCopyVisibility
+          data class Integer internal constructor(
+              val value: Int,
+              private val internalStart: Position,
+              private val internalEnd: Position
+          ) : KsonNumber(internalStart, internalEnd){
+              override val type = KsonValueType.INTEGER
+          }
+
+        @ConsistentCopyVisibility
+        data class Decimal internal constructor(
+            val value: Double,
+            private val internalStart: Position,
+            private val internalEnd: Position
+        ) : KsonNumber(internalStart, internalEnd) {
+            override val type = KsonValueType.DECIMAL
+        }
+      }
+
+
+    /**
+     * A Kson boolean value
+     */
+    @ConsistentCopyVisibility
+    data class KsonBoolean internal constructor(
+        val value: Boolean,
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.BOOLEAN
+    }
+
+    /**
+     * A Kson null value
+     */
+    @ConsistentCopyVisibility
+    data class KsonNull internal constructor(
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.NULL
+    }
+
+    /**
+     * A Kson embed block
+     */
+    @ConsistentCopyVisibility
+    data class KsonEmbed internal constructor(
+        val tag: String?,
+        val metadata: String?,
+        val content: String,
+        private val internalStart: Position,
+        private val internalEnd: Position
+    ) : KsonValue(internalStart, internalEnd) {
+        override val type = KsonValueType.EMBED
+    }
+}
+
+/**
  * Helper class to let FFI users iterate through the elements of a [List]
  */
 sealed class SimpleListIterator(list: List<Any>) {
@@ -464,6 +669,27 @@ sealed class SimpleListIterator(list: List<Any>) {
     }
 }
 
+/**
+ * Helper class to represent a key-value pair from a Map for FFI users
+ */
+data class SimpleMapEntry(val key: Any, val value: Any)
+
+/**
+ * Helper class to let FFI users iterate through the entries of a Map
+ */
+sealed class SimpleMapIterator(map: Map<*, *>) {
+    private val inner = map.entries.iterator()
+
+    fun next(): SimpleMapEntry? {
+        return if (inner.hasNext()) {
+            val entry = inner.next()
+            SimpleMapEntry(entry.key!!, entry.value!!)
+        } else {
+            null
+        }
+    }
+}
+
 
 /**
  * Helper object to let FFI users access enum properties
@@ -471,4 +697,23 @@ sealed class SimpleListIterator(list: List<Any>) {
 object EnumHelper {
     fun name(value: Enum<*>): String = value.name
     fun ordinal(value: Enum<*>): Int = value.ordinal
+}
+
+/**
+ * Helper object to let FFI users access functions for the `Any` type
+ */
+object AnyHelper {
+    @JsName("anyToString")
+    fun toString(x: Any): String {
+        return x.toString()
+    }
+
+    fun equals(x: Any, y: Any): Boolean {
+        return x == y
+    }
+
+    @JsName("anyHashCode")
+    fun hashCode(x: Any): Int {
+        return x.hashCode()
+    }
 }

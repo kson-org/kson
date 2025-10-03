@@ -1,417 +1,413 @@
+# !!!!!
+# THIS FILE IS AUTO-GENERATED FROM config.kson
+# DO NOT EDIT! IT WILL BE OVERWRITTEN ON NEXT BUILD
+# TO MODIFY, EDIT config.kson AND RUN ANY GRADLE TASK
+# !!!!!
 version: 2.1
-
 orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
-  browser-tools: circleci/browser-tools@1.1
+  "browser-tools": "circleci/browser-tools@1.1"
   # Windows support for testing Python on Windows
-  windows: circleci/windows@5.0
+  windows: "circleci/windows@5.0"
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  build-windows-amd64:
-    resource_class: 'windows.large'
-    machine:
-      image: 'windows-server-2022-gui:current'
-      shell: 'powershell.exe -ExecutionPolicy Bypass'
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
+# Reusable command definitions - only for truly cross-platform operations
+commands:
+  "gradle-core-tasks":
+    description: "Run core Gradle build and verification tasks"
+    steps:
+      - run:
+          name: "Download dependencies"
+          command: "./gradlew --no-daemon dependencies"
+
+      - run:
+          name: "Verify buildSrc project"
+          command: "cd buildSrc\n./gradlew --no-daemon check\n"
+
+      - run:
+          name: "Verify Kson project"
+          command: "./gradlew --no-daemon check"
+
+      - run:
+          name: "Build native kson-lib"
+          command: "./gradlew --no-daemon :kson-lib:nativeRelease"
+
+
+  "store-native-artifacts":
+    description: "Store build artifacts in a consistent way"
+    steps:
+      - store_artifacts:
+          path: "kson-lib/build/bin/nativeKson/releaseShared"
+          destination: "kson-lib-shared"
+
+      - store_artifacts:
+          path: "kson-lib/build/bin/nativeKson/releaseStatic"
+          destination: "kson-lib-static"
+
+
+  "restore-gradle-caches":
+    description: "Restore Gradle and JDK caches"
+    parameters:
+      platform:
+        type: string
+        description: "Platform identifier for cache keys"
+
+    steps:
+      - restore_cache:
+          keys:
+            - "v1-<< parameters.platform >>-dependencies-{{ checksum \"build.gradle.kts\" }}"
+            - "v1-<< parameters.platform >>-dependencies-"
+      - restore_cache:
+          keys:
+            - "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
+      - restore_cache:
+          keys:
+            - "v1-<< parameters.platform >>-vscode-tests"
+
+  "save-gradle-caches":
+    description: "Save Gradle and JDK caches"
+    parameters:
+      platform:
+        type: string
+        description: "Platform identifier for cache keys"
+
+    steps:
+      - save_cache:
+          paths:
+            - "~/.gradle"
+          key: "v1-<< parameters.platform >>-dependencies-{{ checksum \"build.gradle.kts\" }}"
+
+      - save_cache:
+          paths:
+            - "./gradle/jdk"
+            - "./buildSrc/gradle/jdk"
+          key: "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
+
+      - save_cache:
+          paths:
+            - "./tooling/lsp-clients/vscode/.vscode-test"
+            - "./tooling/lsp-clients/vscode/.vscode-test-web"
+          key: "v1-<< parameters.platform >>-vscode-tests"
+
+
+  "clean-git-config":
+    description: "Remove erroneous git config across platforms"
+    parameters:
+      shell:
+        type: enum
+        enum:
+          - bash
+          - powershell
+        default: bash
+
+    steps:
+      - when:
+          condition:
+            equal:
+              - "<< parameters.shell >>"
+              - bash
+          steps:
+            - run:
+                name: "Clean git config"
+                command: "rm -rf ~/.gitconfig"
+
+
+      - when:
+          condition:
+            equal:
+              - "<< parameters.shell >>"
+              - powershell
+          steps:
+            - run:
+                name: "Clean git config"
+                command: "Remove-Item -Path \"$env:USERPROFILE\\.gitconfig\" -Force -ErrorAction SilentlyContinue\n"
+                shell: "powershell.exe"
+
+
+
+  "setup-python-test":
+    description: "Common setup for Python sdist testing"
+    parameters:
+      platform:
+        type: string
     steps:
       - checkout
-      - run:
-          name: Get rid of erroneous git config
-          command: |
-            Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
+      - when:
+          condition:
+            equal:
+              - "<< parameters.platform >>"
+              - windows
+          steps:
+            - "clean-git-config":
+                shell: powershell
 
+      - when:
+          condition:
+            not:
+              equal:
+                - "<< parameters.platform >>"
+                - windows
+          steps:
+            - "clean-git-config":
+                shell: bash
+
+      - attach_workspace:
+          at: "~/repo"
+
+  "run-python-tests-unix":
+    description: "Run Python sdist tests and build wheel for Unix-like systems"
+    steps:
+      - run:
+          name: "Install kson from sdist"
+          command: "python3 -m pip install lib-python/dist/kson_lang-*.tar.gz"
+
+      - run:
+          name: "Install test dependencies"
+          command: "python3 -m pip install pytest"
+
+      - run:
+          name: "Run smoke tests on sdist installation"
+          command: "python3 -m pytest lib-python -v"
+
+      - run:
+          name: "Build platform-specific wheel"
+          command: "./gradlew :lib-python:buildWheel"
+
+
+
+# Job definitions
+jobs:
+  "build-windows-amd64":
+    resource_class: "windows.large"
+    machine:
+      image: "windows-server-2022-gui:current"
+      shell: "powershell.exe -ExecutionPolicy Bypass"
+
+    environment:
+      JVM_OPTS: "-Xmx3200m"
+    steps:
+      - checkout
+      - "clean-git-config":
+          shell: powershell
+      # Windows-specific installations
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
-      - run: choco install googlechrome --ignore-checksums
+      - run:
+          name: "Install Chrome"
+          command: "choco install googlechrome --ignore-checksums"
+
       # We would ideally install libclang through pixi, but after _hours_ of fiddling we
       # couldn't make the CI happy and decided to add it here instead
-      - run: choco install llvm
-      - restore_cache:
-          keys:
-            - v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-win-amd64-dependencies-
-
-      - restore_cache:
-          keys:
-            - v1-win-amd64-jdk-{{ checksum "jdk.properties" }}
-
-      - restore_cache:
-          keys:
-            - v1-win-amd64-vscode-tests
-
-      - run: ./gradlew --no-daemon dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-win-amd64-dependencies-{{ checksum "build.gradle.kts" }}
-
       - run:
-          name: Verify `buildSrc/` project
-          command: |
-            cd buildSrc
-            ./gradlew --no-daemon check
+          name: "Install LLVM"
+          command: "choco install llvm"
 
-      - run:
-          name: Verify Kson project
-          command: ./gradlew --no-daemon check
+      - "restore-gradle-caches":
+          platform: "win-amd64"
+      # Cross-platform Gradle tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "win-amd64"
 
-      - run:
-          name: Build native kson-lib
-          command: ./gradlew --no-daemon :kson-lib:nativeRelease
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseShared
-          destination: kson-lib-shared
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseStatic
-          destination: kson-lib-static
-
-      - save_cache:
-          paths:
-            - ./tooling/lsp-clients/vscode/.vscode-test
-            - ./tooling/lsp-clients/vscode/.vscode-test-web
-          key: v1-win-amd64-vscode-tests
-
-      - save_cache:
-          paths:
-            - ./gradle/jdk
-            - ./buildSrc/gradle/jdk
-          key: v1-win-amd64-jdk-{{ checksum "jdk.properties" }}
-
-  build-linux-amd64:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+  "build-linux-amd64":
     docker:
-      # Choose the `node:lts-browsers` image so that we can install Chrome for testing.  Note that we
-      # do not install a JDK image so that we are always exercising the project's built-in JDK (see jdk.properties for details)
-      - image: cimg/node:lts-browsers
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: cimg/postgres:9.4
-
-    working_directory: ~/repo
-
+      - image: "cimg/node:lts-browsers"
+    working_directory: "~/repo"
     environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
+      JVM_OPTS: "-Xmx3200m"
       TERM: dumb
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      # Install Chrome according to https://circleci.com/developer/orbs/orb/circleci/browser-tools#usage-install_chrome
-      - browser-tools/install-chrome
-      - checkout
-      - run: google-chrome --version
 
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle.kts" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - restore_cache:
-          keys:
-            - v1-jdk-{{ checksum "jdk.properties" }}
-
-      - restore_cache:
-          keys:
-            - v1-vscode-tests
-
-      # installed needed native dependency on Linux
-      - run: sudo apt update
-      - run: sudo apt install libncurses-dev
-      - run:
-          name: Get rid of erroneous git config
-          command: |
-            rm -rf ~/.gitconfig
-      - run: ./gradlew --no-daemon dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle.kts" }}
-
-      - run:
-          name: Verify `buildSrc/` project
-          command: |
-            cd buildSrc
-            ./gradlew --no-daemon check
-
-      - run:
-          name: Verify Kson project
-          command: ./gradlew --no-daemon check
-
-      - run:
-          name: Build native kson-lib
-          command: ./gradlew --no-daemon :kson-lib:nativeRelease
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseShared
-          destination: kson-lib-shared
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseStatic
-          destination: kson-lib-static
-
-      - save_cache:
-          paths:
-            - ./tooling/lsp-clients/vscode/.vscode-test
-            - ./tooling/lsp-clients/vscode/.vscode-test-web
-          key: v1-vscode-tests
-
-      - save_cache:
-          paths:
-            - ./gradle/jdk
-            - ./buildSrc/gradle/jdk
-          key: v1-jdk-{{ checksum "jdk.properties" }}
-
-    # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
     resource_class: large
+    steps:
+      - "browser-tools/install-chrome"
+      - checkout
+      - run:
+          name: "Verify Chrome installation"
+          command: "google-chrome --version"
 
-  build-macos-arm64:
+      - "restore-gradle-caches":
+          platform: "linux-amd64"
+      # Linux-specific installations
+      - run:
+          name: "Install system dependencies"
+          command: "sudo apt update\nsudo apt install libncurses-dev\n"
+
+      - "clean-git-config":
+          shell: bash
+      # Cross-platform Gradle tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "linux-amd64"
+
+  "build-macos-arm64":
     macos:
-      xcode: 16.4.0
-    resource_class: m4pro.medium
-    working_directory: ~/repo
+      xcode: "16.4.0"
+    resource_class: "m4pro.medium"
+    working_directory: "~/repo"
     steps:
-      - run: brew install --cask google-chrome
+      - run:
+          name: "Install Chrome"
+          command: "brew install --cask google-chrome"
+
       - checkout
-      - run: '"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version'
       - run:
-          name: Get rid of erroneous git config
-          command: |
-            rm -rf ~/.gitconfig
-      - restore_cache:
-          keys:
-            - v1-macos-arm64-dependencies-{{ checksum "build.gradle.kts" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-macos-arm64-dependencies-
+          name: "Verify Chrome installation"
+          command: "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --version"
 
-      - restore_cache:
-          keys:
-            - v1-macos-arm64-jdk-{{ checksum "jdk.properties" }}
+      - "clean-git-config":
+          shell: bash
+      - "restore-gradle-caches":
+          platform: "macos-arm64"
+      # Cross-platform Gradle tasks
+      - "gradle-core-tasks"
+      - "store-native-artifacts"
+      - "save-gradle-caches":
+          platform: "macos-arm64"
 
-      - restore_cache:
-          keys:
-            - v1-macos-arm64-vscode-tests
-
-      - run: ./gradlew --no-daemon dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-macos-arm64-dependencies-{{ checksum "build.gradle.kts" }}
-
-      - run:
-          name: Verify `buildSrc/` project
-          command: |
-            cd buildSrc
-            ./gradlew --no-daemon check
-
-      - run:
-          name: Verify Kson project
-          command: ./gradlew --no-daemon check
-
-      - run:
-          name: Build native kson-lib
-          command: ./gradlew --no-daemon :kson-lib:nativeRelease
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseShared
-          destination: kson-lib-shared
-
-      - store_artifacts:
-          path: kson-lib/build/bin/nativeKson/releaseStatic
-          destination: kson-lib-static
-
-      - save_cache:
-          paths:
-            - ./tooling/lsp-clients/vscode/.vscode-test
-            - ./tooling/lsp-clients/vscode/.vscode-test-web
-          key: v1-macos-arm64-vscode-tests
-
-      - save_cache:
-          paths:
-            - ./gradle/jdk
-            - ./buildSrc/gradle/jdk
-          key: v1-macos-arm64-jdk-{{ checksum "jdk.properties" }}
-
-  build-python-sdist:
+  "build-python-sdist":
     docker:
-      - image: cimg/python:3.11
-    working_directory: ~/repo
+      - image: "cimg/python:3.11"
+    working_directory: "~/repo"
     steps:
       - checkout
+      - "clean-git-config":
+          shell: bash
       - run:
-          name: Get rid of erroneous git config
-          command: |
-            rm -rf ~/.gitconfig
+          name: "Build Python source distribution"
+          command: "./gradlew :lib-python:createSdistBuildEnvironment"
+
       - run:
-          name: Build Python source distribution
-          command: |
-            ./gradlew :lib-python:createSdistBuildEnvironment
-      - run:
-          name: Verify sdist was created
-          command: |
-            ls -la lib-python/dist/
-            test -f lib-python/dist/kson_lang-*.tar.gz
+          name: "Verify sdist was created"
+          command: "ls -la lib-python/dist/\ntest -f lib-python/dist/kson_lang-*.tar.gz\n"
+
       - persist_to_workspace:
-          root: ~/repo
+          root: "~/repo"
           paths:
-            - lib-python/dist/*.tar.gz
-      - store_artifacts:
-          path: lib-python/dist
-          destination: python-sdist
+            - "lib-python/dist/*.tar.gz"
 
-  test-python-sdist-linux-amd64:
+      - store_artifacts:
+          path: "lib-python/dist"
+          destination: "python-sdist"
+
+
+  "test-python-sdist-linux-amd64":
     docker:
-      - image: cimg/python:3.11
-    working_directory: ~/repo
+      - image: "cimg/python:3.11"
+    working_directory: "~/repo"
     steps:
-      - checkout
+      - "setup-python-test":
+          platform: linux
       - setup_remote_docker
-      - run:
-          name: Get rid of erroneous git config
-          command: |
-            rm -rf ~/.gitconfig
-      - attach_workspace:
-          at: ~/repo
-      - run:
-          name: Install kson from sdist
-          command: |
-            python3 -m pip install lib-python/dist/kson_lang-*.tar.gz
-      - run:
-          name: Install test dependencies
-          command: |
-            python3 -m pip install pytest
-      - run:
-          name: Run smoke tests on sdist installation
-          command: |
-            python3 -m pytest lib-python -v
-      - run:
-          name: Build platform-specific wheel
-          command: |
-            ./gradlew :lib-python:buildWheel
+      - "run-python-tests-unix"
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-linux-amd64
+          path: "lib-python/dist"
+          destination: "python-linux-amd64"
 
-  test-python-sdist-macos:
+
+  "test-python-sdist-macos":
     macos:
-      xcode: 14.2.0
-    working_directory: ~/repo
+      xcode: "14.2.0"
+    working_directory: "~/repo"
     steps:
-      - checkout
-      - run:
-          name: Get rid of erroneous git config
-          command: |
-            rm -rf ~/.gitconfig
-      - attach_workspace:
-          at: ~/repo
-      - run:
-          name: Install kson from sdist
-          command: |
-            python3 -m pip install lib-python/dist/kson_lang-*.tar.gz
-      - run:
-          name: Install test dependencies
-          command: |
-            python3 -m pip install pytest
-      - run:
-          name: Run smoke tests on sdist installation
-          command: |
-            python3 -m pytest lib-python -v
-      - run:
-          name: Build platform-specific wheel
-          command: |
-            ./gradlew :lib-python:buildWheel
+      - "setup-python-test":
+          platform: macos
+      - "run-python-tests-unix"
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-macos
+          path: "lib-python/dist"
+          destination: "python-macos"
 
-  test-python-sdist-windows:
+
+  "test-python-sdist-windows":
     executor:
-      name: windows/default
+      name: "windows/default"
       size: medium
-    working_directory: ~/repo
+
+    working_directory: "~/repo"
     steps:
-      - checkout
+      - "setup-python-test":
+          platform: windows
       - run:
-          name: Get rid of erroneous git config
-          command: |
-            Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
-          shell: powershell.exe
-      - attach_workspace:
-          at: ~/repo
+          name: "Check Python version and upgrade if needed"
+          command: "python --version\npython -m pip install --upgrade pip\n"
+
       - run:
-          name: Check Python version and upgrade if needed
-          command: |
-            python --version
-            python -m pip install --upgrade pip
+          name: "Install kson from sdist"
+          command: "python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName\n"
+          shell: "powershell.exe"
+
       - run:
-          name: Install kson from sdist
-          command: |
-            python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName
-          shell: powershell.exe
+          name: "Install test dependencies"
+          command: "python -m pip install pytest"
+
       - run:
-          name: Install test dependencies
-          command: |
-            python -m pip install pytest
+          name: "Run smoke tests on sdist installation"
+          command: "python -m pytest lib-python -v"
+
       - run:
-          name: Run smoke tests on sdist installation
-          command: |
-            python -m pytest lib-python -v
-      - run:
-          name: Build platform-specific wheel
-          command: |
-            .\gradlew.bat :lib-python:buildWheel --no-daemon
+          name: "Build platform-specific wheel"
+          command: ".\\gradlew.bat :lib-python:buildWheel --no-daemon\n"
+
       - store_artifacts:
-          path: lib-python/dist
-          destination: python-windows
+          path: "lib-python/dist"
+          destination: "python-windows"
+
+
 
 workflows:
   version: 2
-  build-all:
+  # Main build workflow - runs on version tags
+  "build-all":
     jobs:
-      - build-linux-amd64
-      - build-windows-amd64
-      - build-macos-arm64
-  build-python-and-test:
+      - "build-linux-amd64"
+      - "build-windows-amd64":
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+      - "build-macos-arm64":
+          filters:
+            tags:
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
+            branches:
+              ignore: "/.*/"
+
+  "build-python-and-test":
     jobs:
-      - build-python-sdist:
+      - "build-python-sdist":
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
             branches:
-              ignore: /.*/
-      - test-python-sdist-linux-amd64:
+              ignore: "/.*/"
+
+      - "test-python-sdist-linux-amd64":
           requires:
-            - build-python-sdist
+            - "build-python-sdist"
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
             branches:
-              ignore: /.*/
-      - test-python-sdist-macos:
+              ignore: "/.*/"
+
+
+      - "test-python-sdist-macos":
           requires:
-            - build-python-sdist
+            - "build-python-sdist"
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
             branches:
-              ignore: /.*/
-      - test-python-sdist-windows:
+              ignore: "/.*/"
+
+
+      - "test-python-sdist-windows":
           requires:
-            - build-python-sdist
+            - "build-python-sdist"
           filters:
             tags:
-              only: /^v\d+\.\d+\.\d+$/
+              only: "/^v\\d+\\.\\d+\\.\\d+$/"
             branches:
-              ignore: /.*/
+              ignore: "/.*/"
