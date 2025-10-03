@@ -730,113 +730,126 @@ class EmbedBlockNode(
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson -> {
-                val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
-                val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
+            is Kson -> renderKsonFormat(indent, compileTarget)
+            is Yaml -> renderYamlFormat(indent, compileTarget)
+            is Json -> renderJsonFormat(indent, compileTarget)
+        }
+    }
 
-                // Choose delimiter that requires least escaping
-                val (delimiter, content) = when {
-                    // The primary delimiter is not in the content, so we can use the default delimiter
-                    // without any escaping needed
-                    percentCount == 0 ->
-                        EmbedDelim.Percent to embedContent
+    /**
+     * Renders this embed block as KSON format source code
+     *
+     * @param indent The indentation to apply
+     * @param compileTarget The KSON compile target with formatting configuration
+     * @return The rendered KSON source string
+     */
+    private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
+        val (delimiter, content) = selectOptimalDelimiter()
+        val embedPreamble = embedTag + if (metadataTag.isNotEmpty()) ": $metadataTag" else ""
 
-                    // Otherwise, check if we can use the alternate delimiter without escaping
-                    dollarCount == 0 ->
-                        EmbedDelim.Dollar to EmbedDelim.Dollar.escapeEmbedContent(embedContent)
-
-                    // We'll choose the delimiter that requires less escaping
-                    else -> {
-                        val chosenDelimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
-                        chosenDelimiter to chosenDelimiter.escapeEmbedContent(embedContent)
-                    }
-                }
-
-                val embedPreamble = embedTag + if (metadataTag.isNotEmpty()) ": $metadataTag" else ""
-                when (compileTarget.formatConfig.formattingStyle) {
-                    FormattingStyle.PLAIN, FormattingStyle.DELIMITED -> {
-                        // Format the embed block
-                        indent.firstLineIndent() + delimiter.openDelimiter + embedPreamble + "\n" +
-                                indent.bodyLinesIndent() + content.lines()
-                            .joinToString("\n${indent.bodyLinesIndent()}") { it } +
-                                delimiter.closeDelimiter
-                    }
-
-                    FormattingStyle.COMPACT -> {
-                        // Format the embed block
-                        delimiter.openDelimiter + embedPreamble + "\n" +
-                                content.lines()
-                                    .joinToString("\n") { it } +
-                                delimiter.closeDelimiter
-                    }
-                }
+        return when (compileTarget.formatConfig.formattingStyle) {
+            FormattingStyle.PLAIN, FormattingStyle.DELIMITED -> {
+                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}") { it }
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$embedPreamble\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
             }
-
-            is Yaml -> {
-                if (!compileTarget.retainEmbedTags) {
-                    renderMultilineYamlString(embedContent, indent, indent.next(false))
-                } else {
-                    encodeEmbedBlock(compileTarget, indent)
-                }
-            }
-
-            is Json -> {
-                if (!compileTarget.retainEmbedTags) {
-                    indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
-                } else {
-                    encodeEmbedBlock(compileTarget, indent)
-                }
+            FormattingStyle.COMPACT -> {
+                val compactContent = content.lines().joinToString("\n") { it }
+                "${delimiter.openDelimiter}$embedPreamble\n$compactContent${delimiter.closeDelimiter}"
             }
         }
     }
 
     /**
-     * Encode the [EmbedBlockNode] to a Json or Yaml object with the [EmbedObjectKeys]
+     * Selects the optimal delimiter for the embed block content, preferring delimiters that don't appear in the content
+     * to avoid escaping. Returns a pair of the chosen delimiter and the content (escaped if necessary).
+     *
+     * @return A pair of the chosen [EmbedDelim] and the content string (escaped if the delimiter appears in content)
      */
-    private fun encodeEmbedBlock(compileTarget: CompileTarget, indent: Indent): String {
-        return when (compileTarget) {
-            is Json -> {
-                val nextIndent = indent.next(false)
-                val embedTag = if (embedTag.isNotEmpty()) {
-                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\"," + "\n"
-                } else {
-                    ""
-                }
-                val metadataTag = if (metadataTag.isNotEmpty()) {
-                    nextIndent.bodyLinesIndent() + "\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\"," + "\n"
-                } else {
-                    ""
-                }
+    private fun selectOptimalDelimiter(): Pair<EmbedDelim, String> {
+        val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
+        val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
 
-                """
-                |${indent.firstLineIndent()}{
-                |$embedTag$metadataTag${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${
-                    renderForJsonString(
-                        embedContent
-                    )
-                }"
-                |${indent.bodyLinesIndent()}}
-                        """.trimMargin()
-
+        return when {
+            percentCount == 0 -> EmbedDelim.Percent to embedContent
+            dollarCount == 0 -> EmbedDelim.Dollar to embedContent
+            else -> {
+                val delimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
+                delimiter to delimiter.escapeEmbedContent(embedContent)
             }
-
-            is Yaml -> {
-                if (embedTag.isNotEmpty()) {
-                    indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_TAG.key}: \"" + embedTag + "\"\n"
-                } else {
-                    ""
-                } +
-                        if (metadataTag.isNotEmpty()) {
-                            indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_METADATA.key}: \"" + metadataTag + "\"\n"
-                        } else {
-                            ""
-                        } +
-                        indent.firstLineIndent() + "${EmbedObjectKeys.EMBED_CONTENT.key}: " +
-                        renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
-            }
-
-            is Kson -> throw UnsupportedOperationException("should not encode embed block as ${compileTarget::class.simpleName}")
         }
+    }
+
+    /**
+     * Renders this embed block as YAML format source code
+     *
+     * @param indent The indentation to apply
+     * @param compileTarget The YAML compile target with configuration
+     * @return The rendered YAML source string
+     */
+    private fun renderYamlFormat(indent: Indent, compileTarget: Yaml): String {
+        return if (!compileTarget.retainEmbedTags) {
+            renderMultilineYamlString(embedContent, indent, indent.next(false))
+        } else {
+            renderYamlObject(indent)
+        }
+    }
+
+    /**
+     * Renders this embed block as JSON format source code
+     *
+     * @param indent The indentation to apply
+     * @param compileTarget The JSON compile target with configuration
+     * @return The rendered JSON source string
+     */
+    private fun renderJsonFormat(indent: Indent, compileTarget: Json): String {
+        return if (!compileTarget.retainEmbedTags) {
+            indent.firstLineIndent() + "\"${renderForJsonString(embedContent)}\""
+        } else {
+            renderJsonObject(indent, indent.next(false))
+        }
+    }
+
+    /**
+     * Renders this embed block as a JSON object with separate fields for embed tag, metadata, and content
+     *
+     * @param indent The base indentation to apply to the object
+     * @param nextIndent The indentation for nested object properties
+     * @return The rendered JSON object string
+     */
+    private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
+        val embedTagLine = if (embedTag.isNotEmpty()) {
+            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\",\n"
+        } else ""
+
+        val metadataTagLine = if (metadataTag.isNotEmpty()) {
+            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\",\n"
+        } else ""
+
+        return """
+            |${indent.firstLineIndent()}{
+            |$embedTagLine$metadataTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
+            |${indent.bodyLinesIndent()}}
+        """.trimMargin()
+    }
+
+    /**
+     * Renders this embed block as a YAML object with separate fields for embed tag, metadata, and content
+     *
+     * @param indent The indentation to apply to the object
+     * @return The rendered YAML object string
+     */
+    private fun renderYamlObject(indent: Indent): String {
+        val embedTagLine = if (embedTag.isNotEmpty()) {
+            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"$embedTag\"\n"
+        } else ""
+
+        val metadataTagLine = if (metadataTag.isNotEmpty()) {
+            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_METADATA.key}: \"$metadataTag\"\n"
+        } else ""
+
+        return embedTagLine + metadataTagLine +
+                "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
+                renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }
 
     /**
