@@ -31,6 +31,12 @@ export class CodeLensService {
             { documentUri: document.uri, formattingStyle: FormattingStyle.COMPACT }
         );
 
+        const classicFormatCommand = createTypedCommand(
+            CommandType.CLASSIC_FORMAT,
+            'classic',
+            { documentUri: document.uri, formattingStyle: FormattingStyle.CLASSIC }
+        );
+
         // Place both lenses at the start of the document
         const range = {
             start: { line: 0, character: 0 },
@@ -45,6 +51,10 @@ export class CodeLensService {
             {
                 range,
                 command: delimitedFormatCommand
+            },
+            {
+                range,
+                command: classicFormatCommand
             },
             {
                 range,

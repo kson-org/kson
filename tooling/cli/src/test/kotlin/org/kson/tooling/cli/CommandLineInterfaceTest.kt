@@ -230,6 +230,28 @@ class CommandLineInterfaceTest {
     }
 
     @Test
+    fun testTranspileToKsonWithClassicStyle() {
+        assertCommand(
+            subCommand = SubCommands.FORMAT,
+            input = """
+                key: value
+                list: [1,2,3]
+            """.trimIndent(),
+            expectedOutput = OutputExpectation.Success("""
+                {
+                  "key": "value",
+                  "list": [
+                    1,
+                    2,
+                    3
+                  ]
+                }
+            """.trimIndent()),
+            "--style", "classic"
+        )
+    }
+
+    @Test
     fun testTranspileToKsonWithDelimitedStyle() {
         assertCommand(
             subCommand = SubCommands.FORMAT,

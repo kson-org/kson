@@ -10,7 +10,7 @@ import {FormattingStyle} from 'kson'
 describe('CodeLensService', () => {
     const service = new CodeLensService();
 
-    it('should return two code lenses at the top of the document', () => {
+    it('should return code lenses at the top of the document', () => {
         const content = '{ "name": "test" }';
         const textDocument = TextDocument.create('file:///test.kson', 'kson', 1, content);
         const analysisResult = Kson.getInstance().analyze(content);
@@ -18,7 +18,7 @@ describe('CodeLensService', () => {
 
         const lenses = service.getCodeLenses(document);
 
-        assert.strictEqual(lenses.length, 3);
+        assert.strictEqual(lenses.length, 4);
 
         // First lens should be "plain"
         assert.strictEqual(lenses[0].command?.title, 'plain');
@@ -40,14 +40,24 @@ describe('CodeLensService', () => {
         assert.deepStrictEqual(lenses[1].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[1].range.end, { line: 0, character: 0 });
 
-        // Second lens should be "compact"
-        assert.strictEqual(lenses[2].command?.title, 'compact');
-        assert.strictEqual(lenses[2].command?.command, CommandType.COMPACT_FORMAT);
+        // Third lens should be "classic"
+        assert.strictEqual(lenses[2].command?.title, 'classic');
+        assert.strictEqual(lenses[2].command?.command, CommandType.CLASSIC_FORMAT);
         assert.deepStrictEqual(lenses[2].command?.arguments, [{
             documentUri: 'file:///test.kson',
-            formattingStyle: FormattingStyle.COMPACT
+            formattingStyle: FormattingStyle.CLASSIC
         }]);
         assert.deepStrictEqual(lenses[2].range.start, { line: 0, character: 0 });
         assert.deepStrictEqual(lenses[2].range.end, { line: 0, character: 0 });
+
+        // Fourth lens should be "compact"
+        assert.strictEqual(lenses[3].command?.title, 'compact');
+        assert.strictEqual(lenses[3].command?.command, CommandType.COMPACT_FORMAT);
+        assert.deepStrictEqual(lenses[3].command?.arguments, [{
+            documentUri: 'file:///test.kson',
+            formattingStyle: FormattingStyle.COMPACT
+        }]);
+        assert.deepStrictEqual(lenses[3].range.start, { line: 0, character: 0 });
+        assert.deepStrictEqual(lenses[3].range.end, { line: 0, character: 0 });
     });
 });
