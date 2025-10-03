@@ -6,6 +6,10 @@ import {
     DocumentFormattingParams,
     DocumentDiagnosticParams,
     DocumentDiagnosticReport,
+    DocumentHighlight,
+    DocumentHighlightParams,
+    DocumentSymbol,
+    DocumentSymbolParams,
     CodeLens,
     CodeLensParams,
     ExecuteCommandParams,
@@ -15,8 +19,11 @@ import {FormattingService} from '../features/FormattingService.js';
 import {DiagnosticService} from '../features/DiagnosticService.js';
 import {SemanticTokensService} from '../features/SemanticTokensService.js';
 import {CodeLensService} from '../features/CodeLensService.js';
+import {DocumentHighlightService} from '../features/DocumentHighlightService.js';
+import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
 import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
+import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 
 /**
  * This is the coordinator for all the service classes.
@@ -24,10 +31,12 @@ import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 export class KsonTextDocumentService {
     private connection!: Connection;
 
-    private formattingService: FormattingService;
+    private readonly formattingService: FormattingService;
     private diagnosticService: DiagnosticService;
     private semanticTokensService: SemanticTokensService;
     private codeLensService: CodeLensService;
+    private documentHighlightService: DocumentHighlightService;
+    private documentSymbolService: DocumentSymbolService;
     private commandExecutor!: CommandExecutor;
     private configuration: Required<KsonSettings>;
 
@@ -36,6 +45,8 @@ export class KsonTextDocumentService {
         this.diagnosticService = new DiagnosticService();
         this.semanticTokensService = new SemanticTokensService();
         this.codeLensService = new CodeLensService();
+        this.documentHighlightService = new DocumentHighlightService();
+        this.documentSymbolService = new DocumentSymbolService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -84,6 +95,8 @@ export class KsonTextDocumentService {
         this.connection.languages.diagnostics.on(this.onDiagnostic.bind(this));
         this.connection.onCodeLens(this.onCodeLens.bind(this));
         this.connection.onExecuteCommand(this.onExecuteCommand.bind(this));
+        this.connection.onDocumentHighlight(this.onDocumentHighlight.bind(this));
+        this.connection.onDocumentSymbol(this.onDocumentSymbol.bind(this));
     }
 
 
@@ -145,6 +158,34 @@ export class KsonTextDocumentService {
         } catch (error) {
             this.connection.console.error(`Error executing command: ${error}`);
             this.connection.window.showErrorMessage(`Command execution failed: ${error}`);
+        }
+    }
+
+    private async onDocumentHighlight(params: DocumentHighlightParams): Promise<DocumentHighlight[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            return this.documentHighlightService.getDocumentHighlights(document, params.position);
+        } catch (error) {
+            this.connection.console.error(`Error providing document highlights: ${error}`);
+            return [];
+        }
+    }
+
+    private async onDocumentSymbol(params: DocumentSymbolParams): Promise<DocumentSymbol[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue)
+            document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
+            return documentSymbols
+        } catch (error) {
+            this.connection.console.error(`Error providing document symbols: ${error}`);
+            return [];
         }
     }
 }

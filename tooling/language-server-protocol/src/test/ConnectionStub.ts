@@ -12,7 +12,12 @@ import {
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, WillSaveTextDocumentParams, DidSaveTextDocumentParams,
     CodeLensParams,
     CodeLens,
-    ExecuteCommandParams
+    ExecuteCommandParams,
+    DocumentHighlight,
+    DocumentHighlightParams,
+    DocumentSymbol,
+    DocumentSymbolParams,
+    SymbolInformation
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
@@ -42,11 +47,21 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public diagnosticsHandler: ServerRequestHandler<DocumentDiagnosticParams, DocumentDiagnosticReport, any, void>;
     public codeLensHandler: ServerRequestHandler<CodeLensParams, CodeLens[] | null | undefined, never, void>;
     public executeCommandHandler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>;
+    public documentHighlightHandler: ServerRequestHandler<DocumentHighlightParams, DocumentHighlight[] | null | undefined, DocumentHighlight[], void>;
+    public documentSymbolHandler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>;
 
     languages: Languages;
 
     constructor() {
         super();
+        
+        // Initialize console with mock implementation
+        this.console = {
+            error: () => {},
+            warn: () => {},
+            info: () => {},
+            log: () => {}
+        } as any;
         this.languages = {
             semanticTokens: {
                 on: (handler: ServerRequestHandler<SemanticTokensParams, SemanticTokens, any, void>) => {
@@ -105,6 +120,16 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     override onExecuteCommand(handler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>): Disposable {
         this.executeCommandHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onDocumentHighlight(handler: ServerRequestHandler<DocumentHighlightParams, DocumentHighlight[] | null | undefined, DocumentHighlight[], void>): Disposable {
+        this.documentHighlightHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onDocumentSymbol(handler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>): Disposable {
+        this.documentSymbolHandler = handler;
         return NOOP_DISPOSABLE;
     }
 }
