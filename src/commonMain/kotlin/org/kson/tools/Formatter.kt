@@ -60,8 +60,10 @@ class IndentFormatter(
      *   should assume the snippet itself is already indented nested to a level of [snippetNestingLevel].
      * @return The indented KSON source code
      */
-    @Deprecated("This formatter is no long a good general purpose formatter. " +
-            "See the TODO in this class's doc for details")
+    @Deprecated(
+        "This formatter is no long a good general purpose formatter. " +
+                "See the TODO in this class's doc for details"
+    )
     private fun indent(source: String, snippetNestingLevel: Int? = null): String {
         if (source.isBlank() && snippetNestingLevel == null) return ""
         val tokens = Lexer(source, gapFree = true).tokenize()
@@ -104,7 +106,7 @@ class IndentFormatter(
                      * carefully preserved
                      */
                     EMBED_CONTENT -> {
-                        val embedContentIndent = if (line.subList(0,tokenIndex + 1).any {
+                        val embedContentIndent = if (line.subList(0, tokenIndex + 1).any {
                                 it.tokenType == COLON
                             }) {
                             /**
@@ -131,6 +133,7 @@ class IndentFormatter(
                         lineContent.clear()
                         break
                     }
+
                     COLON -> {
                         // if we're currently nested in a COLON, consider that nest closed on this line
                         // since we're starting a new object property
@@ -145,20 +148,22 @@ class IndentFormatter(
                         }
                         lineContent.add(token.lexeme.text)
                     }
+
                     in OPENING_DELIMITERS -> {
                         // register the indent from this opening delim
                         nextNests.add(token.tokenType)
                         lineContent.add(token.lexeme.text)
                     }
+
                     in CLOSING_DELIMITERS -> {
                         /**
                          * [CLOSING_DELIMITERS] that are part of a leading line of leading close delimiters
                          * on a line may trigger an immediate un-nest
                          */
                         if (line.subList(0, tokenIndex + 1).all {
-                            CLOSING_DELIMITERS.contains(it.tokenType)
-                                    || it.tokenType == WHITESPACE
-                        }) {
+                                CLOSING_DELIMITERS.contains(it.tokenType)
+                                        || it.tokenType == WHITESPACE
+                            }) {
                             if (nesting.lastOrNull() == COLON) {
                                 /**
                                  * If we spot a [COLON] nest as we're closing things, that must be closed too:
@@ -176,6 +181,7 @@ class IndentFormatter(
                         }
                         lineContent.add(token.lexeme.text)
                     }
+
                     else -> {
                         lineContent.add(token.lexeme.text)
                     }
@@ -265,7 +271,7 @@ class IndentFormatter(
         while (startIndex < tokens.size && tokens[startIndex].tokenType == WHITESPACE) {
             startIndex++
         }
-        
+
         var index = startIndex
         while (index < tokens.size) {
             val token = tokens[index]
@@ -288,12 +294,13 @@ class IndentFormatter(
                 val nextToken = tokens.getOrNull(index + 1)
                 if (nextToken?.tokenType == COMMENT) {
                     var commentToken: Token = nextToken
-                    while(commentToken.tokenType == COMMENT
-                        || (commentToken.tokenType == WHITESPACE && commentToken.lexeme.text.contains('\n'))) {
+                    while (commentToken.tokenType == COMMENT
+                        || (commentToken.tokenType == WHITESPACE && commentToken.lexeme.text.contains('\n'))
+                    ) {
                         index++
                         if (commentToken.tokenType == WHITESPACE) {
                             val numNewlines = commentToken.lexeme.text.count { it == '\n' }
-                            repeat (numNewlines) {
+                            repeat(numNewlines) {
                                 currentLine.add(commentToken.copy(lexeme = commentToken.lexeme.copy(text = "\n")))
                             }
                         } else {

@@ -21,9 +21,9 @@ class FormatterTest {
         /**
          * TODO There are two test cases that currently can't roundtrip. After we handled these corner cases we should
          * roundtrip for every test.
-        **/
+         **/
         var roundtripKson = formattedKson
-        if(roundTrip){
+        if (roundTrip) {
             FormattingStyle.entries.filter { it != formattingStyle }.forEach { intermediateStyle ->
                 roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle))
             }
@@ -45,7 +45,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testColonWithWhitespace(){
+    fun testColonWithWhitespace() {
         assertFormatting(
             """
             {
@@ -435,7 +435,8 @@ class FormatterTest {
               # comment
               # comment
               y: 12
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     @Test
@@ -472,7 +473,7 @@ class FormatterTest {
         )
 
     }
-    
+
     @Test
     fun testEmbedBlocksAtDifferentNestingLevels() {
         assertFormatting(
@@ -746,7 +747,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testFormattingMixedUnnesting(){
+    fun testFormattingMixedUnnesting() {
         assertFormatting(
             """
             outer_key1: {
@@ -1014,149 +1015,237 @@ class FormatterTest {
     fun testGetCurrentLineIndentLevel() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("{"),
-            "should indent one level after opening brace")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("  {"),
-            "should indent one level after opening brace with existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("{"),
+            "should indent one level after opening brace"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("  {"),
+            "should indent one level after opening brace with existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("key:"),
-            "should indent one level after colon")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("  key:"),
-            "should indent one level after colon with existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("key:"),
+            "should indent one level after colon"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("  key:"),
+            "should indent one level after colon with existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("<"),
-            "should indent one level after opening angle bracket")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("  <"),
-            "should indent one level after opening angle bracket with existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("<"),
+            "should indent one level after opening angle bracket"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("  <"),
+            "should indent one level after opening angle bracket with existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  - item"),
-            "should maintain indent after dash in list")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  - item"),
+            "should maintain indent after dash in list"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  }"),
-            "should match closing brace indent")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    }"),
-            "should match closing brace indent with higher existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  }"),
+            "should match closing brace indent"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    }"),
+            "should match closing brace indent with higher existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  >"),
-            "should match closing angle bracket indent")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    >"),
-            "should match closing angle bracket indent with higher existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  >"),
+            "should match closing angle bracket indent"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    >"),
+            "should match closing angle bracket indent with higher existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  some text"),
-            "should maintain indent for normal lines")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    other text"),
-            "should maintain indent for normal lines with higher existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  some text"),
+            "should maintain indent for normal lines"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    other text"),
+            "should maintain indent for normal lines with higher existing indent"
+        )
     }
 
     @Test
     fun testEmptyLineIndentLevel() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  "),
-            "should maintain previous indent for empty lines")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    "),
-            "should maintain previous indent for empty lines with higher existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  "),
+            "should maintain previous indent for empty lines"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    "),
+            "should maintain previous indent for empty lines with higher existing indent"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithTabs() {
         val formatter = IndentFormatter(IndentType.Tab())
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("{"),
-            "should indent one level after opening brace with tab indentation")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("\t{"),
-            "should indent one level after opening brace with existing tab indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("{"),
+            "should indent one level after opening brace with tab indentation"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("\t{"),
+            "should indent one level after opening brace with existing tab indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("key:"),
-            "should indent one level after colon with tab indentation")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("\tkey:"),
-            "should indent one level after colon with existing tab indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("key:"),
+            "should indent one level after colon with tab indentation"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("\tkey:"),
+            "should indent one level after colon with existing tab indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("\tsome text"),
-            "should maintain indent for normal lines with tab indentation")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("\t\tother text"),
-            "should maintain indent for normal lines with higher existing tab indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("\tsome text"),
+            "should maintain indent for normal lines with tab indentation"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("\t\tother text"),
+            "should maintain indent for normal lines with higher existing tab indent"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithEmbedBlocks() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(0, formatter.getCurrentLineIndentLevel("%%sql"),
-            "should not change indent for embed block start")
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  %%sql"),
-            "should not change indent for embed block start with existing indent")
+        assertEquals(
+            0, formatter.getCurrentLineIndentLevel("%%sql"),
+            "should not change indent for embed block start"
+        )
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  %%sql"),
+            "should not change indent for embed block start with existing indent"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  SELECT *"),
-            "should maintain indent inside embed block")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  SELECT *"),
+            "should maintain indent inside embed block"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  %%"),
-            "should decrease indent after embed block end")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    %%"),
-            "should decrease indent after embed block end with higher existing indent")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  %%"),
+            "should decrease indent after embed block end"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    %%"),
+            "should decrease indent after embed block end with higher existing indent"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithMixedStructures() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("{"),
-            "should properly indent for nested structures")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("  nested: {"),
-            "should properly indent for nested object properties")
-        assertEquals(3, formatter.getCurrentLineIndentLevel("    items: <"),
-            "should properly indent for nested angle brackets")
-        assertEquals(3, formatter.getCurrentLineIndentLevel("    - {"),
-            "should properly indent for nested list items")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("{"),
+            "should properly indent for nested structures"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("  nested: {"),
+            "should properly indent for nested object properties"
+        )
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("    items: <"),
+            "should properly indent for nested angle brackets"
+        )
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("    - {"),
+            "should properly indent for nested list items"
+        )
 
-        assertEquals(3, formatter.getCurrentLineIndentLevel("      }"),
-            "should properly indent after closing nested delimiters")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    >"),
-            "should properly indent after closing angle brackets")
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  }"),
-            "should properly indent after closing outer brace")
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("      }"),
+            "should properly indent after closing nested delimiters"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    >"),
+            "should properly indent after closing angle brackets"
+        )
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  }"),
+            "should properly indent after closing outer brace"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithMultipleChanges() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(2, formatter.getCurrentLineIndentLevel("{ {"),
-            "should increase indent by more than 1 for multiple opening delimiters on one line")
-        assertEquals(3, formatter.getCurrentLineIndentLevel("{ { {"),
-            "should increase indent by multiple levels for three opening delimiters")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("key: {nested: {"),
-            "should increase indent by more than 1 for nested properties")
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("{ {"),
+            "should increase indent by more than 1 for multiple opening delimiters on one line"
+        )
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("{ { {"),
+            "should increase indent by multiple levels for three opening delimiters"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("key: {nested: {"),
+            "should increase indent by more than 1 for nested properties"
+        )
 
-        assertEquals(1, formatter.getCurrentLineIndentLevel("  } }"),
-            "should have no effect on the next line for multiple closing delimiters as they unindent their own line")
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    } } }"),
-            "should maintain existing indent levels for multiple closing delimiters")
+        assertEquals(
+            1, formatter.getCurrentLineIndentLevel("  } }"),
+            "should have no effect on the next line for multiple closing delimiters as they unindent their own line"
+        )
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    } } }"),
+            "should maintain existing indent levels for multiple closing delimiters"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithDeferredClosures() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(0, formatter.getCurrentLineIndentLevel("key:val }}}"),
-            "should trigger an unindent on the next line, not their own line, for non-leading close delimiters")
-        assertEquals(4, formatter.getCurrentLineIndentLevel("              key:val }}}"),
-            "should maintain existing indent for trailing delimiters with leading spaces")
+        assertEquals(
+            0, formatter.getCurrentLineIndentLevel("key:val }}}"),
+            "should trigger an unindent on the next line, not their own line, for non-leading close delimiters"
+        )
+        assertEquals(
+            4, formatter.getCurrentLineIndentLevel("              key:val }}}"),
+            "should maintain existing indent for trailing delimiters with leading spaces"
+        )
     }
 
     @Test
     fun testGetCurrentLineIndentLevelWithNestedClosures() {
         val formatter = IndentFormatter(IndentType.Space(2))
 
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    }}"),
-            "should handle multiple nested structures closing at once")
-        assertEquals(3, formatter.getCurrentLineIndentLevel("      }}}"),
-            "should handle three nested structures closing at once")
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    }}"),
+            "should handle multiple nested structures closing at once"
+        )
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("      }}}"),
+            "should handle three nested structures closing at once"
+        )
 
-        assertEquals(2, formatter.getCurrentLineIndentLevel("    }>"),
-            "should work with mixed bracket types")
-        assertEquals(3, formatter.getCurrentLineIndentLevel("      ]}>"),
-            "should work with multiple mixed bracket types")
+        assertEquals(
+            2, formatter.getCurrentLineIndentLevel("    }>"),
+            "should work with mixed bracket types"
+        )
+        assertEquals(
+            3, formatter.getCurrentLineIndentLevel("      ]}>"),
+            "should work with multiple mixed bracket types"
+        )
     }
 
     @Test
@@ -1359,7 +1448,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testDelimitedFormattingStyleLists(){
+    fun testDelimitedFormattingStyleLists() {
         assertFormatting(
             """
                 list: [1,2,3]
@@ -1711,7 +1800,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testPlainFormattingEmptyObject(){
+    fun testPlainFormattingEmptyObject() {
         assertFormatting(
             """
                 key:
@@ -1725,7 +1814,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testDelimitedFormattingEmptyObject(){
+    fun testDelimitedFormattingEmptyObject() {
         assertFormatting(
             """
                 key:
@@ -1741,7 +1830,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testCompactFormattingEmptyObject(){
+    fun testCompactFormattingEmptyObject() {
         assertFormatting(
             """
                 key: {}
@@ -1754,7 +1843,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testPlainFormattingEmptyList(){
+    fun testPlainFormattingEmptyList() {
         assertFormatting(
             """
                 key:
@@ -1768,7 +1857,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testDelimitedFormattingEmptyList(){
+    fun testDelimitedFormattingEmptyList() {
         assertFormatting(
             """
                 key:
@@ -1784,7 +1873,7 @@ class FormatterTest {
     }
 
     @Test
-    fun testCompactFormattingEmptyList(){
+    fun testCompactFormattingEmptyList() {
         assertFormatting(
             """
                 key: <>
