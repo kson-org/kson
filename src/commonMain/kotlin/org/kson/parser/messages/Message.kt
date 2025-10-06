@@ -716,7 +716,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This property's indentation must properly reflect its nesting. " +
+            return "Deceptive indentation. This property should be aligned with the other leading properties in this object." +
                     "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
         }
     },
@@ -726,8 +726,26 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This list item's indentation must properly reflect its nesting. " +
+            return "Deceptive indentation. This element should be aligned with the other leading elements in this list." +
                     "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
+        }
+    },
+    OBJECT_PROPERTY_NESTING_ISSUE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This value should be nested deeper than the object that contains it."
+        }
+    },
+    DASH_LIST_ITEMS_NESTING_ISSUE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This value should nested deeper than the list that contains it."
         }
     },
     OBJECT_DUPLICATE_KEY(MessageSeverity.WARNING) {
