@@ -19,7 +19,6 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
         }
 
         if (!anyValid) {
-            messageSink.error(ksonValue.location.trimToFirstLine(), SCHEMA_ANY_OF_VALIDATION_FAILED.create())
             val matchAttemptMessageGroups = matchAttemptMessageSinks.map { it.messageSink.loggedMessages() }
             val universalMessages = matchAttemptMessageGroups.takeIf {
                 it.isNotEmpty()
@@ -27,23 +26,32 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
                 acc.intersect(messages).toList()
             } ?: emptyList()
 
-            // if there are issues that make this invalid for all the schemas, we can log those directly
-            universalMessages.forEach {
-                messageSink.error(it.location, it.message)
-            }
+            if (universalMessages.isNotEmpty()) {
+                /**
+                 * If there are "universal" issues that make this invalid for all the schemas, we can log those directly.
+                 * Users must fix these errors to reveal any other errors---though it's usually preferable to render all
+                 * possible errors when they are detected, using a progressive approach here makes the often-opaque
+                 * sub-schema errors a bit easier to handle
+                 */
+                universalMessages.forEach {
+                    messageSink.error(it.location, it.message)
+                }
+            } else {
+                messageSink.error(ksonValue.location.trimToFirstLine(), SCHEMA_ANY_OF_VALIDATION_FAILED.create())
 
-            // for the other subSchema-specific messages, we write one group message anchored to
-            // the beginning of the object
-            var subSchemaErrors = matchAttemptMessageSinks.joinToString("\n\n") { matchAttemptSink ->
-                "'" + matchAttemptSink.label + "': [" +
-                        matchAttemptSink.messageSink
-                            .loggedMessages()
-                            .joinToString(",") {
-                                "\'${it.message}\'"
-                            } + "]"
-            }
+                // for the other subSchema-specific messages, we write one group message anchored to
+                // the beginning of the object
+                var subSchemaErrors = matchAttemptMessageSinks.joinToString("\n\n") { matchAttemptSink ->
+                    "'" + matchAttemptSink.label + "': [" +
+                            matchAttemptSink.messageSink
+                                .loggedMessages()
+                                .joinToString(",") {
+                                    "\'${it.message}\'"
+                                } + "]"
+                }
 
-            messageSink.error(ksonValue.location.trimToFirstLine(), SCHEMA_SUB_SCHEMA_ERRORS.create(subSchemaErrors))
+                messageSink.error(ksonValue.location.trimToFirstLine(), SCHEMA_SUB_SCHEMA_ERRORS.create(subSchemaErrors))
+            }
         }
     }
 }
