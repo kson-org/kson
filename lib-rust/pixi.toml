@@ -17,16 +17,20 @@ version = "0.1.2-dev"
 rust = "1.89.0.*"
 
 [target.win-64.dependencies]
-vc14_runtime = "14.44.*"
+vs2022_win-64 = ">=19.44.35207,<20"
 
 [target.linux-64.dependencies]
 libclang = "20.*"
+sysroot_linux-64 = ">=2.34"
+zlib = "==1.3.1"
 
 [target.linux-64.activation.env]
 LIBCLANG_PATH = "$CONDA_PREFIX/lib"
 
 [target.linux-aarch64.dependencies]
 libclang = "20.*"
+sysroot_linux-64 = ">=2.34"
+zlib = "==1.3.1"
 
 [target.linux-aarch64.activation.env]
 LIBCLANG_PATH = "$CONDA_PREFIX/lib"
