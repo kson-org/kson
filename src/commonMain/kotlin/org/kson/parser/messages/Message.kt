@@ -642,11 +642,12 @@ enum class MessageType(
     },
     SCHEMA_VALUE_NOT_EQUAL_TO_CONST(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Required Value")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must be exactly equal to const value"
+            val requiredValue = parsedArgs.getArg("Required Value")
+            return "Value must be exactly equal to '$requiredValue'"
         }
     },
     SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
