@@ -10,6 +10,7 @@ import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
+import org.kson.tools.FormattingStyle
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
@@ -92,7 +93,10 @@ object KsonCore {
         val astParseResult = parseToAst(source)
         val firstToken = astParseResult.lexedTokens[0]
         if (firstToken.tokenType == TokenType.EOF) {
-            return SchemaParseResult(null, listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create())))
+            return SchemaParseResult(
+                null,
+                listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create()))
+            )
         }
         val ksonValue = astParseResult.ksonValue
         if (ksonValue == null || astParseResult.hasErrors()) {
@@ -119,7 +123,7 @@ object KsonCore {
      * Parse the given Kson [source] and compile it to Json
      *
      * @param source The Kson source to parse
-     * @param compileConfig a [CompileTarget.Json] object with this compilation's config
+     * @param compileConfig a [Json] object with this compilation's config
      * @return A [JsonParseResult]
      */
     fun parseToJson(source: String, compileConfig: Json = Json()): JsonParseResult {
@@ -196,7 +200,8 @@ data class AstParseResult(
 
 data class SchemaParseResult(
     val jsonSchema: JsonSchema?,
-    val messages: List<LoggedMessage>)
+    val messages: List<LoggedMessage>
+)
 
 
 class KsonParseResult(
@@ -251,7 +256,7 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * @param formatConfig the settings for formatting the compiler Kson output
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
-    class Kson(
+    open class Kson(
         override val preserveComments: Boolean = true,
         val formatConfig: KsonFormatterConfig = KsonFormatterConfig(),
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
@@ -269,20 +274,23 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
     ) : CompileTarget(coreCompileConfig)
 
-    /**
-     * Compile target for Json transpilation
-     *
-     * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
-     * @param coreCompileConfig the [CoreCompileConfig] for this compile
-     */
-    class Json(
-        val retainEmbedTags: Boolean = true,
-        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
-    ) : CompileTarget(coreCompileConfig) {
-        // Json does not support comments
-        override val preserveComments: Boolean = false
-    }
 }
+
+/**
+ * Compile target for Json transpilation. Transpiling to JSON is the same as formatting KSON with [FormattingStyle.CLASSIC].
+ *
+ * @param retainEmbedTags If true, embed blocks will be compiled to objects containing both tag and content
+ * @param coreCompileConfig the [CoreCompileConfig] for this compile
+ */
+class Json(
+    val retainEmbedTags: Boolean = true,
+    coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+) : Kson(
+    formatConfig = KsonFormatterConfig(formattingStyle = FormattingStyle.CLASSIC),
+    coreCompileConfig = coreCompileConfig,
+    // Json does not support comments
+    preserveComments = false
+)
 
 /**
  * Configuration applicable to all compile targets

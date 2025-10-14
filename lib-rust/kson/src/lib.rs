@@ -730,6 +730,7 @@ pub enum FormattingStyle {
     Plain,
     Delimited,
     Compact,
+    Classic,
 }
 
 impl_kotlin_object_for_c_enum!(
@@ -737,6 +738,7 @@ impl_kotlin_object_for_c_enum!(
     0 = FormattingStyle::Plain = KSON_SYMBOLS.kotlin.root.org.kson.FormattingStyle.PLAIN,
     1 = FormattingStyle::Delimited = KSON_SYMBOLS.kotlin.root.org.kson.FormattingStyle.DELIMITED,
     2 = FormattingStyle::Compact = KSON_SYMBOLS.kotlin.root.org.kson.FormattingStyle.COMPACT,
+    3 = FormattingStyle::Classic = KSON_SYMBOLS.kotlin.root.org.kson.FormattingStyle.CLASSIC,
 );
 
 impl FormattingStyle {

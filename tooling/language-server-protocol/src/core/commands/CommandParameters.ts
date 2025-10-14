@@ -18,6 +18,10 @@ export interface CommandParameters {
         documentUri: string;
         formattingStyle: FormattingStyle;
     };
+    [CommandType.CLASSIC_FORMAT]: {
+        documentUri: string;
+        formattingStyle: FormattingStyle;
+    };
 }
 
 /**

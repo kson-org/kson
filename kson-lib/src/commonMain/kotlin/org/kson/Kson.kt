@@ -48,7 +48,7 @@ object Kson {
      * @return A Result containing either the Json output or error messages
      */
     fun toJson(kson: String, retainEmbedTags: Boolean = true): Result {
-        val compileConfig = CompileTarget.Json(
+        val compileConfig = Json(
             retainEmbedTags = retainEmbedTags,
         )
         val jsonParseResult = KsonCore.parseToJson(kson, compileConfig)
@@ -192,6 +192,7 @@ data class FormatOptions(
             FormattingStyle.PLAIN -> InternalFormattingStyle.PLAIN
             FormattingStyle.DELIMITED -> InternalFormattingStyle.DELIMITED
             FormattingStyle.COMPACT -> InternalFormattingStyle.COMPACT
+            FormattingStyle.CLASSIC -> InternalFormattingStyle.CLASSIC
         }
         return KsonFormatterConfig(indentType = indentType, formattingStyle)
     }
@@ -206,7 +207,8 @@ enum class FormattingStyle{
      */
     PLAIN,
     DELIMITED,
-    COMPACT
+    COMPACT,
+    CLASSIC
 }
 
 /**

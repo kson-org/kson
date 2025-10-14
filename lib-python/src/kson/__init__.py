@@ -434,10 +434,15 @@ class FormattingStyle(Enum):
                 result = symbols.kotlin.root.org.kson.FormattingStyle.COMPACT.get()
                 result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
                 return result
+            case FormattingStyle.CLASSIC:
+                result = symbols.kotlin.root.org.kson.FormattingStyle.CLASSIC.get()
+                result.pinned = ffi.gc(result.pinned, symbols.DisposeStablePointer)
+                return result
 
     PLAIN = 0
     DELIMITED = 1
     COMPACT = 2
+    CLASSIC = 3
 
 
 class FormatOptions:
