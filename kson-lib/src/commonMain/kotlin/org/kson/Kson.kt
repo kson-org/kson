@@ -44,12 +44,12 @@ object Kson {
      * Converts Kson to Json.
      *
      * @param kson The Kson source to convert
-     * @param retainEmbedTags Whether to retain the embed tags in the result
+     * @param options Options for the JSON transpilation
      * @return A Result containing either the Json output or error messages
      */
-    fun toJson(kson: String, retainEmbedTags: Boolean = true): Result {
+    fun toJson(kson: String, options: TranspileOptions.Json = TranspileOptions.Json()): Result {
         val compileConfig = Json(
-            retainEmbedTags = retainEmbedTags,
+            retainEmbedTags = options.retainEmbedTags,
         )
         val jsonParseResult = KsonCore.parseToJson(kson, compileConfig)
         return if (jsonParseResult.hasErrors()) {
@@ -63,12 +63,12 @@ object Kson {
      * Converts Kson to Yaml, preserving comments
      *
      * @param kson The Kson source to convert
-     * @param retainEmbedTags Whether to retain the embed tags in the result
+     * @param options Options for the YAML transpilation
      * @return A Result containing either the Yaml output or error messages
      */
-    fun toYaml(kson: String, retainEmbedTags: Boolean = true): Result {
+    fun toYaml(kson: String, options: TranspileOptions.Yaml = TranspileOptions.Yaml()): Result {
         val compileConfig = CompileTarget.Yaml(
-            retainEmbedTags = retainEmbedTags,
+            retainEmbedTags = options.retainEmbedTags,
         )
         val yamlParseResult = KsonCore.parseToYaml(kson, compileConfig)
         return if (yamlParseResult.hasErrors()) {
@@ -196,6 +196,27 @@ data class FormatOptions(
         }
         return KsonFormatterConfig(indentType = indentType, formattingStyle)
     }
+}
+
+/**
+ * Core interface for transpilation options shared across all output formats.
+ */
+sealed class TranspileOptions {
+    abstract val retainEmbedTags: Boolean
+
+    /**
+     * Options for transpiling Kson to JSON.
+     */
+    data class Json(
+        override val retainEmbedTags: Boolean = true
+    ) : TranspileOptions()
+
+    /**
+     * Options for transpiling Kson to YAML.
+     */
+    data class Yaml(
+        override val retainEmbedTags: Boolean = true
+    ) : TranspileOptions()
 }
 
 /**

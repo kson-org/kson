@@ -647,6 +647,30 @@ class KsonValueType(Enum):
     EMBED = 7
 
 
+class TranspileOptionsJson:
+    """Options for transpiling Kson to JSON."""
+
+    ptr: CData
+
+    def __init__(self, retain_embed_tags: bool = True) -> None:
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.TranspileOptions.Json.Json, [retain_embed_tags]
+        )
+        self.ptr = result
+
+
+class TranspileOptionsYaml:
+    """Options for transpiling Kson to YAML."""
+
+    ptr: CData
+
+    def __init__(self, retain_embed_tags: bool = True) -> None:
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.TranspileOptions.Yaml.Yaml, [retain_embed_tags]
+        )
+        self.ptr = result
+
+
 class KsonValue:
     """Base class for parsed Kson values."""
 
@@ -889,22 +913,24 @@ class Kson:
         return result
 
     @staticmethod
-    def to_json(kson: str, retain_embed_tags: bool = True) -> Result:
+    def to_json(kson: str, options: Optional[TranspileOptionsJson] = None) -> Result:
         """Converts Kson to Json.
 
         Args:
             kson: The Kson source to convert.
-            retain_embed_tags: Whether to retain the embed tags in the result.
+            options: Options for the JSON transpilation.
 
         Returns:
             A Result containing either the Json output or error messages.
         """
+        if options is None:
+            options = TranspileOptionsJson()
         result = _cast_and_call(
             symbols.kotlin.root.org.kson.Kson.toJson,
             [
                 symbols.kotlin.root.org.kson.Kson._instance(),
                 kson.encode("utf-8"),
-                retain_embed_tags,
+                options.ptr,
             ],
         )
         result = _init_wrapper(Result, result)
@@ -912,22 +938,24 @@ class Kson:
         return result
 
     @staticmethod
-    def to_yaml(kson: str, retain_embed_tags: bool = True) -> Result:
+    def to_yaml(kson: str, options: Optional[TranspileOptionsYaml] = None) -> Result:
         """Converts Kson to Yaml, preserving comments.
 
         Args:
             kson: The Kson source to convert.
-            retain_embed_tags: Whether to retain the embed tags in the result.
+            options: Options for the YAML transpilation.
 
         Returns:
             A Result containing either the Yaml output or error messages.
         """
+        if options is None:
+            options = TranspileOptionsYaml()
         result = _cast_and_call(
             symbols.kotlin.root.org.kson.Kson.toYaml,
             [
                 symbols.kotlin.root.org.kson.Kson._instance(),
                 kson.encode("utf-8"),
-                retain_embed_tags,
+                options.ptr,
             ],
         )
         result = _init_wrapper(Result, result)
