@@ -234,7 +234,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbedBlockTagsRetainment() {
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+            jsonSettings = Json(retainEmbedTags = true)
         )
         assertParsesTo(
             """
@@ -305,7 +305,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbedBlockFromObject() {
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+            jsonSettings = Json(retainEmbedTags = true)
         )
 
         assertParsesTo(
@@ -364,7 +364,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbedBlockFromObjectWithoutStrings(){
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+            jsonSettings = Json(retainEmbedTags = true)
         )
 
         assertParsesTo(
@@ -403,7 +403,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbeddedEmbedBlockFromObject(){
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = CompileTarget.Json(retainEmbedTags = true)
+            jsonSettings = Json(retainEmbedTags = true)
         )
 
         assertParsesTo(

@@ -15,7 +15,12 @@ export enum CommandType {
     /**
      * Format the document as compact Kson
      */
-    COMPACT_FORMAT = 'kson.compactFormat'
+    COMPACT_FORMAT = 'kson.compactFormat',
+
+     /**
+     * Format the document as classic Kson
+     */
+    CLASSIC_FORMAT = 'kson.classicFormat'
 }
 
 /**
