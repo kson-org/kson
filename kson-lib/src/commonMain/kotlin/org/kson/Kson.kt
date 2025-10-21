@@ -134,16 +134,16 @@ object Kson {
  * Result of a Kson conversion operation
  */
 sealed class Result {
-    data class Success(val output: String) : Result()
-    data class Failure(val errors: List<Message>) : Result()
+    class Success(val output: String) : Result()
+    class Failure(val errors: List<Message>) : Result()
 }
 
 /**
  * A [parseSchema] result
  */
 sealed class SchemaResult {
-    data class Success(val schemaValidator: SchemaValidator) : SchemaResult()
-    data class Failure(val errors: List<Message>) : SchemaResult()
+    class Success(val schemaValidator: SchemaValidator) : SchemaResult()
+    class Failure(val errors: List<Message>) : SchemaResult()
 }
 
 /**
@@ -175,7 +175,7 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
 /**
  * Options for formatting Kson output.
  */
-data class FormatOptions(
+class FormatOptions(
     val indentType: IndentType = IndentType.Spaces(2),
     val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
 ) {
@@ -207,14 +207,14 @@ sealed class TranspileOptions {
     /**
      * Options for transpiling Kson to JSON.
      */
-    data class Json(
+    class Json(
         override val retainEmbedTags: Boolean = true
     ) : TranspileOptions()
 
     /**
      * Options for transpiling Kson to YAML.
      */
-    data class Yaml(
+    class Yaml(
         override val retainEmbedTags: Boolean = true
     ) : TranspileOptions()
 }
@@ -237,7 +237,7 @@ enum class FormattingStyle{
  */
 sealed class IndentType {
     /** Use spaces for indentation with the specified count */
-    data class Spaces(val size: Int = 2) : IndentType()
+    class Spaces(val size: Int = 2) : IndentType()
 
     /** Use tabs for indentation */
     data object Tabs : IndentType()
@@ -246,8 +246,7 @@ sealed class IndentType {
 /**
  * The result of statically analyzing a Kson document
  */
-@ConsistentCopyVisibility
-data class Analysis internal constructor(
+class Analysis internal constructor(
     val errors: List<Message>,
     val tokens: List<Token>,
     val ksonValue: KsonValue?
@@ -256,8 +255,7 @@ data class Analysis internal constructor(
 /**
  * [Token] produced by the lexing phase of a Kson parse
  */
-@ConsistentCopyVisibility
-data class Token internal constructor(
+class Token internal constructor(
     val tokenType: TokenType,
     val text: String,
     val start: Position,
@@ -302,8 +300,7 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
-@ConsistentCopyVisibility
-data class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
+class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
 
 /**
  * Represents the severity of a [Message]
@@ -582,8 +579,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson object with key-value pairs
      */
-    @ConsistentCopyVisibility
-    data class KsonObject internal constructor(
+    class KsonObject internal constructor(
         val properties: Map<KsonString, KsonValue>,
         private val internalStart: Position,
         private val internalEnd: Position
@@ -594,8 +590,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson array with elements
      */
-    @ConsistentCopyVisibility
-    data class KsonArray internal constructor(
+    class KsonArray internal constructor(
         val elements: List<KsonValue>,
         private val internalStart: Position,
         private val internalEnd: Position
@@ -606,8 +601,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson string value
      */
-    @ConsistentCopyVisibility
-    data class KsonString internal constructor(
+    class KsonString internal constructor(
         val value: String,
         private val internalStart: Position,
         private val internalEnd: Position
@@ -619,8 +613,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      * A Kson number value.
      */
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
-          @ConsistentCopyVisibility
-          data class Integer internal constructor(
+
+          class Integer internal constructor(
               val value: Int,
               private val internalStart: Position,
               private val internalEnd: Position
@@ -628,8 +622,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
               override val type = KsonValueType.INTEGER
           }
 
-        @ConsistentCopyVisibility
-        data class Decimal internal constructor(
+        class Decimal internal constructor(
             val value: Double,
             private val internalStart: Position,
             private val internalEnd: Position
@@ -642,8 +635,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson boolean value
      */
-    @ConsistentCopyVisibility
-    data class KsonBoolean internal constructor(
+    class KsonBoolean internal constructor(
         val value: Boolean,
         private val internalStart: Position,
         private val internalEnd: Position
@@ -654,8 +646,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson null value
      */
-    @ConsistentCopyVisibility
-    data class KsonNull internal constructor(
+    class KsonNull internal constructor(
         private val internalStart: Position,
         private val internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
@@ -665,8 +656,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson embed block
      */
-    @ConsistentCopyVisibility
-    data class KsonEmbed internal constructor(
+    class KsonEmbed internal constructor(
         val tag: String?,
         val metadata: String?,
         val content: String,
