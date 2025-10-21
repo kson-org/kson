@@ -8,10 +8,8 @@ import org.kson.schema.JsonSchemaValidator
 
 class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
-        val enumMatch = enum.elements.any {
-            it.dataEquals(ksonValue)
-        }
-        if (!enumMatch) {
+        val enumValues = enum.elements
+        if (!enumValues.contains(ksonValue)) {
             messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create())
         }
     }

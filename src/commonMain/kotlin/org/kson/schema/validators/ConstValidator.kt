@@ -14,7 +14,7 @@ import org.kson.value.KsonString
 
 class ConstValidator(private val const: KsonValue) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
-        if (!ksonValue.dataEquals(const)) {
+        if (ksonValue != const) {
             val requiredValue = when (const) {
                 is KsonNull -> "null"
                 is KsonBoolean -> const.value.toString()
