@@ -10,14 +10,19 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  * The [KsonValue] classes provide a client-friendly API interface for fully valid Kson [AstNode] trees that
  * exposes just the data properties of the represented Kson and can be traversed confidently without
  * any error- or null-checking
+ *
+ * NOTE: [KsonValue] classes implement a "logical" equals/hashcode which compares just the values, not the
+ *   [location] (which we consider metadata).  The ability to treat these [KsonValue]s as _values_ leads to
+ *   more ergonomic code than having a strict equals that incorporates [location].
  */
 sealed class KsonValue(val location: Location) {
     /**
-     * Behaves like a standard [equals] implementation but only compares data, not [location].
-     * Allows [KsonValue]s to be compared for type and data equality without cumbersome type checking and value
-     * unwrapping.
+     * Ensure all our [KsonValue] classes implement their [equals] and [hashCode]
+     * NOTE: this [equals] and [hashCode] must be logical equality of the underlying values, and
+     *   no take [location] into account
      */
-    abstract fun dataEquals(other: Any?): Boolean
+    abstract override fun equals(other: Any?): Boolean
+    abstract override fun hashCode(): Int
 }
 
 data class KsonObjectProperty(val propName: KsonString, val propValue: KsonValue)
@@ -36,31 +41,36 @@ class KsonObject(
      * Convenience lookup with the [String] keys pointing directly to the regular [KsonValue] values
      */
     val propertyLookup = propertyMap.mapValues { it.value.propValue }
-
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonObject) return false
         
         if (propertyMap.size != other.propertyMap.size) return false
         
         return propertyMap.all { (key, value) ->
-            other.propertyMap[key]?.let {
-                value.propName.dataEquals(it.propName) && value.propValue.dataEquals(it.propValue)
-            } == true
+            other.propertyMap[key]?.let { value == it } ?: false
         }
+    }
+
+    override fun hashCode(): Int {
+        return propertyMap.hashCode()
     }
 }
 
 class KsonList(val elements: List<KsonValue>, location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonList) return false
         
         if (elements.size != other.elements.size) return false
         
         return elements.zip(other.elements).all { (a, b) ->
-            a.dataEquals(b)
+            a == b
         }
+    }
+
+    override fun hashCode(): Int {
+        return elements.map { it.hashCode() }.hashCode()
     }
 }
 
@@ -69,13 +79,11 @@ class EmbedBlock(
     val metadataTag: KsonString?,
     val embedContent: KsonString,
                  location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is EmbedBlock) return false
         
-        return embedTag == other.embedTag &&
-                metadataTag == other.metadataTag &&
-                embedContent == other.embedContent
+        return embedTag == other.embedTag && metadataTag == other.metadataTag && embedContent == other.embedContent
     }
 
     fun asKsonObject(): KsonObject {
@@ -95,19 +103,27 @@ class EmbedBlock(
             location
         )
     }
+
+    override fun hashCode(): Int {
+        return 31 * embedTag.hashCode() + 31 * metadataTag.hashCode() + 31 * embedContent.hashCode()
+    }
 }
 
 class KsonString(val value: String, location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonString) return false
         
         return value == other.value
     }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
+    }
 }
 
 class KsonNumber(val value: NumberParser.ParsedNumber, location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonNumber) return false
         
@@ -123,20 +139,37 @@ class KsonNumber(val value: NumberParser.ParsedNumber, location: Location) : Kso
         
         return thisValue == otherValue
     }
+
+    override fun hashCode(): Int {
+        // Use the double value for consistent hashing across integer/decimal representations
+        val doubleValue = when (value) {
+            is NumberParser.ParsedNumber.Integer -> value.value.toDouble()
+            is NumberParser.ParsedNumber.Decimal -> value.value
+        }
+        return doubleValue.hashCode()
+    }
 }
 
 class KsonBoolean(val value: Boolean, location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonBoolean) return false
         
         return value == other.value
     }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
+    }
 }
 
 class KsonNull(location: Location) : KsonValue(location) {
-    override fun dataEquals(other: Any?): Boolean {
+    override fun equals(other: Any?): Boolean {
         return other is KsonNull
+    }
+
+    override fun hashCode(): Int {
+        return KsonNull::class.hashCode()
     }
 }
 

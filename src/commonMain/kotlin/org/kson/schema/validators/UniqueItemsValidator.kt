@@ -19,7 +19,7 @@ class UniqueItemsValidator(private val uniqueItems: Boolean) : JsonArrayValidato
     private fun areItemsUnique(elements: List<KsonValue>): Boolean {
         for (i in elements.indices) {
             for (j in i + 1 until elements.size) {
-                if (elements[i].dataEquals(elements[j])) {
+                if (elements[i] == elements[j]) {
                     return false
                 }
             }
