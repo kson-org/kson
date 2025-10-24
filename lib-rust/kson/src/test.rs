@@ -78,7 +78,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_json_with_options(kson_with_embed, false);
+    let result = Kson::to_json_with_options(kson_with_embed, &TranspileOptionsJson::new(false));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -142,7 +142,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_yaml_with_options(kson_with_embed, false);
+    let result = Kson::to_yaml_with_options(kson_with_embed, &TranspileOptionsYaml::new(false));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {

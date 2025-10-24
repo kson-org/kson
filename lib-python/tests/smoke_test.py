@@ -89,7 +89,9 @@ embed$$"""
     # The JSON output should contain the embed tag information
 
     # Test with retain_embed_tags=False
-    result = Kson.to_json(kson_with_embed, retain_embed_tags=False)
+    result = Kson.to_json(
+        kson_with_embed, TranspileOptionsJson(retain_embed_tags=False)
+    )
     assert isinstance(result, Success)
     assert (
         result.output()
@@ -137,7 +139,9 @@ embed$$"""
     )
 
     # Test with retain_embed_tags=False
-    result = Kson.to_yaml(kson_with_embed, retain_embed_tags=False)
+    result = Kson.to_yaml(
+        kson_with_embed, TranspileOptionsYaml(retain_embed_tags=False)
+    )
     assert isinstance(result, Success)
     assert (
         result.output()

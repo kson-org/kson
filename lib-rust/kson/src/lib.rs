@@ -461,6 +461,60 @@ impl Token {
 }
 
 declare_kotlin_object! {
+    /// Options for transpiling Kson to JSON
+    TranspileOptionsJson
+}
+
+impl TranspileOptionsJson {
+    pub fn new(retain_embed_tags: bool) -> Self {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .TranspileOptions
+            .Json
+            .Json
+            .unwrap();
+        let result = unsafe { f(retain_embed_tags) };
+        TranspileOptionsJson {
+            kson_ref: KsonPtr {
+                inner: std::sync::Arc::new(OwnedKotlinPtr {
+                    inner: result.pinned,
+                }),
+            },
+        }
+    }
+}
+
+declare_kotlin_object! {
+    /// Options for transpiling Kson to YAML
+    TranspileOptionsYaml
+}
+
+impl TranspileOptionsYaml {
+    pub fn new(retain_embed_tags: bool) -> Self {
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .TranspileOptions
+            .Yaml
+            .Yaml
+            .unwrap();
+        let result = unsafe { f(retain_embed_tags) };
+        TranspileOptionsYaml {
+            kson_ref: KsonPtr {
+                inner: std::sync::Arc::new(OwnedKotlinPtr {
+                    inner: result.pinned,
+                }),
+            },
+        }
+    }
+}
+
+declare_kotlin_object! {
     /// The [Kson](https://kson.org) language
     Kson
 }
@@ -503,31 +557,33 @@ impl Kson {
     /// Converts Kson to Json.
     ///
     /// @param kson The Kson source to convert
-    /// @param retain_embed_tags Whether to retain the embed tags in the result (default: true)
     /// @return A Result containing either the Json output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_json(kson: &str) -> Result<ResultSuccess, ResultFailure> {
-        Self::to_json_with_options(kson, true)
+        Self::to_json_with_options(kson, &TranspileOptionsJson::new(true))
     }
 
     /// Converts Kson to Json with options.
     ///
     /// @param kson The Kson source to convert
-    /// @param retain_embed_tags Whether to retain the embed tags in the result
+    /// @param options Options for the JSON transpilation
     /// @return A Result containing either the Json output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_json_with_options(
         kson: &str,
-        retain_embed_tags: bool,
+        options: &TranspileOptionsJson,
     ) -> Result<ResultSuccess, ResultFailure> {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Kson.toJson.unwrap();
         let p0 = util::to_kotlin_string(kson);
         let p0 = p0.as_ptr();
+        let p1 = kson_sys::kson_kref_org_kson_TranspileOptions_Json {
+            pinned: options.to_kotlin_object(),
+        };
         let result = unsafe {
             f(
                 KSON_SYMBOLS.kotlin.root.org.kson.Kson._instance.unwrap()(),
                 p0,
-                retain_embed_tags,
+                p1,
             )
         };
         Result::from_kotlin_object(result.pinned)
@@ -536,31 +592,33 @@ impl Kson {
     /// Converts Kson to Yaml, preserving comments
     ///
     /// @param kson The Kson source to convert
-    /// @param retain_embed_tags Whether to retain the embed tags in the result (default: true)
     /// @return A Result containing either the Yaml output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_yaml(kson: &str) -> Result<ResultSuccess, ResultFailure> {
-        Self::to_yaml_with_options(kson, true)
+        Self::to_yaml_with_options(kson, &TranspileOptionsYaml::new(true))
     }
 
     /// Converts Kson to Yaml with options, preserving comments
     ///
     /// @param kson The Kson source to convert
-    /// @param retain_embed_tags Whether to retain the embed tags in the result
+    /// @param options Options for the YAML transpilation
     /// @return A Result containing either the Yaml output or error messages
     #[allow(clippy::wrong_self_convention)]
     pub fn to_yaml_with_options(
         kson: &str,
-        retain_embed_tags: bool,
+        options: &TranspileOptionsYaml,
     ) -> Result<ResultSuccess, ResultFailure> {
         let f = KSON_SYMBOLS.kotlin.root.org.kson.Kson.toYaml.unwrap();
         let p0 = util::to_kotlin_string(kson);
         let p0 = p0.as_ptr();
+        let p1 = kson_sys::kson_kref_org_kson_TranspileOptions_Yaml {
+            pinned: options.to_kotlin_object(),
+        };
         let result = unsafe {
             f(
                 KSON_SYMBOLS.kotlin.root.org.kson.Kson._instance.unwrap()(),
                 p0,
-                retain_embed_tags,
+                p1,
             )
         };
         Result::from_kotlin_object(result.pinned)
