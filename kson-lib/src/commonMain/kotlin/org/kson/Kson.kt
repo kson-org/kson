@@ -22,7 +22,6 @@ import org.kson.value.KsonBoolean as InternalKsonBoolean
 import org.kson.value.KsonNull as InternalKsonNull
 import org.kson.value.EmbedBlock as InternalEmbedBlock
 import kotlin.js.JsExport
-import kotlin.ConsistentCopyVisibility
 import kotlin.js.JsName
 
 /**
@@ -571,7 +570,7 @@ enum class KsonValueType {
 /**
  * Represents a parsed [InternalKsonValue] in the public API
  */
-sealed class KsonValue private constructor(val start: Position, val end: Position) {
+sealed class KsonValue(val start: Position, val end: Position) {
     /**
      * Type discriminator for easier type checking in TypeScript/JavaScript
      */
@@ -581,8 +580,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     class KsonObject internal constructor(
         val properties: Map<KsonString, KsonValue>,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.OBJECT
     }
@@ -592,8 +591,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     class KsonArray internal constructor(
         val elements: List<KsonValue>,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.ARRAY
     }
@@ -603,8 +602,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     class KsonString internal constructor(
         val value: String,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.STRING
     }
@@ -616,16 +615,16 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
 
           class Integer internal constructor(
               val value: Int,
-              private val internalStart: Position,
-              private val internalEnd: Position
+              val internalStart: Position,
+              val internalEnd: Position
           ) : KsonNumber(internalStart, internalEnd){
               override val type = KsonValueType.INTEGER
           }
 
         class Decimal internal constructor(
             val value: Double,
-            private val internalStart: Position,
-            private val internalEnd: Position
+            internalStart: Position,
+            internalEnd: Position
         ) : KsonNumber(internalStart, internalEnd) {
             override val type = KsonValueType.DECIMAL
         }
@@ -637,8 +636,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     class KsonBoolean internal constructor(
         val value: Boolean,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.BOOLEAN
     }
@@ -647,8 +646,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      * A Kson null value
      */
     class KsonNull internal constructor(
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.NULL
     }
@@ -660,8 +659,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         val tag: String?,
         val metadata: String?,
         val content: String,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.EMBED
     }
@@ -670,6 +669,7 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
 /**
  * Helper class to let FFI users iterate through the elements of a [List]
  */
+@Suppress("unused") // used in FFI
 sealed class SimpleListIterator(list: List<Any>) {
     private val inner = list.iterator()
 
@@ -690,6 +690,7 @@ data class SimpleMapEntry(val key: Any, val value: Any)
 /**
  * Helper class to let FFI users iterate through the entries of a Map
  */
+@Suppress("unused") // used in FFI
 sealed class SimpleMapIterator(map: Map<*, *>) {
     private val inner = map.entries.iterator()
 
@@ -725,6 +726,7 @@ object AnyHelper {
         return x == y
     }
 
+    @Suppress("unused") // needed as part of the equals/hashcode contract
     @JsName("anyHashCode")
     fun hashCode(x: Any): Int {
         return x.hashCode()
