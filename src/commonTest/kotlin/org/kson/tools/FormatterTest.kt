@@ -1372,6 +1372,8 @@ class FormatterTest {
             """
                 outer:
                   inner: value
+                  .
+                .
 
                 "Illegal trailing content"
             """.trimIndent()
@@ -1384,6 +1386,7 @@ class FormatterTest {
             """.trimIndent(),
             """
                 key: value
+                .
                 
                 trailingContent
           
@@ -1392,6 +1395,8 @@ class FormatterTest {
                   - 1
                   - 2
                   - 3
+                  =
+                .
                 
                 extraTrailingContent
             """.trimIndent()
@@ -1403,6 +1408,7 @@ class FormatterTest {
             """.trimIndent(),
             """
                 key: value
+                .
                 
                 extraValue 
           
@@ -1918,6 +1924,141 @@ class FormatterTest {
             """
                 # comment
                 
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testTrailingContentWithEndDot() {
+        assertFormatting(
+            """
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                outer2: 8 # unexpected trailing content
+            """.trimIndent(),
+            """
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                
+                outer2: 8 # unexpected trailing content
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testMultipleTrailingContent() {
+        assertFormatting(
+            """
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                outer2: 8 # unexpected trailing content
+                .
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                # unexpected trailing content
+                outer2: 8
+            """.trimIndent(),
+            """
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                
+                outer2: 8 # unexpected trailing content
+                .
+                
+                
+                outer:
+                  nest1:
+                    nest2: 4
+                    .
+                  .
+                .
+                
+                # unexpected trailing content
+                outer2: 8
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            """
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                key: value
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                key: value
+            """.trimIndent(),
+            """
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                
+                key: value
+                
+                
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                
+                key: value
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testTrailingContentWithEndDash() {
+        assertFormatting(
+            """
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                key: value
+            """.trimIndent(),
+            """
+                - 
+                  - 
+                    - list
+                    =
+                  =
+                =
+                
+                key: value
             """.trimIndent()
         )
     }

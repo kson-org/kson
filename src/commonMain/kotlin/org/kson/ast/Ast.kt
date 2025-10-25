@@ -175,13 +175,17 @@ class KsonRootImpl(
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
-                var ksonDocument = rootNode.toSourceWithNext(indent, null, compileTarget)
+                var ksonDocument = rootNode.toSourceWithNext(indent, trailingContent.firstOrNull(), compileTarget)
 
-                trailingContent.forEach {
+                trailingContent.forEachIndexed { index, trailingValue ->
                     if (ksonDocument.takeLast(2) != "\n\n") {
                         ksonDocument += "\n\n"
                     }
-                    ksonDocument += it.toSourceWithNext(indent, null, compileTarget)
+                    ksonDocument += trailingValue.toSourceWithNext(
+                        indent,
+                        trailingContent.getOrNull(index + 1),
+                        compileTarget
+                    )
                 }
 
                 // remove any trailing newlines
@@ -207,6 +211,18 @@ class KsonRootImpl(
             }
         }
     }
+}
+
+/**
+ *  This check is used to determine if the document contains trailing content.
+ *  This is the case if the node after an [ObjectNode] or [ListNode] is a [KsonValueNode] (not an element
+ *  adding to an object or list).
+ *  It must be erroneous "trailing" content, so we can preserve our [org.kson.parser.TokenType.END_DASH] or
+ *  [org.kson.parser.TokenType.DOT] to be safe (that trailing content may be a malformed
+ *  object we don't want to merge with).
+ */
+private fun isTrailingContent(nextNode: AstNode?): Boolean {
+    return nextNode is KsonValueNode
 }
 
 class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) : KsonValueNodeImpl(location) {
@@ -279,7 +295,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
 
             if (needsSpace) "$result " else result
         }
-        return if (nextNode is ObjectPropertyNode) {
+        return if (needsEndDot(nextNode)) {
             // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
             val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
             outputObject + if (needsSpace) " ." else "."
@@ -297,16 +313,21 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
             }
         }
 
-        /**
-         * Only need to explicitly end this object with a [org.kson.parser.TokenType.DOT] if the next
-         * thing in this document is an [ObjectPropertyNode] that does not belong to this object
-         */
-        return if (compileTarget is Kson && nextNode is ObjectPropertyNode) {
+        return if (compileTarget is Kson && needsEndDot(nextNode)) {
             "$outputObject\n${indent.bodyLinesIndent()}."
         } else {
             // put a newline after multi-property objects
             outputObject + if (properties.size > 1) "\n" else ""
         }
+    }
+
+    /**
+     * Only need to explicitly end this object with a [org.kson.parser.TokenType.DOT] if the next
+     * node in this document is an [ObjectPropertyNode] that does not belong to this object,
+     * or if there is any trailing content (which means we have erroneous content after the main document)
+     */
+    private fun needsEndDot(nextNode: AstNode?): Boolean {
+        return nextNode is ObjectPropertyNode || isTrailingContent(nextNode)
     }
 }
 
@@ -429,11 +450,8 @@ class ListNode(
                 when (compileTarget.formatConfig.formattingStyle) {
                     PLAIN -> {
                         val outputList = formatUndelimitedList(indent, nextNode, compileTarget)
-                        /**
-                         * Only need to explicitly end this list with a [org.kson.parser.TokenType.DOT] if the next
-                         * thing in this document is a [ListElementNode] that does not belong to this list
-                         */
-                        if (nextNode is ListElementNode) {
+
+                        if (needsEndDash(nextNode)) {
                             "$outputList\n${indent.bodyLinesIndent()}="
                         } else {
                             outputList
@@ -527,6 +545,15 @@ class ListNode(
             val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
             element.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
         }
+    }
+
+    /**
+    * Only need to explicitly end this list with a [org.kson.parser.TokenType.END_DASH] if the next
+    * node in this document is a [ListElementNode] that does not belong to this list, or if there
+    * is any trailing content (which means we have erroneous content after the main document)
+    */
+    private fun needsEndDash(nextNode: AstNode?):Boolean{
+        return nextNode is ListElementNode || isTrailingContent(nextNode)
     }
 }
 
