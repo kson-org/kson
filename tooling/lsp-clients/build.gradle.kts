@@ -42,4 +42,14 @@ tasks {
          */
         dependsOn(buildVsCode)
     }
+
+    clean {
+        delete("node_modules")
+        delete("vscode/out")
+        delete("vscode/dist")
+        delete("vscode/node_modules")
+        delete("monaco/dist")
+        delete("monaco/node_modules")
+        delete("shared/out")
+    }
 }
