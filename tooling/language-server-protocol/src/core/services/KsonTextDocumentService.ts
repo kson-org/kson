@@ -15,6 +15,8 @@ import {
     ExecuteCommandParams,
     Hover,
     HoverParams,
+    CompletionList,
+    CompletionParams,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
@@ -24,6 +26,7 @@ import {CodeLensService} from '../features/CodeLensService.js';
 import {DocumentHighlightService} from '../features/DocumentHighlightService.js';
 import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
 import {HoverService} from '../features/HoverService.js';
+import {CompletionService} from '../features/CompletionService.js';
 import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
@@ -41,6 +44,7 @@ export class KsonTextDocumentService {
     private documentHighlightService: DocumentHighlightService;
     private documentSymbolService: DocumentSymbolService;
     private hoverService: HoverService;
+    private completionService: CompletionService;
     private commandExecutor!: CommandExecutor;
     private configuration: Required<KsonSettings>;
 
@@ -52,6 +56,7 @@ export class KsonTextDocumentService {
         this.documentHighlightService = new DocumentHighlightService();
         this.documentSymbolService = new DocumentSymbolService();
         this.hoverService = new HoverService();
+        this.completionService = new CompletionService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -103,6 +108,7 @@ export class KsonTextDocumentService {
         this.connection.onDocumentHighlight(this.onDocumentHighlight.bind(this));
         this.connection.onDocumentSymbol(this.onDocumentSymbol.bind(this));
         this.connection.onHover(this.onHover.bind(this));
+        this.connection.onCompletion(this.onCompletion.bind(this));
     }
 
 
@@ -204,6 +210,19 @@ export class KsonTextDocumentService {
             return this.hoverService.getHover(document, params.position);
         } catch (error) {
             this.connection.console.error(`Error providing hover info: ${error}`);
+            return null;
+        }
+    }
+
+    private async onCompletion(params: CompletionParams): Promise<CompletionList | null> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return null;
+            }
+            return this.completionService.getCompletions(document, params.position);
+        } catch (error) {
+            this.connection.console.error(`Error providing completions: ${error}`);
             return null;
         }
     }
