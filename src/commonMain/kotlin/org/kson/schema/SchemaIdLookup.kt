@@ -5,6 +5,7 @@ import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.KsonValueNavigation
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.
@@ -240,7 +241,9 @@ private fun decodeUriEncoding(encoded: String): String {
 private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
     return when (val parseResult = JsonPointerParser(pointer).parse()) {
         is JsonPointerParser.ParseResult.Success -> {
-            navigatePointer(ksonValue, parseResult.tokens, currentBaseUri)
+            val resolvedValue = KsonValueNavigation.navigateByTokens(ksonValue, parseResult.tokens)
+            val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, parseResult.tokens, currentBaseUri)
+            resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
         }
 
         is JsonPointerParser.ParseResult.Error -> {
@@ -253,58 +256,35 @@ private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBas
 data class ResolvedRef(val resolvedValue: KsonValue, val resolvedValueBaseUri: String)
 
 /**
- * Navigates through a [KsonValue] structure using JSON Pointer tokens.
+ * Updates the base URI while following a path of JSON Pointer tokens.
  *
- * @param current The current [KsonValue] node
+ * This function mirrors the navigation logic of [KsonValueNavigation.navigateByTokens] but focuses
+ * on tracking `$id` updates encountered along the path.
+ *
+ * @param current The current [KsonValue] node to start from
  * @param tokens The list of reference tokens to follow
- * @return The [KsonValue] at the final location, or null if path not found
+ * @param currentBaseUri The starting base URI
+ * @return The updated base URI after following the token path
  */
-private fun navigatePointer(current: KsonValue, tokens: List<String>, currentBaseUri: String): ResolvedRef? {
-    if (tokens.isEmpty()) {
-        return ResolvedRef(current, currentBaseUri)
-    }
-
-    var node: KsonValue? = current
+private fun updateBaseUriAlongPath(current: KsonValue, tokens: List<String>, currentBaseUri: String): String {
+    var node = current
     var updatedBaseUri = currentBaseUri
 
     for (token in tokens) {
-        node = when (node) {
-            is KsonObject -> {
-                node.propertyLookup["\$id"]?.let { idValue ->
-                    if (idValue is KsonString) {
-                        val idString = idValue.value
-                        // Resolve the ID relative to the current base URI and update it
-                        val fullyQualifiedId = SchemaIdLookup.resolveUri(idString, updatedBaseUri)
-                        updatedBaseUri = fullyQualifiedId.toString()
-                    }
+        // Update base URI if current node has a $id property
+        if (node is KsonObject) {
+            node.propertyLookup["\$id"]?.let { idValue ->
+                if (idValue is KsonString) {
+                    updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
                 }
-
-                // Navigate into object property
-                node.propertyLookup[token]
-            }
-
-            is KsonList -> {
-                // Navigate into array element
-                val index = token.toIntOrNull()
-                if (index != null && index >= 0 && index < node.elements.size) {
-                    node.elements[index]
-                } else {
-                    null
-                }
-            }
-
-            else -> {
-                // Cannot navigate further
-                null
             }
         }
 
-        if (node == null) {
-            break
-        }
+        // Navigate to next node (same logic as KsonValueNavigation.navigateByTokens)
+        node = KsonValueNavigation.navigateByTokens(node, listOf(token)) ?: break
     }
 
-    return node?.let { ResolvedRef(it, updatedBaseUri) }
+    return updatedBaseUri
 }
 
 /**
