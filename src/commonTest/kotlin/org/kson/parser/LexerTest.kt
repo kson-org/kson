@@ -916,4 +916,210 @@ class LexerTest {
             testGapFreeLexing = true
         )
     }
+
+    @Test
+    fun testlocationContainsPosition_targetStartsAtContainerStart() {
+        val container = Location.create(
+            firstLine = 2, firstColumn = 5,
+            lastLine = 10, lastColumn = 15,
+            startOffset = 20, endOffset = 100
+        )
+        val target = Coordinates(
+            line = 2, column = 5,
+        )
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, target),
+            "Target starting exactly at container start should return true"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_targetStartsAtContainerEnd() {
+        val container = Location.create(
+            firstLine = 2, firstColumn = 5,
+            lastLine = 10, lastColumn = 15,
+            startOffset = 20, endOffset = 100
+        )
+        val target = Coordinates(
+            line = 10, column = 15,
+        )
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, target),
+            "Target starting exactly at container end should return true"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_targetStartsBeforeContainerLine() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 0,
+            lastLine = 10, lastColumn = 20,
+            startOffset = 50, endOffset = 100
+        )
+        val target = Coordinates(3,10)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, target),
+            "Target starting before container line should return false"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_targetStartsAfterContainerLine() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 0,
+            lastLine = 10, lastColumn = 20,
+            startOffset = 50, endOffset = 100
+        )
+        val target = Coordinates(15,5)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, target),
+            "Target starting after container line should return false"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_sameLineTargetBeforeColumn() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 10,
+            lastLine = 5, lastColumn = 20,
+            startOffset = 50, endOffset = 60
+        )
+        val target = Coordinates(5,5)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, target),
+            "Target on same start line but before start column should return false"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_sameLineTargetAfterColumn() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 10,
+            lastLine = 5, lastColumn = 20,
+            startOffset = 50, endOffset = 60
+        )
+        val target = Coordinates(5,25)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, target),
+            "Target on same end line but after end column should return false"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_targetOnSameLineWithinBounds() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 10,
+            lastLine = 5, lastColumn = 20,
+            startOffset = 50, endOffset = 60
+        )
+        val target = Coordinates(5, 15)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, target),
+            "Target on same line and within column bounds should return true"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_multiLineContainer() {
+        val container = Location.create(
+            firstLine = 2, firstColumn = 5,
+            lastLine = 8, lastColumn = 10,
+            startOffset = 20, endOffset = 80
+        )
+
+        // Target on middle line (any column should be valid)
+        val targetMiddle = Coordinates(5, 0)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, targetMiddle),
+            "Target on middle line should return true regardless of column"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_edgeCaseFirstLineBoundary() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 10,
+            lastLine = 10, lastColumn = 5,
+            startOffset = 50, endOffset = 100
+        )
+
+        // Target on first line, before column
+        val targetBefore = Coordinates(5,9)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, targetBefore),
+            "Target on first line but before start column should return false"
+        )
+
+        // Target on first line, at column
+        val targetAt = Coordinates(5,10)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, targetAt),
+            "Target on first line at start column should return true"
+        )
+
+        // Target on first line, after column
+        val targetAfter = Coordinates(5,11)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, targetAfter),
+            "Target on first line after start column should return true"
+        )
+    }
+
+    @Test
+    fun testLocationContainsLocation_edgeCaseLastLineBoundary() {
+        val container = Location.create(
+            firstLine = 5, firstColumn = 10,
+            lastLine = 10, lastColumn = 15,
+            startOffset = 50, endOffset = 100
+        )
+
+        // Target on last line, before end column
+        val targetBefore = Coordinates(10,10)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, targetBefore),
+            "Target on last line before end column should return true"
+        )
+
+        // Target on last line, at end column
+        val targetAt = Coordinates(10,15)
+
+        assertEquals(
+            true,
+            Location.locationContainsCoordinates(container, targetAt),
+            "Target on last line at end column should return true"
+        )
+
+        // Target on last line, after end column
+        val targetAfter = Coordinates(10,16)
+
+        assertEquals(
+            false,
+            Location.locationContainsCoordinates(container, targetAfter),
+            "Target on last line after end column should return false"
+        )
+    }
 }
