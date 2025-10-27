@@ -13,6 +13,8 @@ import {
     CodeLens,
     CodeLensParams,
     ExecuteCommandParams,
+    Hover,
+    HoverParams,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
@@ -21,6 +23,7 @@ import {SemanticTokensService} from '../features/SemanticTokensService.js';
 import {CodeLensService} from '../features/CodeLensService.js';
 import {DocumentHighlightService} from '../features/DocumentHighlightService.js';
 import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
+import {HoverService} from '../features/HoverService.js';
 import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
@@ -37,6 +40,7 @@ export class KsonTextDocumentService {
     private codeLensService: CodeLensService;
     private documentHighlightService: DocumentHighlightService;
     private documentSymbolService: DocumentSymbolService;
+    private hoverService: HoverService;
     private commandExecutor!: CommandExecutor;
     private configuration: Required<KsonSettings>;
 
@@ -47,6 +51,7 @@ export class KsonTextDocumentService {
         this.codeLensService = new CodeLensService();
         this.documentHighlightService = new DocumentHighlightService();
         this.documentSymbolService = new DocumentSymbolService();
+        this.hoverService = new HoverService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -97,6 +102,7 @@ export class KsonTextDocumentService {
         this.connection.onExecuteCommand(this.onExecuteCommand.bind(this));
         this.connection.onDocumentHighlight(this.onDocumentHighlight.bind(this));
         this.connection.onDocumentSymbol(this.onDocumentSymbol.bind(this));
+        this.connection.onHover(this.onHover.bind(this));
     }
 
 
@@ -186,6 +192,19 @@ export class KsonTextDocumentService {
         } catch (error) {
             this.connection.console.error(`Error providing document symbols: ${error}`);
             return [];
+        }
+    }
+
+    private async onHover(params: HoverParams): Promise<Hover | null> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return null;
+            }
+            return this.hoverService.getHover(document, params.position);
+        } catch (error) {
+            this.connection.console.error(`Error providing hover info: ${error}`);
+            return null;
         }
     }
 }
