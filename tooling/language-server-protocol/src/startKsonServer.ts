@@ -59,6 +59,9 @@ export function startKsonServer(connection: Connection): void {
             // Document symbols
             documentSymbolProvider: true,
 
+            // Hover information
+            hoverProvider: true,
+
             workspace: {
                 workspaceFolders: {
                     supported: true,
