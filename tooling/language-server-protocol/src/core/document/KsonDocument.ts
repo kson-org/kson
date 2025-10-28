@@ -88,9 +88,9 @@ export class KsonDocument implements TextDocument {
     }
 
     /**
-     * Set the schema value for this document
+     * Get the schema document for this document, if one is configured.
      */
-    getSchemaDocument(): TextDocument {
-        return this.schemaDocument
+    getSchemaDocument(): TextDocument | undefined {
+        return this.schemaDocument;
     }
 }

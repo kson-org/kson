@@ -2,33 +2,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {Kson} from 'kson';
 import {KsonDocument} from "./KsonDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
-
-/**
- * A simple hardcoded test schema for MVP demonstration.
- * This schema describes a basic configuration object with name, port, and enabled properties.
- */
-const HARDCODED_TEST_SCHEMA = `{
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string",
-      "description": "The name of the service",
-      "title": "Service Name"
-    },
-    "port": {
-      "type": "number",
-      "description": "The port number the service listens on",
-      "title": "Port Number",
-      "minimum": 1024,
-      "maximum": 65535
-    },
-    "enabled": {
-      "type": "boolean",
-      "description": "Whether the service is enabled",
-      "title": "Enabled Flag"
-    }
-  }
-}`;
+import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
 
 /**
  * Document management for the Kson Language Server.
@@ -37,8 +11,12 @@ const HARDCODED_TEST_SCHEMA = `{
  * instances.
  */
 export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
+    private schemaProvider: SchemaProvider;
 
-    constructor() {
+    constructor(schemaProvider?: SchemaProvider) {
+        // Use provided schema provider or default to no-op
+        const provider = schemaProvider ?? new NoOpSchemaProvider();
+
         super({
             create: (
                 uri: DocumentUri,
@@ -47,7 +25,10 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-                const schemaDocument = TextDocument.create("tmp", languageId, version, HARDCODED_TEST_SCHEMA)
+
+                // Try to get schema from provider
+                let schemaDocument = provider.getSchemaForDocument(uri);
+
                 const parseResult = Kson.getInstance().analyze(content);
                 return new KsonDocument(textDocument, parseResult, schemaDocument);
             },
@@ -69,5 +50,16 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 );
             }
         });
+
+        // Assign the schema provider after super() is called
+        this.schemaProvider = provider;
+    }
+
+    /**
+     * Reload the schema configuration.
+     * Should be called when schema configuration changes.
+     */
+    reloadSchemaConfiguration(): void {
+        this.schemaProvider.reload();
     }
 }

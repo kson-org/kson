@@ -88,7 +88,11 @@ async function build() {
             ) : {})
         },
         platform: 'browser',
-        external: ['vscode', 'path', 'crypto'],
+        external: ['vscode', 'path', 'crypto', 'fs'],
+        // Provide a stub for minimatch so it doesn't get bundled
+        alias: {
+            'minimatch': './src/stubs/minimatch.stub.ts'
+        },
         define: {
             'global': 'globalThis'
         },

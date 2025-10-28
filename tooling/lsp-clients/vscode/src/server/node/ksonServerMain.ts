@@ -1,5 +1,5 @@
 import { createConnection } from 'vscode-languageserver/node.js';
-import { startKsonServer } from 'kson-language-server';
+import { startKsonServer } from 'kson-language-server/node';
 
 // Create connection for Node.js environment
 const connection = createConnection();
