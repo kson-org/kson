@@ -114,11 +114,14 @@ export class KsonTextDocumentService {
 
     private async onSemanticTokensFull(params: SemanticTokensParams): Promise<SemanticTokens> {
         try {
+            this.connection.console.info(`Semantic tokens requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return {data: []};
             }
-            return this.semanticTokensService.getSemanticTokens(document);
+            const result = this.semanticTokensService.getSemanticTokens(document);
+            this.connection.console.info(`Semantic tokens result: ${result.data.length} tokens`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing semantic tokens: ${error}`);
             return {data: []};
@@ -140,8 +143,11 @@ export class KsonTextDocumentService {
 
     private async onDiagnostic(params: DocumentDiagnosticParams): Promise<DocumentDiagnosticReport> {
         try {
+            this.connection.console.info(`Diagnostics requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
-            return this.diagnosticService.createDocumentDiagnosticReport(document);
+            const result = this.diagnosticService.createDocumentDiagnosticReport(document);
+            this.connection.console.info(`Diagnostics result: ${JSON.stringify(result)}`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing diagnostics: ${error}`);
             return {
@@ -188,12 +194,14 @@ export class KsonTextDocumentService {
 
     private async onDocumentSymbol(params: DocumentSymbolParams): Promise<DocumentSymbol[]> {
         try {
+            this.connection.console.info(`Document symbols requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return [];
             }
             const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue)
             document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
+            this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
         } catch (error) {
             this.connection.console.error(`Error providing document symbols: ${error}`);
@@ -207,7 +215,9 @@ export class KsonTextDocumentService {
             if (!document) {
                 return null;
             }
-            return this.hoverService.getHover(document, params.position);
+            const result = this.hoverService.getHover(document, params.position);
+            this.connection.console.info(`Hover result: ${JSON.stringify(result)}`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing hover info: ${error}`);
             return null;
@@ -220,7 +230,9 @@ export class KsonTextDocumentService {
             if (!document) {
                 return null;
             }
-            return this.completionService.getCompletions(document, params.position);
+            const result = this.completionService.getCompletions(document, params.position);
+            this.connection.console.info(`Completion result: ${JSON.stringify(result)}`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing completions: ${error}`);
             return null;
