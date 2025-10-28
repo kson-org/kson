@@ -10,7 +10,7 @@ export class DocumentSymbolWithParent implements DocumentSymbol {
     selectionRange: Range;
     children?: DocumentSymbolWithParent[];
     parent?: DocumentSymbolWithParent;
-    
+
     constructor(
         name: string,
         kind: SymbolKind,
@@ -25,7 +25,15 @@ export class DocumentSymbolWithParent implements DocumentSymbol {
         this.detail = detail;
         this.selectionRange = selectionRange || range;
         this.children = [];
-        this.parent = parent;
+
+        // Make parent non-enumerable so it won't be serialized to JSON
+        // This prevents circular reference errors when sending to LSP client
+        Object.defineProperty(this, 'parent', {
+            value: parent,
+            writable: true,
+            enumerable: false,
+            configurable: true
+        });
     }
 }
 
