@@ -22,7 +22,6 @@ export class HoverService {
             return null;
         }
 
-
         // Call the KsonTooling API to get schema hover info at this position
         // The API now accepts line and column directly, avoiding the Location mangling issue
         const tooling = KsonTooling.getInstance();

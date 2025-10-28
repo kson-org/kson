@@ -1,4 +1,4 @@
-import {CompletionItem, CompletionItemKind, CompletionList, Position} from 'vscode-languageserver';
+import {CompletionItem, CompletionItemKind, CompletionList, Position, MarkupKind} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
 import {KsonTooling, CompletionItem as KsonCompletionItem, CompletionKind as KsonCompletionKind} from 'kson-tooling';
 
@@ -56,7 +56,7 @@ export class CompletionService {
             kind: mapCompletionKind(ksonItem.kind),
             detail: ksonItem.detail || undefined,
             documentation: ksonItem.documentation ? {
-                kind: 'markdown',
+                kind: MarkupKind.Markdown,
                 value: ksonItem.documentation
             } : undefined
         };
