@@ -4,8 +4,11 @@ import org.kson.KsonCore
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.TokenType
+import org.kson.value.KsonList
 import org.kson.value.KsonObject
+import org.kson.value.KsonValue
 import org.kson.value.KsonValueNavigation
+import org.kson.value.KsonValueNavigation.navigateByTokens
 
 /**
  * Builds a path from the document root to a specific location in a KSON document.
@@ -72,7 +75,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             ?: return null
 
         // Build the initial path from root to the target node
-        val initialPath = KsonValueNavigation.buildPathTokens(documentValue, targetNode)
+        val initialPath = buildPathTokens(documentValue, targetNode)
             ?: return emptyList()
 
         // Adjust the path based on cursor context (colon handling, boundary checks)
@@ -140,7 +143,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     private fun adjustPathForCursorContext(
         path: List<String>,
         lastToken: org.kson.parser.Token?,
-        targetNode: org.kson.value.KsonValue,
+        targetNode: KsonValue,
         isCursorInsideToken: Boolean
     ): List<String> {
         return when {
@@ -175,7 +178,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     private fun attemptDocumentRecovery(
         document: String,
         location: Coordinates
-    ): org.kson.value.KsonValue? {
+    ): KsonValue? {
         val lines = document.lines().toMutableList()
 
         // Validate that the target line exists
@@ -198,5 +201,63 @@ class KsonValuePathBuilder(private val document: String, private val location: C
 
         // Attempt to parse the recovered document
         return KsonCore.parseToAst(recoveredDocument).ksonValue
+    }
+
+
+    /**
+     * Build a path from root to target as a list of string tokens.
+     *
+     * The returned tokens can be used with [navigateByTokens] to navigate
+     * back to the target node.
+     *
+     * @param root The root of the tree
+     * @param target The node to find the path to
+     * @return List of tokens forming the path, or null if target is not in the tree
+     *         Returns empty list if target is the root
+     *
+     * Example:
+     * ```kotlin
+     * val path = buildPathTokens(root, targetNode)
+     * // path might be ["users", "0", "name"]
+     *
+     * // Verify we can navigate back
+     * val found = navigateByTokens(root, path)
+     * assert(found === targetNode)
+     * ```
+     */
+    private fun buildPathTokens(root: KsonValue, target: KsonValue): List<String>? {
+        if (root === target) return emptyList()
+
+        val path = mutableListOf<String>()
+
+        fun search(node: KsonValue): Boolean {
+            if (node === target) return true
+
+            when (node) {
+                is KsonObject -> {
+                    for ((key, property) in node.propertyMap) {
+                        path.add(key)
+                        if (search(property.propValue)) return true
+                        path.removeLast()
+                    }
+                }
+
+                is KsonList -> {
+                    for ((index, element) in node.elements.withIndex()) {
+                        path.add(index.toString())
+                        if (search(element)) return true
+                        path.removeLast()
+                    }
+                }
+
+                else -> {
+                    // Primitive types (KsonString, KsonNumber, KsonBoolean, KsonNull, etc.) have no children
+                    // If we reach here and haven't found the target, return false
+                }
+            }
+            return false
+        }
+
+        return if (search(root)) path else null
     }
 }

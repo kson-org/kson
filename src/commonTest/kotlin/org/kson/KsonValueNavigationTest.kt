@@ -190,62 +190,6 @@ class KsonNavigationUtilTest {
         assertNull(parent)
     }
 
-    @Test
-    fun `buildPathTokens returns empty list for root`() {
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, sampleKson)
-
-        assertNotNull(path)
-        assertTrue(path.isEmpty())
-    }
-
-    @Test
-    fun `buildPathTokens builds correct path to nested property`() {
-        val cityNode = KsonValueNavigation.navigateByTokens(sampleKson, listOf("address", "city"))!!
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, cityNode)
-
-        assertNotNull(path)
-        assertEquals(listOf("address", "city"), path)
-    }
-
-    @Test
-    fun `buildPathTokens builds correct path through arrays`() {
-        val hobbyNode = KsonValueNavigation.navigateByTokens(sampleKson, listOf("hobbies", "1"))!!
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, hobbyNode)
-
-        assertNotNull(path)
-        assertEquals(listOf("hobbies", "1"), path)
-    }
-
-    @Test
-    fun `buildPathTokens builds correct path to deeply nested node`() {
-        val coordinateNode = KsonValueNavigation.navigateByTokens(sampleKson, listOf("address", "coordinates", "0"))!!
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, coordinateNode)
-
-        assertNotNull(path)
-        assertEquals(listOf("address", "coordinates", "0"), path)
-    }
-
-    @Test
-    fun `buildPathTokens returns null for node not in tree`() {
-        val unrelatedNode = KsonString("not in tree", Location.create(0, 0, 0, 0, 0, 0))
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, unrelatedNode)
-
-        assertNull(path)
-    }
-
-    @Test
-    fun `buildPathTokens and navigateByTokens are inverse operations`() {
-        // Find a deeply nested node
-        val targetNode = KsonValueNavigation.navigateByTokens(sampleKson, listOf("metadata", "tags", "0"))!!
-
-        // Build path to it
-        val path = KsonValueNavigation.buildPathTokens(sampleKson, targetNode)
-        assertNotNull(path)
-
-        // Navigate using that path should return the same node
-        val foundNode = KsonValueNavigation.navigateByTokens(sampleKson, path)
-        assertSame(targetNode, foundNode)
-    }
 
     @Test
     fun `findAll finds all string nodes`() {
@@ -395,27 +339,4 @@ class KsonNavigationUtilTest {
         assertTrue(visited[0] is KsonList)
     }
 
-    @Test
-    fun `buildPathTokens works with mixed object and array navigation`() {
-        val complexKson = KsonCore.parseToAst("""
-            data:
-              items:
-                - values:
-                    - 1
-                    - 2
-                  .
-              .
-            .
-        """.trimIndent()).ksonValue!!
-
-        val target = KsonValueNavigation.navigateByTokens(complexKson, listOf("data", "items", "0", "values", "1"))!!
-        val path = KsonValueNavigation.buildPathTokens(complexKson, target)
-
-        assertNotNull(path)
-        assertEquals(listOf("data", "items", "0", "values", "1"), path)
-
-        // Verify round-trip
-        val found = KsonValueNavigation.navigateByTokens(complexKson, path)
-        assertSame(target, found)
-    }
 }
