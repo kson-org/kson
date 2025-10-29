@@ -286,10 +286,125 @@ class KsonSmokeTest {
         val schemaKson = """{"type": "object"}"""
         val schemaResult = Kson.parseSchema(schemaKson)
         assertIs<SchemaResult.Success>(schemaResult)
-        
+
         val validator = schemaResult.schemaValidator
         val invalidKson = """{"invalid": }"""
         val errors = validator.validate(invalidKson)
         assertTrue(errors.isNotEmpty())
+    }
+
+    @Test
+    fun testGetPropertyByName_success() {
+        val input = """
+            name: John
+            age: 30
+            city: 'New York'
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        val nameValue = value.getPropertyByName("name")
+        assertNotNull(nameValue)
+        assertTrue(nameValue is KsonValue.KsonString)
+        assertEquals("John", nameValue.value)
+
+        val ageValue = value.getPropertyByName("age")
+        assertNotNull(ageValue)
+        assertTrue(ageValue is KsonValue.KsonNumber.Integer)
+        assertEquals(30, ageValue.value)
+
+        val cityValue = value.getPropertyByName("city")
+        assertNotNull(cityValue)
+        assertTrue(cityValue is KsonValue.KsonString)
+        assertEquals("New York", cityValue.value)
+    }
+
+    @Test
+    fun testGetPropertyByName_withNestedObject() {
+        val input = """
+            person: 
+              name: Alice
+              age: 25
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        val personValue = value.getPropertyByName("person")
+        assertNotNull(personValue)
+        assertTrue(personValue is KsonValue.KsonObject)
+
+        val nestedName = personValue.getPropertyByName("name")
+        assertNotNull(nestedName)
+        assertTrue(nestedName is KsonValue.KsonString)
+        assertEquals("Alice", nestedName.value)
+    }
+
+    @Test
+    fun testGetPropertyByName_nonExistentProperty() {
+        val input = """
+            name: John
+            age: 30
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        val nonExistentValue = value.getPropertyByName("nonexistent")
+        assertNull(nonExistentValue)
+    }
+
+    @Test
+    fun testGetPropertyByName_withDifferentValueTypes() {
+        val input = """
+            string: "text"
+            number: 42
+            decimal: 3.14
+            boolean: true
+            null_value: null
+            array: [1, 2, 3]
+            object: {key: value}
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        val stringValue = value.getPropertyByName("string")
+        assertNotNull(stringValue)
+        assertTrue(stringValue is KsonValue.KsonString)
+        assertEquals("text", stringValue.value)
+
+        val numberValue = value.getPropertyByName("number")
+        assertNotNull(numberValue)
+        assertTrue(numberValue is KsonValue.KsonNumber.Integer)
+        assertEquals(42, numberValue.value)
+
+        val decimalValue = value.getPropertyByName("decimal")
+        assertNotNull(decimalValue)
+        assertTrue(decimalValue is KsonValue.KsonNumber.Decimal)
+        assertEquals(3.14, decimalValue.value)
+
+        val boolValue = value.getPropertyByName("boolean")
+        assertNotNull(boolValue)
+        assertTrue(boolValue is KsonValue.KsonBoolean)
+        assertEquals(true, boolValue.value)
+
+        val nullValue = value.getPropertyByName("null_value")
+        assertNotNull(nullValue)
+        assertTrue(nullValue is KsonValue.KsonNull)
+
+        val arrayValue = value.getPropertyByName("array")
+        assertNotNull(arrayValue)
+        assertTrue(arrayValue is KsonValue.KsonArray)
+        assertEquals(3, arrayValue.elements.size)
+
+        val objectValue = value.getPropertyByName("object")
+        assertNotNull(objectValue)
+        assertTrue(objectValue is KsonValue.KsonObject)
     }
 }
