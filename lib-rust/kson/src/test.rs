@@ -347,3 +347,143 @@ embed:%tag
     assert_eq!(embed.end().line(), 6);
     assert_eq!(embed.end().column(), 2);
 }
+
+#[test]
+fn test_get_property_by_name_success() {
+    let input = r#"name: John
+age: 30
+city: 'New York'"#;
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    let name_value = obj.get_property_by_name("name");
+    assert!(name_value.is_some());
+    let KsonValue::KsonString(name_str) = name_value.unwrap() else {
+        panic!("expected string");
+    };
+    assert_eq!(name_str.value(), "John");
+
+    let age_value = obj.get_property_by_name("age");
+    assert!(age_value.is_some());
+    let KsonValue::KsonInteger(age_int) = age_value.unwrap() else {
+        panic!("expected integer");
+    };
+    assert_eq!(age_int.value(), 30);
+
+    let city_value = obj.get_property_by_name("city");
+    assert!(city_value.is_some());
+    let KsonValue::KsonString(city_str) = city_value.unwrap() else {
+        panic!("expected string");
+    };
+    assert_eq!(city_str.value(), "New York");
+}
+
+#[test]
+fn test_get_property_by_name_with_nested_object() {
+    let input = r#"person:
+  name: Alice
+  age: 25"#;
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    let person_value = obj.get_property_by_name("person");
+    assert!(person_value.is_some());
+    let KsonValue::KsonObject(person_obj) = person_value.unwrap() else {
+        panic!("expected object");
+    };
+
+    let nested_name = person_obj.get_property_by_name("name");
+    assert!(nested_name.is_some());
+    let KsonValue::KsonString(nested_name_str) = nested_name.unwrap() else {
+        panic!("expected string");
+    };
+    assert_eq!(nested_name_str.value(), "Alice");
+}
+
+#[test]
+fn test_get_property_by_name_nonexistent_property() {
+    let input = r#"name: John
+age: 30"#;
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    let nonexistent_value = obj.get_property_by_name("nonexistent");
+    assert!(nonexistent_value.is_none());
+}
+
+#[test]
+fn test_get_property_by_name_with_different_value_types() {
+    let input = r#"string: text
+number: 42
+decimal: 3.14
+boolean: true
+null_value: null
+array: [1, 2, 3]
+object: {key: value}"#;
+
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    // Test string
+    let string_value = obj.get_property_by_name("string");
+    assert!(string_value.is_some());
+    let KsonValue::KsonString(string_str) = string_value.unwrap() else {
+        panic!("expected string");
+    };
+    assert_eq!(string_str.value(), "text");
+
+    // Test integer
+    let number_value = obj.get_property_by_name("number");
+    assert!(number_value.is_some());
+    let KsonValue::KsonInteger(number_int) = number_value.unwrap() else {
+        panic!("expected integer");
+    };
+    assert_eq!(number_int.value(), 42);
+
+    // Test decimal
+    let decimal_value = obj.get_property_by_name("decimal");
+    assert!(decimal_value.is_some());
+    let KsonValue::KsonDecimal(decimal_dec) = decimal_value.unwrap() else {
+        panic!("expected decimal");
+    };
+    assert_eq!(decimal_dec.value(), 3.14);
+
+    // Test boolean
+    let boolean_value = obj.get_property_by_name("boolean");
+    assert!(boolean_value.is_some());
+    assert!(matches!(boolean_value.unwrap(), KsonValue::KsonBoolean(_)));
+
+    // Test null
+    let null_value = obj.get_property_by_name("null_value");
+    assert!(null_value.is_some());
+    assert!(matches!(null_value.unwrap(), KsonValue::KsonNull(_)));
+
+    // Test array
+    let array_value = obj.get_property_by_name("array");
+    assert!(array_value.is_some());
+    let KsonValue::KsonArray(array_arr) = array_value.unwrap() else {
+        panic!("expected array");
+    };
+    assert_eq!(array_arr.elements().len(), 3);
+
+    // Test nested object
+    let object_value = obj.get_property_by_name("object");
+    assert!(object_value.is_some());
+    assert!(matches!(object_value.unwrap(), KsonValue::KsonObject(_)));
+}
