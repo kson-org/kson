@@ -568,6 +568,16 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
         private val internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.OBJECT
+
+        /**
+         * Retrieves the value of a property by its name.
+         *
+         * @param name The name of the property to retrieve
+         * @return The [KsonValue] associated with the given property name, or null if no such property exists
+         */
+        fun getPropertyByName(name: String): KsonValue? {
+            return properties.entries.firstOrNull { it.key.value == name }?.value
+        }
     }
 
     /**
