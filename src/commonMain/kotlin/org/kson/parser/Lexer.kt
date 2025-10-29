@@ -218,6 +218,27 @@ data class Location(
                 endLocation.endOffset
             )
         }
+
+        /**
+         * Check if a container [Location] contains [Coordinates]
+         */
+        fun locationContainsCoordinates(
+            containerLocation: Location,
+            targetCoordinates: Coordinates
+        ): Boolean {
+            val containerStart = containerLocation.start
+            val containerEnd = containerLocation.end
+
+            // Target must start at o
+            // r after container start
+            if (targetCoordinates.line < containerStart.line) return false
+            if (targetCoordinates.line == containerStart.line && targetCoordinates.column < containerStart.column) return false
+
+            // Target must start at or before container end
+            if (targetCoordinates.line > containerEnd.line) return false
+            if (targetCoordinates.line == containerEnd.line && targetCoordinates.column > containerEnd.column) return false
+            return true
+        }
     }
 }
 
