@@ -2,10 +2,10 @@ use super::*;
 
 #[test]
 fn test_kson_format() {
-    let indent = IndentType::Spaces(IndentTypeSpaces::new(2));
+    let indent = IndentType::Spaces(indent_type::Spaces::new(2));
     let result = Kson::format(
         "key: [1, 2, 3, 4]",
-        &FormatOptions::new(&indent, &FormattingStyle::Plain),
+        FormatOptions::new(indent, FormattingStyle::Plain),
     );
     insta::assert_snapshot!(result, @r"
     key:
@@ -18,10 +18,10 @@ fn test_kson_format() {
 
 #[test]
 fn test_kson_format_classic() {
-    let indent = IndentType::Spaces(IndentTypeSpaces::new(2));
+    let indent = IndentType::Spaces(indent_type::Spaces::new(2));
     let result = Kson::format(
         "key: [1, 2, 3, 4]",
-        &FormatOptions::new(&indent, &FormattingStyle::Classic),
+        FormatOptions::new(indent, FormattingStyle::Classic),
     );
     insta::assert_snapshot!(result, @r#"
       {
@@ -37,7 +37,7 @@ fn test_kson_format_classic() {
 
 #[test]
 fn test_kson_to_json_success() {
-    let result = Kson::to_json("key: [1, 2, 3, 4]");
+    let result = Kson::to_json("key: [1, 2, 3, 4]", true);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -62,7 +62,7 @@ This is embedded content
 embed$$"#;
 
     // Test with default retain_embed_tags=true
-    let result = Kson::to_json(kson_with_embed);
+    let result = Kson::to_json(kson_with_embed, true);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -78,7 +78,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_json_with_options(kson_with_embed, false);
+    let result = Kson::to_json(kson_with_embed, false);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -93,7 +93,7 @@ embed$$"#;
 
 #[test]
 fn test_kson_to_json_failure() {
-    let result = Kson::to_json("key: [1, 2, 3, 4");
+    let result = Kson::to_json("key: [1, 2, 3, 4", true);
     match result {
         Ok(_) => panic!("expected failure, found success"),
         Err(failure) => {
@@ -105,7 +105,7 @@ fn test_kson_to_json_failure() {
 
 #[test]
 fn test_kson_to_yaml_success() {
-    let result = Kson::to_yaml("key: [1, 2, 3, 4]");
+    let result = Kson::to_yaml("key: [1, 2, 3, 4]", true);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -127,7 +127,7 @@ This is embedded content
 embed$$"#;
 
     // Test with default retain_embed_tags=true
-    let result = Kson::to_yaml(kson_with_embed);
+    let result = Kson::to_yaml(kson_with_embed, true);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -142,7 +142,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_yaml_with_options(kson_with_embed, false);
+    let result = Kson::to_yaml(kson_with_embed, false);
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -157,7 +157,7 @@ embed$$"#;
 
 #[test]
 fn test_kson_to_yaml_failure() {
-    let result = Kson::to_yaml("key: [1, 2, 3, 4");
+    let result = Kson::to_yaml("key: [1, 2, 3, 4", true);
     match result {
         Ok(_) => panic!("expected failure, found success"),
         Err(failure) => {
@@ -276,12 +276,7 @@ embed:%tag
 
     let mapped_properties: std::collections::HashMap<String, &KsonValue> = properties
         .iter()
-        .map(|(key, value)| {
-            let KsonValue::KsonString(s) = key else {
-                panic!("expected string key");
-            };
-            (s.value().clone(), value)
-        })
+        .map(|(key, value)| (key.value().clone(), value))
         .collect();
 
     // Check "key" property
@@ -308,7 +303,7 @@ embed:%tag
     assert_eq!(array.end().column(), 7);
 
     // Check list elements
-    let KsonValue::KsonInteger(integer) = &elements[0] else {
+    let KsonValue::KsonNumber(kson_value::KsonNumber::Integer(integer)) = &elements[0] else {
         panic!("expected integer");
     };
     assert_eq!(integer.value(), 1);
@@ -317,7 +312,7 @@ embed:%tag
     assert_eq!(integer.end().line(), 2);
     assert_eq!(integer.end().column(), 5);
 
-    let KsonValue::KsonDecimal(decimal1) = &elements[1] else {
+    let KsonValue::KsonNumber(kson_value::KsonNumber::Decimal(decimal1)) = &elements[1] else {
         panic!("expected decimal");
     };
     assert_eq!(decimal1.value(), 2.1);
@@ -326,7 +321,7 @@ embed:%tag
     assert_eq!(decimal1.end().line(), 3);
     assert_eq!(decimal1.end().column(), 7);
 
-    let KsonValue::KsonDecimal(decimal2) = &elements[2] else {
+    let KsonValue::KsonNumber(kson_value::KsonNumber::Decimal(decimal2)) = &elements[2] else {
         panic!("expected decimal");
     };
     assert_eq!(decimal2.value(), 3e5);

@@ -1,5 +1,11 @@
 # Rust bindings for kson-lib API
 
+The Rust bindings for KSON are split into two crates, following the convention in the Rust
+ecosystem:
+
+- `kson-sys`: the low-level interface to the native library (you probably don't need to use it directly)
+- `kson-rs`: the idiomatic wrapper around kson (what you are probably looking for, see the example below)
+
 ## Example usage
 
 Add the library to your dependencies:
@@ -8,13 +14,20 @@ Add the library to your dependencies:
 cargo add kson-rs
 ```
 
+Tell the build where to put the KSON shared library (see [below](#a-note-on-dynamic-linking) for
+details):
+
+```bash
+export KSON_COPY_SHARED_LIBRARY_TO_DIR=target/debug
+```
+
 Write some code:
 
 ```rust
 use kson_rs::Kson;
 
 fn main() {
-    let json = Kson::to_json("key: [1, 2, 3, 4]")
+    let json = Kson::to_json("key: [1, 2, 3, 4]", false)
         .map_err(|_| "unreachable: kson input is guaranteed to be valid!")
         .unwrap();
     println!("{}", json.output());
@@ -45,41 +58,8 @@ the following environment variables:
 * `KSON_ROOT_SOURCE_DIR`: if set to the root of a KSON source tree, we will attempt to build and use the necessary binaries from there.
 * `KSON_PREBUILT_BIN_DIR`: use pre-built KSON binaries from the specified directory.
 
-## A note on Windows and dynamic linking
+## A note on dynamic linking
 
-By default we use static linking under the hood, which means you can use the `kson` crate without
-further setup. On Windows, however, we have no choice but to use dynamic linking (due to limitations
-in kotlin-native). This requires extra work from your side so the operating system can find
-`kson.dll` when your program runs. Unfold the section below if you'd like to know more.
-
-<details>
-<summary>Placing `kson.dll` where Windows can find it</summary>
-
-If you `cargo add kson-sys` to your dependencies, it becomes possible to automatically place the
-`kson.dll` file next to your compiled binary through the following build script:
-
-```rust
-// build.rs
-use std::path::Path;
-use std::{env, fs};
-
-fn main() {
-    let lib_bin_path = env::var("DEP_KSON_LIB_BINARY").expect("DEP_KSON_LIB_BINARY not set");
-    let lib_bin_path = Path::new(&lib_bin_path);
-
-    let profile = env::var("PROFILE").unwrap();
-    let target_root = Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap()).join("target");
-    let dest_dir = target_root.join(&profile);
-
-    fs::create_dir_all(&dest_dir).unwrap();
-    fs::copy(
-        lib_bin_path,
-        dest_dir.join(lib_bin_path.file_name().unwrap()),
-    )
-    .expect("failed to copy kson binary");
-
-    // Re-run if the source library changes
-    println!("cargo:rerun-if-changed={}", lib_bin_path.display());
-}
-```
-</details>
+The KSON bindings use dynamic linking, so you need to make sure the operating system can find the
+KSON library at runtime. Hence the `KSON_COPY_SHARED_LIBRARY_TO_DIR` trick, to put the library next
+to your binary.
