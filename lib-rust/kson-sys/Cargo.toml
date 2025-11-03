@@ -8,9 +8,9 @@ license = "Apache-2.0"
 
 [features]
 default = []
-dynamic-linking = []
 
 [build-dependencies]
+anyhow = "1.0.100"
 bindgen = "0.71.0"
 flate2 = "1.1.2"
 tar = "0.4"

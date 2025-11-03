@@ -1,11 +1,16 @@
-import org.jetbrains.kotlin.konan.target.Architecture
-import org.jetbrains.kotlin.konan.target.Family
-import org.jetbrains.kotlin.konan.target.HostManager
+import nl.ochagavia.krossover.gradle.ReturnTypeMapping
+import org.kson.BinaryArtifactPaths
+import org.kson.GraalVmHelper
+
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.pathString
 
 plugins {
     kotlin("multiplatform")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
+    id("nl.ochagavia.krossover") version "1.0.4"
 }
 
 repositories {
@@ -14,24 +19,6 @@ repositories {
 
 group = "org.kson"
 version = "0.1.2-SNAPSHOT"
-
-tasks {
-    val copyHeaderDynamic = register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
-        dependsOn(":kson-lib:nativeKsonBinaries")
-        useDynamicLinking = true
-        outputDir = project.projectDir.resolve("build/nativeHeaders")
-    }
-
-    val copyHeaderStatic = register<CopyNativeHeaderTask>("copyNativeHeaderStatic") {
-        dependsOn(":kson-lib:nativeKsonBinaries")
-        useDynamicLinking = false
-        outputDir = project.projectDir.resolve("build/nativeHeaders")
-    }
-
-    register<Task>("nativeRelease") {
-        dependsOn(":kson-lib:nativeKsonBinaries", copyHeaderDynamic, copyHeaderStatic)
-    }
-}
 
 kotlin {
     jvm {
@@ -47,31 +34,6 @@ kotlin {
         generateTypeScriptDefinitions()
     }
 
-    val host = HostManager.host
-    val nativeTarget = when (host.family) {
-        Family.OSX -> when (host.architecture) {
-            Architecture.ARM64 -> macosArm64("nativeKson")
-            else -> macosX64("nativeKson")
-        }
-        Family.LINUX -> linuxX64("nativeKson")
-        Family.MINGW -> mingwX64("nativeKson")
-        Family.IOS, Family.TVOS, Family.WATCHOS, Family.ANDROID -> {
-            throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
-        }
-    }
-
-    nativeTarget.apply {
-        binaries {
-            sharedLib {
-                baseName = "kson"
-            }
-
-            staticLib {
-                baseName = "kson"
-            }
-        }
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -83,6 +45,27 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+    }
+}
+
+krossover {
+    libName = "kson"
+    rootClasses = listOf("org.kson.Kson")
+    exposedPackages = listOf("org.kson")
+
+    jniHeaderOutputFile = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage/jni_simplified.h").toPath()
+
+    python {
+        outputDir = Path("${rootProject.projectDir}/lib-python/src/kson")
+    }
+
+    rust {
+        jniSysModule = "kson_sys"
+        outputDir = Path("${rootProject.projectDir}/lib-rust/kson/src/generated")
+        returnTypeMappings = listOf(
+            ReturnTypeMapping("org.kson.Result", "std::result::Result<result::Success, result::Failure>", "crate::kson_result_into_rust_result"),
+            ReturnTypeMapping("org.kson.SchemaResult", "std::result::Result<schema_result::Success, schema_result::Failure>", "crate::kson_schema_result_into_rust_result")
+        )
     }
 }
 
@@ -250,4 +233,52 @@ mavenPublishing {
             url.set("https://github.com/kson-org/kson")
         }
     }
+}
+
+// Build native image using GraalVM JDK from the Gradle wrapper
+tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
+    group = "build"
+    description = "Builds native executable using GraalVM from JDK toolchain"
+    dependsOn(":kson-lib:generateJniBindingsJvm")
+
+    val jvmTask = tasks.named<Jar>("jvmJar")
+    dependsOn(jvmTask, "generateJniBindingsJvm")
+
+    // Configure the command at configuration time using providers
+    command.set(provider {
+        val graalHome = GraalVmHelper.getGraalVMHome(rootProject)
+
+        val nativeImageExe = file("${graalHome}/bin/native-image${GraalVmHelper.getNativeImageExtension()}")
+        if (!nativeImageExe.exists()) {
+            throw GradleException("native-image not found at $nativeImageExe. Ensure GraalVM JDK is properly installed.")
+        }
+
+        // Ensure build dir exists
+        val buildDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage").toPath()
+        buildDir.createDirectories()
+
+        val buildArtifactPath = buildDir.resolve(BinaryArtifactPaths.binaryFileNameWithoutExtension()).toAbsolutePath().pathString
+        val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
+        val ksonCoreJar = rootDir.resolve("build/libs/kson-jvm-x.2-SNAPSHOT.jar")
+
+        val jarFile = jvmTask.get().archiveFile.get().asFile
+        val kotlinRuntimeJarCandidates = configurations.getByName("jvmRuntimeClasspath").resolvedConfiguration.resolvedArtifacts.filter { a -> a.file.path.contains("org.jetbrains.kotlin") }
+        val kotlinRuntimeJarFile = kotlinRuntimeJarCandidates[0]!!.file.absolutePath
+
+        val cpSeparator = if (System.getProperty("os.name").lowercase().contains("win")) {
+            ";"
+        } else {
+            ":"
+        }
+        val classPath = sequenceOf(jarFile.absolutePath, ksonCoreJar, kotlinRuntimeJarFile).joinToString(cpSeparator)
+
+        listOf(
+            nativeImageExe.absolutePath,
+            "--shared",
+            "-cp", classPath,
+            "-H:+UnlockExperimentalVMOptions", // Necessary to use JNIConfigurationFiles option below
+            "-H:JNIConfigurationFiles=$jniConfig",
+            "-o", buildArtifactPath
+        )
+    })
 }
