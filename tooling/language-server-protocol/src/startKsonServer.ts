@@ -97,6 +97,9 @@ export function startKsonServer(
             // Hover information
             hoverProvider: true,
 
+            // Go to definition
+            definitionProvider: true,
+
             workspace: {
                 workspaceFolders: {
                     supported: true,
