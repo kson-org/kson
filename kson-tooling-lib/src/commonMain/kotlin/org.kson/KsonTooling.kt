@@ -45,6 +45,40 @@ object KsonTooling {
     }
 
     /**
+     * Get schema location for a position in a document.
+     *
+     * This is a convenience method that finds the KsonValue at the given position
+     * and then returns its location in the schema document.
+     *
+     * @param documentRoot The root of the document being edited (KSON string)
+     * @param schemaValue The schema for the document (KSON string)
+     * @param line The zero-based line number
+     * @param column The zero-based column number
+     * @return DefinitionLocationResult with zero-based coordinates, or null if no schema info available
+     */
+    fun getSchemaLocationAtLocation(
+        documentRoot: String,
+        schemaValue: String,
+        line: Int,
+        column: Int
+    ): Range? {
+        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(forDefinition = true) ?: return null
+        val location = KsonCore.parseToAst(schemaValue).ksonValue.let{
+            it ?: return null
+            SchemaInformation.getSchemaLocation(it, buildPath)
+        } ?: return null
+
+        return location.let {
+            Range(
+                it.start.line,
+                it.start.column,
+                it.end.line,
+                it.end.column
+            )
+        }
+    }
+
+    /**
      * Get completion suggestions for a position in a document.
      *
      * This is a convenience method that finds the KsonValue at the given position
@@ -93,3 +127,13 @@ enum class CompletionKind {
     PROPERTY,    // Object property name
     VALUE        // Enum value or suggested value
 }
+
+/**
+ * Ranges are used to describe the start and end Coordinates inside a document
+ *
+ * @param startLine line where range starts
+ * @param startColumn column where range starts
+ * @param endLine line where range ends
+ * @param endColumn column where range ends
+ */
+class Range(val startLine: Int, val startColumn: Int, val  endLine: Int, val endColumn: Int)

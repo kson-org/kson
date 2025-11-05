@@ -2,6 +2,7 @@ package org.kson.navigation
 
 import org.kson.CompletionItem
 import org.kson.CompletionKind
+import org.kson.parser.Location
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
@@ -26,6 +27,21 @@ internal object SchemaInformation{
     ): String? {
         val resolvedSchema = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
         return resolvedSchema?.resolvedValue?.extractSchemaInfo()
+    }
+
+    /**
+     * Get location for node in a schema, found by using the
+     * [documentPath] to navigate the schema
+     *
+     * @param schemaValue The schema for the document (as KsonValue)
+     * @param documentPath The path to the [org.kson.value.KsonValue] in the document
+     */
+    fun getSchemaLocation(
+        schemaValue: InternalKsonValue,
+        documentPath: List<String>
+    ): Location? {
+        val resolvedSchema = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
+        return resolvedSchema?.resolvedValue?.location
     }
 
     /**
