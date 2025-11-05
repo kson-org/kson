@@ -131,21 +131,15 @@ export class FileSystemSchemaProvider implements SchemaProvider {
         try {
             const schemaContent = fs.readFileSync(absolutePath, 'utf-8');
 
-            // If the schema file is in KSON format, convert it to JSON
-            let jsonSchemaContent = schemaContent;
-            if (schemaPath.endsWith('.kson')) {
-                const ksonResult = Kson.getInstance().toJson(schemaContent);
-
-                if (ksonResult instanceof Result.Success) {
-                    jsonSchemaContent = ksonResult.output;
-                } else {
-                    this.logger?.error(`Failed to convert KSON schema to JSON: ${(ksonResult as Result.Failure).errors.join(', ')}`);
-                    return undefined;
-                }
+            // Check whether the schema is a valid KSON file
+            let ksonSchema = Kson.getInstance().analyze(schemaContent)
+            if (ksonSchema.errors.asJsReadonlyArrayView().length != 0) {
+                this.logger?.error(`Failed to convert KSON schema to JSON: ${ksonSchema.errors.join(', ')}`);
+                return undefined;
             }
 
             const schemaUri = this.pathToUri(absolutePath);
-            return TextDocument.create(schemaUri, 'json', 1, jsonSchemaContent);
+            return TextDocument.create(schemaUri, 'kson', 1, schemaContent);
         } catch (error) {
             this.logger?.error(`Failed to load schema file ${schemaPath}: ${error}`);
             return undefined;

@@ -46,7 +46,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 return new KsonDocument(
                     textDocument,
                     parseResult,
-                    ksonDocument.getSchemaDocument()
+                    provider.getSchemaForDocument(ksonDocument.uri)
                 );
             }
         });

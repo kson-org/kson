@@ -139,7 +139,7 @@ describe('FileSystemSchemaProvider', () => {
             const schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
 
             assert.ok(schema);
-            assert.strictEqual(schema.languageId, 'json');
+            assert.strictEqual(schema.languageId, 'kson');
             assert.ok(schema.getText().includes('"name"'));
         });
 

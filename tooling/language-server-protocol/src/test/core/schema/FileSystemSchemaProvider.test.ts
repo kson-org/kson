@@ -167,23 +167,6 @@ describe('FileSystemSchemaProvider', () => {
             assert.ok(schema);
             assert.strictEqual(schema!.getText(), schema1);
         });
-
-        it('should convert KSON schema files to JSON', () => {
-            const workspace = createWorkspace();
-            const ksonSchema = 'type: "object"';
-
-            writeConfig(workspace, {
-                schemas: [{fileMatch: ['*.kson'], schema: 'schemas/test.kson'}]
-            });
-            writeSchema(workspace, 'schemas/test.kson', ksonSchema);
-
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
-
-            assert.ok(schema);
-            const parsed = JSON.parse(schema!.getText());
-            assert.strictEqual(parsed.type, 'object');
-        });
     });
 
     describe('reload', () => {
