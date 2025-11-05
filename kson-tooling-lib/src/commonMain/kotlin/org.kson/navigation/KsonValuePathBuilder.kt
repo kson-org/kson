@@ -48,12 +48,15 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * The method handles several edge cases:
      * - Invalid documents (attempts recovery by inserting quotes)
      * - Cursor positioned after a colon (targets the value being entered)
-     * - Cursor positioned outside a token (targets the parent element)
+     * - Cursor positioned outside a token (targets the parent element, unless forDefinition is true)
      *
+     * @param forDefinition If true, keeps the path to the current property even when cursor is outside token.
+     *                      This is useful for "jump to definition" where we want to navigate to the property's
+     *                      schema definition, not its parent. Default is false for completion behavior.
      * @return A list of property names representing the path from root to target,
      *         or null if the path cannot be determined
      */
-    fun buildPathToPosition(): List<String>? {
+    fun buildPathToPosition(forDefinition: Boolean = false): List<String>? {
         val parsedDocument = KsonCore.parseToAst(document)
 
         // Find the token immediately before or at the cursor position
@@ -83,7 +86,8 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             path = initialPath,
             lastToken = lastToken,
             targetNode = targetNode,
-            isCursorInsideToken = isCursorInsideToken
+            isCursorInsideToken = isCursorInsideToken,
+            forDefinition = forDefinition
         )
     }
 
@@ -130,21 +134,25 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     /**
      * Adjusts the path based on cursor context.
      *
-     * Handles two special cases:
+     * Handles special cases:
      * 1. Cursor after a colon: Add the property name to target the value being entered
-     * 2. Cursor outside token bounds: Remove the last path element to target the parent
+     * 2. Cursor on a property key: Add the property name to the path (for definition lookups)
+     * 3. Cursor outside token bounds: Remove the last path element to target the parent
+     *    (unless forDefinition is true, in which case keep the path to the property)
      *
      * @param path The initial path built from document navigation
      * @param lastToken The last token before the cursor
      * @param targetNode The KsonValue node found at the target location
      * @param isCursorInsideToken Whether the cursor is inside the token bounds
+     * @param forDefinition If true, don't drop the last element when cursor is outside token
      * @return The adjusted path
      */
     private fun adjustPathForCursorContext(
         path: List<String>,
         lastToken: org.kson.parser.Token?,
         targetNode: KsonValue,
-        isCursorInsideToken: Boolean
+        isCursorInsideToken: Boolean,
+        forDefinition: Boolean
     ): List<String> {
         return when {
             // Cursor is right after a colon - we're entering a value
@@ -152,8 +160,19 @@ class KsonValuePathBuilder(private val document: String, private val location: C
                 val propertyName = (targetNode as KsonObject).propertyLookup.keys.last()
                 path + propertyName
             }
-            // Cursor is outside the token - target the parent element
-            !isCursorInsideToken -> {
+            // Cursor is on a property key (UNQUOTED_STRING or STRING_OPEN_QUOTE token) and we're at the parent object
+            // This happens when cursor is in the middle of a property name like "user<caret>name"
+            isCursorInsideToken &&
+            (lastToken?.tokenType == TokenType.UNQUOTED_STRING || lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE) &&
+            targetNode is KsonObject &&
+            forDefinition -> {
+                // Extract the property name from the token
+                val propertyName = lastToken.value
+                path + propertyName
+            }
+            // Cursor is outside the token - target the parent element (for completions)
+            // But keep the path as-is for definition lookups
+            !isCursorInsideToken && !forDefinition -> {
                 path.dropLast(1)
             }
             // Normal case - return path as-is
