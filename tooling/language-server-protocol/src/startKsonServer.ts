@@ -5,6 +5,7 @@ import {
     ServerCapabilities,
     DiagnosticRegistrationOptions,
 } from 'vscode-languageserver';
+import { URI } from 'vscode-uri'
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
@@ -17,23 +18,6 @@ type SchemaProviderFactory = (
     workspaceRootUri: string | undefined,
     logger: { info: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void }
 ) => Promise<SchemaProvider | undefined>;
-
-/**
- * Convert a file:// URI to a file system path.
- */
-function uriToPath(uri: string): string {
-    if (uri.startsWith('file://')) {
-        let filePath = decodeURIComponent(uri.substring(7));
-
-        // On Windows, file:///c:/path becomes /c:/path, need to remove leading slash
-        if (process.platform === 'win32' && /^\/[a-z]:/i.test(filePath)) {
-            filePath = filePath.substring(1);
-        }
-
-        return filePath;
-    }
-    return uri;
-}
 
 /**
  * Core Kson Language Server implementation.
@@ -145,7 +129,7 @@ export function startKsonServer(
             if (schemaDocument) {
                 const schemaUri = schemaDocument.uri;
                 // Extract readable path from URI
-                const schemaPath = schemaUri.startsWith('file://') ? uriToPath(schemaUri) : schemaUri;
+                const schemaPath = schemaUri.startsWith('file://') ? URI.parse(schemaUri).fsPath : schemaUri;
                 return {
                     schemaUri,
                     schemaPath,

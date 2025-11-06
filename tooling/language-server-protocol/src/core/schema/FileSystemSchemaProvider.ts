@@ -1,5 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {DocumentUri} from 'vscode-languageserver';
+import { URI } from 'vscode-uri';
 import {SchemaConfig, isValidSchemaConfig, SCHEMA_CONFIG_FILENAME} from './SchemaConfig.js';
 import {SchemaProvider} from './SchemaProvider.js';
 import { Kson, Result} from 'kson'
@@ -29,7 +30,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             error: (message: string) => void;
         }
     ) {
-        this.workspaceRoot = workspaceRootUri ? this.uriToPath(workspaceRootUri) : null;
+        this.workspaceRoot = workspaceRootUri ? URI.parse(workspaceRootUri).fsPath : null;
         this.loadConfiguration();
     }
 
@@ -52,7 +53,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return undefined;
         }
 
-        const documentPath = this.uriToPath(documentUri);
+        const documentPath = URI.parse(documentUri).fsPath;
         const relativePath = this.getRelativePath(documentPath);
 
         // Normalize path separators for consistent matching
@@ -153,7 +154,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
                 return undefined;
             }
 
-            const schemaUri = this.pathToUri(absolutePath);
+            const schemaUri = URI.file(absolutePath).toString();
             return TextDocument.create(schemaUri, 'kson', 1, schemaContent);
         } catch (error) {
             this.logger?.error(`Failed to load schema file ${schemaPath}: ${error}`);
@@ -200,45 +201,5 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return absolutePath;
         }
         return path.relative(this.workspaceRoot, absolutePath);
-    }
-
-    /**
-     * Convert a file:// URI to a file system path.
-     *
-     * @param uri The URI to convert
-     * @returns File system path
-     */
-    private uriToPath(uri: string): string {
-        // Simple implementation - handle file:// URIs
-        if (uri.startsWith('file://')) {
-            // Decode URI components and remove file:// prefix
-            let filePath = decodeURIComponent(uri.substring(7));
-
-            // On Windows, file:///c:/path becomes /c:/path, need to remove leading slash
-            if (process.platform === 'win32' && /^\/[a-z]:/i.test(filePath)) {
-                filePath = filePath.substring(1);
-            }
-
-            return filePath;
-        }
-        return uri;
-    }
-
-    /**
-     * Convert a file system path to a file:// URI.
-     *
-     * @param filePath The file path to convert
-     * @returns file:// URI
-     */
-    private pathToUri(filePath: string): string {
-        // Normalize path separators to forward slashes
-        const normalized = filePath.replace(/\\/g, '/');
-
-        // On Windows, add extra slash for drive letter
-        if (process.platform === 'win32' && /^[a-z]:/i.test(normalized)) {
-            return `file:///${normalized}`;
-        }
-
-        return `file://${normalized}`;
     }
 }
