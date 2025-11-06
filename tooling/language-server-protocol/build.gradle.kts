@@ -22,4 +22,9 @@ tasks {
     check {
         dependsOn("npm_run_test")
     }
+
+    clean {
+        delete("out")
+        delete("node_modules")
+    }
 }
