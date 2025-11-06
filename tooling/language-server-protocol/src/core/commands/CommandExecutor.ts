@@ -10,6 +10,7 @@ import {CommandParameters, isValidCommand} from './CommandParameters.js';
 import {FormatOptions} from 'kson';
 import type {KsonSettings} from '../KsonSettings.js';
 import {KsonDocument} from "../document/KsonDocument";
+import {AssociateSchemaCommand} from './AssociateSchemaCommand.js';
 
 /**
  * Service responsible for executing commands in the Kson Language Server
@@ -19,7 +20,8 @@ export class CommandExecutor {
         private connection: Connection,
         private documentManager: KsonDocumentsManager,
         private formattingService: FormattingService,
-        private getConfiguration: () => Required<KsonSettings>
+        private getConfiguration: () => Required<KsonSettings>,
+        private workspaceRoot: string | null = null
     ) {
     }
 
@@ -60,10 +62,33 @@ export class CommandExecutor {
 
                 return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
                     indentType,
-                    commandArgs.formattingStyle,
+                    (commandArgs as CommandParameters[CommandType.PLAIN_FORMAT]).formattingStyle,
                 ));
             }
+            case CommandType.ASSOCIATE_SCHEMA: {
+                const schemaArgs = commandArgs as CommandParameters[CommandType.ASSOCIATE_SCHEMA];
+                return this.executeAssociateSchema(schemaArgs);
+            }
         }
+    }
+
+    /**
+     * Execute the associate schema command
+     */
+    private async executeAssociateSchema(commandArgs: CommandParameters[CommandType.ASSOCIATE_SCHEMA]): Promise<any> {
+        const result = AssociateSchemaCommand.execute({
+            documentUri: commandArgs.documentUri,
+            schemaPath: commandArgs.schemaPath,
+            workspaceRoot: this.workspaceRoot
+        });
+
+        if (result.success) {
+            this.connection.window.showInformationMessage(result.message);
+        } else {
+            this.connection.window.showErrorMessage(result.message);
+        }
+
+        return result;
     }
 
     /**

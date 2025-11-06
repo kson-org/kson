@@ -19,6 +19,23 @@ type SchemaProviderFactory = (
 ) => Promise<SchemaProvider | undefined>;
 
 /**
+ * Convert a file:// URI to a file system path.
+ */
+function uriToPath(uri: string): string {
+    if (uri.startsWith('file://')) {
+        let filePath = decodeURIComponent(uri.substring(7));
+
+        // On Windows, file:///c:/path becomes /c:/path, need to remove leading slash
+        if (process.platform === 'win32' && /^\/[a-z]:/i.test(filePath)) {
+            filePath = filePath.substring(1);
+        }
+
+        return filePath;
+    }
+    return uri;
+}
+
+/**
  * Core Kson Language Server implementation.
  *
  * @param connection The LSP connection
@@ -119,6 +136,35 @@ export function startKsonServer(
     // Called after initialization is complete
     connection.onInitialized(() => {
         logger.info('Kson Language Server initialized');
+    });
+
+    // Handle custom request to get schema information for a document
+    connection.onRequest('kson/getDocumentSchema', (params: { uri: string }) => {
+        try {
+            const schemaDocument = documentManager.get(params.uri)?.getSchemaDocument();
+            if (schemaDocument) {
+                const schemaUri = schemaDocument.uri;
+                // Extract readable path from URI
+                const schemaPath = schemaUri.startsWith('file://') ? uriToPath(schemaUri) : schemaUri;
+                return {
+                    schemaUri,
+                    schemaPath,
+                    hasSchema: true
+                };
+            }
+            return {
+                schemaUri: undefined,
+                schemaPath: undefined,
+                hasSchema: false
+            };
+        } catch (error) {
+            logger.error(`Error getting schema for document: ${error}`);
+            return {
+                schemaUri: undefined,
+                schemaPath: undefined,
+                hasSchema: false
+            };
+        }
     });
 
     // Handle changes to watched files

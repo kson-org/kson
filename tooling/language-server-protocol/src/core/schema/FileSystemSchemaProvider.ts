@@ -55,7 +55,22 @@ export class FileSystemSchemaProvider implements SchemaProvider {
         const documentPath = this.uriToPath(documentUri);
         const relativePath = this.getRelativePath(documentPath);
 
-        // Find the first matching schema mapping
+        // Normalize path separators for consistent matching
+        const normalizedPath = relativePath.replace(/\\/g, '/');
+
+        // First, check for exact path matches (higher priority - these are manually associated)
+        // Exact matches don't contain wildcards and match the file path exactly
+        for (const mapping of this.config.schemas) {
+            const exactMatches = mapping.fileMatch.filter(pattern => !this.hasWildcard(pattern));
+            for (const exactPath of exactMatches) {
+                const normalizedPattern = exactPath.replace(/\\/g, '/');
+                if (normalizedPath === normalizedPattern) {
+                    return this.loadSchemaFile(mapping.schema);
+                }
+            }
+        }
+
+        // Then, check glob patterns (lower priority - these are general rules)
         for (const mapping of this.config.schemas) {
             if (this.matchesAnyPattern(relativePath, mapping.fileMatch)) {
                 return this.loadSchemaFile(mapping.schema);
@@ -144,6 +159,17 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             this.logger?.error(`Failed to load schema file ${schemaPath}: ${error}`);
             return undefined;
         }
+    }
+
+    /**
+     * Check if a pattern contains wildcard characters.
+     * Wildcard characters are: *, ?, [, ]
+     *
+     * @param pattern The pattern to check
+     * @returns True if the pattern contains wildcards
+     */
+    private hasWildcard(pattern: string): boolean {
+        return /[*?\[\]]/.test(pattern);
     }
 
     /**
