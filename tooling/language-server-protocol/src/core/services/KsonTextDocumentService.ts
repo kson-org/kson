@@ -30,7 +30,8 @@ import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
 import {HoverService} from '../features/HoverService.js';
 import {CompletionService} from '../features/CompletionService.js';
 import {DefinitionService} from '../features/DefinitionService.js';
-import {CommandExecutor} from '../commands/CommandExecutor.js';
+import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
+import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 
@@ -49,10 +50,14 @@ export class KsonTextDocumentService {
     private hoverService: HoverService;
     private completionService: CompletionService;
     private definitionService: DefinitionService;
-    private commandExecutor!: CommandExecutor;
+    private commandExecutor!: CommandExecutorBase;
     private configuration: Required<KsonSettings>;
 
-    constructor(private documentManager: KsonDocumentsManager) {
+    constructor(
+        private documentManager: KsonDocumentsManager,
+        private createCommandExecutor: CommandExecutorFactory,
+        private workspaceRoot: string | null = null
+    ) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService();
         this.semanticTokensService = new SemanticTokensService();
@@ -81,12 +86,13 @@ export class KsonTextDocumentService {
     connect(connection: Connection): void {
         this.connection = connection;
 
-        // Initialize CommandExecutor with the connection
-        this.commandExecutor = new CommandExecutor(
+        // Initialize CommandExecutor using the factory
+        this.commandExecutor = this.createCommandExecutor(
             this.connection,
             this.documentManager,
             this.formattingService,
-            () => this.configuration
+            () => this.configuration,
+            this.workspaceRoot
         );
 
         this.setupLanguageFeatures();

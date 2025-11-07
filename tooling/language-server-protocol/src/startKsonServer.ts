@@ -13,6 +13,7 @@ import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
+import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
 
 type SchemaProviderFactory = (
     workspaceRootUri: string | undefined,
@@ -24,10 +25,12 @@ type SchemaProviderFactory = (
  *
  * @param connection The LSP connection
  * @param createSchemaProvider Factory function to create the appropriate schema provider for the environment
+ * @param createCommandExecutor Factory function to create the appropriate command executor for the environment
  */
 export function startKsonServer(
     connection: Connection,
-    createSchemaProvider: SchemaProviderFactory
+    createSchemaProvider: SchemaProviderFactory,
+    createCommandExecutor: CommandExecutorFactory
 ): void {
     // Variables to store state during initialization
     let workspaceRootUri: string | undefined;
@@ -53,7 +56,15 @@ export function startKsonServer(
 
         // Now that we have workspace root and schema provider, create the document manager
         documentManager = new KsonDocumentsManager(schemaProvider);
-        textDocumentService = new KsonTextDocumentService(documentManager);
+
+        // Extract workspace root path from URI if available
+        const workspaceRoot = workspaceRootUri ? URI.parse(workspaceRootUri).fsPath : null;
+
+        textDocumentService = new KsonTextDocumentService(
+            documentManager,
+            createCommandExecutor,
+            workspaceRoot
+        );
 
         // Setup document handling and connect services
         documentManager.listen(connection);

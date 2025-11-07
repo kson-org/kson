@@ -16,6 +16,7 @@ import {ConnectionStub} from "../../ConnectionStub";
 import {KsonDocumentsManager} from "../../../core/document/KsonDocumentsManager.js";
 import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentService.js";
 import {FullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
+import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 
 describe('KsonTextDocumentService', () => {
     let connection: ConnectionStub;
@@ -26,7 +27,7 @@ describe('KsonTextDocumentService', () => {
     beforeEach(() => {
         connection = new ConnectionStub();
         documentsManager = new KsonDocumentsManager();
-        service = new KsonTextDocumentService(documentsManager);
+        service = new KsonTextDocumentService(documentsManager, createCommandExecutor);
 
         documentsManager.listen(connection);
         service.connect(connection)
