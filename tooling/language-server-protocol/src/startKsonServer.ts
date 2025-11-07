@@ -168,7 +168,10 @@ export function startKsonServer(
             if (change.uri.endsWith(SCHEMA_CONFIG_FILENAME)) {
                 logger.info('Schema configuration file changed, reloading...');
                 documentManager.reloadSchemaConfiguration();
-                // Note: Could trigger re-validation of all documents here if needed
+                // Refresh all open documents with the updated schemas
+                documentManager.refreshDocumentSchemas();
+                // Notify client that schema configuration changed so it can update UI (e.g., status bar)
+                connection.sendNotification('kson/schemaConfigurationChanged');
             }
         }
     });

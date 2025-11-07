@@ -45,6 +45,17 @@ export async function activate(context: vscode.ExtensionContext) {
         const statusBarManager = new StatusBarManager(languageClient);
         context.subscriptions.push(statusBarManager);
 
+        // Listen for schema configuration changes from the server
+        context.subscriptions.push(
+            languageClient.onNotification('kson/schemaConfigurationChanged', async () => {
+                // Refresh status bar for current editor when schema config changes
+                const editor = vscode.window.activeTextEditor;
+                if (editor && editor.document.languageId === 'kson') {
+                    await statusBarManager.updateForDocument(editor.document);
+                }
+            })
+        );
+
         // Register the schema selection command
         context.subscriptions.push(
             vscode.commands.registerCommand('kson.selectSchema', async () => {

@@ -62,4 +62,27 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
     reloadSchemaConfiguration(): void {
         this.schemaProvider.reload();
     }
+
+    /**
+     * Refresh all documents with updated schemas.
+     * This forces all cached documents to re-fetch their schemas from the provider.
+     */
+    refreshDocumentSchemas(): void {
+        // Get all currently open documents
+        const allDocs = this.all();
+
+        // For each document, create a new KsonDocument instance with the updated schema
+        for (const doc of allDocs) {
+            const textDocument = doc.textDocument;
+            const parseResult = doc.getAnalysisResult();
+            const updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri);
+
+            // Create new document instance with updated schema
+            const updatedDoc = new KsonDocument(textDocument, parseResult, updatedSchema);
+
+            // Replace in the internal document cache
+            // Access the protected _syncedDocuments property from parent class
+            (this as any)._syncedDocuments.set(doc.uri, updatedDoc);
+        }
+    }
 }
