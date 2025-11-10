@@ -363,34 +363,34 @@ workflows:
       - "build-windows-amd64":
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
       - "build-macos-arm64":
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
   "build-python-and-test":
     jobs:
       - "build-python-sdist":
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
       - "test-python-sdist-linux-amd64":
           requires:
             - "build-python-sdist"
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
 
       - "test-python-sdist-macos":
           requires:
             - "build-python-sdist"
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
 
       - "test-python-sdist-windows":
           requires:
             - "build-python-sdist"
           filters:
             branches:
-              only: "/^release\\/.*/"
+              only: "/^release.*"
