@@ -399,19 +399,12 @@ workflows:
       - 'build-linux-amd64'
       - 'build-windows-amd64':
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
-
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
       - 'build-macos-arm64':
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
               .
             .
           .
@@ -421,40 +414,25 @@ workflows:
     jobs:
       - 'build-python-sdist':
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
-
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
       - 'test-python-sdist-linux-amd64':
           requires:
             - 'build-python-sdist'
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
-
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
 
       - 'test-python-sdist-macos':
           requires:
             - 'build-python-sdist'
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
-
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
 
       - 'test-python-sdist-windows':
           requires:
             - 'build-python-sdist'
           filters:
-            tags:
-              only: '/^v\\d+\\.\\d+\\.\\d+$/'
-              .
             branches:
-              ignore: '/.*/'
+              only: '/^v\\d+\\.\\d+\\.\\d+$/'
