@@ -8,6 +8,7 @@ recursive-include src *.c
 recursive-include kson-sdist *.kts *.kt *.properties *.md
 # Include Python source files from kson-sdist
 recursive-include kson-sdist *.py
+include kson-sdist/.circleci/config.kson
 include kson-sdist/gradlew
 include kson-sdist/gradlew.bat
 include kson-sdist/buildSrc/gradlew
