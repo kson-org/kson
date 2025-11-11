@@ -115,9 +115,17 @@ def _from_kotlin_map(
 
         key = symbols.kotlin.root.org.kson.SimpleMapEntry.get_key(entry)
         if key_wrap_as is not None:
-            tmp = object.__new__(key_wrap_as)
-            tmp.ptr = key
-            key = tmp
+            if key_wrap_as == str:
+                # Special handling for string keys - use AnyHelper to convert kotlin.Any to String
+                any_helper = symbols.kotlin.root.org.kson.AnyHelper._instance()
+                string_ptr = symbols.kotlin.root.org.kson.AnyHelper.toString(
+                    any_helper, key
+                )
+                key = _from_kotlin_string(string_ptr)
+            else:
+                tmp = object.__new__(key_wrap_as)
+                tmp.ptr = key
+                key = tmp
 
         value = symbols.kotlin.root.org.kson.SimpleMapEntry.get_value(entry)
         if value_wrap_as is not None:
@@ -729,16 +737,31 @@ class KsonValue:
 class _KsonObject(KsonValue):
     """A Kson object with key-value pairs."""
 
-    def properties(self) -> Dict["_KsonString", "KsonValue"]:
+    def properties(self) -> Dict[str, "KsonValue"]:
         result = _cast_and_call(
             symbols.kotlin.root.org.kson.KsonValue.KsonObject.get_properties,
             [self.ptr],
         )
         raw_dict = _from_kotlin_map(
             result,
-            "kson_kref_org_kson_KsonValue_KsonString",
+            "kson_kref_kotlin_String",
             "kson_kref_org_kson_KsonValue",
-            KsonValue.KsonString,
+            str,
+            KsonValue,
+        )
+        # Translate values to their specific subtypes
+        return {k: v._translate() for k, v in raw_dict.items()}
+
+    def property_keys(self) -> Dict[str, "KsonValue"]:
+        result = _cast_and_call(
+            symbols.kotlin.root.org.kson.KsonValue.KsonObject.get_propertyKeys,
+            [self.ptr],
+        )
+        raw_dict = _from_kotlin_map(
+            result,
+            "kson_kref_kotlin_String",
+            "kson_kref_org_kson_KsonValue_KsonString",
+            str,
             KsonValue,
         )
         # Translate values to their specific subtypes

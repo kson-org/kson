@@ -971,7 +971,7 @@ declare_kotlin_object! {
 }
 
 impl KsonValueObject {
-    pub fn properties(&self) -> std::collections::HashMap<KsonValue, KsonValue> {
+    pub fn properties(&self) -> std::collections::HashMap<String, KsonValue> {
         let ptr = self.to_kotlin_object();
         let f = KSON_SYMBOLS
             .kotlin
@@ -984,7 +984,23 @@ impl KsonValueObject {
             .unwrap();
         let result =
             unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject { pinned: ptr }) };
-        util::from_kotlin_value_map(result)
+        util::from_kotlin_string_map(result)
+    }
+
+    pub fn property_keys(&self) -> std::collections::HashMap<String, KsonValueString> {
+        let ptr = self.to_kotlin_object();
+        let f = KSON_SYMBOLS
+            .kotlin
+            .root
+            .org
+            .kson
+            .KsonValue
+            .KsonObject
+            .get_propertyKeys
+            .unwrap();
+        let result =
+            unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject { pinned: ptr }) };
+        util::from_kotlin_string_map(result)
     }
 }
 

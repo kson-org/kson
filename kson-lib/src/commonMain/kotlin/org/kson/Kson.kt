@@ -473,9 +473,14 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         is InternalKsonObject -> {
             KsonValue.KsonObject(
                 properties = ksonValue.propertyMap.map {
-                    (convertValue(it.value.propName) as KsonValue.KsonString) to convertValue(
+                    (convertValue(it.value.propName) as KsonValue.KsonString).value to convertValue(
                         it.value.propValue
                     )
+                }.toMap(),
+                propertyKeys = ksonValue.propertyMap.map {
+                    (convertValue(it.value.propName) as KsonValue.KsonString).value to (convertValue(
+                        it.value.propName
+                    ) as KsonValue.KsonString)
                 }.toMap(),
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -553,7 +558,7 @@ enum class KsonValueType {
 /**
  * Represents a parsed [InternalKsonValue] in the public API
  */
-sealed class KsonValue private constructor(val start: Position, val end: Position) {
+sealed class KsonValue(val start: Position, val end: Position) {
     /**
      * Type discriminator for easier type checking in TypeScript/JavaScript
      */
@@ -563,7 +568,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     @ConsistentCopyVisibility
     data class KsonObject internal constructor(
-        val properties: Map<KsonString, KsonValue>,
+        val properties: Map<String, KsonValue>,
+        val propertyKeys: Map<String, KsonString>,
         private val internalStart: Position,
         private val internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
