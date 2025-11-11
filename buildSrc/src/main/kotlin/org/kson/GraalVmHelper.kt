@@ -21,16 +21,17 @@ object GraalVmHelper {
             it.isDirectory && it.name.contains("graalvm")
         } ?: throw GradleException("GraalVM JDK not found in $graalvmDir (no top-level dir present). Run './gradlew' to download it.")
 
-        // Special handling for macOS
-        val graalvmUnpackDir = if ((os.contains("mac") || os.contains("darwin")) && File("$graalvmTopLevelDir/Contents/Home").exists()) {
-            File("$graalvmTopLevelDir/Contents/Home")
-        } else {
-            graalvmTopLevelDir
-        }
-
-        return graalvmUnpackDir.listFiles()?.find {
+        // In MacOS the graalvm directory is unpacked inside a graalvm directory, try to find it
+        val graalvmUnpackDir = graalvmTopLevelDir.listFiles()?.find {
             it.isDirectory && it.name.contains("graalvm")
-        } ?: throw GradleException("GraalVM JDK not found in $graalvmUnpackDir. Run './gradlew' to download it.")
+        } ?: graalvmTopLevelDir  // Fall back to top-level if no nested dir found
+
+        // Special handling for macOS: use Contents/Home subdirectory if it exists
+        return if ((os.contains("mac") || os.contains("darwin")) && File("$graalvmUnpackDir/Contents/Home").exists()) {
+            File("$graalvmUnpackDir/Contents/Home")
+        } else {
+            graalvmUnpackDir
+        }
     }
 
     /**
