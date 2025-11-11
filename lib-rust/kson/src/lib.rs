@@ -986,42 +986,6 @@ impl KsonValueObject {
             unsafe { f(kson_sys::kson_kref_org_kson_KsonValue_KsonObject { pinned: ptr }) };
         util::from_kotlin_value_map(result)
     }
-
-    /// Retrieves the value of a property by its name.
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The name of the property to retrieve
-    ///
-    /// # Returns
-    ///
-    /// The KsonValue associated with the given property name, or None if no such property exists
-    pub fn get_property_by_name(&self, name: &str) -> Option<KsonValue> {
-        let f = KSON_SYMBOLS
-            .kotlin
-            .root
-            .org
-            .kson
-            .KsonValue
-            .KsonObject
-            .getPropertyByName
-            .unwrap();
-        let p0 = util::to_kotlin_string(name);
-        let p0 = p0.as_ptr();
-        let result = unsafe {
-            f(
-                kson_sys::kson_kref_org_kson_KsonValue_KsonObject {
-                    pinned: self.to_kotlin_object(),
-                },
-                p0,
-            )
-        };
-        if result.pinned == std::ptr::null_mut() {
-            None
-        } else {
-            Some(KsonValue::from_kotlin_object(result.pinned))
-        }
-    }
 }
 
 declare_kotlin_object! {

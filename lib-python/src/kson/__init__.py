@@ -744,24 +744,6 @@ class _KsonObject(KsonValue):
         # Translate values to their specific subtypes
         return {k: v._translate() for k, v in raw_dict.items()}
 
-    def get_property_by_name(self, name: str) -> Optional["KsonValue"]:
-        """Retrieves the value of a property by its name.
-
-        Args:
-            name: The name of the property to retrieve.
-
-        Returns:
-            The KsonValue associated with the given property name, or None if no such property exists.
-        """
-        result = _cast_and_call(
-            symbols.kotlin.root.org.kson.KsonValue.KsonObject.getPropertyByName,
-            [self.ptr, name.encode("utf-8")],
-        )
-        if result.pinned == ffi.NULL:
-            return None
-        value = _init_wrapper(KsonValue, result)
-        return value._translate()
-
 
 class _KsonArray(KsonValue):
     """A Kson array with elements."""
