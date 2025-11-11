@@ -1,13 +1,18 @@
 package org.kson.tooling.cli
 
 import com.github.ajalt.clikt.core.*
+import com.github.ajalt.clikt.parameters.options.versionOption
 import org.kson.tooling.cli.commands.JsonCommand
 import org.kson.tooling.cli.commands.YamlCommand
 import org.kson.tooling.cli.commands.ValidateCommand
 import org.kson.tooling.cli.commands.KsonFormatCommand
+import org.kson.tooling.cli.generated.KSON_VERSION
 
 
 class KsonCli : CliktCommand(name = "kson") {
+    init {
+        versionOption(KSON_VERSION, names = setOf("--version", "-V"))
+    }
     override fun help(context: Context) = """
         |KSON CLI - A tool for working with KSON (KSON Structured Object Notation) files.
         |
