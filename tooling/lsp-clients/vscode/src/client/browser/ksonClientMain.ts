@@ -40,6 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
         await languageClient.start();
 
         logOutputChannel.info('KSON Browser extension activated successfully');
+        logOutputChannel.info('Note: Schema features are not available in browser environment');
         console.log('KSON Language Server (Browser) started');
 
     } catch (error) {

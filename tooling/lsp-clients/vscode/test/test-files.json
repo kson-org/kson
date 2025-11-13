@@ -1,6 +1,8 @@
 {
   "tests": [
     "syntax-highlighting.test",
+    "status-bar-schema-association.test",
+    "schema-loading.test",
     "formatting-settings.test",
     "editing.test",
     "diagnostics.test"

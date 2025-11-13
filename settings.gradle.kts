@@ -8,6 +8,7 @@ pluginManagement {
 
 rootProject.name = "kson"
 include("kson-lib")
+include("kson-tooling-lib")
 include("lib-python")
 include("lib-rust")
 include("tooling:jetbrains")
