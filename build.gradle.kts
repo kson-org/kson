@@ -18,6 +18,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("com.vanniktech.maven.publish") version "0.30.0"
+    id("org.jetbrains.dokka") version "2.0.0"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -121,8 +122,9 @@ group = "org.kson"
  * We use x.[incrementing number] version here since this in not intended for general consumption.
  *   This version number is both easy to increment and (hopefully) telegraphs well with the strange
  *   versioning that this should not be depended on
+ * [[kson-version-num]]
  */
-version = "x.2-SNAPSHOT"
+version = "x.3-SNAPSHOT"
 
 kotlin {
     jvm()

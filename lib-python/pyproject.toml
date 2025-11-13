@@ -1,6 +1,7 @@
 [project]
 name = "kson-lang"
-version = "0.1.0"
+# [[kson-version-num]]
+version = "0.3.0.dev0"
 authors = [
   { name="KSON", email="kson@kson.org" },
 ]

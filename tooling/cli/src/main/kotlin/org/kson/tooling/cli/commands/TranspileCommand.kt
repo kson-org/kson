@@ -6,6 +6,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.kson.Kson
 import org.kson.Result
+import org.kson.TranspileOptions
 
 /**
  * Base class for transpile commands (JSON, YAML, etc.)
@@ -14,7 +15,8 @@ import org.kson.Result
 abstract class TranspileCommand(
     name: String,
     private val targetFormat: String,
-    private val converter: (String, Boolean) -> Result
+    private val optionsFactory: (Boolean) -> TranspileOptions,
+    private val converter: (String, TranspileOptions) -> Result
 ) : BaseKsonCommand(name = name) {
 
     private val cmdName = name
@@ -54,7 +56,8 @@ abstract class TranspileCommand(
         // Validate against schema if provided
         validateWithSchema(ksonContent)
 
-        when (val result = converter(ksonContent, retainEmbedTags)) {
+        val options = optionsFactory(retainEmbedTags)
+        when (val result = converter(ksonContent, options)) {
             is Result.Success -> {
                 writeOutput(result.output)
             }
@@ -72,11 +75,13 @@ abstract class TranspileCommand(
 class JsonCommand : TranspileCommand(
     name = "json",
     targetFormat = "JSON",
-    converter = Kson::toJson
+    optionsFactory = { retainEmbedTags -> TranspileOptions.Json(retainEmbedTags) },
+    converter = { kson, options -> Kson.toJson(kson, options as TranspileOptions.Json) }
 )
 
 class YamlCommand : TranspileCommand(
     name = "yaml",
     targetFormat = "YAML",
-    converter = Kson::toYaml
+    optionsFactory = { retainEmbedTags -> TranspileOptions.Yaml(retainEmbedTags) },
+    converter = { kson, options -> Kson.toYaml(kson, options as TranspileOptions.Yaml) }
 )
