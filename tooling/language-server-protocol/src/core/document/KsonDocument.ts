@@ -11,10 +11,12 @@ import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
  */
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
+    private schemaDocument?: TextDocument;
     private readonly parseAnalysis: Analysis;
     private indexedDocumentSymbols?: IndexedDocumentSymbols;
 
-    constructor(textDocument: TextDocument, parseAnalysis:Analysis) {
+    constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
+        this.schemaDocument = schemaDocument;
         this.textDocument = textDocument;
         this.parseAnalysis = parseAnalysis;
     }
@@ -83,5 +85,12 @@ export class KsonDocument implements TextDocument {
      */
     setSymbolsWithIndex(symbolsWithIndex: IndexedDocumentSymbols): void {
         this.indexedDocumentSymbols = symbolsWithIndex;
+    }
+
+    /**
+     * Get the schema document for this document, if one is configured.
+     */
+    getSchemaDocument(): TextDocument | undefined {
+        return this.schemaDocument;
     }
 }
