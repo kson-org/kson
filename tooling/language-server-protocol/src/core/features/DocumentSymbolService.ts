@@ -83,19 +83,22 @@ export class DocumentSymbolService {
      * Create a DocumentSymbol for an object
      */
     private createObjectSymbol(obj: KsonValue.KsonObject, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
-        const propertyMap = obj.properties.asJsReadonlyMapView();
+        const propertyValues = obj.properties.asJsReadonlyMapView();
+        const propertyKeys = obj.propertyKeys.asJsReadonlyMapView();
 
         const symbol = new DocumentSymbolWithParent(
             name,
             SymbolKind.Object,
             range,
-            `{${propertyMap.size} properties}`,
+            `{${propertyValues.size} properties}`,
             range,
             parent
         );
 
-        for (const [key, value] of propertyMap) {
-            const childSymbol = this.createObjectPropertySymbol(key, value, symbol);
+        for (const key of propertyValues.keys()) {
+            const propertyKey = propertyKeys.get(key)
+            const propertyValue = propertyValues.get(key)
+            const childSymbol = this.createObjectPropertySymbol(propertyKey, propertyValue, symbol);
 
             if (childSymbol) {
                 symbol.children!.push(childSymbol);

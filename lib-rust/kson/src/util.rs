@@ -234,12 +234,9 @@ pub(crate) fn from_kotlin_list<T: FromKotlinObject>(
     vec
 }
 
-pub(crate) fn from_kotlin_value_map<
-    K: FromKotlinObject + Eq + std::hash::Hash,
-    V: FromKotlinObject,
->(
+pub(crate) fn from_kotlin_string_map<V: FromKotlinObject>(
     map: kson_kref_kotlin_collections_Map,
-) -> std::collections::HashMap<K, V> {
+) -> std::collections::HashMap<String, V> {
     let mut hash_map = std::collections::HashMap::new();
     let iterator = unsafe {
         KSON_SYMBOLS
@@ -277,6 +274,9 @@ pub(crate) fn from_kotlin_value_map<
                 .unwrap()(next)
         };
 
+        // Use AnyHelper to convert kotlin.Any key to String
+        let key_string = to_string(key.pinned);
+
         let value = unsafe {
             KSON_SYMBOLS
                 .kotlin
@@ -289,7 +289,7 @@ pub(crate) fn from_kotlin_value_map<
         };
 
         hash_map.insert(
-            FromKotlinObject::from_kotlin_object(key.pinned),
+            key_string,
             FromKotlinObject::from_kotlin_object(value.pinned),
         );
 
