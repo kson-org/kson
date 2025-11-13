@@ -536,4 +536,21 @@ class CommandLineInterfaceTest {
             outputFile.delete()
         }
     }
+
+    @Test
+    fun testVersionFlag() {
+        val flags = listOf("--version", "-V")
+
+        for (flag in flags) {
+            val result = KsonCli().test(argv = flag)
+
+            assertEquals(0, result.statusCode)
+            assert(result.output.contains("kson version")) {
+                "Version output for '$flag' should contain 'kson version', but was: ${result.output}"
+            }
+            assert(result.output.contains("0.3.0-SNAPSHOT")) {
+                "Version output for '$flag' should contain version number, but was: ${result.output}"
+            }
+        }
+    }
 }
