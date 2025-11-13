@@ -13,6 +13,12 @@ import {
     CodeLens,
     CodeLensParams,
     ExecuteCommandParams,
+    Hover,
+    HoverParams,
+    CompletionList,
+    CompletionParams,
+    DefinitionParams,
+    DefinitionLink,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
@@ -21,6 +27,9 @@ import {SemanticTokensService} from '../features/SemanticTokensService.js';
 import {CodeLensService} from '../features/CodeLensService.js';
 import {DocumentHighlightService} from '../features/DocumentHighlightService.js';
 import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
+import {HoverService} from '../features/HoverService.js';
+import {CompletionService} from '../features/CompletionService.js';
+import {DefinitionService} from '../features/DefinitionService.js';
 import {CommandExecutor} from '../commands/CommandExecutor.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
@@ -37,6 +46,9 @@ export class KsonTextDocumentService {
     private codeLensService: CodeLensService;
     private documentHighlightService: DocumentHighlightService;
     private documentSymbolService: DocumentSymbolService;
+    private hoverService: HoverService;
+    private completionService: CompletionService;
+    private definitionService: DefinitionService;
     private commandExecutor!: CommandExecutor;
     private configuration: Required<KsonSettings>;
 
@@ -47,6 +59,9 @@ export class KsonTextDocumentService {
         this.codeLensService = new CodeLensService();
         this.documentHighlightService = new DocumentHighlightService();
         this.documentSymbolService = new DocumentSymbolService();
+        this.hoverService = new HoverService();
+        this.completionService = new CompletionService();
+        this.definitionService = new DefinitionService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -97,16 +112,22 @@ export class KsonTextDocumentService {
         this.connection.onExecuteCommand(this.onExecuteCommand.bind(this));
         this.connection.onDocumentHighlight(this.onDocumentHighlight.bind(this));
         this.connection.onDocumentSymbol(this.onDocumentSymbol.bind(this));
+        this.connection.onHover(this.onHover.bind(this));
+        this.connection.onCompletion(this.onCompletion.bind(this));
+        this.connection.onDefinition(this.onDefinition.bind(this));
     }
 
 
     private async onSemanticTokensFull(params: SemanticTokensParams): Promise<SemanticTokens> {
         try {
+            this.connection.console.info(`Semantic tokens requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return {data: []};
             }
-            return this.semanticTokensService.getSemanticTokens(document);
+            const result = this.semanticTokensService.getSemanticTokens(document);
+            this.connection.console.info(`Semantic tokens result: ${result.data.length} tokens`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing semantic tokens: ${error}`);
             return {data: []};
@@ -128,8 +149,11 @@ export class KsonTextDocumentService {
 
     private async onDiagnostic(params: DocumentDiagnosticParams): Promise<DocumentDiagnosticReport> {
         try {
+            this.connection.console.info(`Diagnostics requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
-            return this.diagnosticService.createDocumentDiagnosticReport(document);
+            const result = this.diagnosticService.createDocumentDiagnosticReport(document);
+            this.connection.console.info(`Diagnostics result: ${JSON.stringify(result)}`);
+            return result;
         } catch (error) {
             this.connection.console.error(`Error providing diagnostics: ${error}`);
             return {
@@ -176,16 +200,63 @@ export class KsonTextDocumentService {
 
     private async onDocumentSymbol(params: DocumentSymbolParams): Promise<DocumentSymbol[]> {
         try {
+            this.connection.console.info(`Document symbols requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return [];
             }
             const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue)
             document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
+            this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
         } catch (error) {
             this.connection.console.error(`Error providing document symbols: ${error}`);
             return [];
+        }
+    }
+
+    private async onHover(params: HoverParams): Promise<Hover | null> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return null;
+            }
+            const result = this.hoverService.getHover(document, params.position);
+            this.connection.console.info(`Hover result: ${JSON.stringify(result)}`);
+            return result;
+        } catch (error) {
+            this.connection.console.error(`Error providing hover info: ${error}`);
+            return null;
+        }
+    }
+
+    private async onCompletion(params: CompletionParams): Promise<CompletionList | null> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return null;
+            }
+            const result = this.completionService.getCompletions(document, params.position);
+            this.connection.console.info(`Completion result: ${JSON.stringify(result)}`);
+            return result;
+        } catch (error) {
+            this.connection.console.error(`Error providing completions: ${error}`);
+            return null;
+        }
+    }
+
+    private async onDefinition(params: DefinitionParams): Promise<DefinitionLink[] | null> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return null;
+            }
+            const result = this.definitionService.getDefinition(document, params.position);
+            this.connection.console.info(`Definition result: ${JSON.stringify(result)}`);
+            return result;
+        } catch (error) {
+            this.connection.console.error(`Error providing definition: ${error}`);
+            return null;
         }
     }
 }

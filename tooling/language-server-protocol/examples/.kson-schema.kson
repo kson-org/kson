@@ -1,0 +1,8 @@
+{
+  "schemas": [
+    {
+      "fileMatch": ["config/*.kson", "**/*.config.kson"],
+      "schema": "schemas/config.schema.json"
+    }
+  ]
+}
