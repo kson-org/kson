@@ -10,10 +10,15 @@ import org.kson.parser.NumberParser
 import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.tools.IndentType
 import org.kson.parser.Parser
+import org.kson.parser.Token
+import org.kson.parser.TokenType.COMMENT
+import org.kson.parser.TokenType.WHITESPACE
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
+import org.kson.parser.behavior.embedblock.EmbedBlockIndent
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.tools.FormattingStyle.*
 
 interface AstNode {
@@ -35,6 +40,11 @@ interface AstNode {
      * The source location from which this [AstNode] was parsed
      */
     val location: Location
+
+    /**
+     * The sequence of tokens that defines this [AstNode] in the originally parsed source
+     */
+    val sourceTokens: List<Token>
 
     /**
      * Abstract representation of the indentation to apply when serializing an AST as source code
@@ -91,7 +101,11 @@ interface AstNode {
 /**
  * Base [AstNode] to be subclassed by all Kson AST Node classes
  */
-sealed class AstNodeImpl(override val location: Location) : AstNode {
+sealed class AstNodeImpl(override val sourceTokens: List<Token>) : AstNode {
+    override val location: Location by lazy {
+        Location.merge(sourceTokens.first().lexeme.location, sourceTokens.last().lexeme.location)
+    }
+
     /**
      * Transpiles this [AstNode] to the given [compileTarget] source, respecting the configuration in the given
      * [CompileTarget]
@@ -128,10 +142,11 @@ sealed class AstNodeImpl(override val location: Location) : AstNode {
  * two implementations: the concrete `Impl` version for valid [AstNode]s and the "shadow" `Error` implementation
  * which patches the AST with an [AstNodeError] where an [AstNodeImpl] would otherwise go
  */
-open class AstNodeError(private val invalidSource: String, location: Location) : AstNode, AstNodeImpl(location) {
+open class AstNodeError(sourceTokens: List<Token>) : AstNode, AstNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
+                val invalidSource = sourceTokens.joinToString("") { it.lexeme.text }
                 invalidSource.split("\n")
                     .joinToString("\n") { line ->
                         indent.firstLineIndent() + line
@@ -146,8 +161,8 @@ open class AstNodeError(private val invalidSource: String, location: Location) :
  * the grammar documented on [Parser]
  */
 interface KsonValueNode : AstNode
-class KsonValueNodeError(content: String, location: Location) : KsonValueNode, AstNodeError(content, location)
-abstract class KsonValueNodeImpl(location: Location) : KsonValueNode, AstNodeImpl(location)
+class KsonValueNodeError(sourceTokens: List<Token>) : KsonValueNode, AstNodeError(sourceTokens)
+abstract class KsonValueNodeImpl(sourceTokens: List<Token>) : KsonValueNode, AstNodeImpl(sourceTokens)
 
 /**
  * Any kson entity is either the [KsonRoot] of the document, an [ObjectPropertyNode]
@@ -160,14 +175,14 @@ interface Documented {
 }
 
 interface KsonRoot : AstNode
-class KsonRootError(content: String, location: Location) : KsonRoot, AstNodeError(content, location)
+class KsonRootError(sourceTokens: List<Token>) : KsonRoot, AstNodeError(sourceTokens)
 class KsonRootImpl(
     val rootNode: KsonValueNode,
     private val trailingContent: List<KsonValueNode>,
     override val comments: List<String>,
     private val documentEndComments: List<String>,
-    location: Location
-) : KsonRoot, AstNodeImpl(location), Documented {
+    sourceTokens: List<Token>
+) : KsonRoot, AstNodeImpl(sourceTokens), Documented {
 
     /**
      * Produces valid [compileTarget] source code for the AST rooted at this [KsonRoot]
@@ -209,7 +224,7 @@ class KsonRootImpl(
     }
 }
 
-class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) : KsonValueNodeImpl(location) {
+class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (properties.isEmpty()) {
             return "${indent.firstLineIndent()}{}"
@@ -311,10 +326,10 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, location: Location) :
 }
 
 interface ObjectKeyNode : StringNode
-class ObjectKeyNodeError(content: String, location: Location) : ObjectKeyNode, AstNodeError(content, location)
+class ObjectKeyNodeError(sourceTokens: List<Token>) : ObjectKeyNode, AstNodeError(sourceTokens)
 class ObjectKeyNodeImpl(
     val key: StringNode
-) : ObjectKeyNode, AstNodeImpl(key.location) {
+) : ObjectKeyNode, AstNodeImpl(key.sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         val keyOutput = key.toSourceWithNext(indent, null, compileTarget)
         return "$keyOutput:"
@@ -322,14 +337,14 @@ class ObjectKeyNodeImpl(
 }
 
 interface ObjectPropertyNode : AstNode
-class ObjectPropertyNodeError(content: String, location: Location) : ObjectPropertyNode, AstNodeError(content, location)
+class ObjectPropertyNodeError(sourceTokens: List<Token>) : ObjectPropertyNode, AstNodeError(sourceTokens)
 class ObjectPropertyNodeImpl(
     val key: ObjectKeyNode,
     val value: KsonValueNode,
     override val comments: List<String>,
-    location: Location
+    sourceTokens: List<Token>
 ) :
-    ObjectPropertyNode, AstNodeImpl(location), Documented {
+    ObjectPropertyNode, AstNodeImpl(sourceTokens), Documented {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson -> {
@@ -403,8 +418,8 @@ class ObjectPropertyNodeImpl(
 
 class ListNode(
     val elements: List<ListElementNode>,
-    location: Location
-) : KsonValueNodeImpl(location) {
+    sourceTokens: List<Token>
+) : KsonValueNodeImpl(sourceTokens) {
     private sealed class ListDelimiters(val open: Char, val close: Char) {
         data object AngleBrackets : ListDelimiters('<', '>')
         data object SquareBrackets : ListDelimiters('[', ']')
@@ -531,9 +546,11 @@ class ListNode(
 }
 
 interface ListElementNode : AstNode
-class ListElementNodeError(content: String, location: Location) : AstNodeError(content, location), ListElementNode
-class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<String>, location: Location) :
-    ListElementNode, AstNodeImpl(location), Documented {
+class ListElementNodeError(sourceTokens: List<Token>) : AstNodeError(sourceTokens), ListElementNode
+class ListElementNodeImpl(val value: KsonValueNode,
+                          override val comments: List<String>,
+                          sourceTokens: List<Token>) :
+    ListElementNode, AstNodeImpl(sourceTokens), Documented {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
@@ -573,24 +590,35 @@ class ListElementNodeImpl(val value: KsonValueNode, override val comments: List<
 }
 
 interface StringNode : KsonValueNode
-abstract class StringNodeImpl(location: Location) : StringNode, KsonValueNodeImpl(location) {
+abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValueNodeImpl(sourceTokens) {
     abstract val stringContent: String
 
-    val processedStringContent: String by lazy {
-        unescapeStringContent(stringContent)
-    }
+    abstract val processedStringContent: String
 }
 
-/**
- * Note: [ksonEscapedStringContent] is expected to be the exact content of a [stringQuote]-delimited [Kson] string,
- *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
- *   except that [Kson] allows raw whitespace to be embedded in strings
- */
-open class QuotedStringNode(
-    private val ksonEscapedStringContent: String,
-    private val stringQuote: StringQuote,
-    location: Location
-) : StringNodeImpl(location) {
+class QuotedStringNode(
+    sourceTokens: List<Token>,
+    // TODO this should not be nullable
+    private val stringQuote: StringQuote?,
+) : StringNodeImpl(sourceTokens) {
+
+    override val processedStringContent: String by lazy {
+        if (stringQuote != null) {
+            unescapeStringContent(stringContent)
+        } else {
+            stringContent
+
+        }
+    }
+
+    /**
+     * Note: [ksonEscapedStringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
+     *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
+     *   except that [Kson] allows raw whitespace to be embedded in strings
+     */
+    val ksonEscapedStringContent: String by lazy {
+        renderTokens(sourceTokens)
+    }
 
     /**
      * An "unquoted" Kson string: i.e. a valid Kson string with all escapes intact except for quote escapes.
@@ -598,7 +626,7 @@ open class QuotedStringNode(
      * to obtain a fully valid KsonString
      */
     private val unquotedString: String by lazy {
-        stringQuote.unescapeQuotes(ksonEscapedStringContent)
+        stringQuote?.removeQuotes(ksonEscapedStringContent) ?: ksonEscapedStringContent
     }
 
     override val stringContent: String by lazy {
@@ -641,7 +669,15 @@ open class QuotedStringNode(
     }
 }
 
-class UnquotedStringNode(override val stringContent: String, location: Location) : StringNodeImpl(location) {
+class UnquotedStringNode(sourceTokens: List<Token>) : StringNodeImpl(sourceTokens) {
+    override val processedStringContent: String by lazy {
+        stringContent
+    }
+
+    override val stringContent: String by lazy {
+        renderTokens(sourceTokens)
+    }
+
     val yamlReservedKeywords = setOf(
         // Boolean true values
         "y", "Y", "yes", "Yes", "YES",
@@ -679,7 +715,11 @@ class UnquotedStringNode(override val stringContent: String, location: Location)
 /**
  * Callers are in charge of ensuring that `stringValue` is parseable by [NumberParser]
  */
-class NumberNode(stringValue: String, location: Location) : KsonValueNodeImpl(location) {
+class NumberNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
+    val stringValue: String by lazy {
+        renderTokens(sourceTokens)
+    }
+
     val value: ParsedNumber by lazy {
         val parsedNumber = NumberParser(stringValue).parse()
         parsedNumber.number ?: throw IllegalStateException(
@@ -697,7 +737,7 @@ class NumberNode(stringValue: String, location: Location) : KsonValueNodeImpl(lo
     }
 }
 
-class TrueNode(location: Location) : KsonValueNodeImpl(location) {
+class TrueNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
@@ -707,7 +747,7 @@ class TrueNode(location: Location) : KsonValueNodeImpl(location) {
     }
 }
 
-class FalseNode(location: Location) : KsonValueNodeImpl(location) {
+class FalseNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
@@ -717,7 +757,7 @@ class FalseNode(location: Location) : KsonValueNodeImpl(location) {
     }
 }
 
-class NullNode(location: Location) : KsonValueNodeImpl(location) {
+class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml, is Json -> {
@@ -731,16 +771,13 @@ class EmbedBlockNode(
     val embedTagNode: StringNodeImpl?,
     val metadataTagNode: StringNodeImpl?,
     val embedContentNode: StringNodeImpl,
-    embedDelim: EmbedDelim,
-    location: Location
+    sourceTokens: List<Token>
 ) :
-    KsonValueNodeImpl(location) {
+    KsonValueNodeImpl(sourceTokens) {
 
     private val embedTag: String = embedTagNode?.stringContent ?: ""
     private val metadataTag: String = metadataTagNode?.stringContent ?: ""
-    private val embedContent: String by lazy {
-        embedDelim.unescapeEmbedContent(embedContentNode.stringContent)
-    }
+    private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
@@ -897,4 +934,35 @@ class EmbedBlockNode(
                         contentIndent.bodyLinesIndent() + line
                     }
     }
+}
+
+class EmbedBlockContentNode(
+    sourceTokens: List<Token>,
+    embedDelim: EmbedDelim
+) : StringNodeImpl(sourceTokens) {
+    override val stringContent: String by lazy {
+        renderTokens(sourceTokens)
+    }
+
+    override val processedStringContent: String by lazy {
+        val indentTrimmedContent = EmbedBlockIndent(embedDelim.unescapeEmbedContent(stringContent)).trimMinimumIndent()
+        indentTrimmedContent
+    }
+
+    override fun toSourceInternal(
+        indent: Indent,
+        nextNode: AstNode?,
+        compileTarget: CompileTarget
+    ): String {
+        /**
+         * [EmbedBlockNode] renders this using its [processedStringContent] property
+         */
+        throw ShouldNotHappenException("this node is render by ${EmbedBlockNode::class.simpleName}")
+    }
+}
+
+private fun renderTokens(sourceTokens: List<Token>): String {
+    return sourceTokens
+        .filter { it.tokenType != WHITESPACE && it.tokenType != COMMENT }
+        .joinToString("") { it.lexeme.text }
 }

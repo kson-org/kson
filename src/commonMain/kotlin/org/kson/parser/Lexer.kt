@@ -6,7 +6,6 @@ import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
-import org.kson.parser.behavior.embedblock.EmbedBlockIndent
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 private val KEYWORDS =
@@ -231,10 +230,6 @@ data class Token(
      */
     val lexeme: Lexeme,
     /**
-     * The final lexed [value] of this token, extracted (and possibly transformed) from [lexeme]
-     */
-    val value: String,
-    /**
      * The comments that the scanner found for this token.
      *
      * NOTE: if we find a "trailing" comment for this token (i.e. `key: value # trailing comment`), we consider
@@ -304,7 +299,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             scan()
         }
 
-        addToken(EOF, Lexeme("", sourceScanner.currentLocation()), "")
+        addToken(EOF, Lexeme("", sourceScanner.currentLocation()))
 
         return tokens.toList()
     }
@@ -371,7 +366,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
     private fun comment(): String {
         val commentToken = extractCommentToken()
         tokens.add(commentToken)
-        return commentToken.value
+        return commentToken.lexeme.text
     }
 
     /**
@@ -382,7 +377,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         while (sourceScanner.peek() != '\n' && !sourceScanner.eof()) sourceScanner.advance()
 
         val commentLexeme = sourceScanner.extractLexeme()
-        return Token(COMMENT, commentLexeme, commentLexeme.text, emptyList())
+        return Token(COMMENT, commentLexeme, emptyList())
     }
 
     /**
@@ -404,7 +399,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
         val lexeme = sourceScanner.extractLexeme()
         val type: TokenType = KEYWORDS[lexeme.text] ?: UNQUOTED_STRING
-        addToken(type, lexeme, lexeme.text)
+        addToken(type, lexeme)
     }
 
     private fun quotedString(delimiter: Char) {
@@ -505,9 +500,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             // extract our embed tag (note: may be empty, that's supported)
             val embedTagLexeme = sourceScanner.extractLexeme()
             addToken(
-                EMBED_TAG, embedTagLexeme,
-                // trim any trailing whitespace from the embed tag's value
-                embedTagLexeme.text.trim()
+                EMBED_TAG, embedTagLexeme
             )
 
             if(sourceScanner.peek() == ':') {
@@ -522,9 +515,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 // extract our embed metadata (note: may be empty, that's supported)
                 val embedMetadataLexeme = sourceScanner.extractLexeme()
                 addToken(
-                    EMBED_METADATA, embedMetadataLexeme,
-                    // trim any trailing whitespace from the embed tag's value
-                    embedMetadataLexeme.text.trim()
+                    EMBED_METADATA, embedMetadataLexeme
                 )
             }
 
@@ -554,9 +545,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
         }
 
         val embedBlockLexeme = sourceScanner.extractLexeme()
-
-        val trimmedEmbedBlockContent = EmbedBlockIndent(embedBlockLexeme.text).trimMinimumIndent()
-        addToken(EMBED_CONTENT, embedBlockLexeme, trimmedEmbedBlockContent)
+        addToken(EMBED_CONTENT, embedBlockLexeme)
 
         /**
          * We scanned everything that wasn't an [TokenType.EMBED_CLOSE_DELIM] into our embed content,
@@ -594,7 +583,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
      */
     private fun addLiteralToken(tokenType: TokenType): Location {
         val lexeme = sourceScanner.extractLexeme()
-        addToken(tokenType, lexeme, lexeme.text)
+        addToken(tokenType, lexeme)
         return lexeme.location
     }
 
@@ -603,11 +592,11 @@ class Lexer(source: String, gapFree: Boolean = false) {
      *
      * @return the location of the added [Token]
      */
-    private fun addToken(type: TokenType, lexeme: Lexeme, value: String): Location {
+    private fun addToken(type: TokenType, lexeme: Lexeme): Location {
 
         val commentMetadata = commentMetadataForCurrentToken(type)
 
-        tokens.add(Token(type, lexeme, value, commentMetadata.comments))
+        tokens.add(Token(type, lexeme, commentMetadata.comments))
 
         for (commentLookaheadTokens in commentMetadata.lookaheadTokens) {
             tokens.add(commentLookaheadTokens)
@@ -655,7 +644,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
                     Token(
                         WHITESPACE,
                         whitespaceLexeme,
-                        whitespaceLexeme.text,
                         emptyList()
                     )
                 )
@@ -663,7 +651,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             val trailingComment = if (sourceScanner.peek() == '#') {
                 val commentToken = extractCommentToken()
                 trailingCommentTokens.add(commentToken)
-                commentToken.value
+                commentToken.lexeme.text
             } else {
                 ""
             }

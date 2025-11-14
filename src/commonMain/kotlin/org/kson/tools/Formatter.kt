@@ -7,6 +7,7 @@ import org.kson.parser.Token
 import org.kson.parser.TokenType
 import org.kson.ast.AstNode
 import org.kson.parser.TokenType.*
+import org.kson.parser.behavior.embedblock.EmbedBlockIndent
 
 /**
  * Format the given Kson source according to [formatterConfig]
@@ -122,7 +123,8 @@ class IndentFormatter(
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
                         // write out the lines of the embed content, indenting the whole block appropriately
-                        result.append(prefixWithIndent(token.value, embedContentIndent, true))
+                        val trimmedEmbedContent = EmbedBlockIndent(token.lexeme.text).trimMinimumIndent()
+                        result.append(prefixWithIndent(trimmedEmbedContent, embedContentIndent, true))
                         tokenIndex++
                         // write the rest of the trailing content from this line
                         while (tokenIndex < line.size) {
