@@ -17,7 +17,7 @@ describe('Formatting Settings Test Suite', () => {
         // Sample unformatted content used in all tests
         const unformattedContent = '{"a":1,"b":{"c":2}}';
 
-        const [uri, doc] = await createTestFile(unformattedContent);
+        const [uri, _] = await createTestFile(unformattedContent);
         testFileUri = uri;
 
         // Wait for the extension to be active
