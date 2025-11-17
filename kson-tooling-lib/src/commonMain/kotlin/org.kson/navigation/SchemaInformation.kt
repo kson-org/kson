@@ -194,9 +194,9 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
         enumList.elements.forEach { enumValue ->
             completions.add(
                 CompletionItem(
-                    label = enumValue.formatValueForDisplay(),  // Reuse existing function!
+                    label = enumValue.formatValueForDisplay(),
                     detail = "enum value",
-                    documentation = this.extractSchemaInfo(),  // Reuse existing function!
+                    documentation = this.extractSchemaInfo(),
                     kind = CompletionKind.VALUE
                 )
             )

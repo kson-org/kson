@@ -930,7 +930,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target starting exactly at container start should return true"
         )
     }
@@ -948,7 +948,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target starting exactly at container end should return true"
         )
     }
@@ -964,7 +964,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target starting before container line should return false"
         )
     }
@@ -980,7 +980,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target starting after container line should return false"
         )
     }
@@ -996,7 +996,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target on same start line but before start column should return false"
         )
     }
@@ -1012,7 +1012,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target on same end line but after end column should return false"
         )
     }
@@ -1028,7 +1028,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, target),
+            Location.containsCoordinates(container, target),
             "Target on same line and within column bounds should return true"
         )
     }
@@ -1046,7 +1046,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, targetMiddle),
+            Location.containsCoordinates(container, targetMiddle),
             "Target on middle line should return true regardless of column"
         )
     }
@@ -1064,7 +1064,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, targetBefore),
+            Location.containsCoordinates(container, targetBefore),
             "Target on first line but before start column should return false"
         )
 
@@ -1073,7 +1073,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, targetAt),
+            Location.containsCoordinates(container, targetAt),
             "Target on first line at start column should return true"
         )
 
@@ -1082,7 +1082,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, targetAfter),
+            Location.containsCoordinates(container, targetAfter),
             "Target on first line after start column should return true"
         )
     }
@@ -1100,7 +1100,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, targetBefore),
+            Location.containsCoordinates(container, targetBefore),
             "Target on last line before end column should return true"
         )
 
@@ -1109,7 +1109,7 @@ class LexerTest {
 
         assertEquals(
             true,
-            Location.locationContainsCoordinates(container, targetAt),
+            Location.containsCoordinates(container, targetAt),
             "Target on last line at end column should return true"
         )
 
@@ -1118,7 +1118,7 @@ class LexerTest {
 
         assertEquals(
             false,
-            Location.locationContainsCoordinates(container, targetAfter),
+            Location.containsCoordinates(container, targetAfter),
             "Target on last line after end column should return false"
         )
     }

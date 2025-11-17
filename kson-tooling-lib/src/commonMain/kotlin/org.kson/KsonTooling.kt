@@ -18,16 +18,16 @@ import kotlin.js.JsExport
 object KsonTooling {
 
     /**
-     * Get schema hover information for a position in a document.
+     * Get schema information for a position in a document.
      *
      * This is a convenience method that finds the KsonValue at the given position
-     * and then retrieves schema hover information for it.
+     * and then retrieves schema information for it.
      *
      * @param documentRoot The root of the document being edited (internal KsonValue)
      * @param schemaValue The schema for the document (internal KsonValue)
      * @param line The zero-based line number
      * @param column The zero-based column number
-     * @return Formatted hover text, or null if no schema info available
+     * @return Formatted text, or null if no schema info available
      */
     fun getSchemaInfoAtLocation(
         documentRoot: String,

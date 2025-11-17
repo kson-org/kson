@@ -123,7 +123,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         position: Coordinates
     ): Boolean {
         return token?.lexeme?.location?.let {
-            Location.locationContainsCoordinates(it, position)
+            Location.containsCoordinates(it, position)
         } ?: false
     }
 

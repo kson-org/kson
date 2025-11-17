@@ -222,7 +222,7 @@ data class Location(
         /**
          * Check if a container [Location] contains [Coordinates]
          */
-        fun locationContainsCoordinates(
+        fun containsCoordinates(
             containerLocation: Location,
             targetCoordinates: Coordinates
         ): Boolean {

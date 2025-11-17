@@ -2,7 +2,6 @@ package org.kson.value
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import kotlin.collections.iterator
 
 /**
  * Core utilities for navigating and traversing [KsonValue] structures.
@@ -228,7 +227,7 @@ object KsonValueNavigation {
         val smallestSize = Int.MAX_VALUE
 
         walkTree(root) { node, _, _ ->
-            if (Location.locationContainsCoordinates(node.location, targetPosition)) {
+            if (Location.containsCoordinates(node.location, targetPosition)) {
                 val size = calculateLocationSize(node.location)
                 if (size < smallestSize) {
                     mostSpecific = node
