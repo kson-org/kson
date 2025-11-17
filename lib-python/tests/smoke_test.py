@@ -205,8 +205,6 @@ embed:%tag
     properties = value.properties()
     assert len(properties) == 3
 
-    mapped_properties = {key.value(): val for key, val in properties.items()}
-
     # Check root object location (should span entire document)
     assert value.start().line() == 0
     assert value.start().column() == 0
@@ -214,7 +212,7 @@ embed:%tag
     assert value.end().column() == 2
 
     # Check "key" property
-    key_value = mapped_properties["key"]
+    key_value = properties["key"]
     assert isinstance(key_value, KsonValue.KsonString)
     assert key_value.value() == "value"
     assert key_value.start().line() == 0
@@ -223,7 +221,7 @@ embed:%tag
     assert key_value.end().column() == 10
 
     # Check "list" property
-    list_value = mapped_properties["list"]
+    list_value = properties["list"]
     assert isinstance(list_value, KsonValue.KsonArray)
     elements = list_value.elements()
     assert len(elements) == 3
@@ -258,7 +256,7 @@ embed:%tag
     assert third_element.end().column() == 7
 
     # Check "embed" property
-    embed_value = mapped_properties["embed"]
+    embed_value = properties["embed"]
     assert isinstance(embed_value, KsonValue.KsonEmbed)
     assert embed_value.tag() == "tag"
     assert embed_value.content() == ""
@@ -266,3 +264,64 @@ embed:%tag
     assert embed_value.start().column() == 6
     assert embed_value.end().line() == 6
     assert embed_value.end().column() == 2
+
+
+def test_property_keys_basic_access():
+    input = """name: John
+age: 30
+city: 'New York'"""
+    analysis = Kson.analyze(input)
+    value = analysis.kson_value()
+    assert value is not None
+    assert isinstance(value, KsonValue.KsonObject)
+
+    # Verify all keys are present in property_keys
+    property_keys = value.property_keys()
+    assert len(property_keys) == 3
+    assert "name" in property_keys
+    assert "age" in property_keys
+    assert "city" in property_keys
+
+    # Verify property_keys contains KsonString values
+    name_key = property_keys["name"]
+    assert isinstance(name_key, KsonValue.KsonString)
+    assert name_key.value() == "name"
+
+    age_key = property_keys["age"]
+    assert isinstance(age_key, KsonValue.KsonString)
+    assert age_key.value() == "age"
+
+
+def test_property_keys_with_position_information():
+    input = """name: John
+age: 30"""
+    analysis = Kson.analyze(input)
+    value = analysis.kson_value()
+    assert value is not None
+    assert isinstance(value, KsonValue.KsonObject)
+
+    # Verify position information for keys
+    property_keys = value.property_keys()
+    name_key = property_keys["name"]
+    assert name_key.start().line() == 0
+    assert name_key.start().column() == 0
+    assert name_key.end().line() == 0
+    assert name_key.end().column() == 4
+
+    age_key = property_keys["age"]
+    assert age_key.start().line() == 1
+    assert age_key.start().column() == 0
+    assert age_key.end().line() == 1
+    assert age_key.end().column() == 3
+
+
+def test_property_keys_empty_object():
+    input = "{}"
+    analysis = Kson.analyze(input)
+    value = analysis.kson_value()
+    assert value is not None
+    assert isinstance(value, KsonValue.KsonObject)
+
+    # Empty object should have no property_keys
+    assert len(value.property_keys()) == 0
+    assert len(value.properties()) == 0

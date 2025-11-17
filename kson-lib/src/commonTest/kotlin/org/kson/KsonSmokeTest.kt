@@ -167,9 +167,8 @@ class KsonSmokeTest {
         assertEquals(6, value.end.line)
         assertEquals(2, value.end.column)
 
-        val mappedProperties = value.properties.map { it.key.value to it.value }.toMap()
         // Check "key" property
-        val keyValue = mappedProperties["key"]
+        val keyValue = value.properties.get("key")
         assertTrue(keyValue is KsonValue.KsonString)
         assertEquals("value", keyValue.value)
         assertEquals(0, keyValue.start.line)
@@ -178,7 +177,7 @@ class KsonSmokeTest {
         assertEquals(10, keyValue.end.column)
 
         // Check "list" property
-        val listValue = mappedProperties["list"]
+        val listValue = value.properties.get("list")
         assertTrue(listValue is KsonValue.KsonArray)
         assertEquals(3, listValue.elements.size)
         assertEquals(2, listValue.start.line)
@@ -212,7 +211,7 @@ class KsonSmokeTest {
         assertEquals(7, thirdElement.end.column)
 
         // Check "embed" property
-        val embedValue = mappedProperties["embed"]
+        val embedValue = value.properties.get("embed")
         assertTrue(embedValue is KsonValue.KsonEmbed)
         assertEquals("tag", embedValue.tag)
         assertEquals("", embedValue.content)
@@ -286,10 +285,78 @@ class KsonSmokeTest {
         val schemaKson = """{"type": "object"}"""
         val schemaResult = Kson.parseSchema(schemaKson)
         assertIs<SchemaResult.Success>(schemaResult)
-        
+
         val validator = schemaResult.schemaValidator
         val invalidKson = """{"invalid": }"""
         val errors = validator.validate(invalidKson)
         assertTrue(errors.isNotEmpty())
+    }
+
+    @Test
+    fun testPropertyKeys_basicAccess() {
+        val input = """
+            name: John
+            age: 30
+            city: 'New York'
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        // Verify all keys are present in propertyKeys
+        assertEquals(3, value.propertyKeys.size)
+        assertTrue(value.propertyKeys.containsKey("name"))
+        assertTrue(value.propertyKeys.containsKey("age"))
+        assertTrue(value.propertyKeys.containsKey("city"))
+
+        // Verify propertyKeys contains KsonString values
+        val nameKey = value.propertyKeys.get("name")
+        assertNotNull(nameKey)
+        assertEquals("name", nameKey.value)
+
+        val ageKey = value.propertyKeys.get("age")
+        assertNotNull(ageKey)
+        assertEquals("age", ageKey.value)
+    }
+
+    @Test
+    fun testPropertyKeys_withPositionInformation() {
+        val input = """
+            name: John
+            age: 30
+        """.trimIndent()
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        // Verify position information for keys
+        val nameKey = value.propertyKeys.get("name")
+        assertNotNull(nameKey)
+        assertEquals(0, nameKey.start.line)
+        assertEquals(0, nameKey.start.column)
+        assertEquals(0, nameKey.end.line)
+        assertEquals(4, nameKey.end.column)
+
+        val ageKey = value.propertyKeys.get("age")
+        assertNotNull(ageKey)
+        assertEquals(1, ageKey.start.line)
+        assertEquals(0, ageKey.start.column)
+        assertEquals(1, ageKey.end.line)
+        assertEquals(3, ageKey.end.column)
+    }
+
+    @Test
+    fun testPropertyKeys_emptyObject() {
+        val input = "{}"
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonObject)
+
+        // Empty object should have no propertyKeys
+        assertEquals(0, value.propertyKeys.size)
+        assertEquals(0, value.properties.size)
     }
 }
