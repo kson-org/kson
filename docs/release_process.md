@@ -9,13 +9,13 @@ When `main` is ready to have a release cut from it:
 
 #### On the `main` branch:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:
-  * [kson-lib](../kson-lib/build.gradle.kts): `X.(Y+1).0-SNAPSHOT`
-  * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version)
-  * [lib-rust](../lib-rust/pixi.toml): `X.(Y+1).0-dev`
-  * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
-  * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
-  * [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
-  * [tooling/jetbrains](../tooling/jetbrains/gradle.properties): `X.(Y+1).0-SNAPSHOT`
+  -[ ] [kson-lib](../kson-lib/build.gradle.kts): `X.(Y+1).0-SNAPSHOT`
+  -[ ] [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version)
+  -[ ] [lib-rust](../lib-rust/pixi.toml): `X.(Y+1).0-dev`
+  -[ ] [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
+  -[ ] [tooling/cli](../tooling/cli/build.gradle.kts): (note: copies the version from `kson-lib`)
+  -[ ] [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
+  -[ ] [tooling/jetbrains](../tooling/jetbrains/gradle.properties): `X.(Y+1).0-SNAPSHOT`
 
 #### On the `release/X.Y.Z` branch:
 
@@ -26,6 +26,7 @@ When `main` is ready to have a release cut from it:
   * [lib-python](../lib-python/pyproject.toml)
   * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json)
+  * [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json)
   * [tooling/jetbrains](../tooling/jetbrains/gradle.properties)
 - Commit and push the `release-X.Y.Z-prep` branch
 - Run CircleCI across ALL supported platforms on the `release-X.Y.Z-prep` branch (only linux builds are run on every pull request)
