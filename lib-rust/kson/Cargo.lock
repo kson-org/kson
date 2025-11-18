@@ -230,7 +230,7 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 
 [[package]]
 name = "kson-rs"
-version = "0.2.0-dev"
+version = "0.3.0-dev"
 dependencies = [
  "insta",
  "kson-sys",
@@ -239,7 +239,7 @@ dependencies = [
 
 [[package]]
 name = "kson-sys"
-version = "0.2.0-dev"
+version = "0.3.0-dev"
 dependencies = [
  "bindgen",
  "flate2",

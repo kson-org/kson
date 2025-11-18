@@ -8,7 +8,7 @@ use std::process::{Command, Stdio};
 struct CustomRenamer;
 
 // [[kson-version-num]]
-static KSON_LIB_VERSION: &str = "0.2.0";
+static KSON_LIB_VERSION: &str = "0.3.0-dev";
 
 impl ParseCallbacks for CustomRenamer {
     // Necessary to get rid of the `libkson` vs. `kson` difference depending on the target OS
