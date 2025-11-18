@@ -7,6 +7,9 @@ use std::process::{Command, Stdio};
 #[derive(Debug)]
 struct CustomRenamer;
 
+// [[kson-version-num]]
+static KSON_LIB_VERSION: &str = "0.2.1";
+
 impl ParseCallbacks for CustomRenamer {
     // Necessary to get rid of the `libkson` vs. `kson` difference depending on the target OS
     fn item_name(&self, original_item_name: &str) -> Option<String> {
@@ -52,8 +55,6 @@ fn download_prebuilt_kson(
     use_dynamic_linking: bool,
     out_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let kson_lib_version = fs::read_to_string(Path::new(&manifest_dir).join("kson-lib-version"))?;
     let cpu_arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "aarch64" => "arm64",
         "x86_64" => "amd64",
@@ -72,7 +73,7 @@ fn download_prebuilt_kson(
 
     fs::create_dir_all(out_dir)?;
     let url = format!(
-        "https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{kson_lib_version}/kson-lib-{shared_or_static}-{cpu_arch}-{os}.tar.gz"
+        "https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_VERSION}/kson-lib-{shared_or_static}-{cpu_arch}-{os}.tar.gz"
     );
     let archive = ureq::get(url).call()?.body_mut().read_to_vec()?;
     let decoder = flate2::read::GzDecoder::new(archive.as_slice());
