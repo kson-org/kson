@@ -14,7 +14,7 @@ repositories {
 
 group = "org.kson"
 // [[kson-version-num]]
-version = "0.2.0"
+version = "0.2.1"
 
 tasks {
     val copyHeaderDynamic = register<CopyNativeHeaderTask>("copyNativeHeaderDynamic") {
@@ -163,7 +163,7 @@ tasks.register("buildUniversalJsPackage") {
         val packageJson = """
         {
           "name": "@kson_org/kson",
-          "version": "0.1.0",
+          "version": ${version},
           "description": "KSON - Extended JSON format with comments and more",
           "author": {
             "name": "KSON Team",
