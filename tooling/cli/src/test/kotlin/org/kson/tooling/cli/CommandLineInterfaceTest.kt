@@ -6,6 +6,7 @@ import org.kson.tooling.cli.commands.JsonCommand
 import org.kson.tooling.cli.commands.KsonFormatCommand
 import org.kson.tooling.cli.commands.ValidateCommand
 import org.kson.tooling.cli.commands.YamlCommand
+import org.kson.tooling.cli.generated.KSON_VERSION
 import java.io.File
 import kotlin.test.assertEquals
 
@@ -548,7 +549,7 @@ class CommandLineInterfaceTest {
             assert(result.output.contains("kson version")) {
                 "Version output for '$flag' should contain 'kson version', but was: ${result.output}"
             }
-            assert(result.output.contains("0.3.0-SNAPSHOT")) {
+            assert(result.output.contains(KSON_VERSION)) {
                 "Version output for '$flag' should contain version number, but was: ${result.output}"
             }
         }
