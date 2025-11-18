@@ -1,6 +1,6 @@
 [package]
 name = "kson-rs"
-version = "0.1.1"
+version = "0.2.1"
 edition = "2024"
 description = "Idiomatic Rust bindings to kson-lib"
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ default = []
 dynamic-linking = ["kson-sys/dynamic-linking", "dep:libloading"]
 
 [dependencies]
-kson-sys = { version = "0.1.0", path = "../kson-sys" }
+kson-sys = { version = "0.2.1", path = "../kson-sys" }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 libloading = { version = "0.8.8", optional = true }
