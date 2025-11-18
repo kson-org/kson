@@ -7,6 +7,7 @@ use std::process::{Command, Stdio};
 #[derive(Debug)]
 struct CustomRenamer;
 
+// [[kson-version-num]]
 static KSON_LIB_VERSION: &str = "0.2.0";
 
 impl ParseCallbacks for CustomRenamer {
