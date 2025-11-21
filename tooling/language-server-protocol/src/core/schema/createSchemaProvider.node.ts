@@ -1,12 +1,13 @@
 import {SchemaProvider} from './SchemaProvider.js';
 import {FileSystemSchemaProvider} from './FileSystemSchemaProvider';
+import {URI} from "vscode-uri";
 
 /**
  * Node.js-specific schema provider factory.
  * Creates {@link FileSystemSchemaProvider} with file system access.
  */
 export async function createSchemaProvider(
-    workspaceRootUri: string | undefined,
+    workspaceRootUri: URI | undefined,
     logger: { info: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void }
 ): Promise<SchemaProvider | undefined> {
     try {

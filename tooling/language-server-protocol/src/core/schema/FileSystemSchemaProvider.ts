@@ -14,7 +14,7 @@ import minimatch from 'minimatch';
  */
 export class FileSystemSchemaProvider implements SchemaProvider {
     private config: SchemaConfig | null = null;
-    private workspaceRoot: string | null;
+    private workspaceRoot: URI | null;
 
     /**
      * Creates a new FileSystemSchemaProvider.
@@ -23,14 +23,14 @@ export class FileSystemSchemaProvider implements SchemaProvider {
      * @param logger Optional logger for warnings and errors
      */
     constructor(
-        workspaceRootUri: string | null,
+        workspaceRootUri: URI | null,
         private logger?: {
             info: (message: string) => void;
             warn: (message: string) => void;
             error: (message: string) => void;
         }
     ) {
-        this.workspaceRoot = workspaceRootUri ? URI.parse(workspaceRootUri).fsPath : null;
+        this.workspaceRoot = workspaceRootUri
         this.loadConfiguration();
     }
 
@@ -90,7 +90,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return;
         }
 
-        const configPath = path.join(this.workspaceRoot, SCHEMA_CONFIG_FILENAME);
+        const configPath = path.join(this.workspaceRoot.fsPath, SCHEMA_CONFIG_FILENAME);
 
         if (!fs.existsSync(configPath)) {
             this.logger?.info(`No ${SCHEMA_CONFIG_FILENAME} found in workspace root`);
@@ -137,7 +137,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return undefined;
         }
 
-        const absolutePath = path.join(this.workspaceRoot, schemaPath);
+        const absolutePath = path.join(this.workspaceRoot.fsPath, schemaPath);
 
         if (!fs.existsSync(absolutePath)) {
             this.logger?.warn(`Schema file not found: ${schemaPath}`);
@@ -200,6 +200,6 @@ export class FileSystemSchemaProvider implements SchemaProvider {
         if (!this.workspaceRoot) {
             return absolutePath;
         }
-        return path.relative(this.workspaceRoot, absolutePath);
+        return path.relative(this.workspaceRoot.fsPath, absolutePath);
     }
 }
