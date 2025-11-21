@@ -17,7 +17,11 @@ import {
     DocumentHighlightParams,
     DocumentSymbol,
     DocumentSymbolParams,
-    SymbolInformation
+    SymbolInformation,
+    Hover,
+    HoverParams,
+    CompletionParams,
+    CompletionList
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
@@ -49,6 +53,8 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public executeCommandHandler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>;
     public documentHighlightHandler: ServerRequestHandler<DocumentHighlightParams, DocumentHighlight[] | null | undefined, DocumentHighlight[], void>;
     public documentSymbolHandler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>;
+    public hoverHandler: ServerRequestHandler<HoverParams, Hover | null | undefined, never, void>;
+    public completionHandler: ServerRequestHandler<CompletionParams, CompletionList | null | undefined, never, void>;
 
     languages: Languages;
 
@@ -130,6 +136,16 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     override onDocumentSymbol(handler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>): Disposable {
         this.documentSymbolHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onHover(handler: ServerRequestHandler<HoverParams, Hover | null | undefined, never, void>): Disposable {
+        this.hoverHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onCompletion(handler: ServerRequestHandler<CompletionParams, CompletionList | null | undefined, never, void>): Disposable {
+        this.completionHandler = handler;
         return NOOP_DISPOSABLE;
     }
 }
