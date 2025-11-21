@@ -16,7 +16,7 @@ import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
 import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
 
 type SchemaProviderFactory = (
-    workspaceRootUri: string | undefined,
+    workspaceRootUri: URI | undefined,
     logger: { info: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void }
 ) => Promise<SchemaProvider | undefined>;
 
@@ -33,7 +33,7 @@ export function startKsonServer(
     createCommandExecutor: CommandExecutorFactory
 ): void {
     // Variables to store state during initialization
-    let workspaceRootUri: string | undefined;
+    let workspaceRootUri: URI | undefined;
 
     // Create logger that uses the connection
     const logger = {
@@ -49,7 +49,10 @@ export function startKsonServer(
     // Setup connection event handlers
     connection.onInitialize(async (params): Promise<InitializeResult> => {
         // Capture workspace root from initialization parameters
-        workspaceRootUri = params.workspaceFolders?.[0]?.uri || params.rootUri || undefined;
+        const stringUri = params.workspaceFolders?.[0]?.uri
+        if (stringUri) {
+            workspaceRootUri = URI.parse(stringUri)
+        }
 
         // Create the appropriate schema provider for this environment
         const schemaProvider = await createSchemaProvider(workspaceRootUri, logger);
@@ -58,7 +61,7 @@ export function startKsonServer(
         documentManager = new KsonDocumentsManager(schemaProvider);
 
         // Extract workspace root path from URI if available
-        const workspaceRoot = workspaceRootUri ? URI.parse(workspaceRootUri).fsPath : null;
+        const workspaceRoot = workspaceRootUri ? workspaceRootUri.fsPath : null;
 
         textDocumentService = new KsonTextDocumentService(
             documentManager,

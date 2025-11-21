@@ -5,6 +5,7 @@ import {SchemaConfig} from '../../../core/schema/SchemaConfig.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import {URI} from "vscode-uri";
 
 describe('FileSystemSchemaProvider', () => {
     let tempDir: string | null = null;
@@ -27,21 +28,23 @@ describe('FileSystemSchemaProvider', () => {
         }
     });
 
-    function createWorkspace(): string {
+    function createWorkspace(): URI {
         tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kson-test-'));
-        return tempDir;
+        return URI.file(tempDir)
     }
 
-    function writeConfig(workspaceDir: string, config: SchemaConfig): void {
+    function writeConfig(workspaceUri: URI, config: SchemaConfig): void {
+        const workspacePath = workspaceUri.fsPath
         fs.writeFileSync(
-            path.join(workspaceDir, '.kson-schema.kson'),
+            path.join(workspacePath, '.kson-schema.kson'),
             JSON.stringify(config),
             'utf-8'
         );
     }
 
-    function writeSchema(workspaceDir: string, schemaPath: string, content: string): void {
-        const fullPath = path.join(workspaceDir, schemaPath);
+    function writeSchema(workspaceUri: URI, schemaPath: string, content: string): void {
+        const workspacePath = workspaceUri.fsPath
+        const fullPath = path.join(workspacePath, schemaPath);
         fs.mkdirSync(path.dirname(fullPath), {recursive: true});
         fs.writeFileSync(fullPath, content, 'utf-8');
     }
@@ -55,7 +58,7 @@ describe('FileSystemSchemaProvider', () => {
 
         it('should create provider with workspace but no config', () => {
             const workspace = createWorkspace();
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
             assert.ok(provider);
             assert.ok(logs.some(msg => msg.includes('No .kson-schema.kson found')));
         });
@@ -64,16 +67,16 @@ describe('FileSystemSchemaProvider', () => {
             const workspace = createWorkspace();
             writeConfig(workspace, {schemas: [{fileMatch: ['*.kson'], schema: 'test.json'}]});
 
-            new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            new FileSystemSchemaProvider(workspace, logger);
 
             assert.ok(logs.some(msg => msg.includes('Loaded schema configuration with 1 mappings')));
         });
 
         it('should handle invalid config format', () => {
             const workspace = createWorkspace();
-            fs.writeFileSync(path.join(workspace, '.kson-schema.kson'), 'invalid json', 'utf-8');
+            fs.writeFileSync(path.join(workspace.fsPath, '.kson-schema.kson'), 'invalid json', 'utf-8');
 
-            new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            new FileSystemSchemaProvider(workspace, logger);
 
             assert.ok(logs.some(msg => msg.includes('Failed to load .kson-schema.kson')));
         });
@@ -82,9 +85,9 @@ describe('FileSystemSchemaProvider', () => {
     describe('getSchemaForDocument', () => {
         it('should return undefined when no config', () => {
             const workspace = createWorkspace();
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
 
-            const schema = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, "test.kson"));
 
             assert.strictEqual(schema, undefined);
         });
@@ -98,10 +101,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             writeSchema(workspace, 'schemas/test.json', schemaContent);
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, `test.kson`));
 
-            assert.ok(schema);
+            assert.ok(schema, "schema was undefined");
             assert.strictEqual(schema!.getText(), schemaContent);
         });
 
@@ -112,8 +115,8 @@ describe('FileSystemSchemaProvider', () => {
                 schemas: [{fileMatch: ['config/*.kson'], schema: 'schemas/config.json'}]
             });
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/other.kson`);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, "other.kson"));
 
             assert.strictEqual(schema, undefined);
         });
@@ -125,8 +128,8 @@ describe('FileSystemSchemaProvider', () => {
                 schemas: [{fileMatch: ['*.kson'], schema: 'schemas/missing.json'}]
             });
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, "test.kson"));
 
             assert.strictEqual(schema, undefined);
             assert.ok(logs.some(msg => msg.includes('Schema file not found')));
@@ -141,8 +144,8 @@ describe('FileSystemSchemaProvider', () => {
             });
             writeSchema(workspace, 'schemas/config.json', schemaContent);
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/config/deep/test.kson`);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, "config/deep/test.kson"));
 
             assert.ok(schema);
         });
@@ -161,8 +164,8 @@ describe('FileSystemSchemaProvider', () => {
             writeSchema(workspace, 'schemas/first.json', schema1);
             writeSchema(workspace, 'schemas/second.json', schema2);
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
-            const schema = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, "test.kson"));
 
             assert.ok(schema);
             assert.strictEqual(schema!.getText(), schema1);
@@ -176,7 +179,7 @@ describe('FileSystemSchemaProvider', () => {
                 schemas: [{fileMatch: ['*.kson'], schema: 'schemas/test.json'}]
             });
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
             logs = [];
 
             // Update config
@@ -202,10 +205,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             writeSchema(workspace, 'schemas/test.json', originalSchema);
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
 
             // Get schema before update
-            const schemaBefore = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const schemaBefore = provider.getSchemaForDocument(path.join(workspace.fsPath, "test.kson"));
             assert.ok(schemaBefore);
             assert.strictEqual(schemaBefore!.getText(), originalSchema);
 
@@ -214,7 +217,7 @@ describe('FileSystemSchemaProvider', () => {
             provider.reload();
 
             // Get schema after reload
-            const schemaAfter = provider.getSchemaForDocument(`file://${workspace}/test.kson`);
+            const schemaAfter = provider.getSchemaForDocument(path.join(workspace.fsPath, "test.kson"));
             assert.ok(schemaAfter);
             assert.strictEqual(schemaAfter!.getText(), updatedSchema);
         });
@@ -227,10 +230,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             writeSchema(workspace, 'schemas/config.json', JSON.stringify({type: 'config'}));
 
-            const provider = new FileSystemSchemaProvider(`file://${workspace}`, logger);
+            const provider = new FileSystemSchemaProvider(workspace, logger);
 
             // Should not match initially
-            const schemaBefore = provider.getSchemaForDocument(`file://${workspace}/data.kson`);
+            const schemaBefore = provider.getSchemaForDocument(path.join(workspace.fsPath, "data.kson"));
             assert.strictEqual(schemaBefore, undefined);
 
             // Add new mapping
@@ -244,7 +247,7 @@ describe('FileSystemSchemaProvider', () => {
             provider.reload();
 
             // Should match after reload
-            const schemaAfter = provider.getSchemaForDocument(`file://${workspace}/data.kson`);
+            const schemaAfter = provider.getSchemaForDocument(path.join(workspace.fsPath, "data.kson"));
             assert.ok(schemaAfter);
             const parsed = JSON.parse(schemaAfter!.getText());
             assert.strictEqual(parsed.type, 'data');

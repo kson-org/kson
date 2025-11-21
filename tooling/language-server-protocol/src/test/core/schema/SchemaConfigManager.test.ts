@@ -1,9 +1,10 @@
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {afterEach, beforeEach, describe, it} from 'mocha';
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import {FileSystemSchemaProvider} from '../../../core/schema/FileSystemSchemaProvider';
+import {URI} from "vscode-uri";
 
 describe('FileSystemSchemaProvider', () => {
     let tempDir: string;
@@ -32,7 +33,11 @@ describe('FileSystemSchemaProvider', () => {
         if (fs.existsSync(tempDir)) {
             fs.rmSync(tempDir, {recursive: true, force: true});
         }
-    });
+    })
+
+    function fileDocumentUri(filePath: string, ...appended: string[]): string {
+        return URI.file(path.join(filePath, ...appended)).toString()
+    }
 
     describe('constructor', () => {
         it('should handle null workspace root', () => {
@@ -42,7 +47,7 @@ describe('FileSystemSchemaProvider', () => {
         });
 
         it('should handle missing .kson-schema.kson file', () => {
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             assert.ok(manager);
@@ -61,7 +66,7 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             assert.ok(manager);
@@ -72,7 +77,7 @@ describe('FileSystemSchemaProvider', () => {
             // Create an invalid config file
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), 'invalid json {');
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             assert.ok(manager);
@@ -86,7 +91,7 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             assert.ok(manager);
@@ -103,9 +108,9 @@ describe('FileSystemSchemaProvider', () => {
         });
 
         it('should return undefined when no config loaded', () => {
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
-            const schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.strictEqual(schema, undefined);
         });
@@ -133,10 +138,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
-            const schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.ok(schema);
             assert.strictEqual(schema.languageId, 'kson');
@@ -161,7 +166,7 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             // Test various matching patterns
@@ -174,7 +179,7 @@ describe('FileSystemSchemaProvider', () => {
             const schema3 = manager.getSchemaForDocument(`file://${tempDir}/other/test.config.kson`);
             assert.ok(schema3, 'Should match **/*.config.kson in subdirectory');
 
-            const schema4 = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            const schema4 = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
             assert.strictEqual(schema4, undefined, 'Should not match non-matching pattern');
         });
 
@@ -200,10 +205,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
-            const schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.ok(schema);
             assert.ok(schema.getText().includes('first'), 'Should use first matching schema');
@@ -221,10 +226,10 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
-            const schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.strictEqual(schema, undefined);
             assert.ok(logMessages.some(msg => msg.includes('WARN') && msg.includes('Schema file not found')));
@@ -234,10 +239,10 @@ describe('FileSystemSchemaProvider', () => {
     describe('reload', () => {
         it('should reload configuration after file changes', () => {
             // Start with no config file
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
-            let schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            let schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
             assert.strictEqual(schema, undefined);
 
             // Now create a config file
@@ -258,7 +263,7 @@ describe('FileSystemSchemaProvider', () => {
 
             // Reload and check again
             manager.reload();
-            schema = manager.getSchemaForDocument(`file://${tempDir}/test.kson`);
+            schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.ok(schema, 'Schema should be available after reload');
         });
@@ -284,11 +289,10 @@ describe('FileSystemSchemaProvider', () => {
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
             // Test with file:// URI
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
-            const documentUri = `file://${tempDir}/test.kson`;
-            const schema = manager.getSchemaForDocument(documentUri);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, "test.kson"));
 
             assert.ok(schema, 'Should handle file:// URIs');
         });
@@ -315,12 +319,11 @@ describe('FileSystemSchemaProvider', () => {
             });
             fs.writeFileSync(path.join(tempDir, '.kson-schema.kson'), configContent);
 
-            const workspaceUri = `file://${tempDir}`;
+            const workspaceUri = URI.file(tempDir);
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             // Should work regardless of platform path separators
-            const documentUri = `file://${path.join(tempDir, 'config', 'app.kson')}`;
-            const schema = manager.getSchemaForDocument(documentUri);
+            const schema = manager.getSchemaForDocument(fileDocumentUri(tempDir, 'config', 'app.kson'));
 
             assert.ok(schema, 'Should normalize path separators for matching');
         });
