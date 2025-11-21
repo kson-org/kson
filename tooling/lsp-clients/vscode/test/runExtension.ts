@@ -27,7 +27,8 @@ async function main() {
     console.log('Installing VSIX...');
     const installResult = cp.spawnSync(cliPath, [...args, '--install-extension', vsixPath], {
       encoding: 'utf-8',
-      stdio: 'inherit'
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
     });
     
     if (installResult.error) {
@@ -46,7 +47,8 @@ async function main() {
 
     const vscodeProcess = cp.spawn(cliPath, [...args, ...launchArgs], {
       stdio: 'inherit',
-      detached: false
+      detached: false,
+      shell: process.platform === 'win32',
     });
 
     vscodeProcess.on('error', (err) => {
