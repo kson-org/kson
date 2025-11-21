@@ -163,7 +163,7 @@ tasks.register("buildUniversalJsPackage") {
         val packageJson = """
         {
           "name": "@kson_org/kson",
-          "version": "0.1.0",
+          "version": $version,
           "description": "KSON - Extended JSON format with comments and more",
           "author": {
             "name": "KSON Team",
