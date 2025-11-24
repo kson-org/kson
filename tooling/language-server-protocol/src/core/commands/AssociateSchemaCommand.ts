@@ -85,7 +85,7 @@ export class AssociateSchemaCommand {
             const parsedConfig = ksonConfigResult instanceof Result.Success
                 ? JSON.parse(ksonConfigResult.output)
                 : (() => {
-                    throw new Error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.join(', ')}`);
+                    throw new Error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.asJsReadonlyArrayView().join(', ')}`);
                 })();
 
             if (!isValidSchemaConfig(parsedConfig)) {

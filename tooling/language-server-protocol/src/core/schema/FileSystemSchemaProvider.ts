@@ -104,7 +104,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
               const parsedConfig = ksonConfigResult instanceof Result.Success
                   ? JSON.parse(ksonConfigResult.output)
                   : (() => {
-                      this.logger?.error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.join(', ')}`);
+                      this.logger?.error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.asJsReadonlyArrayView().join(', ')}`);
                       this.config = null;
                       return null;
                   })();
@@ -149,8 +149,9 @@ export class FileSystemSchemaProvider implements SchemaProvider {
 
             // Check whether the schema is a valid KSON file
             let ksonSchema = Kson.getInstance().analyze(schemaContent)
-            if (ksonSchema.errors.asJsReadonlyArrayView().length != 0) {
-                this.logger?.error(`Failed to convert KSON schema to JSON: ${ksonSchema.errors.join(', ')}`);
+            let schemaErrors = ksonSchema.errors.asJsReadonlyArrayView()
+            if (schemaErrors.length != 0) {
+                this.logger?.error(`Failed to convert KSON schema to JSON: ${schemaErrors.join(', ')}`);
                 return undefined;
             }
 

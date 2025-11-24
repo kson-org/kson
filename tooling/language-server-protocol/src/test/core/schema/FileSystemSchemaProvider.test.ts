@@ -78,7 +78,7 @@ describe('FileSystemSchemaProvider', () => {
 
             new FileSystemSchemaProvider(workspace, logger);
 
-            assert.ok(logs.some(msg => msg.includes('Failed to load .kson-schema.kson')));
+            assert.ok(logs.some(msg => msg.includes('Failed to parse .kson-schema.kson')));
         });
     });
 

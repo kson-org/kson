@@ -6,7 +6,7 @@ import * as os from 'os';
 import {FileSystemSchemaProvider} from '../../../core/schema/FileSystemSchemaProvider';
 import {URI} from "vscode-uri";
 
-describe('FileSystemSchemaProvider', () => {
+describe('SchemaConfigManager', () => {
     let tempDir: string;
     let logger: {
         info: (message: string) => void;
@@ -81,7 +81,7 @@ describe('FileSystemSchemaProvider', () => {
             const manager = new FileSystemSchemaProvider(workspaceUri, logger);
 
             assert.ok(manager);
-            assert.ok(logMessages.some(msg => msg.includes('ERROR') && msg.includes('Failed to load')));
+            assert.ok(logMessages.some(msg => msg.includes('ERROR') && msg.includes('Failed to parse')));
         });
 
         it('should handle invalid schema config format', () => {
