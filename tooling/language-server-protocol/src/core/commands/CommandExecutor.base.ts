@@ -69,6 +69,10 @@ export abstract class CommandExecutorBase {
                 const schemaArgs = commandArgs as CommandParameters[CommandType.ASSOCIATE_SCHEMA];
                 return this.executeAssociateSchema(schemaArgs);
             }
+            case CommandType.REMOVE_SCHEMA: {
+                const schemaArgs = commandArgs as CommandParameters[CommandType.REMOVE_SCHEMA];
+                return this.executeRemoveSchema(schemaArgs);
+            }
         }
     }
 
@@ -77,6 +81,12 @@ export abstract class CommandExecutorBase {
      * Platform-specific implementations must provide this method.
      */
     protected abstract executeAssociateSchema(commandArgs: CommandParameters[CommandType.ASSOCIATE_SCHEMA]): Promise<any>;
+
+    /**
+     * Execute the remove schema command.
+     * Platform-specific implementations must provide this method.
+     */
+    protected abstract executeRemoveSchema(commandArgs: CommandParameters[CommandType.REMOVE_SCHEMA]): Promise<any>;
 
     /**
      * Execute the format command

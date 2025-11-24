@@ -26,6 +26,9 @@ export interface CommandParameters {
         documentUri: string;
         schemaPath: string;
     };
+    [CommandType.REMOVE_SCHEMA]: {
+        documentUri: string;
+    };
 }
 
 /**

@@ -25,7 +25,12 @@ export enum CommandType {
     /**
      * Associate a schema with the current document
      */
-    ASSOCIATE_SCHEMA = 'kson.associateSchema'
+    ASSOCIATE_SCHEMA = 'kson.associateSchema',
+
+    /**
+     * Remove schema association from the current document
+     */
+    REMOVE_SCHEMA = 'kson.removeSchema'
 }
 
 /**

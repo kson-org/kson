@@ -175,6 +175,8 @@ export function startKsonServer(
                 documentManager.refreshDocumentSchemas();
                 // Notify client that schema configuration changed so it can update UI (e.g., status bar)
                 connection.sendNotification('kson/schemaConfigurationChanged');
+                // Rerun diagnostics for open files, so we immediately see errors of schema
+                connection.sendRequest('workspace/diagnostic/refresh')
             }
         }
     });

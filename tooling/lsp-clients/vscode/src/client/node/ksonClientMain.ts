@@ -103,7 +103,20 @@ export async function activate(context: vscode.ExtensionContext) {
                         schemaPath = schemaFile.filePath;
                     }
                 } else if (selection.action === 'remove') {
-                    vscode.window.showInformationMessage('Schema removal not yet implemented. You can manually edit .kson-schema.kson');
+                    // Execute the remove schema command via LSP
+                    try {
+                        await languageClient.sendRequest('workspace/executeCommand', {
+                            command: 'kson.removeSchema',
+                            arguments: [{
+                                documentUri: editor.document.uri.toString()
+                            }]
+                        });
+
+                        // Refresh status bar
+                        await statusBarManager.updateForDocument(editor.document);
+                    } catch (error) {
+                        vscode.window.showErrorMessage(`Failed to remove schema: ${error}`);
+                    }
                     return;
                 }
 
@@ -147,6 +160,7 @@ export async function activate(context: vscode.ExtensionContext) {
                     if (editor && editor.document.languageId === 'kson') {
                         await statusBarManager.updateForDocument(editor.document);
                     }
+
                 }
             })
         );

@@ -18,4 +18,17 @@ export class CommandExecutor extends CommandExecutorBase {
             message: errorMessage
         };
     }
+
+    /**
+     * Execute the remove schema command (not supported in browser)
+     */
+    protected async executeRemoveSchema(_commandArgs: CommandParameters[CommandType.REMOVE_SCHEMA]): Promise<any> {
+        const errorMessage = 'Remove Schema command is not supported in browser environments (requires file system access)';
+        this.connection.window.showErrorMessage(errorMessage);
+
+        return {
+            success: false,
+            message: errorMessage
+        };
+    }
 }
