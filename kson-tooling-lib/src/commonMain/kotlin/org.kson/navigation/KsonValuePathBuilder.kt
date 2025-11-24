@@ -3,12 +3,22 @@ package org.kson.navigation
 import org.kson.KsonCore
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.parser.Token
 import org.kson.parser.TokenType
-import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
 import org.kson.value.KsonValueNavigation
-import org.kson.value.KsonValueNavigation.navigateByTokens
+
+/**
+ * Context information about a token at a specific location.
+ *
+ * @param lastToken The last token that starts at or before the location
+ * @param isInsideToken Whether the location falls within the token's bounds
+ */
+private data class TokenContext(
+    val lastToken: Token?,
+    val isInsideToken: Boolean
+)
 
 /**
  * Builds a path from the document root to a specific location in a KSON document.
@@ -59,36 +69,48 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     fun buildPathToPosition(forDefinition: Boolean = false): List<String>? {
         val parsedDocument = KsonCore.parseToAst(document)
 
-        // Find the token immediately before or at the cursor position
-        val lastToken = findLastTokenBeforeCursor(parsedDocument.lexedTokens, location)
-
-        // Check if the cursor is actually inside the token's bounds
-        val isCursorInsideToken = isPositionInsideToken(lastToken, location)
+        // Analyze token context at the target location
+        val tokenContext = analyzeTokenContext(parsedDocument.lexedTokens, location)
 
         // Parse the document, or attempt recovery if it contains syntax errors
         val documentValue = parsedDocument.ksonValue
             ?: attemptDocumentRecovery(document, location)
             ?: return null
 
-        // Determine the search position: use token start if available, otherwise cursor position
-        val searchPosition = lastToken?.lexeme?.location?.start ?: location
+        // Determine the search position: use token start if available, otherwise location
+        val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
-        // Navigate to the KsonValue node at the search position
-        val targetNode = KsonValueNavigation.findValueAtPosition(documentValue, searchPosition)
-            ?: return null
-
-        // Build the initial path from root to the target node
-        val initialPath = buildPathTokens(documentValue, targetNode)
+        // Navigate to the target node and build the path in a single traversal
+        val navResult = KsonValueNavigation.navigateToLocationWithPath(documentValue, searchPosition)
             ?: return emptyList()
 
-        // Adjust the path based on cursor context (colon handling, boundary checks)
-        return adjustPathForCursorContext(
-            path = initialPath,
-            lastToken = lastToken,
-            targetNode = targetNode,
-            isCursorInsideToken = isCursorInsideToken,
+        // Adjust the path based on token context (colon handling, boundary checks)
+        return adjustPathForLocationContext(
+            path = navResult.pathFromRoot,
+            lastToken = tokenContext.lastToken,
+            targetNode = navResult.targetNode,
+            isLocationInsideToken = tokenContext.isInsideToken,
             forDefinition = forDefinition
         )
+    }
+
+    /**
+     * Analyzes the token context at a specific location.
+     *
+     * Determines which token (if any) is at or before the location,
+     * and whether the location falls within that token's bounds.
+     *
+     * @param tokens The list of lexed tokens from the document
+     * @param location The location to analyze
+     * @return Token context information
+     */
+    private fun analyzeTokenContext(
+        tokens: List<Token>,
+        location: Coordinates
+    ): TokenContext {
+        val lastToken = findLastTokenBeforeCursor(tokens, location)
+        val isInsideToken = isPositionInsideToken(lastToken, location)
+        return TokenContext(lastToken, isInsideToken)
     }
 
     /**
@@ -102,9 +124,9 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * @return The last token before the cursor, or null if no such token exists
      */
     private fun findLastTokenBeforeCursor(
-        tokens: List<org.kson.parser.Token>,
+        tokens: List<Token>,
         location: Coordinates
-    ): org.kson.parser.Token? {
+    ): Token? {
         return tokens
             .dropLast(1)  // Exclude EOF token
             .lastOrNull { token ->
@@ -123,7 +145,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * @return true if the position is inside the token's location, false otherwise
      */
     private fun isPositionInsideToken(
-        token: org.kson.parser.Token?,
+        token: Token?,
         position: Coordinates
     ): Boolean {
         return token?.lexeme?.location?.let {
@@ -132,37 +154,37 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     }
 
     /**
-     * Adjusts the path based on cursor context.
+     * Adjusts the path based on token context.
      *
      * Handles special cases:
-     * 1. Cursor after a colon: Add the property name to target the value being entered
-     * 2. Cursor on a property key: Add the property name to the path (for definition lookups)
-     * 3. Cursor outside token bounds: Remove the last path element to target the parent
+     * 1. Location after a colon: Add the property name to target the value being entered
+     * 2. Location on a property key: Add the property name to the path (for definition lookups)
+     * 3. Location outside token bounds: Remove the last path element to target the parent
      *    (unless forDefinition is true, in which case keep the path to the property)
      *
      * @param path The initial path built from document navigation
-     * @param lastToken The last token before the cursor
+     * @param lastToken The last token before the location
      * @param targetNode The KsonValue node found at the target location
-     * @param isCursorInsideToken Whether the cursor is inside the token bounds
-     * @param forDefinition If true, don't drop the last element when cursor is outside token
+     * @param isLocationInsideToken Whether the location is inside the token bounds
+     * @param forDefinition If true, don't drop the last element when location is outside token
      * @return The adjusted path
      */
-    private fun adjustPathForCursorContext(
+    private fun adjustPathForLocationContext(
         path: List<String>,
-        lastToken: org.kson.parser.Token?,
+        lastToken: Token?,
         targetNode: KsonValue,
-        isCursorInsideToken: Boolean,
+        isLocationInsideToken: Boolean,
         forDefinition: Boolean
     ): List<String> {
         return when {
-            // Cursor is right after a colon - we're entering a value
+            // Location is right after a colon - we're entering a value
             lastToken?.tokenType == TokenType.COLON -> {
                 val propertyName = (targetNode as KsonObject).propertyLookup.keys.last()
                 path + propertyName
             }
-            // Cursor is on a property key (UNQUOTED_STRING or STRING_OPEN_QUOTE token) and we're at the parent object
-            // This happens when cursor is in the middle of a property name like "user<caret>name"
-            isCursorInsideToken &&
+            // Location is on a property key (UNQUOTED_STRING or STRING_OPEN_QUOTE token) and we're at the parent object
+            // This happens when location is in the middle of a property name like "user<caret>name"
+            isLocationInsideToken &&
             (lastToken?.tokenType == TokenType.UNQUOTED_STRING || lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE) &&
             targetNode is KsonObject &&
             forDefinition -> {
@@ -170,9 +192,9 @@ class KsonValuePathBuilder(private val document: String, private val location: C
                 val propertyName = lastToken.value
                 path + propertyName
             }
-            // Cursor is outside the token - target the parent element (for completions)
+            // Location is outside the token - target the parent element (for completions)
             // But keep the path as-is for definition lookups
-            !isCursorInsideToken && !forDefinition -> {
+            !isLocationInsideToken && !forDefinition -> {
                 path.dropLast(1)
             }
             // Normal case - return path as-is
@@ -223,60 +245,4 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     }
 
 
-    /**
-     * Build a path from root to target as a list of string tokens.
-     *
-     * The returned tokens can be used with [navigateByTokens] to navigate
-     * back to the target node.
-     *
-     * @param root The root of the tree
-     * @param target The node to find the path to
-     * @return List of tokens forming the path, or null if target is not in the tree
-     *         Returns empty list if target is the root
-     *
-     * Example:
-     * ```kotlin
-     * val path = buildPathTokens(root, targetNode)
-     * // path might be ["users", "0", "name"]
-     *
-     * // Verify we can navigate back
-     * val found = navigateByTokens(root, path)
-     * assert(found === targetNode)
-     * ```
-     */
-    private fun buildPathTokens(root: KsonValue, target: KsonValue): List<String>? {
-        if (root === target) return emptyList()
-
-        val path = mutableListOf<String>()
-
-        fun search(node: KsonValue): Boolean {
-            if (node === target) return true
-
-            when (node) {
-                is KsonObject -> {
-                    for ((key, property) in node.propertyMap) {
-                        path.add(key)
-                        if (search(property.propValue)) return true
-                        path.removeLast()
-                    }
-                }
-
-                is KsonList -> {
-                    for ((index, element) in node.elements.withIndex()) {
-                        path.add(index.toString())
-                        if (search(element)) return true
-                        path.removeLast()
-                    }
-                }
-
-                else -> {
-                    // Primitive types (KsonString, KsonNumber, KsonBoolean, KsonNull, etc.) have no children
-                    // If we reach here and haven't found the target, return false
-                }
-            }
-            return false
-        }
-
-        return if (search(root)) path else null
-    }
 }

@@ -1,5 +1,6 @@
 package org.kson
 
+import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
@@ -337,6 +338,175 @@ class KsonNavigationUtilTest {
 
         assertEquals(1, visited.size)
         assertTrue(visited[0] is KsonList)
+    }
+
+    // Tests for navigateToLocationWithPath()
+
+    @Test
+    fun `navigateToLocationWithPath finds simple property with correct path`() {
+        // Document: name: 'John Doe'
+        // Location inside 'John Doe' string
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(0, 8)  // Inside "John Doe" value
+        )
+
+        assertNotNull(result)
+        assertTrue(result.targetNode is KsonString)
+        assertEquals("John Doe", (result.targetNode as KsonString).value)
+        assertEquals(listOf("name"), result.pathFromRoot)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath finds nested property with correct path`() {
+        // Document has: address.city: 'Springfield'
+        // Find location inside 'Springfield'
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(4, 8)  // Line with "city: 'Springfield'"
+        )
+
+        assertNotNull(result)
+        assertTrue(result.targetNode is KsonString)
+        assertEquals("Springfield", (result.targetNode as KsonString).value)
+        assertEquals(listOf("address", "city"), result.pathFromRoot)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath finds array element with index in path`() {
+        // Document has: hobbies[1] = 'coding' on line 12 (0-indexed: line 11)
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(11, 6)  // Inside 'coding'
+        )
+
+        assertNotNull(result)
+        assertTrue(result.targetNode is KsonString)
+        assertEquals("coding", (result.targetNode as KsonString).value)
+        assertEquals(listOf("hobbies", "1"), result.pathFromRoot)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath finds deeply nested array element`() {
+        // Document has: address.coordinates[0] = 40.7128
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(6, 6)  // Inside first coordinate
+        )
+
+        assertNotNull(result)
+        assertTrue(result.targetNode is KsonNumber)
+        assertEquals(40.7128, (result.targetNode as KsonNumber).value.asDouble)
+        assertEquals(listOf("address", "coordinates", "0"), result.pathFromRoot)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath returns root with empty path when location is at root`() {
+        // Test with a simple root value
+        val simpleRoot = KsonCore.parseToAst("'test'").ksonValue!!
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            simpleRoot,
+            Coordinates(0, 1)  // Inside the string
+        )
+
+        assertNotNull(result)
+        assertSame(simpleRoot, result.targetNode)
+        assertTrue(result.pathFromRoot.isEmpty())
+    }
+
+    @Test
+    fun `navigateToLocationWithPath finds parent object when location is at object level`() {
+        // Target the address object line (line 3, 0-indexed: line 2)
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(2, 0)  // Beginning of "address:" line
+        )
+
+        assertNotNull(result)
+        // At the start of "address:" we should be at the root or address object level
+        assertTrue(result.pathFromRoot.isEmpty() || result.pathFromRoot == listOf("address"))
+    }
+
+    @Test
+    fun `navigateToLocationWithPath returns null when location is outside document bounds`() {
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(1000, 1000)  // Far outside document
+        )
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath handles complex nested structure`() {
+        // metadata.tags[1] = 'author' on line 17 (0-indexed: line 16)
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            sampleKson,
+            Coordinates(16, 6)  // Inside 'author'
+        )
+
+        assertNotNull(result)
+        assertTrue(result.targetNode is KsonString)
+        assertEquals("author", (result.targetNode as KsonString).value)
+        assertEquals(listOf("metadata", "tags", "1"), result.pathFromRoot)
+    }
+
+    @Test
+    fun `navigateToLocationWithPath finds most specific node`() {
+        // When multiple nodes contain the location, should return the smallest/deepest one
+        val doc = KsonCore.parseToAst("""
+            user:
+              name: 'Alice'
+            .
+        """.trimIndent()).ksonValue!!
+
+        // Location inside 'Alice' string
+        val result = KsonValueNavigation.navigateToLocationWithPath(
+            doc,
+            Coordinates(1, 10)  // Inside 'Alice'
+        )
+
+        assertNotNull(result)
+        // Should find the string 'Alice', not the parent object
+        assertTrue(result.targetNode is KsonString)
+        assertEquals("Alice", (result.targetNode as KsonString).value)
+        assertEquals(listOf("user", "name"), result.pathFromRoot)
+    }
+
+    // Test for the findValueAtPosition() bug fix
+
+    @Test
+    fun `findValueAtPosition returns most specific node after bug fix`() {
+        // This test verifies that the smallestSize bug is fixed
+        val doc = KsonCore.parseToAst("""
+            outer:
+              inner: 'value'
+            .
+        """.trimIndent()).ksonValue!!
+
+        // Location inside 'value' string
+        val result = KsonValueNavigation.findValueAtPosition(
+            doc,
+            Coordinates(1, 11)  // Inside 'value'
+        )
+
+        assertNotNull(result)
+        // Should find the most specific node (the string), not a parent
+        assertTrue(result is KsonString)
+        assertEquals("value", result.value)
+    }
+
+    @Test
+    fun `findValueAtPosition and navigateToLocationWithPath return same node`() {
+        // These two methods should find the same target node
+        val location = Coordinates(4, 8)  // Inside 'Springfield'
+
+        val nodeFromFind = KsonValueNavigation.findValueAtPosition(sampleKson, location)
+        val resultFromNavigate = KsonValueNavigation.navigateToLocationWithPath(sampleKson, location)
+
+        assertNotNull(nodeFromFind)
+        assertNotNull(resultFromNavigate)
+        assertSame(nodeFromFind, resultFromNavigate.targetNode)
     }
 
 }

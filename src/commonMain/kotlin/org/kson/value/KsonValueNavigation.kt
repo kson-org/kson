@@ -4,6 +4,28 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 
 /**
+ * Result of navigating to a location in a KSON document.
+ * Contains both the target node and the path from root to that node.
+ *
+ * @param targetNode The most specific KsonValue at the target location
+ * @param pathFromRoot List of property names/array indices from root to target
+ *
+ * Example:
+ * ```kotlin
+ * // For document: { users: [{ name: "Alice" }] }
+ * // At location in "Alice"
+ * LocationNavigationResult(
+ *     targetNode = KsonString("Alice"),
+ *     pathFromRoot = listOf("users", "0", "name")
+ * )
+ * ```
+ */
+data class LocationNavigationResult(
+    val targetNode: KsonValue,
+    val pathFromRoot: List<String>
+)
+
+/**
  * Core utilities for navigating and traversing [KsonValue] structures.
  *
  * This provides the canonical implementation for tree operations, used by both:
@@ -195,6 +217,77 @@ object KsonValueNavigation {
             }
         }
         return result
+    }
+
+    /**
+     * Find the most specific KsonValue at a location AND build the path to it.
+     *
+     * This is more efficient than calling [findValueAtPosition] and then building
+     * the path separately, as it performs both operations in a single tree traversal.
+     *
+     * The function recursively descends the tree, checking if the target location
+     * is within each node's bounds. It always returns the most specific (deepest/smallest)
+     * node that contains the target location.
+     *
+     * @param root The root node to start navigation from
+     * @param targetLocation The coordinates to find a node at
+     * @param currentPath The path accumulated during recursion (used internally)
+     * @return Result containing the target node and path, or null if not found
+     *
+     * Example:
+     * ```kotlin
+     * // Document: { users: [{ name: "Alice" }] }
+     * // Target location: inside "Alice"
+     * val result = navigateToLocationWithPath(root, Coordinates(0, 24))
+     * // result.targetNode = KsonString("Alice")
+     * // result.pathFromRoot = ["users", "0", "name"]
+     * ```
+     */
+    fun navigateToLocationWithPath(
+        root: KsonValue,
+        targetLocation: Coordinates,
+        currentPath: List<String> = emptyList()
+    ): LocationNavigationResult? {
+        // If target location is not within this node's bounds, return null
+        if (!Location.locationContainsCoordinates(root.location, targetLocation)) {
+            return null
+        }
+
+        // Try to find a more specific child node that contains the target
+        when (root) {
+            is KsonObject -> {
+                for ((key, property) in root.propertyMap) {
+                    val childResult = navigateToLocationWithPath(
+                        property.propValue,
+                        targetLocation,
+                        currentPath + key
+                    )
+                    if (childResult != null) {
+                        return childResult  // Found a more specific child
+                    }
+                }
+            }
+
+            is KsonList -> {
+                for ((index, element) in root.elements.withIndex()) {
+                    val childResult = navigateToLocationWithPath(
+                        element,
+                        targetLocation,
+                        currentPath + index.toString()
+                    )
+                    if (childResult != null) {
+                        return childResult  // Found a more specific child
+                    }
+                }
+            }
+
+            else -> {
+                // Leaf node (primitive) - no children to check
+            }
+        }
+
+        // No child was more specific, so this node is the target
+        return LocationNavigationResult(root, currentPath)
     }
 
     /**
