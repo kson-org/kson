@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {Kson, Result} from 'kson';
 import {SchemaConfig, isValidSchemaConfig, SCHEMA_CONFIG_FILENAME} from '../schema/SchemaConfig.js';
+import { URI } from 'vscode-uri'
 
 export interface AssociateSchemaParams {
     documentUri: string;
@@ -42,7 +43,7 @@ export class AssociateSchemaCommand {
 
         try {
             // Convert document URI to relative path
-            const documentPath = this.uriToPath(documentUri);
+            const documentPath = URI.parse(documentUri).fsPath
             const relativePath = path.relative(workspaceRoot, documentPath);
 
             // Read or create configuration
@@ -134,22 +135,5 @@ export class AssociateSchemaCommand {
         // Write as KSON
         const jsonString = JSON.stringify(config, null, 2);
         fs.writeFileSync(configPath, Kson.getInstance().format(jsonString), 'utf-8');
-    }
-
-    /**
-     * Convert a file:// URI to a file system path.
-     */
-    private static uriToPath(uri: string): string {
-        if (uri.startsWith('file://')) {
-            let filePath = decodeURIComponent(uri.substring(7));
-
-            // On Windows, file:///c:/path becomes /c:/path, need to remove leading slash
-            if (process.platform === 'win32' && /^\/[a-z]:/i.test(filePath)) {
-                filePath = filePath.substring(1);
-            }
-
-            return filePath;
-        }
-        return uri;
     }
 }
