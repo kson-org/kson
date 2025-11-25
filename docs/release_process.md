@@ -38,7 +38,7 @@ When `main` is ready to have a release cut from it:
 
 - TODO flesh out this documentation
 
-#### [kson-lib](../kson-lib/) Publishing Process
+#### [kson-lib](../kson-lib) Publishing Process
 
 The project uses the [Vanniktech Maven Publish plugin](https://github.com/vanniktech/gradle-maven-publish-plugin) to publish to Maven Central Portal. This process publishes both:
 - `org.kson:kson` (public API from kson-lib)
@@ -74,13 +74,13 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
 
 4. Manually release: we have `automaticRelease = false` as a final gate/protection, so once everything looks good at https://central.sonatype.com/publishing/deployments for this release, click Publish
 
-#### [lib-rust](../lib-rust/) Publishing Process
+#### [lib-rust](../lib-rust) Publishing Process
 * todo doc process
-#### [lib-python](../lib-python/) Publishing Process
+#### [lib-python](../lib-python) Publishing Process
 * todo doc process
-#### [tooling/cli](../tooling/cli/) Publishing Process
+#### [tooling/cli](../tooling/cli) Publishing Process
 * todo doc process
 #### [tooling/lsp-clients](../tooling/lsp-clients) Publishing Process
 * todo doc process
-#### [tooling/jetbrains](../tooling/jetbrains/) Publishing Process
+#### [tooling/jetbrains](../tooling/jetbrains) Publishing Process
 * todo doc process
