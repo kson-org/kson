@@ -39,7 +39,41 @@ When `main` is ready to have a release cut from it:
 - TODO flesh out this documentation
 
 #### [kson-lib](../kson-lib/) Publishing Process
-* todo doc process
+
+The project uses the [Vanniktech Maven Publish plugin](https://github.com/vanniktech/gradle-maven-publish-plugin) to publish to Maven Central Portal. This process publishes both:
+- `org.kson:kson` (public API from kson-lib)
+- `org.kson:kson-internals` (internal implementation from root build that is deployed with kson-lib)
+
+##### Prerequisites
+
+- You will need a user account on https://central.sonatype.com/
+- You will need a GPG key pair with the public key published to https://keyserver.ubuntu.com/
+
+Ensure you have credentials for both of these in your `~/.gradle/gradle.properties` file:
+
+```properties
+mavenCentralUsername=<your-username>
+mavenCentralPassword=<your-password>
+
+# GPG signing credentials
+signing.keyId=<your-key-id>
+signing.password=<your-passphrase>
+signing.secretKeyRingFile=<path-to-secring.gpg>
+```
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Publish to Maven Central:
+   ```bash
+   ./gradlew publishAllPublicationsToMavenCentralRepository
+   ```
+
+3. Verify the publications are valid and ready to be published: https://central.sonatype.com/publishing/deployments
+
+4. Manually release: we have `automaticRelease = false` as a final gate/protection, so once everything looks good at https://central.sonatype.com/publishing/deployments for this release, click Publish
+
 #### [lib-rust](../lib-rust/) Publishing Process
 * todo doc process
 #### [lib-python](../lib-python/) Publishing Process
