@@ -23,14 +23,14 @@ private data class TokenContext(
 /**
  * Builds a path from the document root to a specific location in a KSON document.
  *
- * This class analyzes a KSON document and cursor position to construct a path
+ * This class analyzes a KSON document and position to construct a path
  * (sequence of property names) from the root to the element at the given location.
  * The path is used for schema navigation, IDE auto-completion, and hover information.
  *
  * The builder handles several scenarios:
- * - **Invalid documents**: Attempts recovery by inserting empty quotes at the cursor position
- * - **Cursor after colon**: Adds the property name to target the value being entered
- * - **Cursor outside token**: Removes the last path element to target the parent
+ * - **Invalid documents**: Attempts recovery by inserting empty quotes at the position
+ * - **Position after colon**: Adds the property name to target the value being entered
+ * - **Position outside token**: Removes the last path element to target the parent
  *
  * Example usage:
  * ```kotlin
@@ -41,7 +41,7 @@ private data class TokenContext(
  * ```
  *
  * @param document The KSON document string to analyze
- * @param location The cursor position (line and column, zero-based)
+ * @param location The position (line and column, zero-based)
  *
  * @see buildPathToPosition Main method to build the path
  * @see org.kson.value.KsonValueNavigation For navigation within parsed KSON values
@@ -57,10 +57,10 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      *
      * The method handles several edge cases:
      * - Invalid documents (attempts recovery by inserting quotes)
-     * - Cursor positioned after a colon (targets the value being entered)
-     * - Cursor positioned outside a token (targets the parent element, unless forDefinition is true)
+     * - Positioned after a colon (targets the value being entered)
+     * - Positioned outside a token (targets the parent element, unless forDefinition is true)
      *
-     * @param forDefinition If true, keeps the path to the current property even when cursor is outside token.
+     * @param forDefinition If true, keeps the path to the current property even when position is outside token.
      *                      This is useful for "jump to definition" where we want to navigate to the property's
      *                      schema definition, not its parent. Default is false for completion behavior.
      * @return A list of property names representing the path from root to target,
@@ -101,29 +101,29 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * and whether the location falls within that token's bounds.
      *
      * @param tokens The list of lexed tokens from the document
-     * @param location The location to analyze
+     * @param location The position (line and column, zero-based)
      * @return Token context information
      */
     private fun analyzeTokenContext(
         tokens: List<Token>,
         location: Coordinates
     ): TokenContext {
-        val lastToken = findLastTokenBeforeCursor(tokens, location)
+        val lastToken = findLastTokenBeforeLocation(tokens, location)
         val isInsideToken = isPositionInsideToken(lastToken, location)
         return TokenContext(lastToken, isInsideToken)
     }
 
     /**
-     * Finds the last token that starts at or before the cursor location.
+     * Finds the last token that starts at or before the location.
      *
-     * This helps determine what syntactic element the cursor is positioned at or after.
+     * This helps determine what syntactic element is positioned at or after.
      * The EOF token is excluded from consideration.
      *
      * @param tokens The list of lexed tokens from the document
-     * @param location The cursor position
-     * @return The last token before the cursor, or null if no such token exists
+     * @param location The position (line and column, zero-based)
+     * @return The last token before the location, or null if no such token exists
      */
-    private fun findLastTokenBeforeCursor(
+    private fun findLastTokenBeforeLocation(
         tokens: List<Token>,
         location: Coordinates
     ): Token? {
@@ -131,7 +131,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             .dropLast(1)  // Exclude EOF token
             .lastOrNull { token ->
                 val tokenStart = token.lexeme.location.start
-                // Token starts before or at the cursor location
+                // Token starts before or at location
                 tokenStart.line < location.line ||
                     (tokenStart.line == location.line && tokenStart.column <= location.column)
             }
@@ -206,14 +206,14 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * Attempts to recover a parseable document from an invalid one.
      *
      * When a document contains syntax errors, this method tries to make it valid
-     * by inserting empty quotes at the cursor position. This is useful for
+     * by inserting empty quotes at the location. This is useful for
      * providing IDE features even when the user is in the middle of typing.
      *
-     * For example, if the cursor is at `{ "key": | }`, this would try parsing
+     * For example, if the location is at `{ "key": | }`, this would try parsing
      * `{ "key": "" }` to enable completions for the value.
      *
      * @param document The invalid document string
-     * @param location The cursor position where quotes should be inserted
+     * @param location The position where quotes should be inserted
      * @return A KsonValue from the recovered document, or null if recovery fails
      */
     private fun attemptDocumentRecovery(
@@ -230,7 +230,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         val targetLine = lines[location.line]
         val safeColumn = location.column.coerceAtMost(targetLine.length)
 
-        // Insert empty quotes at the cursor position
+        // Insert empty quotes at the position
         val recoveredLine = buildString {
             append(targetLine.take(safeColumn))
             append("\"\"")  // Empty string literal

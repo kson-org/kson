@@ -153,7 +153,4 @@ describe('KsonTextDocumentService', () => {
             await assertDiagnostics(content, expected)
         });
     });
-
-
-
 });
