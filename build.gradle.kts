@@ -3,11 +3,7 @@ import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
-import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.konan.target.Architecture
-import org.jetbrains.kotlin.konan.target.Family
-import org.jetbrains.kotlin.konan.target.HostManager
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -102,11 +98,6 @@ tasks {
         testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
     }
 
-    withType<KotlinNativeTest> {
-        testLogging.showStandardStreams = true
-        testLogging.events = setOf(PASSED, SKIPPED, FAILED, STANDARD_OUT, STANDARD_ERROR)
-    }
-
     /**
      * Work around Gradle complaining about duplicate readmes in the mpp build.  Related context:
      * - https://github.com/gradle/gradle/issues/17236
@@ -145,26 +136,6 @@ kotlin {
         useEsModules()
         generateTypeScriptDefinitions()
     }
-    val host = HostManager.host
-    val nativeTarget = when (host.family) {
-        Family.OSX -> when (host.architecture) {
-            Architecture.ARM64 -> macosArm64("nativeKson")
-            else -> macosX64("nativeKson")
-        }
-        Family.LINUX -> linuxX64("nativeKson")
-        Family.MINGW -> mingwX64("nativeKson")
-        Family.IOS, Family.TVOS, Family.WATCHOS, Family.ANDROID -> {
-            throw GradleException("Host OS '${host.name}' is not supported in Kotlin/Native.")
-        }
-    }
-
-    nativeTarget.apply {
-        binaries {
-            sharedLib {
-                baseName = "kson"
-            }
-        }
-    }
 
     sourceSets {
         val commonMain by getting
@@ -188,8 +159,6 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-        val nativeKsonMain by getting
-        val nativeKsonTest by getting
     }
 }
 

@@ -122,30 +122,30 @@ JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
     case $JVM_ARCH in
     x86_64)
-        JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_mac_hotspot_17.0.14_7.tar.gz
-        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_mac_hotspot_17.0.14_7-80286c
+        JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-x64_bin.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/graalvm-community-jdk-21.0.2_macos-x64_bin-016f70
         ;;
     arm64)
-        JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.14_7.tar.gz
-        JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.14_7-9e2ecf
+        JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_macos-aarch64_bin.tar.gz
+        JVM_TARGET_DIR=$BUILD_DIR/graalvm-community-jdk-21.0.2_macos-aarch64_bin-2c5382
         ;;
     *) 
         die "Unknown architecture $JVM_ARCH"
         ;;
     esac
 elif [ "$cygwin" = "true" ] || [ "$msys" = "true" ]; then
-    JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7.zip
-    JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7-c15042
+    JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
+    JVM_TARGET_DIR=$BUILD_DIR/graalvm-community-jdk-21.0.2_windows-x64_bin-8bbfc2
 else
     JVM_ARCH=$(linux$(getconf LONG_BIT) uname -m)
      case $JVM_ARCH in
         x86_64)
-            JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.14_7.tar.gz
-            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_x64_linux_hotspot_17.0.14_7-a3ebc3
+            JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/graalvm-community-jdk-21.0.2_linux-x64_bin-ed9d4f
             ;;
         aarch64)
-            JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%2B7/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.14_7.tar.gz
-            JVM_TARGET_DIR=$BUILD_DIR/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.14_7-bd719f
+            JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-aarch64_bin.tar.gz
+            JVM_TARGET_DIR=$BUILD_DIR/graalvm-community-jdk-21.0.2_linux-aarch64_bin-9ac980
             ;;
         *) 
             die "Unknown architecture $JVM_ARCH"

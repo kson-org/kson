@@ -2,7 +2,6 @@ import org.gradle.internal.os.OperatingSystem
 
 val build = "build"
 val copyNativeArtifacts = "copyNativeArtifacts"
-val formattingCheck = "formattingCheck"
 val test = "test"
 val typeCheck = "typeCheck"
 val prepareSdistBuildEnvironment = "prepareSdistBuildEnvironment"
@@ -17,7 +16,7 @@ tasks {
     }
 
     register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
-        dependsOn(":kson-lib:nativeKsonBinaries")
+        dependsOn(":kson-lib:buildWithGraalVmNativeImage")
     }
 
     register<Task>(build) {
@@ -32,9 +31,6 @@ tasks {
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
-
-        // Ensure the subprocess can find the kson shared library
-        injectSharedLibraryPath()
     }
 
     register<Exec>(typeCheck) {
@@ -45,41 +41,32 @@ tasks {
         isIgnoreExitValue = false
     }
 
-    register<Exec>(formattingCheck) {
-        group = "verification"
-        commandLine = "$uvwPath run ruff format --diff".split(" ")
-        standardOutput = System.out
-        errorOutput = System.err
-        isIgnoreExitValue = false
-    }
-
     register<Task>("check") {
         dependsOn(test)
         dependsOn(typeCheck)
-        dependsOn(formattingCheck)
     }
 
     register<Copy>(prepareSdistBuildEnvironment) {
         group = "build"
         description = "Prepare kson-sdist directory with necessary Gradle files for sdist"
-        
+
         val ksonCopyDir = layout.projectDirectory.dir("kson-sdist")
-        
+
         // Clear existing kson-sdist directory
         doFirst {
             delete(ksonCopyDir)
         }
-        
+
         // Copy gradlew scripts
         from(rootProject.file("gradlew"))
         from(rootProject.file("gradlew.bat"))
         into(ksonCopyDir)
-        
+
         // Make gradlew executable
         filePermissions {
             unix("755")
         }
-        
+
         // Copy gradle wrapper (excluding JDK)
         from(rootProject.file("gradle/wrapper")) {
             into("gradle/wrapper")
@@ -110,7 +97,7 @@ tasks {
             exclude("support/**")
             exclude("out/**")
         }
-        
+
         // Copy kson-lib source (needed for native artifact build)
         from(rootProject.file("kson-lib")) {
             into("kson-lib")

@@ -1,31 +1,18 @@
-use bindgen::callbacks::ParseCallbacks;
+use anyhow::{bail, Context};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-#[derive(Debug)]
-struct CustomRenamer;
-
-impl ParseCallbacks for CustomRenamer {
-    // Necessary to get rid of the `libkson` vs. `kson` difference depending on the target OS
-    fn item_name(&self, original_item_name: &str) -> Option<String> {
-        if original_item_name.starts_with("libkson_") {
-            Some(original_item_name.strip_prefix("lib").unwrap().to_string())
-        } else {
-            None
-        }
-    }
-}
+static KSON_LIB_VERSION: &str = "beta-2";
 
 fn get_kson_artifacts(
-    use_dynamic_linking: bool,
     out_dir: &Path,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> anyhow::Result<()> {
     let kson_root_env_var = "KSON_ROOT_SOURCE_DIR";
     let kson_prebuild_env_var = "KSON_PREBUILT_BIN_DIR";
     if let Ok(kson_root) = env::var(kson_root_env_var) {
-        build_kson_from_source(Path::new(&kson_root), use_dynamic_linking, out_dir)
+        build_kson_from_source(Path::new(&kson_root), out_dir)
     } else {
         if let Ok(prebuilt_root) = env::var(kson_prebuild_env_var) {
             for entry in fs::read_dir(&prebuilt_root)? {
@@ -38,8 +25,8 @@ fn get_kson_artifacts(
                     println!("cargo:rerun-if-changed={}", source_path.display());
                 }
             }
-        } else if let Err(e) = download_prebuilt_kson(use_dynamic_linking, out_dir) {
-            panic!(
+        } else if let Err(e) = download_prebuilt_kson(true, out_dir) {
+            bail!(
                 "failed to download prebuilt kson: {e}\nset the `{kson_prebuild_env_var}` variable to the path of compatible kson binaries, or the `{kson_root_env_var}` variable to the path of a compatible kson source tree (if you prefer to build kson from source)"
             );
         }
@@ -51,9 +38,7 @@ fn get_kson_artifacts(
 fn download_prebuilt_kson(
     use_dynamic_linking: bool,
     out_dir: &Path,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let kson_lib_version = fs::read_to_string(Path::new(&manifest_dir).join("kson-lib-version"))?;
+) -> anyhow::Result<()> {
     let cpu_arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "aarch64" => "arm64",
         "x86_64" => "amd64",
@@ -72,7 +57,7 @@ fn download_prebuilt_kson(
 
     fs::create_dir_all(out_dir)?;
     let url = format!(
-        "https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{kson_lib_version}/kson-lib-{shared_or_static}-{cpu_arch}-{os}.tar.gz"
+        "https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_VERSION}/kson-lib-{shared_or_static}-{cpu_arch}-{os}.tar.gz"
     );
     let archive = ureq::get(url).call()?.body_mut().read_to_vec()?;
     let decoder = flate2::read::GzDecoder::new(archive.as_slice());
@@ -84,9 +69,8 @@ fn download_prebuilt_kson(
 
 fn build_kson_from_source(
     kson_root: &Path,
-    use_dynamic_linking: bool,
     out_dir: &Path,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> anyhow::Result<()> {
     // Build kotlin-native artifacts
     let gradle_script = if cfg!(target_os = "windows") {
         kson_root.join("gradlew.bat")
@@ -95,23 +79,19 @@ fn build_kson_from_source(
     };
 
     let status = Command::new(&gradle_script)
-        .arg(":kson-lib:nativeRelease")
+        .arg(":kson-lib:buildWithGraalVmNativeImage")
         .arg("--no-daemon")
         .current_dir(&kson_root)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()?;
 
     if !status.success() {
-        return Err(format!("Kotlin build failed with exit code: {:?}", status.code()).into());
+        bail!("Kotlin build failed with exit code: {:?}", status.code());
     }
 
     // Copy built artifacts
-    let release_path = if use_dynamic_linking {
-        "kson-lib/build/bin/nativeKson/releaseShared"
-    } else {
-        "kson-lib/build/bin/nativeKson/releaseStatic"
-    };
+    let release_path = "kson-lib/build/kotlin/compileGraalVmNativeImage";
     let source_dir = kson_root.join(release_path);
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
@@ -127,55 +107,50 @@ fn build_kson_from_source(
     Ok(())
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let use_dynamic_linking = cfg!(feature = "dynamic-linking") || cfg!(target_os = "windows");
 
-    // Obtain kotlin artifacts (TODO: allow compiling from source)
-    get_kson_artifacts(use_dynamic_linking, &out_dir).expect("Failed to copy Kotlin artifacts");
+    // Obtain kotlin artifacts
+    get_kson_artifacts(&out_dir).context("Failed to copy Kotlin artifacts")?;
 
     // Generate bindings
     let bindings = bindgen::Builder::default()
         .header(
             out_dir
-                .join("kson_api_preprocessed.h")
+                .join("jni_simplified.h")
                 .display()
                 .to_string(),
         )
-        .parse_callbacks(Box::new(CustomRenamer))
         .generate()
-        .expect("Unable to generate bindings");
+        .context("Unable to generate bindings")?;
 
     bindings
         .write_to_file(out_dir.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+        .context("Couldn't write bindings!")?;
 
-    // Deal with static vs. dynamic linking
-    if use_dynamic_linking {
-        // Let users of the library know the path to the compiled binary, so they can copy it
-        let shared_name = if cfg!(target_os = "windows") {
-            format!("kson.dll")
-        } else if cfg!(target_os = "macos") {
-            format!("libkson.dylib")
-        } else {
-            format!("libkson.so")
-        };
-        let built_lib = out_dir.join(&shared_name);
-        println!("cargo:lib-binary={}", built_lib.display());
+    // Tell the compiler where to find the dynamic library
+    println!("cargo:rustc-link-search=native={}", out_dir.display());
+    println!("cargo:rustc-link-lib=dylib=kson");
+
+    #[cfg(not(target_os = "windows"))]
+    println!("cargo:rustc-link-lib=dylib=z");
+
+    // Let users of the library know the path to the compiled binary
+    let shared_name = if cfg!(target_os = "windows") {
+        format!("kson.dll")
+    } else if cfg!(target_os = "macos") {
+        format!("libkson.dylib")
     } else {
-        // Tell the compiler where to find the static library
-        println!("cargo:rustc-link-search=native={}", out_dir.display());
-        println!("cargo:rustc-link-lib=static=kson");
+        format!("libkson.so")
+    };
+    let built_lib = out_dir.join(&shared_name);
+    println!("cargo:lib-binary={}", built_lib.display());
 
-        // Note: our kotlin-native binary relies on platform-specific libraries, which we don't want
-        // to statically link. Below we explicitly configure them to be dynamically linked.
-        #[cfg(target_os = "linux")]
-        println!("cargo:rustc-link-lib=dylib=stdc++");
-        #[cfg(target_os = "macos")]
-        {
-            println!("cargo:rustc-link-lib=dylib=c++");
-            println!("cargo:rustc-link-lib=framework=CoreFoundation");
-            println!("cargo:rustc-link-lib=framework=Foundation");
-        }
+    // Copy the library to a specific directory, if requested
+    if let Ok(copy_dir) = env::var("KSON_COPY_SHARED_LIBRARY_TO_DIR") {
+        fs::create_dir_all(&copy_dir).with_context(|| format!("failed to copy the shared library to the provided directory (the directory at `{copy_dir}` does not exist and could not be created)"))?;
+        fs::copy(built_lib, Path::new(&copy_dir).join(shared_name)).with_context(|| format!("failed to copy the shared library to the provided directory (the directory was `{copy_dir}`)"))?;
     }
+
+    Ok(())
 }
