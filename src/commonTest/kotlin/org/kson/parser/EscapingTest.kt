@@ -1,7 +1,7 @@
 package org.kson.parser
 
 import org.kson.ast.renderForJsonString
-import org.kson.ast.unescapeStringContent
+import org.kson.parser.behavior.quotedstring.unescapeStringContent
 import org.kson.testSupport.validateJson
 import kotlin.test.Test
 import kotlin.test.assertEquals

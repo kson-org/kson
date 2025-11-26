@@ -18,6 +18,7 @@ import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedContentTransformer
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
+import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.tools.FormattingStyle.*
 
@@ -602,9 +603,13 @@ class QuotedStringNode(
     private val stringQuote: StringQuote?,
 ) : StringNodeImpl(sourceTokens) {
 
+    private val stringContentTransformer: QuotedStringContentTransformer by lazy {
+        QuotedStringContentTransformer(stringContent, location)
+    }
+
     override val processedStringContent: String by lazy {
         if (stringQuote != null) {
-            unescapeStringContent(stringContent)
+            stringContentTransformer.processedContent
         } else {
             stringContent
 
