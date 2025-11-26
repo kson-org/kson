@@ -83,4 +83,19 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
 #### [tooling/lsp-clients](../tooling/lsp-clients) Publishing Process
 * todo doc process
 #### [tooling/jetbrains](../tooling/jetbrains) Publishing Process
-* todo doc process
+
+Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
+
+1. Ensure you have **the tag you wish to release checked out and that your Git status is clean**.
+
+2. Build the plugin distribution:
+
+    ```bash
+    ./gradlew :tooling:jetbrains:buildPlugin
+    ```
+
+    This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
+
+3. Manually upload to JetBrains Marketplace:
+   - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
+   - Upload the ZIP file from the distributions folder
