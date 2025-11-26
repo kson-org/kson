@@ -16,7 +16,7 @@ import org.kson.parser.TokenType.WHITESPACE
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
-import org.kson.parser.behavior.embedblock.EmbedBlockIndent
+import org.kson.parser.behavior.embedblock.EmbedContentTransformer
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.tools.FormattingStyle.*
@@ -938,15 +938,22 @@ class EmbedBlockNode(
 
 class EmbedBlockContentNode(
     sourceTokens: List<Token>,
-    embedDelim: EmbedDelim
+    private val embedDelim: EmbedDelim
 ) : StringNodeImpl(sourceTokens) {
     override val stringContent: String by lazy {
         renderTokens(sourceTokens)
     }
 
+    private val embedContentTransformer: EmbedContentTransformer by lazy {
+        EmbedContentTransformer(
+            rawContent = stringContent,
+            embedDelim = embedDelim,
+            rawLocation = this.location
+        )
+    }
+
     override val processedStringContent: String by lazy {
-        val indentTrimmedContent = EmbedBlockIndent(embedDelim.unescapeEmbedContent(stringContent)).trimMinimumIndent()
-        indentTrimmedContent
+        embedContentTransformer.processedContent
     }
 
     override fun toSourceInternal(
