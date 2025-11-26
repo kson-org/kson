@@ -242,8 +242,9 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     description = "Builds native executable using GraalVM from JDK toolchain"
     dependsOn(":kson-lib:generateJniBindingsJvm")
 
-    val jvmTask = tasks.named<Jar>("jvmJar")
-    dependsOn(jvmTask, "generateJniBindingsJvm")
+    val ksonLibJarTask = tasks.named<Jar>("jvmJar")
+    val ksonCoreJarTask = project.rootProject.tasks.named<Jar>("jvmJar")
+    dependsOn(ksonLibJarTask, ksonCoreJarTask, "generateJniBindingsJvm")
 
     // Configure the command at configuration time using providers
     command.set(provider {
@@ -257,21 +258,29 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
         // Ensure build dir exists
         val buildDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage").toPath()
         buildDir.createDirectories()
-
         val buildArtifactPath = buildDir.resolve(BinaryArtifactPaths.binaryFileNameWithoutExtension()).toAbsolutePath().pathString
-        val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
-        val ksonCoreJar = rootDir.resolve("build/libs/kson-jvm-x.2-SNAPSHOT.jar")
 
-        val jarFile = jvmTask.get().archiveFile.get().asFile
+        // Gather JAR files with the classes we use
+        val ksonLibJar = ksonLibJarTask.get().archiveFile.get().asFile
+        val ksonCoreJar = ksonCoreJarTask.get().archiveFile.get().asFile
         val kotlinRuntimeJarCandidates = configurations.getByName("jvmRuntimeClasspath").resolvedConfiguration.resolvedArtifacts.filter { a -> a.file.path.contains("org.jetbrains.kotlin") }
         val kotlinRuntimeJarFile = kotlinRuntimeJarCandidates[0]!!.file.absolutePath
+        val jars = sequenceOf(ksonLibJar.absolutePath, ksonCoreJar.absolutePath, kotlinRuntimeJarFile)
+        jars.forEach {
+            if (!Path(it).toFile().exists()) {
+                throw GradleException("Missing JAR file. It should have been present at $it")
+            }
+        }
 
         val cpSeparator = if (System.getProperty("os.name").lowercase().contains("win")) {
             ";"
         } else {
             ":"
         }
-        val classPath = sequenceOf(jarFile.absolutePath, ksonCoreJar, kotlinRuntimeJarFile).joinToString(cpSeparator)
+        val classPath = jars.joinToString(cpSeparator)
+
+        // The `jniConfig` file tells graal which classes should be publicly exposed
+        val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
 
         listOf(
             nativeImageExe.absolutePath,
