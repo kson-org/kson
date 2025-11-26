@@ -18,7 +18,8 @@ repositories {
 }
 
 group = "org.kson"
-version = "0.1.2-SNAPSHOT"
+// [[kson-version-num]]
+version = "0.3.0-SNAPSHOT"
 
 kotlin {
     jvm {

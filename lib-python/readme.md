@@ -7,7 +7,7 @@
 Install from PyPI:
 
 ```bash
-pip install kson
+pip install kson-lang
 ```
 
 ### Build from source

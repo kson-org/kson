@@ -5,13 +5,14 @@ import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.KsonValueNavigation
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.
  *
  * @param schemaRootValue the [KsonValue] root of the schema to build this [SchemaIdLookup] from
  */
-class SchemaIdLookup(schemaRootValue: KsonValue) {
+class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
     private val idMap: Map<String, KsonValue>
 
@@ -70,6 +71,128 @@ class SchemaIdLookup(schemaRootValue: KsonValue) {
             idMap[resolvedRefUri.toString().substringBefore("#") + resolvedRefUri.fragment.removePrefix("#")]
                 ?.let { ResolvedRef(it, currentBaseUri) }
         }
+    }
+
+    /**
+     * Navigate schema by document path tokens.
+     *
+     * This function translates document paths to schema paths by inserting schema-specific wrappers:
+     * - For object properties: navigates through "properties" wrapper
+     * - For array indices: navigates to "items" schema (all array elements share the same schema)
+     * - Falls back to "additionalProperties" or "patternProperties" when specific property not found
+     * - Resolves `$ref` references to their target schemas
+     *
+     * Base URI tracking is handled internally to ensure correct `$ref` resolution.
+     *
+     * Example:
+     * ```kotlin
+     * // Document path: ["users", "0", "name"]
+     * // Schema navigation: properties/users → items → properties/name
+     * val idLookup = SchemaIdLookup(schemaRoot)
+     * val schemaRef = idLookup.navigateByDocumentPath(listOf("users", "0", "name"))
+     * ```
+     *
+     * @param documentPathTokens Path through the document (from [KsonValueNavigation.buildPathTokens])
+     * @return The [ResolvedRef] containing the sub-schema at that location, or null if not found
+     */
+    fun navigateByDocumentPath(
+        documentPathTokens: List<String>,
+    ): ResolvedRef? {
+        val startingBaseUri = ""
+
+        if (documentPathTokens.isEmpty()) {
+            return ResolvedRef(schemaRootValue, startingBaseUri)
+        }
+
+        var node: KsonValue? = schemaRootValue
+        var updatedBaseUri = startingBaseUri
+
+        for (token in documentPathTokens) {
+            if (node !is KsonObject) {
+                return null
+            }
+
+            // Track $id changes for proper URI resolution
+            node.propertyLookup[$$"$id"]?.let { idValue ->
+                if (idValue is KsonString) {
+                    val fullyQualifiedId = resolveUri(idValue.value, updatedBaseUri)
+                    updatedBaseUri = fullyQualifiedId.toString()
+                }
+            }
+
+            // Determine if this is an array index or property name
+            val isArrayIndex = token.toIntOrNull() != null
+
+            node = if (isArrayIndex) {
+                // Array navigation: go to "items" schema
+                // We ignore the actual index - all array elements use the same schema
+                navigateArrayItems(node)
+            } else {
+                // Object navigation: go to "properties" wrapper, then the property
+                navigateObjectProperty(node, token)
+            }
+
+            if (node == null) {
+                break
+            }
+
+            // Resolve $ref if present
+            if (node is KsonObject) {
+                val refValue = node.propertyLookup[$$"$ref"] as? KsonString
+                if (refValue != null) {
+                    val resolved = resolveRef(refValue.value, updatedBaseUri)
+                    if (resolved != null) {
+                        node = resolved.resolvedValue
+                        updatedBaseUri = resolved.resolvedValueBaseUri
+                    }
+                }
+            }
+        }
+
+        return node?.let { ResolvedRef(it, updatedBaseUri) }
+    }
+
+    /**
+     * Navigate to the schema for array items.
+     *
+     * Looks for "items" or "additionalItems" schema properties.
+     */
+    private fun navigateArrayItems(schemaNode: KsonObject): KsonValue? {
+        // Try "items" first (most common case)
+        schemaNode.propertyLookup["items"]?.let { return it }
+
+        // Fallback to "additionalItems"
+        return schemaNode.propertyLookup["additionalItems"]
+    }
+
+    /**
+     * Navigate an object schema to find the sub-schema for a property.
+     *
+     * Handles multiple JSON Schema patterns:
+     * 1. Direct property lookup in "properties"
+     * 2. Pattern matching via "patternProperties"
+     * 3. Fallback to "additionalProperties"
+     */
+    private fun navigateObjectProperty(schemaNode: KsonObject, propertyName: String): KsonValue? {
+        // Try direct property lookup in "properties"
+        val properties = schemaNode.propertyLookup["properties"] as? KsonObject
+        properties?.propertyLookup?.get(propertyName)?.let { return it }
+
+        // Try pattern properties - check all patterns for a match
+        val patternProperties = schemaNode.propertyLookup["patternProperties"] as? KsonObject
+        patternProperties?.propertyMap?.forEach { (pattern, property) ->
+            try {
+                if (Regex(pattern).containsMatchIn(propertyName)) {
+                    return property.propValue
+                }
+            } catch (_: Throwable) {
+                // Invalid regex pattern, skip it
+                // Use Throwable to catch JavaScript SyntaxError and other platform-specific errors
+            }
+        }
+
+        // Fallback to additionalProperties
+        return schemaNode.propertyLookup["additionalProperties"]
     }
 
     companion object {
@@ -214,7 +337,7 @@ private fun decodeUriEncoding(encoded: String): String {
             val hex = encoded.substring(i + 1, i + 3)
             val decoded = try {
                 hex.toInt(16).toChar()
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 // Invalid hex sequence, keep the % and continue
                 result.append(char)
                 i++
@@ -240,7 +363,9 @@ private fun decodeUriEncoding(encoded: String): String {
 private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
     return when (val parseResult = JsonPointerParser(pointer).parse()) {
         is JsonPointerParser.ParseResult.Success -> {
-            navigatePointer(ksonValue, parseResult.tokens, currentBaseUri)
+            val resolvedValue = KsonValueNavigation.navigateByTokens(ksonValue, parseResult.tokens)
+            val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, parseResult.tokens, currentBaseUri)
+            resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
         }
 
         is JsonPointerParser.ParseResult.Error -> {
@@ -253,58 +378,35 @@ private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBas
 data class ResolvedRef(val resolvedValue: KsonValue, val resolvedValueBaseUri: String)
 
 /**
- * Navigates through a [KsonValue] structure using JSON Pointer tokens.
+ * Updates the base URI while following a path of JSON Pointer tokens.
  *
- * @param current The current [KsonValue] node
+ * This function mirrors the navigation logic of [KsonValueNavigation.navigateByTokens] but focuses
+ * on tracking `$id` updates encountered along the path.
+ *
+ * @param current The current [KsonValue] node to start from
  * @param tokens The list of reference tokens to follow
- * @return The [KsonValue] at the final location, or null if path not found
+ * @param currentBaseUri The starting base URI
+ * @return The updated base URI after following the token path
  */
-private fun navigatePointer(current: KsonValue, tokens: List<String>, currentBaseUri: String): ResolvedRef? {
-    if (tokens.isEmpty()) {
-        return ResolvedRef(current, currentBaseUri)
-    }
-
-    var node: KsonValue? = current
+private fun updateBaseUriAlongPath(current: KsonValue, tokens: List<String>, currentBaseUri: String): String {
+    var node = current
     var updatedBaseUri = currentBaseUri
 
     for (token in tokens) {
-        node = when (node) {
-            is KsonObject -> {
-                node.propertyLookup["\$id"]?.let { idValue ->
-                    if (idValue is KsonString) {
-                        val idString = idValue.value
-                        // Resolve the ID relative to the current base URI and update it
-                        val fullyQualifiedId = SchemaIdLookup.resolveUri(idString, updatedBaseUri)
-                        updatedBaseUri = fullyQualifiedId.toString()
-                    }
+        // Update base URI if current node has a $id property
+        if (node is KsonObject) {
+            node.propertyLookup["\$id"]?.let { idValue ->
+                if (idValue is KsonString) {
+                    updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
                 }
-
-                // Navigate into object property
-                node.propertyLookup[token]
-            }
-
-            is KsonList -> {
-                // Navigate into array element
-                val index = token.toIntOrNull()
-                if (index != null && index >= 0 && index < node.elements.size) {
-                    node.elements[index]
-                } else {
-                    null
-                }
-            }
-
-            else -> {
-                // Cannot navigate further
-                null
             }
         }
 
-        if (node == null) {
-            break
-        }
+        // Navigate to next node (same logic as KsonValueNavigation.navigateByTokens)
+        node = KsonValueNavigation.navigateByTokens(node, listOf(token)) ?: break
     }
 
-    return node?.let { ResolvedRef(it, updatedBaseUri) }
+    return updatedBaseUri
 }
 
 /**

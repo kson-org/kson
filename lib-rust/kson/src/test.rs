@@ -37,7 +37,7 @@ fn test_kson_format_classic() {
 
 #[test]
 fn test_kson_to_json_success() {
-    let result = Kson::to_json("key: [1, 2, 3, 4]", true);
+    let result = Kson::to_json("key: [1, 2, 3, 4]", transpile_options::Json::new(true));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -62,7 +62,7 @@ This is embedded content
 embed$$"#;
 
     // Test with default retain_embed_tags=true
-    let result = Kson::to_json(kson_with_embed, true);
+    let result = Kson::to_json(kson_with_embed, transpile_options::Json::new(true));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -78,7 +78,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_json(kson_with_embed, false);
+    let result = Kson::to_json(kson_with_embed, transpile_options::Json::new(false));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -93,7 +93,7 @@ embed$$"#;
 
 #[test]
 fn test_kson_to_json_failure() {
-    let result = Kson::to_json("key: [1, 2, 3, 4", true);
+    let result = Kson::to_json("key: [1, 2, 3, 4", transpile_options::Json::new(true));
     match result {
         Ok(_) => panic!("expected failure, found success"),
         Err(failure) => {
@@ -105,7 +105,7 @@ fn test_kson_to_json_failure() {
 
 #[test]
 fn test_kson_to_yaml_success() {
-    let result = Kson::to_yaml("key: [1, 2, 3, 4]", true);
+    let result = Kson::to_yaml("key: [1, 2, 3, 4]", transpile_options::Yaml::new(true));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -127,7 +127,7 @@ This is embedded content
 embed$$"#;
 
     // Test with default retain_embed_tags=true
-    let result = Kson::to_yaml(kson_with_embed, true);
+    let result = Kson::to_yaml(kson_with_embed, transpile_options::Yaml::new(true));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -142,7 +142,7 @@ embed$$"#;
     }
 
     // Test with retain_embed_tags=false
-    let result = Kson::to_yaml(kson_with_embed, false);
+    let result = Kson::to_yaml(kson_with_embed, transpile_options::Yaml::new(false));
     match result {
         Err(_) => panic!("expected success, found failure"),
         Ok(success) => {
@@ -157,7 +157,7 @@ embed$$"#;
 
 #[test]
 fn test_kson_to_yaml_failure() {
-    let result = Kson::to_yaml("key: [1, 2, 3, 4", true);
+    let result = Kson::to_yaml("key: [1, 2, 3, 4", transpile_options::Yaml::new(false));
     match result {
         Ok(_) => panic!("expected failure, found success"),
         Err(failure) => {
@@ -274,13 +274,8 @@ embed:%tag
     let properties = obj.properties();
     assert_eq!(properties.len(), 3);
 
-    let mapped_properties: std::collections::HashMap<String, &KsonValue> = properties
-        .iter()
-        .map(|(key, value)| (key.value().clone(), value))
-        .collect();
-
     // Check "key" property
-    let key_value = mapped_properties.get("key").unwrap();
+    let key_value = properties.get("key").unwrap();
     let KsonValue::KsonString(string) = key_value else {
         panic!("expected string");
     };
@@ -291,7 +286,7 @@ embed:%tag
     assert_eq!(string.end().column(), 10);
 
     // Check "list" property
-    let list_value = mapped_properties.get("list").unwrap();
+    let list_value = properties.get("list").unwrap();
     let KsonValue::KsonArray(array) = list_value else {
         panic!("expected arrayay");
     };
@@ -331,7 +326,7 @@ embed:%tag
     assert_eq!(decimal2.end().column(), 7);
 
     // Check "embed" property
-    let embed_value = mapped_properties.get("embed").unwrap();
+    let embed_value = properties.get("embed").unwrap();
     let KsonValue::KsonEmbed(embed) = embed_value else {
         panic!("expected embed");
     };
@@ -341,4 +336,69 @@ embed:%tag
     assert_eq!(embed.start().column(), 6);
     assert_eq!(embed.end().line(), 6);
     assert_eq!(embed.end().column(), 2);
+}
+
+#[test]
+fn test_property_keys_basic_access() {
+    let input = r#"name: John
+age: 30
+city: 'New York'"#;
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    // Verify all keys are present in property_keys
+    let property_keys = obj.property_keys();
+    assert_eq!(property_keys.len(), 3);
+    assert!(property_keys.contains_key("name"));
+    assert!(property_keys.contains_key("age"));
+    assert!(property_keys.contains_key("city"));
+
+    // Verify property_keys contains KsonValueString values
+    let name_key = property_keys.get("name").unwrap();
+    assert_eq!(name_key.value(), "name");
+
+    let age_key = property_keys.get("age").unwrap();
+    assert_eq!(age_key.value(), "age");
+}
+
+#[test]
+fn test_property_keys_with_position_information() {
+    let input = r#"name: John
+age: 30"#;
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    // Verify position information for keys
+    let property_keys = obj.property_keys();
+    let name_key = property_keys.get("name").unwrap();
+    assert_eq!(name_key.start().line(), 0);
+    assert_eq!(name_key.start().column(), 0);
+    assert_eq!(name_key.end().line(), 0);
+    assert_eq!(name_key.end().column(), 4);
+
+    let age_key = property_keys.get("age").unwrap();
+    assert_eq!(age_key.start().line(), 1);
+    assert_eq!(age_key.start().column(), 0);
+    assert_eq!(age_key.end().line(), 1);
+    assert_eq!(age_key.end().column(), 3);
+}
+
+#[test]
+fn test_property_keys_empty_object() {
+    let input = "{}";
+    let analysis = Kson::analyze(input);
+    let value = analysis.kson_value().unwrap();
+    let KsonValue::KsonObject(obj) = value else {
+        panic!("expected object");
+    };
+
+    // Empty object should have no property_keys
+    assert_eq!(obj.property_keys().len(), 0);
+    assert_eq!(obj.properties().len(), 0);
 }

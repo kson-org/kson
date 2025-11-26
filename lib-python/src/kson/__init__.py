@@ -532,6 +532,24 @@ class KsonValue:
     KsonNumber: TypeAlias
     Decimal: TypeAlias
     Integer: TypeAlias
+    def __init__(
+        self,
+        start: Position,
+        end: Position,
+    ):
+        if start is None:
+            raise ValueError("`start` cannot be None")
+        if end is None:
+            raise ValueError("`end` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/KsonValue",
+            b"(Lorg/kson/Position;Lorg/kson/Position;)V",
+            [
+
+                start._jni_ref,
+                end._jni_ref,
+            ]
+        )
     def __eq__(self, other):
         return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
 
@@ -635,7 +653,7 @@ class _KsonValue_KsonObject(KsonValue):
 
     def properties(
         self,
-    ) -> Dict[_KsonValue_KsonString, KsonValue]:
+    ) -> Dict[str, KsonValue]:
 
 
         jni_ref = self._jni_ref
@@ -648,7 +666,24 @@ class _KsonValue_KsonObject(KsonValue):
             []
         )
 
-        return cast(Any, (lambda x0: _from_kotlin_map(x0, lambda x1: _from_kotlin_object(KsonValue.KsonString, x1), lambda x1: KsonValue._downcast(x1)))(result))
+        return cast(Any, (lambda x0: _from_kotlin_map(x0, _java_string_to_python_str, lambda x1: KsonValue._downcast(x1)))(result))
+
+    def property_keys(
+        self,
+    ) -> Dict[str, _KsonValue_KsonString]:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/KsonValue$KsonObject",
+            jni_ref,
+            b"getPropertyKeys",
+            b"()Ljava/util/Map;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: _from_kotlin_map(x0, _java_string_to_python_str, lambda x1: _from_kotlin_object(KsonValue.KsonString, x1)))(result))
 
     def type(
         self,
@@ -834,6 +869,40 @@ class _KsonValue_KsonNumber_Integer(KsonValue.KsonNumber):
         )
 
         return cast(Any, (lambda x0: x0)(result))
+
+    def internal_start(
+        self,
+    ) -> Position:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/KsonValue$KsonNumber$Integer",
+            jni_ref,
+            b"getInternalStart",
+            b"()Lorg/kson/Position;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
+
+    def internal_end(
+        self,
+    ) -> Position:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/KsonValue$KsonNumber$Integer",
+            jni_ref,
+            b"getInternalEnd",
+            b"()Lorg/kson/Position;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
 
     def type(
         self,
@@ -1413,6 +1482,147 @@ SchemaResult.Failure = _SchemaResult_Failure
 
 
 
+class TranspileOptions:
+    """Core interface for transpilation options shared across all output formats."""
+
+    _jni_ref: Any
+
+    Json: TypeAlias
+    Yaml: TypeAlias
+    def __init__(
+        self,
+
+    ):
+
+        self._jni_ref = _construct(
+            b"org/kson/TranspileOptions",
+            b"()V",
+            []
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def retain_embed_tags(
+        self,
+    ) -> bool:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/TranspileOptions",
+            jni_ref,
+            b"getRetainEmbedTags",
+            b"()Z",
+            "BooleanMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: x0)(result))
+    @staticmethod
+    def _downcast(jni_ref) -> Any:
+        match _jni_class_name(jni_ref):
+
+            case "org.kson.TranspileOptions$Json":
+                return _from_kotlin_object(_TranspileOptions_Json, jni_ref)
+
+            case "org.kson.TranspileOptions$Yaml":
+                return _from_kotlin_object(_TranspileOptions_Yaml, jni_ref)
+
+class _TranspileOptions_Json(TranspileOptions):
+    """Options for transpiling Kson to JSON."""
+
+    _jni_ref: Any
+
+    def __init__(
+        self,
+        retain_embed_tags: bool,
+    ):
+        if retain_embed_tags is None:
+            raise ValueError("`retain_embed_tags` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/TranspileOptions$Json",
+            b"(Z)V",
+            [
+
+                ffi.cast('jboolean', retain_embed_tags),
+            ]
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def retain_embed_tags(
+        self,
+    ) -> bool:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/TranspileOptions$Json",
+            jni_ref,
+            b"getRetainEmbedTags",
+            b"()Z",
+            "BooleanMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: x0)(result))
+TranspileOptions.Json = _TranspileOptions_Json
+
+
+class _TranspileOptions_Yaml(TranspileOptions):
+    """Options for transpiling Kson to YAML."""
+
+    _jni_ref: Any
+
+    def __init__(
+        self,
+        retain_embed_tags: bool,
+    ):
+        if retain_embed_tags is None:
+            raise ValueError("`retain_embed_tags` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/TranspileOptions$Yaml",
+            b"(Z)V",
+            [
+
+                ffi.cast('jboolean', retain_embed_tags),
+            ]
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def retain_embed_tags(
+        self,
+    ) -> bool:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/TranspileOptions$Yaml",
+            jni_ref,
+            b"getRetainEmbedTags",
+            b"()Z",
+            "BooleanMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: x0)(result))
+TranspileOptions.Yaml = _TranspileOptions_Yaml
+
+
+
 class Kson:
     """The [Kson](https://kson.org) language"""
 
@@ -1461,31 +1671,31 @@ class Kson:
     @staticmethod
     def to_json(
         kson: str,
-        retain_embed_tags: bool,
+        options: _TranspileOptions_Json,
 
     ) -> Result:
         """Converts Kson to Json.
 
         @param kson The Kson source to convert
-        @param retainEmbedTags Whether to retain the embed tags in the result
+        @param options Options for the JSON transpilation
         @return A Result containing either the Json output or error messages
         """
 
         if kson is None:
             raise ValueError("`kson` cannot be None")
-        if retain_embed_tags is None:
-            raise ValueError("`retain_embed_tags` cannot be None")
+        if options is None:
+            raise ValueError("`options` cannot be None")
         jni_ref = _access_static_field(b"org/kson/Kson", b"INSTANCE", b"Lorg/kson/Kson;")
         result = _call_method(
             b"org/kson/Kson",
             jni_ref,
             b"toJson",
-            b"(Ljava/lang/String;Z)Lorg/kson/Result;",
+            b"(Ljava/lang/String;Lorg/kson/TranspileOptions$Json;)Lorg/kson/Result;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(kson),
-                ffi.cast('jboolean', retain_embed_tags),
+                options._jni_ref,
             ]
         )
 
@@ -1494,31 +1704,31 @@ class Kson:
     @staticmethod
     def to_yaml(
         kson: str,
-        retain_embed_tags: bool,
+        options: _TranspileOptions_Yaml,
 
     ) -> Result:
         """Converts Kson to Yaml, preserving comments
 
         @param kson The Kson source to convert
-        @param retainEmbedTags Whether to retain the embed tags in the result
+        @param options Options for the YAML transpilation
         @return A Result containing either the Yaml output or error messages
         """
 
         if kson is None:
             raise ValueError("`kson` cannot be None")
-        if retain_embed_tags is None:
-            raise ValueError("`retain_embed_tags` cannot be None")
+        if options is None:
+            raise ValueError("`options` cannot be None")
         jni_ref = _access_static_field(b"org/kson/Kson", b"INSTANCE", b"Lorg/kson/Kson;")
         result = _call_method(
             b"org/kson/Kson",
             jni_ref,
             b"toYaml",
-            b"(Ljava/lang/String;Z)Lorg/kson/Result;",
+            b"(Ljava/lang/String;Lorg/kson/TranspileOptions$Yaml;)Lorg/kson/Result;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(kson),
-                ffi.cast('jboolean', retain_embed_tags),
+                options._jni_ref,
             ]
         )
 

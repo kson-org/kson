@@ -22,7 +22,6 @@ import org.kson.value.KsonBoolean as InternalKsonBoolean
 import org.kson.value.KsonNull as InternalKsonNull
 import org.kson.value.EmbedBlock as InternalEmbedBlock
 import kotlin.js.JsExport
-import kotlin.ConsistentCopyVisibility
 import kotlin.js.JsName
 
 /**
@@ -44,12 +43,12 @@ object Kson {
      * Converts Kson to Json.
      *
      * @param kson The Kson source to convert
-     * @param retainEmbedTags Whether to retain the embed tags in the result
+     * @param options Options for the JSON transpilation
      * @return A Result containing either the Json output or error messages
      */
-    fun toJson(kson: String, retainEmbedTags: Boolean = true): Result {
+    fun toJson(kson: String, options: TranspileOptions.Json = TranspileOptions.Json()): Result {
         val compileConfig = Json(
-            retainEmbedTags = retainEmbedTags,
+            retainEmbedTags = options.retainEmbedTags,
         )
         val jsonParseResult = KsonCore.parseToJson(kson, compileConfig)
         return if (jsonParseResult.hasErrors()) {
@@ -63,12 +62,12 @@ object Kson {
      * Converts Kson to Yaml, preserving comments
      *
      * @param kson The Kson source to convert
-     * @param retainEmbedTags Whether to retain the embed tags in the result
+     * @param options Options for the YAML transpilation
      * @return A Result containing either the Yaml output or error messages
      */
-    fun toYaml(kson: String, retainEmbedTags: Boolean = true): Result {
+    fun toYaml(kson: String, options: TranspileOptions.Yaml = TranspileOptions.Yaml()): Result {
         val compileConfig = CompileTarget.Yaml(
-            retainEmbedTags = retainEmbedTags,
+            retainEmbedTags = options.retainEmbedTags,
         )
         val yamlParseResult = KsonCore.parseToYaml(kson, compileConfig)
         return if (yamlParseResult.hasErrors()) {
@@ -134,16 +133,16 @@ object Kson {
  * Result of a Kson conversion operation
  */
 sealed class Result {
-    data class Success(val output: String) : Result()
-    data class Failure(val errors: List<Message>) : Result()
+    class Success(val output: String) : Result()
+    class Failure(val errors: List<Message>) : Result()
 }
 
 /**
  * A [parseSchema] result
  */
 sealed class SchemaResult {
-    data class Success(val schemaValidator: SchemaValidator) : SchemaResult()
-    data class Failure(val errors: List<Message>) : SchemaResult()
+    class Success(val schemaValidator: SchemaValidator) : SchemaResult()
+    class Failure(val errors: List<Message>) : SchemaResult()
 }
 
 /**
@@ -175,7 +174,7 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
 /**
  * Options for formatting Kson output.
  */
-data class FormatOptions(
+class FormatOptions(
     val indentType: IndentType = IndentType.Spaces(2),
     val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
 ) {
@@ -199,6 +198,27 @@ data class FormatOptions(
 }
 
 /**
+ * Core interface for transpilation options shared across all output formats.
+ */
+sealed class TranspileOptions {
+    abstract val retainEmbedTags: Boolean
+
+    /**
+     * Options for transpiling Kson to JSON.
+     */
+    class Json(
+        override val retainEmbedTags: Boolean = true
+    ) : TranspileOptions()
+
+    /**
+     * Options for transpiling Kson to YAML.
+     */
+    class Yaml(
+        override val retainEmbedTags: Boolean = true
+    ) : TranspileOptions()
+}
+
+/**
  * [FormattingStyle] options for Kson Output
  */
 enum class FormattingStyle{
@@ -216,7 +236,7 @@ enum class FormattingStyle{
  */
 sealed class IndentType {
     /** Use spaces for indentation with the specified count */
-    data class Spaces(val size: Int = 2) : IndentType()
+    class Spaces(val size: Int = 2) : IndentType()
 
     /** Use tabs for indentation */
     data object Tabs : IndentType()
@@ -225,8 +245,7 @@ sealed class IndentType {
 /**
  * The result of statically analyzing a Kson document
  */
-@ConsistentCopyVisibility
-data class Analysis internal constructor(
+class Analysis internal constructor(
     val errors: List<Message>,
     val tokens: List<Token>,
     val ksonValue: KsonValue?
@@ -235,8 +254,7 @@ data class Analysis internal constructor(
 /**
  * [Token] produced by the lexing phase of a Kson parse
  */
-@ConsistentCopyVisibility
-data class Token internal constructor(
+class Token internal constructor(
     val tokenType: TokenType,
     val text: String,
     val start: Position,
@@ -281,8 +299,7 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
-@ConsistentCopyVisibility
-data class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
+class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
 
 /**
  * Represents the severity of a [Message]
@@ -473,9 +490,14 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         is InternalKsonObject -> {
             KsonValue.KsonObject(
                 properties = ksonValue.propertyMap.map {
-                    (convertValue(it.value.propName) as KsonValue.KsonString) to convertValue(
+                    (convertValue(it.value.propName) as KsonValue.KsonString).value to convertValue(
                         it.value.propValue
                     )
+                }.toMap(),
+                propertyKeys = ksonValue.propertyMap.map {
+                    (convertValue(it.value.propName) as KsonValue.KsonString).value to (convertValue(
+                        it.value.propName
+                    ) as KsonValue.KsonString)
                 }.toMap(),
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -553,7 +575,7 @@ enum class KsonValueType {
 /**
  * Represents a parsed [InternalKsonValue] in the public API
  */
-sealed class KsonValue private constructor(val start: Position, val end: Position) {
+sealed class KsonValue(val start: Position, val end: Position) {
     /**
      * Type discriminator for easier type checking in TypeScript/JavaScript
      */
@@ -563,7 +585,8 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      */
     @ConsistentCopyVisibility
     data class KsonObject internal constructor(
-        val properties: Map<KsonString, KsonValue>,
+        val properties: Map<String, KsonValue>,
+        val propertyKeys: Map<String, KsonString>,
         private val internalStart: Position,
         private val internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
@@ -573,11 +596,10 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson array with elements
      */
-    @ConsistentCopyVisibility
-    data class KsonArray internal constructor(
+    class KsonArray internal constructor(
         val elements: List<KsonValue>,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.ARRAY
     }
@@ -585,11 +607,10 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson string value
      */
-    @ConsistentCopyVisibility
-    data class KsonString internal constructor(
+    class KsonString internal constructor(
         val value: String,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.STRING
     }
@@ -598,20 +619,19 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
      * A Kson number value.
      */
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
-          @ConsistentCopyVisibility
-          data class Integer internal constructor(
+
+          class Integer internal constructor(
               val value: Int,
-              private val internalStart: Position,
-              private val internalEnd: Position
+              val internalStart: Position,
+              val internalEnd: Position
           ) : KsonNumber(internalStart, internalEnd){
               override val type = KsonValueType.INTEGER
           }
 
-        @ConsistentCopyVisibility
-        data class Decimal internal constructor(
+        class Decimal internal constructor(
             val value: Double,
-            private val internalStart: Position,
-            private val internalEnd: Position
+            internalStart: Position,
+            internalEnd: Position
         ) : KsonNumber(internalStart, internalEnd) {
             override val type = KsonValueType.DECIMAL
         }
@@ -621,11 +641,10 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson boolean value
      */
-    @ConsistentCopyVisibility
-    data class KsonBoolean internal constructor(
+    class KsonBoolean internal constructor(
         val value: Boolean,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.BOOLEAN
     }
@@ -633,10 +652,9 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson null value
      */
-    @ConsistentCopyVisibility
-    data class KsonNull internal constructor(
-        private val internalStart: Position,
-        private val internalEnd: Position
+    class KsonNull internal constructor(
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.NULL
     }
@@ -644,13 +662,12 @@ sealed class KsonValue private constructor(val start: Position, val end: Positio
     /**
      * A Kson embed block
      */
-    @ConsistentCopyVisibility
-    data class KsonEmbed internal constructor(
+    class KsonEmbed internal constructor(
         val tag: String?,
         val metadata: String?,
         val content: String,
-        private val internalStart: Position,
-        private val internalEnd: Position
+        internalStart: Position,
+        internalEnd: Position
     ) : KsonValue(internalStart, internalEnd) {
         override val type = KsonValueType.EMBED
     }

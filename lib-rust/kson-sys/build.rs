@@ -131,6 +131,8 @@ fn main() -> anyhow::Result<()> {
     // Tell the compiler where to find the dynamic library
     println!("cargo:rustc-link-search=native={}", out_dir.display());
     println!("cargo:rustc-link-lib=dylib=kson");
+
+    #[cfg(not(target_os = "windows"))]
     println!("cargo:rustc-link-lib=dylib=z");
 
     // Let users of the library know the path to the compiled binary

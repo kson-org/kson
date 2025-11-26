@@ -1341,6 +1341,50 @@ pub mod kson_value {
             }
 
 
+            pub fn internal_start(
+                &self,
+            ) -> Position {
+                let self_ptr = self.to_kotlin_object();
+                let self_obj = self_ptr.as_kotlin_object();
+
+
+                let (_, _detach_guard) = util::attach_thread_to_java_vm();
+                let result = call_jvm_function!(
+                    util,
+                    c"org/kson/KsonValue$KsonNumber$Integer",
+                    c"getInternalStart",
+                    c"()Lorg/kson/Position;",
+                    CallObjectMethod,
+                    self_obj,
+
+                );
+
+                FromKotlinObject::from_kotlin_object(result)
+            }
+
+
+            pub fn internal_end(
+                &self,
+            ) -> Position {
+                let self_ptr = self.to_kotlin_object();
+                let self_obj = self_ptr.as_kotlin_object();
+
+
+                let (_, _detach_guard) = util::attach_thread_to_java_vm();
+                let result = call_jvm_function!(
+                    util,
+                    c"org/kson/KsonValue$KsonNumber$Integer",
+                    c"getInternalEnd",
+                    c"()Lorg/kson/Position;",
+                    CallObjectMethod,
+                    self_obj,
+
+                );
+
+                FromKotlinObject::from_kotlin_object(result)
+            }
+
+
             pub fn type_(
                 &self,
             ) -> KsonValueType {
@@ -1582,7 +1626,7 @@ pub mod kson_value {
 
         pub fn properties(
             &self,
-        ) -> std::collections::HashMap<kson_value::KsonString, KsonValue> {
+        ) -> std::collections::HashMap<String, KsonValue> {
             let self_ptr = self.to_kotlin_object();
             let self_obj = self_ptr.as_kotlin_object();
 
@@ -1592,6 +1636,28 @@ pub mod kson_value {
                 util,
                 c"org/kson/KsonValue$KsonObject",
                 c"getProperties",
+                c"()Ljava/util/Map;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            util::from_kotlin_value_map(result)
+        }
+
+
+        pub fn property_keys(
+            &self,
+        ) -> std::collections::HashMap<String, kson_value::KsonString> {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue$KsonObject",
+                c"getPropertyKeys",
                 c"()Ljava/util/Map;",
                 CallObjectMethod,
                 self_obj,
@@ -2674,6 +2740,279 @@ impl std::hash::Hash for SchemaResult {
     }
 }
 
+/// Core interface for transpilation options shared across all output formats.
+#[derive(Clone)]
+pub enum TranspileOptions {
+    Json(transpile_options::Json),
+    Yaml(transpile_options::Yaml),
+}
+
+pub mod transpile_options {
+    use super::*;
+
+
+    /// Options for transpiling Kson to JSON.
+    #[derive(Clone)]
+    pub struct Json {
+        kotlin_ptr: KotlinPtr,
+    }
+
+    impl FromKotlinObject for Json {
+        fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let kotlin_ptr = util::to_gc_global_ref(env, obj);
+            Self { kotlin_ptr }
+        }
+    }
+
+    impl ToKotlinObject for Json {
+        fn to_kotlin_object(&self) -> KotlinPtr {
+            self.kotlin_ptr.clone()
+        }
+    }
+
+    impl AsKotlinObject for Json {
+        fn as_kotlin_object(&self) -> self::sys::jobject {
+            self.kotlin_ptr.inner.inner
+        }
+    }
+
+    impl Json {
+        pub fn new(
+            retain_embed_tags: bool,
+        ) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let class = util::get_class(env, c"org/kson/TranspileOptions$Json");
+            let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Z)V");
+
+            let retain_embed_tags = retain_embed_tags as c_int;
+
+            let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
+                retain_embed_tags,
+            )};
+            util::panic_upon_exception(env);
+            Self {
+                kotlin_ptr: util::to_gc_global_ref(env, jobject)
+            }
+        }
+    }
+
+
+    impl Json {
+
+
+        pub fn retain_embed_tags(
+            &self,
+        ) -> bool {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/TranspileOptions$Json",
+                c"getRetainEmbedTags",
+                c"()Z",
+                CallBooleanMethod,
+                self_obj,
+
+            );
+
+            result != 0
+        }
+    }
+
+    impl std::fmt::Debug for Json {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let obj = self.to_kotlin_object();
+            write!(f, "{}", util::call_to_string(c"org/kson/TranspileOptions$Json", &obj))
+        }
+    }
+
+    impl Eq for Json {}
+    impl PartialEq for Json {
+        fn eq(&self, other: &Json) -> bool {
+            util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+        }
+    }
+    impl std::hash::Hash for Json {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            util::apply_hash_code(self.to_kotlin_object(), state)
+        }
+    }
+
+    /// Options for transpiling Kson to YAML.
+    #[derive(Clone)]
+    pub struct Yaml {
+        kotlin_ptr: KotlinPtr,
+    }
+
+    impl FromKotlinObject for Yaml {
+        fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let kotlin_ptr = util::to_gc_global_ref(env, obj);
+            Self { kotlin_ptr }
+        }
+    }
+
+    impl ToKotlinObject for Yaml {
+        fn to_kotlin_object(&self) -> KotlinPtr {
+            self.kotlin_ptr.clone()
+        }
+    }
+
+    impl AsKotlinObject for Yaml {
+        fn as_kotlin_object(&self) -> self::sys::jobject {
+            self.kotlin_ptr.inner.inner
+        }
+    }
+
+    impl Yaml {
+        pub fn new(
+            retain_embed_tags: bool,
+        ) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let class = util::get_class(env, c"org/kson/TranspileOptions$Yaml");
+            let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Z)V");
+
+            let retain_embed_tags = retain_embed_tags as c_int;
+
+            let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
+                retain_embed_tags,
+            )};
+            util::panic_upon_exception(env);
+            Self {
+                kotlin_ptr: util::to_gc_global_ref(env, jobject)
+            }
+        }
+    }
+
+
+    impl Yaml {
+
+
+        pub fn retain_embed_tags(
+            &self,
+        ) -> bool {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/TranspileOptions$Yaml",
+                c"getRetainEmbedTags",
+                c"()Z",
+                CallBooleanMethod,
+                self_obj,
+
+            );
+
+            result != 0
+        }
+    }
+
+    impl std::fmt::Debug for Yaml {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let obj = self.to_kotlin_object();
+            write!(f, "{}", util::call_to_string(c"org/kson/TranspileOptions$Yaml", &obj))
+        }
+    }
+
+    impl Eq for Yaml {}
+    impl PartialEq for Yaml {
+        fn eq(&self, other: &Yaml) -> bool {
+            util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+        }
+    }
+    impl std::hash::Hash for Yaml {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            util::apply_hash_code(self.to_kotlin_object(), state)
+        }
+    }
+}
+impl FromKotlinObject for TranspileOptions {
+    fn from_kotlin_object(obj: jobject) -> Self {
+        match util::class_name(obj).as_str() {
+            "org.kson.TranspileOptions$Json" => TranspileOptions::Json(transpile_options::Json::from_kotlin_object(obj)),
+            "org.kson.TranspileOptions$Yaml" => TranspileOptions::Yaml(transpile_options::Yaml::from_kotlin_object(obj)),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl ToKotlinObject for TranspileOptions {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        match self {
+            Self::Json(inner) => inner.to_kotlin_object(),
+            Self::Yaml(inner) => inner.to_kotlin_object(),
+        }
+    }
+}
+
+impl TranspileOptions {
+    pub fn name(self) -> String {
+        let obj = self.to_kotlin_object();
+        util::enum_name(&obj)
+    }
+}
+
+
+impl TranspileOptions {
+
+
+    pub fn retain_embed_tags(
+        &self,
+    ) -> bool {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/TranspileOptions",
+            c"getRetainEmbedTags",
+            c"()Z",
+            CallBooleanMethod,
+            self_obj,
+
+        );
+
+        result != 0
+    }
+}
+
+impl std::fmt::Debug for TranspileOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let obj = self.to_kotlin_object();
+        write!(f, "{}", util::call_to_string(c"org/kson/TranspileOptions", &obj))
+    }
+}
+
+impl Eq for TranspileOptions {}
+impl PartialEq for TranspileOptions {
+    fn eq(&self, other: &TranspileOptions) -> bool {
+        util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+    }
+}
+impl std::hash::Hash for TranspileOptions {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self.to_kotlin_object(), state)
+    }
+}
+
 
 /// The [Kson](https://kson.org) language
 #[derive(Clone)]
@@ -2741,28 +3080,29 @@ impl Kson {
     /// Converts Kson to Json.
     ///
     /// @param kson The Kson source to convert
-    /// @param retainEmbedTags Whether to retain the embed tags in the result
+    /// @param options Options for the JSON transpilation
     /// @return A Result containing either the Json output or error messages
     pub fn to_json(
         kson: &str,
-        retain_embed_tags: bool,
+        options: transpile_options::Json,
     ) -> std::result::Result<result::Success, result::Failure> {
         let self_ptr = util::access_static_field(c"org/kson/Kson", c"INSTANCE", c"Lorg/kson/Kson;");
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
-        let retain_embed_tags = retain_embed_tags as c_int;
+        let options_ptr = options.to_kotlin_object();
+        let options = options_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/Kson",
             c"toJson",
-            c"(Ljava/lang/String;Z)Lorg/kson/Result;",
+            c"(Ljava/lang/String;Lorg/kson/TranspileOptions$Json;)Lorg/kson/Result;",
             CallObjectMethod,
             self_obj,
             kson,
-            retain_embed_tags,
+            options,
         );
 
         crate::kson_result_into_rust_result(FromKotlinObject::from_kotlin_object(result))
@@ -2771,28 +3111,29 @@ impl Kson {
     /// Converts Kson to Yaml, preserving comments
     ///
     /// @param kson The Kson source to convert
-    /// @param retainEmbedTags Whether to retain the embed tags in the result
+    /// @param options Options for the YAML transpilation
     /// @return A Result containing either the Yaml output or error messages
     pub fn to_yaml(
         kson: &str,
-        retain_embed_tags: bool,
+        options: transpile_options::Yaml,
     ) -> std::result::Result<result::Success, result::Failure> {
         let self_ptr = util::access_static_field(c"org/kson/Kson", c"INSTANCE", c"Lorg/kson/Kson;");
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
-        let retain_embed_tags = retain_embed_tags as c_int;
+        let options_ptr = options.to_kotlin_object();
+        let options = options_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/Kson",
             c"toYaml",
-            c"(Ljava/lang/String;Z)Lorg/kson/Result;",
+            c"(Ljava/lang/String;Lorg/kson/TranspileOptions$Yaml;)Lorg/kson/Result;",
             CallObjectMethod,
             self_obj,
             kson,
-            retain_embed_tags,
+            options,
         );
 
         crate::kson_result_into_rust_result(FromKotlinObject::from_kotlin_object(result))

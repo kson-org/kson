@@ -72,6 +72,11 @@ tasks {
             into("gradle/wrapper")
         }
 
+        // Need this file to satisfy the `transpileCircleCiConfigTask`
+        from(rootProject.file(".circleci/config.kson")){
+            into(".circleci")
+        }
+
         // Copy build configuration files
         from(rootProject.file("build.gradle.kts"))
         from(rootProject.file("settings.gradle.kts"))
