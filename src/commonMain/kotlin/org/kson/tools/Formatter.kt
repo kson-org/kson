@@ -197,7 +197,7 @@ class IndentFormatter(
 
             for (i in 1..toBeClosedNestCount) {
                 if (nextNests.isNotEmpty()) {
-                    nextNests.removeAt(nextNests.lastIndex)
+                    nextNests.removeLast()
                 } else if (nesting.isNotEmpty()) {
                     nesting.removeLast()
                 }

@@ -605,7 +605,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
          * Our [forgetMe] operation is a basic [removeLast] because [addMark] guarantees the last entry here
          * is the only unresolved mark created by us.  See [addMark] for details.
          */
-        val lastChild = childMarkers. removeAt(childMarkers.lastIndex)
+        val lastChild = childMarkers.removeLast()
         if (lastChild != me) {
             throw ShouldNotHappenException(
                 "Bug: This should be an impossible `forgetMe` call since " +
