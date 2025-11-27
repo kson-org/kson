@@ -15,7 +15,11 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  *   [location] (which we consider metadata).  The ability to treat these [KsonValue]s as _values_ leads to
  *   more ergonomic code than having a strict equals that incorporates [location].
  */
-sealed class KsonValue(val location: Location) {
+sealed class KsonValue(val astNode: KsonValueNode) {
+
+    val location: Location by lazy {
+        astNode.location
+    }
     /**
      * Ensure all our [KsonValue] classes implement their [equals] and [hashCode]
      * NOTE: this [equals] and [hashCode] must be logical equality of the underlying values, and
@@ -36,7 +40,7 @@ class KsonObject(
      *
      * For a direct [String] key to [KsonValue] value lookup for this [KsonObject], so [propertyLookup]
      */
-    val propertyMap: Map<String, KsonObjectProperty>, location: Location) : KsonValue(location) {
+    val propertyMap: Map<String, KsonObjectProperty>, astNode: KsonValueNode) : KsonValue(astNode) {
     /**
      * Convenience lookup with the [String] keys pointing directly to the regular [KsonValue] values
      */
@@ -57,7 +61,7 @@ class KsonObject(
     }
 }
 
-class KsonList(val elements: List<KsonValue>, location: Location) : KsonValue(location) {
+class KsonList(val elements: List<KsonValue>, astNode: ListNode) : KsonValue(astNode) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonList) return false
@@ -74,11 +78,15 @@ class KsonList(val elements: List<KsonValue>, location: Location) : KsonValue(lo
     }
 }
 
-class EmbedBlock(
-    val embedTag: KsonString?,
-    val metadataTag: KsonString?,
-    val embedContent: KsonString,
-                 location: Location) : KsonValue(location) {
+class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
+    private val embedTagNode = embedBlockNode.embedTagNode
+    private val metadataTagNode = embedBlockNode.metadataTagNode
+    private val embedContentNode = embedBlockNode.embedContentNode
+
+    val embedTag: KsonString? = embedTagNode?.let { KsonString(it) }
+    val metadataTag: KsonString? = metadataTagNode?.let { KsonString(it) }
+    val embedContent: KsonString = KsonString(embedContentNode)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is EmbedBlock) return false
@@ -89,18 +97,33 @@ class EmbedBlock(
     fun asKsonObject(): KsonObject {
         return KsonObject(
             buildMap {
-                embedTag?.let {
-                    val embedTagKey = KsonString(EmbedObjectKeys.EMBED_TAG.key, embedTag.location)
-                    put(embedTagKey.value, KsonObjectProperty(embedTagKey, it))
+                embedTagNode?.let {
+                    val embedTagStringNode = object: UnquotedStringNode(embedTagNode.sourceTokens) {
+                        override val stringContent = EmbedObjectKeys.EMBED_TAG.key
+                        override val processedStringContent = EmbedObjectKeys.EMBED_TAG.key
+                    }
+                    put(EmbedObjectKeys.EMBED_TAG.key,
+                        KsonObjectProperty(KsonString(embedTagStringNode),
+                            KsonString(it)))
                 }
-                metadataTag?.let {
-                    val embedMetadataKey = KsonString(EmbedObjectKeys.EMBED_METADATA.key, metadataTag.location)
-                    put(embedMetadataKey.value, KsonObjectProperty(embedMetadataKey, it))
+                metadataTagNode?.let {
+                    val metadataTagStringNode = object: UnquotedStringNode(metadataTagNode.sourceTokens) {
+                        override val stringContent = EmbedObjectKeys.EMBED_METADATA.key
+                        override val processedStringContent = EmbedObjectKeys.EMBED_METADATA.key
+                    }
+                    put(EmbedObjectKeys.EMBED_METADATA.key,
+                        KsonObjectProperty(KsonString(metadataTagStringNode),
+                            KsonString(it)))
                 }
-                val embedContentKey = KsonString(EmbedObjectKeys.EMBED_CONTENT.key, embedContent.location)
-                put(embedContentKey. value, KsonObjectProperty(embedContentKey, embedContent))
+                val embedContentStringNode = object: UnquotedStringNode(embedContentNode.sourceTokens) {
+                    override val stringContent = EmbedObjectKeys.EMBED_CONTENT.key
+                    override val processedStringContent = EmbedObjectKeys.EMBED_CONTENT.key
+                }
+                put(EmbedObjectKeys.EMBED_CONTENT.key,
+                    KsonObjectProperty(KsonString(embedContentStringNode),
+                        KsonString(embedContentNode)))
             },
-            location
+            astNode
         )
     }
 
@@ -109,7 +132,11 @@ class EmbedBlock(
     }
 }
 
-class KsonString(val value: String, location: Location) : KsonValue(location) {
+class KsonString(astNode: StringNodeImpl) : KsonValue(astNode) {
+    val value: String by lazy {
+        astNode.processedStringContent
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonString) return false
@@ -122,7 +149,8 @@ class KsonString(val value: String, location: Location) : KsonValue(location) {
     }
 }
 
-class KsonNumber(val value: NumberParser.ParsedNumber, location: Location) : KsonValue(location) {
+class KsonNumber(astNode: NumberNode) : KsonValue(astNode) {
+    val value = astNode.value
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonNumber) return false
@@ -150,7 +178,9 @@ class KsonNumber(val value: NumberParser.ParsedNumber, location: Location) : Kso
     }
 }
 
-class KsonBoolean(val value: Boolean, location: Location) : KsonValue(location) {
+class KsonBoolean(astNode: BooleanNode) : KsonValue(astNode) {
+    val value = astNode.value
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonBoolean) return false
@@ -163,7 +193,7 @@ class KsonBoolean(val value: Boolean, location: Location) : KsonValue(location) 
     }
 }
 
-class KsonNull(location: Location) : KsonValue(location) {
+class KsonNull(astNode: NullNode) : KsonValue(astNode) {
     override fun equals(other: Any?): Boolean {
         return other is KsonNull
     }
@@ -191,25 +221,20 @@ fun AstNode.toKsonValue(): KsonValue {
                 val keyName = propKey.key.toKsonValue() as KsonString
                 keyName.value to KsonObjectProperty(keyName, propImpl.value.toKsonValue())
             },
-                location)
+                this)
         }
         is ListNode -> KsonList(elements.map { elem ->
             val listElementNode = elem as? ListElementNodeImpl
                 ?: throw ShouldNotHappenException("this AST is fully valid")
             listElementNode.value.toKsonValue()
 
-        }, location)
-        is EmbedBlockNode -> EmbedBlock(
-            embedTagNode?.toKsonValue() as? KsonString,
-            metadataTagNode?.toKsonValue() as? KsonString,
-            embedContentNode.toKsonValue() as KsonString,
-            location
-        )
-        is StringNodeImpl -> KsonString(processedStringContent, location)
-        is NumberNode -> KsonNumber(value, location)
-        is TrueNode -> KsonBoolean(true, location)
-        is FalseNode -> KsonBoolean(false, location)
-        is NullNode -> KsonNull(location)
+        }, this)
+        is EmbedBlockNode -> EmbedBlock(this)
+        is StringNodeImpl -> KsonString(this)
+        is NumberNode -> KsonNumber(this)
+        is TrueNode -> KsonBoolean(this)
+        is FalseNode -> KsonBoolean(this)
+        is NullNode -> KsonNull(this)
         is KsonValueNodeImpl -> this.toKsonValue()
         is ObjectKeyNodeImpl -> {
             throw ShouldNotHappenException("these properties are processed above in the ${ObjectNode::class.simpleName} case")
