@@ -40,9 +40,9 @@ set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 setlocal
 set BUILD_DIR=%APP_HOME%\gradle\jdk
-set JVM_TARGET_DIR=%BUILD_DIR%\OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7-c15042\
+set JVM_TARGET_DIR=%BUILD_DIR%\graalvm-community-jdk-21.0.2_windows-x64_bin-8bbfc2\
 
-set JVM_URL=https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14%%2B7/OpenJDK17U-jdk_x64_windows_hotspot_17.0.14_7.zip
+set JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip
 
 set IS_TAR_GZ=0
 set JVM_TEMP_FILE=gradle-jvm.zip

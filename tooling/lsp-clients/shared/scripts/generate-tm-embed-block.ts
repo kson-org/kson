@@ -25,6 +25,12 @@ const languages: LanguageConfig[] = [
         contentName: 'meta.embedded.typescript'
     },
     {
+        id: 'jinja',
+        aliases: ['jinja'],
+        scopeName: 'source.jinja',
+        contentName: 'meta.embedded.jinja'
+    },
+    {
         id: 'javascript',
         aliases: ['js'],
         scopeName: 'source.js',

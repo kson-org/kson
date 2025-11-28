@@ -1,3 +1,4 @@
+import pytest
 from kson import *
 
 
@@ -12,6 +13,11 @@ def messages_to_string(msgs):
         output += line.strip()
         output += "\n"
     return output
+
+
+def test_none_argument():
+    with pytest.raises(ValueError):
+        IndentType.Spaces(None)
 
 
 def test_kson_format():
@@ -54,8 +60,10 @@ def test_kson_formatting_classic():
 
 
 def test_kson_to_json_success():
-    result = Kson.to_json("key: [1, 2, 3, 4]")
-    assert isinstance(result, Success)
+    result = Kson.to_json(
+        "key: [1, 2, 3, 4]", TranspileOptions.Json(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """{
@@ -75,8 +83,10 @@ This is embedded content
 embed$$"""
 
     # Test with default retain_embed_tags=True
-    result = Kson.to_json(kson_with_embed)
-    assert isinstance(result, Success)
+    result = Kson.to_json(
+        kson_with_embed, TranspileOptions.Json(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """{
@@ -90,9 +100,9 @@ embed$$"""
 
     # Test with retain_embed_tags=False
     result = Kson.to_json(
-        kson_with_embed, TranspileOptionsJson(retain_embed_tags=False)
+        kson_with_embed, TranspileOptions.Json(retain_embed_tags=False)
     )
-    assert isinstance(result, Success)
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """{
@@ -102,15 +112,19 @@ embed$$"""
 
 
 def test_kson_to_json_failure():
-    result = Kson.to_json("key: [1, 2, 3, 4")
-    assert isinstance(result, Failure)
+    result = Kson.to_json(
+        "key: [1, 2, 3, 4", TranspileOptions.Json(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Failure)
     output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"
 
 
 def test_kson_to_yaml_success():
-    result = Kson.to_yaml("key: [1, 2, 3, 4]")
-    assert isinstance(result, Success)
+    result = Kson.to_yaml(
+        "key: [1, 2, 3, 4]", TranspileOptions.Yaml(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """key:
@@ -127,8 +141,10 @@ This is embedded content
 embed$$"""
 
     # Test with default retain_embed_tags=True
-    result = Kson.to_yaml(kson_with_embed)
-    assert isinstance(result, Success)
+    result = Kson.to_yaml(
+        kson_with_embed, TranspileOptions.Yaml(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """key:
@@ -140,9 +156,9 @@ embed$$"""
 
     # Test with retain_embed_tags=False
     result = Kson.to_yaml(
-        kson_with_embed, TranspileOptionsYaml(retain_embed_tags=False)
+        kson_with_embed, TranspileOptions.Yaml(retain_embed_tags=False)
     )
-    assert isinstance(result, Success)
+    assert isinstance(result, Result.Success)
     assert (
         result.output()
         == """key: |
@@ -152,8 +168,10 @@ embed$$"""
 
 
 def test_kson_to_yaml_failure():
-    result = Kson.to_yaml("key: [1, 2, 3, 4")
-    assert isinstance(result, Failure)
+    result = Kson.to_yaml(
+        "key: [1, 2, 3, 4", TranspileOptions.Yaml(retain_embed_tags=True)
+    )
+    assert isinstance(result, Result.Failure)
     output = messages_to_string(result.errors())
     assert output == "0,5 to 0,16 - Unclosed list\n"
 
