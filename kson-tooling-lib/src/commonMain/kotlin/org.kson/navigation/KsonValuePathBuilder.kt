@@ -189,7 +189,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             targetNode is KsonObject &&
             forDefinition -> {
                 // Extract the property name from the token
-                val propertyName = lastToken.value
+                val propertyName = lastToken.lexeme.text
                 path + propertyName
             }
             // Location is outside the token - target the parent element (for completions)

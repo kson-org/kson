@@ -305,7 +305,7 @@ describeNode('Schema Loading Tests', () => {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Request completions inside the array (should suggest enum values)
-        const position = new vscode.Position(2, 11); // After "features: -"<caret>""
+        const position = new vscode.Position(2, 12); // After "features: -"<caret>""
 
         try {
             const completions = await waitForCompletions(document, position);
