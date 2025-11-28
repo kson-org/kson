@@ -127,4 +127,19 @@ class DuplicateKeyValidatorTest {
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Same key in different objects should be allowed")
     }
+
+    @Test
+    fun testEquivalentKeyWithDifferentStringIsNotAllowed() {
+        val source = """
+            # these two keys are identical in spite of being represented differently
+            'key with\nnewline': 1
+            'key with
+            newline': 1
+        """.trimIndent()
+
+        val messages = KsonCore.parseToAst(source).messages
+        assertEquals(1, messages.size, "Should have errors for duplicate keys in list objects")
+
+        assertEquals(OBJECT_DUPLICATE_KEY, messages[0].message.type, "should have duplicate key error")
+    }
 }

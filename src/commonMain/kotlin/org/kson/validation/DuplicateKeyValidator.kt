@@ -63,7 +63,7 @@ class DuplicateKeyValidator {
         objNode.properties.filterIsInstance<ObjectPropertyNodeImpl>().forEach {
             // Get the property key as string
             val keyString = if (it.key is ObjectKeyNodeImpl && it.key.key is StringNodeImpl) {
-                it.key.key.stringContent
+                it.key.key.processedStringContent
             } else {
                 ""
             }
