@@ -202,6 +202,23 @@ describeNode('Schema Loading Tests', () => {
         throw new Error(`Timeout waiting for completions at position ${position.line}:${position.character}`);
     }
 
+    /**
+     * Wait for diagnostics to be available.
+     */
+    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < timeout) {
+            const diagnostics = vscode.languages.getDiagnostics(uri);
+            if (diagnostics.length === expectedCount) {
+                return diagnostics;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
+    }
+
     it('Should load schema for files matching fileMatch pattern', async () => {
         // Create a test file that matches the pattern "**/*.config.kson"
         const content = [
@@ -345,6 +362,36 @@ describeNode('Schema Loading Tests', () => {
             assert.ok(
                 hoverText.includes('Host') || hoverText.includes('host') || hoverText.toLowerCase().includes('server') || hoverText.includes('Application Configuration'),
                 `Hover should contain schema information. Got: ${hoverText}`
+            );
+        } finally {
+            await cleanUp(testFileUri);
+        }
+    }).timeout(10000);
+
+    it('Should report errors for valid Kson file that does not follow schema', async () => {
+        // Create a test file that matches the pattern but doesn't follow the schema
+        // (missing required properties: appName and version)
+        const content = 'key: "value"';
+
+        const [testFileUri, document] = await createTestFile(content, SCHEMA_FILENAME);
+
+        // Wait a bit for the language server to process the document
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        try {
+            const diagnostics = await waitForDiagnostics(document.uri, 1);
+
+            assert.ok(diagnostics.length === 1, `Should have 2 diagnostics for missing required properties. Got: ${diagnostics.length}`);
+
+            // Verify diagnostics are about missing required properties
+            const messages = diagnostics.map(d => d.message.toLowerCase());
+            const hasMissingPropertyErrors = messages.some(msg =>
+                msg.includes('required') || msg.includes('appname') || msg.includes('version')
+            );
+
+            assert.ok(
+                hasMissingPropertyErrors,
+                `Diagnostics should mention missing required properties. Got: ${messages.join(', ')}`
             );
         } finally {
             await cleanUp(testFileUri);

@@ -9,17 +9,19 @@ import {CommandType} from './CommandType.js';
 import {CommandParameters, isValidCommand} from './CommandParameters.js';
 import {FormatOptions} from 'kson';
 import type {KsonSettings} from '../KsonSettings.js';
-import {KsonDocument} from "../document/KsonDocument";
+import {KsonDocument} from "../document/KsonDocument.js";
 
 /**
- * Service responsible for executing commands in the Kson Language Server
+ * Base class for command execution in the Kson Language Server.
+ * Platform-specific implementations extend this to handle environment-specific commands.
  */
-export class CommandExecutor {
+export abstract class CommandExecutorBase {
     constructor(
-        private connection: Connection,
-        private documentManager: KsonDocumentsManager,
-        private formattingService: FormattingService,
-        private getConfiguration: () => Required<KsonSettings>
+        protected connection: Connection,
+        protected documentManager: KsonDocumentsManager,
+        protected formattingService: FormattingService,
+        protected getConfiguration: () => Required<KsonSettings>,
+        protected workspaceRoot: string | null = null
     ) {
     }
 
@@ -60,16 +62,36 @@ export class CommandExecutor {
 
                 return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
                     indentType,
-                    commandArgs.formattingStyle,
+                    (commandArgs as CommandParameters[CommandType.PLAIN_FORMAT]).formattingStyle,
                 ));
+            }
+            case CommandType.ASSOCIATE_SCHEMA: {
+                const schemaArgs = commandArgs as CommandParameters[CommandType.ASSOCIATE_SCHEMA];
+                return this.executeAssociateSchema(schemaArgs);
+            }
+            case CommandType.REMOVE_SCHEMA: {
+                const schemaArgs = commandArgs as CommandParameters[CommandType.REMOVE_SCHEMA];
+                return this.executeRemoveSchema(schemaArgs);
             }
         }
     }
 
     /**
+     * Execute the associate schema command.
+     * Platform-specific implementations must provide this method.
+     */
+    protected abstract executeAssociateSchema(commandArgs: CommandParameters[CommandType.ASSOCIATE_SCHEMA]): Promise<any>;
+
+    /**
+     * Execute the remove schema command.
+     * Platform-specific implementations must provide this method.
+     */
+    protected abstract executeRemoveSchema(commandArgs: CommandParameters[CommandType.REMOVE_SCHEMA]): Promise<any>;
+
+    /**
      * Execute the format command
      */
-    private async executeFormat(documentUri: string, document: KsonDocument, formattingOptions: FormatOptions): Promise<void> {
+    protected async executeFormat(documentUri: string, document: KsonDocument, formattingOptions: FormatOptions): Promise<void> {
         try {
             const edits = this.formattingService.formatDocument(document, formattingOptions);
 

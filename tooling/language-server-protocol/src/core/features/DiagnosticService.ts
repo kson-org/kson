@@ -6,7 +6,7 @@ import {
     RelatedFullDocumentDiagnosticReport
 } from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument';
-import {Message} from 'kson';
+import {Message, Kson, SchemaResult} from 'kson';
 
 /**
  * Service responsible for providing diagnostic information for Kson documents.
@@ -22,7 +22,17 @@ export class DiagnosticService {
     }
 
     private getDiagnostics(document: KsonDocument): Diagnostic[] {
-        return this.loggedMessagesToDiagnostics(document.getAnalysisResult().errors.asJsReadonlyArrayView());
+        const schema = document.getSchemaDocument()
+
+        const schemaMessages = schema ? (() => {
+            const parsedSchema = Kson.getInstance().parseSchema(schema.getText())
+            if(parsedSchema instanceof SchemaResult.Success){
+                return parsedSchema.schemaValidator.validate(document.getText()).asJsReadonlyArrayView()
+            }
+            return []
+        })() : []
+        const documentMessages = document.getAnalysisResult().errors.asJsReadonlyArrayView()
+        return this.loggedMessagesToDiagnostics([...schemaMessages, ...documentMessages]);
     }
 
     /**

@@ -229,8 +229,7 @@ data class Location(
             val containerStart = containerLocation.start
             val containerEnd = containerLocation.end
 
-            // Target must start at o
-            // r after container start
+            // Target must start at or after container start
             if (targetCoordinates.line < containerStart.line) return false
             if (targetCoordinates.line == containerStart.line && targetCoordinates.column < containerStart.column) return false
 

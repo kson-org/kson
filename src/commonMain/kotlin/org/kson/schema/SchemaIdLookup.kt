@@ -380,9 +380,6 @@ data class ResolvedRef(val resolvedValue: KsonValue, val resolvedValueBaseUri: S
 /**
  * Updates the base URI while following a path of JSON Pointer tokens.
  *
- * This function mirrors the navigation logic of [KsonValueNavigation.navigateByTokens] but focuses
- * on tracking `$id` updates encountered along the path.
- *
  * @param current The current [KsonValue] node to start from
  * @param tokens The list of reference tokens to follow
  * @param currentBaseUri The starting base URI
@@ -402,7 +399,7 @@ private fun updateBaseUriAlongPath(current: KsonValue, tokens: List<String>, cur
             }
         }
 
-        // Navigate to next node (same logic as KsonValueNavigation.navigateByTokens)
+        // Navigate to next node
         node = KsonValueNavigation.navigateByTokens(node, listOf(token)) ?: break
     }
 

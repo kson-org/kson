@@ -5,6 +5,7 @@ import {
     ServerCapabilities,
     DiagnosticRegistrationOptions,
 } from 'vscode-languageserver';
+import { URI } from 'vscode-uri'
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
@@ -12,9 +13,10 @@ import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
+import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
 
 type SchemaProviderFactory = (
-    workspaceRootUri: string | undefined,
+    workspaceRootUri: URI | undefined,
     logger: { info: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void }
 ) => Promise<SchemaProvider | undefined>;
 
@@ -23,13 +25,15 @@ type SchemaProviderFactory = (
  *
  * @param connection The LSP connection
  * @param createSchemaProvider Factory function to create the appropriate schema provider for the environment
+ * @param createCommandExecutor Factory function to create the appropriate command executor for the environment
  */
 export function startKsonServer(
     connection: Connection,
-    createSchemaProvider: SchemaProviderFactory
+    createSchemaProvider: SchemaProviderFactory,
+    createCommandExecutor: CommandExecutorFactory
 ): void {
     // Variables to store state during initialization
-    let workspaceRootUri: string | undefined;
+    let workspaceRootUri: URI | undefined;
 
     // Create logger that uses the connection
     const logger = {
@@ -45,14 +49,25 @@ export function startKsonServer(
     // Setup connection event handlers
     connection.onInitialize(async (params): Promise<InitializeResult> => {
         // Capture workspace root from initialization parameters
-        workspaceRootUri = params.workspaceFolders?.[0]?.uri || params.rootUri || undefined;
+        const stringUri = params.workspaceFolders?.[0]?.uri
+        if (stringUri) {
+            workspaceRootUri = URI.parse(stringUri)
+        }
 
         // Create the appropriate schema provider for this environment
         const schemaProvider = await createSchemaProvider(workspaceRootUri, logger);
 
         // Now that we have workspace root and schema provider, create the document manager
         documentManager = new KsonDocumentsManager(schemaProvider);
-        textDocumentService = new KsonTextDocumentService(documentManager);
+
+        // Extract workspace root path from URI if available
+        const workspaceRoot = workspaceRootUri ? workspaceRootUri.fsPath : null;
+
+        textDocumentService = new KsonTextDocumentService(
+            documentManager,
+            createCommandExecutor,
+            workspaceRoot
+        );
 
         // Setup document handling and connect services
         documentManager.listen(connection);
@@ -121,13 +136,47 @@ export function startKsonServer(
         logger.info('Kson Language Server initialized');
     });
 
+    // Handle custom request to get schema information for a document
+    connection.onRequest('kson/getDocumentSchema', (params: { uri: string }) => {
+        try {
+            const schemaDocument = documentManager.get(params.uri)?.getSchemaDocument();
+            if (schemaDocument) {
+                const schemaUri = schemaDocument.uri;
+                // Extract readable path from URI
+                const schemaPath = schemaUri.startsWith('file://') ? URI.parse(schemaUri).fsPath : schemaUri;
+                return {
+                    schemaUri,
+                    schemaPath,
+                    hasSchema: true
+                };
+            }
+            return {
+                schemaUri: undefined,
+                schemaPath: undefined,
+                hasSchema: false
+            };
+        } catch (error) {
+            logger.error(`Error getting schema for document: ${error}`);
+            return {
+                schemaUri: undefined,
+                schemaPath: undefined,
+                hasSchema: false
+            };
+        }
+    });
+
     // Handle changes to watched files
     connection.onDidChangeWatchedFiles((params) => {
         for (const change of params.changes) {
             if (change.uri.endsWith(SCHEMA_CONFIG_FILENAME)) {
                 logger.info('Schema configuration file changed, reloading...');
                 documentManager.reloadSchemaConfiguration();
-                // Note: Could trigger re-validation of all documents here if needed
+                // Refresh all open documents with the updated schemas
+                documentManager.refreshDocumentSchemas();
+                // Notify client that schema configuration changed so it can update UI (e.g., status bar)
+                connection.sendNotification('kson/schemaConfigurationChanged');
+                // Rerun diagnostics for open files, so we immediately see errors of schema
+                connection.sendRequest('workspace/diagnostic/refresh')
             }
         }
     });

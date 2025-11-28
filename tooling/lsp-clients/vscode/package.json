@@ -18,6 +18,13 @@
   "main": "./dist/client.js",
   "browser": "./dist/browserClient.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "kson.selectSchema",
+        "title": "KSON: Select Schema for Current File",
+        "category": "KSON"
+      }
+    ],
     "languages": [
       {
         "id": "kson",

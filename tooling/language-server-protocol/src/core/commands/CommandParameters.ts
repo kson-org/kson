@@ -22,6 +22,13 @@ export interface CommandParameters {
         documentUri: string;
         formattingStyle: FormattingStyle;
     };
+    [CommandType.ASSOCIATE_SCHEMA]: {
+        documentUri: string;
+        schemaPath: string;
+    };
+    [CommandType.REMOVE_SCHEMA]: {
+        documentUri: string;
+    };
 }
 
 /**

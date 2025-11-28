@@ -62,10 +62,6 @@ If multiple patterns match a file, the first matching schema is used.
 
 If no schema configuration is found or no pattern matches a file, the language server falls back to a built-in test schema for backward compatibility.
 
-## Reloading Configuration
-
-Currently, changes to `.kson-schema.kson` require restarting the language server. Dynamic reloading is planned for a future release.
-
 ## Schema File Format
 
 Schema files should be valid JSON Schema (draft-07 or compatible):

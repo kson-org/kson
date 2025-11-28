@@ -1,5 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {DocumentUri} from 'vscode-languageserver';
+import { URI } from 'vscode-uri';
 import {SchemaConfig, isValidSchemaConfig, SCHEMA_CONFIG_FILENAME} from './SchemaConfig.js';
 import {SchemaProvider} from './SchemaProvider.js';
 import { Kson, Result} from 'kson'
@@ -13,7 +14,7 @@ import minimatch from 'minimatch';
  */
 export class FileSystemSchemaProvider implements SchemaProvider {
     private config: SchemaConfig | null = null;
-    private workspaceRoot: string | null;
+    private workspaceRoot: URI | null;
 
     /**
      * Creates a new FileSystemSchemaProvider.
@@ -22,14 +23,14 @@ export class FileSystemSchemaProvider implements SchemaProvider {
      * @param logger Optional logger for warnings and errors
      */
     constructor(
-        workspaceRootUri: string | null,
+        workspaceRootUri: URI | null,
         private logger?: {
             info: (message: string) => void;
             warn: (message: string) => void;
             error: (message: string) => void;
         }
     ) {
-        this.workspaceRoot = workspaceRootUri ? this.uriToPath(workspaceRootUri) : null;
+        this.workspaceRoot = workspaceRootUri
         this.loadConfiguration();
     }
 
@@ -52,10 +53,25 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return undefined;
         }
 
-        const documentPath = this.uriToPath(documentUri);
+        const documentPath = URI.parse(documentUri).fsPath;
         const relativePath = this.getRelativePath(documentPath);
 
-        // Find the first matching schema mapping
+        // Normalize path separators for consistent matching
+        const normalizedPath = relativePath.replace(/\\/g, '/');
+
+        // First, check for exact path matches (higher priority - these are manually associated)
+        // Exact matches don't contain wildcards and match the file path exactly
+        for (const mapping of this.config.schemas) {
+            const exactMatches = mapping.fileMatch.filter(pattern => !this.hasWildcard(pattern));
+            for (const exactPath of exactMatches) {
+                const normalizedPattern = exactPath.replace(/\\/g, '/');
+                if (normalizedPath === normalizedPattern) {
+                    return this.loadSchemaFile(mapping.schema);
+                }
+            }
+        }
+
+        // Then, check glob patterns (lower priority - these are general rules)
         for (const mapping of this.config.schemas) {
             if (this.matchesAnyPattern(relativePath, mapping.fileMatch)) {
                 return this.loadSchemaFile(mapping.schema);
@@ -74,7 +90,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return;
         }
 
-        const configPath = path.join(this.workspaceRoot, SCHEMA_CONFIG_FILENAME);
+        const configPath = path.join(this.workspaceRoot.fsPath, SCHEMA_CONFIG_FILENAME);
 
         if (!fs.existsSync(configPath)) {
             this.logger?.info(`No ${SCHEMA_CONFIG_FILENAME} found in workspace root`);
@@ -88,7 +104,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
               const parsedConfig = ksonConfigResult instanceof Result.Success
                   ? JSON.parse(ksonConfigResult.output)
                   : (() => {
-                      this.logger?.error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.join(', ')}`);
+                      this.logger?.error(`Failed to parse ${SCHEMA_CONFIG_FILENAME}: ${(ksonConfigResult as Result.Failure).errors.asJsReadonlyArrayView().join(', ')}`);
                       this.config = null;
                       return null;
                   })();
@@ -121,7 +137,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
             return undefined;
         }
 
-        const absolutePath = path.join(this.workspaceRoot, schemaPath);
+        const absolutePath = path.join(this.workspaceRoot.fsPath, schemaPath);
 
         if (!fs.existsSync(absolutePath)) {
             this.logger?.warn(`Schema file not found: ${schemaPath}`);
@@ -133,17 +149,29 @@ export class FileSystemSchemaProvider implements SchemaProvider {
 
             // Check whether the schema is a valid KSON file
             let ksonSchema = Kson.getInstance().analyze(schemaContent)
-            if (ksonSchema.errors.asJsReadonlyArrayView().length != 0) {
-                this.logger?.error(`Failed to convert KSON schema to JSON: ${ksonSchema.errors.join(', ')}`);
+            let schemaErrors = ksonSchema.errors.asJsReadonlyArrayView()
+            if (schemaErrors.length != 0) {
+                this.logger?.error(`Failed to convert KSON schema to JSON: ${schemaErrors.join(', ')}`);
                 return undefined;
             }
 
-            const schemaUri = this.pathToUri(absolutePath);
+            const schemaUri = URI.file(absolutePath).toString();
             return TextDocument.create(schemaUri, 'kson', 1, schemaContent);
         } catch (error) {
             this.logger?.error(`Failed to load schema file ${schemaPath}: ${error}`);
             return undefined;
         }
+    }
+
+    /**
+     * Check if a pattern contains wildcard characters.
+     * Wildcard characters are: *, ?, [, ]
+     *
+     * @param pattern The pattern to check
+     * @returns True if the pattern contains wildcards
+     */
+    private hasWildcard(pattern: string): boolean {
+        return /[*?\[\]]/.test(pattern);
     }
 
     /**
@@ -173,46 +201,6 @@ export class FileSystemSchemaProvider implements SchemaProvider {
         if (!this.workspaceRoot) {
             return absolutePath;
         }
-        return path.relative(this.workspaceRoot, absolutePath);
-    }
-
-    /**
-     * Convert a file:// URI to a file system path.
-     *
-     * @param uri The URI to convert
-     * @returns File system path
-     */
-    private uriToPath(uri: string): string {
-        // Simple implementation - handle file:// URIs
-        if (uri.startsWith('file://')) {
-            // Decode URI components and remove file:// prefix
-            let filePath = decodeURIComponent(uri.substring(7));
-
-            // On Windows, file:///c:/path becomes /c:/path, need to remove leading slash
-            if (process.platform === 'win32' && /^\/[a-z]:/i.test(filePath)) {
-                filePath = filePath.substring(1);
-            }
-
-            return filePath;
-        }
-        return uri;
-    }
-
-    /**
-     * Convert a file system path to a file:// URI.
-     *
-     * @param filePath The file path to convert
-     * @returns file:// URI
-     */
-    private pathToUri(filePath: string): string {
-        // Normalize path separators to forward slashes
-        const normalized = filePath.replace(/\\/g, '/');
-
-        // On Windows, add extra slash for drive letter
-        if (process.platform === 'win32' && /^[a-z]:/i.test(normalized)) {
-            return `file:///${normalized}`;
-        }
-
-        return `file://${normalized}`;
+        return path.relative(this.workspaceRoot.fsPath, absolutePath);
     }
 }

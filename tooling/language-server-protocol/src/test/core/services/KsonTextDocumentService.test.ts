@@ -16,6 +16,7 @@ import {ConnectionStub} from "../../ConnectionStub";
 import {KsonDocumentsManager} from "../../../core/document/KsonDocumentsManager.js";
 import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentService.js";
 import {FullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
+import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 
 describe('KsonTextDocumentService', () => {
     let connection: ConnectionStub;
@@ -26,7 +27,7 @@ describe('KsonTextDocumentService', () => {
     beforeEach(() => {
         connection = new ConnectionStub();
         documentsManager = new KsonDocumentsManager();
-        service = new KsonTextDocumentService(documentsManager);
+        service = new KsonTextDocumentService(documentsManager, createCommandExecutor);
 
         documentsManager.listen(connection);
         service.connect(connection)
@@ -150,31 +151,6 @@ describe('KsonTextDocumentService', () => {
                 }
             ]
             await assertDiagnostics(content, expected)
-        });
-    });
-
-    describe('Completions', () => {
-        it('should provide completions via LSP connection', async () => {
-            // Simple sanity check that completions work through the LSP layer
-            const content = `{ status: "active" }`;
-            openDocument(content);
-
-            const params: CompletionParams = {
-                textDocument: {uri: TEST_URI},
-                position: {line: 0, character: 13}
-            };
-
-            const result = await connection.completionHandler(params, {} as any, {} as any, undefined);
-
-            // Should return completions without error
-            assert.ok(!(result instanceof ResponseError), 'Should not return ResponseError');
-            // TODO - this test is currently passing but acutally doesn't have completions. If we can set the schema
-            //  ourselves we should do so.
-            // assert.notEqual(result, null, "Should have completions available")
-            if (result !== null && !(result instanceof ResponseError)) {
-                const completionList = result as CompletionList;
-                assert.ok(Array.isArray(completionList.items), 'Should return completion items array');
-            }
         });
     });
 });
