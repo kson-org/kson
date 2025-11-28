@@ -4,7 +4,22 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-static KSON_LIB_VERSION: &str = "beta-2";
+#[derive(Debug)]
+struct CustomRenamer;
+
+// [[kson-version-num]]
+static KSON_LIB_VERSION: &str = "0.3.0-dev";
+
+impl ParseCallbacks for CustomRenamer {
+    // Necessary to get rid of the `libkson` vs. `kson` difference depending on the target OS
+    fn item_name(&self, original_item_name: &str) -> Option<String> {
+        if original_item_name.starts_with("libkson_") {
+            Some(original_item_name.strip_prefix("lib").unwrap().to_string())
+        } else {
+            None
+        }
+    }
+}
 
 fn get_kson_artifacts(
     out_dir: &Path,
@@ -38,7 +53,7 @@ fn get_kson_artifacts(
 fn download_prebuilt_kson(
     use_dynamic_linking: bool,
     out_dir: &Path,
-) -> anyhow::Result<()> {
+) -> Result<(), Box<dyn std::error::Error>> {
     let cpu_arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "aarch64" => "arm64",
         "x86_64" => "amd64",
