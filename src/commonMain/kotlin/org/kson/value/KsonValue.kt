@@ -15,11 +15,12 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  *   [location] (which we consider metadata).  The ability to treat these [KsonValue]s as _values_ leads to
  *   more ergonomic code than having a strict equals that incorporates [location].
  */
-sealed class KsonValue(val astNode: KsonValueNode) {
+sealed class KsonValue(protected val astNode: KsonValueNode) {
 
     val location: Location by lazy {
         astNode.location
     }
+
     /**
      * Ensure all our [KsonValue] classes implement their [equals] and [hashCode]
      * NOTE: this [equals] and [hashCode] must be logical equality of the underlying values, and
@@ -132,9 +133,18 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     }
 }
 
-class KsonString(astNode: StringNodeImpl) : KsonValue(astNode) {
+class KsonString(private val stringNode: StringNodeImpl) : KsonValue(stringNode), SubParseable {
     val value: String by lazy {
-        astNode.processedStringContent
+        stringNode.processedStringContent
+    }
+
+    override fun subOffsetLocation(subStartOffset: Int, subEndOffset: Int): Location {
+        return stringNode.contentTransformer.mapToOriginal(subStartOffset,subEndOffset)
+    }
+
+    override fun subCoordinatesLocation(subStartLine: Int, subStartColumn: Int, subEndLine: Int, subEndColumn: Int): Location {
+        return stringNode.contentTransformer
+            .mapToOriginal(subStartLine, subStartColumn, subEndLine, subEndColumn)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -149,8 +159,18 @@ class KsonString(astNode: StringNodeImpl) : KsonValue(astNode) {
     }
 }
 
-class KsonNumber(astNode: NumberNode) : KsonValue(astNode) {
-    val value = astNode.value
+class KsonNumber(private val numberNode: NumberNode) : KsonValue(numberNode), SubParseable {
+    val value = numberNode.value
+
+    override fun subOffsetLocation(subStartOffset: Int, subEndOffset: Int): Location {
+        return numberNode.contentTransformer.mapToOriginal(subStartOffset,subEndOffset)
+    }
+
+    override fun subCoordinatesLocation(subStartLine: Int, subStartColumn: Int, subEndLine: Int, subEndColumn: Int): Location {
+        return numberNode.contentTransformer
+            .mapToOriginal(subStartLine, subStartColumn, subEndLine, subStartColumn)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is KsonNumber) return false

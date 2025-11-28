@@ -118,3 +118,15 @@ abstract class KsonContentTransformer(
         }
     }
 }
+
+/**
+ * A [KsonContentTransformer] for content that performs the "identity" transformation, i.e. no transformation
+ */
+class IdentityContentTransformer(content: String, location: Location)
+    : KsonContentTransformer(content, location) {
+    override val processedContent = content
+
+    override fun mapProcessedOffsetToRawOffset(processedOffset: Int): Int {
+        return processedOffset
+    }
+}

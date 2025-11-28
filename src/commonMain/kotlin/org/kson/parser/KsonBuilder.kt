@@ -381,7 +381,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         val propertiesMap = propertyNodes.mapNotNull { prop ->
             (prop as? ObjectPropertyNodeImpl)?.let { property ->
                 val keyString = (property.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
-                keyString?.stringContent?.let { key ->
+                keyString?.processedStringContent?.let { key ->
                     key to (property.value as? StringNodeImpl)
                 }
             }
@@ -412,13 +412,18 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      */
     private fun quoteStringToStringNode(marker: KsonMarker): QuotedStringNode {
         /**
-         * [Parser.string] ensures that a [QUOTED_STRING] contains its [STRING_OPEN_QUOTE]
-         * and [STRING_CLOSE_QUOTE]
+         * [Parser.string] ensures that a [QUOTED_STRING] starts with [STRING_OPEN_QUOTE]
          */
         val quotedString = marker.getRawText()
         val stringDelim = quotedString.first()
 
-        return QuotedStringNode(marker.getSourceTokens(), StringQuote.fromChar(stringDelim))
+        val stringContentTokens = marker.getSourceTokens()
+            // drop the open quote token
+            .drop(1)
+            // and take everything up to the close quote (or the end, whichever comes first)
+            .takeWhile { it.tokenType != TokenType.STRING_CLOSE_QUOTE }
+
+        return QuotedStringNode(stringContentTokens, StringQuote.fromChar(stringDelim))
     }
 
     /**

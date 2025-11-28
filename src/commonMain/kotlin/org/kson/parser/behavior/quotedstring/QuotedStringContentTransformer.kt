@@ -81,8 +81,8 @@ fun unescapeStringContent(content: String): String {
 private fun unescapeAndTrackEscapes(content: String): Pair<String, List<EscapeInfo>> {
     val sb = StringBuilder(content.length)
     val escapes = mutableListOf<EscapeInfo>()
-    var i = 0
 
+    var i = 0
     while (i < content.length) {
         val char = content[i]
 

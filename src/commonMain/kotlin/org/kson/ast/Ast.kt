@@ -13,6 +13,8 @@ import org.kson.parser.Parser
 import org.kson.parser.Token
 import org.kson.parser.TokenType.COMMENT
 import org.kson.parser.TokenType.WHITESPACE
+import org.kson.parser.behavior.IdentityContentTransformer
+import org.kson.parser.behavior.KsonContentTransformer
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.*
 import org.kson.parser.behavior.StringUnquoted
@@ -595,6 +597,8 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
     abstract val stringContent: String
 
     abstract val processedStringContent: String
+
+    abstract val contentTransformer: KsonContentTransformer
 }
 
 class QuotedStringNode(
@@ -603,13 +607,13 @@ class QuotedStringNode(
     private val stringQuote: StringQuote?,
 ) : StringNodeImpl(sourceTokens) {
 
-    private val stringContentTransformer: QuotedStringContentTransformer by lazy {
+    override val contentTransformer: QuotedStringContentTransformer by lazy {
         QuotedStringContentTransformer(stringContent, location)
     }
 
     override val processedStringContent: String by lazy {
         if (stringQuote != null) {
-            stringContentTransformer.processedContent
+            contentTransformer.processedContent
         } else {
             stringContent
 
@@ -617,11 +621,11 @@ class QuotedStringNode(
     }
 
     /**
-     * Note: [ksonEscapedStringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
+     * Note: [stringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
      *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
      *   except that [Kson] allows raw whitespace to be embedded in strings
      */
-    val ksonEscapedStringContent: String by lazy {
+    override val stringContent: String by lazy {
         renderTokens(sourceTokens)
     }
 
@@ -631,11 +635,7 @@ class QuotedStringNode(
      * to obtain a fully valid KsonString
      */
     private val unquotedString: String by lazy {
-        stringQuote?.removeQuotes(ksonEscapedStringContent) ?: ksonEscapedStringContent
-    }
-
-    override val stringContent: String by lazy {
-        unquotedString
+        stringQuote?.unescapeQuotes(stringContent) ?: stringContent
     }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -679,6 +679,10 @@ open class UnquotedStringNode(sourceTokens: List<Token>) : StringNodeImpl(source
         stringContent
     }
 
+    override val contentTransformer: IdentityContentTransformer by lazy {
+        IdentityContentTransformer(stringContent, location)
+    }
+
     override val stringContent: String by lazy {
         renderTokens(sourceTokens)
     }
@@ -718,18 +722,23 @@ open class UnquotedStringNode(sourceTokens: List<Token>) : StringNodeImpl(source
 }
 
 /**
- * Callers are in charge of ensuring that `stringValue` is parseable by [NumberParser]
+ * Callers are in charge of ensuring that [sourceTokens] are fully valid, i.e. that the
+ * [stringValue] produced by them is parseable by [NumberParser]
  */
 class NumberNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     val stringValue: String by lazy {
         renderTokens(sourceTokens)
     }
 
+    val contentTransformer: IdentityContentTransformer by lazy {
+        IdentityContentTransformer(stringValue, location)
+    }
+
     val value: ParsedNumber by lazy {
         val parsedNumber = NumberParser(stringValue).parse()
         parsedNumber.number ?: throw IllegalStateException(
             "Hitting this indicates a parser bug: unparseable " +
-                    "strings should be passed here but we got: " + stringValue
+                    "strings NEVER should be passed here but we got: " + stringValue
         )
     }
 
@@ -788,8 +797,8 @@ class EmbedBlockNode(
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
-    private val embedTag: String = embedTagNode?.stringContent ?: ""
-    private val metadataTag: String = metadataTagNode?.stringContent ?: ""
+    private val embedTag: String = embedTagNode?.processedStringContent ?: ""
+    private val metadataTag: String = metadataTagNode?.processedStringContent ?: ""
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -957,7 +966,7 @@ class EmbedBlockContentNode(
         renderTokens(sourceTokens)
     }
 
-    private val embedContentTransformer: EmbedContentTransformer by lazy {
+    override val contentTransformer: EmbedContentTransformer by lazy {
         EmbedContentTransformer(
             rawContent = stringContent,
             embedDelim = embedDelim,
@@ -966,7 +975,7 @@ class EmbedBlockContentNode(
     }
 
     override val processedStringContent: String by lazy {
-        embedContentTransformer.processedContent
+        contentTransformer.processedContent
     }
 
     override fun toSourceInternal(

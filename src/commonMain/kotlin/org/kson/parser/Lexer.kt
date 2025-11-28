@@ -404,6 +404,16 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
     private fun quotedString(delimiter: Char) {
         var hasUntokenizedStringCharacters = false
+
+        if (sourceScanner.peek() == delimiter || sourceScanner.eof()) {
+            // empty string
+            addLiteralToken(STRING_CONTENT)
+            if (sourceScanner.peek() == delimiter) {
+                sourceScanner.advance()
+                addLiteralToken(STRING_CLOSE_QUOTE)
+            }
+            return
+        }
         while (sourceScanner.peek() != delimiter) {
             val nextStringChar = sourceScanner.peek() ?: break
 
