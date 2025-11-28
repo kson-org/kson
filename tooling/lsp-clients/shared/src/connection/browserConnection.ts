@@ -1,9 +1,9 @@
-import { 
-    BrowserMessageReader, 
+import {
+    BrowserMessageReader,
     BrowserMessageWriter,
 } from 'vscode-languageserver/browser';
 import { createConnection } from 'vscode-languageserver/browser';
-import { startKsonServer } from 'kson-language-server';
+import { startKsonServer } from 'kson-language-server/browser';
 
 /**
  * Creates browser-specific message reader and writer.
