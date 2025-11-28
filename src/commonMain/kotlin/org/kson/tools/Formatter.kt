@@ -172,7 +172,7 @@ class IndentFormatter(
                                  * If we spot a [COLON] nest as we're closing things, that must be closed too:
                                  * a [COLON] nest is only valid as long as it has a sub-nest
                                  */
-                                nesting.removeLast()
+                                nesting.removeLastOrNull()
                             }
                             // unnest this leading close delimiter immediately if it matches the current open nest
                             if (nesting.lastOrNull() == CLOSE_TO_OPEN_MAP[token.tokenType]) {
@@ -199,9 +199,9 @@ class IndentFormatter(
 
             for (i in 1..toBeClosedNestCount) {
                 if (nextNests.isNotEmpty()) {
-                    nextNests.removeLast()
+                    nextNests.removeLastOrNull()
                 } else if (nesting.isNotEmpty()) {
-                    nesting.removeLast()
+                    nesting.removeLastOrNull()
                 }
             }
             toBeClosedNestCount = 0

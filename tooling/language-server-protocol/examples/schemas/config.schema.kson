@@ -1,0 +1,63 @@
+'$schema': 'http://json-schema.org/draft-07/schema#'
+type: object
+title: 'Application Configuration'
+description: 'Configuration schema for the application'
+properties:
+  appName:
+    type: string
+    description: 'The name of the application'
+    title: 'Application Name'
+    .
+  version:
+    type: string
+    description: 'The version number'
+    title: Version
+    pattern: '^\\d+\\.\\d+\\.\\d+$'
+    .
+  server:
+    type: object
+    description: 'Server configuration'
+    title: 'Server Settings'
+    properties:
+      host:
+        type: string
+        description: 'The server host address'
+        title: Host
+        default: localhost
+        .
+      port:
+        type: number
+        description: 'The port number the server listens on'
+        title: 'Port Number'
+        minimum: 1024
+        maximum: 65535
+        default: 8080
+        .
+      enabled:
+        type: boolean
+        description: 'Whether the server is enabled'
+        title: 'Enabled Flag'
+        default: true
+        .
+      .
+    required:
+      - host
+      - port
+    .
+  features:
+    type: array
+    description: 'List of enabled features'
+    title: Features
+    items:
+      type: string
+      enum:
+        - logging
+        - metrics
+        - tracing
+        - caching
+      .
+    .
+  .
+required:
+  - appName
+  - version

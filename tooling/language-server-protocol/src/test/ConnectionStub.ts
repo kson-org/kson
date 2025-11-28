@@ -17,10 +17,15 @@ import {
     DocumentHighlightParams,
     DocumentSymbol,
     DocumentSymbolParams,
-    SymbolInformation
+    SymbolInformation,
+    Hover,
+    HoverParams,
+    CompletionParams,
+    CompletionList, DefinitionParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
+import {Definition, DefinitionLink, Location} from "vscode-languageserver-protocol";
 
 /**
  * A stub implementation of the `Connection` interface for testing purposes.
@@ -49,6 +54,9 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public executeCommandHandler: ServerRequestHandler<ExecuteCommandParams, any | null | undefined, never, void>;
     public documentHighlightHandler: ServerRequestHandler<DocumentHighlightParams, DocumentHighlight[] | null | undefined, DocumentHighlight[], void>;
     public documentSymbolHandler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>;
+    public hoverHandler: ServerRequestHandler<HoverParams, Hover | null | undefined, never, void>;
+    public completionHandler: ServerRequestHandler<CompletionParams, CompletionList | null | undefined, never, void>;
+    public onDefinitionHandler: ServerRequestHandler<DefinitionParams, Definition | DefinitionLink[] | undefined | null, Location[] | DefinitionLink[], void>;
 
     languages: Languages;
 
@@ -130,6 +138,21 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     override onDocumentSymbol(handler: ServerRequestHandler<DocumentSymbolParams, SymbolInformation[] | DocumentSymbol[] | null | undefined, SymbolInformation[] | DocumentSymbol[], void>): Disposable {
         this.documentSymbolHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onHover(handler: ServerRequestHandler<HoverParams, Hover | null | undefined, never, void>): Disposable {
+        this.hoverHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onCompletion(handler: ServerRequestHandler<CompletionParams, CompletionList | null | undefined, never, void>): Disposable {
+        this.completionHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
+    override onDefinition(handler: ServerRequestHandler<DefinitionParams, Definition | DefinitionLink[] | undefined | null, Location[] | DefinitionLink[], void>): Disposable {
+        this.onDefinitionHandler = handler;
         return NOOP_DISPOSABLE;
     }
 }

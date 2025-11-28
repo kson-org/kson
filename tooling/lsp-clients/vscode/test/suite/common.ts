@@ -2,9 +2,8 @@ import * as vscode from 'vscode';
 import { v4 as uuid } from 'uuid';
 import { assert } from './assert';
 
-export async function createTestFile(initialContent: string = ''): Promise<[vscode.Uri, vscode.TextDocument]> {
+export async function createTestFile(initialContent: string = '', fileName: string = `${uuid()}.kson`): Promise<[vscode.Uri, vscode.TextDocument]> {
     const workspaceFolder = getWorkspaceFolder();
-    const fileName = `${uuid()}.kson`;
 
     // Always use VS Code's URI joining which works in both environments
     const uri = vscode.Uri.joinPath(workspaceFolder.uri, fileName);

@@ -20,7 +20,17 @@ export enum CommandType {
      /**
      * Format the document as classic Kson
      */
-    CLASSIC_FORMAT = 'kson.classicFormat'
+    CLASSIC_FORMAT = 'kson.classicFormat',
+
+    /**
+     * Associate a schema with the current document
+     */
+    ASSOCIATE_SCHEMA = 'kson.associateSchema',
+
+    /**
+     * Remove schema association from the current document
+     */
+    REMOVE_SCHEMA = 'kson.removeSchema'
 }
 
 /**

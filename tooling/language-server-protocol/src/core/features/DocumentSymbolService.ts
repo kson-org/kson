@@ -10,7 +10,7 @@ export class DocumentSymbolWithParent implements DocumentSymbol {
     selectionRange: Range;
     children?: DocumentSymbolWithParent[];
     parent?: DocumentSymbolWithParent;
-    
+
     constructor(
         name: string,
         kind: SymbolKind,
@@ -25,7 +25,15 @@ export class DocumentSymbolWithParent implements DocumentSymbol {
         this.detail = detail;
         this.selectionRange = selectionRange || range;
         this.children = [];
-        this.parent = parent;
+
+        // Make parent non-enumerable so it won't be serialized to JSON
+        // This prevents circular reference errors when sending to LSP client
+        Object.defineProperty(this, 'parent', {
+            value: parent,
+            writable: true,
+            enumerable: false,
+            configurable: true
+        });
     }
 }
 
@@ -83,19 +91,22 @@ export class DocumentSymbolService {
      * Create a DocumentSymbol for an object
      */
     private createObjectSymbol(obj: KsonValue.KsonObject, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
-        const propertyMap = obj.properties.asJsReadonlyMapView();
+        const propertyValues = obj.properties.asJsReadonlyMapView();
+        const propertyKeys = obj.propertyKeys.asJsReadonlyMapView();
 
         const symbol = new DocumentSymbolWithParent(
             name,
             SymbolKind.Object,
             range,
-            `{${propertyMap.size} properties}`,
+            `{${propertyValues.size} properties}`,
             range,
             parent
         );
 
-        for (const [key, value] of propertyMap) {
-            const childSymbol = this.createObjectPropertySymbol(key, value, symbol);
+        for (const key of propertyValues.keys()) {
+            const propertyKey = propertyKeys.get(key)
+            const propertyValue = propertyValues.get(key)
+            const childSymbol = this.createObjectPropertySymbol(propertyKey, propertyValue, symbol);
 
             if (childSymbol) {
                 symbol.children!.push(childSymbol);

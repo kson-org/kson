@@ -4,15 +4,21 @@ import {createTestFile, cleanUp, assertTextEqual} from './common';
 
 describe('Formatting Settings Test Suite', () => {
     let testFileUri: vscode.Uri | undefined;
-    let document: vscode.TextDocument | undefined;
+
+    /**
+     * This function returns a guaranteed fresh copy of our test document.
+     */
+    let document: () => Promise<vscode.TextDocument> = async () => {
+        // always fetch from the workspace to ensure we see the latest edits
+        return vscode.workspace.openTextDocument(testFileUri!);
+    };
 
     beforeEach(async () => {
         // Sample unformatted content used in all tests
         const unformattedContent = '{"a":1,"b":{"c":2}}';
 
-        const [uri, doc] = await createTestFile(unformattedContent);
+        const [uri, _] = await createTestFile(unformattedContent);
         testFileUri = uri;
-        document = doc;
 
         // Wait for the extension to be active
         const extension = vscode.extensions.getExtension('kson.kson');
@@ -49,7 +55,7 @@ describe('Formatting Settings Test Suite', () => {
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
 
-        assertTextEqual(document!, expectedText);
+        assertTextEqual(await document(), expectedText);
     }).timeout(10000);
 
     it('Should format with tabs when insertSpaces is false', async () => {
@@ -67,7 +73,7 @@ describe('Formatting Settings Test Suite', () => {
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
 
-        assertTextEqual(document!, expectedText);
+        assertTextEqual(await document(), expectedText);
     }).timeout(10000);
 
     it('Should format delimited when formattingStyle is delimited', async () => {
@@ -88,7 +94,7 @@ describe('Formatting Settings Test Suite', () => {
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
 
-        assertTextEqual(document!, expectedText);
+        assertTextEqual(await document(), expectedText);
     }).timeout(10000);
 
     it('Should update formatting when settings change dynamically', async () => {
@@ -111,12 +117,12 @@ describe('Formatting Settings Test Suite', () => {
         await config.update('format.formattingStyle', 'plain', vscode.ConfigurationTarget.Workspace);
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
-        assertTextEqual(document!, expectedSpacesText);
+        assertTextEqual(await document(), expectedSpacesText);
 
         // Now change to tabs
         await config.update('format.insertSpaces', false, vscode.ConfigurationTarget.Workspace);
 
         await vscode.commands.executeCommand('editor.action.formatDocument');
-        assertTextEqual(document!, expectedTabsText);
+        assertTextEqual(await document(), expectedTabsText);
     }).timeout(15000);
 });

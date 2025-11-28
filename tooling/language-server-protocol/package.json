@@ -17,6 +17,14 @@
     ".": {
       "types": "./out/index.d.ts",
       "default": "./out/index.js"
+    },
+    "./node": {
+      "types": "./out/index.node.d.ts",
+      "default": "./out/index.node.js"
+    },
+    "./browser": {
+      "types": "./out/index.browser.d.ts",
+      "default": "./out/index.browser.js"
     }
   },
   "scripts": {
@@ -34,8 +42,10 @@
   },
   "dependencies": {
     "kson": "file:../../kson-lib/build/dist/js/productionLibrary",
+    "kson-tooling": "file:../../kson-tooling-lib/build/dist/js/productionLibrary",
     "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
+    "vscode-languageserver-textdocument": "^1.0.12",
+    "vscode-uri": "^3.0.8"
   },
   "devDependencies": {
     "@types/mocha": "10.0.10",

@@ -64,7 +64,7 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels
-        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels.set(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').take(1))
     }
 
     patchPluginXml {
