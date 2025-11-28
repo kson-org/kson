@@ -115,7 +115,7 @@ group = "org.kson"
  *   versioning that this should not be depended on
  * [[kson-version-num]]
  */
-version = "x.3-SNAPSHOT"
+version = "x.4-SNAPSHOT"
 
 kotlin {
     jvm()

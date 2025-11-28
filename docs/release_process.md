@@ -38,9 +38,43 @@ When `main` is ready to have a release cut from it:
 
 - TODO flesh out this documentation
 
-#### [kson-lib](../kson-lib/) Publishing Process
-* todo doc process
-#### [lib-rust](../lib-rust/) Publishing Process
+#### [kson-lib](../kson-lib) Publishing Process
+
+The project uses the [Vanniktech Maven Publish plugin](https://github.com/vanniktech/gradle-maven-publish-plugin) to publish to Maven Central Portal. This process publishes both:
+- `org.kson:kson` (public API from kson-lib)
+- `org.kson:kson-internals` (internal implementation from root build that is deployed with kson-lib)
+
+##### Prerequisites
+
+- You will need a user account on https://central.sonatype.com/
+- You will need a GPG key pair with the public key published to https://keyserver.ubuntu.com/
+
+Ensure you have credentials for both of these in your `~/.gradle/gradle.properties` file:
+
+```properties
+mavenCentralUsername=<your-username>
+mavenCentralPassword=<your-password>
+
+# GPG signing credentials
+signing.keyId=<your-key-id>
+signing.password=<your-passphrase>
+signing.secretKeyRingFile=<path-to-secring.gpg>
+```
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Publish to Maven Central:
+   ```bash
+   ./gradlew publishAllPublicationsToMavenCentralRepository
+   ```
+
+3. Verify the publications are valid and ready to be published: https://central.sonatype.com/publishing/deployments
+
+4. Manually release: we have `automaticRelease = false` as a final gate/protection, so once everything looks good at https://central.sonatype.com/publishing/deployments for this release, click Publish
+
+#### [lib-rust](../lib-rust) Publishing Process
 * todo doc process
 
 #### [kson-lib npm package](../kson-lib) Publishing Process
@@ -139,4 +173,19 @@ The KSON language support includes VSCode extensions published to both the Visua
    - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=kson.kson
    - Open VSX: https://open-vsx.org/extension/kson/kson
 #### [tooling/jetbrains](../tooling/jetbrains) Publishing Process
-* todo doc process
+
+Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
+
+1. Ensure you have **the tag you wish to release checked out and that your Git status is clean**.
+
+2. Build the plugin distribution:
+   
+    ```bash
+    ./gradlew :tooling:jetbrains:buildPlugin
+    ```
+   
+   This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
+
+3. Manually upload to JetBrains Marketplace:
+  - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
+  - Upload the ZIP file from the distributions folder

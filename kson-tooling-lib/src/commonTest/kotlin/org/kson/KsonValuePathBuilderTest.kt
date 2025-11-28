@@ -154,4 +154,44 @@ class KsonValuePathBuilderTest {
         assertNotNull(path)
         assertEquals(listOf("key"), path)
     }
+
+    @Test
+    fun testBuildPathToPosition_onPropertyKey_forCompletion() {
+        // When cursor is on property key, for completion, path should drop last element (go to parent)
+        val document = """
+            user<caret>name: johndoe
+        """.trimIndent()
+
+        val caretMarker = "<caret>"
+        val caretIndex = document.indexOf(caretMarker)
+        val beforeCaret = document.take(caretIndex)
+        val line = beforeCaret.count { it == '\n' }
+        val column = caretIndex - (beforeCaret.lastIndexOf('\n') + 1)
+        val cleanDocument = document.replace(caretMarker, "")
+
+        val path = KsonValuePathBuilder(cleanDocument, Coordinates(line, column)).buildPathToPosition(forDefinition = false)
+
+        assertNotNull(path)
+        assertEquals(emptyList(), path)  // Drops "username", returns empty (parent of root)
+    }
+
+    @Test
+    fun testBuildPathToPosition_onPropertyKey_forDefinition() {
+        // When cursor is on property key, for definition, path should keep the property
+        val document = """
+            user<caret>name: johndoe
+        """.trimIndent()
+
+        val caretMarker = "<caret>"
+        val caretIndex = document.indexOf(caretMarker)
+        val beforeCaret = document.take(caretIndex)
+        val line = beforeCaret.count { it == '\n' }
+        val column = caretIndex - (beforeCaret.lastIndexOf('\n') + 1)
+        val cleanDocument = document.replace(caretMarker, "")
+
+        val path = KsonValuePathBuilder(cleanDocument, Coordinates(line, column)).buildPathToPosition(forDefinition = true)
+
+        assertNotNull(path)
+        assertEquals(listOf("username"), path)  // Keeps "username" for definition lookup
+    }
 }
