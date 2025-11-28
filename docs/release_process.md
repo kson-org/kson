@@ -76,12 +76,102 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
 
 #### [lib-rust](../lib-rust) Publishing Process
 * todo doc process
+
+#### [kson-lib npm package](../kson-lib) Publishing Process
+
+The KSON JavaScript/TypeScript library is published to npm as `@kson_org/kson` with support for both browser and Node.js environments.
+
+##### Prerequisites
+
+- You will need an npm account at https://www.npmjs.com/
+- You will need publish access to the `@kson_org/kson` package
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Build the universal JavaScript package:
+   ```bash
+   ./gradlew buildUniversalJsPackage
+   ```
+
+   This builds a package for both the browser and Node.js and bundles it into `kson-lib/build/js-package`
+
+3. Publish to npm:
+   ```bash
+   cd kson-lib/build/js-package
+   npm login
+   npm publish --access=public
+   ```
+
+4. Verify the package is available at: https://www.npmjs.com/package/@kson_org/kson
 #### [lib-python](../lib-python) Publishing Process
-* todo doc process
+
+The Python package is published to PyPI as `kson-lang` using platform-specific wheels built by CircleCI.
+
+##### Prerequisites
+
+- You will need a PyPI account at https://pypi.org/
+- You will need the PyPI API token (stored in MM 1Password)
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Create the source distribution:
+   ```bash
+   ./gradlew createDist
+   ```
+
+3. Download the pre-built wheels from the CircleCI build for this tag:
+   - Download the wheel artifacts from CircleCI (they will download as `.zip` files)
+   - Copy all wheels into the `lib-python/dist/` directory
+   - Change the file extensions from `.zip` to `.whl`
+
+4. Upload to PyPI using `twine`:
+   ```bash
+   cd lib-python
+   ./uvw run python -m twine upload --repository pypi dist/* --verbose
+   ```
+   - Use the API Token when prompted
+
+5. Verify the package is available at: https://pypi.org/project/kson-lang/
 #### [tooling/cli](../tooling/cli) Publishing Process
 * todo doc process
 #### [tooling/lsp-clients](../tooling/lsp-clients) Publishing Process
-* todo doc process
+
+The KSON language support includes VSCode extensions published to both the Visual Studio Code Marketplace and Open VSX Registry.
+
+##### Prerequisites
+
+- GitHub account with access to publish to the marketplaces
+- Access to https://marketplace.visualstudio.com
+- Access to https://open-vsx.org
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Build the VSCode extension package:
+   ```bash
+   ./gradlew clean && ./gradlew npm_run_buildVSCode
+   ```
+
+   This creates a VSIX package at `tooling/lsp-clients/vscode/dist/vscode-kson-plugin.vsix`
+
+3. Publish to VS Code Marketplace:
+   - Login to https://marketplace.visualstudio.com with GitHub
+   - Navigate to the KSON extension
+   - Update/upload the extension with the built VSIX file
+
+4. Publish to Open VSX Registry:
+   - Login to https://open-vsx.org/user-settings/extensions with GitHub
+   - Navigate to the KSON extension
+   - Update/upload the extension with the built VSIX file
+
+5. Verify the extensions are available at:
+   - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=kson.kson
+   - Open VSX: https://open-vsx.org/extension/kson/kson
 #### [tooling/jetbrains](../tooling/jetbrains) Publishing Process
 
 Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
@@ -89,13 +179,13 @@ Note: it is possible to automate this process us some Gradle tasks provided by t
 1. Ensure you have **the tag you wish to release checked out and that your Git status is clean**.
 
 2. Build the plugin distribution:
-
+   
     ```bash
     ./gradlew :tooling:jetbrains:buildPlugin
     ```
-
-    This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
+   
+   This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
 
 3. Manually upload to JetBrains Marketplace:
-   - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
-   - Upload the ZIP file from the distributions folder
+  - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
+  - Upload the ZIP file from the distributions folder
