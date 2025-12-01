@@ -23,7 +23,7 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
             val universalMessages = matchAttemptMessageGroups.takeIf {
                 it.isNotEmpty()
             }?.reduce { acc, messages ->
-                acc.intersect(messages).toList()
+                acc.intersect(messages.toSet()).toList()
             } ?: emptyList()
 
             if (universalMessages.isNotEmpty()) {
@@ -41,7 +41,7 @@ class AnyOfValidator(private val anyOf: List<JsonSchema>) : JsonSchemaValidator 
 
                 // for the other subSchema-specific messages, we write one group message anchored to
                 // the beginning of the object
-                var subSchemaErrors = matchAttemptMessageSinks.joinToString("\n\n") { matchAttemptSink ->
+                val subSchemaErrors = matchAttemptMessageSinks.joinToString("\n\n") { matchAttemptSink ->
                     "'" + matchAttemptSink.label + "': [" +
                             matchAttemptSink.messageSink
                                 .loggedMessages()
