@@ -25,33 +25,34 @@ sealed interface DependencyValidator {
      * @param ksonObject the [KsonObject] to check for dependencies
      * @param requiredBy the [KsonObjectProperty] of [KsonObject] that requires these dependencies
      */
-    fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean
+    fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink)
 }
 data class DependencyValidatorArray(val dependency: Set<KsonString>) : DependencyValidator {
-    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean {
+    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink) {
         val propertyNames = ksonObject.propertyMap.keys
-        var dependenciesMissing = false
         dependency.forEach {
             val requiredPropertyName = it.value
             if (!propertyNames.contains(requiredPropertyName)) {
-                dependenciesMissing = true
                 val requiredByName = requiredBy.propName
                 messageSink.error(requiredByName.location,
                     MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES.create(requiredByName.value, requiredPropertyName))
             }
         }
-
-        return dependenciesMissing
     }
 }
 data class DependencyValidatorSchema(val dependency: JsonSchema?) : DependencyValidator {
-    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink): Boolean {
+    override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink) {
         if (dependency == null) {
-            return true
+            return
         }
-        val numErrors = messageSink.loggedMessages().size
-        dependency.validate(ksonObject, messageSink)
-        // valid if we didn't add any new errors
-        return messageSink.loggedMessages().size == numErrors
+        val dependencyErrorsMessageSink = MessageSink()
+        dependency.validate(ksonObject, dependencyErrorsMessageSink)
+        if (dependencyErrorsMessageSink.loggedMessages().isNotEmpty()) {
+            val requiredByName = requiredBy.propName
+            dependencyErrorsMessageSink.loggedMessages().forEach { message ->
+                messageSink.error(message.location,
+                    MessageType.SCHEMA_DEPENDENCIES_SCHEMA_ERROR.create(requiredByName.value, message.message.toString()))
+            }
+        }
     }
 }
