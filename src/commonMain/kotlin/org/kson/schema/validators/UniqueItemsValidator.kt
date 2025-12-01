@@ -17,11 +17,10 @@ class UniqueItemsValidator(private val uniqueItems: Boolean) : JsonArrayValidato
      * Check if all items in a list are unique using JSON Schema equality semantics.
      */
     private fun areItemsUnique(elements: List<KsonValue>): Boolean {
-        for (i in elements.indices) {
-            for (j in i + 1 until elements.size) {
-                if (elements[i] == elements[j]) {
-                    return false
-                }
+        val seen = mutableSetOf<KsonValue>()
+        for (element in elements) {
+            if (!seen.add(element)) {
+                return false
             }
         }
         return true
