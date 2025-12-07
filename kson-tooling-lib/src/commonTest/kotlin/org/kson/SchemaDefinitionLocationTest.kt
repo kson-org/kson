@@ -359,4 +359,169 @@ class SchemaDefinitionLocationTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testGetSchemaLocationAtLocation_anyOf_filteredLocation() {
+        // Property defined in multiple anyOf branches should return only the valid location
+        // Document has name: value (string), so only the string branch validates
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "object",
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "name": <caret>{
+                          "type": "string",
+                          "description": "Name from first branch"
+                        }<caret>
+                      }
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "type": "number",
+                          "description": "Name from second branch"
+                        }
+                      }
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                name: <caret>value
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testGetSchemaLocationAtLocation_allOf_multipleLocations() {
+        // Property defined in multiple allOf branches should return multiple locations
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "properties": {
+                        "shared": <caret>{
+                          "type": "string"
+                        }<caret>
+                      }
+                    },
+                    {
+                      "properties": {
+                        "shared": <caret>{
+                          "minLength": 5
+                        }<caret>
+                      }
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                shared: <caret>test
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_anyOf_filteredByValidation() {
+        // For anyOf with discriminator, only the valid branch should be shown
+        // Document has type: email, so only the email branch validates
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "object",
+                  "properties": {
+                    "notification": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": <caret>{
+                              "const": "email"
+                            }<caret>,
+                            "recipient": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "const": "sms"
+                            },
+                            "phoneNumber": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                notification:
+                  type<caret>: email
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_oneOf_filteredByType() {
+        // When a property appears in multiple oneOf branches with different types,
+        // only the valid branch should be shown based on the actual value
+        // Document has value: test (a string), so only the string branch validates
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": <caret>{
+                              "type": "string",
+                              "description": "String value"
+                            }<caret>
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "number",
+                              "description": "Numeric value"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array value"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                data:
+                  value<caret>: test
+            """.trimIndent()
+        )
+    }
+
 }

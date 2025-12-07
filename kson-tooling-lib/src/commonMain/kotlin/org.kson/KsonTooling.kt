@@ -5,6 +5,7 @@ package org.kson
 
 import org.kson.navigation.KsonValuePathBuilder
 import org.kson.navigation.SchemaInformation
+import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
@@ -30,8 +31,12 @@ object KsonTooling {
      * This is a convenience method that finds the KsonValue at the given position
      * and then retrieves schema information for it.
      *
-     * @param documentRoot The root of the document being edited (internal KsonValue)
-     * @param schemaValue The schema for the document (internal KsonValue)
+     * Filters schemas based on validation - only returns info from schemas that
+     * are compatible with the existing document properties (for oneOf/anyOf combinators).
+     * When multiple valid schemas exist, their information is combined with separators.
+     *
+     * @param documentRoot The root of the document being edited (KSON string)
+     * @param schemaValue The schema for the document (KSON string)
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return Formatted text, or null if no schema info available
@@ -43,12 +48,26 @@ object KsonTooling {
         column: Int
     ): String? {
         val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition() ?: return null
-        val schemaInfo = KsonCore.parseToAst(schemaValue).ksonValue.let{
-            it ?: return null
-            SchemaInformation.getSchemaInfo(it, buildPath)
+        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
+
+        // Get all candidate schemas at this path
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
+
+        // Apply the same filtering logic as completions and jump-to-definition
+        val validSchemas = getValidSchemas(candidateSchemas, documentRoot, buildPath, schemaIdLookup)
+
+        // Extract schema info from each valid schema
+        val schemaInfos = validSchemas.mapNotNull { ref ->
+            ref.resolvedValue.extractSchemaInfo()
         }
 
-        return schemaInfo
+        // Combine multiple schema infos with separator
+        return when {
+            schemaInfos.isEmpty() -> null
+            schemaInfos.size == 1 -> schemaInfos.first()
+            else -> schemaInfos.joinToString("\n\n---\n\n")
+        }
     }
 
     /**
@@ -56,6 +75,9 @@ object KsonTooling {
      *
      * This is a convenience method that finds the KsonValue at the given position
      * and then returns its location in the schema document.
+     *
+     * Filters schemas based on validation - only returns locations for schemas that
+     * are compatible with the existing document properties (for oneOf/anyOf combinators).
      *
      * @param documentRoot The root of the document being edited (KSON string)
      * @param schemaValue The schema for the document (KSON string)
@@ -70,17 +92,21 @@ object KsonTooling {
         column: Int
     ): List<Range>? {
         val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(forDefinition = true) ?: return null
-        val locations = KsonCore.parseToAst(schemaValue).ksonValue.let{
-            it ?: return null
-            SchemaInformation.getSchemaLocations(it, buildPath)
-        }
+        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
 
-        return locations.map {
+        // Get all candidate schemas at this path
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
+
+        // Apply the same filtering logic as completions to only show valid schemas
+        val validSchemas = getValidSchemas(candidateSchemas, documentRoot, buildPath, schemaIdLookup)
+
+        return validSchemas.map {
             Range(
-                it.start.line,
-                it.start.column,
-                it.end.line,
-                it.end.column
+                it.resolvedValue.location.start.line,
+                it.resolvedValue.location.start.column,
+                it.resolvedValue.location.end.line,
+                it.resolvedValue.location.end.column
             )
         }
     }
