@@ -61,14 +61,14 @@ object KsonTooling {
         schemaValue: String,
         line: Int,
         column: Int
-    ): Range? {
+    ): List<Range>? {
         val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(forDefinition = true) ?: return null
-        val location = KsonCore.parseToAst(schemaValue).ksonValue.let{
+        val locations = KsonCore.parseToAst(schemaValue).ksonValue.let{
             it ?: return null
-            SchemaInformation.getSchemaLocation(it, buildPath)
-        } ?: return null
+            SchemaInformation.getSchemaLocations(it, buildPath)
+        }
 
-        return location.let {
+        return locations.map {
             Range(
                 it.start.line,
                 it.start.column,

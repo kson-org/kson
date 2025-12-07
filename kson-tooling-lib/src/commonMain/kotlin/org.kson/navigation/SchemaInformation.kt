@@ -18,6 +18,9 @@ internal object SchemaInformation{
      * Get info for the node in a schema, found by using the
      * [documentPath] to navigate the schema
      *
+     * When multiple schemas match (e.g., property defined in multiple combinator branches),
+     * returns info from the first match.
+     *
      * @param schemaValue The schema for the document (as KsonValue)
      * @param documentPath The path to the [org.kson.value.KsonValue] in the document
      */
@@ -25,28 +28,33 @@ internal object SchemaInformation{
         schemaValue: InternalKsonValue,
         documentPath: List<String>
     ): String? {
-        val resolvedSchema = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
-        return resolvedSchema?.resolvedValue?.extractSchemaInfo()
+        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
+        return resolvedSchemas.firstOrNull()?.resolvedValue?.extractSchemaInfo()
     }
 
     /**
-     * Get location for node in a schema, found by using the
+     * Get [Location]'s for node in a schema, found by using the
      * [documentPath] to navigate the schema
      *
      * @param schemaValue The schema for the document (as KsonValue)
      * @param documentPath The path to the [org.kson.value.KsonValue] in the document
      */
-    fun getSchemaLocation(
+    fun getSchemaLocations(
         schemaValue: InternalKsonValue,
         documentPath: List<String>
-    ): Location? {
-        val resolvedSchema = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
-        return resolvedSchema?.resolvedValue?.location
+    ): List<Location> {
+        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
+        return resolvedSchemas.map {
+            it.resolvedValue.location
+        }
     }
 
     /**
      * Get completion suggestions for the node in a schema, found by using the
      * [documentPath] to navigate the schema
+     *
+     * When multiple schemas match (e.g., property defined in multiple combinator branches),
+     * merges completions from all matching schemas.
      *
      * @param schemaValue The schema for the document (as KsonValue)
      * @param documentPath The path to the [org.kson.value.KsonValue] in the document
@@ -56,10 +64,10 @@ internal object SchemaInformation{
         schemaValue: InternalKsonValue,
         documentPath: List<String>
     ): List<CompletionItem> {
-
-        val resolvedSchema = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
-        return resolvedSchema?.resolvedValue?.extractCompletions()
-            ?: emptyList()
+        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
+        return resolvedSchemas
+            .flatMap { it.resolvedValue.extractCompletions() }
+            .distinctBy { it.label } // Remove duplicates based on label
     }
 }
 
