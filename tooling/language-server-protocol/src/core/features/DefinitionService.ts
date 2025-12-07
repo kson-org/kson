@@ -27,38 +27,36 @@ export class DefinitionService {
 
         // Call the KsonTooling API to get the definition location in the schema
         const tooling = KsonTooling.getInstance();
-        const location = tooling.getSchemaLocationAtLocation(
+        const locations = tooling.getSchemaLocationAtLocation(
             document.getText(),
             schemaDocument.getText(),
             position.line,
             position.character
         );
 
-        if (!location) {
+        if (!locations) {
             // No definition found at this position
             return null;
         }
 
-        // Convert the location from kson-tooling-lib to LSP DefinitionLink format
-        const targetRange: Range = {
-            start: {
-                line: location.startLine,
-                character: location.startColumn
-            },
-            end: {
-                line: location.endLine,
-                character: location.startColumn
+        return locations.asJsReadonlyArrayView().map(location => {
+                const targetRange: Range = {
+                    start: {
+                        line: location.startLine,
+                        character: location.startColumn
+                    },
+                    end: {
+                        line: location.endLine,
+                        character: location.startColumn
+                    }
+                };
+                const definition: DefinitionLink = {
+                    targetUri: schemaDocument.uri,
+                    targetRange: targetRange,
+                    targetSelectionRange: targetRange
+                }
+                return definition
             }
-        };
-
-        // Return as an array of DefinitionLink
-        // We use the same range for both targetRange and targetSelectionRange
-        // targetRange is the full range of the definition
-        // targetSelectionRange is the range of the identifier within the definition
-        return [{
-            targetUri: schemaDocument.uri,
-            targetRange: targetRange,
-            targetSelectionRange: targetRange
-        }];
+        )
     }
 }

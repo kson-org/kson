@@ -187,11 +187,11 @@ object KsonTooling {
         val expandedSchemas = expandCombinatorSchemas(candidateSchemas)
 
         // Filter if needed (for oneOf/anyOf that require validation)
-        val validSchemas = if (needsFiltering) {
+        return if (needsFiltering) {
             // Parse the document for validation
             val documentValue = KsonCore.parseToAst(documentRoot).ksonValue
             if (documentValue != null) {
-                filterValidSchemas(expandedSchemas, documentValue, buildPath, schemaIdLookup)
+                filterValidSchemas(expandedSchemas, documentValue, documentPath, schemaIdLookup)
             } else {
                 // If document doesn't parse, fall back to unfiltered schemas
                 expandedSchemas
@@ -200,11 +200,6 @@ object KsonTooling {
             // No filtering needed, use all expanded schemas
             expandedSchemas
         }
-
-        // Get completions from valid schemas
-        val completions = SchemaInformation.getCompletions(parsedSchema, buildPath, validSchemas)
-
-        return completions.takeIf { it.isNotEmpty() }
     }
 
     /**

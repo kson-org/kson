@@ -78,19 +78,14 @@ describe('DefinitionService', () => {
         const definition = definitionService.getDefinition(document, position);
 
         // Verify definition link is returned if the tooling lib supports it
-        if (definition !== null) {
-            assert.ok(Array.isArray(definition), 'Definition should be an array');
-            assert.ok(definition.length > 0, 'Definition array should not be empty');
+        assert.ok(Array.isArray(definition), 'Definition should be an array');
+        assert.ok(definition.length > 0, 'Definition array should not be empty');
 
-            const firstDef = definition[0];
-            assert.ok(firstDef.targetUri, 'Definition should have targetUri');
-            assert.strictEqual(firstDef.targetUri, schemaDocument.uri, 'Target URI should be schema document');
-            assert.ok(firstDef.targetRange, 'Definition should have targetRange');
-            assert.ok(firstDef.targetSelectionRange, 'Definition should have targetSelectionRange');
-        } else {
-            // If null, log that the tooling-lib doesn't support this yet
-            console.log('DefinitionService returned null - tooling-lib may not support definition location yet');
-        }
+        const firstDef = definition[0];
+        assert.ok(firstDef.targetUri, 'Definition should have targetUri');
+        assert.strictEqual(firstDef.targetUri, schemaDocument.uri, 'Target URI should be schema document');
+        assert.ok(firstDef.targetRange, 'Definition should have targetRange');
+        assert.ok(firstDef.targetSelectionRange, 'Definition should have targetSelectionRange');
     });
 
     it('should handle errors gracefully', () => {
