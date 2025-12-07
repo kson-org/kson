@@ -2,7 +2,6 @@ package org.kson
 
 import org.kson.parser.Coordinates
 import kotlin.test.*
-import org.kson.parser.Location
 
 /**
  * Tests for [KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
@@ -12,11 +11,12 @@ class SchemaDefinitionLocationTest {
     /**
      * Helper to test definition location.
      *
-     * [schemaWithCaret] contains two <caret>'s, to signal the 'start' and 'end' [Location],
-     * [documentWithCaret] contains <caret>. The test verifies that the returned location
-     * points to that [Location] in the schema.
+     * [schemaWithCaret] contains <caret> markers to signal expected ranges.
+     * Multiple ranges can be specified for scenarios where multiple schema locations match (e.g., combinators).
+     * [documentWithCaret] contains a single <caret> marker. The test verifies that the returned locations
+     * match all the expected ranges in the schema.
      *
-     * If schemaWithCaret does NOT contain <caret>, the test verifies that the result is null.
+     * If schemaWithCaret does NOT contain any <caret> markers, the test verifies that the result is null or empty.
      */
     private fun assertDefinitionLocation(schemaWithCaret: String, documentWithCaret: String) {
         val caretMarker = "<caret>"
@@ -38,34 +38,80 @@ class SchemaDefinitionLocationTest {
         val docCoordinates = createCoordinates(documentWithCaret, docCaretIndex) ?: throw IllegalArgumentException("Document must contain $caretMarker marker")
         val document = documentWithCaret.replace(caretMarker, "")
 
-        // Process schema
-        val schemaCaretIndexes =
-            (schemaWithCaret.indexOf(caretMarker) to schemaWithCaret.lastIndexOf(caretMarker)).let {
-                createCoordinates(schemaWithCaret, it.first) to createCoordinates(schemaWithCaret, it.second)
-            }
+        // Process schema - find all <caret> markers (they come in pairs: open and close)
+        val expectedRanges = mutableListOf<Pair<Coordinates, Coordinates>>()
+        var searchText = schemaWithCaret
+        var offset = 0
+
+        while (true) {
+            val startIdx = searchText.indexOf(caretMarker)
+            if (startIdx == -1) break
+
+            val endIdx = searchText.indexOf(caretMarker, startIdx + caretMarker.length)
+            if (endIdx == -1) break
+
+            val startCoords = createCoordinates(schemaWithCaret, offset + startIdx)!!
+            val endCoords = createCoordinates(schemaWithCaret, offset + endIdx)!!
+
+            expectedRanges.add(startCoords to endCoords)
+
+            // Move past this pair
+            offset += endIdx + caretMarker.length
+            searchText = searchText.substring(endIdx + caretMarker.length)
+        }
+
         val schema = schemaWithCaret.replace(caretMarker, "")
 
-
         // Get the actual location result
-        val location = KsonTooling.getSchemaLocationAtLocation(document, schema, docCoordinates.line, docCoordinates.column)
+        val locations = KsonTooling.getSchemaLocationAtLocation(document, schema, docCoordinates.line, docCoordinates.column)
 
-        if (schemaCaretIndexes.first == null) {
-            // No <caret> in schema means we expect null
-            assertNull(location, "Expected null when no schema definition is found")
+        if (expectedRanges.isEmpty()) {
+            // No <caret> in schema means we expect null or empty
+            assertTrue(locations == null || locations.isEmpty(), "Expected null or empty when no schema definition is found")
         } else {
-            // Calculate expected position in schema
-            assertNotNull(location, "Expected definition location but got null")
+            // We expect locations to match all expected ranges
+            assertNotNull(locations, "Expected definition locations but got null")
+            assertEquals(expectedRanges.size, locations.size, "Expected ${expectedRanges.size} location(s) but got ${locations.size}")
 
-            // The location should start at the first <caret> position in the schema and end at the second <caret> position
+            // Insert <caret> markers into the actual schema to visualize where the returned locations are
+            val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
+
+            // Use string assertion to show differences clearly
             assertEquals(
-                schemaCaretIndexes.first?.column to schemaCaretIndexes.first?.line, location.startColumn to location.startLine,
-                "Expected start coordinates to be ${schemaCaretIndexes.first} but was ${location.startColumn to location.startLine}"
-            )
-            assertEquals(
-                schemaCaretIndexes.second?.column to schemaCaretIndexes.second?.line, location.endColumn to location.endLine,
-                "Expected end coordinates to be ${schemaCaretIndexes.second} but was ${location.endColumn to location.endLine}"
+                schemaWithCaret,
+                actualSchemaWithCarets,
+                "Schema definition locations do not match. Expected vs Actual with <caret> markers:"
             )
         }
+    }
+
+    /**
+     * Helper function to insert <caret> markers into the schema at the locations returned by the function.
+     * This allows for easy visual comparison of expected vs actual locations.
+     */
+    private fun buildActualSchemaWithCarets(schema: String, locations: List<Range>): String {
+        val caretMarker = "<caret>"
+
+        // Sort locations by position (descending) so we can insert from end to start without affecting indices
+        val sortedLocations = locations.sortedWith(
+            compareByDescending<Range> { it.startLine }
+                .thenByDescending { it.startColumn }
+        )
+
+        val lines = schema.lines().toMutableList()
+
+        // Insert carets from end to start to preserve indices
+        for (location in sortedLocations) {
+            // Insert end marker
+            val endLine = lines[location.endLine]
+            lines[location.endLine] = endLine.substring(0, location.endColumn) + caretMarker + endLine.substring(location.endColumn)
+
+            // Insert start marker
+            val startLine = lines[location.startLine]
+            lines[location.startLine] = startLine.substring(0, location.startColumn) + caretMarker + startLine.substring(location.startColumn)
+        }
+
+        return lines.joinToString("\n")
     }
 
     @Test

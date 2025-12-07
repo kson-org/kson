@@ -10,9 +10,17 @@ import kotlin.test.*
 class KsonValuePathBuilderTest {
 
     /**
-     * Helper to build path at the <caret> position in the document
+     * Helper to test path building at the <caret> position in the document.
+     *
+     * [documentWithCaret] contains a single <caret> marker indicating the cursor position.
+     * [expectedPath] is the expected path result.
+     * [includePropertyKeys] controls whether property keys should be included in the path.
      */
-    private fun buildPathAtCaret(documentWithCaret: String): List<String>? {
+    private fun assertPathAtCaret(
+        documentWithCaret: String,
+        expectedPath: List<String>,
+        includePropertyKeys: Boolean = true
+    ) {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
@@ -25,173 +33,158 @@ class KsonValuePathBuilderTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        return KsonValuePathBuilder(document, Coordinates(line, column)).buildPathToPosition()
+        val actualPath = KsonValuePathBuilder(document, Coordinates(line, column))
+            .buildPathToPosition(includePropertyKeys = includePropertyKeys)
+
+        assertEquals(expectedPath, actualPath, "Path does not match expected value")
     }
 
     @Test
     fun testBuildPathToPosition_simpleProperty() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             name: <caret>John
             age: 30
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("name"), path)
+            """.trimIndent(),
+            expectedPath = listOf("name")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_secondProperty() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             name: John
             age: <caret>30
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("age"), path)
+            """.trimIndent(),
+            expectedPath = listOf("age")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_nestedProperty() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             person:
               name: <caret>Alice
               age: 25
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("person", "name"), path)
+            """.trimIndent(),
+            expectedPath = listOf("person", "name")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_deeplyNestedProperty() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             company:
               address:
                 city: <caret>Boston
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("company", "address", "city"), path)
+            """.trimIndent(),
+            expectedPath = listOf("company", "address", "city")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_arrayItem() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             tags:
               - <caret>kotlin
               - multiplatform
-        """.trimIndent())
-
-        assertNotNull(path)
-        // Path includes array index
-        assertEquals(listOf("tags", "0"), path)
+            """.trimIndent(),
+            expectedPath = listOf("tags", "0") // Path includes array index
+        )
     }
 
     @Test
     fun testBuildPathToPosition_nestedArrayItem() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             users:
               - name: <caret>Alice
                 age: 30
               - name: Bob
                 age: 25
-        """.trimIndent())
-
-        assertNotNull(path)
-        // Path includes array index and property name
-        assertEquals(listOf("users", "0", "name"), path)
+            """.trimIndent(),
+            expectedPath = listOf("users", "0", "name") // Path includes array index and property name
+        )
     }
 
     @Test
     fun testBuildPathToPosition_afterColon() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             name: <caret>
             age: 30
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("name"), path)
+            """.trimIndent(),
+            expectedPath = listOf("name")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_emptyDocument() {
-        val path = buildPathAtCaret("<caret>")
-
-        // Empty document should an empty list
-        assertNotNull(path)
-        assertTrue(path.isEmpty())
+        assertPathAtCaret(
+            "<caret>",
+            expectedPath = emptyList() // Empty document should return an empty list
+        )
     }
 
     @Test
     fun testBuildPathToPosition_rootLevel() {
-        val path = buildPathAtCaret("""
+        // When caret is at the start of a line with a property, it returns that property's path
+        assertPathAtCaret(
+            """
             <caret>name: John
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertTrue(path.isEmpty() || path == listOf("name"))
+            """.trimIndent(),
+            expectedPath = listOf("name")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_multiLevelNesting() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             root:
               level1:
                 level2:
                   level<caret>3: value
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("root", "level1", "level2"), path)
+            """.trimIndent(),
+            expectedPath = listOf("root", "level1", "level2", "level3")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_fixInvalidDocumentWithoutKey() {
-        val path = buildPathAtCaret("""
+        assertPathAtCaret(
+            """
             key: <caret>
-        """.trimIndent())
-
-        assertNotNull(path)
-        assertEquals(listOf("key"), path)
+            """.trimIndent(),
+            expectedPath = listOf("key")
+        )
     }
 
     @Test
     fun testBuildPathToPosition_onPropertyKey_forCompletion() {
         // When cursor is on property key, for completion, path should drop last element (go to parent)
-        val document = """
+        assertPathAtCaret(
+            """
             user<caret>name: johndoe
-        """.trimIndent()
-
-        val caretMarker = "<caret>"
-        val caretIndex = document.indexOf(caretMarker)
-        val beforeCaret = document.take(caretIndex)
-        val line = beforeCaret.count { it == '\n' }
-        val column = caretIndex - (beforeCaret.lastIndexOf('\n') + 1)
-        val cleanDocument = document.replace(caretMarker, "")
-
-        val path = KsonValuePathBuilder(cleanDocument, Coordinates(line, column)).buildPathToPosition(forDefinition = false)
-
-        assertNotNull(path)
-        assertEquals(emptyList(), path)  // Drops "username", returns empty (parent of root)
+            """.trimIndent(),
+            expectedPath = emptyList(), // Drops "username", returns empty (parent of root)
+            includePropertyKeys = false
+        )
     }
 
     @Test
     fun testBuildPathToPosition_onPropertyKey_forDefinition() {
         // When cursor is on property key, for definition, path should keep the property
-        val document = """
+        assertPathAtCaret(
+            """
             user<caret>name: johndoe
-        """.trimIndent()
-
-        val caretMarker = "<caret>"
-        val caretIndex = document.indexOf(caretMarker)
-        val beforeCaret = document.take(caretIndex)
-        val line = beforeCaret.count { it == '\n' }
-        val column = caretIndex - (beforeCaret.lastIndexOf('\n') + 1)
-        val cleanDocument = document.replace(caretMarker, "")
-
-        val path = KsonValuePathBuilder(cleanDocument, Coordinates(line, column)).buildPathToPosition(forDefinition = true)
-
-        assertNotNull(path)
-        assertEquals(listOf("username"), path)  // Keeps "username" for definition lookup
+            """.trimIndent(),
+            expectedPath = listOf("username"), // Keeps "username" for definition lookup
+            includePropertyKeys = true
+        )
     }
 }
