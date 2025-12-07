@@ -135,7 +135,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                 val navigatedNodes = if (isArrayIndex) {
                     // Array navigation: go to "items" schema
                     // We ignore the actual index - all array elements use the same schema
-                    navigateArrayItems(node)?.let { listOf(ResolvedRef(it, updatedBaseUri)) } ?: emptyList()
+                    navigateArrayItems(node, updatedBaseUri)?.let { listOf(it) } ?: emptyList()
                 } else {
                     // Object navigation: go to "properties" wrapper, then the property
                     navigateObjectProperty(node, token, updatedBaseUri)
@@ -145,6 +145,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                 for (navNode in navigatedNodes) {
                     var resolvedNode = navNode.resolvedValue
                     var resolvedBaseUri = navNode.resolvedValueBaseUri
+                    val resolutionType = navNode.resolutionType
 
                     if (resolvedNode is KsonObject) {
                         val refValue = resolvedNode.propertyLookup[$$"$ref"] as? KsonString
@@ -157,7 +158,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                         }
                     }
 
-                    nextNodes.add(ResolvedRef(resolvedNode, resolvedBaseUri))
+                    nextNodes.add(ResolvedRef(resolvedNode, resolvedBaseUri, resolutionType))
                 }
             }
 
@@ -175,12 +176,16 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      *
      * Looks for "items" or "additionalItems" schema properties.
      */
-    private fun navigateArrayItems(schemaNode: KsonObject): KsonValue? {
+    private fun navigateArrayItems(schemaNode: KsonObject, currentBaseUri: String): ResolvedRef? {
         // Try "items" first (most common case)
-        schemaNode.propertyLookup["items"]?.let { return it }
+        schemaNode.propertyLookup["items"]?.let {
+            return ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS)
+        }
 
         // Fallback to "additionalItems"
-        return schemaNode.propertyLookup["additionalItems"]
+        return schemaNode.propertyLookup["additionalItems"]?.let {
+            ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS)
+        }
     }
 
     /**
@@ -199,7 +204,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         val results = mutableListOf<ResolvedRef>()
 
         // Helper to process a combinator array
-        fun processCombinator(combinator: KsonValue?) {
+        fun processCombinator(combinator: KsonValue?, resolutionType: SchemaResolutionType) {
             val combinatorList = combinator as? KsonList ?: return
 
             for (element in combinatorList.elements) {
@@ -220,15 +225,27 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
                 // Recursively navigate through this schema
                 if (schema is KsonObject) {
-                    results.addAll(navigateObjectProperty(schema, propertyName, schemaBaseUri))
+                    val nestedResults = navigateObjectProperty(schema, propertyName, schemaBaseUri)
+                    // Tag nested results with the combinator type if they don't already have a combinator type
+                    results.addAll(nestedResults.map { ref ->
+                        if (ref.resolutionType in listOf(
+                                SchemaResolutionType.DIRECT_PROPERTY,
+                                SchemaResolutionType.PATTERN_PROPERTY,
+                                SchemaResolutionType.ADDITIONAL_PROPERTY
+                            )) {
+                            ref.copy(resolutionType = resolutionType)
+                        } else {
+                            ref
+                        }
+                    })
                 }
             }
         }
 
         // Process each type of combinator
-        processCombinator(schemaNode.propertyLookup["allOf"])
-        processCombinator(schemaNode.propertyLookup["anyOf"])
-        processCombinator(schemaNode.propertyLookup["oneOf"])
+        processCombinator(schemaNode.propertyLookup["allOf"], SchemaResolutionType.ALL_OF)
+        processCombinator(schemaNode.propertyLookup["anyOf"], SchemaResolutionType.ANY_OF)
+        processCombinator(schemaNode.propertyLookup["oneOf"], SchemaResolutionType.ONE_OF)
 
         return results
     }
@@ -256,7 +273,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         // Try direct property lookup in "properties"
         val properties = schemaNode.propertyLookup["properties"] as? KsonObject
         properties?.propertyLookup?.get(propertyName)?.let {
-            results.add(ResolvedRef(it, currentBaseUri))
+            results.add(ResolvedRef(it, currentBaseUri, SchemaResolutionType.DIRECT_PROPERTY))
         }
 
         // Try pattern properties - check all patterns for a match
@@ -264,7 +281,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         patternProperties?.propertyMap?.forEach { (pattern, property) ->
             try {
                 if (Regex(pattern).containsMatchIn(propertyName)) {
-                    results.add(ResolvedRef(property.propValue, currentBaseUri))
+                    results.add(ResolvedRef(property.propValue, currentBaseUri, SchemaResolutionType.PATTERN_PROPERTY))
                 }
             } catch (_: Throwable) {
                 // Invalid regex pattern, skip it
@@ -283,7 +300,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         // Fallback to additionalProperties if nothing found
         if (results.isEmpty()) {
             schemaNode.propertyLookup["additionalProperties"]?.let {
-                results.add(ResolvedRef(it, currentBaseUri))
+                results.add(ResolvedRef(it, currentBaseUri, SchemaResolutionType.ADDITIONAL_PROPERTY))
             }
         }
 
@@ -470,7 +487,34 @@ private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBas
     }
 }
 
-data class ResolvedRef(val resolvedValue: KsonValue, val resolvedValueBaseUri: String)
+/**
+ * Describes how a schema was resolved during navigation.
+ * This information is used by completion providers to determine which schemas need validation.
+ */
+enum class SchemaResolutionType {
+    /** Schema found via direct property lookup in "properties" */
+    DIRECT_PROPERTY,
+    /** Schema found via pattern matching in "patternProperties" */
+    PATTERN_PROPERTY,
+    /** Schema from "additionalProperties" fallback */
+    ADDITIONAL_PROPERTY,
+    /** Schema from "items" or "additionalItems" for array elements */
+    ARRAY_ITEMS,
+    /** Schema from "allOf" combinator - all branches must be valid */
+    ALL_OF,
+    /** Schema from "anyOf" combinator - at least one branch must be valid */
+    ANY_OF,
+    /** Schema from "oneOf" combinator - exactly one branch must be valid */
+    ONE_OF,
+    /** Root schema or schema resolved via $ref */
+    ROOT
+}
+
+data class ResolvedRef(
+    val resolvedValue: KsonValue,
+    val resolvedValueBaseUri: String,
+    val resolutionType: SchemaResolutionType = SchemaResolutionType.ROOT
+)
 
 /**
  * Updates the base URI while following a path of JSON Pointer tokens.

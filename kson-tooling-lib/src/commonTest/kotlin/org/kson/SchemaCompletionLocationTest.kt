@@ -548,8 +548,10 @@ class SchemaCompletionLocationTest {
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
         // Should suggest properties from the object schema
+        // Should suggest properties from the object schema, excluding already-filled ones
         val labels = completions.map { it.label }
         assertTrue("name" in labels, "Should include 'name' property")
+        assertTrue("name" !in labels, "Should NOT include 'name' property (already filled)")
         assertTrue("age" in labels, "Should include 'age' property")
         assertTrue("email" in labels, "Should include 'email' property")
 
@@ -585,8 +587,10 @@ class SchemaCompletionLocationTest {
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
         // Should infer object type from presence of properties
+        // Should infer object type from presence of properties, excluding already-filled ones
         val labels = completions.map { it.label }
         assertTrue("debug" in labels, "Should include 'debug' property")
+        assertTrue("debug" !in labels, "Should NOT include 'debug' property (already filled)")
         assertTrue("verbose" in labels, "Should include 'verbose' property")
     }
 
@@ -619,8 +623,10 @@ class SchemaCompletionLocationTest {
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
         // When object is in union type, should provide property completions
+        // When object is in union type, should provide property completions, excluding already-filled ones
         val labels = completions.map { it.label }
         assertTrue("x" in labels, "Should include 'x' property")
+        assertTrue("x" !in labels, "Should NOT include 'x' property (already filled)")
         assertTrue("y" in labels, "Should include 'y' property")
     }
 
@@ -727,8 +733,10 @@ class SchemaCompletionLocationTest {
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
         // Should get all root object properties
+        // Should get unfilled root object properties (name is already filled)
         val labels = completions.map { it.label }
         assertTrue("name" in labels, "Should include 'name' property")
+        assertTrue("name" !in labels, "Should NOT include 'name' property (already filled)")
         assertTrue("age" in labels, "Should include 'age' property")
         assertTrue("email" in labels, "Should include 'email' property")
 
@@ -843,4 +851,362 @@ class SchemaCompletionLocationTest {
         assertTrue("inactive" in labels, "Should include 'inactive' enum value")
         assertTrue("pending" in labels, "Should include 'pending' enum value")
     }
+
+    @Test
+    fun testOneOfCompletionsFilteredByExistingProperties() {
+        // Test that only valid oneOf branches provide completions based on discriminator property
+        val schema = """
+            type: object
+            properties:
+              notification:
+                oneOf:
+                  - type: object
+                    properties:
+                      type:
+                        const: email
+                        .
+                      recipient:
+                        type: string
+                        .
+                      subject:
+                        type: string
+                        .
+                      .
+                    required: [type, recipient, subject]
+                    .
+                  - type: object
+                    properties:
+                      type:
+                        const: sms
+                        .
+                      phoneNumber:
+                        type: string
+                        .
+                      message:
+                        type: string
+                        .
+                      .
+                    required: [type, phoneNumber, message]
+                    .
+                  - type: object
+                    properties:
+                      type:
+                        const: push
+                        .
+                      deviceId:
+                        type: string
+                        .
+                      title:
+                        type: string
+                        .
+                      body:
+                        type: string
+                        .
+                      .
+                    required: [type, deviceId, title, body]
+                    .
+                .
+              .
+        """
+
+        // When type is "email", should only get email-specific properties
+        val emailCompletions = getCompletionsAtCaret(schema, """
+            notification:
+              type: email
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(emailCompletions, "Should return completions for email notification")
+        val emailLabels = emailCompletions.map { it.label }
+        assertTrue("recipient" in emailLabels, "Should include 'recipient' for email type")
+        assertTrue("subject" in emailLabels, "Should include 'subject' for email type")
+        assertTrue("phoneNumber" !in emailLabels, "Should NOT include 'phoneNumber' (SMS-specific)")
+        assertTrue("deviceId" !in emailLabels, "Should NOT include 'deviceId' (push-specific)")
+
+        // When type is "sms", should only get SMS-specific properties
+        val smsCompletions = getCompletionsAtCaret(schema, """
+            notification:
+              type: sms
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(smsCompletions, "Should return completions for SMS notification")
+        val smsLabels = smsCompletions.map { it.label }
+        assertTrue("phoneNumber" in smsLabels, "Should include 'phoneNumber' for SMS type")
+        assertTrue("message" in smsLabels, "Should include 'message' for SMS type")
+        assertTrue("recipient" !in smsLabels, "Should NOT include 'recipient' (email-specific)")
+        assertTrue("deviceId" !in smsLabels, "Should NOT include 'deviceId' (push-specific)")
+
+        // When type is "push", should only get push-specific properties
+        val pushCompletions = getCompletionsAtCaret(schema, """
+            notification:
+              type: push
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(pushCompletions, "Should return completions for push notification")
+        val pushLabels = pushCompletions.map { it.label }
+        assertTrue("deviceId" in pushLabels, "Should include 'deviceId' for push type")
+        assertTrue("title" in pushLabels, "Should include 'title' for push type")
+        assertTrue("body" in pushLabels, "Should include 'body' for push type")
+        assertTrue("recipient" !in pushLabels, "Should NOT include 'recipient' (email-specific)")
+        assertTrue("phoneNumber" !in pushLabels, "Should NOT include 'phoneNumber' (SMS-specific)")
+    }
+
+    @Test
+    fun testAnyOfCompletionsCombineValidBranches() {
+        // Test that all valid anyOf branches provide completions
+        val schema = """
+            type: object
+            properties:
+              config:
+                anyOf:
+                  - type: object
+                    properties:
+                      debugMode:
+                        type: boolean
+                        .
+                      logLevel:
+                        enum: [debug, info, warn, error]
+                        .
+                      .
+                    .
+                  - type: object
+                    properties:
+                      production:
+                        type: boolean
+                        .
+                      apiKey:
+                        type: string
+                        .
+                      .
+                    .
+                .
+              .
+        """
+
+        // Both branches are valid initially (anyOf means at least one must match)
+        val completions = getCompletionsAtCaret(schema, """
+            config:
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should include properties from both branches since both are valid
+        assertTrue("debugMode" in labels, "Should include 'debugMode' from first branch")
+        assertTrue("logLevel" in labels, "Should include 'logLevel' from first branch")
+        assertTrue("production" in labels, "Should include 'production' from second branch")
+        assertTrue("apiKey" in labels, "Should include 'apiKey' from second branch")
+    }
+
+    @Test
+    fun testAllOfCompletionsCombineAllBranches() {
+        // Test that all allOf branches always provide completions (no filtering)
+        val schema = """
+            type: object
+            properties:
+              entity:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        .
+                      createdAt:
+                        type: string
+                        .
+                      .
+                    .
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        .
+                      description:
+                        type: string
+                        .
+                      .
+                    .
+                .
+              .
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            entity:
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should include properties from all branches (allOf means all must match)
+        assertTrue("id" in labels, "Should include 'id' from first branch")
+        assertTrue("createdAt" in labels, "Should include 'createdAt' from first branch")
+        assertTrue("name" in labels, "Should include 'name' from second branch")
+        assertTrue("description" in labels, "Should include 'description' from second branch")
+    }
+
+    @Test
+    fun testCompletionsExcludeAlreadyFilledProperties() {
+        // Test that properties already filled in the object are excluded from completions
+        val schema = """
+            type: object
+            properties:
+              user:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    .
+                  age:
+                    type: number
+                    .
+                  email:
+                    type: string
+                    .
+                  address:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        // User object already has 'name' and 'email' filled in
+        val completions = getCompletionsAtCaret(schema, """
+            user:
+              name: "John"
+              email: "john@example.com"
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should include only properties that are NOT already filled
+        assertTrue("age" in labels, "Should include 'age' (not filled yet)")
+        assertTrue("address" in labels, "Should include 'address' (not filled yet)")
+
+        // Should NOT include properties that are already filled
+        assertTrue("name" !in labels, "Should NOT include 'name' (already filled)")
+        assertTrue("email" !in labels, "Should NOT include 'email' (already filled)")
+    }
+
+    @Test
+    fun testCompletionsExcludeAlreadyFilledPropertiesInArrayItems() {
+        // Test that properties already filled in array items are excluded from completions
+        val schema = """
+            type: object
+            properties:
+              todos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      .
+                    status:
+                      type: string
+                      enum: [todo, done]
+                      .
+                    priority:
+                      type: number
+                      .
+                    assignee:
+                      type: string
+                      .
+                    .
+                  .
+                .
+              .
+        """
+
+        // Array item already has 'title' and 'status' filled in
+        val completions = getCompletionsAtCaret(schema, """
+            todos:
+              - title: "Fix bug"
+                status: done
+                <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should include only properties that are NOT already filled
+        assertTrue("priority" in labels, "Should include 'priority' (not filled yet)")
+        assertTrue("assignee" in labels, "Should include 'assignee' (not filled yet)")
+
+        // Should NOT include properties that are already filled
+        assertTrue("title" !in labels, "Should NOT include 'title' (already filled)")
+        assertTrue("status" !in labels, "Should NOT include 'status' (already filled)")
+    }
+
+    @Test
+    fun testCompletionsExcludeAlreadyFilledPropertiesWithOneOf() {
+        // Test that filtering works correctly with oneOf schemas
+        val schema = """
+            type: object
+            properties:
+              notification:
+                oneOf:
+                  - type: object
+                    properties:
+                      type:
+                        const: email
+                        .
+                      recipient:
+                        type: string
+                        .
+                      subject:
+                        type: string
+                        .
+                      body:
+                        type: string
+                        .
+                      .
+                    .
+                  - type: object
+                    properties:
+                      type:
+                        const: sms
+                        .
+                      phoneNumber:
+                        type: string
+                        .
+                      message:
+                        type: string
+                        .
+                      .
+                    .
+                .
+              .
+        """
+
+        // Email notification with 'type' and 'recipient' already filled
+        val completions = getCompletionsAtCaret(schema, """
+            notification:
+              type: email
+              recipient: "user@example.com"
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should include only unfilled properties from the email branch
+        assertTrue("subject" in labels, "Should include 'subject' (not filled yet)")
+        assertTrue("body" in labels, "Should include 'body' (not filled yet)")
+
+        // Should NOT include already filled properties
+        assertTrue("type" !in labels, "Should NOT include 'type' (already filled)")
+        assertTrue("recipient" !in labels, "Should NOT include 'recipient' (already filled)")
+
+        // Should NOT include properties from other branches (SMS)
+        assertTrue("phoneNumber" !in labels, "Should NOT include 'phoneNumber' (from SMS branch)")
+        assertTrue("message" !in labels, "Should NOT include 'message' (from SMS branch)")
+    }
+
 }

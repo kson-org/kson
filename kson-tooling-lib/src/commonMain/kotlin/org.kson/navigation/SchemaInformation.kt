@@ -3,6 +3,7 @@ package org.kson.navigation
 import org.kson.CompletionItem
 import org.kson.CompletionKind
 import org.kson.parser.Location
+import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
@@ -58,16 +59,52 @@ internal object SchemaInformation{
      *
      * @param schemaValue The schema for the document (as KsonValue)
      * @param documentPath The path to the [org.kson.value.KsonValue] in the document
+     * @param validSchemas Pre-filtered list of valid schemas (optional). If not provided, all schemas at the path will be used.
+     * @param documentValue The current document value (optional). If provided, used to filter out already-filled properties.
      * @return List of completion items
      */
     fun getCompletions(
         schemaValue: InternalKsonValue,
-        documentPath: List<String>
+        documentPath: List<String>,
+        validSchemas: List<ResolvedRef>? = null,
+        documentValue: InternalKsonValue? = null
     ): List<CompletionItem> {
-        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
-        return resolvedSchemas
+        val resolvedSchemas = validSchemas ?: SchemaIdLookup(schemaValue).navigateByDocumentPath(documentPath)
+        val allCompletions = resolvedSchemas
             .flatMap { it.resolvedValue.extractCompletions() }
             .distinctBy { it.label } // Remove duplicates based on label
+
+        // Only filter if:
+        // 1. Document value is provided
+        // 2. We have PROPERTY completions (not just VALUE completions)
+        // 3. We can successfully navigate to an object at the document path
+        if (documentValue == null) {
+            return allCompletions
+        }
+
+        val hasPropertyCompletions = allCompletions.any { it.kind == org.kson.CompletionKind.PROPERTY }
+        if (!hasPropertyCompletions) {
+            return allCompletions
+        }
+
+        // Get the current object at the completion location
+        // If we can't find an object, it means the caret is before the object literal,
+        // so we shouldn't filter (e.g., "user: <caret>{" - object exists but path doesn't reach it yet)
+        val currentObject = org.kson.value.KsonValueNavigation.navigateByTokens(documentValue, documentPath) as? InternalKsonObject
+            ?: return allCompletions
+
+        // Get the set of already-filled property names
+        val filledProperties = currentObject.propertyLookup.keys
+
+        // Filter out completions for properties that are already filled
+        return allCompletions.filter { completion ->
+            // Only filter PROPERTY kind completions (not VALUE completions like enum values)
+            if (completion.kind == org.kson.CompletionKind.PROPERTY) {
+                completion.label !in filledProperties
+            } else {
+                true // Keep all VALUE completions
+            }
+        }
     }
 }
 
@@ -195,6 +232,9 @@ internal fun InternalKsonValue.extractCompletions(
  * - Enum values (if enum is defined)
  * - Boolean values (if type is boolean)
  * - Null value (if type is null or includes null)
+ *
+ * Note: Combinator expansion (oneOf/anyOf/allOf) is handled by the caller (KsonTooling),
+ * so this function receives pre-expanded and pre-filtered schemas.
  */
 private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     // Check if this schema represents an object type
