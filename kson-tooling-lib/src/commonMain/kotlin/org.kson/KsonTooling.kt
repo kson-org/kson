@@ -112,6 +112,54 @@ object KsonTooling {
     }
 
     /**
+     * Resolve a $ref reference within a schema document at the given position.
+     *
+     * This function checks if the cursor is positioned on a $ref string value,
+     * and if so, resolves it to the target location within the same schema document.
+     * Only internal references (starting with #) are supported.
+     *
+     * @param schemaValue The schema document (KSON string)
+     * @param line The zero-based line number
+     * @param column The zero-based column number
+     * @return List of Range objects pointing to the referenced schema location(s), or null if not a ref or not found
+     */
+    fun resolveRefAtLocation(
+        schemaValue: String,
+        line: Int,
+        column: Int
+    ): List<Range>? {
+        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
+        val buildPath = KsonValuePathBuilder(schemaValue, Coordinates(line, column)).buildPathToPosition() ?: return null
+
+        // Return early if we are not in a $ref string
+        if( buildPath.lastOrNull() != $$"$ref") { return emptyList() }
+
+        // Navigate to the value at the cursor position
+        val valueAtPosition = KsonValueNavigation.navigateByTokens(parsedSchema, buildPath) ?: return null
+        // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
+        val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return null
+
+        // Determine the base URI for the schema root
+        val baseUri = (parsedSchema as? org.kson.value.KsonObject)
+            ?.propertyLookup["\$id"]
+            ?.let { it as? org.kson.value.KsonString }
+            ?.value ?: ""
+
+        // Resolve the reference and return its location
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return null
+
+        return listOf(
+            Range(
+                resolvedRef.resolvedValue.location.start.line,
+                resolvedRef.resolvedValue.location.start.column,
+                resolvedRef.resolvedValue.location.end.line,
+                resolvedRef.resolvedValue.location.end.column
+            )
+        )
+    }
+
+    /**
      * Get completion suggestions for a position in a document.
      *
      * This is a convenience method that finds the KsonValue at the given position
@@ -184,7 +232,7 @@ object KsonTooling {
         }
 
         // Always expand combinators to get individual branches
-        val expandedSchemas = expandCombinatorSchemas(candidateSchemas)
+        val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
 
         // Filter if needed (for oneOf/anyOf that require validation)
         return if (needsFiltering) {
@@ -200,55 +248,6 @@ object KsonTooling {
             // No filtering needed, use all expanded schemas
             expandedSchemas
         }
-    }
-
-    /**
-     * Expands combinator schemas (oneOf/anyOf/allOf) into individual branches.
-     *
-     * If a schema contains oneOf/anyOf/allOf, this replaces it with multiple ResolvedRef objects,
-     * one for each branch, tagged with the appropriate resolution type.
-     *
-     * @param schemas The list of schemas to expand
-     * @return Expanded list with combinator branches as separate items
-     */
-    private fun expandCombinatorSchemas(schemas: List<ResolvedRef>): List<ResolvedRef> {
-        val expanded = mutableListOf<ResolvedRef>()
-
-        for (ref in schemas) {
-            val schemaObj = ref.resolvedValue as? org.kson.value.KsonObject
-
-            if (schemaObj != null) {
-                var addedBranches = false
-
-                // Check for oneOf
-                (schemaObj.propertyLookup["oneOf"] as? org.kson.value.KsonList)?.elements?.forEach { branch ->
-                    expanded.add(ResolvedRef(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ONE_OF))
-                    addedBranches = true
-                }
-
-                // Check for anyOf
-                (schemaObj.propertyLookup["anyOf"] as? org.kson.value.KsonList)?.elements?.forEach { branch ->
-                    expanded.add(ResolvedRef(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ANY_OF))
-                    addedBranches = true
-                }
-
-                // Check for allOf - these don't need filtering, but we expand them for consistency
-                (schemaObj.propertyLookup["allOf"] as? org.kson.value.KsonList)?.elements?.forEach { branch ->
-                    expanded.add(ResolvedRef(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ALL_OF))
-                    addedBranches = true
-                }
-
-                // If we didn't add any branches, keep the original schema
-                if (!addedBranches) {
-                    expanded.add(ref)
-                }
-            } else {
-                // Not an object, keep as-is
-                expanded.add(ref)
-            }
-        }
-
-        return expanded
     }
 
     /**

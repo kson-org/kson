@@ -82,7 +82,7 @@ internal object SchemaInformation{
             return allCompletions
         }
 
-        val hasPropertyCompletions = allCompletions.any { it.kind == org.kson.CompletionKind.PROPERTY }
+        val hasPropertyCompletions = allCompletions.any { it.kind == CompletionKind.PROPERTY }
         if (!hasPropertyCompletions) {
             return allCompletions
         }
@@ -99,7 +99,7 @@ internal object SchemaInformation{
         // Filter out completions for properties that are already filled
         return allCompletions.filter { completion ->
             // Only filter PROPERTY kind completions (not VALUE completions like enum values)
-            if (completion.kind == org.kson.CompletionKind.PROPERTY) {
+            if (completion.kind == CompletionKind.PROPERTY) {
                 completion.label !in filledProperties
             } else {
                 true // Keep all VALUE completions
@@ -232,9 +232,6 @@ internal fun InternalKsonValue.extractCompletions(
  * - Enum values (if enum is defined)
  * - Boolean values (if type is boolean)
  * - Null value (if type is null or includes null)
- *
- * Note: Combinator expansion (oneOf/anyOf/allOf) is handled by the caller (KsonTooling),
- * so this function receives pre-expanded and pre-filtered schemas.
  */
 private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     // Check if this schema represents an object type

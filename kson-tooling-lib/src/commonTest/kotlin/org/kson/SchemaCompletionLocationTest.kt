@@ -547,10 +547,8 @@ class SchemaCompletionLocationTest {
         assertNotNull(completions, "Should return completions for object value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
-        // Should suggest properties from the object schema
         // Should suggest properties from the object schema, excluding already-filled ones
         val labels = completions.map { it.label }
-        assertTrue("name" in labels, "Should include 'name' property")
         assertTrue("name" !in labels, "Should NOT include 'name' property (already filled)")
         assertTrue("age" in labels, "Should include 'age' property")
         assertTrue("email" in labels, "Should include 'email' property")
@@ -586,10 +584,8 @@ class SchemaCompletionLocationTest {
         assertNotNull(completions, "Should return completions even without explicit type")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
-        // Should infer object type from presence of properties
         // Should infer object type from presence of properties, excluding already-filled ones
         val labels = completions.map { it.label }
-        assertTrue("debug" in labels, "Should include 'debug' property")
         assertTrue("debug" !in labels, "Should NOT include 'debug' property (already filled)")
         assertTrue("verbose" in labels, "Should include 'verbose' property")
     }
@@ -622,10 +618,8 @@ class SchemaCompletionLocationTest {
         assertNotNull(completions, "Should return completions for union with object")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
-        // When object is in union type, should provide property completions
         // When object is in union type, should provide property completions, excluding already-filled ones
         val labels = completions.map { it.label }
-        assertTrue("x" in labels, "Should include 'x' property")
         assertTrue("x" !in labels, "Should NOT include 'x' property (already filled)")
         assertTrue("y" in labels, "Should include 'y' property")
     }
@@ -732,10 +726,8 @@ class SchemaCompletionLocationTest {
         assertNotNull(completions, "Should return completions on newline in object")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
 
-        // Should get all root object properties
         // Should get unfilled root object properties (name is already filled)
         val labels = completions.map { it.label }
-        assertTrue("name" in labels, "Should include 'name' property")
         assertTrue("name" !in labels, "Should NOT include 'name' property (already filled)")
         assertTrue("age" in labels, "Should include 'age' property")
         assertTrue("email" in labels, "Should include 'email' property")
@@ -1002,6 +994,89 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testAnyOfWithRefsFiltersBasedOnExistingProperties() {
+        val schema = $$"""
+            anyOf:
+              - '$ref': '#/$defs/Development'
+              - '$ref': '#/$defs/Production'
+              =
+            '$defs':
+              Development:
+                type: object
+                additionalProperties: false
+                properties:
+                  debugMode:
+                    type: boolean
+                    .
+                  logLevel:
+                    enum: [debug, info, warn]
+                    .
+                  localDb:
+                    type: string
+                    .
+                  .
+                .
+              Production:
+                type: object
+                additionalProperties: false
+                properties:
+                  apiKey:
+                    type: string
+                    .
+                  replicas:
+                    type: number
+                    .
+                  cluster:
+                    type: string
+                    .
+                  .
+                .
+        """
+
+        // When no properties are filled, should include properties from both branches
+        val emptyCompletions = getCompletionsAtCaret(schema, """
+            <caret>
+        """.trimIndent())
+
+        assertNotNull(emptyCompletions, "Should return completions for empty document")
+        val emptyLabels = emptyCompletions.map { it.label }
+        assertTrue("debugMode" in emptyLabels, "Should include 'debugMode' from Development")
+        assertTrue("logLevel" in emptyLabels, "Should include 'logLevel' from Development")
+        assertTrue("localDb" in emptyLabels, "Should include 'localDb' from Development")
+        assertTrue("apiKey" in emptyLabels, "Should include 'apiKey' from Production")
+        assertTrue("replicas" in emptyLabels, "Should include 'replicas' from Production")
+        assertTrue("cluster" in emptyLabels, "Should include 'cluster' from Production")
+
+        // When debugMode is used (Development property), should only get Development properties
+        val devCompletions = getCompletionsAtCaret(schema, """
+            debugMode: true
+            <caret>
+        """.trimIndent())
+
+        assertNotNull(devCompletions, "Should return completions for Development branch")
+        val devLabels = devCompletions.map { it.label }
+        assertTrue("logLevel" in devLabels, "Should include 'logLevel' from Development")
+        assertTrue("localDb" in devLabels, "Should include 'localDb' from Development")
+        assertTrue("apiKey" !in devLabels, "Should NOT include 'apiKey' (from Production)")
+        assertTrue("replicas" !in devLabels, "Should NOT include 'replicas' (from Production)")
+        assertTrue("cluster" !in devLabels, "Should NOT include 'cluster' (from Production)")
+
+        // When apiKey is used (Production property), should only get Production properties
+        val prodCompletions = getCompletionsAtCaret(schema, """
+            apiKey: "secret123"
+            <caret>
+        """.trimIndent())
+
+        assertNotNull(prodCompletions, "Should return completions for Production branch")
+        val prodLabels = prodCompletions.map { it.label }
+        assertTrue("replicas" in prodLabels, "Should include 'replicas' from Production")
+        assertTrue("cluster" in prodLabels, "Should include 'cluster' from Production")
+        assertTrue("debugMode" !in prodLabels, "Should NOT include 'debugMode' (from Development)")
+        assertTrue("logLevel" !in prodLabels, "Should NOT include 'logLevel' (from Development)")
+        assertTrue("localDb" !in prodLabels, "Should NOT include 'localDb' (from Development)")
+    }
+
+    @Test
     fun testAllOfCompletionsCombineAllBranches() {
         // Test that all allOf branches always provide completions (no filtering)
         val schema = """
@@ -1208,5 +1283,4 @@ class SchemaCompletionLocationTest {
         assertTrue("phoneNumber" !in labels, "Should NOT include 'phoneNumber' (from SMS branch)")
         assertTrue("message" !in labels, "Should NOT include 'message' (from SMS branch)")
     }
-
 }
