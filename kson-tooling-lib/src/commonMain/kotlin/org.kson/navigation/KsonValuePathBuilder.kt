@@ -58,15 +58,15 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * The method handles several edge cases:
      * - Invalid documents (attempts recovery by inserting quotes)
      * - Positioned after a colon (targets the value being entered)
-     * - Positioned outside a token (targets the parent element, unless forDefinition is true)
+     * - Positioned outside a token (targets the parent element, unless includePropertyKeys is true)
      *
-     * @param forDefinition If true, keeps the path to the current property even when position is outside token.
-     *                      This is useful for "jump to definition" where we want to navigate to the property's
-     *                      schema definition, not its parent. Default is false for completion behavior.
+     * @param includePropertyKeys If true, keeps the path to the current property even when position is outside token.
+     *                            This is useful for "jump to definition" where we want to navigate to the property's
+     *                            schema definition, not its parent. Default is false for completion behavior.
      * @return A list of property names representing the path from root to target,
      *         or null if the path cannot be determined
      */
-    fun buildPathToPosition(forDefinition: Boolean = false): List<String>? {
+    fun buildPathToPosition(includePropertyKeys: Boolean = false): List<String>? {
         val parsedDocument = KsonCore.parseToAst(document)
 
         // Analyze token context at the target location
@@ -90,7 +90,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             lastToken = tokenContext.lastToken,
             targetNode = navResult.targetNode,
             isLocationInsideToken = tokenContext.isInsideToken,
-            forDefinition = forDefinition
+            includePropertyKeys = includePropertyKeys
         )
     }
 
@@ -160,13 +160,13 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * 1. Location after a colon: Add the property name to target the value being entered
      * 2. Location on a property key: Add the property name to the path (for definition lookups)
      * 3. Location outside token bounds: Remove the last path element to target the parent
-     *    (unless forDefinition is true, in which case keep the path to the property)
+     *    (unless includePropertyKeys is true, in which case keep the path to the property)
      *
      * @param path The initial path built from document navigation
      * @param lastToken The last token before the location
      * @param targetNode The KsonValue node found at the target location
      * @param isLocationInsideToken Whether the location is inside the token bounds
-     * @param forDefinition If true, don't drop the last element when location is outside token
+     * @param includePropertyKeys If true, don't drop the last element when location is outside token
      * @return The adjusted path
      */
     private fun adjustPathForLocationContext(
@@ -174,7 +174,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         lastToken: Token?,
         targetNode: KsonValue,
         isLocationInsideToken: Boolean,
-        forDefinition: Boolean
+        includePropertyKeys: Boolean
     ): List<String> {
         return when {
             // Location is right after a colon - we're entering a value
@@ -187,14 +187,14 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             isLocationInsideToken &&
             (lastToken?.tokenType == TokenType.UNQUOTED_STRING || lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE) &&
             targetNode is KsonObject &&
-            forDefinition -> {
+            includePropertyKeys -> {
                 // Extract the property name from the token
                 val propertyName = lastToken.value
                 path + propertyName
             }
             // Location is outside the token - target the parent element (for completions)
             // But keep the path as-is for definition lookups
-            !isLocationInsideToken && !forDefinition -> {
+            !isLocationInsideToken && !includePropertyKeys -> {
                 path.dropLast(1)
             }
             // Normal case - return path as-is

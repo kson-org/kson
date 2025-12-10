@@ -7,12 +7,7 @@ import org.kson.navigation.KsonValuePathBuilder
 import org.kson.navigation.SchemaInformation
 import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
-import org.kson.parser.MessageSink
-import org.kson.parser.messages.MessageType
-import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
-import org.kson.schema.SchemaParser
-import org.kson.schema.SchemaResolutionType
 import org.kson.value.KsonValueNavigation
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -55,7 +50,8 @@ object KsonTooling {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
 
         // Apply the same filtering logic as completions and jump-to-definition
-        val validSchemas = getValidSchemas(candidateSchemas, documentRoot, buildPath, schemaIdLookup)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
 
         // Extract schema info from each valid schema
         val schemaInfos = validSchemas.mapNotNull { ref ->
@@ -91,7 +87,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range>? {
-        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(forDefinition = true) ?: return null
+        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(includePropertyKeys = true) ?: return null
         val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
 
         // Get all candidate schemas at this path
@@ -99,7 +95,8 @@ object KsonTooling {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
 
         // Apply the same filtering logic as completions to only show valid schemas
-        val validSchemas = getValidSchemas(candidateSchemas, documentRoot, buildPath, schemaIdLookup)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
 
         return validSchemas.map {
             Range(
@@ -193,130 +190,13 @@ object KsonTooling {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
 
         // Apply filtering to get only valid schemas
-        val validSchemas = getValidSchemas(candidateSchemas, documentRoot, buildPath, schemaIdLookup)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties
         val completions = SchemaInformation.getCompletions(parsedSchema, buildPath, validSchemas, parsedDocument)
 
         return completions.takeIf { it.isNotEmpty() }
-    }
-
-    /**
-     * Get valid schemas for a document path, applying combinator expansion and filtering.
-     *
-     * This function:
-     * 1. Expands combinator schemas (oneOf/anyOf/allOf) into individual branches
-     * 2. Filters branches based on validation against the current document (for oneOf/anyOf)
-     * 3. Returns all branches for allOf and direct properties (no filtering needed)
-     *
-     * @param candidateSchemas The schemas found at the document path
-     * @param documentRoot The document being edited (KSON string)
-     * @param documentPath The path to the location in the document
-     * @param schemaIdLookup The schema lookup for parsing schemas
-     * @return List of valid schemas after expansion and filtering
-     */
-    private fun getValidSchemas(
-        candidateSchemas: List<ResolvedRef>,
-        documentRoot: String,
-        documentPath: List<String>,
-        schemaIdLookup: SchemaIdLookup
-    ): List<ResolvedRef> {
-        // Check if we need to filter based on combinators
-        // This includes both schemas directly tagged as combinators AND schemas that contain combinator properties
-        val needsFiltering = candidateSchemas.any { ref ->
-            ref.resolutionType == SchemaResolutionType.ANY_OF ||
-            ref.resolutionType == SchemaResolutionType.ONE_OF ||
-            (ref.resolvedValue as? org.kson.value.KsonObject)?.let { obj ->
-                obj.propertyLookup.containsKey("oneOf") || obj.propertyLookup.containsKey("anyOf")
-            } ?: false
-        }
-
-        // Always expand combinators to get individual branches
-        val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
-
-        // Filter if needed (for oneOf/anyOf that require validation)
-        return if (needsFiltering) {
-            // Parse the document for validation
-            val documentValue = KsonCore.parseToAst(documentRoot).ksonValue
-            if (documentValue != null) {
-                filterValidSchemas(expandedSchemas, documentValue, documentPath, schemaIdLookup)
-            } else {
-                // If document doesn't parse, fall back to unfiltered schemas
-                expandedSchemas
-            }
-        } else {
-            // No filtering needed, use all expanded schemas
-            expandedSchemas
-        }
-    }
-
-    /**
-     * Filters schemas based on validation against the current document.
-     *
-     * For schemas resolved via combinators (anyOf/oneOf), this validates them against
-     * the parent object to ensure only compatible schemas contribute completions.
-     *
-     * This uses a "soft" validation approach: a schema is included if the existing
-     * properties don't contradict it, even if required properties are missing.
-     *
-     * @param candidateSchemas All schemas found at the document path
-     * @param documentValue The parsed document
-     * @param documentPath The path to the completion location
-     * @param schemaIdLookup The schema lookup for parsing schemas
-     * @return Filtered list of compatible schemas
-     */
-    private fun filterValidSchemas(
-        candidateSchemas: List<ResolvedRef>,
-        documentValue: org.kson.value.KsonValue,
-        documentPath: List<String>,
-        schemaIdLookup: SchemaIdLookup
-    ): List<ResolvedRef> {
-        // Get the object to validate against
-        // For completions, we validate the object where we're adding properties
-        val targetValue = KsonValueNavigation.navigateByTokens(documentValue, documentPath) ?: documentValue
-
-        return candidateSchemas.filter { ref ->
-            when (ref.resolutionType) {
-                // For anyOf/oneOf, check if the current document state is compatible
-                SchemaResolutionType.ANY_OF,
-                SchemaResolutionType.ONE_OF -> {
-                    val messageSink = MessageSink()
-                    val schema = SchemaParser.parseSchemaElement(
-                        ref.resolvedValue,
-                        messageSink,
-                        ref.resolvedValueBaseUri,
-                        schemaIdLookup
-                    )
-
-                    if (schema == null) {
-                        // If we can't parse the schema, include it (fail open)
-                        return@filter true
-                    }
-
-                    // Check for validation errors
-                    // Important: we want to see if existing properties are COMPATIBLE,
-                    // not if the object is complete. So we check if validation produces errors
-                    // about existing properties (type mismatches, const violations, etc.)
-                    // vs. missing required properties.
-                    val errorCountBefore = messageSink.loggedMessages().size
-                    schema.validate(targetValue, messageSink)
-                    val errors = messageSink.loggedMessages().drop(errorCountBefore)
-
-                    // Filter out "required" errors - those are expected during completion
-                    // We only care about errors that indicate incompatibility with existing properties,
-                    // not missing properties (which we're about to add via completions)
-                    val significantErrors = errors.filter { loggedMessage ->
-                        loggedMessage.message.type != MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING &&
-                        loggedMessage.message.type != MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES
-                    }
-
-                    // Include this schema if there are no significant validation errors
-                    significantErrors.isEmpty()
-                }
-                // For all other types (direct property, allOf, etc.), include them
-                else -> true
-            }
-        }
     }
 }
 
