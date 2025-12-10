@@ -79,7 +79,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range> {
-        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(includePropertyKeys = true) ?: return emptyList()
+        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition() ?: return emptyList()
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, buildPath) ?: return emptyList()
 
         return context.validSchemas.map {
@@ -158,7 +158,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<CompletionItem> {
-        val buildPath = KsonValuePathBuilder(documentRoot, Coordinates(line, column)).buildPathToPosition() ?: return emptyList()
+        val buildPath = KsonValuePathBuilder(documentRoot, Coordinates(line, column)).buildPathToPosition(includePropertyKeys = false) ?: return emptyList()
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, buildPath) ?: return emptyList()
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties

@@ -508,6 +508,32 @@ class SchemaNavigationTest {
     }
 
     @Test
+    fun testNavigateAnyOfWithArray() {
+        val schema = """
+            '${'$'}defs':
+              StringType:
+                type: string
+                minLength: 1
+                .
+              NumberType:
+                type: number
+                minimum: 0
+                .
+              .
+            anyOf:
+              - '${'$'}ref': '#/${'$'}defs/StringType'
+              - type: array
+                items:
+                  anyOf:
+                    - '${'$'}ref': '#/${'$'}defs/NumberType'
+        """
+
+        // This test verifies that navigation works when anyOf contains $ref
+        val results = navigateSchema(schema, listOf("0"))
+        assertEquals(1, results.size, "Root schema should return single result")
+    }
+
+    @Test
     fun testNavigateDefs() {
         // This is the original failing test - property defined deep in a $ref within anyOf
         val schema = """

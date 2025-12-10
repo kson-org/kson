@@ -66,7 +66,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * @return A list of property names representing the path from root to target,
      *         or null if the path cannot be determined
      */
-    fun buildPathToPosition(includePropertyKeys: Boolean = false): List<String>? {
+    fun buildPathToPosition(includePropertyKeys: Boolean = true): List<String>? {
         val parsedDocument = KsonCore.parseToAst(document)
 
         // Analyze token context at the target location

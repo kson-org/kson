@@ -193,7 +193,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                 val navigatedNodes = if (isArrayIndex) {
                     // Array navigation: go to "items" schema
                     // We ignore the actual index - all array elements use the same schema
-                    navigateArrayItems(node, updatedBaseUri)?.let { listOf(it) } ?: emptyList()
+                    navigateArrayItems(node, updatedBaseUri)
                 } else {
                     // Object navigation: go to "properties" wrapper, then the property
                     navigateObjectProperty(node, token, updatedBaseUri)
@@ -219,17 +219,35 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * Navigate to the schema for array items.
      *
      * Looks for "items" or "additionalItems" schema properties.
+     * Also searches through combinators (anyOf/oneOf/allOf) to find items schemas.
      */
-    private fun navigateArrayItems(schemaNode: KsonObject, currentBaseUri: String): ResolvedRef? {
+    private fun navigateArrayItems(schemaNode: KsonObject, currentBaseUri: String): List<ResolvedRef> {
+        val results = mutableListOf<ResolvedRef>()
+
         // Try "items" first (most common case)
         schemaNode.propertyLookup["items"]?.let {
-            return ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS)
+            results.add(ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS))
         }
 
         // Fallback to "additionalItems"
-        return schemaNode.propertyLookup["additionalItems"]?.let {
-            ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS)
+        schemaNode.propertyLookup["additionalItems"]?.let {
+            results.add(ResolvedRef(it, currentBaseUri, SchemaResolutionType.ARRAY_ITEMS))
         }
+
+        // If no items found directly, search through combinators
+        if (results.isEmpty() &&
+            (schemaNode.propertyLookup.containsKey("allOf") ||
+             schemaNode.propertyLookup.containsKey("anyOf") ||
+             schemaNode.propertyLookup.containsKey("oneOf"))) {
+            results.addAll(navigateThroughCombinators(
+                schemaNode = schemaNode,
+                currentBaseUri = currentBaseUri,
+                recursiveNavigate = { schema, baseUri -> navigateArrayItems(schema, baseUri) },
+                shouldTagWithCombinator = { it == SchemaResolutionType.ARRAY_ITEMS }
+            ))
+        }
+
+        return results
     }
 
     /**
@@ -251,41 +269,45 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     }
 
     /**
-     * Navigate through combinator schemas (allOf, anyOf, oneOf) to find property definitions.
+     * Navigate through combinator schemas (allOf, anyOf, oneOf) to find matching sub-schemas.
+     *
+     * This is a shared implementation used by both array and object navigation.
+     * For each combinator branch, it resolves any $ref, then delegates to the caller's
+     * navigation function to continue traversal.
+     *
+     * Example for array navigation:
+     * ```
+     * schema: { anyOf: [{ items: {...} }, { items: {...} }] }
+     * -> finds both items schemas and tags them as ANY_OF
+     * ```
      *
      * @param schemaNode The schema node containing combinators
-     * @param propertyName The property to search for
      * @param currentBaseUri The current base URI for $ref resolution
-     * @return All matching property schemas found across all combinator branches
+     * @param recursiveNavigate How to continue navigation (e.g., navigateArrayItems or navigateObjectProperty)
+     * @param shouldTagWithCombinator Which resolution types to overwrite with combinator type (e.g., ARRAY_ITEMS -> ANY_OF)
      */
     private fun navigateThroughCombinators(
         schemaNode: KsonObject,
-        propertyName: String,
-        currentBaseUri: String
+        currentBaseUri: String,
+        recursiveNavigate: (schema: KsonObject, baseUri: String) -> List<ResolvedRef>,
+        shouldTagWithCombinator: (resolutionType: SchemaResolutionType) -> Boolean
     ): List<ResolvedRef> {
         val results = mutableListOf<ResolvedRef>()
 
-        // Helper to process a combinator array
-        fun processCombinator(combinator: KsonValue?, resolutionType: SchemaResolutionType) {
+        fun processCombinator(combinator: KsonValue?, combinatorType: SchemaResolutionType) {
             val combinatorList = combinator as? KsonList ?: return
 
             for (element in combinatorList.elements) {
-                // Resolve $ref if present
                 val resolved = resolveRefIfPresent(element, currentBaseUri)
 
-                // Recursively navigate through this schema
                 if (resolved.resolvedValue is KsonObject) {
-                    val schema = resolved.resolvedValue
-                    val schemaBaseUri = resolved.resolvedValueBaseUri
-                    val nestedResults = navigateObjectProperty(schema, propertyName, schemaBaseUri)
-                    // Tag nested results with the combinator type if they don't already have a combinator type
+                    // Continue navigation through this combinator branch
+                    val nestedResults = recursiveNavigate(resolved.resolvedValue, resolved.resolvedValueBaseUri)
+
+                    // Tag results with combinator type if appropriate
                     results.addAll(nestedResults.map { ref ->
-                        if (ref.resolutionType in listOf(
-                                SchemaResolutionType.DIRECT_PROPERTY,
-                                SchemaResolutionType.PATTERN_PROPERTY,
-                                SchemaResolutionType.ADDITIONAL_PROPERTY
-                            )) {
-                            ref.copy(resolutionType = resolutionType)
+                        if (shouldTagWithCombinator(ref.resolutionType)) {
+                            ref.copy(resolutionType = combinatorType)
                         } else {
                             ref
                         }
@@ -294,7 +316,6 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             }
         }
 
-        // Process each type of combinator
         processCombinator(schemaNode.propertyLookup["allOf"], SchemaResolutionType.ALL_OF)
         processCombinator(schemaNode.propertyLookup["anyOf"], SchemaResolutionType.ANY_OF)
         processCombinator(schemaNode.propertyLookup["oneOf"], SchemaResolutionType.ONE_OF)
@@ -324,8 +345,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         // Try direct property lookup in "properties"
         val properties = schemaNode.propertyLookup["properties"] as? KsonObject
-        properties?.propertyLookup?.get(propertyName)?.let {
-            results.add(ResolvedRef(it, currentBaseUri, SchemaResolutionType.DIRECT_PROPERTY))
+        properties?.propertyMap?.get(propertyName)?.let {
+            results.add(ResolvedRef(it.propValue, currentBaseUri, SchemaResolutionType.DIRECT_PROPERTY))
         }
 
         // Try pattern properties - check all patterns for a match
@@ -346,7 +367,16 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         if (schemaNode.propertyLookup.containsKey("allOf") ||
             schemaNode.propertyLookup.containsKey("anyOf") ||
             schemaNode.propertyLookup.containsKey("oneOf")) {
-            results.addAll(navigateThroughCombinators(schemaNode, propertyName, currentBaseUri))
+            results.addAll(navigateThroughCombinators(
+                schemaNode = schemaNode,
+                currentBaseUri = currentBaseUri,
+                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri) },
+                shouldTagWithCombinator = { it in listOf(
+                    SchemaResolutionType.DIRECT_PROPERTY,
+                    SchemaResolutionType.PATTERN_PROPERTY,
+                    SchemaResolutionType.ADDITIONAL_PROPERTY
+                )}
+            ))
         }
 
         // Fallback to additionalProperties if nothing found

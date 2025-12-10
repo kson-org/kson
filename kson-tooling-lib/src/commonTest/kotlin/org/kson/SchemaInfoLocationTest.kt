@@ -45,7 +45,7 @@ class SchemaInfoLocationTest {
         """.trimIndent()
 
         val hoverInfo = getInfoAtCaret(schema, """
-            name: <caret>John
+            nam<caret>e: John
             age: 30
         """.trimIndent())
 

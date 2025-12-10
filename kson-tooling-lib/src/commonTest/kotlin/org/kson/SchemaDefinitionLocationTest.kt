@@ -65,23 +65,16 @@ class SchemaDefinitionLocationTest {
         // Get the actual location result
         val locations = KsonTooling.getSchemaLocationAtLocation(document, schema, docCoordinates.line, docCoordinates.column)
 
-        if (expectedRanges.isEmpty()) {
-            // No <caret> in schema means we expect empty list
-            assertTrue(locations.isEmpty(), "Expected empty list when no schema definition is found")
-        } else {
-            // We expect locations to match all expected ranges
-            assertEquals(expectedRanges.size, locations.size, "Expected ${expectedRanges.size} location(s) but got ${locations.size}")
+        // Insert <caret> markers into the actual schema to visualize where the returned locations are
+        val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
 
-            // Insert <caret> markers into the actual schema to visualize where the returned locations are
-            val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
+        // Use string assertion to show differences clearly
+        assertEquals(
+            schemaWithCaret,
+            actualSchemaWithCarets,
+            "Schema definition locations do not match. Expected vs Actual with <caret> markers:"
+        )
 
-            // Use string assertion to show differences clearly
-            assertEquals(
-                schemaWithCaret,
-                actualSchemaWithCarets,
-                "Schema definition locations do not match. Expected vs Actual with <caret> markers:"
-            )
-        }
     }
 
     /**
@@ -565,6 +558,33 @@ class SchemaDefinitionLocationTest {
             documentWithCaret = """
                 data:
                   value<caret>: test
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_anyOfInArray_Test() {
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                '${'$'}defs':
+                  UrlSource:
+                    type: object
+                    properties:
+                      url:
+                        <caret>type: string
+                        .<caret>
+                      .
+                    .
+                  .
+                anyOf:
+                  - '${'$'}ref': '#/${'$'}defs/UrlSource'
+                  - type: array
+                    items:
+                      anyOf:
+                        - '${'$'}ref': '#/${'$'}defs/UrlSource'
+            """.trimIndent(),
+            documentWithCaret = """
+                - ur<caret>l: 'https://example.com/file.exe'
             """.trimIndent()
         )
     }
