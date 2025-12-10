@@ -31,10 +31,7 @@ export class DefinitionService {
                 position.line,
                 position.character
             );
-
-            if (locations) {
-                return this.convertRangesToDefinitionLinks(locations, schemaDocument.uri);
-            }
+            return this.convertRangesToDefinitionLinks(locations, schemaDocument.uri);
         }
 
         // Try schema $ref resolution (within the same document)
@@ -44,13 +41,7 @@ export class DefinitionService {
             position.line,
             position.character
         );
-
-        if (refLocations) {
-            return this.convertRangesToDefinitionLinks(refLocations, document.uri);
-        }
-
-        // No definition found
-        return null;
+        return this.convertRangesToDefinitionLinks(refLocations, document.uri);
     }
 
     /**

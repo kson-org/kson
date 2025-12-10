@@ -66,11 +66,10 @@ class SchemaDefinitionLocationTest {
         val locations = KsonTooling.getSchemaLocationAtLocation(document, schema, docCoordinates.line, docCoordinates.column)
 
         if (expectedRanges.isEmpty()) {
-            // No <caret> in schema means we expect null or empty
-            assertTrue(locations == null || locations.isEmpty(), "Expected null or empty when no schema definition is found")
+            // No <caret> in schema means we expect empty list
+            assertTrue(locations.isEmpty(), "Expected empty list when no schema definition is found")
         } else {
             // We expect locations to match all expected ranges
-            assertNotNull(locations, "Expected definition locations but got null")
             assertEquals(expectedRanges.size, locations.size, "Expected ${expectedRanges.size} location(s) but got ${locations.size}")
 
             // Insert <caret> markers into the actual schema to visualize where the returned locations are

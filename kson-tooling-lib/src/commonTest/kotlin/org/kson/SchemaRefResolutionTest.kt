@@ -59,12 +59,11 @@ class SchemaRefResolutionTest {
         val locations = KsonTooling.resolveRefAtLocation(schema, cursorCoordinates.line, cursorCoordinates.column)
 
         if (expectedRange == null) {
-            // No expected range means we expect null or empty
-            assertTrue(locations == null || locations.isEmpty(),
-                "Expected null or empty when \$ref should not resolve")
+            // No expected range means we expect empty list
+            assertTrue(locations.isEmpty(),
+                "Expected empty list when \$ref should not resolve")
         } else {
             // We expect locations to match the expected range
-            assertNotNull(locations, "Expected \$ref to resolve but got null")
             assertEquals(1, locations.size, "Expected exactly one location")
 
             val location = locations.first()

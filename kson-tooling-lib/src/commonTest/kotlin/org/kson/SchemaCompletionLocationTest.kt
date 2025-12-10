@@ -478,7 +478,7 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
-    fun testNoSchemaReturnsNull() {
+    fun testNoSchemaReturnsEmptyList() {
         // Try to get completions with empty schema
         val completions = getCompletionsAtCaret("", """
             {
@@ -487,7 +487,7 @@ class SchemaCompletionLocationTest {
         """.trimIndent())
 
         // Should return null when schema is invalid
-        assertEquals(completions, null, "Should return null when schema is empty/invalid")
+        assertEquals(completions, emptyList(), "Should return empty list when schema is empty/invalid")
     }
 
     @Test

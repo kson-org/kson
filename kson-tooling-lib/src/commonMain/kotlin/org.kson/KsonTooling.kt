@@ -43,18 +43,10 @@ object KsonTooling {
         column: Int
     ): String? {
         val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition() ?: return null
-        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
-
-        // Get all candidate schemas at this path
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
-
-        // Apply the same filtering logic as completions and jump-to-definition
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, buildPath) ?: return null
 
         // Extract schema info from each valid schema
-        val schemaInfos = validSchemas.mapNotNull { ref ->
+        val schemaInfos = context.validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
         }
 
@@ -79,26 +71,18 @@ object KsonTooling {
      * @param schemaValue The schema for the document (KSON string)
      * @param line The zero-based line number
      * @param column The zero-based column number
-     * @return DefinitionLocationResult with zero-based coordinates, or null if no schema info available
+     * @return List of Range objects with zero-based coordinates, or empty list if no schema info available
      */
     fun getSchemaLocationAtLocation(
         documentRoot: String,
         schemaValue: String,
         line: Int,
         column: Int
-    ): List<Range>? {
-        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(includePropertyKeys = true) ?: return null
-        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
+    ): List<Range> {
+        val buildPath = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildPathToPosition(includePropertyKeys = true) ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, buildPath) ?: return emptyList()
 
-        // Get all candidate schemas at this path
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
-
-        // Apply the same filtering logic as completions to only show valid schemas
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
-
-        return validSchemas.map {
+        return context.validSchemas.map {
             Range(
                 it.resolvedValue.location.start.line,
                 it.resolvedValue.location.start.column,
@@ -118,33 +102,33 @@ object KsonTooling {
      * @param schemaValue The schema document (KSON string)
      * @param line The zero-based line number
      * @param column The zero-based column number
-     * @return List of Range objects pointing to the referenced schema location(s), or null if not a ref or not found
+     * @return List of Range objects pointing to the referenced schema location(s), or empty list if not a ref or not found
      */
     fun resolveRefAtLocation(
         schemaValue: String,
         line: Int,
         column: Int
-    ): List<Range>? {
-        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
-        val buildPath = KsonValuePathBuilder(schemaValue, Coordinates(line, column)).buildPathToPosition() ?: return null
+    ): List<Range> {
+        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return emptyList()
+        val buildPath = KsonValuePathBuilder(schemaValue, Coordinates(line, column)).buildPathToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
         if( buildPath.lastOrNull() != $$"$ref") { return emptyList() }
 
         // Navigate to the value at the cursor position
-        val valueAtPosition = KsonValueNavigation.navigateByTokens(parsedSchema, buildPath) ?: return null
+        val valueAtPosition = KsonValueNavigation.navigateByTokens(parsedSchema, buildPath) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
-        val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return null
+        val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return emptyList()
 
         // Determine the base URI for the schema root
         val baseUri = (parsedSchema as? org.kson.value.KsonObject)
-            ?.propertyLookup["\$id"]
+            ?.propertyLookup[$$"$id"]
             ?.let { it as? org.kson.value.KsonString }
             ?.value ?: ""
 
         // Resolve the reference and return its location
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return null
+        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return emptyList()
 
         return listOf(
             Range(
@@ -173,30 +157,54 @@ object KsonTooling {
         schemaValue: String,
         line: Int,
         column: Int
-    ): List<CompletionItem>? {
-        // Create a location from the position
-        val position = Coordinates(line, column)
-
-        val buildPath = KsonValuePathBuilder(documentRoot, position).buildPathToPosition() ?: return null
-
-        // Parse the schema
-        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
-
-        // Parse the document
-        val parsedDocument = KsonCore.parseToAst(documentRoot).ksonValue
-
-        // Get all candidate schemas at this path
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(buildPath)
-
-        // Apply filtering to get only valid schemas
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, buildPath)
+    ): List<CompletionItem> {
+        val buildPath = KsonValuePathBuilder(documentRoot, Coordinates(line, column)).buildPathToPosition() ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, buildPath) ?: return emptyList()
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties
-        val completions = SchemaInformation.getCompletions(parsedSchema, buildPath, validSchemas, parsedDocument)
+        return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, buildPath, context.validSchemas, context.parsedDocument)
+    }
 
-        return completions.takeIf { it.isNotEmpty() }
+    /**
+     * Internal helper data class to hold the result of schema resolution and filtering.
+     */
+    private data class ResolvedSchemaContext(
+        val schemaIdLookup: SchemaIdLookup,
+        val validSchemas: List<org.kson.schema.ResolvedRef>,
+        val parsedDocument: org.kson.value.KsonValue?
+    ){
+        companion object {
+            /**
+             * Common helper to parse, navigate, and filter schemas based on a document path.
+             *
+             * This method encapsulates the repeated pattern of:
+             * 1. Parsing the schema
+             * 2. Creating a SchemaIdLookup
+             * 3. Navigating to candidate schemas
+             * 4. Filtering schemas based on validation
+             *
+             * @param schemaValue The schema document (KSON string)
+             * @param documentRoot The document being edited (KSON string)
+             * @param documentPath The path to navigate to in the schema
+             * @return ResolvedSchemaContext containing the parsed schema, lookup, filtered schemas, and parsed document, or null if parsing fails
+             */
+            fun resolveAndFilterSchemas(
+                schemaValue: String,
+                documentRoot: String,
+                documentPath: List<String>
+            ): ResolvedSchemaContext? {
+                val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
+                val schemaIdLookup = SchemaIdLookup(parsedSchema)
+                val candidateSchemas = schemaIdLookup.navigateByDocumentPath(documentPath)
+
+                val filteringService = SchemaFilteringService(schemaIdLookup)
+                val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, documentPath)
+
+                val parsedDocument = KsonCore.parseToAst(documentRoot).ksonValue
+
+                return ResolvedSchemaContext( schemaIdLookup, validSchemas, parsedDocument)
+            }
+        }
     }
 }
 
