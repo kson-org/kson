@@ -50,12 +50,7 @@ object KsonTooling {
             ref.resolvedValue.extractSchemaInfo()
         }
 
-        // Combine multiple schema infos with separator
-        return when {
-            schemaInfos.isEmpty() -> null
-            schemaInfos.size == 1 -> schemaInfos.first()
-            else -> schemaInfos.joinToString("\n\n---\n\n")
-        }
+        return schemaInfos.distinct().joinToString("\n\n---\n\n")
     }
 
     /**

@@ -312,8 +312,8 @@ class SchemaInfoLocationTest {
             undefinedProp: <caret>value
         """.trimIndent())
 
-        // Should return null when no schema matches
-        assertNull(hoverInfo)
+        // Should return empty string when no schema matches
+        assertEquals("", hoverInfo)
     }
 
     @Test
