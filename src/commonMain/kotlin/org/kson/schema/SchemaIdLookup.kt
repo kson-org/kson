@@ -93,6 +93,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
             if (schemaObj != null) {
                 var addedBranches = false
+                // Track where to insert the parent (to add it first)
+                val branchesStartIndex = expanded.size
 
                 // Check for oneOf
                 (schemaObj.propertyLookup["oneOf"] as? KsonList)?.elements?.forEach { branch ->
@@ -115,8 +117,12 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                     addedBranches = true
                 }
 
-                // If we didn't add any branches, keep the original schema
-                if (!addedBranches) {
+                if (addedBranches) {
+                    // Include the parent schema to preserve its properties (e.g., description, title, constraints)
+                    // Insert at the start so it appears first in hover info
+                    expanded.add(branchesStartIndex, ref)
+                } else {
+                    // If we didn't add any branches, keep the original schema
                     expanded.add(ref)
                 }
             } else {

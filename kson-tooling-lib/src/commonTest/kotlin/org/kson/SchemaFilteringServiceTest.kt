@@ -120,8 +120,8 @@ class SchemaFilteringServiceTest {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
         val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
 
-        // allOf should include all branches (no filtering)
-        assertEquals(2, validSchemas.size, "allOf should include all branches without filtering")
+        // allOf should include all branches (no filtering) plus the parent schema
+        assertEquals(3, validSchemas.size, "allOf should include parent + all branches without filtering")
     }
 
     @Test
@@ -143,8 +143,8 @@ class SchemaFilteringServiceTest {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
         val validSchemas = filteringService.getValidSchemas(candidateSchemas, invalidDocument, emptyList())
 
-        // Should fall back to all expanded schemas without filtering
-        assertEquals(2, validSchemas.size, "Should return all schemas when document doesn't parse")
+        // Should fall back to all expanded schemas without filtering (parent + branches)
+        assertEquals(3, validSchemas.size, "Should return parent + all branches when document doesn't parse")
     }
 
     @Test
@@ -208,8 +208,8 @@ class SchemaFilteringServiceTest {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
         val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
 
-        // Both branches should be valid (missing required properties are ignored during filtering)
-        assertEquals(2, validSchemas.size, "Both branches should be valid - missing required props are ignored")
+        // Both branches should be valid (missing required properties are ignored during filtering) plus parent
+        assertEquals(3, validSchemas.size, "Parent + both branches should be valid - missing required props are ignored")
     }
 
     @Test
@@ -239,7 +239,7 @@ class SchemaFilteringServiceTest {
         val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
         val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
 
-        // Should filter to only the string branch
-        assertEquals(1, validSchemas.size, "Should only match the string branch")
+        // Should filter to only the string branch plus parent
+        assertEquals(2, validSchemas.size, "Should match parent + the string branch")
     }
 }

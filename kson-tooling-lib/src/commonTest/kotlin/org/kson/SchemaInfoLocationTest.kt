@@ -493,7 +493,8 @@ class SchemaInfoLocationTest {
                       "description": "String value with pattern",
                       "pattern": "^[A-Z]+"
                     }
-                  ]
+                  ],
+                  "description": "Object description",
                 }
               }
             }
@@ -505,6 +506,8 @@ class SchemaInfoLocationTest {
         """.trimIndent())
 
         assertNotNull(hoverInfo, "Expected hover info for value field")
+
+        assertTrue(hoverInfo.contains("Object description"), "Expected object description. Got: $hoverInfo")
 
         // Should contain info from both branches, separated
         assertTrue(hoverInfo.contains("String value representation"), "Expected first branch description. Got: $hoverInfo")
