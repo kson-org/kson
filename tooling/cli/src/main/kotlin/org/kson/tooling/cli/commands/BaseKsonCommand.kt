@@ -26,7 +26,7 @@ abstract class BaseKsonCommand(
         .file(mustExist = true, canBeDir = false, mustBeReadable = true)
 
     protected val errorFormat = { error: Message ->
-        "[${error.severity}] ${error.message} at ${error.start.line}:${error.start.column}"
+        "[${error.severity}] ${error.message} at ${error.start.line}:${error.start.column}\n"
     }
 
     /**
