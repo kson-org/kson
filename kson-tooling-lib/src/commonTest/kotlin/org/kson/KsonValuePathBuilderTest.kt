@@ -141,35 +141,171 @@ class KsonValuePathBuilderTest {
         )
     }
 
+
     @Test
-    fun testBuildPathToPosition_multiLevelNesting() {
+    fun testBuildPathToPosition_classic_simpleProperty() {
         assertPathAtCaret(
             """
-            root:
-              level1:
-                level2:
-                  level<caret>3: value
+            {
+              "name": <caret>"John",
+              "age": 30
+            }
+            """.trimIndent(),
+            expectedPath = listOf("name")
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_secondProperty() {
+        assertPathAtCaret(
+            """
+            {
+              "name": "John",
+              "age": <caret>30
+            }
+            """.trimIndent(),
+            expectedPath = listOf("age")
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_nestedProperty() {
+        assertPathAtCaret(
+            """
+            {
+              "person": {
+                "name": <caret>"Alice",
+                "age": 25
+              }
+            }
+            """.trimIndent(),
+            expectedPath = listOf("person", "name")
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_deeplyNestedProperty() {
+        assertPathAtCaret(
+            """
+            {
+              "company": {
+                "address": {
+                  "city": <caret>"Boston"
+                }
+              }
+            }
+            """.trimIndent(),
+            expectedPath = listOf("company", "address", "city")
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_arrayItem() {
+        assertPathAtCaret(
+            """
+            {
+              "tags": [
+                <caret>"kotlin",
+                "multiplatform"
+              ]
+            }
+            """.trimIndent(),
+            expectedPath = listOf("tags", "0") // Path includes array index
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_nestedArrayItem() {
+        assertPathAtCaret(
+            """
+            {
+              "users": [
+                {
+                  "name": <caret>"Alice",
+                  "age": 30
+                },
+                {
+                  "name": "Bob",
+                  "age": 25
+                }
+              ]
+            }
+            """.trimIndent(),
+            expectedPath = listOf("users", "0", "name") // Path includes array index and property name
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_afterColon() {
+        assertPathAtCaret(
+            """
+            {
+              "name": <caret>,
+              "age": 30
+            }
+            """.trimIndent(),
+            expectedPath = listOf("name")
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_emptyDocument() {
+        assertPathAtCaret(
+            "<caret>",
+            expectedPath = emptyList() // Empty document should return an empty list
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_rootLevel() {
+        assertPathAtCaret(
+            """
+            {<caret>
+              "name": "John"
+            }
+            """.trimIndent(),
+            expectedPath = emptyList() // At root level inside braces
+        )
+    }
+
+    @Test
+    fun testBuildPathToPosition_classic_multiLevelNesting() {
+        assertPathAtCaret(
+            """
+            {
+              "root": {
+                "level1": {
+                  "level2": {
+                    "level<caret>3": "value"
+                  }
+                }
+              }
+            }
             """.trimIndent(),
             expectedPath = listOf("root", "level1", "level2", "level3")
         )
     }
 
     @Test
-    fun testBuildPathToPosition_fixInvalidDocumentWithoutKey() {
+    fun testBuildPathToPosition_classic_fixInvalidDocumentWithoutKey() {
         assertPathAtCaret(
             """
-            key: <caret>
+            {
+              "key": <caret>
+            }
             """.trimIndent(),
             expectedPath = listOf("key")
         )
     }
 
     @Test
-    fun testBuildPathToPosition_onPropertyKey_forCompletion() {
+    fun testBuildPathToPosition_classic_onPropertyKey_forCompletion() {
         // When cursor is on property key, for completion, path should drop last element (go to parent)
         assertPathAtCaret(
             """
-            user<caret>name: johndoe
+            {
+              "user<caret>name": "johndoe"
+            }
             """.trimIndent(),
             expectedPath = emptyList(), // Drops "username", returns empty (parent of root)
             includePropertyKeys = false
@@ -177,11 +313,13 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildPathToPosition_onPropertyKey_forDefinition() {
+    fun testBuildPathToPosition_classic_onPropertyKey_forDefinition() {
         // When cursor is on property key, for definition, path should keep the property
         assertPathAtCaret(
             """
-            user<caret>name: johndoe
+            {
+              "user<caret>name": "johndoe"
+            }
             """.trimIndent(),
             expectedPath = listOf("username"), // Keeps "username" for definition lookup
             includePropertyKeys = true

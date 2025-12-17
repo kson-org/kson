@@ -182,10 +182,12 @@ class KsonValuePathBuilder(private val document: String, private val location: C
                 val propertyName = (targetNode as KsonObject).propertyLookup.keys.last()
                 path + propertyName
             }
-            // Location is on a property key (UNQUOTED_STRING or STRING_OPEN_QUOTE token) and we're at the parent object
+            // Location is on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) and we're at the parent object
             // This happens when location is in the middle of a property name like "user<caret>name"
             isLocationInsideToken &&
-            (lastToken?.tokenType == TokenType.UNQUOTED_STRING || lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE) &&
+            (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
+             lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
+             lastToken?.tokenType == TokenType.STRING_CONTENT) &&
             targetNode is KsonObject &&
             includePropertyKeys -> {
                 // Extract the property name from the token
