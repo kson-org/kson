@@ -167,17 +167,28 @@ export function startKsonServer(
 
     // Handle changes to watched files
     connection.onDidChangeWatchedFiles((params) => {
+        const schemaProvider = documentManager.getSchemaProvider();
+        let schemaChanged = false;
+
         for (const change of params.changes) {
+            // Check if schema configuration file or any schema file changed
             if (change.uri.endsWith(SCHEMA_CONFIG_FILENAME)) {
                 logger.info('Schema configuration file changed, reloading...');
                 documentManager.reloadSchemaConfiguration();
-                // Refresh all open documents with the updated schemas
-                documentManager.refreshDocumentSchemas();
-                // Notify client that schema configuration changed so it can update UI (e.g., status bar)
-                connection.sendNotification('kson/schemaConfigurationChanged');
-                // Rerun diagnostics for open files, so we immediately see errors of schema
-                connection.sendRequest('workspace/diagnostic/refresh')
+                schemaChanged = true;
+            } else if (schemaProvider.isSchemaFile(change.uri)) {
+                logger.info('Schema file changed, reloading schemas...');
+                schemaChanged = true;
             }
+        }
+
+        if (schemaChanged) {
+            // Refresh all open documents with the updated schemas
+            documentManager.refreshDocumentSchemas();
+            // Notify client that schema configuration changed so it can update UI (e.g., status bar)
+            connection.sendNotification('kson/schemaConfigurationChanged');
+            // Rerun diagnostics for open files, so we immediately see errors of schema
+            connection.sendRequest('workspace/diagnostic/refresh');
         }
     });
 

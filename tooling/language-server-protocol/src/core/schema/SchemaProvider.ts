@@ -19,6 +19,14 @@ export interface SchemaProvider {
      * Should be called when configuration changes are detected.
      */
     reload(): void;
+
+    /**
+     * Check if a given file URI is a schema file referenced in the configuration.
+     *
+     * @param fileUri The URI of the file to check
+     * @returns True if the file is a schema file
+     */
+    isSchemaFile(fileUri: DocumentUri): boolean;
 }
 
 /**
@@ -32,5 +40,9 @@ export class NoOpSchemaProvider implements SchemaProvider {
 
     reload(): void {
         // No-op
+    }
+
+    isSchemaFile(_fileUri: DocumentUri): boolean {
+        return false;
     }
 }

@@ -56,6 +56,14 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
     }
 
     /**
+     * Get the schema provider used by this document manager.
+     * @returns The schema provider instance
+     */
+    getSchemaProvider(): SchemaProvider {
+        return this.schemaProvider;
+    }
+
+    /**
      * Reload the schema configuration.
      * Should be called when schema configuration changes.
      */

@@ -43,6 +43,27 @@ export class FileSystemSchemaProvider implements SchemaProvider {
     }
 
     /**
+     * Check if a given file URI is a schema file referenced in the configuration.
+     *
+     * @param fileUri The URI of the file to check
+     * @returns True if the file is a schema file
+     */
+    isSchemaFile(fileUri: DocumentUri): boolean {
+        if (!this.config || !this.workspaceRoot) {
+            return false;
+        }
+
+        const filePath = URI.parse(fileUri).fsPath;
+        const relativePath = this.getRelativePath(filePath);
+        const normalizedRelativePath = relativePath.replace(/\\/g, '/');
+
+        return this.config.schemas.some(mapping => {
+            const normalizedSchemaPath = mapping.schema.replace(/\\/g, '/');
+            return normalizedRelativePath === normalizedSchemaPath;
+        });
+    }
+
+    /**
      * Get the schema for a given document URI.
      *
      * @param documentUri The URI of the KSON document
