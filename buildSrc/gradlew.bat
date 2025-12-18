@@ -39,7 +39,7 @@ set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 @rem GRADLE JVM WRAPPER START MARKER
 
 setlocal
-set BUILD_DIR=%APP_HOME%\gradle\jdk
+set BUILD_DIR=%USERPROFILE%\.gradle\jdks\graalvm-21.0.2
 set JVM_TARGET_DIR=%BUILD_DIR%\graalvm-community-jdk-21.0.2_windows-x64_bin-8bbfc2\
 
 set JVM_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_windows-x64_bin.zip

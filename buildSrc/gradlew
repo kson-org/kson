@@ -116,7 +116,7 @@ CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
 # GRADLE JVM WRAPPER START MARKER
-BUILD_DIR="$APP_HOME/gradle/jdk"
+BUILD_DIR="$HOME/.gradle/jdks/graalvm-21.0.2"
 JVM_ARCH=$(uname -m)
 JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
