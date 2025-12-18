@@ -262,12 +262,17 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
 
         // Gather JAR files with the classes we use
         val ksonLibJar = ksonLibJarTask.get().archiveFile.get().asFile
-        val ksonCoreJar = ksonCoreJarTask.get().archiveFile.get().asFile
-        val kotlinRuntimeJarCandidates = configurations.getByName("jvmRuntimeClasspath").resolvedConfiguration.resolvedArtifacts.filter { a -> a.file.path.contains("org.jetbrains.kotlin") }
-        val kotlinRuntimeJarFile = kotlinRuntimeJarCandidates[0]!!.file.absolutePath
-        val jars = sequenceOf(ksonLibJar.absolutePath, ksonCoreJar.absolutePath, kotlinRuntimeJarFile)
+
+        // Get all runtime classpath dependencies (includes all transitive dependencies)
+        val runtimeClasspathJars = configurations.getByName("jvmRuntimeClasspath")
+            .resolvedConfiguration
+            .resolvedArtifacts
+            .map { it.file }
+
+        // Ensure ksonLib is at the front of the classpath, followed by all dependencies
+        val jars = listOf(ksonLibJar) + runtimeClasspathJars
         jars.forEach {
-            if (!Path(it).toFile().exists()) {
+            if (!it.exists()) {
                 throw GradleException("Missing JAR file. It should have been present at $it")
             }
         }
