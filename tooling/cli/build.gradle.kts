@@ -61,7 +61,7 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
 
     // Configure the command at configuration time using providers
     command.set(provider {
-        val graalHome = GraalVmHelper.getGraalVMHome(rootProject)
+        val graalHome = GraalVmHelper.getGraalVMHome()
 
         val nativeImageExe = file("${graalHome}/bin/native-image${GraalVmHelper.getNativeImageExtension()}")
         if (!nativeImageExe.exists()) {
