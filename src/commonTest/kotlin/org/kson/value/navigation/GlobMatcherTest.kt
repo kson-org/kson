@@ -1,5 +1,6 @@
-package org.kson.schema
+package org.kson.value.navigation
 
+import org.kson.value.navigation.jsonPointer.GlobMatcher
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

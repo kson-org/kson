@@ -1,11 +1,12 @@
 package org.kson.schema
 
 import org.kson.*
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
-import org.kson.value.KsonValueNavigation
+import org.kson.value.navigation.KsonValueNavigation
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.

@@ -1,6 +1,6 @@
 package org.kson
 
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue
 import kotlin.test.*

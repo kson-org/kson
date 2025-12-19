@@ -1,6 +1,7 @@
 package org.kson.schema
 
 import org.kson.KsonCore
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
 import org.kson.value.KsonString as InternalKsonString

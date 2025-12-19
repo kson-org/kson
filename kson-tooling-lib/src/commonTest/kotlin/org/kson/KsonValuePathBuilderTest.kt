@@ -2,7 +2,7 @@ package org.kson
 
 import org.kson.navigation.KsonValuePathBuilder
 import org.kson.parser.Coordinates
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import kotlin.test.*
 
 /**

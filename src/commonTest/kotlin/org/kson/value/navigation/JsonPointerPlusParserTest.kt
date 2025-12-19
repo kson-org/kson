@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.value.navigation
 
 import org.kson.value.navigation.jsonPointer.PointerParser
 import org.kson.value.navigation.jsonPointer.PointerParser.Tokens

@@ -3,9 +3,10 @@ package org.kson.navigation
 import org.kson.CompletionItem
 import org.kson.CompletionKind
 import org.kson.parser.Location
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
+import org.kson.value.navigation.KsonValueNavigation
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
 import org.kson.value.KsonList as InternalKsonList
@@ -91,7 +92,7 @@ internal object SchemaInformation{
         // Get the current object at the completion location
         // If we can't find an object, it means the caret is before the object literal,
         // so we shouldn't filter (e.g., "user: <caret>{" - object exists but path doesn't reach it yet)
-        val currentObject = org.kson.value.KsonValueNavigation.navigateWithJsonPointer(documentValue, documentPointer) as? InternalKsonObject
+        val currentObject = KsonValueNavigation.navigateWithJsonPointer(documentValue, documentPointer) as? InternalKsonObject
             ?: return allCompletions
 
         // Get the set of already-filled property names

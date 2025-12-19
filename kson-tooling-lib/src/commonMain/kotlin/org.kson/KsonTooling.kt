@@ -7,9 +7,9 @@ import org.kson.navigation.KsonValuePathBuilder
 import org.kson.navigation.SchemaInformation
 import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
-import org.kson.value.KsonValueNavigation
+import org.kson.value.navigation.KsonValueNavigation
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 

@@ -1,8 +1,12 @@
-package org.kson.value
+package org.kson.value.navigation
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.KsonList
+import org.kson.value.KsonObject
+import org.kson.value.KsonValue
+import kotlin.collections.iterator
 
 /**
  * Result of navigating to a location in a KSON document.
@@ -34,8 +38,8 @@ data class LocationNavigationResult(
  * - IDE tooling (KsonNavigator, SchemaNavigator)
  *
  * All navigation methods handle the three cases of [KsonValue]:
- * - [KsonObject]: Navigate by property name
- * - [KsonList]: Navigate by array index
+ * - [org.kson.value.KsonObject]: Navigate by property name
+ * - [org.kson.value.KsonList]: Navigate by array index
  * - Primitive types: Terminal nodes with no children
  */
 object KsonValueNavigation {
@@ -43,7 +47,7 @@ object KsonValueNavigation {
      * Navigate through a [KsonValue] using a JSON Pointer.
      *
      * JSON Pointers provide a standard way to reference specific values within a JSON document.
-     * See [org.kson.schema.JsonPointer] and RFC 6901 for details.
+     * See [JsonPointer] and RFC 6901 for details.
      *
      * @param root The root node to start navigation from
      * @param pointer The JSON Pointer to follow
@@ -66,8 +70,8 @@ object KsonValueNavigation {
      * Navigate through a [KsonValue] using string tokens (JSON Pointer style).
      *
      * Each token represents one navigation step:
-     * - For [KsonObject]: token is the property name
-     * - For [KsonList]: token is the array index as a string (e.g., "0", "1", "2")
+     * - For [org.kson.value.KsonObject]: token is the property name
+     * - For [org.kson.value.KsonList]: token is the array index as a string (e.g., "0", "1", "2")
      *
      * @param root The root node to start navigation from
      * @param tokens The path segments to follow

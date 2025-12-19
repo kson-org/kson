@@ -1,10 +1,11 @@
-package org.kson
+package org.kson.value.navigation
 
+import org.kson.KsonCore
 import org.kson.parser.Coordinates
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointer
 import org.kson.value.KsonNumber
 import org.kson.value.KsonString
-import org.kson.value.KsonValueNavigation
+import org.kson.value.navigation.KsonValueNavigation
 import kotlin.test.*
 
 class KsonNavigationUtilTest {

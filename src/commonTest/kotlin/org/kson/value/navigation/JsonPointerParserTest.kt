@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.value.navigation
 
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
