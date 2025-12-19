@@ -119,7 +119,7 @@ object KsonValueNavigation {
      * // result.pathFromRoot = ["users", "0", "name"]
      * ```
      */
-    fun navigateToLocationWithPath(
+    fun navigateToLocationWithPointer(
         root: KsonValue,
         targetLocation: Coordinates,
         currentPointer: JsonPointer = JsonPointer.ROOT
@@ -133,7 +133,7 @@ object KsonValueNavigation {
         when (root) {
             is KsonObject -> {
                 for ((key, property) in root.propertyMap) {
-                    val childResult = navigateToLocationWithPath(
+                    val childResult = navigateToLocationWithPointer(
                         property.propValue,
                         targetLocation,
                         JsonPointer.fromTokens(currentPointer.tokens + key)
@@ -146,7 +146,7 @@ object KsonValueNavigation {
 
             is KsonList -> {
                 for ((index, element) in root.elements.withIndex()) {
-                    val childResult = navigateToLocationWithPath(
+                    val childResult = navigateToLocationWithPointer(
                         element,
                         targetLocation,
                         JsonPointer.fromTokens(currentPointer.tokens + index.toString())

@@ -159,7 +159,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * val schemaRefs = idLookup.navigateByDocumentPath(listOf("users", "0", "name"))
      * ```
      *
-     * @param documentPointer Pointer through the document (from [KsonValueNavigation.navigateToLocationWithPath])
+     * @param documentPointer Pointer through the document (from [KsonValueNavigation.navigateToLocationWithPointer])
      * @return List of [ResolvedRef] containing all sub-schemas at that location (empty if not found)
      */
     fun navigateByDocumentPointer(

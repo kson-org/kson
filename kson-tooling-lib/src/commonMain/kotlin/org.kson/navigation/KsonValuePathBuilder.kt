@@ -82,7 +82,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
         // Navigate to the target node and build the path in a single traversal
-        val navResult = KsonValueNavigation.navigateToLocationWithPath(documentValue, searchPosition)
+        val navResult = KsonValueNavigation.navigateToLocationWithPointer(documentValue, searchPosition)
             ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)

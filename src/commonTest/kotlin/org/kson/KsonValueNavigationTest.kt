@@ -142,7 +142,7 @@ class KsonNavigationUtilTest {
     fun `navigateToLocationWithPath finds simple property with correct path`() {
         // Document: name: 'John Doe'
         // Location inside 'John Doe' string
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(0, 8)  // Inside "John Doe" value
         )
@@ -157,7 +157,7 @@ class KsonNavigationUtilTest {
     fun `navigateToLocationWithPath finds nested property with correct path`() {
         // Document has: address.city: 'Springfield'
         // Find location inside 'Springfield'
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(4, 9)  // Line with "city: 'Springfield'"
         )
@@ -171,7 +171,7 @@ class KsonNavigationUtilTest {
     @Test
     fun `navigateToLocationWithPath finds array element with index in path`() {
         // Document has: hobbies[1] = 'coding' on line 12 (0-indexed: line 11)
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(11, 6)  // Inside 'coding'
         )
@@ -185,7 +185,7 @@ class KsonNavigationUtilTest {
     @Test
     fun `navigateToLocationWithPath finds deeply nested array element`() {
         // Document has: address.coordinates[0] = 40.7128
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(6, 6)  // Inside first coordinate
         )
@@ -200,7 +200,7 @@ class KsonNavigationUtilTest {
     fun `navigateToLocationWithPath returns root with empty path when location is at root`() {
         // Test with a simple root value
         val simpleRoot = KsonCore.parseToAst("'test'").ksonValue!!
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             simpleRoot,
             Coordinates(0, 1)  // Inside the string
         )
@@ -213,7 +213,7 @@ class KsonNavigationUtilTest {
     @Test
     fun `navigateToLocationWithPath finds parent object when location is at object level`() {
         // Target the address object line (line 3, 0-indexed: line 2)
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(2, 0)  // Beginning of "address:" line
         )
@@ -225,7 +225,7 @@ class KsonNavigationUtilTest {
 
     @Test
     fun `navigateToLocationWithPath returns null when location is outside document bounds`() {
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(1000, 1000)  // Far outside document
         )
@@ -236,7 +236,7 @@ class KsonNavigationUtilTest {
     @Test
     fun `navigateToLocationWithPath handles complex nested structure`() {
         // metadata.tags[1] = 'author' on line 17 (0-indexed: line 16)
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             sampleKson,
             Coordinates(16, 7)  // Inside 'author'
         )
@@ -257,7 +257,7 @@ class KsonNavigationUtilTest {
         """.trimIndent()).ksonValue!!
 
         // Location inside 'Alice' string
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             doc,
             Coordinates(1, 10)  // Inside 'Alice'
         )
@@ -279,7 +279,7 @@ class KsonNavigationUtilTest {
         """.trimIndent()).ksonValue!!
 
         // Location inside 'value' string
-        val result = KsonValueNavigation.navigateToLocationWithPath(
+        val result = KsonValueNavigation.navigateToLocationWithPointer(
             doc,
             Coordinates(1, 11)  // Inside 'value'
         )
@@ -316,6 +316,39 @@ class KsonNavigationUtilTest {
         assertNotNull(result2)
         assertTrue(result2 is KsonString)
         assertEquals("tilde value", result2.value)
+    }
+
+    @Test
+    fun `navigateWithJsonPointer with invalid pointer string throws exception`() {
+        assertFailsWith<IllegalArgumentException> {
+            KsonValueNavigation.navigateWithJsonPointer(sampleKson, JsonPointer("invalid/pointer"))
+        }
+    }
+
+    @Test
+    fun `navigateWithJsonPointer handles complex nested structure`() {
+        val complexKson = KsonCore.parseToAst("""
+            users:
+              - name: 'Alice'
+                roles:
+                  - 'admin'
+                  - 'editor'
+                .
+              - name: 'Bob'
+                roles:
+                  - 'viewer'
+                .
+            .
+        """.trimIndent()).ksonValue!!
+
+        val result = KsonValueNavigation.navigateWithJsonPointer(
+            complexKson,
+            JsonPointer("/users/0/roles/1")
+        )
+
+        assertNotNull(result)
+        assertTrue(result is KsonString)
+        assertEquals("editor", result.value)
     }
 
     @Test
