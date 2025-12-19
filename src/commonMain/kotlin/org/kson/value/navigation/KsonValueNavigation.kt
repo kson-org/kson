@@ -3,9 +3,12 @@ package org.kson.value.navigation
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointerPlus
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.jsonPointer.GlobMatcher
+import org.kson.value.navigation.jsonPointer.PointerParser
 import kotlin.collections.iterator
 
 /**
@@ -63,43 +66,40 @@ object KsonValueNavigation {
         root: KsonValue,
         pointer: JsonPointer
     ): KsonValue? {
-        return navigateByTokens(root, pointer.tokens)
+        // JSON Pointer always has only Literal tokens, so we expect exactly 0 or 1 result
+        return navigateByParsedTokens(root, pointer.rawTokens).firstOrNull()
     }
 
     /**
-     * Navigate through a [KsonValue] using string tokens (JSON Pointer style).
+     * Navigate through a [KsonValue] using a JsonPointerPlus (with wildcard and pattern support).
      *
-     * Each token represents one navigation step:
-     * - For [org.kson.value.KsonObject]: token is the property name
-     * - For [org.kson.value.KsonList]: token is the array index as a string (e.g., "0", "1", "2")
+     * JsonPointerPlus extends JSON Pointer with:
+     * - Wildcard tokens: `*` matches any single key or array index
+     * - Glob patterns: tokens containing `*` or `?` match using glob-style patterns
+     *
+     * Unlike [navigateWithJsonPointer], this returns ALL matching nodes, since wildcards
+     * and patterns can match multiple keys/indices at each level.
      *
      * @param root The root node to start navigation from
-     * @param tokens The path segments to follow
-     * @return The node at the end of the path, or null if navigation fails
+     * @param pointer The JsonPointerPlus to follow
+     * @return List of all nodes matching the pointer (empty list if no matches)
+     *
+     * Example:
+     * ```kotlin
+     * // Match all user emails
+     * val pointer1 = JsonPointerPlus("/users/\*\/email")
+     * val emails = navigateWithJsonPointerPlus(root, pointer1)
+     *
+     * // Match roles for users with "admin" in their key
+     * val pointer2 = JsonPointerPlus("/users/\*admin*\/role")
+     * val adminRoles = navigateWithJsonPointerPlus(root, pointer2)
+     * ```
      */
-    private fun navigateByTokens(
+    fun navigateWithJsonPointerPlus(
         root: KsonValue,
-        tokens: List<String>
-    ): KsonValue? {
-        if (tokens.isEmpty()) return root
-
-        var node: KsonValue? = root
-        for (token in tokens) {
-            node = when (node) {
-                is KsonObject -> node.propertyLookup[token]
-                is KsonList -> {
-                    val index = token.toIntOrNull()
-                    if (index != null && index >= 0 && index < node.elements.size) {
-                        node.elements[index]
-                    } else {
-                        null
-                    }
-                }
-                else -> null
-            }
-            if (node == null) break
-        }
-        return node
+        pointer: JsonPointerPlus
+    ): List<KsonValue> {
+        return navigateByParsedTokens(root, pointer.rawTokens)
     }
 
     /**
@@ -168,5 +168,91 @@ object KsonValueNavigation {
 
         // No child was more specific, so this node is the target
         return LocationNavigationResult(root, currentPointer)
+    }
+
+    /**
+     * Navigate through a [KsonValue] using parsed tokens (JSON Pointer/JsonPointerPlus style).
+     *
+     * Supports three token types:
+     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.Literal]: Exact match
+     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.Wildcard]: Matches all keys/indices
+     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.GlobPattern]: Pattern matching with * and ?
+     *
+     * Each token represents one navigation step:
+     * - For [org.kson.value.KsonObject]: token matches against property names
+     * - For [org.kson.value.KsonList]: Literal/Wildcard matches indices, patterns match stringified indices
+     *
+     * @param root The root node to start navigation from
+     * @param tokens The parsed path segments to follow
+     * @return List of all nodes matching the path (might be empty if no matches found)
+     */
+    private fun navigateByParsedTokens(
+        root: KsonValue,
+        tokens: List<PointerParser.Tokens>
+    ): List<KsonValue> {
+        if (tokens.isEmpty()) return listOf(root)
+
+        var currentNodes: List<KsonValue> = listOf(root)
+
+        for (token in tokens) {
+            val nextNodes = mutableListOf<KsonValue>()
+
+            for (node in currentNodes) {
+                when (token) {
+                    is PointerParser.Tokens.Literal -> {
+                        // Exact match behavior
+                        val child = when (node) {
+                            is KsonObject -> node.propertyLookup[token.value]
+                            is KsonList -> {
+                                val index = token.value.toIntOrNull()
+                                if (index != null && index >= 0 && index < node.elements.size) {
+                                    node.elements[index]
+                                } else {
+                                    null
+                                }
+                            }
+                            else -> null
+                        }
+                        if (child != null) nextNodes.add(child)
+                    }
+
+                    is PointerParser.Tokens.Wildcard -> {
+                        // Match all children
+                        when (node) {
+                            is KsonObject -> nextNodes.addAll(node.propertyMap.values.map { it.propValue })
+                            is KsonList -> nextNodes.addAll(node.elements)
+                            else -> { /* primitives have no children */ }
+                        }
+                    }
+
+                    is PointerParser.Tokens.GlobPattern -> {
+                        // Pattern matching
+                        when (node) {
+                            is KsonObject -> {
+                                for ((key, property) in node.propertyMap) {
+                                    if (GlobMatcher.matches(token.pattern, key)) {
+                                        nextNodes.add(property.propValue)
+                                    }
+                                }
+                            }
+                            is KsonList -> {
+                                // For arrays, match pattern against stringified indices
+                                for ((index, element) in node.elements.withIndex()) {
+                                    if (GlobMatcher.matches(token.pattern, index.toString())) {
+                                        nextNodes.add(element)
+                                    }
+                                }
+                            }
+                            else -> { /* primitives have no children */ }
+                        }
+                    }
+                }
+            }
+
+            currentNodes = nextNodes
+            if (currentNodes.isEmpty()) break
+        }
+
+        return currentNodes
     }
 }

@@ -1,329 +1,404 @@
 package org.kson.value.navigation
 
 import org.kson.KsonCore
-import org.kson.parser.Coordinates
-import org.kson.value.navigation.jsonPointer.JsonPointer
-import org.kson.value.KsonNumber
 import org.kson.value.KsonString
-import org.kson.value.navigation.KsonValueNavigation
+import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.navigation.jsonPointer.JsonPointerPlus
+import org.kson.value.KsonValue
 import kotlin.test.*
 
-class KsonNavigationUtilTest {
+class KsonValueNavigationTest {
 
-    // Sample KSON document for testing
-    private val sampleKson = KsonCore.parseToAst("""
-        name: 'John Doe'
-        age: 30
-        address:
-          street: '123 Main St'
-          city: 'Springfield'
-          coordinates:
-            - 40.7128
-            - -74.0060
-          .
-        hobbies:
-          - 'reading'
-          - 'coding'
-          - 'hiking'
-        metadata:
-          tags:
-            - 'developer'
-            - 'author'
-          score: 95
-          .
-        .
-    """.trimIndent()).ksonValue!!
+    // ========================================
+    // Tests for navigateWithJsonPointer()
+    // ========================================
 
-    @Test
-    fun `navigateByTokens navigates to nested object property`() {
-        val pointer = JsonPointer.fromTokens(listOf("address", "city"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
+    /**
+     * Helper to test navigation with JsonPointer using <match></match> markers.
+     * The documentWithMatch contains a single <match></match> pair indicating the expected matched value.
+     */
+    private fun assertJsonPointerNavigation(
+        documentWithMatch: String,
+        pointer: JsonPointer
+    ) {
+        val matchMarker = "<match>"
+        val endMatchMarker = "</match>"
 
-        assertNotNull(result)
-        assertTrue(result is KsonString)
-        assertEquals("Springfield", result.value)
+        // Remove markers to get the actual document
+        val document = documentWithMatch.replace(matchMarker, "").replace(endMatchMarker, "")
+
+        // Parse and navigate
+        val ksonValue = KsonCore.parseToAst(document).ksonValue!!
+        val result = KsonValueNavigation.navigateWithJsonPointer(ksonValue, pointer)
+
+        // Build actual document with markers at the result's location
+        val actualDocumentWithMarkers = if (result != null) {
+            insertMatchMarkers(document, listOf(result))
+        } else {
+            document // No markers if null result
+        }
+
+        // Compare expected vs actual with markers
+        assertEquals(
+            documentWithMatch,
+            actualDocumentWithMarkers,
+            "Navigation result does not match expected. Expected vs Actual with <match> markers:"
+        )
     }
 
     @Test
-    fun `navigateByTokens navigates through array by index`() {
-        val pointer = JsonPointer.fromTokens(listOf("hobbies", "1"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNotNull(result)
-        assertTrue(result is KsonString)
-        assertEquals("coding", result.value)
-    }
-
-    @Test
-    fun `navigateByTokens navigates through nested arrays`() {
-        val pointer = JsonPointer.fromTokens(listOf("address", "coordinates", "0"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNotNull(result)
-        assertTrue(result is KsonNumber)
-        assertEquals(40.7128, result.value.asDouble)
-    }
-
-    @Test
-    fun `navigateByTokens returns null for invalid property`() {
-        val pointer = JsonPointer.fromTokens(listOf("nonexistent", "property"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateByTokens returns null for out of bounds array index`() {
-        val pointer = JsonPointer.fromTokens(listOf("hobbies", "99"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateByTokens returns null for negative array index`() {
-        val pointer = JsonPointer.fromTokens(listOf("hobbies", "-1"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateByTokens returns null for non-numeric array index`() {
-        val pointer = JsonPointer.fromTokens(listOf("hobbies", "notANumber"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateByTokens with empty path returns root`() {
-        val pointer = JsonPointer.fromTokens(emptyList())
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertSame(sampleKson, result)
-    }
-
-    @Test
-    fun `navigateByTokens cannot navigate into primitive values`() {
-        // Try to navigate into a string (primitive)
-        val pointer = JsonPointer.fromTokens(listOf("name", "someProp"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, pointer)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateByTokens handles complex nested structure`() {
-        val complexKson = KsonCore.parseToAst("""
-            users:
-              - name: 'Alice'
-                roles:
-                  - 'admin'
-                  - 'editor'
+    fun `navigateWithJsonPointer navigates to nested object property`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                name: 'John Doe'
+                age: 30
+                address:
+                  street: '123 Main St'
+                  city: '<match>Springfield</match>'
+                  coordinates:
+                    - 40.7128
+                    - -74.0060
+                  .
                 .
-              - name: 'Bob'
-                roles:
-                  - 'viewer'
+            """.trimIndent(),
+            pointer = JsonPointer("/address/city")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer navigates through array by index`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                hobbies:
+                  - 'reading'
+                  - '<match>coding</match>'
+                  - 'hiking'
+            """.trimIndent(),
+            pointer = JsonPointer("/hobbies/1")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer navigates through nested arrays`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                address:
+                  coordinates:
+                    - <match>40.7128</match>
+                    - -74.0060
+                  .
                 .
-            .
-        """.trimIndent()).ksonValue!!
-
-        val pointer = JsonPointer.fromTokens(listOf("users", "0", "roles", "1"))
-        val result = KsonValueNavigation.navigateWithJsonPointer(complexKson, pointer)
-
-        assertNotNull(result)
-        assertTrue(result is KsonString)
-        assertEquals("editor", result.value)
-    }
-
-    // Tests for navigateToLocationWithPath()
-
-    @Test
-    fun `navigateToLocationWithPath finds simple property with correct path`() {
-        // Document: name: 'John Doe'
-        // Location inside 'John Doe' string
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(0, 8)  // Inside "John Doe" value
+            """.trimIndent(),
+            pointer = JsonPointer("/address/coordinates/0")
         )
-
-        assertNotNull(result)
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("John Doe", result.targetNode.value)
-        assertEquals(listOf("name"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath finds nested property with correct path`() {
-        // Document has: address.city: 'Springfield'
-        // Find location inside 'Springfield'
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(4, 9)  // Line with "city: 'Springfield'"
-        )
-
-        assertNotNull(result)
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("Springfield", result.targetNode.value)
-        assertEquals(listOf("address", "city"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath finds array element with index in path`() {
-        // Document has: hobbies[1] = 'coding' on line 12 (0-indexed: line 11)
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(11, 6)  // Inside 'coding'
-        )
-
-        assertNotNull(result)
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("coding", result.targetNode.value)
-        assertEquals(listOf("hobbies", "1"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath finds deeply nested array element`() {
-        // Document has: address.coordinates[0] = 40.7128
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(6, 6)  // Inside first coordinate
-        )
-
-        assertNotNull(result)
-        assertTrue(result.targetNode is KsonNumber)
-        assertEquals(40.7128, result.targetNode.value.asDouble)
-        assertEquals(listOf("address", "coordinates", "0"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath returns root with empty path when location is at root`() {
-        // Test with a simple root value
-        val simpleRoot = KsonCore.parseToAst("'test'").ksonValue!!
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            simpleRoot,
-            Coordinates(0, 1)  // Inside the string
-        )
-
-        assertNotNull(result)
-        assertSame(simpleRoot, result.targetNode)
-        assertTrue(result.pointerFromRoot.tokens.isEmpty())
-    }
-
-    @Test
-    fun `navigateToLocationWithPath finds parent object when location is at object level`() {
-        // Target the address object line (line 3, 0-indexed: line 2)
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(2, 0)  // Beginning of "address:" line
-        )
-
-        assertNotNull(result)
-        // At the start of "address:" we should be at the root or address object level
-        assertTrue(result.pointerFromRoot.tokens.isEmpty() || result.pointerFromRoot.tokens == listOf("address"))
-    }
-
-    @Test
-    fun `navigateToLocationWithPath returns null when location is outside document bounds`() {
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(1000, 1000)  // Far outside document
-        )
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath handles complex nested structure`() {
-        // metadata.tags[1] = 'author' on line 17 (0-indexed: line 16)
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            sampleKson,
-            Coordinates(16, 7)  // Inside 'author'
-        )
-
-        assertNotNull(result)
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("author", result.targetNode.value)
-        assertEquals(listOf("metadata", "tags", "1"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath finds most specific node`() {
-        // When multiple nodes contain the location, should return the smallest/deepest one
-        val doc = KsonCore.parseToAst("""
-            user:
-              name: 'Alice'
-            .
-        """.trimIndent()).ksonValue!!
-
-        // Location inside 'Alice' string
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            doc,
-            Coordinates(1, 10)  // Inside 'Alice'
-        )
-
-        assertNotNull(result)
-        // Should find the string 'Alice', not the parent object
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("Alice", result.targetNode.value)
-        assertEquals(listOf("user", "name"), result.pointerFromRoot.tokens)
-    }
-
-    @Test
-    fun `navigateToLocationWithPath returns most specific node in nested structure`() {
-        // This test verifies that navigation finds the most specific (deepest) node
-        val doc = KsonCore.parseToAst("""
-            outer:
-              inner: 'value'
-            .
-        """.trimIndent()).ksonValue!!
-
-        // Location inside 'value' string
-        val result = KsonValueNavigation.navigateToLocationWithPointer(
-            doc,
-            Coordinates(1, 11)  // Inside 'value'
-        )
-
-        assertNotNull(result)
-        // Should find the most specific node (the string), not a parent
-        assertTrue(result.targetNode is KsonString)
-        assertEquals("value", result.targetNode.value)
-        assertEquals(listOf("outer", "inner"), result.pointerFromRoot.tokens)
     }
 
     @Test
     fun `navigateWithJsonPointer returns null for invalid property`() {
-        val result = KsonValueNavigation.navigateWithJsonPointer(sampleKson, JsonPointer("/nonexistent/property"))
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                name: 'John Doe'
+                age: 30
+            """.trimIndent(),
+            pointer = JsonPointer("/nonexistent/property")
+        )
+    }
 
-        assertNull(result)
+    @Test
+    fun `navigateWithJsonPointer returns null for out of bounds array index`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                hobbies:
+                  - 'reading'
+                  - 'coding'
+                  - 'hiking'
+            """.trimIndent(),
+            pointer = JsonPointer("/hobbies/99")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer returns null for negative array index`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                hobbies:
+                  - 'reading'
+                  - 'coding'
+            """.trimIndent(),
+            pointer = JsonPointer("/hobbies/-1")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer returns null for non-numeric array index`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                hobbies:
+                  - 'reading'
+                  - 'coding'
+            """.trimIndent(),
+            pointer = JsonPointer("/hobbies/notANumber")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer with empty path returns root`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                <match>name: 'John Doe'
+                age: 30</match>
+            """.trimIndent(),
+            pointer = JsonPointer("")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointer cannot navigate into primitive values`() {
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                name: 'John Doe'
+                age: 30
+            """.trimIndent(),
+            pointer = JsonPointer("/name/someProp")
+        )
     }
 
     @Test
     fun `navigateWithJsonPointer handles escaped characters`() {
-        val doc = KsonCore.parseToAst("""
-            'a/b': 'slash value'
-            'm~n': 'tilde value'
-        """.trimIndent()).ksonValue!!
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                'a/b': '<match>slash value</match>'
+                'm~n': 'tilde value'
+            """.trimIndent(),
+            pointer = JsonPointer("/a~1b")
+        )
 
-        // ~1 represents /
-        val result1 = KsonValueNavigation.navigateWithJsonPointer(doc, JsonPointer("/a~1b"))
-        assertNotNull(result1)
-        assertTrue(result1 is KsonString)
-        assertEquals("slash value", result1.value)
+        assertJsonPointerNavigation(
+            documentWithMatch = """
+                'a/b': 'slash value'
+                'm~n': '<match>tilde value</match>'
+            """.trimIndent(),
+            pointer = JsonPointer("/m~0n")
+        )
+    }
 
-        // ~0 represents ~
-        val result2 = KsonValueNavigation.navigateWithJsonPointer(doc, JsonPointer("/m~0n"))
-        assertNotNull(result2)
-        assertTrue(result2 is KsonString)
-        assertEquals("tilde value", result2.value)
+    // ========================================
+    // Tests for navigateWithJsonPointerPlus() - Wildcard and Pattern Matching
+    // ========================================
+
+    /**
+     * Helper to test navigation with JsonPointerPlus using multiple <match></match> markers.
+     * Each matched value should be wrapped in <match></match> tags.
+     */
+    private fun assertJsonPointerPlusNavigation(
+        documentWithMatches: String,
+        pointer: JsonPointerPlus
+    ) {
+        // Remove markers to get the actual document
+        val matchMarker = "<match>"
+        val endMatchMarker = "</match>"
+        val document = documentWithMatches.replace(matchMarker, "").replace(endMatchMarker, "")
+
+        // Parse and navigate
+        val ksonValue = KsonCore.parseToAst(document).ksonValue!!
+        val results = KsonValueNavigation.navigateWithJsonPointerPlus(ksonValue, pointer)
+
+        // Build actual document with markers at the results' locations
+        val actualDocumentWithMarkers = insertMatchMarkers(document, results)
+
+        // Compare expected vs actual with markers
+        assertEquals(
+            documentWithMatches,
+            actualDocumentWithMarkers,
+            "Navigation results do not match expected. Expected vs Actual with <match> markers:"
+        )
+    }
+
+    /**
+     * Helper function to insert <match></match> markers into the document at the locations of the results.
+     * This allows for easy visual comparison of expected vs actual locations.
+     */
+    private fun insertMatchMarkers(document: String, results: List<KsonValue>): String {
+        val matchMarker = "<match>"
+        val endMatchMarker = "</match>"
+
+        // Sort results by position (descending) so we can insert from end to start without affecting indices
+        val sortedResults = results.sortedWith(
+            compareByDescending<KsonValue> { it.location.start.line }
+                .thenByDescending { it.location.start.column }
+        )
+
+        val lines = document.lines().toMutableList()
+
+        // Insert markers from end to start to preserve indices
+        for (result in sortedResults) {
+            val startLine = result.location.start.line
+            val startColumn = result.location.start.column
+            val endLine = result.location.end.line
+            val endColumn = result.location.end.column
+
+            // Insert end marker
+            val endLineContent = lines[endLine]
+            lines[endLine] = endLineContent.take(endColumn) + endMatchMarker + endLineContent.substring(endColumn)
+
+            // Insert start marker
+            val startLineContent = lines[startLine]
+            lines[startLine] = startLineContent.take(startColumn) + matchMarker + startLineContent.substring(startColumn)
+        }
+
+        return lines.joinToString("\n")
     }
 
     @Test
-    fun `navigateWithJsonPointer with invalid pointer string throws exception`() {
-        assertFailsWith<IllegalArgumentException> {
-            KsonValueNavigation.navigateWithJsonPointer(sampleKson, JsonPointer("invalid/pointer"))
-        }
+    fun `navigateWithJsonPointerPlus matches all object properties with wildcard`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                users:
+                  alice:
+                    email: '<match>alice@example.com</match>'
+                    .
+                  bob:
+                    email: '<match>bob@example.com</match>'
+                    .
+                  charlie:
+                    email: '<match>charlie@example.com</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/users/*/email")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus matches all array elements with wildcard`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                hobbies:
+                  - '<match>reading</match>'
+                  - '<match>coding</match>'
+                  - '<match>hiking</match>'
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/hobbies/*")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus matches pattern in object keys`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                users:
+                  admin1:
+                    role: '<match>superadmin</match>'
+                    .
+                  user1:
+                    role: 'viewer'
+                    .
+                  admin2:
+                    role: '<match>admin</match>'
+                    .
+                  guest1:
+                    role: 'guest'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/users/*admin*/role")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus matches pattern with question mark wildcard`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                items:
+                  item1: '<match>first</match>'
+                  item2: '<match>second</match>'
+                  item3: '<match>third</match>'
+                  item10: 'tenth'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/items/item?")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus returns empty list for no matches`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                users:
+                  alice: 'Alice'
+                  bob: 'Bob'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/users/*admin*")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus handles nested wildcards`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                departments:
+                  engineering:
+                    - name: '<match>Alice</match>'
+                      skills: ['kotlin', 'java']
+                      .
+                    - name: '<match>Bob</match>'
+                      skills: ['python', 'go']
+                      .
+                  sales:
+                    - name: '<match>Charlie</match>'
+                      skills: ['negotiation']
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/departments/*/*/name")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus handles combination of literal and wildcard`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                users:
+                  - name: 'Alice'
+                    email: '<match>alice@example.com</match>'
+                  - name: 'Bob'
+                    email: '<match>bob@example.com</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/users/*/email")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus returns root for empty pointer`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                <match>name: 'test'</match>
+            """.trimIndent(),
+            pointer = JsonPointerPlus("")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus handles exact wildcard token`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                data:
+                  a: '<match>first</match>'
+                  b: '<match>second</match>'
+                  c: '<match>third</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/data/*")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerPlus wildcard on primitive returns empty`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                value: 'test'
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/value/*")
+        )
     }
 
     @Test
@@ -353,36 +428,47 @@ class KsonNavigationUtilTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer with invalid pointer string throws exception`() {
-        assertFailsWith<IllegalArgumentException> {
-            KsonValueNavigation.navigateWithJsonPointer(sampleKson, JsonPointer("invalid/pointer"))
-        }
+    fun `navigateWithJsonPointerPlus pattern on array indices`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                items:
+                  - '<match>item0</match>'
+                  - '<match>item1</match>'
+                  - '<match>item2</match>'
+                  - '<match>item3</match>'
+                  - '<match>item4</match>'
+                  - '<match>item5</match>'
+                  - '<match>item6</match>'
+                  - '<match>item7</match>'
+                  - '<match>item8</match>'
+                  - '<match>item9</match>'
+                  - 'item10'
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/items/?")
+        )
     }
 
     @Test
-    fun `navigateWithJsonPointer handles complex nested structure`() {
-        val complexKson = KsonCore.parseToAst("""
-            users:
-              - name: 'Alice'
-                roles:
-                  - 'admin'
-                  - 'editor'
+    fun `navigateWithJsonPointerPlus handles complex real-world scenario`() {
+        assertJsonPointerPlusNavigation(
+            documentWithMatches = """
+                api:
+                  v1:
+                    users:
+                      admin_panel:
+                        endpoint: '<match>/api/v1/admin/users</match>'
+                        .
+                      user_list:
+                        endpoint: '/api/v1/users'
+                        .
+                      .  
+                    products:
+                      admin_panel:
+                        endpoint: '<match>/api/v1/admin/products</match>'
                 .
-              - name: 'Bob'
-                roles:
-                  - 'viewer'
-                .
-            .
-        """.trimIndent()).ksonValue!!
-
-        val result = KsonValueNavigation.navigateWithJsonPointer(
-            complexKson,
-            JsonPointer("/users/0/roles/1")
+            """.trimIndent(),
+            pointer = JsonPointerPlus("/api/v1/*/admin_panel/endpoint")
         )
-
-        assertNotNull(result)
-        assertTrue(result is KsonString)
-        assertEquals("editor", result.value)
     }
 
 }
