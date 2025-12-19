@@ -6,17 +6,18 @@ import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
+import org.kson.validation.Validator
 
 /**
  * Base [JsonSchema] type that [KsonValue]s may be validated against
  */
-sealed interface JsonSchema {
+sealed interface JsonSchema: Validator {
   /**
    * A guaranteed non-null description for this schema that may be used in user-facing messages.  Should be defaulted
    * to something reasonable (if not as helpful) when the schema itself provides no description
    */
   fun descriptionWithDefault(): String
-  fun validate(ksonValue: KsonValue, messageSink: MessageSink)
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 
   fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
     val numErrors = messageSink.loggedMessages().size

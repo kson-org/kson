@@ -14,6 +14,7 @@ import org.kson.tools.FormattingStyle
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.tools.KsonFormatterConfig
+import org.kson.validation.Validator
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValue
 
@@ -75,10 +76,11 @@ object KsonCore {
             DuplicateKeyValidator().validate(ast, messageSink)
         }
 
-        val jsonSchema = coreCompileConfig.schemaJson
-        if (jsonSchema != NO_SCHEMA && !coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
-            // validate against our schema, logging any errors to our message sink
-            jsonSchema.validate(ast.toKsonValue(), messageSink)
+        if (!coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
+            // Run validators
+            coreCompileConfig.validators.forEach {
+                it.validate(ast.toKsonValue(), messageSink)
+            }
         }
         return AstParseResult(ast, tokens, messageSink)
     }
@@ -308,7 +310,12 @@ data class CoreCompileConfig(
     /**
      * The deep object/list nesting to allow in the parsed document.  See [DEFAULT_MAX_NESTING_LEVEL] for more details.
      */
-    val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL
+    val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL,
+
+    /**
+     * List of validators that are run on a complete KsonValue
+     */
+    val validators: List<Validator> = listOf(schemaJson)
 )
 
 /**
