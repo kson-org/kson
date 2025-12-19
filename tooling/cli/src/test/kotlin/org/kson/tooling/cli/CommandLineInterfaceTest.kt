@@ -348,17 +348,27 @@ class CommandLineInterfaceTest {
         assertCommand(
             SubCommands.VALIDATE,
             input = """
-                { {} 
+                error1: {
+                    key
+                }
+                error2: 3.4.5 
             """.trimIndent(),
             expectedOutput = OutputExpectation.Failure("""
-                [ERROR] Object properties must be `key: value` pairs at 0:2
+                [ERROR] Object properties must be `key: value` pairs at 1:4
+                [ERROR] Invalid character `.` found in this number at 3:8
+                
                 
                 Tokens:
-                  CURLY_BRACE_L: '{' at 0:0-0:1
-                  CURLY_BRACE_L: '{' at 0:2-0:3
-                  CURLY_BRACE_R: '}' at 0:3-0:4
-                  EOF: '' at 0:5-0:5
-                
+                  UNQUOTED_STRING: 'error1' at 0:0-0:6
+                  COLON: ':' at 0:6-0:7
+                  CURLY_BRACE_L: '{' at 0:8-0:9
+                  UNQUOTED_STRING: 'key' at 1:4-1:7
+                  CURLY_BRACE_R: '}' at 2:0-2:1
+                  UNQUOTED_STRING: 'error2' at 3:0-3:6
+                  COLON: ':' at 3:6-3:7
+                  NUMBER: '3.4.5' at 3:8-3:13
+                  EOF: '' at 3:14-3:14
+
             """.trimIndent()),
             "--show-tokens"
         )
