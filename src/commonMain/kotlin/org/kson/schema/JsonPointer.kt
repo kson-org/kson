@@ -27,10 +27,10 @@ data class JsonPointer(val pointerString: String) {
 
     init {
         when (val result = JsonPointerParser(pointerString).parse()) {
-            is JsonPointerParser.ParseResult.Success -> {
+            is AbstractPointerParser.ParseResult.Success -> {
                 tokens = result.tokens
             }
-            is JsonPointerParser.ParseResult.Error -> {
+            is AbstractPointerParser.ParseResult.Error -> {
                 throw IllegalArgumentException(
                     "Invalid JSON Pointer '$pointerString': ${result.message}"
                 )
