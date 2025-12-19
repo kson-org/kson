@@ -5,6 +5,7 @@ package org.kson
 
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
+import org.kson.schema.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
@@ -35,13 +36,13 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      *
      * @param candidateSchemas The schemas found at the document path
      * @param documentRoot The document being edited (KSON string)
-     * @param documentPath The path to the location in the document
+     * @param documentPointer The [JsonPointer] to the location in the document
      * @return List of valid schemas after expansion and filtering
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
         documentRoot: String,
-        documentPath: List<String>
+        documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Check if we need to filter based on combinators
         // This includes both schemas directly tagged as combinators AND schemas that contain combinator properties
@@ -59,7 +60,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
             // Parse the document for validation
             val documentValue = KsonCore.parseToAst(documentRoot).ksonValue
             if (documentValue != null) {
-                filterByValidation(expandedSchemas, documentValue, documentPath)
+                filterByValidation(expandedSchemas, documentValue, documentPointer)
             } else {
                 // If document doesn't parse, fall back to unfiltered schemas
                 expandedSchemas
@@ -98,17 +99,17 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      *
      * @param candidateSchemas All schemas found at the document path
      * @param documentValue The parsed document
-     * @param documentPath The path to the completion location
+     * @param documentPointer The [JsonPointer] to the completion location
      * @return Filtered list of compatible schemas
      */
     private fun filterByValidation(
         candidateSchemas: List<ResolvedRef>,
         documentValue: org.kson.value.KsonValue,
-        documentPath: List<String>
+        documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Get the object to validate against
         // For completions, we validate the object where we're adding properties
-        val targetValue = KsonValueNavigation.navigateByTokens(documentValue, documentPath) ?: documentValue
+        val targetValue = KsonValueNavigation.navigateWithJsonPointer(documentValue, documentPointer) ?: documentValue
 
         return candidateSchemas.filter { ref ->
             when (ref.resolutionType) {

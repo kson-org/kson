@@ -16,7 +16,7 @@ class SchemaNavigationTest {
      */
     private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaIdLookup(it).navigateByDocumentPath(path)
+            SchemaIdLookup(it).navigateByDocumentPointer(JsonPointer.fromTokens(path))
                 .map { it.resolvedValue }
         } ?: emptyList()
     }

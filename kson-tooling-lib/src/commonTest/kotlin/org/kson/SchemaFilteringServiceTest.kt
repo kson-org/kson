@@ -1,7 +1,8 @@
 package org.kson
 
+import org.kson.schema.JsonPointer
 import org.kson.schema.SchemaIdLookup
-import org.kson.value.KsonObject
+import org.kson.value.KsonValue
 import kotlin.test.*
 
 /**
@@ -11,6 +12,21 @@ import kotlin.test.*
  * without going through the full public API.
  */
 class SchemaFilteringServiceTest {
+
+    /**
+     * Helper function to set up schema filtering and return valid schemas for a given document.
+     *
+     * @param schema The schema definition as a string
+     * @param document The document to validate against the schema
+     * @return List of valid schemas after filtering
+     */
+    private fun getValidSchemasForDocument(schema: String, document: String): List<KsonValue> {
+        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(JsonPointer(""))
+        return filteringService.getValidSchemas(candidateSchemas, document, JsonPointer("")).map { it.resolvedValue }
+    }
 
     @Test
     fun testGetValidSchemas_withOneOfCombinator_filtersIncompatibleSchemas() {
@@ -36,15 +52,7 @@ class SchemaFilteringServiceTest {
             type: email
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        // Navigate to root
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-
-        // Apply filtering
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
         // Should filter to only the email branch (oneOf creates 2 branches, only 1 should be valid)
         // Note: The filtering happens after expansion, so we expect 1 valid schema
@@ -80,12 +88,7 @@ class SchemaFilteringServiceTest {
             age: 30
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
         // Should filter to compatible branches only
         assertTrue(validSchemas.size >= 1, "Should have at least 1 valid schema")
@@ -113,12 +116,7 @@ class SchemaFilteringServiceTest {
             name: John
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
         // allOf should include all branches (no filtering) plus the parent schema
         assertEquals(3, validSchemas.size, "allOf should include parent + all branches without filtering")
@@ -136,12 +134,7 @@ class SchemaFilteringServiceTest {
         // Invalid document (not parseable)
         val invalidDocument = "{ invalid json"
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, invalidDocument, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, invalidDocument)
 
         // Should fall back to all expanded schemas without filtering (parent + branches)
         assertEquals(3, validSchemas.size, "Should return parent + all branches when document doesn't parse")
@@ -163,15 +156,10 @@ class SchemaFilteringServiceTest {
             name: John
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
-
-        // Should return all candidate schemas since there are no combinators
-        assertEquals(candidateSchemas.size, validSchemas.size, "Should return all schemas when no combinators")
+        // Should return all candidate schemas since there are no combinators (only 1 in this case)
+        assertEquals(1, validSchemas.size, "Should return all schemas when no combinators")
     }
 
     @Test
@@ -201,12 +189,7 @@ class SchemaFilteringServiceTest {
             name: John
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
         // Both branches should be valid (missing required properties are ignored during filtering) plus parent
         assertEquals(3, validSchemas.size, "Parent + both branches should be valid - missing required props are ignored")
@@ -232,12 +215,7 @@ class SchemaFilteringServiceTest {
             value: hello
         """.trimIndent()
 
-        val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPath(emptyList())
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document, emptyList())
+        val validSchemas = getValidSchemasForDocument(schema, document)
 
         // Should filter to only the string branch plus parent
         assertEquals(2, validSchemas.size, "Should match parent + the string branch")

@@ -61,7 +61,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         // otherwise, see if we can interpret the fragment
         return if (resolvedRefUri.fragment.startsWith("#/")) {
-            val decodedPointer = decodeUriEncoding(resolvedRefUri.fragment.substring(1))
+            val decodedPointer = JsonPointer(decodeUriEncoding(resolvedRefUri.fragment.substring(1)))
             if (resolvedRefUri.origin.isNotBlank()) {
                 idMap[resolvedRefUri.toString().substringBefore("#")]?.let { resolveJsonPointer(decodedPointer, it, resolvedRefUri.toString()) }
             } else {
@@ -159,14 +159,14 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * val schemaRefs = idLookup.navigateByDocumentPath(listOf("users", "0", "name"))
      * ```
      *
-     * @param documentPathTokens Path through the document (from [KsonValueNavigation.navigateByTokens])
+     * @param documentPointer Pointer through the document (from [KsonValueNavigation.navigateToLocationWithPath])
      * @return List of [ResolvedRef] containing all sub-schemas at that location (empty if not found)
      */
-    fun navigateByDocumentPath(
-        documentPathTokens: List<String>,
+    fun navigateByDocumentPointer(
+        documentPointer: JsonPointer,
     ): List<ResolvedRef> {
         val startingBaseUri = ""
-
+        val documentPathTokens = documentPointer.tokens
         if (documentPathTokens.isEmpty()) {
             // Even at root, resolve $ref if present
             val resolved = resolveRefIfPresent(schemaRootValue, startingBaseUri)
@@ -560,19 +560,10 @@ private fun decodeUriEncoding(encoded: String): String {
  * @param ksonValue The [KsonValue] to traverse
  * @return The [KsonValue] at the pointer location, or null if not found
  */
-private fun resolveJsonPointer(pointer: String, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
-    return when (val parseResult = JsonPointerParser(pointer).parse()) {
-        is JsonPointerParser.ParseResult.Success -> {
-            val resolvedValue = KsonValueNavigation.navigateByTokens(ksonValue, parseResult.tokens)
-            val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, parseResult.tokens, currentBaseUri)
-            resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
-        }
-
-        is JsonPointerParser.ParseResult.Error -> {
-            // Invalid JSON Pointer
-            null
-        }
-    }
+private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
+    val resolvedValue = KsonValueNavigation.navigateWithJsonPointer(ksonValue, pointer)
+    val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, pointer, currentBaseUri)
+    return resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
 }
 
 /**
@@ -608,15 +599,15 @@ data class ResolvedRef(
  * Updates the base URI while following a path of JSON Pointer tokens.
  *
  * @param current The current [KsonValue] node to start from
- * @param tokens The list of reference tokens to follow
+ * @param pointer The [JsonPointer] to follow
  * @param currentBaseUri The starting base URI
  * @return The updated base URI after following the token path
  */
-private fun updateBaseUriAlongPath(current: KsonValue, tokens: List<String>, currentBaseUri: String): String {
+private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, currentBaseUri: String): String {
     var node = current
     var updatedBaseUri = currentBaseUri
 
-    for (token in tokens) {
+    for (token in pointer.tokens) {
         // Update base URI if current node has a $id property
         if (node is KsonObject) {
             node.propertyLookup["\$id"]?.let { idValue ->
@@ -627,7 +618,7 @@ private fun updateBaseUriAlongPath(current: KsonValue, tokens: List<String>, cur
         }
 
         // Navigate to next node
-        node = KsonValueNavigation.navigateByTokens(node, listOf(token)) ?: break
+        node = KsonValueNavigation.navigateWithJsonPointer(node, JsonPointer.fromTokens(listOf(token))) ?: break
     }
 
     return updatedBaseUri

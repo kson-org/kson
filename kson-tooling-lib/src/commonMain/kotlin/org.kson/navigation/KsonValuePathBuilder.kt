@@ -5,6 +5,7 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.schema.JsonPointer
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
 import org.kson.value.KsonValueNavigation
@@ -43,7 +44,7 @@ private data class TokenContext(
  * @param document The KSON document string to analyze
  * @param location The position (line and column, zero-based)
  *
- * @see buildPathToPosition Main method to build the path
+ * @see buildJsonPointerToPosition Main method to build the path
  * @see org.kson.value.KsonValueNavigation For navigation within parsed KSON values
  */
 class KsonValuePathBuilder(private val document: String, private val location: Coordinates) {
@@ -66,7 +67,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * @return A list of property names representing the path from root to target,
      *         or null if the path cannot be determined
      */
-    fun buildPathToPosition(includePropertyKeys: Boolean = true): List<String>? {
+    fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): JsonPointer? {
         val parsedDocument = KsonCore.parseToAst(document)
 
         // Analyze token context at the target location
@@ -82,16 +83,17 @@ class KsonValuePathBuilder(private val document: String, private val location: C
 
         // Navigate to the target node and build the path in a single traversal
         val navResult = KsonValueNavigation.navigateToLocationWithPath(documentValue, searchPosition)
-            ?: return emptyList()
+            ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
-            path = navResult.pathFromRoot,
+            pointer = navResult.pointerFromRoot,
             lastToken = tokenContext.lastToken,
             targetNode = navResult.targetNode,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys
-        )
+            )
+
     }
 
     /**
@@ -162,7 +164,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * 3. Location outside token bounds: Remove the last path element to target the parent
      *    (unless includePropertyKeys is true, in which case keep the path to the property)
      *
-     * @param path The initial path built from document navigation
+     * @param pointer The initial [JsonPointer] built from document navigation
      * @param lastToken The last token before the location
      * @param targetNode The KsonValue node found at the target location
      * @param isLocationInsideToken Whether the location is inside the token bounds
@@ -170,17 +172,17 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * @return The adjusted path
      */
     private fun adjustPathForLocationContext(
-        path: List<String>,
+        pointer: JsonPointer,
         lastToken: Token?,
         targetNode: KsonValue,
         isLocationInsideToken: Boolean,
         includePropertyKeys: Boolean
-    ): List<String> {
-        return when {
+    ): JsonPointer {
+        val tokens = when {
             // Location is right after a colon - we're entering a value
             lastToken?.tokenType == TokenType.COLON -> {
                 val propertyName = (targetNode as KsonObject).propertyLookup.keys.last()
-                path + propertyName
+                pointer.tokens + propertyName
             }
             // Location is on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) and we're at the parent object
             // This happens when location is in the middle of a property name like "user<caret>name"
@@ -192,16 +194,17 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             includePropertyKeys -> {
                 // Extract the property name from the token
                 val propertyName = lastToken.value
-                path + propertyName
+                pointer.tokens + propertyName
             }
             // Location is outside the token - target the parent element (for completions)
             // But keep the path as-is for definition lookups
             !isLocationInsideToken && !includePropertyKeys -> {
-                path.dropLast(1)
+                pointer.tokens.dropLast(1)
             }
             // Normal case - return path as-is
-            else -> path
+            else -> pointer.tokens
         }
+        return JsonPointer.fromTokens(tokens)
     }
 
     /**

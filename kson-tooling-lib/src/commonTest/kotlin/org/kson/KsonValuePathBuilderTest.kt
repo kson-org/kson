@@ -2,6 +2,7 @@ package org.kson
 
 import org.kson.navigation.KsonValuePathBuilder
 import org.kson.parser.Coordinates
+import org.kson.schema.JsonPointer
 import kotlin.test.*
 
 /**
@@ -18,7 +19,7 @@ class KsonValuePathBuilderTest {
      */
     private fun assertPathAtCaret(
         documentWithCaret: String,
-        expectedPath: List<String>,
+        expectedPath: JsonPointer,
         includePropertyKeys: Boolean = true
     ) {
         val caretMarker = "<caret>"
@@ -34,71 +35,71 @@ class KsonValuePathBuilderTest {
         val document = documentWithCaret.replace(caretMarker, "")
 
         val actualPath = KsonValuePathBuilder(document, Coordinates(line, column))
-            .buildPathToPosition(includePropertyKeys = includePropertyKeys)
+            .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
         assertEquals(expectedPath, actualPath, "Path does not match expected value")
     }
 
     @Test
-    fun testBuildPathToPosition_simpleProperty() {
+    fun testBuildJsonPointerToPosition_simpleProperty() {
         assertPathAtCaret(
             """
             name: <caret>John
             age: 30
             """.trimIndent(),
-            expectedPath = listOf("name")
+            expectedPath = JsonPointer.fromTokens(listOf("name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_secondProperty() {
+    fun testBuildJsonPointerToPosition_secondProperty() {
         assertPathAtCaret(
             """
             name: John
             age: <caret>30
             """.trimIndent(),
-            expectedPath = listOf("age")
+            expectedPath = JsonPointer.fromTokens(listOf("age"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_nestedProperty() {
+    fun testBuildJsonPointerToPosition_nestedProperty() {
         assertPathAtCaret(
             """
             person:
               name: <caret>Alice
               age: 25
             """.trimIndent(),
-            expectedPath = listOf("person", "name")
+            expectedPath = JsonPointer.fromTokens(listOf("person", "name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_deeplyNestedProperty() {
+    fun testBuildJsonPointerToPosition_deeplyNestedProperty() {
         assertPathAtCaret(
             """
             company:
               address:
                 city: <caret>Boston
             """.trimIndent(),
-            expectedPath = listOf("company", "address", "city")
+            expectedPath = JsonPointer.fromTokens(listOf("company", "address", "city"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_arrayItem() {
+    fun testBuildJsonPointerToPosition_arrayItem() {
         assertPathAtCaret(
             """
             tags:
               - <caret>kotlin
               - multiplatform
             """.trimIndent(),
-            expectedPath = listOf("tags", "0") // Path includes array index
+            expectedPath = JsonPointer.fromTokens(listOf("tags", "0")) // Path includes array index
         )
     }
 
     @Test
-    fun testBuildPathToPosition_nestedArrayItem() {
+    fun testBuildJsonPointerToPosition_nestedArrayItem() {
         assertPathAtCaret(
             """
             users:
@@ -107,43 +108,43 @@ class KsonValuePathBuilderTest {
               - name: Bob
                 age: 25
             """.trimIndent(),
-            expectedPath = listOf("users", "0", "name") // Path includes array index and property name
+            expectedPath = JsonPointer.fromTokens(listOf("users", "0", "name")) // Path includes array index and property name
         )
     }
 
     @Test
-    fun testBuildPathToPosition_afterColon() {
+    fun testBuildJsonPointerToPosition_afterColon() {
         assertPathAtCaret(
             """
             name: <caret>
             age: 30
             """.trimIndent(),
-            expectedPath = listOf("name")
+            expectedPath = JsonPointer.fromTokens(listOf("name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_emptyDocument() {
+    fun testBuildJsonPointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = emptyList() // Empty document should return an empty list
+            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
         )
     }
 
     @Test
-    fun testBuildPathToPosition_rootLevel() {
+    fun testBuildJsonPointerToPosition_rootLevel() {
         // When caret is at the start of a line with a property, it returns that property's path
         assertPathAtCaret(
             """
             <caret>name: John
             """.trimIndent(),
-            expectedPath = listOf("name")
+            expectedPath = JsonPointer.fromTokens(listOf("name"))
         )
     }
 
 
     @Test
-    fun testBuildPathToPosition_classic_simpleProperty() {
+    fun testBuildJsonPointerToPosition_classic_simpleProperty() {
         assertPathAtCaret(
             """
             {
@@ -151,12 +152,12 @@ class KsonValuePathBuilderTest {
               "age": 30
             }
             """.trimIndent(),
-            expectedPath = listOf("name")
+            expectedPath = JsonPointer.fromTokens(listOf("name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_secondProperty() {
+    fun testBuildJsonPointerToPosition_classic_secondProperty() {
         assertPathAtCaret(
             """
             {
@@ -164,12 +165,12 @@ class KsonValuePathBuilderTest {
               "age": <caret>30
             }
             """.trimIndent(),
-            expectedPath = listOf("age")
+            expectedPath = JsonPointer.fromTokens(listOf("age"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_nestedProperty() {
+    fun testBuildJsonPointerToPosition_classic_nestedProperty() {
         assertPathAtCaret(
             """
             {
@@ -179,12 +180,12 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = listOf("person", "name")
+            expectedPath = JsonPointer.fromTokens(listOf("person", "name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_deeplyNestedProperty() {
+    fun testBuildJsonPointerToPosition_classic_deeplyNestedProperty() {
         assertPathAtCaret(
             """
             {
@@ -195,12 +196,12 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = listOf("company", "address", "city")
+            expectedPath = JsonPointer.fromTokens(listOf("company", "address", "city"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_arrayItem() {
+    fun testBuildJsonPointerToPosition_classic_arrayItem() {
         assertPathAtCaret(
             """
             {
@@ -210,12 +211,12 @@ class KsonValuePathBuilderTest {
               ]
             }
             """.trimIndent(),
-            expectedPath = listOf("tags", "0") // Path includes array index
+            expectedPath = JsonPointer.fromTokens(listOf("tags", "0")) // Path includes array index
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_nestedArrayItem() {
+    fun testBuildJsonPointerToPosition_classic_nestedArrayItem() {
         assertPathAtCaret(
             """
             {
@@ -231,12 +232,12 @@ class KsonValuePathBuilderTest {
               ]
             }
             """.trimIndent(),
-            expectedPath = listOf("users", "0", "name") // Path includes array index and property name
+            expectedPath = JsonPointer.fromTokens(listOf("users", "0", "name")) // Path includes array index and property name
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_afterColon() {
+    fun testBuildJsonPointerToPosition_classic_afterColon() {
         assertPathAtCaret(
             """
             {
@@ -244,32 +245,32 @@ class KsonValuePathBuilderTest {
               "age": 30
             }
             """.trimIndent(),
-            expectedPath = listOf("name")
+            expectedPath = JsonPointer.fromTokens(listOf("name"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_emptyDocument() {
+    fun testBuildJsonPointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = emptyList() // Empty document should return an empty list
+            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_rootLevel() {
+    fun testBuildJsonPointerToPosition_classic_rootLevel() {
         assertPathAtCaret(
             """
             {<caret>
               "name": "John"
             }
             """.trimIndent(),
-            expectedPath = emptyList() // At root level inside braces
+            expectedPath = JsonPointer.fromTokens(emptyList()) // At root level inside braces
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_multiLevelNesting() {
+    fun testBuildJsonPointerToPosition_classic_multiLevelNesting() {
         assertPathAtCaret(
             """
             {
@@ -282,24 +283,24 @@ class KsonValuePathBuilderTest {
               }
             }
             """.trimIndent(),
-            expectedPath = listOf("root", "level1", "level2", "level3")
+            expectedPath = JsonPointer.fromTokens(listOf("root", "level1", "level2", "level3"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_fixInvalidDocumentWithoutKey() {
+    fun testBuildJsonPointerToPosition_classic_fixInvalidDocumentWithoutKey() {
         assertPathAtCaret(
             """
             {
               "key": <caret>
             }
             """.trimIndent(),
-            expectedPath = listOf("key")
+            expectedPath = JsonPointer.fromTokens(listOf("key"))
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_onPropertyKey_forCompletion() {
+    fun testBuildJsonPointerToPosition_classic_onPropertyKey_forCompletion() {
         // When cursor is on property key, for completion, path should drop last element (go to parent)
         assertPathAtCaret(
             """
@@ -307,13 +308,13 @@ class KsonValuePathBuilderTest {
               "user<caret>name": "johndoe"
             }
             """.trimIndent(),
-            expectedPath = emptyList(), // Drops "username", returns empty (parent of root)
+            expectedPath = JsonPointer.fromTokens(emptyList()), // Drops "username", returns empty (parent of root)
             includePropertyKeys = false
         )
     }
 
     @Test
-    fun testBuildPathToPosition_classic_onPropertyKey_forDefinition() {
+    fun testBuildJsonPointerToPosition_classic_onPropertyKey_forDefinition() {
         // When cursor is on property key, for definition, path should keep the property
         assertPathAtCaret(
             """
@@ -321,7 +322,7 @@ class KsonValuePathBuilderTest {
               "user<caret>name": "johndoe"
             }
             """.trimIndent(),
-            expectedPath = listOf("username"), // Keeps "username" for definition lookup
+            expectedPath = JsonPointer.fromTokens(listOf("username")), // Keeps "username" for definition lookup
             includePropertyKeys = true
         )
     }
