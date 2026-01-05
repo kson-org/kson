@@ -4,7 +4,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-static KSON_LIB_VERSION: &str = "beta-2";
+// [[kson-version-num]]
+static KSON_LIB_VERSION: &str = "0.3.0-dev";
 
 fn get_kson_artifacts(
     out_dir: &Path,

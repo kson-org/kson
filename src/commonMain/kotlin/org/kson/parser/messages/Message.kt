@@ -711,6 +711,17 @@ enum class MessageType(
             return "Property `$missingProperty' is not provided, but it is required by '$requiredBy'"
         }
     },
+    SCHEMA_DEPENDENCIES_SCHEMA_ERROR(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Required by", "Schema error")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val requiredBy = parsedArgs.getArg("Required by")
+            val schemaError = parsedArgs.getArg("Schema error")
+            return "Error from '$requiredBy' dependency schema: `$schemaError'"
+        }
+    },
     OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()

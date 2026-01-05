@@ -11,7 +11,7 @@ When `main` is ready to have a release cut from it:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:
   * [kson-lib](../kson-lib/build.gradle.kts): `X.(Y+1).0-SNAPSHOT`
   * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version)
-  * [lib-rust](../lib-rust/pixi.toml): `X.(Y+1).0-dev`
+  * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
   * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
@@ -22,7 +22,7 @@ When `main` is ready to have a release cut from it:
 - Search the codebase for `[[kson-version-num]]` to find and update all the development/snapshot versions to the new `X.Y.Z` version.  Here's a hopefully complete checklist of the artifacts we version and publish that should marked `[[kson-version-num]]`:
   * [kson-lib](../kson-lib/build.gradle.kts)
   * [KSON Core internals](../build.gradle.kts) (**NOTE:** the root [`build.gradle.kts`](../build.gradle.kts) uses a different versioning scheme and will NOT be set to `X.Y.Z`.  See the comments there for details)
-  * [lib-rust](../lib-rust/pixi.toml)
+  * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml)
   * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json)
@@ -179,11 +179,11 @@ Note: it is possible to automate this process us some Gradle tasks provided by t
 1. Ensure you have **the tag you wish to release checked out and that your Git status is clean**.
 
 2. Build the plugin distribution:
-   
+
     ```bash
     ./gradlew :tooling:jetbrains:buildPlugin
     ```
-   
+
    This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
 
 3. Manually upload to JetBrains Marketplace:

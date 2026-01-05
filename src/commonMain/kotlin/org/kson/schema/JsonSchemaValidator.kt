@@ -1,15 +1,16 @@
 package org.kson.schema
 
 import org.kson.parser.MessageSink
+import org.kson.validation.Validator
 import org.kson.value.*
 
 // schema todo capture file/location info from schema to link back to schema def?
-interface JsonSchemaValidator {
+interface JsonSchemaValidator: Validator {
     /**
      * Validates that the given [ksonValue] satisfies this [JsonNumberValidator].  Logs any validation errors to the
      * given [messageSink]
      */
-    fun validate(ksonValue: KsonValue, messageSink: MessageSink)
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink)
 }
 
 abstract class JsonNumberValidator : JsonSchemaValidator {
