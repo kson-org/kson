@@ -527,8 +527,17 @@ class ListNode(
 
             // Determine formatting based on context
             when {
-                // Both objects need a dot separator, with space if current ends with number
-                (isNotLastElement && currentIsObject && nextIsObject) -> "{$elementString}"
+                // Both objects need a separator when both are non-empty
+                (isNotLastElement && currentIsObject && nextIsObject) -> {
+                    val currentIsEmptyObject = currentValue.properties.isEmpty()
+                    if (currentIsEmptyObject) {
+                        // Empty objects already have braces, don't wrap them
+                        "$elementString "
+                    } else {
+                        // Non-empty objects need to be wrapped to separate from the next object
+                        "{$elementString}"
+                    }
+                }
 
                 // Add space between elements in a list, except when the element is a list
                 isNotLastElement && element is ListElementNodeImpl && element.value !is ListNode -> {

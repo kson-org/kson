@@ -1817,6 +1817,18 @@ class FormatterTest {
             """.trimIndent(),
             formattingStyle = FormattingStyle.PLAIN
         )
+
+        assertFormatting(
+            """
+                  - {}
+                  - items: {}
+            """.trimIndent(),
+            """
+                  - {}
+                  - items: {}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.PLAIN
+        )
     }
 
     @Test
