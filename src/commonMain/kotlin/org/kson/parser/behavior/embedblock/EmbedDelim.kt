@@ -96,6 +96,27 @@ sealed class EmbedDelim(val char: Char) {
         return content.replace(hasEscapesPattern, "$delimCharForRegex\$1$delimCharForRegex")
     }
 
+    /**
+     * Finds all positions in the content where escape backslashes appear.
+     * Returns a sequence of character offsets where backslashes are used to escape
+     * the delimiter character, in ascending order (left-to-right as they appear in content).
+     *
+     * For example, in "%\%", the escape backslash is at position 1.
+     * In "%\\%", the escape backslash is at position 1 (position 2 is preserved in output).
+     *
+     * @param content The raw embed content
+     * @return Sequence of character offsets (0-based) where escape backslashes appear, in ascending order
+     */
+    fun findEscapePositions(content: String): Sequence<Int> {
+        return hasEscapesPattern.findAll(content)
+            .map { matchResult ->
+                // The pattern matches: delimChar + backslash(es) + delimChar
+                // The first backslash (right after the first delimChar) is the escape backslash
+                // that gets removed during unescaping
+                matchResult.range.first + 1
+            }
+    }
+
     override fun toString(): String {
         return char.toString()
     }

@@ -37,7 +37,9 @@ async function main() {
                 extensionTestsPath: extensionBrowserTestsPath,
                 folderPath: testWorkspacePath,
                 headless: false,
-                permissions: ['clipboard-read', 'clipboard-write']
+                permissions: ['clipboard-read', 'clipboard-write'],
+                quality: 'stable',
+                commit: '994fd12f8d3a5aa16f17d42c041e5809167e845a'
             });
         }
 

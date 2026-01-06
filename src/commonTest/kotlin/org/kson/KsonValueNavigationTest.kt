@@ -159,7 +159,7 @@ class KsonNavigationUtilTest {
         // Find location inside 'Springfield'
         val result = KsonValueNavigation.navigateToLocationWithPath(
             sampleKson,
-            Coordinates(4, 8)  // Line with "city: 'Springfield'"
+            Coordinates(4, 9)  // Line with "city: 'Springfield'"
         )
 
         assertNotNull(result)
@@ -238,7 +238,7 @@ class KsonNavigationUtilTest {
         // metadata.tags[1] = 'author' on line 17 (0-indexed: line 16)
         val result = KsonValueNavigation.navigateToLocationWithPath(
             sampleKson,
-            Coordinates(16, 6)  // Inside 'author'
+            Coordinates(16, 7)  // Inside 'author'
         )
 
         assertNotNull(result)

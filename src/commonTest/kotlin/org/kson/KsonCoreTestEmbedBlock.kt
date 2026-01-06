@@ -71,7 +71,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
 
         assertParsesTo(
             """
-                %sql: ::::::::::::database:::::: 
+                %sql: ::::::::::::database::::::
                     select * from something
                 %%
             """,

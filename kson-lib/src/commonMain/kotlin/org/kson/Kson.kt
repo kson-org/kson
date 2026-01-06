@@ -346,7 +346,7 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
                         contentStart = contentToken.lexeme.location.start
                     }
                     contentEnd = contentToken.lexeme.location.end
-                    contentBuilder.append(contentToken.value)
+                    contentBuilder.append(contentToken.lexeme.text)
                 }
 
                 // Add the open quote token

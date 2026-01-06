@@ -76,7 +76,6 @@ class LexerTest {
 
         // assert EOF renders how we want when we render token lists to strings
         assertEquals("", eofToken.lexeme.text, "EOF Token's raw text should be empty (can't render an EOF)")
-        assertEquals("", eofToken.value, "EOF Token's value should be empty (can't render an EOF)")
 
         return tokens.subList(0, tokens.size - 1)
     }
@@ -449,77 +448,17 @@ class LexerTest {
     }
 
     @Test
-    fun testEmbedBlockIndentTrimming() {
-        val oneLineEmbedTokens = assertTokenizesTo(
-            """
-                %
-                this is a raw embed
-                %%
-            """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
-
-        assertEquals("this is a raw embed\n", oneLineEmbedTokens[2].value)
-
-        val mulitLineEmbedTokens = assertTokenizesTo(
-            """
-                %sql
-                    this is a multi-line
-                        raw embed
-                who's indent will be determined by
-                                the leftmost line
-                %%
-            """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
-
-        assertEquals(
-            """
-                this is a multi-line
-                    raw embed
-            who's indent will be determined by
-                            the leftmost line
-            
-            """.trimIndent(),
-            mulitLineEmbedTokens[3].value
-        )
-
-        val mulitLineIndentedEmbedTokens = assertTokenizesTo(
-            """
-                %sql
-                    this is a multi-line
-                        raw embed
-                who's indent will be determined by
-                                the leftmost line,
-                which is the end delimiter in this case
-              %%
-            """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
-
-        assertEquals(
-            """      this is a multi-line
-          raw embed
-  who's indent will be determined by
-                  the leftmost line,
-  which is the end delimiter in this case
-""",
-            mulitLineIndentedEmbedTokens[3].value
-        )
-    }
-
-    @Test
     fun testEmbedBlockTrialingWhitespace() {
         val trailingNewlineTokens = assertTokenizesTo(
             """
                 %
                 this should have a newline at the end
                 %%
-            """,
+            """.trimIndent(),
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].value)
+        assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].lexeme.text)
 
         val trailingSpacesTokens = assertTokenizesTo(
             """
@@ -528,7 +467,7 @@ class LexerTest {
                     should have four trailing 
                     spaces and a newline at the end    
                 %%
-            """,
+            """.trimIndent(),
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
@@ -539,7 +478,7 @@ class LexerTest {
                 spaces and a newline at the end    
 
             """.trimIndent(),
-            trailingSpacesTokens[2].value
+            trailingSpacesTokens[2].lexeme.text
         )
 
         val zeroTrailingWhitespaceTokens = assertTokenizesTo(
@@ -547,13 +486,13 @@ class LexerTest {
                 %
                     this on the other hand,
                     should have spaces but no newline at the end    %%
-            """,
+            """.trimIndent(),
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertEquals(
-            "this on the other hand,\nshould have spaces but no newline at the end    ",
-            zeroTrailingWhitespaceTokens[2].value
+            "    this on the other hand,\n    should have spaces but no newline at the end    ",
+            zeroTrailingWhitespaceTokens[2].lexeme.text
         )
     }
 
@@ -664,9 +603,9 @@ class LexerTest {
             listOf(UNQUOTED_STRING, COLON, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
-        assertEquals("a_key", tokens[0].value)
-        assertEquals("\"", tokens[2].value)
-        assertEquals("a_value", tokens[3].value)
+        assertEquals("a_key", tokens[0].lexeme.text)
+        assertEquals("\"", tokens[2].lexeme.text)
+        assertEquals("a_value", tokens[3].lexeme.text)
     }
 
     @Test
@@ -716,9 +655,9 @@ class LexerTest {
         )
 
         // sanity check the tokens are lexing to what we expect
-        assertEquals("string with 'unescaped' and ", tokens[1].value)
-        assertEquals("\\\"", tokens[2].value)
-        assertEquals("embedded", tokens[3].value)
+        assertEquals("string with 'unescaped' and ", tokens[1].lexeme.text)
+        assertEquals("\\\"", tokens[2].lexeme.text)
+        assertEquals("embedded", tokens[3].lexeme.text)
     }
 
     @Test
@@ -731,9 +670,9 @@ class LexerTest {
         )
 
         // sanity check the tokens are lexing to what we expect
-        assertEquals("string with \"unescaped\" and ", tokens[1].value)
-        assertEquals("\\'", tokens[2].value)
-        assertEquals("embedded", tokens[3].value)
+        assertEquals("string with \"unescaped\" and ", tokens[1].lexeme.text)
+        assertEquals("\\'", tokens[2].lexeme.text)
+        assertEquals("embedded", tokens[3].lexeme.text)
     }
 
     @Test
@@ -778,11 +717,11 @@ class LexerTest {
             """   
                 %
                 these double %\% percents are embedded but escaped%%
-            """,
+            """.trimIndent(),
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[2].value)
+        assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[2].lexeme.text)
     }
 
     @Test
@@ -791,11 +730,11 @@ class LexerTest {
             """   
                 $
                 these double $\$ dollars are embedded but escaped$$
-            """,
+            """.trimIndent(),
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
-        assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[2].value)
+        assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[2].lexeme.text)
     }
 
     @Test
