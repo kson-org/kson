@@ -148,7 +148,7 @@ class KsonValuePathBuilderTest {
         assertPathAtCaret(
             """
             {
-              "name": <caret>"John",
+              "name": "<caret>John",
               "age": 30
             }
             """.trimIndent(),
@@ -175,7 +175,7 @@ class KsonValuePathBuilderTest {
             """
             {
               "person": {
-                "name": <caret>"Alice",
+                "name": "<caret>Alice",
                 "age": 25
               }
             }
@@ -191,7 +191,7 @@ class KsonValuePathBuilderTest {
             {
               "company": {
                 "address": {
-                  "city": <caret>"Boston"
+                  "city": "<caret>Boston"
                 }
               }
             }
@@ -206,7 +206,7 @@ class KsonValuePathBuilderTest {
             """
             {
               "tags": [
-                <caret>"kotlin",
+                "<caret>kotlin",
                 "multiplatform"
               ]
             }
@@ -222,7 +222,7 @@ class KsonValuePathBuilderTest {
             {
               "users": [
                 {
-                  "name": <caret>"Alice",
+                  "name": "<caret>Alice",
                   "age": 30
                 },
                 {

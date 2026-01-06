@@ -129,7 +129,7 @@ describe('DefinitionService', () => {
             const document = new KsonDocument(textDoc, analysis, undefined);
 
             // Position on the $ref value "#/$defs/User"
-            const position: Position = {line: 4, character: 23}; // Inside the ref string
+            const position: Position = {line: 4, character: 24}; // Inside the ref string
             const definition = definitionService.getDefinition(document, position);
 
             // Should return a definition pointing to the User definition
@@ -196,7 +196,7 @@ describe('DefinitionService', () => {
             const document = new KsonDocument(textDoc, analysis, undefined);
 
             // Position on the $ref value "#"
-            const position: Position = {line: 4, character: 20}; // Inside the ref string
+            const position: Position = {line: 4, character: 21}; // Inside the ref string
             const definition = definitionService.getDefinition(document, position);
 
             // Should return a definition pointing to the root

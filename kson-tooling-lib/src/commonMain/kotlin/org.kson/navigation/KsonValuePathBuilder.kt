@@ -211,11 +211,11 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * Attempts to recover a parseable document from an invalid one.
      *
      * When a document contains syntax errors, this method tries to make it valid
-     * by inserting empty quotes at the location. This is useful for
+     * by inserting an empty list, `[]`, at the location. This is useful for
      * providing IDE features even when the user is in the middle of typing.
      *
      * For example, if the location is at `{ "key": | }`, this would try parsing
-     * `{ "key": "" }` to enable completions for the value.
+     * `{ "key": [] }` to enable completions for the value.
      *
      * @param document The invalid document string
      * @param location The position where quotes should be inserted
@@ -233,12 +233,12 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         }
 
         val targetLine = lines[location.line]
-        val safeColumn = location.column.coerceAtMost(targetLine.length)
+        val safeColumn = (location.column).coerceAtMost(targetLine.length)
 
-        // Insert empty quotes at the position
+        // Insert empty list at the position
         val recoveredLine = buildString {
             append(targetLine.take(safeColumn))
-            append("\"\"")  // Empty string literal
+            append("[]")  // Empty string literal
             append(targetLine.substring(safeColumn))
         }
 
@@ -248,6 +248,4 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         // Attempt to parse the recovered document
         return KsonCore.parseToAst(recoveredDocument).ksonValue
     }
-
-
 }
