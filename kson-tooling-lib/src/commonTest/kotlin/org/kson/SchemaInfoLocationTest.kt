@@ -149,7 +149,7 @@ class SchemaInfoLocationTest {
         """.trimIndent()
 
         val hoverInfo = getInfoAtCaret(schema, """
-            email: <caret>'user@example.com'
+            email: '<caret>user@example.com'
         """.trimIndent())
 
         assertNotNull(hoverInfo, "Expected hover info but got null")

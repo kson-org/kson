@@ -151,9 +151,9 @@ describe('DocumentHighlightService', () => {
 
             // Should highlight all three properties at the same level
             const ranges = highlights.map(h => h.range);
-            assertDeepIncludes(ranges, {start: {line: 3, character: 12}, end: {line: 3, character: 19}}); // "prop1"
-            assertDeepIncludes(ranges, {start: {line: 4, character: 12}, end: {line: 4, character: 19}}); // "prop2"
-            assertDeepIncludes(ranges, {start: {line: 5, character: 12}, end: {line: 5, character: 19}}); // "prop3"
+            assertDeepIncludes(ranges, {start: {line: 3, character: 13}, end: {line: 3, character: 18}}); // "prop1"
+            assertDeepIncludes(ranges, {start: {line: 4, character: 13}, end: {line: 4, character: 18}}); // "prop2"
+            assertDeepIncludes(ranges, {start: {line: 5, character: 13}, end: {line: 5, character: 18}}); // "prop3"
         });
     });
 
@@ -180,8 +180,8 @@ describe('DocumentHighlightService', () => {
 
             // Should highlight keys from first object only
             const ranges = highlights.map(h => h.range);
-            assertDeepIncludes(ranges, {start: {line: 2, character: 8}, end: {line: 2, character: 12}}); // "id"
-            assertDeepIncludes(ranges, {start: {line: 3, character: 8}, end: {line: 3, character: 14}}); // "name"
+            assertDeepIncludes(ranges, {start: {line: 2, character: 9}, end: {line: 2, character: 11}}); // "id"
+            assertDeepIncludes(ranges, {start: {line: 3, character: 9}, end: {line: 3, character: 13}}); // "name"
         });
 
         it('should not highlight keys from different objects in array', () => {
@@ -206,8 +206,8 @@ describe('DocumentHighlightService', () => {
 
             // Should highlight keys from second object only
             const ranges = highlights.map(h => h.range);
-            assertDeepIncludes(ranges, {start: {line: 6, character: 8}, end: {line: 6, character: 12}}); // "id"
-            assertDeepIncludes(ranges, {start: {line: 7, character: 8}, end: {line: 7, character: 14}}); // "name"
+            assertDeepIncludes(ranges, {start: {line: 6, character: 9}, end: {line: 6, character: 11}}); // "id"
+            assertDeepIncludes(ranges, {start: {line: 7, character: 9}, end: {line: 7, character: 13}}); // "name"
         });
     });
 
@@ -231,9 +231,9 @@ describe('DocumentHighlightService', () => {
 
             // Should highlight all three top-level keys
             const ranges = highlights.map(h => h.range);
-            assertDeepIncludes(ranges, {start: {line: 1, character: 4}, end: {line: 1, character: 12}}); // "simple"
-            assertDeepIncludes(ranges, {start: {line: 2, character: 4}, end: {line: 2, character: 13}}); // "complex"
-            assertDeepIncludes(ranges, {start: {line: 5, character: 4}, end: {line: 5, character: 13}}); // "another"
+            assertDeepIncludes(ranges, {start: {line: 1, character: 5}, end: {line: 1, character: 11}}); // "simple"
+            assertDeepIncludes(ranges, {start: {line: 2, character: 5}, end: {line: 2, character: 12}}); // "complex"
+            assertDeepIncludes(ranges, {start: {line: 5, character: 5}, end: {line: 5, character: 12}}); // "another"
         });
 
         it('should handle duplicate property keys', () => {
@@ -258,12 +258,12 @@ describe('DocumentHighlightService', () => {
 
             // Check that at least one "value" key is highlighted
             const valueHighlights = ranges.filter(r =>
-                r.start.character === 4 && r.end.character === 11
+                r.start.character === 5 && r.end.character === 10
             );
             assert.ok(valueHighlights.length >= 1, 'Should highlight at least one "value" key');
 
             // Check that "other" is highlighted
-            assertDeepIncludes(ranges, {start: {line: 4, character: 4}, end: {line: 4, character: 11}}); // "other"
+            assertDeepIncludes(ranges, {start: {line: 4, character: 5}, end: {line: 4, character: 10}}); // "other"
         });
     });
 
@@ -351,8 +351,8 @@ describe('DocumentHighlightService', () => {
             // Should still highlight the single key
             assert.strictEqual(highlights.length, 1);
             assert.deepStrictEqual(highlights[0].range, {
-                start: {line: 1, character: 4},
-                end: {line: 1, character: 13}
+                start: {line: 1, character: 5},
+                end: {line: 1, character: 12}
             });
         });
     });

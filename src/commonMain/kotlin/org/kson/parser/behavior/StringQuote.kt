@@ -44,6 +44,7 @@ sealed class StringQuote(private val quoteChar: Char) {
      * @return a copy of [escapedContent] with all delimiter escapes processed
      */
     fun unescapeQuotes(escapedContent: String): String {
+        // unescape any escaped internal quotes
         return escapedContent.replace(escapedDelimiterString, delimiterString)
     }
 

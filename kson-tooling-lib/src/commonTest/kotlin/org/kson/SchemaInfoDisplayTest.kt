@@ -283,7 +283,7 @@ class SchemaInfoDisplayTest {
         """
 
         // Get hover info for the name field (line 2, pointing to "John")
-        val hoverInfo = KsonTooling.getSchemaInfoAtLocation(document, schema, 2, 14)
+        val hoverInfo = KsonTooling.getSchemaInfoAtLocation(document, schema, 2, 15)
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("User's full name"))
         assertTrue(hoverInfo.contains("*Type:* `string`"))
