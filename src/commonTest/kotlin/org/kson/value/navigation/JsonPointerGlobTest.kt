@@ -278,4 +278,84 @@ class JsonPointerGlobTest {
         val pointer = JsonPointerGlob.fromTokens(originalTokens)
         assertEquals(originalTokens, pointer.tokens)
     }
+
+    // Tests for RecursiveDescent (**) token
+
+    @Test
+    fun `recursive descent token`() {
+        val pointer = JsonPointerGlob("/users/**/email")
+        assertEquals(listOf("users", "**", "email"), pointer.tokens)
+    }
+
+    @Test
+    fun `recursive descent at beginning`() {
+        val pointer = JsonPointerGlob("/**/email")
+        assertEquals(listOf("**", "email"), pointer.tokens)
+    }
+
+    @Test
+    fun `recursive descent at end`() {
+        val pointer = JsonPointerGlob("/config/**")
+        assertEquals(listOf("config", "**"), pointer.tokens)
+    }
+
+    @Test
+    fun `only recursive descent token`() {
+        val pointer = JsonPointerGlob("/**")
+        assertEquals(listOf("**"), pointer.tokens)
+    }
+
+    @Test
+    fun `multiple recursive descent tokens`() {
+        val pointer = JsonPointerGlob("/a/**/b/**/c")
+        assertEquals(listOf("a", "**", "b", "**", "c"), pointer.tokens)
+    }
+
+    @Test
+    fun `recursive descent combined with wildcards`() {
+        val pointer = JsonPointerGlob("/users/**/roles/*")
+        assertEquals(listOf("users", "**", "roles", "*"), pointer.tokens)
+    }
+
+    @Test
+    fun `recursive descent combined with patterns`() {
+        val pointer = JsonPointerGlob("/data/**/*_test")
+        assertEquals(listOf("data", "**", "*_test"), pointer.tokens)
+    }
+
+    @Test
+    fun `escaped double asterisk becomes literal`() {
+        val pointer = JsonPointerGlob("/path/\\*\\*")
+        assertEquals(listOf("path", "**"), pointer.tokens)
+    }
+
+    @Test
+    fun `fromTokens with double asterisk creates recursive descent`() {
+        val pointer = JsonPointerGlob.fromTokens(listOf("data", "**", "name"))
+        assertEquals("/data/**/name", pointer.pointerString)
+        assertEquals(listOf("data", "**", "name"), pointer.tokens)
+    }
+
+    @Test
+    fun `fromTokens with multiple double asterisks`() {
+        val pointer = JsonPointerGlob.fromTokens(listOf("a", "**", "b", "**", "c"))
+        assertEquals("/a/**/b/**/c", pointer.pointerString)
+        assertEquals(listOf("a", "**", "b", "**", "c"), pointer.tokens)
+    }
+
+    @Test
+    fun `fromTokens round-trips with recursive descent`() {
+        val originalTokens = listOf("users", "**", "profile", "*", "email")
+        val pointer = JsonPointerGlob.fromTokens(originalTokens)
+        assertEquals(originalTokens, pointer.tokens)
+    }
+
+    @Test
+    fun `fromTokens escapes literal double asterisk pattern`() {
+        // When the string contains "**" as literal text (not as a token), it should be escaped
+        val pointer = JsonPointerGlob.fromTokens(listOf("file**name"))
+        // This should create a glob pattern since it contains unescaped *
+        assertEquals("/file\\*\\*name", pointer.pointerString)
+        assertEquals(listOf("file**name"), pointer.tokens)
+    }
 }

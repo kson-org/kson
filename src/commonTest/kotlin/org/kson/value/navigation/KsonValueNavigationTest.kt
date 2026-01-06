@@ -461,13 +461,290 @@ class KsonValueNavigationTest {
                       user_list:
                         endpoint: '/api/v1/users'
                         .
-                      .  
+                      .
                     products:
                       admin_panel:
                         endpoint: '<match>/api/v1/admin/products</match>'
                 .
             """.trimIndent(),
             pointer = JsonPointerGlob("/api/v1/*/admin_panel/endpoint")
+        )
+    }
+
+    // ========================================
+    // Tests for RecursiveDescent (**) token
+    // ========================================
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent zero levels`() {
+        // ** should match zero levels: /users/**/name should match /users/name
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                users:
+                  name: '<match>root-user</match>'
+                  profile:
+                    name: '<match>profile-name</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/users/**/name")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent one level`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                users:
+                  alice:
+                    email: '<match>alice@example.com</match>'
+                    .
+                  bob:
+                    email: '<match>bob@example.com</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/users/**/email")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent multiple levels`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                company:
+                  departments:
+                    engineering:
+                      teams:
+                        backend:
+                          lead:
+                            email: '<match>backend-lead@co.com</match>'
+                            .
+                          .
+                        frontend:
+                          lead:
+                            email: '<match>frontend-lead@co.com</match>'
+                            .
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/company/**/email")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent at beginning`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                config:
+                  debug: '<match>true</match>'
+                  .
+                settings:
+                  debug: '<match>false</match>'
+                  .
+                app:
+                  options:
+                    debug: '<match>verbose</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/**/debug")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent at end returns all descendants`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                config:
+                  database:
+                    <match>host: '<match>localhost</match>'
+                    port: <match>5432</match>
+                    .</match>
+                  cache:
+                    <match>enabled: <match>true</match>
+                .</match>
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/config/**")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob only recursive descent returns everything`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                <match>users:
+                  <match>alice: '<match>Alice</match>'
+                  bob: '<match>Bob</match>'
+                  .</match></match>
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/**")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent through arrays`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                teams:
+                  - name: '<match>Team A</match>'
+                    members:
+                      - name: '<match>Alice</match>'
+                      - name: '<match>Bob</match>'
+                      .
+                  - name: '<match>Team B</match>'
+                    members:
+                      - name: '<match>Charlie</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/teams/**/name")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob multiple recursive descent tokens`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                level1:
+                  level2:
+                    target:
+                      value: '<match>found1</match>'
+                      .
+                    .
+                  target:
+                    value: '<match>found2</match>'
+                    .
+                  .
+                target:
+                  level2:
+                    value: '<match>found3</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/**/target/**/value")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent combined with wildcard`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                api:
+                  v1:
+                    users:
+                      endpoint: '<match>/api/v1/users</match>'
+                      .
+                    products:
+                      endpoint: '<match>/api/v1/products</match>'
+                      .
+                    .
+                  v2:
+                    users:
+                      endpoint: '<match>/api/v2/users</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/api/**/*/endpoint")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent combined with pattern`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                services:
+                  auth:
+                    admin_user:
+                      role: '<match>superadmin</match>'
+                      .
+                    regular_user:
+                      role: 'user'
+                      .
+                    .
+                  db:
+                    nested:
+                      admin_config:
+                        role: '<match>admin</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/services/**/*admin*/role")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent finds no matches`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                users:
+                  alice:
+                    name: 'Alice'
+                    .
+                  bob:
+                    name: 'Bob'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/users/**/email")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent on primitives returns empty`() {
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                value: 'test'
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/value/**")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent complex real-world scenario`() {
+        // Find all endpoints that contain "admin" anywhere in the path
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                api:
+                  v1:
+                    users:
+                      admin:
+                        list:
+                          endpoint: '<match>/api/v1/users/admin/list</match>'
+                          .
+                        create:
+                          endpoint: '<match>/api/v1/users/admin/create</match>'
+                          .
+                        .
+                      public:
+                        list:
+                          endpoint: '/api/v1/users/public/list'
+                          .
+                      .
+                    products:
+                      admin:
+                        list:
+                          endpoint: '<match>/api/v1/products/admin/list</match>'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/api/**/admin/**/endpoint")
+        )
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob recursive descent with intermediate literal match`() {
+        // Pattern: /root/**/config/value should match config at any depth, but only if followed by value
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                root:
+                  config:
+                    value: '<match>direct</match>'
+                    .
+                  level1:
+                    config:
+                      value: '<match>nested-once</match>'
+                      other: 'ignored'
+                      .
+                    level2:
+                      config:
+                        value: '<match>nested-twice</match>'
+                        .
+                      other_config:
+                        value: 'not-matched'
+                .
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/root/**/config/value")
         )
     }
 

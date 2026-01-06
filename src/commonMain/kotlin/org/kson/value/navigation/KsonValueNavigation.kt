@@ -173,9 +173,10 @@ object KsonValueNavigation {
     /**
      * Navigate through a [KsonValue] using parsed tokens (JSON Pointer/JsonPointerGlob style).
      *
-     * Supports three token types:
+     * Supports four token types:
      * - [PointerParser.Tokens.Literal]: Exact match
      * - [PointerParser.Tokens.Wildcard]: Matches all keys/indices
+     * - [PointerParser.Tokens.RecursiveDescent]: Matches zero or more levels (depth-first search)
      * - [PointerParser.Tokens.GlobPattern]: Pattern matching with * and ?
      *
      * Each token represents one navigation step:
@@ -194,7 +195,7 @@ object KsonValueNavigation {
 
         var currentNodes: List<KsonValue> = listOf(root)
 
-        for (token in tokens) {
+        for ((tokenIndex, token) in tokens.withIndex()) {
             val nextNodes = mutableListOf<KsonValue>()
 
             for (node in currentNodes) {
@@ -223,6 +224,25 @@ object KsonValueNavigation {
                             is KsonList -> nextNodes.addAll(node.elements)
                             else -> { /* primitives have no children */ }
                         }
+                    }
+
+                    is PointerParser.Tokens.RecursiveDescent -> {
+                        // Recursive descent: match zero or more levels
+                        val remainingTokens = tokens.subList(tokenIndex + 1, tokens.size)
+                        val descendants = collectAllDescendants(node)
+
+                        if (remainingTokens.isEmpty()) {
+                            // ** at end: for /**, include node; for /path/**, exclude it
+                            nextNodes.addAll(if (tokenIndex == 0) descendants else descendants.drop(1))
+                        } else {
+                            // ** in middle: try matching remaining tokens at all levels
+                            descendants.forEach { candidate ->
+                                nextNodes.addAll(navigateByParsedTokens(candidate, remainingTokens))
+                            }
+                        }
+
+                        // RecursiveDescent already handled remaining tokens, so we're done
+                        return nextNodes
                     }
 
                     is PointerParser.Tokens.GlobPattern -> {
@@ -254,5 +274,35 @@ object KsonValueNavigation {
         }
 
         return currentNodes
+    }
+
+    /**
+     * Collect all descendants of a node using depth-first search.
+     * The result includes the node itself (to support zero-level matching).
+     *
+     * @param node The node to collect descendants from
+     * @return List of the node itself plus all its descendants
+     */
+    private fun collectAllDescendants(node: KsonValue): List<KsonValue> {
+        val result = mutableListOf<KsonValue>()
+        result.add(node)  // Include current node for zero-level matching
+
+        when (node) {
+            is KsonObject -> {
+                for (property in node.propertyMap.values) {
+                    result.addAll(collectAllDescendants(property.propValue))
+                }
+            }
+            is KsonList -> {
+                for (element in node.elements) {
+                    result.addAll(collectAllDescendants(element))
+                }
+            }
+            else -> {
+                // Primitives have no descendants
+            }
+        }
+
+        return result
     }
 }

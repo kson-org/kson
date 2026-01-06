@@ -44,6 +44,13 @@ abstract class PointerParser(internal val pointerString: String) {
         data object Wildcard : Tokens()
 
         /**
+         * A recursive descent token that matches zero or more levels.
+         * Represented by a token that is exactly "**".
+         * Performs depth-first traversal to find matches at any depth.
+         */
+        data object RecursiveDescent : Tokens()
+
+        /**
          * A glob pattern token for matching keys.
          * @property pattern The glob pattern (may contain * and ?)
          */

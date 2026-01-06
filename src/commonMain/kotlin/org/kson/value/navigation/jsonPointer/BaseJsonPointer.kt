@@ -27,6 +27,7 @@ abstract class BaseJsonPointer(parser: PointerParser) {
      * This is a convenience property that converts tokens to their string representation:
      * - Literal -> the literal value
      * - Wildcard -> "*"
+     * - RecursiveDescent -> "**"
      * - GlobPattern -> the pattern string
      * Empty list for root pointer ("").
      */
@@ -35,6 +36,7 @@ abstract class BaseJsonPointer(parser: PointerParser) {
             when (it) {
                 is Tokens.Literal -> it.value
                 is Tokens.Wildcard -> "*"
+                is Tokens.RecursiveDescent -> "**"
                 is Tokens.GlobPattern -> it.pattern
             }
         }

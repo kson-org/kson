@@ -7,16 +7,19 @@ import org.kson.parser.messages.MessageType.*
  *
  * Extends RFC 6901 JSON Pointer with:
  * - Wildcard tokens: A token that is exactly `*` matches any single key or array index
- * - Glob patterns: A token containing `*` or `?` (but not only `*`) is treated as a pattern
+ * - Recursive descent: A token that is exactly `**` matches zero or more levels
+ * - Glob patterns: A token containing `*` or `?` (but not only `*` or `**`) is treated as a pattern
  * - Backslash escaping: `\*`, `\?`, `\\` for literal characters in patterns
  * - RFC 6901 escaping: `~0` (tilde), `~1` (slash) still supported for compatibility
  *
  * Examples (where STAR represents the asterisk character):
  * ```
- * /users/STAR/email          - Wildcard: matches email of any user
- * /users/STARadminSTAR/role  - Pattern: matches users with "admin" in key name
- * /config/\STAR value        - Literal: matches key named "STARvalue"
- * /path/to\\from             - Literal: matches key named "to\from"
+ * /users/STAR/email              - Wildcard: matches email of any user
+ * /users/STARSTAR/email          - Recursive descent: matches all emails at any depth under users
+ * /STARSTAR/email                - Recursive descent: matches all emails anywhere in document
+ * /users/STARadminSTAR/role      - Pattern: matches users with "admin" in key name
+ * /config/\STAR value            - Literal: matches key named "STARvalue"
+ * /path/to\\from                 - Literal: matches key named "to\from"
  * ```
  *
  * @param pointerString The JsonPointerGlob string to parse
@@ -41,6 +44,7 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
         val rawTokenBuilder = StringBuilder() // Unescaped content
         var hasWildcard = false
         var hasSingleCharWildcard = false
+        var hadGlobEscape = false // Track if we escaped any glob characters
 
         // Collect all characters until next '/' or EOF
         while (!scanner.eof() && scanner.peek() != PATH_SEPARATOR) {
@@ -65,6 +69,10 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
             when (val backslashResult = PointerEscapeHandler.handleBackslashEscape(scanner)) {
                 is PointerEscapeHandler.EscapeResult.Success -> {
                     rawTokenBuilder.append(backslashResult.char)
+                    // If we escaped a glob character, mark it
+                    if (backslashResult.char == '*' || backslashResult.char == '?') {
+                        hadGlobEscape = true
+                    }
                     continue
                 }
                 is PointerEscapeHandler.EscapeResult.Failure -> {
@@ -103,11 +111,13 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
         val rawToken = rawTokenBuilder.toString()
 
         // Determine token type:
-        // 1. If token is exactly "*" -> Wildcard
-        // 2. If token contains * or ? -> GlobPattern
-        // 3. Otherwise -> Literal
+        // 1. If token is exactly "**" AND not from escapes -> RecursiveDescent
+        // 2. If token is exactly "*" AND not from escapes -> Wildcard
+        // 3. If token contains * or ? -> GlobPattern
+        // 4. Otherwise -> Literal
         val parsedToken = when {
-            rawToken == "*" -> Tokens.Wildcard
+            !hadGlobEscape && rawToken == "**" -> Tokens.RecursiveDescent
+            !hadGlobEscape && rawToken == "*" -> Tokens.Wildcard
             hasWildcard || hasSingleCharWildcard -> Tokens.GlobPattern(rawToken)
             else -> Tokens.Literal(rawToken)
         }

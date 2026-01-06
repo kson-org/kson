@@ -242,4 +242,123 @@ class JsonPointerGlobParserTest {
         assertEquals(Tokens.Wildcard, result.tokens[1])
         assertEquals(Tokens.Literal("世界"), result.tokens[2])
     }
+
+    // RecursiveDescent token tests
+    @Test
+    fun `exact double asterisk is recursive descent token`() {
+        val result = JsonPointerGlobParser("/users/**/email").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(3, result.tokens.size)
+        assertEquals(Tokens.Literal("users"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+        assertEquals(Tokens.Literal("email"), result.tokens[2])
+    }
+
+    @Test
+    fun `recursive descent at beginning`() {
+        val result = JsonPointerGlobParser("/**/email").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.RecursiveDescent, result.tokens[0])
+        assertEquals(Tokens.Literal("email"), result.tokens[1])
+    }
+
+    @Test
+    fun `recursive descent at end`() {
+        val result = JsonPointerGlobParser("/config/**").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.Literal("config"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+    }
+
+    @Test
+    fun `only recursive descent`() {
+        val result = JsonPointerGlobParser("/**").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(1, result.tokens.size)
+        assertEquals(Tokens.RecursiveDescent, result.tokens[0])
+    }
+
+    @Test
+    fun `multiple recursive descent tokens`() {
+        val result = JsonPointerGlobParser("/a/**/b/**/c").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(5, result.tokens.size)
+        assertEquals(Tokens.Literal("a"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+        assertEquals(Tokens.Literal("b"), result.tokens[2])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[3])
+        assertEquals(Tokens.Literal("c"), result.tokens[4])
+    }
+
+    @Test
+    fun `recursive descent combined with wildcard`() {
+        val result = JsonPointerGlobParser("/data/**/items/*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(4, result.tokens.size)
+        assertEquals(Tokens.Literal("data"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+        assertEquals(Tokens.Literal("items"), result.tokens[2])
+        assertEquals(Tokens.Wildcard, result.tokens[3])
+    }
+
+    @Test
+    fun `recursive descent combined with pattern`() {
+        val result = JsonPointerGlobParser("/users/**/*admin*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(3, result.tokens.size)
+        assertEquals(Tokens.Literal("users"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+        assertEquals(Tokens.GlobPattern("*admin*"), result.tokens[2])
+    }
+
+    @Test
+    fun `escaped double asterisk is literal`() {
+        val result = JsonPointerGlobParser("/path/\\*\\*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.Literal("path"), result.tokens[0])
+        assertEquals(Tokens.Literal("**"), result.tokens[1])
+    }
+
+    @Test
+    fun `triple asterisk is a pattern not recursive descent`() {
+        val result = JsonPointerGlobParser("/path/***").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.Literal("path"), result.tokens[0])
+        assertEquals(Tokens.GlobPattern("***"), result.tokens[1])
+    }
+
+    @Test
+    fun `double asterisk with prefix is pattern`() {
+        val result = JsonPointerGlobParser("/path/test**").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.Literal("path"), result.tokens[0])
+        assertEquals(Tokens.GlobPattern("test**"), result.tokens[1])
+    }
+
+    @Test
+    fun `double asterisk with suffix is pattern`() {
+        val result = JsonPointerGlobParser("/path/**test").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(2, result.tokens.size)
+        assertEquals(Tokens.Literal("path"), result.tokens[0])
+        assertEquals(Tokens.GlobPattern("**test"), result.tokens[1])
+    }
+
+    @Test
+    fun `complex example with all token types`() {
+        val result = JsonPointerGlobParser("/api/**/v1/*/admin*/endpoints").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        assertEquals(6, result.tokens.size)
+        assertEquals(Tokens.Literal("api"), result.tokens[0])
+        assertEquals(Tokens.RecursiveDescent, result.tokens[1])
+        assertEquals(Tokens.Literal("v1"), result.tokens[2])
+        assertEquals(Tokens.Wildcard, result.tokens[3])
+        assertEquals(Tokens.GlobPattern("admin*"), result.tokens[4])
+        assertEquals(Tokens.Literal("endpoints"), result.tokens[5])
+    }
 }
