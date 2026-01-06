@@ -28,7 +28,7 @@ abstract class PointerParser(internal val pointerString: String) {
 
     /**
      * Represents a parsed token with its type.
-     * Shared by both JsonPointer (only Literal) and JsonPointerPlus (all types).
+     * Shared by both JsonPointer (only Literal) and JsonPointerGlob (all types).
      */
     sealed class Tokens {
         /**

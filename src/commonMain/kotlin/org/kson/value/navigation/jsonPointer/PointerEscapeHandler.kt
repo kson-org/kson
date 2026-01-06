@@ -5,7 +5,7 @@ import org.kson.parser.messages.MessageType.*
 
 /**
  * Handles escape sequence processing for JSON Pointer parsers.
- * Supports both RFC 6901 escape sequences and backslash escapes used in JsonPointerPlus.
+ * Supports both RFC 6901 escape sequences and backslash escapes used in JsonPointerGlob.
  */
 internal object PointerEscapeHandler {
     // Character constants

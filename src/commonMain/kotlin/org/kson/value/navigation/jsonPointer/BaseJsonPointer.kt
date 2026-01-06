@@ -5,7 +5,7 @@ import org.kson.value.navigation.jsonPointer.PointerParser.*
 /**
  * Abstract base class for JSON Pointer implementations.
  *
- * Provides common functionality for both JsonPointer (RFC 6901) and JsonPointerPlus (with wildcards/patterns).
+ * Provides common functionality for both JsonPointer (RFC 6901) and JsonPointerGlob (with wildcards/patterns).
  *
  * @property pointerString The pointer string representation
  */
@@ -48,7 +48,7 @@ abstract class BaseJsonPointer(parser: PointerParser) {
                 // Determine the pointer type name for error message
                 val pointerTypeName = when (parser) {
                     is JsonPointerParser -> "JSON Pointer"
-                    is JsonPointerPlusParser -> "JsonPointerPlus"
+                    is JsonPointerGlobParser -> "JsonPointerGlob"
                     else -> "pointer"
                 }
                 throw IllegalArgumentException(

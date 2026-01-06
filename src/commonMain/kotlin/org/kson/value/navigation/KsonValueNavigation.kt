@@ -3,7 +3,7 @@ package org.kson.value.navigation
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.value.navigation.jsonPointer.JsonPointer
-import org.kson.value.navigation.jsonPointer.JsonPointerPlus
+import org.kson.value.navigation.jsonPointer.JsonPointerGlob
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -71,9 +71,9 @@ object KsonValueNavigation {
     }
 
     /**
-     * Navigate through a [KsonValue] using a JsonPointerPlus (with wildcard and pattern support).
+     * Navigate through a [KsonValue] using a JsonPointerGlob (with wildcard and pattern support).
      *
-     * JsonPointerPlus extends JSON Pointer with:
+     * JsonPointerGlob extends JSON Pointer with:
      * - Wildcard tokens: `*` matches any single key or array index
      * - Glob patterns: tokens containing `*` or `?` match using glob-style patterns
      *
@@ -81,23 +81,23 @@ object KsonValueNavigation {
      * and patterns can match multiple keys/indices at each level.
      *
      * @param root The root node to start navigation from
-     * @param pointer The JsonPointerPlus to follow
+     * @param pointer The JsonPointerGlob to follow
      * @return List of all nodes matching the pointer (empty list if no matches)
      *
      * Example:
      * ```kotlin
      * // Match all user emails
-     * val pointer1 = JsonPointerPlus("/users/\*\/email")
-     * val emails = navigateWithJsonPointerPlus(root, pointer1)
+     * val pointer1 = JsonPointerGlob("/users/\*\/email")
+     * val emails = navigateWithJsonPointerGlob(root, pointer1)
      *
      * // Match roles for users with "admin" in their key
-     * val pointer2 = JsonPointerPlus("/users/\*admin*\/role")
-     * val adminRoles = navigateWithJsonPointerPlus(root, pointer2)
+     * val pointer2 = JsonPointerGlob("/users/\*admin*\/role")
+     * val adminRoles = navigateWithJsonPointerGlob(root, pointer2)
      * ```
      */
-    fun navigateWithJsonPointerPlus(
+    fun navigateWithJsonPointerGlob(
         root: KsonValue,
-        pointer: JsonPointerPlus
+        pointer: JsonPointerGlob
     ): List<KsonValue> {
         return navigateByParsedTokens(root, pointer.rawTokens)
     }
@@ -171,7 +171,7 @@ object KsonValueNavigation {
     }
 
     /**
-     * Navigate through a [KsonValue] using parsed tokens (JSON Pointer/JsonPointerPlus style).
+     * Navigate through a [KsonValue] using parsed tokens (JSON Pointer/JsonPointerGlob style).
      *
      * Supports three token types:
      * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.Literal]: Exact match

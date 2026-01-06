@@ -2,24 +2,24 @@ package org.kson.value.navigation
 
 import org.kson.value.navigation.jsonPointer.PointerParser
 import org.kson.value.navigation.jsonPointer.PointerParser.Tokens
-import org.kson.value.navigation.jsonPointer.JsonPointerPlusParser
+import org.kson.value.navigation.jsonPointer.JsonPointerGlobParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class JsonPointerPlusParserTest {
+class JsonPointerGlobParserTest {
 
     // Basic literal token tests
     @Test
     fun `root pointer has empty token list`() {
-        val result = JsonPointerPlusParser("").parse()
+        val result = JsonPointerGlobParser("").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertTrue(result.tokens.isEmpty())
     }
 
     @Test
     fun `simple literal property`() {
-        val result = JsonPointerPlusParser("/foo").parse()
+        val result = JsonPointerGlobParser("/foo").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         assertEquals(Tokens.Literal("foo"), result.tokens[0])
@@ -27,7 +27,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `nested literal properties`() {
-        val result = JsonPointerPlusParser("/users/john/email").parse()
+        val result = JsonPointerGlobParser("/users/john/email").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.Literal("users"), result.tokens[0])
@@ -38,7 +38,7 @@ class JsonPointerPlusParserTest {
     // Wildcard token tests
     @Test
     fun `exact asterisk is wildcard token`() {
-        val result = JsonPointerPlusParser("/users/*/email").parse()
+        val result = JsonPointerGlobParser("/users/*/email").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.Literal("users"), result.tokens[0])
@@ -48,7 +48,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `multiple wildcards`() {
-        val result = JsonPointerPlusParser("/*/*/value").parse()
+        val result = JsonPointerGlobParser("/*/*/value").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.Wildcard, result.tokens[0])
@@ -59,7 +59,7 @@ class JsonPointerPlusParserTest {
     // Glob pattern token tests
     @Test
     fun `prefix pattern with asterisk`() {
-        val result = JsonPointerPlusParser("/users/admin*/role").parse()
+        val result = JsonPointerGlobParser("/users/admin*/role").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.Literal("users"), result.tokens[0])
@@ -69,7 +69,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `suffix pattern with asterisk`() {
-        val result = JsonPointerPlusParser("/users/*admin/role").parse()
+        val result = JsonPointerGlobParser("/users/*admin/role").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.GlobPattern("*admin"), result.tokens[1])
@@ -77,14 +77,14 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `contains pattern with asterisk`() {
-        val result = JsonPointerPlusParser("/users/*admin*/role").parse()
+        val result = JsonPointerGlobParser("/users/*admin*/role").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(Tokens.GlobPattern("*admin*"), result.tokens[1])
     }
 
     @Test
     fun `pattern with question mark`() {
-        val result = JsonPointerPlusParser("/files/file?.txt").parse()
+        val result = JsonPointerGlobParser("/files/file?.txt").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal("files"), result.tokens[0])
@@ -93,7 +93,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `pattern with multiple wildcards`() {
-        val result = JsonPointerPlusParser("/data/*test*case?").parse()
+        val result = JsonPointerGlobParser("/data/*test*case?").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.GlobPattern("*test*case?"), result.tokens[1])
@@ -102,7 +102,7 @@ class JsonPointerPlusParserTest {
     // Backslash escape tests
     @Test
     fun `escaped asterisk is literal`() {
-        val result = JsonPointerPlusParser("/config/\\*value").parse()
+        val result = JsonPointerGlobParser("/config/\\*value").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal("config"), result.tokens[0])
@@ -111,7 +111,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `escaped question mark is literal`() {
-        val result = JsonPointerPlusParser("/what/\\?").parse()
+        val result = JsonPointerGlobParser("/what/\\?").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal("?"), result.tokens[1])
@@ -119,7 +119,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `escaped backslash is literal`() {
-        val result = JsonPointerPlusParser("/path/to\\\\from").parse()
+        val result = JsonPointerGlobParser("/path/to\\\\from").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal("to\\from"), result.tokens[1])
@@ -127,7 +127,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `mixed escaped and unescaped wildcards`() {
-        val result = JsonPointerPlusParser("/prefix\\*suffix*").parse()
+        val result = JsonPointerGlobParser("/prefix\\*suffix*").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         // Should be a pattern because it contains unescaped *
@@ -136,7 +136,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `all wildcards escaped becomes literal`() {
-        val result = JsonPointerPlusParser("/\\*\\?\\*").parse()
+        val result = JsonPointerGlobParser("/\\*\\?\\*").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         assertEquals(Tokens.Literal("*?*"), result.tokens[0])
@@ -145,7 +145,7 @@ class JsonPointerPlusParserTest {
     // RFC 6901 escape compatibility tests
     @Test
     fun `RFC 6901 tilde escape still works`() {
-        val result = JsonPointerPlusParser("/m~0n").parse()
+        val result = JsonPointerGlobParser("/m~0n").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         assertEquals(Tokens.Literal("m~n"), result.tokens[0])
@@ -153,7 +153,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `RFC 6901 slash escape still works`() {
-        val result = JsonPointerPlusParser("/a~1b").parse()
+        val result = JsonPointerGlobParser("/a~1b").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         assertEquals(Tokens.Literal("a/b"), result.tokens[0])
@@ -161,7 +161,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `mixed RFC 6901 and backslash escapes`() {
-        val result = JsonPointerPlusParser("/a~1b/c\\*d").parse()
+        val result = JsonPointerGlobParser("/a~1b/c\\*d").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal("a/b"), result.tokens[0])
@@ -171,7 +171,7 @@ class JsonPointerPlusParserTest {
     // Empty token tests
     @Test
     fun `empty tokens are allowed`() {
-        val result = JsonPointerPlusParser("//").parse()
+        val result = JsonPointerGlobParser("//").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(2, result.tokens.size)
         assertEquals(Tokens.Literal(""), result.tokens[0])
@@ -181,38 +181,38 @@ class JsonPointerPlusParserTest {
     // Error cases
     @Test
     fun `invalid start without leading slash`() {
-        val result = JsonPointerPlusParser("foo/bar").parse()
+        val result = JsonPointerGlobParser("foo/bar").parse()
         assertTrue(result is PointerParser.ParseResult.Error)
     }
 
     @Test
     fun `incomplete RFC escape at end`() {
-        val result = JsonPointerPlusParser("/foo~").parse()
+        val result = JsonPointerGlobParser("/foo~").parse()
         assertTrue(result is PointerParser.ParseResult.Error)
     }
 
     @Test
     fun `incomplete backslash escape at end`() {
-        val result = JsonPointerPlusParser("/foo\\").parse()
+        val result = JsonPointerGlobParser("/foo\\").parse()
         assertTrue(result is PointerParser.ParseResult.Error)
     }
 
     @Test
     fun `invalid RFC escape sequence`() {
-        val result = JsonPointerPlusParser("/foo~2bar").parse()
+        val result = JsonPointerGlobParser("/foo~2bar").parse()
         assertTrue(result is PointerParser.ParseResult.Error)
     }
 
     @Test
     fun `invalid backslash escape sequence`() {
-        val result = JsonPointerPlusParser("/foo\\x").parse()
+        val result = JsonPointerGlobParser("/foo\\x").parse()
         assertTrue(result is PointerParser.ParseResult.Error)
     }
 
     // Complex real-world examples
     @Test
     fun `complex example with mixed token types`() {
-        val result = JsonPointerPlusParser("/users/*/roles/*admin*/permissions").parse()
+        val result = JsonPointerGlobParser("/users/*/roles/*admin*/permissions").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(5, result.tokens.size)
         assertEquals(Tokens.Literal("users"), result.tokens[0])
@@ -224,7 +224,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `complex example with escapes and patterns`() {
-        val result = JsonPointerPlusParser("/config/\\*special/prefix*/normal").parse()
+        val result = JsonPointerGlobParser("/config/\\*special/prefix*/normal").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(4, result.tokens.size)
         assertEquals(Tokens.Literal("config"), result.tokens[0])
@@ -235,7 +235,7 @@ class JsonPointerPlusParserTest {
 
     @Test
     fun `unicode characters in tokens`() {
-        val result = JsonPointerPlusParser("/你好/*/世界").parse()
+        val result = JsonPointerGlobParser("/你好/*/世界").parse()
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(3, result.tokens.size)
         assertEquals(Tokens.Literal("你好"), result.tokens[0])

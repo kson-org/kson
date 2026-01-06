@@ -1,9 +1,9 @@
 package org.kson.value.navigation.jsonPointer
 
 /**
- * Represents a validated JsonPointerPlus - an extension of JSON Pointer with glob-style pattern matching.
+ * Represents a validated JsonPointerGlob - an extension of JSON Pointer with glob-style pattern matching.
  *
- * JsonPointerPlus extends RFC 6901 JSON Pointer with:
+ * JsonPointerGlob extends RFC 6901 JSON Pointer with:
  * - Wildcard tokens: A token that is exactly `*` matches any single key or array index
  * - Glob patterns: A token containing `*` or `?` (but not only `*`) is treated as a pattern
  * - Backslash escaping: `\*`, `\?`, `\\` for literal characters in patterns
@@ -11,41 +11,41 @@ package org.kson.value.navigation.jsonPointer
  *
  * Examples (STAR represents asterisk):
  * ```kotlin
- * val pointer1 = JsonPointerPlus("")                      // Root document
- * val pointer2 = JsonPointerPlus("/users/STAR/email")     // Email of any user (wildcard)
- * val pointer3 = JsonPointerPlus("/users/STARadminSTAR/role") // Role of users with "admin" in name (pattern)
- * val pointer4 = JsonPointerPlus("/config/\\STARvalue")   // Property "STARvalue" (escaped)
- * val pointer5 = JsonPointerPlus("/path/to\\\\from")      // Property "to\from" (escaped backslash)
+ * val pointer1 = JsonPointerGlob("")                      // Root document
+ * val pointer2 = JsonPointerGlob("/users/STAR/email")     // Email of any user (wildcard)
+ * val pointer3 = JsonPointerGlob("/users/STARadminSTAR/role") // Role of users with "admin" in name (pattern)
+ * val pointer4 = JsonPointerGlob("/config/\\STARvalue")   // Property "STARvalue" (escaped)
+ * val pointer5 = JsonPointerGlob("/path/to\\\\from")      // Property "to\from" (escaped backslash)
  * ```
  *
- * @property pointerString The JsonPointerPlus string (must be valid)
+ * @property pointerString The JsonPointerGlob string (must be valid)
  * @throws IllegalArgumentException if the pointer string is invalid
  */
-class JsonPointerPlus(pointerString: String) : BaseJsonPointer(JsonPointerPlusParser(pointerString)) {
+class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
 
     companion object {
-        val ROOT = JsonPointerPlus("")
+        val ROOT = JsonPointerGlob("")
 
         /**
-         * Creates a JsonPointerPlus from a list of string tokens.
+         * Creates a JsonPointerGlob from a list of string tokens.
          *
          * String tokens are interpreted as follows:
          * - Exactly "*" becomes a Wildcard token
          * - Strings containing unescaped * or ? become GlobPattern tokens
          * - All other strings become Literal tokens
          *
-         * Special characters will be properly escaped according to JsonPointerPlus rules.
+         * Special characters will be properly escaped according to JsonPointerGlob rules.
          *
-         * @param tokens The reference tokens (as strings) to encode into a JsonPointerPlus
-         * @return A JsonPointerPlus representing the token path
+         * @param tokens The reference tokens (as strings) to encode into a JsonPointerGlob
+         * @return A JsonPointerGlob representing the token path
          *
          * Example:
          * ```kotlin
-         * val pointer = JsonPointerPlus.fromTokens(listOf("users", "*", "email"))
+         * val pointer = JsonPointerGlob.fromTokens(listOf("users", "*", "email"))
          * // Result: /users + / + * + / + email
          * ```
          */
-        fun fromTokens(tokens: List<String>): JsonPointerPlus {
+        fun fromTokens(tokens: List<String>): JsonPointerGlob {
             if (tokens.isEmpty()) {
                 return ROOT
             }
@@ -69,7 +69,7 @@ class JsonPointerPlus(pointerString: String) : BaseJsonPointer(JsonPointerPlusPa
                     .replace("~", "~0")
                     .replace("/", "~1")
             }
-            return JsonPointerPlus(pointerString)
+            return JsonPointerGlob(pointerString)
         }
     }
 }

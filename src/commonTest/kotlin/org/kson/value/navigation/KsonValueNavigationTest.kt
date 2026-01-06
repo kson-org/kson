@@ -3,7 +3,7 @@ package org.kson.value.navigation
 import org.kson.KsonCore
 import org.kson.value.KsonString
 import org.kson.value.navigation.jsonPointer.JsonPointer
-import org.kson.value.navigation.jsonPointer.JsonPointerPlus
+import org.kson.value.navigation.jsonPointer.JsonPointerGlob
 import org.kson.value.KsonValue
 import kotlin.test.*
 
@@ -183,16 +183,16 @@ class KsonValueNavigationTest {
     }
 
     // ========================================
-    // Tests for navigateWithJsonPointerPlus() - Wildcard and Pattern Matching
+    // Tests for navigateWithJsonPointerGlob() - Wildcard and Pattern Matching
     // ========================================
 
     /**
-     * Helper to test navigation with JsonPointerPlus using multiple <match></match> markers.
+     * Helper to test navigation with JsonPointerGlob using multiple <match></match> markers.
      * Each matched value should be wrapped in <match></match> tags.
      */
-    private fun assertJsonPointerPlusNavigation(
+    private fun assertJsonPointerGlobNavigation(
         documentWithMatches: String,
-        pointer: JsonPointerPlus
+        pointer: JsonPointerGlob
     ) {
         // Remove markers to get the actual document
         val matchMarker = "<match>"
@@ -201,7 +201,7 @@ class KsonValueNavigationTest {
 
         // Parse and navigate
         val ksonValue = KsonCore.parseToAst(document).ksonValue!!
-        val results = KsonValueNavigation.navigateWithJsonPointerPlus(ksonValue, pointer)
+        val results = KsonValueNavigation.navigateWithJsonPointerGlob(ksonValue, pointer)
 
         // Build actual document with markers at the results' locations
         val actualDocumentWithMarkers = insertMatchMarkers(document, results)
@@ -250,8 +250,8 @@ class KsonValueNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus matches all object properties with wildcard`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob matches all object properties with wildcard`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 users:
                   alice:
@@ -264,26 +264,26 @@ class KsonValueNavigationTest {
                     email: '<match>charlie@example.com</match>'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/users/*/email")
+            pointer = JsonPointerGlob("/users/*/email")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus matches all array elements with wildcard`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob matches all array elements with wildcard`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 hobbies:
                   - '<match>reading</match>'
                   - '<match>coding</match>'
                   - '<match>hiking</match>'
             """.trimIndent(),
-            pointer = JsonPointerPlus("/hobbies/*")
+            pointer = JsonPointerGlob("/hobbies/*")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus matches pattern in object keys`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob matches pattern in object keys`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 users:
                   admin1:
@@ -299,13 +299,13 @@ class KsonValueNavigationTest {
                     role: 'guest'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/users/*admin*/role")
+            pointer = JsonPointerGlob("/users/*admin*/role")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus matches pattern with question mark wildcard`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob matches pattern with question mark wildcard`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 items:
                   item1: '<match>first</match>'
@@ -314,26 +314,26 @@ class KsonValueNavigationTest {
                   item10: 'tenth'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/items/item?")
+            pointer = JsonPointerGlob("/items/item?")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus returns empty list for no matches`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob returns empty list for no matches`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 users:
                   alice: 'Alice'
                   bob: 'Bob'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/users/*admin*")
+            pointer = JsonPointerGlob("/users/*admin*")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus handles nested wildcards`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob handles nested wildcards`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 departments:
                   engineering:
@@ -348,13 +348,13 @@ class KsonValueNavigationTest {
                       skills: ['negotiation']
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/departments/*/*/name")
+            pointer = JsonPointerGlob("/departments/*/*/name")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus handles combination of literal and wildcard`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob handles combination of literal and wildcard`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 users:
                   - name: 'Alice'
@@ -363,23 +363,23 @@ class KsonValueNavigationTest {
                     email: '<match>bob@example.com</match>'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/users/*/email")
+            pointer = JsonPointerGlob("/users/*/email")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus returns root for empty pointer`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob returns root for empty pointer`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 <match>name: 'test'</match>
             """.trimIndent(),
-            pointer = JsonPointerPlus("")
+            pointer = JsonPointerGlob("")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus handles exact wildcard token`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob handles exact wildcard token`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 data:
                   a: '<match>first</match>'
@@ -387,17 +387,17 @@ class KsonValueNavigationTest {
                   c: '<match>third</match>'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/data/*")
+            pointer = JsonPointerGlob("/data/*")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus wildcard on primitive returns empty`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob wildcard on primitive returns empty`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 value: 'test'
             """.trimIndent(),
-            pointer = JsonPointerPlus("/value/*")
+            pointer = JsonPointerGlob("/value/*")
         )
     }
 
@@ -428,8 +428,8 @@ class KsonValueNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus pattern on array indices`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob pattern on array indices`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 items:
                   - '<match>item0</match>'
@@ -444,13 +444,13 @@ class KsonValueNavigationTest {
                   - '<match>item9</match>'
                   - 'item10'
             """.trimIndent(),
-            pointer = JsonPointerPlus("/items/?")
+            pointer = JsonPointerGlob("/items/?")
         )
     }
 
     @Test
-    fun `navigateWithJsonPointerPlus handles complex real-world scenario`() {
-        assertJsonPointerPlusNavigation(
+    fun `navigateWithJsonPointerGlob handles complex real-world scenario`() {
+        assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 api:
                   v1:
@@ -467,7 +467,7 @@ class KsonValueNavigationTest {
                         endpoint: '<match>/api/v1/admin/products</match>'
                 .
             """.trimIndent(),
-            pointer = JsonPointerPlus("/api/v1/*/admin_panel/endpoint")
+            pointer = JsonPointerGlob("/api/v1/*/admin_panel/endpoint")
         )
     }
 

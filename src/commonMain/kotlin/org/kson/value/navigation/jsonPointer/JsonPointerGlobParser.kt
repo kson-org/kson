@@ -3,7 +3,7 @@ package org.kson.value.navigation.jsonPointer
 import org.kson.parser.messages.MessageType.*
 
 /**
- * Parser for JsonPointerPlus - an extension of JSON Pointer with glob-style pattern matching.
+ * Parser for JsonPointerGlob - an extension of JSON Pointer with glob-style pattern matching.
  *
  * Extends RFC 6901 JSON Pointer with:
  * - Wildcard tokens: A token that is exactly `*` matches any single key or array index
@@ -19,9 +19,9 @@ import org.kson.parser.messages.MessageType.*
  * /path/to\\from             - Literal: matches key named "to\from"
  * ```
  *
- * @param pointerString The JsonPointerPlus string to parse
+ * @param pointerString The JsonPointerGlob string to parse
  */
-class JsonPointerPlusParser(pointerString: String) : PointerParser(pointerString) {
+class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString) {
 
     companion object {
         // Character constants

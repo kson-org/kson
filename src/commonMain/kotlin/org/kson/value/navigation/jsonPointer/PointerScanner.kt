@@ -2,7 +2,7 @@ package org.kson.value.navigation.jsonPointer
 
 /**
  * Scanner for character-by-character processing of pointer strings.
- * Used by both [JsonPointerParser] and [JsonPointerPlusParser].
+ * Used by both [JsonPointerParser] and [JsonPointerGlobParser].
  */
 class PointerScanner(private val source: String) {
     var currentIndex = 0
