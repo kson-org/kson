@@ -172,6 +172,82 @@ describe('FileSystemSchemaProvider', () => {
         });
     });
 
+    describe('isSchemaFile', () => {
+        it('should return false when no config', () => {
+            const workspace = createWorkspace();
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+
+            const result = provider.isSchemaFile(URI.file(path.join(workspace.fsPath, "schemas/test.json")).toString());
+
+            assert.strictEqual(result, false);
+        });
+
+        it('should return true for configured schema file', () => {
+            const workspace = createWorkspace();
+
+            writeConfig(workspace, {
+                schemas: [{fileMatch: ['*.kson'], schema: 'schemas/test.json'}]
+            });
+
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schemaUri = URI.file(path.join(workspace.fsPath, "schemas/test.json")).toString();
+
+            const result = provider.isSchemaFile(schemaUri);
+
+            assert.strictEqual(result, true);
+        });
+
+        it('should return false for non-schema files', () => {
+            const workspace = createWorkspace();
+
+            writeConfig(workspace, {
+                schemas: [{fileMatch: ['*.kson'], schema: 'schemas/test.json'}]
+            });
+
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const nonSchemaUri = URI.file(path.join(workspace.fsPath, "data.kson")).toString();
+
+            const result = provider.isSchemaFile(nonSchemaUri);
+
+            assert.strictEqual(result, false);
+        });
+
+        it('should handle multiple schema files', () => {
+            const workspace = createWorkspace();
+
+            writeConfig(workspace, {
+                schemas: [
+                    {fileMatch: ['config/*.kson'], schema: 'schemas/config.json'},
+                    {fileMatch: ['data/*.kson'], schema: 'schemas/data.json'}
+                ]
+            });
+
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const configSchemaUri = URI.file(path.join(workspace.fsPath, "schemas/config.json")).toString();
+            const dataSchemaUri = URI.file(path.join(workspace.fsPath, "schemas/data.json")).toString();
+
+            assert.strictEqual(provider.isSchemaFile(configSchemaUri), true);
+            assert.strictEqual(provider.isSchemaFile(dataSchemaUri), true);
+        });
+
+        it('should normalize path separators on Windows', () => {
+            const workspace = createWorkspace();
+
+            writeConfig(workspace, {
+                schemas: [{fileMatch: ['*.kson'], schema: 'schemas/test.json'}]
+            });
+
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            // Create URI with backslashes (Windows-style)
+            const schemaPath = path.join(workspace.fsPath, "schemas", "test.json");
+            const schemaUri = URI.file(schemaPath).toString();
+
+            const result = provider.isSchemaFile(schemaUri);
+
+            assert.strictEqual(result, true);
+        });
+    });
+
     describe('reload', () => {
         it('should reload configuration from disk', () => {
             const workspace = createWorkspace();

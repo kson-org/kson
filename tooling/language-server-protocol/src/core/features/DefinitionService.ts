@@ -17,48 +17,58 @@ export class DefinitionService {
      * @param position The position of the symbol
      * @returns Array of DefinitionLink objects, or null if no definition found
      */
-    getDefinition(document: KsonDocument, position: Position): DefinitionLink[] | null {
+    getDefinition(document: KsonDocument, position: Position): DefinitionLink[] {
+        const tooling = KsonTooling.getInstance();
+
         // Get the schema for this document
         const schemaDocument = document.getSchemaDocument();
-        if (!schemaDocument) {
-            // No schema configured, no definition available
-            return null;
+
+        // Try document-to-schema navigation first (if schema is configured)
+        if (schemaDocument) {
+            const locations = tooling.getSchemaLocationAtLocation(
+                document.getText(),
+                schemaDocument.getText(),
+                position.line,
+                position.character
+            );
+            return this.convertRangesToDefinitionLinks(locations, schemaDocument.uri);
         }
 
-        // Call the KsonTooling API to get the definition location in the schema
-        const tooling = KsonTooling.getInstance();
-        const location = tooling.getSchemaLocationAtLocation(
+        // Try schema $ref resolution (within the same document)
+        // This handles the case where we're editing a schema file and want to jump to internal refs
+        const refLocations = tooling.resolveRefAtLocation(
             document.getText(),
-            schemaDocument.getText(),
             position.line,
             position.character
         );
+        return this.convertRangesToDefinitionLinks(refLocations, document.uri);
+    }
 
-        if (!location) {
-            // No definition found at this position
-            return null;
-        }
-
-        // Convert the location from kson-tooling-lib to LSP DefinitionLink format
-        const targetRange: Range = {
-            start: {
-                line: location.startLine,
-                character: location.startColumn
-            },
-            end: {
-                line: location.endLine,
-                character: location.startColumn
+    /**
+     * Convert Range objects to DefinitionLink objects.
+     *
+     * @param locations The Range objects from KsonTooling
+     * @param targetUri The URI of the document containing the definitions
+     * @returns Array of DefinitionLink objects
+     */
+    private convertRangesToDefinitionLinks(locations: any, targetUri: string): DefinitionLink[] {
+        return locations.asJsReadonlyArrayView().map((location: any) => {
+            const targetRange: Range = {
+                start: {
+                    line: location.startLine,
+                    character: location.startColumn
+                },
+                end: {
+                    line: location.endLine,
+                    character: location.endColumn
+                }
+            };
+            const definition: DefinitionLink = {
+                targetUri: targetUri,
+                targetRange: targetRange,
+                targetSelectionRange: targetRange
             }
-        };
-
-        // Return as an array of DefinitionLink
-        // We use the same range for both targetRange and targetSelectionRange
-        // targetRange is the full range of the definition
-        // targetSelectionRange is the range of the identifier within the definition
-        return [{
-            targetUri: schemaDocument.uri,
-            targetRange: targetRange,
-            targetSelectionRange: targetRange
-        }];
+            return definition;
+        });
     }
 }

@@ -2,13 +2,14 @@ package org.kson.value
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.schema.JsonPointer
 
 /**
  * Result of navigating to a location in a KSON document.
  * Contains both the target node and the path from root to that node.
  *
  * @param targetNode The most specific KsonValue at the target location
- * @param pathFromRoot List of property names/array indices from root to target
+ * @param pointerFromRoot [JsonPointer] from root to target
  *
  * Example:
  * ```kotlin
@@ -22,7 +23,7 @@ import org.kson.parser.Location
  */
 data class LocationNavigationResult(
     val targetNode: KsonValue,
-    val pathFromRoot: List<String>
+    val pointerFromRoot: JsonPointer,
 )
 
 /**
@@ -39,6 +40,29 @@ data class LocationNavigationResult(
  */
 object KsonValueNavigation {
     /**
+     * Navigate through a [KsonValue] using a JSON Pointer.
+     *
+     * JSON Pointers provide a standard way to reference specific values within a JSON document.
+     * See [org.kson.schema.JsonPointer] and RFC 6901 for details.
+     *
+     * @param root The root node to start navigation from
+     * @param pointer The JSON Pointer to follow
+     * @return The node at the end of the path, or null if navigation fails
+     *
+     * Example:
+     * ```kotlin
+     * val pointer = JsonPointer("/users/0/name")
+     * val node = navigateWithJsonPointer(root, pointer)
+     * ```
+     */
+    fun navigateWithJsonPointer(
+        root: KsonValue,
+        pointer: JsonPointer
+    ): KsonValue? {
+        return navigateByTokens(root, pointer.tokens)
+    }
+
+    /**
      * Navigate through a [KsonValue] using string tokens (JSON Pointer style).
      *
      * Each token represents one navigation step:
@@ -48,14 +72,8 @@ object KsonValueNavigation {
      * @param root The root node to start navigation from
      * @param tokens The path segments to follow
      * @return The node at the end of the path, or null if navigation fails
-     *
-     * Example:
-     * ```kotlin
-     * // Navigate to myObj.users[0].name
-     * val node = navigateByTokens(root, listOf("users", "0", "name"))
-     * ```
      */
-    fun navigateByTokens(
+    private fun navigateByTokens(
         root: KsonValue,
         tokens: List<String>
     ): KsonValue? {
@@ -89,7 +107,7 @@ object KsonValueNavigation {
      *
      * @param root The root node to start navigation from
      * @param targetLocation The coordinates to find a node at
-     * @param currentPath The path accumulated during recursion (used internally)
+     * @param currentPointer The [JsonPointer] accumulated during recursion (used internally)
      * @return Result containing the target node and path, or null if not found
      *
      * Example:
@@ -104,7 +122,7 @@ object KsonValueNavigation {
     fun navigateToLocationWithPath(
         root: KsonValue,
         targetLocation: Coordinates,
-        currentPath: List<String> = emptyList()
+        currentPointer: JsonPointer = JsonPointer.ROOT
     ): LocationNavigationResult? {
         // If target location is not within this node's bounds, return null
         if (!Location.containsCoordinates(root.location, targetLocation)) {
@@ -118,7 +136,7 @@ object KsonValueNavigation {
                     val childResult = navigateToLocationWithPath(
                         property.propValue,
                         targetLocation,
-                        currentPath + key
+                        JsonPointer.fromTokens(currentPointer.tokens + key)
                     )
                     if (childResult != null) {
                         return childResult  // Found a more specific child
@@ -131,7 +149,7 @@ object KsonValueNavigation {
                     val childResult = navigateToLocationWithPath(
                         element,
                         targetLocation,
-                        currentPath + index.toString()
+                        JsonPointer.fromTokens(currentPointer.tokens + index.toString())
                     )
                     if (childResult != null) {
                         return childResult  // Found a more specific child
@@ -145,6 +163,6 @@ object KsonValueNavigation {
         }
 
         // No child was more specific, so this node is the target
-        return LocationNavigationResult(root, currentPath)
+        return LocationNavigationResult(root, currentPointer)
     }
 }

@@ -7,19 +7,18 @@ import org.kson.value.KsonString as InternalKsonString
 import org.kson.value.KsonBoolean as InternalKsonBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+
 
 class SchemaNavigationTest {
 
     /**
-     * Helper to navigate schema and get the result value
+     * Helper to navigate schema and get all result values
      */
-    private fun navigateSchema(schema: String, path: List<String>): InternalKsonValue? {
-        val resolved = KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaIdLookup(it).navigateByDocumentPath(path)
-        }
-        return resolved?.resolvedValue
+    private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
+        return KsonCore.parseToAst(schema).ksonValue?.let {
+            SchemaIdLookup(it).navigateByDocumentPointer(JsonPointer.fromTokens(path))
+                .map { it.resolvedValue }
+        } ?: emptyList()
     }
 
     @Test
@@ -33,9 +32,9 @@ class SchemaNavigationTest {
             }
         """
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue!!
-        val result = navigateSchema(schema, emptyList())
-        assertNotNull(result)
-        assertEquals(parsedSchema, result )
+        val results = navigateSchema(schema, emptyList())
+        assertEquals(1, results.size, "Expected exactly one result for empty path")
+        assertEquals(parsedSchema, results.single())
     }
 
     @Test
@@ -52,11 +51,11 @@ class SchemaNavigationTest {
             }
         """
 
-        val result = navigateSchema(schema, listOf("name"))
-        assertNotNull(result)
+        val results = navigateSchema(schema, listOf("name"))
+        assertEquals(1, results.size, "Expected exactly one result")
 
         // Verify we got the correct schema node
-        val nameSchema = result as InternalKsonObject
+        val nameSchema = results.single() as InternalKsonObject
         assertEquals("string", (nameSchema.propertyLookup["type"] as? InternalKsonString)?.value)
         assertEquals("The name property", (nameSchema.propertyLookup["description"] as? InternalKsonString)?.value)
     }
@@ -80,10 +79,10 @@ class SchemaNavigationTest {
             }
         """
 
-        val result = navigateSchema(schema, listOf("user", "name"))
-        assertNotNull(result)
+        val results = navigateSchema(schema, listOf("user", "name"))
+        assertEquals(1, results.size, "Expected exactly one result")
 
-        val nameSchema = result as InternalKsonObject
+        val nameSchema = results.single() as InternalKsonObject
         assertEquals("string", (nameSchema.propertyLookup["type"] as? InternalKsonString)?.value)
         assertEquals("User name", (nameSchema.propertyLookup["description"] as? InternalKsonString)?.value)
     }
@@ -108,19 +107,19 @@ class SchemaNavigationTest {
         """
 
         // Navigate to users[0] - should give us the items schema
-        val itemSchema = navigateSchema(schema, listOf("users", "0"))
-        assertNotNull(itemSchema)
+        val itemResults = navigateSchema(schema, listOf("users", "0"))
+        assertEquals(1, itemResults.size)
         assertEquals(
             "object",
-            ((itemSchema as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
         )
 
         // Navigate deeper: users[0].name
-        val nameSchema = navigateSchema(schema, listOf("users", "0", "name"))
-        assertNotNull(nameSchema)
+        val nameResults = navigateSchema(schema, listOf("users", "0", "name"))
+        assertEquals(1, nameResults.size)
         assertEquals(
             "string",
-            ((nameSchema as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
         )
     }
 
@@ -143,14 +142,14 @@ class SchemaNavigationTest {
         val item5 = navigateSchema(schema, listOf("tags", "5"))
         val item99 = navigateSchema(schema, listOf("tags", "99"))
 
-        assertNotNull(item0)
-        assertNotNull(item5)
-        assertNotNull(item99)
+        assertEquals(1, item0.size)
+        assertEquals(1, item5.size)
+        assertEquals(1, item99.size)
 
         // They should all be the same schema (type: string)
-        assertEquals("string", ((item0 as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
-        assertEquals("string", ((item5 as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
-        assertEquals("string", ((item99 as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("string", ((item0.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("string", ((item5.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("string", ((item99.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -170,19 +169,20 @@ class SchemaNavigationTest {
 
         // Known property should use the specific schema
         val knownProp = navigateSchema(schema, listOf("knownProp"))
-        assertNotNull(knownProp)
-        assertEquals("string", ((knownProp as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals(1, knownProp.size)
+        assertEquals("string", ((knownProp.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
 
         // Unknown property should use additionalProperties
         val unknownProp = navigateSchema(schema, listOf("unknownProp"))
-        assertNotNull(unknownProp)
+        assertEquals(1, unknownProp.size)
+        val unknownPropSchema = unknownProp.single() as InternalKsonObject
         assertEquals(
             "number",
-            ((unknownProp as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            (unknownPropSchema.propertyLookup["type"] as? InternalKsonString)?.value
         )
         assertEquals(
             "Any other property is a number",
-            (unknownProp.propertyLookup["description"] as? InternalKsonString)?.value
+            (unknownPropSchema.propertyLookup["description"] as? InternalKsonString)?.value
         )
     }
 
@@ -206,15 +206,17 @@ class SchemaNavigationTest {
 
         // Property matching age_ pattern
         val ageProp = navigateSchema(schema, listOf("age_child"))
-        assertNotNull(ageProp)
-        assertEquals("integer", ((ageProp as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
-        assertEquals("Age fields", (ageProp.propertyLookup["description"] as? InternalKsonString)?.value)
+        assertEquals(1, ageProp.size)
+        val agePropSchema = ageProp.single() as InternalKsonObject
+        assertEquals("integer", (agePropSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("Age fields", (agePropSchema.propertyLookup["description"] as? InternalKsonString)?.value)
 
         // Property matching name_ pattern
         val nameProp = navigateSchema(schema, listOf("name_first"))
-        assertNotNull(nameProp)
-        assertEquals("string", ((nameProp as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
-        assertEquals("Name fields", (nameProp.propertyLookup["description"] as? InternalKsonString)?.value)
+        assertEquals(1, nameProp.size)
+        val namePropSchema = nameProp.single() as InternalKsonObject
+        assertEquals("string", (namePropSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("Name fields", (namePropSchema.propertyLookup["description"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -230,10 +232,10 @@ class SchemaNavigationTest {
         """
 
         // Non-existent property with additionalProperties: false
-        val result = navigateSchema(schema, listOf("nonexistent"))
+        val results = navigateSchema(schema, listOf("nonexistent"))
         // Should return the additionalProperties value (false as KsonBoolean)
-        assertNotNull(result)
-        assertEquals(false, (result as? InternalKsonBoolean)?.value)
+        assertEquals(1, results.size)
+        assertEquals(false, (results.single() as? InternalKsonBoolean)?.value)
     }
 
     @Test
@@ -248,8 +250,8 @@ class SchemaNavigationTest {
         """
 
         // Try to navigate deeper into a primitive type
-        val result = navigateSchema(schema, listOf("name", "invalid", "path"))
-        assertNull(result)
+        val results = navigateSchema(schema, listOf("name", "invalid", "path"))
+        assertEquals(0, results.size, "Expected empty list for invalid path")
     }
 
     @Test
@@ -289,10 +291,10 @@ class SchemaNavigationTest {
 
         // Navigate: company.departments[0].employees[0].name
         val path = listOf("company", "departments", "0", "employees", "0", "name")
-        val result = navigateSchema(schema, path)
-        assertNotNull(result)
+        val results = navigateSchema(schema, path)
+        assertEquals(1, results.size)
 
-        val nameSchema = result as InternalKsonObject
+        val nameSchema = results.single() as InternalKsonObject
         assertEquals("string", (nameSchema.propertyLookup["type"] as? InternalKsonString)?.value)
         assertEquals("Employee name", (nameSchema.propertyLookup["description"] as? InternalKsonString)?.value)
     }
@@ -312,14 +314,14 @@ class SchemaNavigationTest {
             }
         """
 
-        val result = navigateSchema(schema, listOf("name"))
-        assertNotNull(result)
+        val results = navigateSchema(schema, listOf("name"))
+        assertEquals(1, results.size)
 
         // The base URI should be updated based on the $id
         // (This tests the URI tracking functionality)
         assertEquals(
             "string",
-            ((result as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
         )
     }
 
@@ -332,9 +334,9 @@ class SchemaNavigationTest {
         """
 
         // Try to navigate to a property when none are defined
-        val result = navigateSchema(schema, listOf("anyProp"))
-        // Should return null since there's no properties or additionalProperties
-        assertNull(result)
+        val results = navigateSchema(schema, listOf("anyProp"))
+        // Should return empty list since there's no properties or additionalProperties
+        assertEquals(0, results.size)
     }
 
     @Test
@@ -355,9 +357,9 @@ class SchemaNavigationTest {
         """
 
         // Navigate to tuple array items - should use additionalItems
-        val result = navigateSchema(schema, listOf("tuple", "0"))
-        assertNotNull(result)
-        assertEquals("boolean", ((result as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        val results = navigateSchema(schema, listOf("tuple", "0"))
+        assertEquals(1, results.size)
+        assertEquals("boolean", ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -375,16 +377,254 @@ class SchemaNavigationTest {
         """
 
         // Should skip the invalid pattern and use additionalProperties
-        val result = navigateSchema(schema, listOf("someProp"))
-        assertNotNull(result)
-        assertEquals("boolean", ((result as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        val results = navigateSchema(schema, listOf("someProp"))
+        assertEquals(1, results.size)
+        assertEquals("boolean", ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
 
         // Valid pattern should still work
-        val validResult = navigateSchema(schema, listOf("valid_prop"))
-        assertNotNull(validResult)
+        val validResults = navigateSchema(schema, listOf("valid_prop"))
+        assertEquals(1, validResults.size)
         assertEquals(
             "number",
-            ((validResult as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((validResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
         )
+    }
+
+    @Test
+    fun testNavigateAnyOf() {
+        val schema = """
+            {
+                type: "object"
+                anyOf:
+                  - properties:
+                      name: { type: "string" }
+                  - properties:
+                      age: { type: "number" }
+            }
+        """
+
+        // name is defined in first anyOf branch
+        val nameResults = navigateSchema(schema, listOf("name"))
+        assertEquals(1, nameResults.size)
+        assertEquals("string", ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // age is defined in second anyOf branch
+        val ageResults = navigateSchema(schema, listOf("age"))
+        assertEquals(1, ageResults.size)
+        assertEquals("number", ((ageResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateOneOf() {
+        val schema = """
+            {
+                type: "object"
+                oneOf:
+                  - properties:
+                      id: { type: "integer" }
+                  - properties:
+                      uuid: { type: "string" }
+            }
+        """
+
+        // id is defined in first oneOf branch
+        val idResults = navigateSchema(schema, listOf("id"))
+        assertEquals(1, idResults.size)
+        assertEquals("integer", ((idResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // uuid is defined in second oneOf branch
+        val uuidResults = navigateSchema(schema, listOf("uuid"))
+        assertEquals(1, uuidResults.size)
+        assertEquals("string", ((uuidResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateAllOf() {
+        val schema = """
+            {
+                type: "object"
+                allOf:
+                  - properties:
+                      name: { type: "string" }
+                  - properties:
+                      email: { type: "string", format: "email" }
+            }
+        """
+
+        // name is defined in first allOf branch
+        val nameResults = navigateSchema(schema, listOf("name"))
+        assertEquals(1, nameResults.size)
+        assertEquals("string", ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // email is defined in second allOf branch
+        val emailResults = navigateSchema(schema, listOf("email"))
+        assertEquals(1, emailResults.size)
+        val emailSchema = emailResults.single() as InternalKsonObject
+        assertEquals("string", (emailSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("email", (emailSchema.propertyLookup["format"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateAnyOfWithMultipleMatches() {
+        val schema = """
+            {
+                type: "object"
+                anyOf:
+                  - properties:
+                      name: { type: "string", minLength: 1 }
+                  - properties:
+                      name: { type: "string", maxLength: 100 }
+            }
+        """
+
+        // name is defined in BOTH anyOf branches - should return both
+        val nameResults = navigateSchema(schema, listOf("name"))
+        assertEquals(2, nameResults.size, "Expected two results for property defined in multiple anyOf branches")
+
+        // Both should be string type
+        nameResults.forEach { result ->
+            assertEquals("string", ((result as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        }
+    }
+
+    @Test
+    fun testNavigateAnyOfWithRef() {
+        val schema = """
+            '${'$'}defs':
+              StringType:
+                type: string
+                minLength: 1
+              NumberType:
+                type: number
+                minimum: 0
+            anyOf:
+              - '${'$'}ref': '#/${'$'}defs/StringType'
+              - '${'$'}ref': '#/${'$'}defs/NumberType'
+        """
+
+        // This test verifies that navigation works when anyOf contains $ref
+        val results = navigateSchema(schema, emptyList())
+        assertEquals(1, results.size, "Root schema should return single result")
+    }
+
+    @Test
+    fun testNavigateAnyOfWithArray() {
+        val schema = """
+            '${'$'}defs':
+              StringType:
+                type: string
+                minLength: 1
+                .
+              NumberType:
+                type: number
+                minimum: 0
+                .
+              .
+            anyOf:
+              - '${'$'}ref': '#/${'$'}defs/StringType'
+              - type: array
+                items:
+                  anyOf:
+                    - '${'$'}ref': '#/${'$'}defs/NumberType'
+        """
+
+        // This test verifies that navigation works when anyOf contains $ref
+        val results = navigateSchema(schema, listOf("0"))
+        assertEquals(1, results.size, "Root schema should return single result")
+    }
+
+    @Test
+    fun testNavigateDefs() {
+        // This is the original failing test - property defined deep in a $ref within anyOf
+        val schema = """
+            '${'$'}defs':
+              ComplexRecipe:
+                additionalProperties: false
+                properties:
+                  context:
+                    anyOf:
+                      - type: object
+                      - type: 'null'
+                        .
+                    default: null
+                    description: 'Defines arbitrary key-value pairs for Jinja interpolation'
+                    title: Context
+                    .
+                  source:
+                    type: string
+                    .
+                  .
+                title: ComplexRecipe
+                type: object
+                .
+              .
+            anyOf:
+              - '${'$'}ref': '#/${'$'}defs/ComplexRecipe'
+        """
+
+        val results = navigateSchema(schema, listOf("context"))
+        assertEquals(1, results.size, "Should find context property through anyOf → \$ref")
+
+        val contextSchema = results.single() as InternalKsonObject
+        assertEquals("Context", (contextSchema.propertyLookup["title"] as? InternalKsonString)?.value)
+        assertEquals("Defines arbitrary key-value pairs for Jinja interpolation",
+                     (contextSchema.propertyLookup["description"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateNestedCombinators() {
+        val schema = """
+            {
+                type: "object"
+                anyOf:
+                  - allOf:
+                      - properties:
+                          name: { type: "string" }
+                      - properties:
+                          email: { type: "string" }
+            }
+        """
+
+        // name is in anyOf → allOf → properties
+        val nameResults = navigateSchema(schema, listOf("name"))
+        assertEquals(1, nameResults.size)
+        assertEquals("string", ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // email is in anyOf → allOf → properties
+        val emailResults = navigateSchema(schema, listOf("email"))
+        assertEquals(1, emailResults.size)
+        assertEquals("string", ((emailResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateMixedPropertiesAndCombinators() {
+        val schema = """
+            {
+                type: "object"
+                properties:
+                    id: { type: "integer" }
+                    .
+                allOf:
+                    - properties:
+                        name: { type: "string" }
+                    - properties:
+                        email: { type: "string" }
+            }
+        """
+
+        // id is in direct properties
+        val idResults = navigateSchema(schema, listOf("id"))
+        assertEquals(1, idResults.size)
+        assertEquals("integer", ((idResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // name is in allOf
+        val nameResults = navigateSchema(schema, listOf("name"))
+        assertEquals(1, nameResults.size)
+        assertEquals("string", ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // email is in allOf
+        val emailResults = navigateSchema(schema, listOf("email"))
+        assertEquals(1, emailResults.size)
+        assertEquals("string", ((emailResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 }
