@@ -1,7 +1,7 @@
 package org.kson.value.navigation.jsonPointer
 
 import org.kson.parser.messages.Message
-import org.kson.parser.messages.MessageType.JSON_POINTER_BAD_START
+import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -85,7 +85,7 @@ abstract class PointerParser(internal val pointerString: String) {
             val char = scanner.peek()
             // If we haven't consumed anything and found a non-slash character, it's an invalid start
             if (tokens.isEmpty() && char != PATH_SEPARATOR) {
-                return ParseResult.Error(JSON_POINTER_BAD_START.create(char.toString()))
+                return ParseResult.Error(MessageType.JSON_POINTER_BAD_START.create(char.toString()))
             }
 
             throw ShouldNotHappenException(

@@ -174,9 +174,9 @@ object KsonValueNavigation {
      * Navigate through a [KsonValue] using parsed tokens (JSON Pointer/JsonPointerGlob style).
      *
      * Supports three token types:
-     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.Literal]: Exact match
-     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.Wildcard]: Matches all keys/indices
-     * - [org.kson.value.navigation.jsonPointer.PointerParser.Tokens.GlobPattern]: Pattern matching with * and ?
+     * - [PointerParser.Tokens.Literal]: Exact match
+     * - [PointerParser.Tokens.Wildcard]: Matches all keys/indices
+     * - [PointerParser.Tokens.GlobPattern]: Pattern matching with * and ?
      *
      * Each token represents one navigation step:
      * - For [org.kson.value.KsonObject]: token matches against property names
