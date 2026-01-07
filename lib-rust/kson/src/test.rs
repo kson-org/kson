@@ -169,7 +169,7 @@ fn test_kson_to_yaml_failure() {
 
 #[test]
 fn test_kson_analysis() {
-    let analysis = Kson::analyze("key: [1, 2, 3, 4]");
+    let analysis = Kson::analyze("key: [1, 2, 3, 4]", None);
     assert!(analysis.errors().is_empty());
 
     // Transform tokens to strings, so we can snapshot them
@@ -213,10 +213,10 @@ fn test_kson_validate_schema() {
     };
 
     let validator = success.schema_validator();
-    let errors = validator.validate(r#""a good old JSON string""#);
+    let errors = validator.validate(r#""a good old JSON string""#, None);
     assert!(errors.is_empty());
 
-    let errors = validator.validate(r#"42"#);
+    let errors = validator.validate(r#"42"#, None);
     assert!(!errors.is_empty());
 
     let output = messages_to_string(&errors);
@@ -255,7 +255,7 @@ list:
   - 3E5
 embed:%tag
 %%"#;
-    let analysis = Kson::analyze(input);
+    let analysis = Kson::analyze(input, None);
     let kson_value = analysis.kson_value();
     assert!(kson_value.is_some());
 
@@ -343,7 +343,7 @@ fn test_property_keys_basic_access() {
     let input = r#"name: John
 age: 30
 city: 'New York'"#;
-    let analysis = Kson::analyze(input);
+    let analysis = Kson::analyze(input, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");
@@ -368,7 +368,7 @@ city: 'New York'"#;
 fn test_property_keys_with_position_information() {
     let input = r#"name: John
 age: 30"#;
-    let analysis = Kson::analyze(input);
+    let analysis = Kson::analyze(input, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");
@@ -392,7 +392,7 @@ age: 30"#;
 #[test]
 fn test_property_keys_empty_object() {
     let input = "{}";
-    let analysis = Kson::analyze(input);
+    let analysis = Kson::analyze(input, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");

@@ -177,7 +177,7 @@ def test_kson_to_yaml_failure():
 
 
 def test_kson_analysis():
-    analysis = Kson.analyze("key: [1, 2, 3, 4]")
+    analysis = Kson.analyze("key: [1, 2, 3, 4]", None)
     assert analysis.errors() == []
 
     # Transform tokens to strings, so we can snapshot them
@@ -215,7 +215,7 @@ list:
   - 3E5
 embed:%tag
 %%"""
-    analysis = Kson.analyze(input)
+    analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -288,7 +288,7 @@ def test_property_keys_basic_access():
     input = """name: John
 age: 30
 city: 'New York'"""
-    analysis = Kson.analyze(input)
+    analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -313,7 +313,7 @@ city: 'New York'"""
 def test_property_keys_with_position_information():
     input = """name: John
 age: 30"""
-    analysis = Kson.analyze(input)
+    analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -335,7 +335,7 @@ age: 30"""
 
 def test_property_keys_empty_object():
     input = "{}"
-    analysis = Kson.analyze(input)
+    analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)

@@ -3,6 +3,7 @@ package org.kson.schema.validators
 import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.schema.*
+import org.kson.validation.SourceContext
 
 /**
  * Validator for JSON Schema `$ref` references
@@ -25,7 +26,7 @@ class RefValidator(
             idLookup)
     }
 
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val schema = refSchema
             ?: // Schema parsing failed, so can't perform validation against it
             return
