@@ -108,6 +108,26 @@ tasks.register("copyNodeDistribution") {
     }
 }
 
+/**
+ * Task to install npm dependencies in the production library output directory.
+ *
+ * This task is used when you need to prepare the production library with its dependencies
+ * installed.
+ * 
+ * This will:
+ * 1. Build the production library (via jsNodeProductionLibraryDistribution)
+ * 2. Run 'npm install' in build/dist/js/productionLibrary
+ * 3. Install all dependencies specified in the library's package.json
+ */
+tasks.register<PixiExecTask>("npmInstallProductionLibrary") {
+    description = "Install npm dependencies in the production library output"
+    dependsOn("jsNodeProductionLibraryDistribution")
+
+    command.set(listOf("npm", "install"))
+    workingDirectory.set(layout.buildDirectory.dir("dist/js/productionLibrary"))
+    doNotTrackState("npm already tracks its own state")
+}
+
 // Configure task ordering to ensure sequential execution
 afterEvaluate {
     tasks.named("jsNodeProductionLibraryDistribution") {
