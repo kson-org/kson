@@ -28,7 +28,9 @@ class KsonValueNavigationTest {
         val document = documentWithMatch.replace(matchMarker, "").replace(endMatchMarker, "")
 
         // Parse and navigate
-        val ksonValue = KsonCore.parseToAst(document).ksonValue!!
+        val parseResult = KsonCore.parseToAst(document)
+        val ksonValue = parseResult.ksonValue
+            ?: error("Parse failed: ${parseResult.messages}")
         val result = KsonValueNavigation.navigateWithJsonPointer(ksonValue, pointer)
 
         // Build actual document with markers at the result's location
@@ -200,7 +202,9 @@ class KsonValueNavigationTest {
         val document = documentWithMatches.replace(matchMarker, "").replace(endMatchMarker, "")
 
         // Parse and navigate
-        val ksonValue = KsonCore.parseToAst(document).ksonValue!!
+          val parseResult = KsonCore.parseToAst(document)
+          val ksonValue = parseResult.ksonValue
+              ?: error("Parse failed: ${parseResult.messages}")
         val results = KsonValueNavigation.navigateWithJsonPointerGlob(ksonValue, pointer)
 
         // Build actual document with markers at the results' locations
@@ -247,6 +251,18 @@ class KsonValueNavigationTest {
         }
 
         return lines.joinToString("\n")
+    }
+
+    @Test
+    fun `navigateWithJsonPointerGlob matches single object with escaped wildcard`(){
+        assertJsonPointerGlobNavigation(
+            documentWithMatches = """
+                name: 'John Doe'
+                age: 30
+                '**': <match>50</match>
+            """.trimIndent(),
+            pointer = JsonPointerGlob("/\\*\\*")
+        )
     }
 
     @Test
