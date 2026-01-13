@@ -1,10 +1,12 @@
 package org.kson.value.navigation
 
+import org.kson.value.navigation.json_pointer.GlobMatcher
 import org.kson.value.navigation.json_pointer.PointerParser
 import org.kson.value.navigation.json_pointer.PointerParser.Tokens
 import org.kson.value.navigation.json_pointer.JsonPointerGlobParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class JsonPointerGlobParserTest {
@@ -131,7 +133,8 @@ class JsonPointerGlobParserTest {
         assertTrue(result is PointerParser.ParseResult.Success)
         assertEquals(1, result.tokens.size)
         // Should be a pattern because it contains unescaped *
-        assertEquals(Tokens.GlobPattern("prefix*suffix*"), result.tokens[0])
+        // The escaped * is preserved as \* so GlobMatcher treats it as literal
+        assertEquals(Tokens.GlobPattern("prefix\\*suffix*"), result.tokens[0])
     }
 
     @Test
@@ -360,5 +363,79 @@ class JsonPointerGlobParserTest {
         assertEquals(Tokens.Wildcard, result.tokens[3])
         assertEquals(Tokens.GlobPattern("admin*"), result.tokens[4])
         assertEquals(Tokens.Literal("endpoints"), result.tokens[5])
+    }
+
+    // Integration tests: Parser + GlobMatcher
+    // These tests verify that parsed GlobPatterns work correctly with GlobMatcher
+
+    @Test
+    fun `integration - mixed escaped and unescaped wildcards match correctly`() {
+        // Input: /prefix\*suffix*
+        // Expected pattern: "prefix\*suffix*" where first * is literal, second is wildcard
+        val result = JsonPointerGlobParser("/prefix\\*suffix*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        val pattern = (result.tokens[0] as Tokens.GlobPattern).pattern
+
+        // Should match: "prefix*suffix" followed by anything
+        assertTrue(GlobMatcher.matches(pattern, "prefix*suffix"))
+        assertTrue(GlobMatcher.matches(pattern, "prefix*suffixanything"))
+        assertTrue(GlobMatcher.matches(pattern, "prefix*suffix123"))
+
+        // Should NOT match: when first * is treated as wildcard
+        assertFalse(GlobMatcher.matches(pattern, "prefixXsuffix"))
+        assertFalse(GlobMatcher.matches(pattern, "prefixABCsuffixXYZ"))
+    }
+
+    @Test
+    fun `integration - escaped question mark with unescaped asterisk`() {
+        // Input: /what\?*
+        // Expected pattern: "what\?*" where ? is literal, * is wildcard
+        val result = JsonPointerGlobParser("/what\\?*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        val pattern = (result.tokens[0] as Tokens.GlobPattern).pattern
+
+        // Should match: "what?" followed by anything
+        assertTrue(GlobMatcher.matches(pattern, "what?"))
+        assertTrue(GlobMatcher.matches(pattern, "what?anything"))
+
+        // Should NOT match: when ? is treated as single-char wildcard
+        assertFalse(GlobMatcher.matches(pattern, "whatX"))
+        assertFalse(GlobMatcher.matches(pattern, "whatAanything"))
+    }
+
+    @Test
+    fun `integration - escaped backslash followed by unescaped wildcard`() {
+        // Input: /path\\*
+        // Expected pattern: "path\\*" where \\ is literal backslash, * is wildcard
+        val result = JsonPointerGlobParser("/path\\\\*").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        val pattern = (result.tokens[0] as Tokens.GlobPattern).pattern
+
+        // Should match: "path\" followed by anything
+        assertTrue(GlobMatcher.matches(pattern, "path\\"))
+        assertTrue(GlobMatcher.matches(pattern, "path\\to"))
+        assertTrue(GlobMatcher.matches(pattern, "path\\anywhere"))
+
+        // Should NOT match: without the backslash
+        assertFalse(GlobMatcher.matches(pattern, "pathto"))
+        assertFalse(GlobMatcher.matches(pattern, "path/to"))
+    }
+
+    @Test
+    fun `integration - multiple mixed escapes and wildcards`() {
+        // Input: /a\*b*c\?d?
+        // Expected: "a\*b*c\?d?" where \* and \? are literal, unescaped * and ? are wildcards
+        val result = JsonPointerGlobParser("/a\\*b*c\\?d?").parse()
+        assertTrue(result is PointerParser.ParseResult.Success)
+        val pattern = (result.tokens[0] as Tokens.GlobPattern).pattern
+
+        // Should match: "a*b" + anything + "c?d" + single char
+        assertTrue(GlobMatcher.matches(pattern, "a*bc?dX"))
+        assertTrue(GlobMatcher.matches(pattern, "a*bXYZc?d1"))
+        assertTrue(GlobMatcher.matches(pattern, "a*banythingc?da"))
+
+        // Should NOT match
+        assertFalse(GlobMatcher.matches(pattern, "aXbc?dY"))  // first * should be literal
+        assertFalse(GlobMatcher.matches(pattern, "a*bcXdY"))  // ? should be literal
     }
 }

@@ -26,104 +26,122 @@ import org.kson.parser.messages.MessageType.*
  */
 class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString) {
 
-    companion object {
-        // Character constants
-        private const val WILDCARD_CHAR = '*'
-        private const val SINGLE_CHAR_WILDCARD = '?'
+    /**
+     * Represents a parsed character with its semantic meaning.
+     * Separates parsing from classification by capturing whether each character
+     * is a literal or a glob wildcard.
+     */
+    private sealed class ParsedChar {
+        /** A literal character (either plain or from an escape sequence) */
+        data class Literal(val char: Char, val escaped: Boolean = false) : ParsedChar()
+        /** An unescaped `*` wildcard */
+        data object Wildcard : ParsedChar() { const val CHAR = '*' }
+        /** An unescaped `?` single-character wildcard */
+        data object SingleCharWildcard : ParsedChar() { const val CHAR = '?' }
     }
 
-    /**
-     * reference-token = *( unescaped / rfc-escaped / backslash-escaped )
-     *
-     * Collects characters for a single reference token, processes escape sequences,
-     * and determines whether the token is a Literal, Wildcard, or GlobPattern.
-     *
-     * @return true if token was successfully parsed, false if an error occurred
-     */
     override fun referenceToken(): Boolean {
-        val rawTokenBuilder = StringBuilder() // Unescaped content
-        var hasWildcard = false
-        var hasSingleCharWildcard = false
-        var hadGlobEscape = false // Track if we escaped any glob characters
-
-        // Collect all characters until next '/' or EOF
-        while (!scanner.eof() && scanner.peek() != PATH_SEPARATOR) {
-            val char = scanner.peek()!!
-
-            // Try RFC escape handling first
-            when (val rfcResult = PointerEscapeHandler.handleRfcEscape(scanner)) {
-                is PointerEscapeHandler.EscapeResult.Success -> {
-                    rawTokenBuilder.append(rfcResult.char)
-                    continue
-                }
-                is PointerEscapeHandler.EscapeResult.Failure -> {
-                    if (rfcResult.error != null) {
-                        error = rfcResult.error
-                        return false
-                    }
-                    // Fall through to try backslash escape
-                }
-            }
-
-            // Try backslash escape handling
-            when (val backslashResult = PointerEscapeHandler.handleBackslashEscape(scanner)) {
-                is PointerEscapeHandler.EscapeResult.Success -> {
-                    rawTokenBuilder.append(backslashResult.char)
-                    // If we escaped a glob character, mark it
-                    if (backslashResult.char == '*' || backslashResult.char == '?') {
-                        hadGlobEscape = true
-                    }
-                    continue
-                }
-                is PointerEscapeHandler.EscapeResult.Failure -> {
-                    if (backslashResult.error != null) {
-                        error = backslashResult.error
-                        return false
-                    }
-                    // Fall through to handle as regular character
-                }
-            }
-
-            // Handle unescaped wildcards and regular characters
-            when (char) {
-                WILDCARD_CHAR -> {
-                    hasWildcard = true
-                    rawTokenBuilder.append(char)
-                    scanner.advance()
-                }
-                SINGLE_CHAR_WILDCARD -> {
-                    hasSingleCharWildcard = true
-                    rawTokenBuilder.append(char)
-                    scanner.advance()
-                }
-                else -> {
-                    if (PointerEscapeHandler.isUnescaped(char)) {
-                        rawTokenBuilder.append(char)
-                        scanner.advance()
-                    } else {
-                        error = JSON_POINTER_INVALID_CHARACTER.create(char.toString())
-                        return false
-                    }
-                }
-            }
-        }
-
-        val rawToken = rawTokenBuilder.toString()
-
-        // Determine token type:
-        // 1. If token is exactly "**" AND not from escapes -> RecursiveDescent
-        // 2. If token is exactly "*" AND not from escapes -> Wildcard
-        // 3. If token contains * or ? -> GlobPattern
-        // 4. Otherwise -> Literal
-        val parsedToken = when {
-            !hadGlobEscape && rawToken == "**" -> Tokens.RecursiveDescent
-            !hadGlobEscape && rawToken == "*" -> Tokens.Wildcard
-            hasWildcard || hasSingleCharWildcard -> Tokens.GlobPattern(rawToken)
-            else -> Tokens.Literal(rawToken)
-        }
-
-        tokens.add(parsedToken)
+        val chars = parseChars() ?: return false
+        tokens.add(classifyToken(chars))
         return true
     }
 
+    /**
+     * Phase 1: Parse all characters in the token, handling escape sequences.
+     * @return list of parsed characters, or null if an error occurred
+     */
+    private fun parseChars(): List<ParsedChar>? {
+        val chars = mutableListOf<ParsedChar>()
+
+        while (!scanner.eof() && scanner.peek() != PATH_SEPARATOR) {
+            val parsed = parseNextChar() ?: return null
+            chars.add(parsed)
+        }
+
+        return chars
+    }
+
+    /**
+     * Parse the next character from the scanner.
+     * @return the parsed character, or null if an error occurred
+     */
+    private fun parseNextChar(): ParsedChar? {
+        // Try RFC escape first (~0, ~1)
+        when (val rfcResult = PointerEscapeHandler.handleRfcEscape(scanner)) {
+            is PointerEscapeHandler.EscapeResult.Success ->
+                return ParsedChar.Literal(rfcResult.char)
+            is PointerEscapeHandler.EscapeResult.Failure -> {
+                if (rfcResult.error != null) {
+                    error = rfcResult.error
+                    return null
+                }
+            }
+        }
+
+        // Try backslash escape (\*, \?, \\)
+        when (val backslashResult = PointerEscapeHandler.handleBackslashEscape(scanner)) {
+            is PointerEscapeHandler.EscapeResult.Success ->
+                return ParsedChar.Literal(backslashResult.char, escaped = true)
+            is PointerEscapeHandler.EscapeResult.Failure -> {
+                if (backslashResult.error != null) {
+                    error = backslashResult.error
+                    return null
+                }
+            }
+        }
+
+        // Handle unescaped characters
+        val char = scanner.peek()!!
+        scanner.advance()
+
+        return when (char) {
+            ParsedChar.Wildcard.CHAR -> ParsedChar.Wildcard
+            ParsedChar.SingleCharWildcard.CHAR -> ParsedChar.SingleCharWildcard
+            else -> if (PointerEscapeHandler.isUnescaped(char)) {
+                ParsedChar.Literal(char)
+            } else {
+                error = JSON_POINTER_INVALID_CHARACTER.create(char.toString())
+                null
+            }
+        }
+    }
+
+    /**
+     * Phase 2: Classify the token based on its parsed characters.
+     */
+    private fun classifyToken(chars: List<ParsedChar>): Tokens {
+        val hasGlobChars = chars.any { it is ParsedChar.Wildcard || it is ParsedChar.SingleCharWildcard }
+
+        return when {
+            chars == listOf(ParsedChar.Wildcard, ParsedChar.Wildcard) -> Tokens.RecursiveDescent
+            chars == listOf(ParsedChar.Wildcard) -> Tokens.Wildcard
+            hasGlobChars -> Tokens.GlobPattern(buildPatternString(chars))
+            else -> Tokens.Literal(buildLiteralString(chars))
+        }
+    }
+
+    /**
+     * Build the literal string value from parsed characters.
+     */
+    private fun buildLiteralString(chars: List<ParsedChar>): String =
+        chars.joinToString("") { (it as ParsedChar.Literal).char.toString() }
+
+    /**
+     * Build the pattern string for GlobMatcher, preserving escape sequences
+     * so the matcher can distinguish literal characters from wildcards.
+     */
+    private fun buildPatternString(chars: List<ParsedChar>): String = buildString {
+        for (char in chars) {
+            when (char) {
+                is ParsedChar.Literal -> {
+                    if (char.escaped) {
+                        append('\\')
+                    }
+                    append(char.char)
+                }
+                is ParsedChar.Wildcard -> append(ParsedChar.Wildcard.CHAR)
+                is ParsedChar.SingleCharWildcard -> append(ParsedChar.SingleCharWildcard.CHAR)
+            }
+        }
+    }
 }
