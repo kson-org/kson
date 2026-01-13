@@ -12,13 +12,13 @@ import org.kson.parser.messages.MessageType.*
  * - Backslash escaping: `\*`, `\?`, `\\` for literal characters in patterns
  * - RFC 6901 escaping: `~0` (tilde), `~1` (slash) still supported for compatibility
  *
- * Examples (where STAR represents the asterisk character):
+ * Examples (where * represents the asterisk character):
  * ```
- * /users/STAR/email              - Wildcard: matches email of any user
- * /users/STARSTAR/email          - Recursive descent: matches all emails at any depth under users
- * /STARSTAR/email                - Recursive descent: matches all emails anywhere in document
- * /users/STARadminSTAR/role      - Pattern: matches users with "admin" in key name
- * /config/\STAR value            - Literal: matches key named "STARvalue"
+ * /users/*/email              - Wildcard: matches email of any user
+ * /users/\*\*/email          - Recursive descent: matches all emails at any depth under users
+ * /**/email                - Recursive descent: matches all emails anywhere in document
+ * /users/*admin*/role      - Pattern: matches users with "admin" in key name
+ * /config/\* value            - Literal: matches key named "*value"
  * /path/to\\from                 - Literal: matches key named "to\from"
  * ```
  *
