@@ -25,21 +25,15 @@ abstract class BaseJsonPointer(parser: PointerParser) {
     /**
      * The parsed reference tokens as strings.
      * This is a convenience property that converts tokens to their string representation:
-     * - Literal -> the literal value
+     * - Literal -> the literal value (escaping depends on subclass)
      * - Wildcard -> "*"
      * - RecursiveDescent -> "**"
      * - GlobPattern -> the pattern string
      * Empty list for root pointer ("").
+     *
+     * Subclasses must implement to provide appropriate escaping behavior for literals.
      */
-    val tokens: List<String>
-        get() = rawTokens.map {
-            when (it) {
-                is Tokens.Literal -> it.value
-                is Tokens.Wildcard -> "*"
-                is Tokens.RecursiveDescent -> "**"
-                is Tokens.GlobPattern -> it.pattern
-            }
-        }
+    abstract val tokens: List<String>
 
     init {
         when (val result = parser.parse()) {

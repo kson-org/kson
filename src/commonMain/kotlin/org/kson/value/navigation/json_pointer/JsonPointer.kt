@@ -20,6 +20,14 @@ package org.kson.value.navigation.json_pointer
  */
 class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(pointerString)) {
 
+    override val tokens: List<String>
+        get() = rawTokens.map {
+            when (it) {
+                is PointerParser.Tokens.Literal -> it.value
+                else -> throw UnsupportedOperationException("JsonPointer only supports 'literal' tokens")
+            }
+        }
+
     companion object {
         /**
          * The root pointer, representing the entire document.

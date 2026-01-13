@@ -61,19 +61,25 @@ class JsonPointerGlobTest {
     @Test
     fun `escaped asterisk becomes literal`() {
         val pointer = JsonPointerGlob("/config/\\*value")
-        assertEquals(listOf("config", "*value"), pointer.tokens)
+        assertEquals(listOf("config", "\\*value"), pointer.tokens)
     }
 
     @Test
     fun `escaped question mark becomes literal`() {
         val pointer = JsonPointerGlob("/what/\\?")
-        assertEquals(listOf("what", "?"), pointer.tokens)
+        assertEquals(listOf("what", "\\?"), pointer.tokens)
     }
 
     @Test
     fun `escaped backslash`() {
         val pointer = JsonPointerGlob("/path/to\\\\from")
-        assertEquals(listOf("path", "to\\from"), pointer.tokens)
+        assertEquals(listOf("path", "to\\\\from"), pointer.tokens)
+    }
+
+    @Test
+    fun `escaped wildcard`() {
+        val pointer = JsonPointerGlob("/\\*\\*")
+        assertEquals(listOf("\\*\\*"), pointer.tokens)
     }
 
     @Test
@@ -220,6 +226,6 @@ class JsonPointerGlobTest {
     @Test
     fun `escaped double asterisk becomes literal`() {
         val pointer = JsonPointerGlob("/path/\\*\\*")
-        assertEquals(listOf("path", "**"), pointer.tokens)
+        assertEquals(listOf("path", "\\*\\*"), pointer.tokens)
     }
 }

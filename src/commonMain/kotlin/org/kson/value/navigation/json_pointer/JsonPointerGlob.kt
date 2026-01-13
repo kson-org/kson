@@ -25,5 +25,27 @@ package org.kson.value.navigation.json_pointer
  * @property pointerString The JsonPointerGlob string (must be valid)
  * @throws IllegalArgumentException if the pointer string is invalid
  */
-class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString))
+class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
+
+    override val tokens: List<String>
+        get() = rawTokens.map {
+            when (it) {
+                is PointerParser.Tokens.Literal -> escapeGlobSpecialChars(it.value)
+                is PointerParser.Tokens.Wildcard -> "*"
+                is PointerParser.Tokens.RecursiveDescent -> "**"
+                is PointerParser.Tokens.GlobPattern -> it.pattern
+            }
+        }
+
+    /**
+     * Escapes glob special characters in a literal value.
+     * Characters *, ?, and \ are escaped with a backslash.
+     */
+    private fun escapeGlobSpecialChars(value: String): String {
+        return value
+            .replace("\\", "\\\\")
+            .replace("*", "\\*")
+            .replace("?", "\\?")
+    }
+}
 
