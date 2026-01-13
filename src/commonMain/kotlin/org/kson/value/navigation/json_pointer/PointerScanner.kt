@@ -1,4 +1,4 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
 /**
  * Scanner for character-by-character processing of pointer strings.

@@ -5,7 +5,7 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
-import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
 import org.kson.value.navigation.KsonValueNavigation

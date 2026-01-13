@@ -1,8 +1,8 @@
 package org.kson.value.navigation
 
-import org.kson.value.navigation.jsonPointer.PointerParser
-import org.kson.value.navigation.jsonPointer.PointerParser.Tokens
-import org.kson.value.navigation.jsonPointer.JsonPointerGlobParser
+import org.kson.value.navigation.json_pointer.PointerParser
+import org.kson.value.navigation.json_pointer.PointerParser.Tokens
+import org.kson.value.navigation.json_pointer.JsonPointerGlobParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

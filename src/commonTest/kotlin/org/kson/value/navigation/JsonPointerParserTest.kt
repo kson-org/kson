@@ -2,8 +2,8 @@ package org.kson.value.navigation
 
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
-import org.kson.value.navigation.jsonPointer.PointerParser
-import org.kson.value.navigation.jsonPointer.JsonPointerParser
+import org.kson.value.navigation.json_pointer.PointerParser
+import org.kson.value.navigation.json_pointer.JsonPointerParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

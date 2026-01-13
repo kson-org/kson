@@ -1,4 +1,4 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
 import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType.*

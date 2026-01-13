@@ -1,4 +1,4 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
 /**
  * Represents a validated JsonPointerGlob - an extension of JSON Pointer with glob-style pattern matching.

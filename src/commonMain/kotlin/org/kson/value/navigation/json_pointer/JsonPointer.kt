@@ -1,4 +1,4 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
 /**
  * Represents a validated JSON Pointer according to RFC 6901.

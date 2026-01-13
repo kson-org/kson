@@ -1,6 +1,6 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
-import org.kson.value.navigation.jsonPointer.PointerParser.*
+import org.kson.value.navigation.json_pointer.PointerParser.*
 
 /**
  * Abstract base class for JSON Pointer implementations.

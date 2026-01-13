@@ -2,13 +2,13 @@ package org.kson.value.navigation
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.value.navigation.jsonPointer.JsonPointer
-import org.kson.value.navigation.jsonPointer.JsonPointerGlob
+import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
-import org.kson.value.navigation.jsonPointer.GlobMatcher
-import org.kson.value.navigation.jsonPointer.PointerParser
+import org.kson.value.navigation.json_pointer.GlobMatcher
+import org.kson.value.navigation.json_pointer.PointerParser
 import kotlin.collections.iterator
 
 /**

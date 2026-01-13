@@ -5,7 +5,7 @@ package org.kson
 
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
-import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser

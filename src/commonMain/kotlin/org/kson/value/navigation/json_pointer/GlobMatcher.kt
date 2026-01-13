@@ -1,4 +1,4 @@
-package org.kson.value.navigation.jsonPointer
+package org.kson.value.navigation.json_pointer
 
 /**
  * Utility for matching strings against glob-style patterns.

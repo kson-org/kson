@@ -3,7 +3,7 @@ package org.kson.navigation
 import org.kson.CompletionItem
 import org.kson.CompletionKind
 import org.kson.parser.Location
-import org.kson.value.navigation.jsonPointer.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.navigation.KsonValueNavigation
