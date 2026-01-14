@@ -29,7 +29,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 // Try to get schema from provider
                 let schemaDocument = provider.getSchemaForDocument(uri);
 
-                const parseResult = Kson.getInstance().analyze(content);
+                const parseResult = Kson.getInstance().analyze(content, uri);
                 return new KsonDocument(textDocument, parseResult, schemaDocument);
             },
             update: (
@@ -42,7 +42,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     changes,
                     version
                 );
-                const parseResult = Kson.getInstance().analyze(textDocument.getText());
+                const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
                 return new KsonDocument(
                     textDocument,
                     parseResult,

@@ -1,6 +1,7 @@
 package org.kson.schema
 
 import org.kson.parser.MessageSink
+import org.kson.validation.SourceContext
 import org.kson.validation.Validator
 import org.kson.value.*
 
@@ -10,11 +11,11 @@ interface JsonSchemaValidator: Validator {
      * Validates that the given [ksonValue] satisfies this [JsonNumberValidator].  Logs any validation errors to the
      * given [messageSink]
      */
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink)
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
 abstract class JsonNumberValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue !is KsonNumber) {
             return
         }
@@ -26,7 +27,7 @@ abstract class JsonNumberValidator : JsonSchemaValidator {
 }
 
 abstract class JsonArrayValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue !is KsonList) {
             return
         }
@@ -38,7 +39,7 @@ abstract class JsonArrayValidator : JsonSchemaValidator {
 }
 
 abstract class JsonObjectValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val ksonObject = if (ksonValue is KsonObject)
             ksonValue
         else if (ksonValue is EmbedBlock) {
@@ -54,7 +55,7 @@ abstract class JsonObjectValidator : JsonSchemaValidator {
 }
 
 abstract class JsonStringValidator : JsonSchemaValidator {
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue !is KsonString) {
             return
         }

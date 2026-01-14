@@ -5,9 +5,10 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
+import org.kson.validation.SourceContext
 
 class NotValidator(private val notSchema: JsonSchema?) : JsonSchemaValidator {
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (notSchema == null) {
             return
         }

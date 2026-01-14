@@ -27,7 +27,7 @@ export class DiagnosticService {
         const schemaMessages = schema ? (() => {
             const parsedSchema = Kson.getInstance().parseSchema(schema.getText())
             if(parsedSchema instanceof SchemaResult.Success){
-                return parsedSchema.schemaValidator.validate(document.getText()).asJsReadonlyArrayView()
+                return parsedSchema.schemaValidator.validate(document.getText(), document.uri).asJsReadonlyArrayView()
             }
             return []
         })() : []

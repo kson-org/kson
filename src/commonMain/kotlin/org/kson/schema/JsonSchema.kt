@@ -6,6 +6,7 @@ import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
+import org.kson.validation.SourceContext
 import org.kson.validation.Validator
 
 /**
@@ -17,7 +18,7 @@ sealed interface JsonSchema: Validator {
    * to something reasonable (if not as helpful) when the schema itself provides no description
    */
   fun descriptionWithDefault(): String
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink)
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 
   fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
     val numErrors = messageSink.loggedMessages().size
@@ -46,7 +47,7 @@ class JsonObjectSchema(
   /**
    * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]
    */
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
     if (typeValidator != null) {
       if (!typeValidator.validate(ksonValue, messageSink)) {
         // we're not the right type for this document, validation cannot continue
@@ -66,7 +67,7 @@ class JsonObjectSchema(
  */
 class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
   override fun descriptionWithDefault() = if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
     if (valid) {
       return
     } else {
