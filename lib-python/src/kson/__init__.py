@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 import threading
-from typing import cast, Any, Callable, Dict, List, Type, TypeAlias
+from typing import cast, Any, Callable, Dict, List, Optional, Type, TypeAlias
 from cffi import FFI
 from pathlib import Path
 from enum import Enum
@@ -207,7 +207,25 @@ def _from_kotlin_list(
     return python_list
 
 def _to_kotlin_list(list: List[Any]) -> Any:
-    raise RuntimeError("not implemented")
+    env = _attach_jni_thread()
+
+    # Create a new ArrayList
+    array_list_class = _get_class(env, b"java/util/ArrayList")
+    constructor = _get_method(env, array_list_class, b"<init>", b"()V")
+    array_list = env[0].NewObject(env, array_list_class, constructor)
+    _raise_exception_if_any(env)
+    array_list = _to_gc_global_ref(env, array_list)
+
+    # Add each element to the list
+    for item in list:
+        if not hasattr(item, '_jni_ref'):
+            raise TypeError(f"Cannot convert item to Kotlin: expected object with _jni_ref attribute, got {type(item).__name__}")
+        item_ref = item._jni_ref
+        _call_method_raw(env, b"java/util/ArrayList", array_list, b"add", b"(Ljava/lang/Object;)Z", "BooleanMethod", [item_ref])
+        _raise_exception_if_any(env)
+
+    _detach_jni_thread()
+    return array_list
 
 def _to_kotlin_map(list: Dict[Any, Any]) -> Any:
     raise RuntimeError("not implemented")
@@ -241,7 +259,12 @@ def _from_kotlin_map(
 
 
 class FormatOptions:
-    """Options for formatting Kson output."""
+    """Options for formatting Kson output.
+
+    @param indentType The type of indentation to use (spaces or tabs)
+    @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
+    @param embedBlockRules Rules for formatting specific paths as embed blocks
+    """
 
     _jni_ref: Any
 
@@ -249,18 +272,22 @@ class FormatOptions:
         self,
         indent_type: IndentType,
         formatting_style: FormattingStyle,
+        embed_block_rules: List[EmbedRule],
     ):
         if indent_type is None:
             raise ValueError("`indent_type` cannot be None")
         if formatting_style is None:
             raise ValueError("`formatting_style` cannot be None")
+        if embed_block_rules is None:
+            raise ValueError("`embed_block_rules` cannot be None")
         self._jni_ref = _construct(
             b"org/kson/FormatOptions",
-            b"(Lorg/kson/IndentType;Lorg/kson/FormattingStyle;)V",
+            b"(Lorg/kson/IndentType;Lorg/kson/FormattingStyle;Ljava/util/List;)V",
             [
 
                 indent_type._jni_ref,
                 formatting_style._to_kotlin_enum(),
+                _to_kotlin_list(embed_block_rules),
             ]
         )
     def __eq__(self, other):
@@ -303,6 +330,23 @@ class FormatOptions:
         )
 
         return cast(Any, (lambda x0: FormattingStyle._from_kotlin_enum(x0))(result))
+
+    def embed_block_rules(
+        self,
+    ) -> List[EmbedRule]:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/FormatOptions",
+            jni_ref,
+            b"getEmbedBlockRules",
+            b"()Ljava/util/List;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: _from_kotlin_list(x0, lambda x1: _from_kotlin_object(EmbedRule, x1)))(result))
 
 
 class Position:
@@ -1064,7 +1108,7 @@ class _KsonValue_KsonEmbed(KsonValue):
 
     def tag(
         self,
-    ) -> str:
+    ) -> Optional[str]:
 
 
         jni_ref = self._jni_ref
@@ -1077,11 +1121,11 @@ class _KsonValue_KsonEmbed(KsonValue):
             []
         )
 
-        return cast(Any, (_java_string_to_python_str)(result))
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
     def metadata(
         self,
-    ) -> str:
+    ) -> Optional[str]:
 
 
         jni_ref = self._jni_ref
@@ -1094,7 +1138,7 @@ class _KsonValue_KsonEmbed(KsonValue):
             []
         )
 
-        return cast(Any, (_java_string_to_python_str)(result))
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
     def content(
         self,
@@ -1222,7 +1266,7 @@ class Analysis:
 
     def kson_value(
         self,
-    ) -> KsonValue:
+    ) -> Optional[KsonValue]:
 
 
         jni_ref = self._jni_ref
@@ -1235,7 +1279,7 @@ class Analysis:
             []
         )
 
-        return cast(Any, (lambda x0: KsonValue._downcast(x0))(result))
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (lambda x0: KsonValue._downcast(x0))(x0))(result))
 
 
 class Result:
@@ -1787,6 +1831,82 @@ class Kson:
         )
 
         return cast(Any, (lambda x0: SchemaResult._downcast(x0))(result))
+
+
+class EmbedRule:
+    """A rule for formatting string values at specific paths as embed blocks.
+
+    When formatting KSON, strings at paths matching [pathPattern] will be rendered
+    as embed blocks instead of regular strings.
+
+    @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+    @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+
+    Example:
+    ```kotlin
+    EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+    EmbedRule("/config/description")        // Match exact path, no tag
+    ```
+    """
+
+    _jni_ref: Any
+
+    def __init__(
+        self,
+        path_pattern: str,
+        tag: Optional[str],
+    ):
+        if path_pattern is None:
+            raise ValueError("`path_pattern` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/EmbedRule",
+            b"(Ljava/lang/String;Ljava/lang/String;)V",
+            [
+
+                _python_str_to_java_string(path_pattern),
+                _python_str_to_java_string(tag) if tag is not None else ffi.NULL,
+            ]
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def path_pattern(
+        self,
+    ) -> str:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/EmbedRule",
+            jni_ref,
+            b"getPathPattern",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (_java_string_to_python_str)(result))
+
+    def tag(
+        self,
+    ) -> Optional[str]:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/EmbedRule",
+            jni_ref,
+            b"getTag",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
 
 class IndentType:
