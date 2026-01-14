@@ -11,12 +11,16 @@ import {
     createClientOptions
 } from '../../config/clientOptions';
 import {StatusBarManager} from '../common/StatusBarManager';
+import { isKsonDialect, initializeLanguageConfig } from '../../config/languageConfig';
 
 /**
  * Node.js-specific activation function for the KSON extension.
  * This handles desktop VS Code environments where we can spawn child processes.
  */
 export async function activate(context: vscode.ExtensionContext) {
+    // Initialize language configuration from package.json
+    initializeLanguageConfig(context.extension.packageJSON);
+
     // Create log output channel
     const logOutputChannel = vscode.window.createOutputChannel('Kson Language Server', {log: true});
     context.subscriptions.push(logOutputChannel);
@@ -50,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
             languageClient.onNotification('kson/schemaConfigurationChanged', async () => {
                 // Refresh status bar for current editor when schema config changes
                 const editor = vscode.window.activeTextEditor;
-                if (editor && editor.document.languageId === 'kson') {
+                if (editor && isKsonDialect(editor.document.languageId)) {
                     await statusBarManager.updateForDocument(editor.document);
                 }
             })
@@ -60,8 +64,8 @@ export async function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.commands.registerCommand('kson.selectSchema', async () => {
                 const editor = vscode.window.activeTextEditor;
-                if (!editor || editor.document.languageId !== 'kson') {
-                    vscode.window.showWarningMessage('Please open a KSON file first.');
+                if (!editor || !isKsonDialect(editor.document.languageId)) {
+                    vscode.window.showWarningMessage('Please open a KSON dialect file first.');
                     return;
                 }
 
@@ -143,7 +147,7 @@ export async function activate(context: vscode.ExtensionContext) {
         // Update status bar when active editor changes
         context.subscriptions.push(
             vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor && editor.document.languageId === 'kson') {
+                if (editor && isKsonDialect(editor.document.languageId)) {
                     await statusBarManager.updateForDocument(editor.document);
                 } else {
                     statusBarManager.hide();
@@ -157,7 +161,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 if (doc.fileName.endsWith('.kson-schema.kson')) {
                     // Schema config changed, refresh status bar for current editor
                     const editor = vscode.window.activeTextEditor;
-                    if (editor && editor.document.languageId === 'kson') {
+                    if (editor && isKsonDialect(editor.document.languageId)) {
                         await statusBarManager.updateForDocument(editor.document);
                     }
 
@@ -166,8 +170,9 @@ export async function activate(context: vscode.ExtensionContext) {
         );
 
         // Initialize status bar for currently active editor
-        if (vscode.window.activeTextEditor?.document.languageId === 'kson') {
-            await statusBarManager.updateForDocument(vscode.window.activeTextEditor.document);
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && isKsonDialect(activeEditor.document.languageId)) {
+            await statusBarManager.updateForDocument(activeEditor.document);
         }
 
         logOutputChannel.info('KSON Node.js extension activated successfully');

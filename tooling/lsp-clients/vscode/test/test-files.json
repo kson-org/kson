@@ -3,8 +3,10 @@
     "syntax-highlighting.test",
     "status-bar-schema-association.test",
     "schema-loading.test",
+    "language-config.test",
     "formatting-settings.test",
     "editing.test",
+    "dialect-support.test",
     "diagnostics.test"
   ]
 }

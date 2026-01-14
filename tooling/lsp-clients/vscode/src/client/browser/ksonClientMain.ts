@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
+import { initializeLanguageConfig } from '../../config/languageConfig';
 import {deactivate} from '../common/deactivate';
 
 /**
@@ -8,6 +9,9 @@ import {deactivate} from '../common/deactivate';
  * This handles VS Code Web and GitHub.dev environments where we run in a browser.
  */
 export async function activate(context: vscode.ExtensionContext) {
+    // Initialize language configuration from package.json
+    initializeLanguageConfig(context.extension.packageJSON);
+
     // Create log output channel
     const logOutputChannel = vscode.window.createOutputChannel('Kson Language Server', { log: true });
     context.subscriptions.push(logOutputChannel);
@@ -23,9 +27,14 @@ export async function activate(context: vscode.ExtensionContext) {
         // In test environments, we need to support the vscode-test-web scheme
         // This is only needed for the test runner, not in production
         if (context.extensionMode === vscode.ExtensionMode.Test) {
+            // Add test scheme for all configured language IDs
+            const testSelectors = (clientOptions.documentSelector || []).map((selector: any) => ({
+                ...selector,
+                scheme: 'vscode-test-web'
+            }));
             clientOptions.documentSelector = [
                 ...(clientOptions.documentSelector || []),
-                { scheme: 'vscode-test-web', language: 'kson' }
+                ...testSelectors
             ];
         }
 
