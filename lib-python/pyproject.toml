@@ -46,7 +46,7 @@ packages = ["kson"]
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so"]
+kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified.h"]
 
 [dependency-groups]
 dev = [
