@@ -15,7 +15,7 @@ import org.kson.parser.messages.MessageType.*
  * Examples (where * represents the asterisk character):
  * ```
  * /users/*/email              - Wildcard: matches email of any user
- * /users/\*\*/email          - Recursive descent: matches all emails at any depth under users
+ * /users/ **/email          - Recursive descent: matches all emails at any depth under users
  * /**/email                - Recursive descent: matches all emails anywhere in document
  * /users/*admin*/role      - Pattern: matches users with "admin" in key name
  * /config/\* value            - Literal: matches key named "*value"

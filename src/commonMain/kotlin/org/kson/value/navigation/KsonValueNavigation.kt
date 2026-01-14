@@ -15,7 +15,7 @@ import kotlin.collections.iterator
  * Result of navigating to a location in a KSON document.
  * Contains both the target node and the path from root to that node.
  *
- * @param targetNode The most specific KsonValue at the target location
+ * @param value The most specific KsonValue at the target location
  * @param pointerFromRoot [JsonPointer] from root to target
  *
  * Example:
@@ -23,13 +23,13 @@ import kotlin.collections.iterator
  * // For document: { users: [{ name: "Alice" }] }
  * // At location in "Alice"
  * LocationNavigationResult(
- *     targetNode = KsonString("Alice"),
+ *     value = KsonString("Alice"),
  *     pathFromRoot = listOf("users", "0", "name")
  * )
  * ```
  */
 data class LocationNavigationResult(
-    val targetNode: KsonValue,
+    val value: KsonValue,
     val pointerFromRoot: JsonPointer,
 )
 

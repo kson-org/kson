@@ -89,7 +89,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         return adjustPathForLocationContext(
             pointer = navResult.pointerFromRoot,
             lastToken = tokenContext.lastToken,
-            targetNode = navResult.targetNode,
+            targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys
             )
