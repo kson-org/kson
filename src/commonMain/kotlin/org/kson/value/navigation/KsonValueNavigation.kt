@@ -191,89 +191,104 @@ object KsonValueNavigation {
         root: KsonValue,
         tokens: List<PointerParser.Tokens>
     ): List<KsonValue> {
-        if (tokens.isEmpty()) return listOf(root)
+        return navigateRecursive(listOf(root), tokens, tokenIndex = 0)
+    }
 
-        var currentNodes: List<KsonValue> = listOf(root)
+    private tailrec fun navigateRecursive(
+        currentNodes: List<KsonValue>,
+        tokens: List<PointerParser.Tokens>,
+        tokenIndex: Int
+    ): List<KsonValue> {
+        if (tokenIndex >= tokens.size || currentNodes.isEmpty()) {
+            return currentNodes
+        }
 
-        for ((tokenIndex, token) in tokens.withIndex()) {
-            val nextNodes = mutableListOf<KsonValue>()
+        val token = tokens[tokenIndex]
 
-            for (node in currentNodes) {
-                when (token) {
-                    is PointerParser.Tokens.Literal -> {
-                        // Exact match behavior
-                        val child = when (node) {
-                            is KsonObject -> node.propertyLookup[token.value]
-                            is KsonList -> {
-                                val index = token.value.toIntOrNull()
-                                if (index != null && index >= 0 && index < node.elements.size) {
-                                    node.elements[index]
-                                } else {
-                                    null
-                                }
+        // RecursiveDescent is special: it consumes all remaining tokens and terminates
+        if (token is PointerParser.Tokens.RecursiveDescent) {
+            return handleRecursiveDescent(currentNodes, tokens, tokenIndex)
+        }
+
+        // All other tokens: process one step, then continue to next token
+        val nextNodes = processSingleToken(currentNodes, token)
+        return navigateRecursive(nextNodes, tokens, tokenIndex + 1)
+    }
+
+    private fun handleRecursiveDescent(
+        currentNodes: List<KsonValue>,
+        tokens: List<PointerParser.Tokens>,
+        tokenIndex: Int
+    ): List<KsonValue> {
+        val remainingTokens = tokens.subList(tokenIndex + 1, tokens.size)
+        return currentNodes.flatMap { node ->
+            val descendants = collectAllDescendants(node)
+            if (remainingTokens.isEmpty()) {
+                // ** at end: for /**, include node; for /path/**, exclude it
+                if (tokenIndex == 0) descendants else descendants.drop(1)
+            } else {
+                // ** in middle: try matching remaining tokens at all levels
+                descendants.flatMap { candidate ->
+                    navigateByParsedTokens(candidate, remainingTokens)
+                }
+            }
+        }
+    }
+
+    private fun processSingleToken(
+        currentNodes: List<KsonValue>,
+        token: PointerParser.Tokens
+    ): List<KsonValue> {
+        return when (token) {
+            is PointerParser.Tokens.Literal -> {
+                currentNodes.mapNotNull { node ->
+                    when (node) {
+                        is KsonObject -> node.propertyLookup[token.value]
+                        is KsonList -> {
+                            val index = token.value.toIntOrNull()
+                            if (index != null && index >= 0 && index < node.elements.size) {
+                                node.elements[index]
+                            } else {
+                                null
                             }
-                            else -> null
                         }
-                        if (child != null) nextNodes.add(child)
-                    }
-
-                    is PointerParser.Tokens.Wildcard -> {
-                        // Match all children
-                        when (node) {
-                            is KsonObject -> nextNodes.addAll(node.propertyMap.values.map { it.propValue })
-                            is KsonList -> nextNodes.addAll(node.elements)
-                            else -> { /* primitives have no children */ }
-                        }
-                    }
-
-                    is PointerParser.Tokens.RecursiveDescent -> {
-                        // Recursive descent: match zero or more levels
-                        val remainingTokens = tokens.subList(tokenIndex + 1, tokens.size)
-                        val descendants = collectAllDescendants(node)
-
-                        if (remainingTokens.isEmpty()) {
-                            // ** at end: for /**, include node; for /path/**, exclude it
-                            nextNodes.addAll(if (tokenIndex == 0) descendants else descendants.drop(1))
-                        } else {
-                            // ** in middle: try matching remaining tokens at all levels
-                            descendants.forEach { candidate ->
-                                nextNodes.addAll(navigateByParsedTokens(candidate, remainingTokens))
-                            }
-                        }
-
-                        // RecursiveDescent already handled remaining tokens, so we're done
-                        return nextNodes
-                    }
-
-                    is PointerParser.Tokens.GlobPattern -> {
-                        // Pattern matching
-                        when (node) {
-                            is KsonObject -> {
-                                for ((key, property) in node.propertyMap) {
-                                    if (GlobMatcher.matches(token.pattern, key)) {
-                                        nextNodes.add(property.propValue)
-                                    }
-                                }
-                            }
-                            is KsonList -> {
-                                // For arrays, match pattern against stringified indices
-                                for ((index, element) in node.elements.withIndex()) {
-                                    if (GlobMatcher.matches(token.pattern, index.toString())) {
-                                        nextNodes.add(element)
-                                    }
-                                }
-                            }
-                            else -> { /* primitives have no children */ }
-                        }
+                        else -> null
                     }
                 }
             }
 
-            currentNodes = nextNodes
-            if (currentNodes.isEmpty()) break
-        }
+            is PointerParser.Tokens.Wildcard -> {
+                currentNodes.flatMap { node ->
+                    when (node) {
+                        is KsonObject -> node.propertyMap.values.map { it.propValue }
+                        is KsonList -> node.elements
+                        else -> emptyList()
+                    }
+                }
+            }
 
-        return currentNodes
+            is PointerParser.Tokens.GlobPattern -> {
+                currentNodes.flatMap { node ->
+                    when (node) {
+                        is KsonObject -> {
+                            node.propertyMap.entries
+                                .filter { (key, _) -> GlobMatcher.matches(token.pattern, key) }
+                                .map { it.value.propValue }
+                        }
+                        is KsonList -> {
+                            node.elements.filterIndexed { index, _ ->
+                                GlobMatcher.matches(token.pattern, index.toString())
+                            }
+                        }
+                        else -> emptyList()
+                    }
+                }
+            }
+
+            is PointerParser.Tokens.RecursiveDescent -> {
+                throw UnsupportedOperationException("RecursiveDescent should be handled by handleRecursiveDescent")
+            }
+        }
     }
 
     /**
