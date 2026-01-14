@@ -5,7 +5,7 @@ fn test_kson_format() {
     let indent = IndentType::Spaces(indent_type::Spaces::new(2));
     let result = Kson::format(
         "key: [1, 2, 3, 4]",
-        FormatOptions::new(indent, FormattingStyle::Plain),
+        FormatOptions::new(indent, FormattingStyle::Plain, &[]),
     );
     insta::assert_snapshot!(result, @r"
     key:
@@ -21,7 +21,7 @@ fn test_kson_format_classic() {
     let indent = IndentType::Spaces(indent_type::Spaces::new(2));
     let result = Kson::format(
         "key: [1, 2, 3, 4]",
-        FormatOptions::new(indent, FormattingStyle::Classic),
+        FormatOptions::new(indent, FormattingStyle::Classic, &[]),
     );
     insta::assert_snapshot!(result, @r#"
       {

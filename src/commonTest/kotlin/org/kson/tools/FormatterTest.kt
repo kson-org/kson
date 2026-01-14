@@ -1,5 +1,6 @@
 package org.kson.tools
 
+import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -9,9 +10,11 @@ class FormatterTest {
         expected: String,
         indentType: IndentType = IndentType.Space(2),
         formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
-        roundTrip: Boolean = true
+        roundTrip: Boolean = true,
+        embedBlockRules: List<InternalEmbedRule> = emptyList()
     ) {
-        val formattedKson = format(source, KsonFormatterConfig(indentType, formattingStyle))
+        val config = KsonFormatterConfig(indentType, formattingStyle, embedBlockRules)
+        val formattedKson = format(source, config)
         assertEquals(
             expected,
             formattedKson
@@ -25,16 +28,21 @@ class FormatterTest {
         var roundtripKson = formattedKson
         if (roundTrip) {
             FormattingStyle.entries.filter { it != formattingStyle }.forEach { intermediateStyle ->
-                roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle))
+                roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle, embedBlockRules))
             }
         }
 
         assertEquals(
             expected,
-            format(roundtripKson, KsonFormatterConfig(indentType, formattingStyle)),
+            format(roundtripKson, config),
             "Formatting with same style should be idempotent"
         )
     }
+
+    private fun embedRule(pathPattern: String, tag: String? = null) = InternalEmbedRule(
+        pathPattern = JsonPointerGlob(pathPattern),
+        tag = tag
+    )
 
     @Test
     fun testEmptySource() {
@@ -2076,8 +2084,8 @@ class FormatterTest {
     fun testTrailingContentWithEndDash() {
         assertFormatting(
             """
-                - 
-                  - 
+                -
+                  -
                     - list
                     =
                   =
@@ -2091,9 +2099,204 @@ class FormatterTest {
                     =
                   =
                 =
-                
+
                 key: value
             """.trimIndent()
+        )
+    }
+
+    // Embed block rules tests
+
+    @Test
+    fun testExactPathMatchFormatsAsEmbedBlock() {
+        assertFormatting(
+            """
+            config:
+              script: "echo hello"
+            """.trimIndent(),
+            """
+            config:
+              script: %
+                echo hello%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/config/script")),
+        )
+    }
+
+    @Test
+    fun testExactPathMatchWithTagFormatsAsEmbedBlockWithTag() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            """
+            scripts:
+              build: %bash
+                make all%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
+        )
+    }
+
+    @Test
+    fun testWildcardPatternMatchesAllChildren() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+              deploy: "rsync -av"
+            """.trimIndent(),
+            """
+            scripts:
+              build: %bash
+                make all%%
+              deploy: %bash
+                rsync -av%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
+        )
+    }
+
+    @Test
+    fun testMultilineStringFormatsCorrectlyAsEmbedBlock() {
+        assertFormatting(
+            """
+            scripts:
+              build: "#!/bin/bash\necho 'Building...'\nmake all"
+            """.trimIndent(),
+            """
+            scripts:
+              build: %bash
+                #!/bin/bash
+                echo 'Building...'
+                make all%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
+        )
+    }
+
+    @Test
+    fun testNonMatchingPathsAreFormattedNormally() {
+        assertFormatting(
+            """
+            name: value
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            """
+            name: value
+            scripts:
+              build: %bash
+                make all%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
+        )
+    }
+
+    @Test
+    fun testRecursiveDescentMatchesNestedPaths() {
+        assertFormatting(
+            """
+            data:
+              level1:
+                level2:
+                  code: "print('hello')"
+            """.trimIndent(),
+            """
+            data:
+              level1:
+                level2:
+                  code: %python
+                    print('hello')%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/data/**/code", "python")),
+        )
+    }
+
+    @Test
+    fun testArrayIndexInPath() {
+        assertFormatting(
+            """
+            scripts:
+              - "echo first"
+              - "echo second"
+            """.trimIndent(),
+            """
+            scripts:
+              - %
+                echo first%%
+              - 'echo second'
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/0")),
+        )
+    }
+
+    @Test
+    fun testWildcardMatchesArrayIndices() {
+        assertFormatting(
+            """
+            scripts:
+              - "echo first"
+              - "echo second"
+            """.trimIndent(),
+            """
+            scripts:
+              - %bash
+                echo first%%
+              - %bash
+                echo second%%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
+        )
+    }
+
+    @Test
+    fun testEmptyEmbedRulesHasNoEffect() {
+        assertFormatting(
+            """
+            name: value
+            """.trimIndent(),
+            """
+            name: value
+            """.trimIndent(),
+            embedBlockRules = emptyList()
+        )
+    }
+
+    @Test
+    fun testClassicFormatStyleIgnoresEmbedRules() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+            """.trimIndent(),
+            """
+            {
+              "scripts": {
+                "build": "make all"
+              }
+            }
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
+            formattingStyle = FormattingStyle.CLASSIC,
+            roundTrip = false
+        )
+    }
+
+    @Test
+    fun testContentWithPercentSignsUsesDollarDelimiter() {
+        assertFormatting(
+            """
+            scripts:
+              build: "echo 100%% complete"
+            """.trimIndent(),
+            """
+            scripts:
+              build: $
+                echo 100%% complete$$
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/build")),
         )
     }
 }

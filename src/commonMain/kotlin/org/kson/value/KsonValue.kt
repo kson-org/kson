@@ -133,7 +133,7 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     }
 }
 
-class KsonString(private val stringNode: StringNodeImpl) : KsonValue(stringNode), SubParseable {
+class KsonString(internal val stringNode: StringNodeImpl) : KsonValue(stringNode), SubParseable {
     val value: String by lazy {
         stringNode.processedStringContent
     }

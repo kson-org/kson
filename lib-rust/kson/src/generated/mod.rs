@@ -12,6 +12,10 @@ use self::util::{AsKotlinObject, FromKotlinObject, KotlinPtr, ToKotlinObject};
 
 
 /// Options for formatting Kson output.
+///
+/// @param indentType The type of indentation to use (spaces or tabs)
+/// @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
+/// @param embedBlockRules Rules for formatting specific paths as embed blocks
 #[derive(Clone)]
 pub struct FormatOptions {
     kotlin_ptr: KotlinPtr,
@@ -41,19 +45,23 @@ impl FormatOptions {
     pub fn new(
         indent_type: IndentType,
         formatting_style: FormattingStyle,
+        embed_block_rules: &[EmbedRule],
     ) -> Self {
         let (env, _detach_guard) = util::attach_thread_to_java_vm();
         let class = util::get_class(env, c"org/kson/FormatOptions");
-        let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Lorg/kson/IndentType;Lorg/kson/FormattingStyle;)V");
+        let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Lorg/kson/IndentType;Lorg/kson/FormattingStyle;Ljava/util/List;)V");
 
         let indent_type_ptr = indent_type.to_kotlin_object();
         let indent_type = indent_type_ptr.as_kotlin_object();
         let formatting_style_ptr = formatting_style.to_kotlin_object();
         let formatting_style = formatting_style_ptr.as_kotlin_object();
+        let embed_block_rules_ptr = util::to_kotlin_list(embed_block_rules);
+        let embed_block_rules = embed_block_rules_ptr.as_kotlin_object();
 
         let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
             indent_type,
             formatting_style,
+            embed_block_rules,
         )};
         util::panic_upon_exception(env);
         Self {
@@ -107,6 +115,28 @@ impl FormatOptions {
         );
 
         FromKotlinObject::from_kotlin_object(result)
+    }
+
+
+    pub fn embed_block_rules(
+        &self,
+    ) -> Vec<EmbedRule> {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/FormatOptions",
+            c"getEmbedBlockRules",
+            c"()Ljava/util/List;",
+            CallObjectMethod,
+            self_obj,
+
+        );
+
+        util::from_kotlin_list(result)
     }
 }
 
@@ -3204,6 +3234,140 @@ impl PartialEq for Kson {
     }
 }
 impl std::hash::Hash for Kson {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self.to_kotlin_object(), state)
+    }
+}
+
+
+/// A rule for formatting string values at specific paths as embed blocks.
+///
+/// When formatting KSON, strings at paths matching [pathPattern] will be rendered
+/// as embed blocks instead of regular strings.
+///
+/// @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+/// @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+///
+/// Example:
+/// ```kotlin
+/// EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+/// EmbedRule("/config/description")        // Match exact path, no tag
+/// ```
+#[derive(Clone)]
+pub struct EmbedRule {
+    kotlin_ptr: KotlinPtr,
+}
+
+impl FromKotlinObject for EmbedRule {
+    fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+        let (env, _detach_guard) = util::attach_thread_to_java_vm();
+        let kotlin_ptr = util::to_gc_global_ref(env, obj);
+        Self { kotlin_ptr }
+    }
+}
+
+impl ToKotlinObject for EmbedRule {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        self.kotlin_ptr.clone()
+    }
+}
+
+impl AsKotlinObject for EmbedRule {
+    fn as_kotlin_object(&self) -> self::sys::jobject {
+        self.kotlin_ptr.inner.inner
+    }
+}
+
+impl EmbedRule {
+    pub fn new(
+        path_pattern: &str,
+        tag: Option<&str>,
+    ) -> Self {
+        let (env, _detach_guard) = util::attach_thread_to_java_vm();
+        let class = util::get_class(env, c"org/kson/EmbedRule");
+        let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Ljava/lang/String;Ljava/lang/String;)V");
+
+        let path_pattern_ptr = path_pattern.to_kotlin_object();
+        let path_pattern = path_pattern_ptr.as_kotlin_object();
+        let tag_ptr = tag.map(|v| v.to_kotlin_object());
+        let tag = tag_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());
+
+        let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
+            path_pattern,
+            tag,
+        )};
+        util::panic_upon_exception(env);
+        Self {
+            kotlin_ptr: util::to_gc_global_ref(env, jobject)
+        }
+    }
+}
+
+
+impl EmbedRule {
+
+
+    pub fn path_pattern(
+        &self,
+    ) -> String {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/EmbedRule",
+            c"getPathPattern",
+            c"()Ljava/lang/String;",
+            CallObjectMethod,
+            self_obj,
+
+        );
+
+        FromKotlinObject::from_kotlin_object(result)
+    }
+
+
+    pub fn tag(
+        &self,
+    ) -> Option<String> {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/EmbedRule",
+            c"getTag",
+            c"()Ljava/lang/String;",
+            CallObjectMethod,
+            self_obj,
+
+        );
+
+        FromKotlinObject::from_kotlin_object(result)
+    }
+}
+
+impl std::fmt::Debug for EmbedRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let obj = self.to_kotlin_object();
+        write!(f, "{}", util::call_to_string(c"org/kson/EmbedRule", &obj))
+    }
+}
+
+impl Eq for EmbedRule {}
+impl PartialEq for EmbedRule {
+    fn eq(&self, other: &EmbedRule) -> bool {
+        util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+    }
+}
+impl std::hash::Hash for EmbedRule {
     fn hash<H>(&self, state: &mut H)
     where
         H: std::hash::Hasher,
