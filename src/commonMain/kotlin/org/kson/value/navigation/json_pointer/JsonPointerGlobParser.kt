@@ -12,7 +12,33 @@ import org.kson.parser.messages.MessageType.*
  * - Backslash escaping: `\*`, `\?`, `\\` for literal characters in patterns
  * - RFC 6901 escaping: `~0` (tilde), `~1` (slash) still supported for compatibility
  *
- * Examples (where * represents the asterisk character):
+ * ## Grammar (ABNF-like)
+ *
+ * ```
+ * json-pointer-glob  = *( "/" reference-token )
+ *
+ * reference-token    = recursive-descent / wildcard / glob-pattern / literal-token
+ *
+ * recursive-descent  = %x2A %x2A                    ; exactly "**"
+ * wildcard           = %x2A                         ; exactly "*"
+ * glob-pattern       = *literal-char glob-wildcard *token-char
+ *                                                   ; not exactly "*" or "**" (handled by parser priority)
+ * literal-token      = *literal-char
+ *
+ * token-char         = literal-char / glob-wildcard
+ * literal-char       = unescaped / rfc-escaped / backslash-escaped
+ *
+ * unescaped          = %x00-29 / %x2B-2E / %x30-3E / %x40-5B / %x5D-7D / %x7F-10FFFF
+ *                    ; any character except: "*" (%x2A), "/" (%x2F), "?" (%x3F), "\" (%x5C), "~" (%x7E)
+ *
+ * rfc-escaped        = "~0" / "~1"                  ; decodes to "~" and "/" respectively
+ * backslash-escaped  = "\*" / "\?" / "\\"           ; decodes to literal *, ?, \
+ * glob-wildcard      = "*" / "?"                    ; unescaped wildcards for pattern matching
+ * ```
+ *
+ * ## Examples
+ *
+ * (where * represents the asterisk character)
  * ```
  * /users/*/email              - Wildcard: matches email of any user
  * /users/ **/email          - Recursive descent: matches all emails at any depth under users
