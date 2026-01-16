@@ -7,6 +7,7 @@ import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
 import org.kson.value.navigation.json_pointer.GlobMatcher
 import org.kson.value.navigation.json_pointer.PointerParser
 import kotlin.collections.iterator
@@ -95,6 +96,7 @@ object KsonValueNavigation {
      * val adminRoles = navigateWithJsonPointerGlob(root, pointer2)
      * ```
      */
+    @OptIn(ExperimentalJsonPointerGlobLanguage::class)
     fun navigateWithJsonPointerGlob(
         root: KsonValue,
         pointer: JsonPointerGlob

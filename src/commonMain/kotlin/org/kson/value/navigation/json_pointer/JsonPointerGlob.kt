@@ -25,6 +25,7 @@ package org.kson.value.navigation.json_pointer
  * @property pointerString The JsonPointerGlob string (must be valid)
  * @throws IllegalArgumentException if the pointer string is invalid
  */
+@ExperimentalJsonPointerGlobLanguage
 class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
 
     override val tokens: List<String>
@@ -49,3 +50,10 @@ class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobPa
     }
 }
 
+@RequiresOptIn(
+  level = RequiresOptIn.Level.WARNING,
+  message = "The JsonPointerGlob language specification is experimental and may change in future versions."
+)
+@Retention(AnnotationRetention.BINARY)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
+annotation class ExperimentalJsonPointerGlobLanguage

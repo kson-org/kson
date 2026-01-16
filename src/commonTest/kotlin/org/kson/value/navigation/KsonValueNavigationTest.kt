@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalJsonPointerGlobLanguage::class)
+
 package org.kson.value.navigation
 
 import org.kson.KsonCore
@@ -5,6 +7,7 @@ import org.kson.value.KsonString
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
 import kotlin.test.*
 
 class KsonValueNavigationTest {

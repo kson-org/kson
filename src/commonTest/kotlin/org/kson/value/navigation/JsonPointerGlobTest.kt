@@ -1,5 +1,8 @@
+@file:OptIn(ExperimentalJsonPointerGlobLanguage::class)
+
 package org.kson.value.navigation
 
+import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
