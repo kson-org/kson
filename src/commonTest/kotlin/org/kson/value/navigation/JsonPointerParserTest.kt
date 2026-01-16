@@ -1,7 +1,9 @@
-package org.kson.schema
+package org.kson.value.navigation
 
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
+import org.kson.value.navigation.json_pointer.PointerParser
+import org.kson.value.navigation.json_pointer.JsonPointerParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -10,13 +12,14 @@ class JsonPointerParserTest {
 
     private fun assertParsesTo(source: String, expectedReferenceTokens: List<String>) {
         val result = JsonPointerParser(source).parse()
-        assertTrue(result is JsonPointerParser.ParseResult.Success)
-        assertEquals(expectedReferenceTokens, result.tokens)
+        assertTrue(result is PointerParser.ParseResult.Success)
+        val actualTokens = result.tokens.map { (it as PointerParser.Tokens.Literal).value }
+        assertEquals(expectedReferenceTokens, actualTokens)
     }
 
     private fun assertParserRejectsSource(source: String, expectedMessage: MessageType) {
         val result = JsonPointerParser(source).parse()
-        assertTrue(result is JsonPointerParser.ParseResult.Error)
+        assertTrue(result is PointerParser.ParseResult.Error)
         assertEquals(expectedMessage, result.message.type)
     }
 

@@ -8,9 +8,11 @@ import org.kson.Kson.publishMessages
 import org.kson.parser.*
 import org.kson.parser.messages.MessageSeverity as InternalMessageSeverity
 import org.kson.schema.JsonSchema
+import org.kson.tools.InternalEmbedRule
 import org.kson.tools.FormattingStyle as InternalFormattingStyle
 import org.kson.tools.IndentType as InternalIndentType
 import org.kson.tools.KsonFormatterConfig
+import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.parser.TokenType as InternalTokenType
 import org.kson.parser.Token as InternalToken
 import org.kson.value.KsonValue as InternalKsonValue
@@ -172,11 +174,38 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
 }
 
 /**
+ * A rule for formatting string values at specific paths as embed blocks.
+ *
+ * When formatting KSON, strings at paths matching [pathPattern] will be rendered
+ * as embed blocks instead of regular strings.
+ *
+ * **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
+ *
+ * @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+ * @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+ *
+ * Example:
+ * ```kotlin
+ * EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+ * EmbedRule("/config/description")        // Match exact path, no tag
+ * ```
+ */
+class EmbedRule(
+    val pathPattern: String,
+    val tag: String? = null
+)
+
+/**
  * Options for formatting Kson output.
+ *
+ * @param indentType The type of indentation to use (spaces or tabs)
+ * @param formattingStyle The formatting style (PLAIN, DELIMITED, COMPACT, CLASSIC)
+ * @param embedBlockRules Rules for formatting specific paths as embed blocks
  */
 class FormatOptions(
     val indentType: IndentType = IndentType.Spaces(2),
-    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
+    val embedBlockRules: List<EmbedRule> = emptyList()
 ) {
     /**
      * Map [FormatOptions] to [KsonFormatterConfig] that is used internally to format a Kson document.
@@ -193,7 +222,19 @@ class FormatOptions(
             FormattingStyle.COMPACT -> InternalFormattingStyle.COMPACT
             FormattingStyle.CLASSIC -> InternalFormattingStyle.CLASSIC
         }
-        return KsonFormatterConfig(indentType = indentType, formattingStyle)
+
+        val internalEmbedRules = embedBlockRules.map { rule ->
+            InternalEmbedRule(
+                pathPattern = JsonPointerGlob(rule.pathPattern),
+                tag = rule.tag
+            )
+        }
+
+        return KsonFormatterConfig(
+            indentType = indentType,
+            formattingStyle = formattingStyle,
+            embedBlockRules = internalEmbedRules
+        )
     }
 }
 

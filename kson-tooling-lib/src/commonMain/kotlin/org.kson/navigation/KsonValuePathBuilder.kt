@@ -5,10 +5,10 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
-import org.kson.schema.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
-import org.kson.value.KsonValueNavigation
+import org.kson.value.navigation.KsonValueNavigation
 
 /**
  * Context information about a token at a specific location.
@@ -45,7 +45,7 @@ private data class TokenContext(
  * @param location The position (line and column, zero-based)
  *
  * @see buildJsonPointerToPosition Main method to build the path
- * @see org.kson.value.KsonValueNavigation For navigation within parsed KSON values
+ * @see KsonValueNavigation For navigation within parsed KSON values
  */
 class KsonValuePathBuilder(private val document: String, private val location: Coordinates) {
 
@@ -82,14 +82,14 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
         // Navigate to the target node and build the path in a single traversal
-        val navResult = KsonValueNavigation.navigateToLocationWithPath(documentValue, searchPosition)
+        val navResult = KsonValueNavigation.navigateToLocationWithPointer(documentValue, searchPosition)
             ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
             pointer = navResult.pointerFromRoot,
             lastToken = tokenContext.lastToken,
-            targetNode = navResult.targetNode,
+            targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys
             )

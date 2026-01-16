@@ -25,7 +25,7 @@ def test_kson_format():
     formatting = FormattingStyle.PLAIN
     result = Kson.format(
         "key: [1, 2, 3, 4]",
-        FormatOptions(indent, formatting),
+        FormatOptions(indent, formatting, []),
     )
 
     assert (
@@ -43,7 +43,7 @@ def test_kson_formatting_classic():
     formatting = FormattingStyle.CLASSIC
     result = Kson.format(
         "key: [1, 2, 3, 4]",
-        FormatOptions(indent, formatting),
+        FormatOptions(indent, formatting, []),
     )
 
     assert (
