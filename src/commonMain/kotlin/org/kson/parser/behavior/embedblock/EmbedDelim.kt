@@ -80,7 +80,7 @@ sealed class EmbedDelim(val char: Char) {
         return content.replace(needsEscapesPattern) { matchResult ->
             // For each match, insert an extra backslash between the delimiter chars
             val match = matchResult.value
-            match[0] + match.substring(1, match.length - 1) + "\\" + match.last()
+            match[0] + "\\" + match.substring(1, match.length)
         }
     }
 
