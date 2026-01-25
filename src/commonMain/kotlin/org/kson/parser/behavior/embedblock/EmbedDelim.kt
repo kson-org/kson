@@ -39,13 +39,13 @@ sealed class EmbedDelim(val char: Char) {
      * The pattern also matches zero or more trailing slashes ensures that in a situation like `%\%\%`, we correctly
      * identify that the leading `%\%` needs unescaping, not the second
      *
-     * NOTE: this pattern captures the slashes which must be re-inserted as the first group.
+     * NOTE: this pattern captures the slashes which must be re-inserted as capture groups.
      *   The code in [escapeEmbedContent] relies on this fact—we tolerate this coupling so we
-     *   cn cache this compiled [Regex] here
+     *   can cache this compiled [Regex] here
      *
      * See [EmbedDelim] class doc for details on embed delimiter escaping
      */
-    private val hasEscapesPattern = "$delimCharForRegex\\\\([\\\\]*)$delimCharForRegex\\\\*".toRegex()
+    private val hasEscapesPattern = "$delimCharForRegex\\\\([\\\\]*)$delimCharForRegex(\\\\*)".toRegex()
 
     /** Percent-style delimiter (%, %%), our "primary" delimiter */
     object Percent : EmbedDelim('%')
@@ -91,9 +91,10 @@ sealed class EmbedDelim(val char: Char) {
     fun unescapeEmbedContent(content: String): String {
         /**
          * Note: we rely on the structure of [hasEscapesPattern] here, in particular how it
-         *   groups in $1 the slashes which must be maintained between escaped delim chars we find
+         *   groups in $1 the slashes which must be maintained between escaped delim chars we find,
+         *   and groups into $2 the slashes which must be maintained at the end
          */
-        return content.replace(hasEscapesPattern, "$delimCharForRegex\$1$delimCharForRegex")
+        return content.replace(hasEscapesPattern, "$delimCharForRegex\$1$delimCharForRegex\$2")
     }
 
     /**

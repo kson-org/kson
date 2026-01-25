@@ -51,4 +51,15 @@ class EmbedDelimTest {
                 \%\\\%\%\%\\n
             """.trimIndent()))
     }
+
+    @Test
+    fun testUnescapeDelimWithTrailingSlash() {
+        assertEquals(
+            """
+                %%\n
+            """.trimIndent(),
+            EmbedDelim.Percent.unescapeEmbedContent("""
+                %\%\n
+            """.trimIndent()))
+    }
 }

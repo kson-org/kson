@@ -270,6 +270,28 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedBlockWithTrailingSlashEscapes() {
+        assertFormatting(
+            """
+                %
+                This embed block has more escaped percents than dollars
+                %\% %\% %\% $$\x
+                so will format to a $-embed block.
+                And it should not get tripped up by trailing slashes when escaping $\$\x
+                %%
+            """.trimIndent(),
+            """
+                $
+                This embed block has more escaped percents than dollars
+                %% %% %% $\$\x
+                so will format to a $-embed block.
+                And it should not get tripped up by trailing slashes when escaping $\\$\x
+                $$
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testEmbedBlockWithPartialEmbedDelim() {
         assertFormatting(
             """
