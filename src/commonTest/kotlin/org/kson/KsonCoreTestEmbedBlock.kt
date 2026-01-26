@@ -346,8 +346,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
-                  "embedContent": "content\n"
-                  "unrelatedKey": "is not an embed block"
+                  embedContent: "content\n"
+                  unrelatedKey: "is not an embed block"
             """.trimIndent(),
             """
                 {
@@ -382,9 +382,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock:
-                  "embedContent":
+                  embedContent:
                     not: content
-                  "unrelatedKey": "is not an embed block"
+                  unrelatedKey: "is not an embed block"
             """.trimIndent(),
             """
                 {

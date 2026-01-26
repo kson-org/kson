@@ -20,7 +20,7 @@ class KsonCoreTestComment : KsonCoreTest {
         """.trimIndent(),
             """
             # this is a comment
-            "string"
+            string
         """.trimIndent(),
             """
             "string"

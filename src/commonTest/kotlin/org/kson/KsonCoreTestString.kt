@@ -21,6 +21,26 @@ class KsonCoreTestString : KsonCoreTest {
     }
 
     @Test
+    fun testQuotedSimpleString() {
+        assertParsesTo(
+            """
+                "simpleKey": "simpleValue"
+            """.trimIndent(),
+            """
+                simpleKey: simpleValue
+            """.trimIndent(),
+            """
+                simpleKey: simpleValue
+            """.trimIndent(),
+            """
+                {
+                  "simpleKey": "simpleValue"
+                }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
     fun testStringWithRawWhitespace() {
         assertParsesTo(
             """

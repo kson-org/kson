@@ -179,7 +179,7 @@ class CommandLineInterfaceTest {
                 number: 42
             """.trimIndent(),
             expectedOutput = OutputExpectation.Success("""
-                key: "value"
+                key: value
                 number: 42
             """.trimIndent())
         )
@@ -200,7 +200,7 @@ class CommandLineInterfaceTest {
                 }
             """.trimIndent(),
             expectedOutput = OutputExpectation.Success("""
-                string: "value"
+                string: value
                 number: 42
                 boolean: true
                 null_value: null
@@ -209,7 +209,7 @@ class CommandLineInterfaceTest {
                   - 2
                   - 3
                 object:
-                  nested: "value"
+                  nested: value
             """.trimIndent())
         )
     }
@@ -311,11 +311,11 @@ class CommandLineInterfaceTest {
             """.trimIndent(),
             expectedOutput = OutputExpectation.Success("""
                 database:
-                  host: "localhost"
+                  host: localhost
                   port: 5432
                   credentials:
-                    username: "admin"
-                    password: "secret"
+                    username: admin
+                    password: secret
             """.trimIndent())
         )
     }
@@ -447,7 +447,7 @@ class CommandLineInterfaceTest {
                 }
             """.trimIndent(),
             expectedOutput = OutputExpectation.Success("""
-                key: "value"
+                key: value
                 nested:
                   inner: 123
             """.trimIndent()),
@@ -506,7 +506,7 @@ class CommandLineInterfaceTest {
             main(arrayOf("yaml", "-o", outputFile.absolutePath))
             assertEquals(
                 """
-                key: "value"
+                key: value
                 number: 42
                 """.trimIndent(),
                 outputFile.readText()
