@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.value.navigation.json_pointer
 
 /**
  * Represents a validated JSON Pointer according to RFC 6901.
@@ -18,27 +18,15 @@ package org.kson.schema
  * @property pointerString The JSON Pointer string (must be valid according to RFC 6901)
  * @throws IllegalArgumentException if the pointer string is invalid
  */
-data class JsonPointer(val pointerString: String) {
-    /**
-     * The parsed reference tokens for this pointer.
-     * Empty list for root pointer (""), otherwise contains the unescaped tokens.
-     */
-    val tokens: List<String>
+class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(pointerString)) {
 
-    init {
-        when (val result = JsonPointerParser(pointerString).parse()) {
-            is JsonPointerParser.ParseResult.Success -> {
-                tokens = result.tokens
-            }
-            is JsonPointerParser.ParseResult.Error -> {
-                throw IllegalArgumentException(
-                    "Invalid JSON Pointer '$pointerString': ${result.message}"
-                )
+    override val tokens: List<String>
+        get() = rawTokens.map {
+            when (it) {
+                is PointerParser.Tokens.Literal -> it.value
+                else -> throw UnsupportedOperationException("JsonPointer only supports 'literal' tokens")
             }
         }
-    }
-
-    override fun toString(): String = pointerString
 
     companion object {
         /**
@@ -47,12 +35,12 @@ data class JsonPointer(val pointerString: String) {
         val ROOT = JsonPointer("")
 
         /**
-         * Creates a JsonPointer from a list of already-parsed tokens.
+         * Creates a JsonPointer from a list of already-parsed string tokens.
          *
          * This is useful when you have tokens from navigation or other sources and need
          * to create a JsonPointer. The tokens will be properly escaped according to RFC 6901.
          *
-         * @param tokens The reference tokens to encode into a JSON Pointer
+         * @param tokens The reference tokens (as strings) to encode into a JSON Pointer
          * @return A JsonPointer representing the token path
          *
          * Example:

@@ -1,5 +1,6 @@
-package org.kson.schema
+package org.kson.value.navigation
 
+import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

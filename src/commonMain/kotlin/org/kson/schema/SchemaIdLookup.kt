@@ -1,11 +1,12 @@
 package org.kson.schema
 
 import org.kson.*
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
-import org.kson.value.KsonValueNavigation
+import org.kson.value.navigation.KsonValueNavigation
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.
@@ -159,7 +160,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * val schemaRefs = idLookup.navigateByDocumentPath(listOf("users", "0", "name"))
      * ```
      *
-     * @param documentPointer Pointer through the document (from [KsonValueNavigation.navigateToLocationWithPath])
+     * @param documentPointer Pointer through the document (from [KsonValueNavigation.navigateToLocationWithPointer])
      * @return List of [ResolvedRef] containing all sub-schemas at that location (empty if not found)
      */
     fun navigateByDocumentPointer(
