@@ -91,9 +91,9 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonUnquotedString,
             // location of "simple" in SRC-denoted KSON string
-            Location.Companion.create(0, 5, 0, 11, 5, 11),
+            Location.create(0, 5, 0, 11, 5, 11),
             // location of "simple" in original source
-            Location.Companion.create(0, 10, 0, 16, 10, 16))
+            Location.create(0, 10, 0, 16, 10, 16))
 
         val ksonQuotedPlainString = """
             key: 'SRCa plain quoted string'
@@ -102,8 +102,8 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonQuotedPlainString,
             // location of " quoted " in SRC-denoted KSON string
-            Location.Companion.create(0, 10, 0, 18, 10, 18),
-            Location.Companion.create(0, 16, 0, 24, 16, 24))
+            Location.create(0, 10, 0, 18, 10, 18),
+            Location.create(0, 16, 0, 24, 16, 24))
 
         val ksonQuotedStringWithNewlines = """
             key: 'SRCa quoted string
@@ -113,8 +113,8 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonQuotedStringWithNewlines,
             // location of "ted string\nwith new" in SRC-denoted KSON string
-            Location.Companion.create(0, 8, 1, 8, 8, 27),
-            Location.Companion.create(0, 14, 1, 8, 14, 33))
+            Location.create(0, 8, 1, 8, 8, 27),
+            Location.create(0, 14, 1, 8, 14, 33))
     }
 
     @Test
@@ -127,7 +127,7 @@ class SubParseableTest: KsonCoreTestError {
             ksonStringWithEscapes,
             // location of "quotes" in the SRC-denoted KSON string
             Location.create(0, 29, 0, 35, 29, 35),
-            Location.Companion.create(0, 37, 0, 43, 37, 43))
+            Location.create(0, 37, 0, 43, 37, 43))
     }
 
     @Test
@@ -139,21 +139,26 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonStringWithEscapes,
             // location of "g\t\n\t h" in the SRC-denoted KSON string
-            Location.Companion.create(0, 13, 1, 3, 13, 19),
-            Location.Companion.create(0, 19, 0, 28, 19, 28))
+            Location.create(0, 13, 1, 3, 13, 19),
+            Location.create(0, 19, 0, 28, 19, 28))
     }
 
     @Test
     fun testSubLocationInPlainEmbed() {
         val ksonPlainEmbed = """
             %
-            this is a very simple embed, with no escapes or
+            SRCthis is a very simple embed, with no escapes or
             indent stripping.  It is equivalent to a string
             with newlines
             %%
         """.trimIndent()
 
-        // TODO test this case
+        assertSubLocationMessageLogged(
+            ksonPlainEmbed,
+            // location of "or\nindent" in the SRC-denoted KSON string
+            Location.create(0, 48, 1, 6, 48, 57),
+            Location.create(1, 48, 2, 6, 50, 59)
+        )
     }
 
     @Test
@@ -165,12 +170,17 @@ class SubParseableTest: KsonCoreTestError {
                 %%
         """.trimIndent()
 
-        // TODO test this case
+        assertSubLocationMessageLogged(
+            ksonIndentedEmbed,
+            // location of "escapes\nfor testing" in the SRC-denoted KSON string
+            Location.create(0, 45, 1, 11, 45, 64),
+            Location.create(1, 49, 2, 15, 56, 79)
+        )
     }
 
     @Test
     fun testSubLocationInEmbedWithEscapes() {
-        val ksonIndentedEmbed = """
+        val ksonEmbedWithEscapes = """
             %
             SRCthis is an indent-free embed block with escaped %\%
             embed delimiters %\\\\% for testing accuracy of
@@ -178,16 +188,26 @@ class SubParseableTest: KsonCoreTestError {
             %%
         """.trimIndent()
 
-        // TODO test this case
+        assertSubLocationMessageLogged(
+            ksonEmbedWithEscapes,
+            // location of "escaped %%\nembed" in the SRC-denoted KSON string
+            Location.create(0, 43, 1, 5, 43, 59),
+            Location.create(1, 43, 2, 5, 45, 62)
+        )
 
         val ksonIndentedEmbedWithEscapes = """
             key: %
-                this is an indented embed block with escaped %\%
+                SRCthis is an indented embed block with escaped %\%
                 embed delimiters %\\\\% for testing accuracy of
                 sub-location generation
                 %%
         """.trimIndent()
 
-        // TODO test this case
+        assertSubLocationMessageLogged(
+            ksonIndentedEmbedWithEscapes,
+            // location of "escaped %%\nembed" in the SRC-denoted KSON string
+            Location.create(0, 40, 1, 5, 40, 56),
+            Location.create(1, 44, 2, 9, 51, 72)
+        )
     }
 }
