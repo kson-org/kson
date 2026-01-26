@@ -264,7 +264,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
     }
 
     private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val seperator = when (compileTarget) {
+        val separator = when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
                     ",\n"
@@ -278,7 +278,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
         return """
             |${indent.firstLineIndent()}{
             |${
-            properties.withIndex().joinToString(seperator) { (index, property) ->
+            properties.withIndex().joinToString(separator) { (index, property) ->
                 val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
                 property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
             }
@@ -497,7 +497,7 @@ class ListNode(
         compileTarget: CompileTarget,
         listDelimiters: ListDelimiters
     ): String {
-        val seperator = when (compileTarget) {
+        val separator = when (compileTarget) {
             is Kson -> if(compileTarget.formatConfig.formattingStyle == CLASSIC) {
                 ",\n"
             }else{
@@ -509,7 +509,7 @@ class ListNode(
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = "\n"
         return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
-                elements.withIndex().joinToString(seperator) { (index, element) ->
+                elements.withIndex().joinToString(separator) { (index, element) ->
                     val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
                     element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
                 } +
