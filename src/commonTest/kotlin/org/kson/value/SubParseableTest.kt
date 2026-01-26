@@ -91,9 +91,9 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonUnquotedString,
             // location of "simple" in SRC-denoted KSON string
-            Location.Companion.create(0, 5, 0, 11, 5, 11),
+            Location.create(0, 5, 0, 11, 5, 11),
             // location of "simple" in original source
-            Location.Companion.create(0, 10, 0, 16, 10, 16))
+            Location.create(0, 10, 0, 16, 10, 16))
 
         val ksonQuotedPlainString = """
             key: 'SRCa plain quoted string'
@@ -102,8 +102,8 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonQuotedPlainString,
             // location of " quoted " in SRC-denoted KSON string
-            Location.Companion.create(0, 10, 0, 18, 10, 18),
-            Location.Companion.create(0, 16, 0, 24, 16, 24))
+            Location.create(0, 10, 0, 18, 10, 18),
+            Location.create(0, 16, 0, 24, 16, 24))
 
         val ksonQuotedStringWithNewlines = """
             key: 'SRCa quoted string
@@ -113,8 +113,8 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonQuotedStringWithNewlines,
             // location of "ted string\nwith new" in SRC-denoted KSON string
-            Location.Companion.create(0, 8, 1, 8, 8, 27),
-            Location.Companion.create(0, 14, 1, 8, 14, 33))
+            Location.create(0, 8, 1, 8, 8, 27),
+            Location.create(0, 14, 1, 8, 14, 33))
     }
 
     @Test
@@ -127,7 +127,7 @@ class SubParseableTest: KsonCoreTestError {
             ksonStringWithEscapes,
             // location of "quotes" in the SRC-denoted KSON string
             Location.create(0, 29, 0, 35, 29, 35),
-            Location.Companion.create(0, 37, 0, 43, 37, 43))
+            Location.create(0, 37, 0, 43, 37, 43))
     }
 
     @Test
@@ -139,8 +139,8 @@ class SubParseableTest: KsonCoreTestError {
         assertSubLocationMessageLogged(
             ksonStringWithEscapes,
             // location of "g\t\n\t h" in the SRC-denoted KSON string
-            Location.Companion.create(0, 13, 1, 3, 13, 19),
-            Location.Companion.create(0, 19, 0, 28, 19, 28))
+            Location.create(0, 13, 1, 3, 13, 19),
+            Location.create(0, 19, 0, 28, 19, 28))
     }
 
     @Test
