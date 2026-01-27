@@ -10,7 +10,9 @@ plugins {
 }
 
 group = properties("pluginGroup")
-version = properties("pluginVersion")
+// [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
+val isRelease = project.findProperty("release") == "true"
+version = org.kson.KsonVersion.getVersion(rootProject.projectDir, isRelease = isRelease)
 
 // Configure project's dependencies
 repositories {
@@ -63,8 +65,8 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
-        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels
-        channels.set(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').take(1))
+        // Use SNAPSHOT channel for snapshot builds, default channel for releases
+        channels.set(listOf(if (version.toString().endsWith("-SNAPSHOT")) "SNAPSHOT" else "default"))
     }
 
     patchPluginXml {
