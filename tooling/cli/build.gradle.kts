@@ -18,12 +18,13 @@ dependencies {
 }
 
 // Task to generate Version.kt with the kson-lib version
+val generatedSrcDir = layout.buildDirectory.dir("generated/kotlin")
 val generateVersion by tasks.registering {
     group = "build"
     description = "Generates Version.kt file with kson-lib version"
 
-    val outputDir = file("src/main/kotlin/org/kson/tooling/cli/generated")
-    val outputFile = file("$outputDir/Version.kt")
+    val outputDir = generatedSrcDir.get().asFile.resolve("org/kson/tooling/cli/generated")
+    val outputFile = outputDir.resolve("Version.kt")
 
     // Get version from kson-lib project
     val ksonLibVersion = project(":kson-lib").version.toString()
@@ -42,6 +43,15 @@ val generateVersion by tasks.registering {
         """.trimMargin())
 
         println("Generated Version.kt with KSON_VERSION = $ksonLibVersion")
+    }
+}
+
+// Add generated sources to the main source set
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir(generatedSrcDir)
+        }
     }
 }
 
