@@ -95,20 +95,6 @@ enum class TokenType : ElementType {
      * A [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] delimited chunk of text, i.e. "This is a string"
      */
     STRING_CONTENT,
-    /**
-     * Control character prohibited from appearing in a Kson [String]
-     */
-    STRING_ILLEGAL_CONTROL_CHARACTER,
-    /**
-     * A unicode escape sequence embedded in a [STRING_CONTENT] as "\uXXXX", where "X" is a hex digit.
-     * Used to give helpful errors to the user when their escape sequence is incorrect.
-     */
-    STRING_UNICODE_ESCAPE,
-    /**
-     * A "\x" escape embedded in a [STRING_CONTENT], where "x" is a legal escape (see [validStringEscapes])
-     * Used to give helpful errors to the user when their escape is incorrect.
-     */
-    STRING_ESCAPE,
     // true
     TRUE,
     /**

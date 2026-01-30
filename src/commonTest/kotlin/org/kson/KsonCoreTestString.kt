@@ -335,4 +335,43 @@ class KsonCoreTestString : KsonCoreTest {
         )
     }
 
+    @Test
+    fun testWhitespaceControlCharactersAllowed() {
+        assertParsesTo(
+            "\"hello\tworld\"",
+            "'hello\tworld'",
+            "\"hello\tworld\"",
+            "\"hello\\tworld\""
+        )
+    }
+
+    @Test
+    fun testStringWithValidEscapesInContext() {
+        assertParsesTo(
+            "\"line1\\nline2\\ttabbed\"",
+            "'line1\\nline2\\ttabbed'",
+            "\"line1\\nline2\\ttabbed\"",
+            "\"line1\\nline2\\ttabbed\""
+        )
+    }
+
+    @Test
+    fun testUnicodeEscapeFollowedByValidEscape() {
+        assertParsesTo(
+            "\"\\u0041\\n\"",
+            "'\\u0041\\n'",
+            "\"\\u0041\\n\"",
+            "\"\\u0041\\n\""
+        )
+    }
+
+    @Test
+    fun testConsecutiveUnicodeEscapes() {
+        assertParsesTo(
+            "\"\\u0041\\u0042\\u0043\"",
+            "'\\u0041\\u0042\\u0043'",
+            "\"\\u0041\\u0042\\u0043\"",
+            "\"\\u0041\\u0042\\u0043\""
+        )
+    }
 }
