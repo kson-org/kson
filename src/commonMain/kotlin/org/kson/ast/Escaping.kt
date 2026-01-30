@@ -96,3 +96,40 @@ private fun appendSurrogatePair(sb: StringBuilder, codePoint: Int) {
     appendUnicodeEscape(sb, high)
     appendUnicodeEscape(sb, low)
 }
+
+/**
+ * Converts `\/` escape sequences to plain `/` while preserving other escape sequences
+ * (e.g. `\\/` which is an escaped backslash followed by a literal `/`).
+ *
+ * This is implemented as a standalone unescape to support YAML use-cases which does not allow the `\/` escape
+ *
+ * @param ksonEscapedString a string with Kson escape sequences intact
+ * @return the string with `\/` escapes resolved to `/`
+ */
+fun unescapeForwardSlashes(ksonEscapedString: String): String {
+    val sb = StringBuilder(ksonEscapedString.length)
+
+    var i = 0
+    while (i < ksonEscapedString.length) {
+        val char = ksonEscapedString[i]
+        if (char == '\\' && i + 1 < ksonEscapedString.length) {
+            val next = ksonEscapedString[i + 1]
+            if (next == '/') {
+                // \/ is not a valid YAML escape; emit just /
+                sb.append('/')
+                i += 2
+            } else {
+                // preserve all other escape sequences as-is (consuming both chars to avoid
+                // misinterpreting the second char, e.g. \\/ should stay as \\/ not become \/)
+                sb.append(char)
+                sb.append(next)
+                i += 2
+            }
+        } else {
+            sb.append(char)
+            i++
+        }
+    }
+
+    return sb.toString()
+}
