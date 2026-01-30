@@ -18,7 +18,6 @@ fun renderForJsonString(content: String): String {
         when {
             char == '"' -> sb.append("\\\"")
             char == '\\' -> sb.append("\\\\")
-            char == '/' -> sb.append("\\/")  // Optional but included for maximum compatibility
             char == '\b' -> sb.append("\\b")
             char == '\u000C' -> sb.append("\\f")
             char == '\n' -> sb.append("\\n")

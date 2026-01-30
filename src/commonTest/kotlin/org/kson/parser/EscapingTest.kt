@@ -46,9 +46,8 @@ class EscapingTest {
 
     @Test
     fun testJsonOptionalEscapes() {
-        // Forward slash can be escaped but isn't required to be, we escape it for completeness
-        // and hopes of broad compatibility
-        assertJsonStringEscaping("/", "\\/")
+        // Forward slash can be escaped in JSON but isn't required to be, we prefer the cleaner output
+        assertJsonStringEscaping("/", "/")
     }
 
     @Test
