@@ -81,18 +81,16 @@ class KsonList(val elements: List<KsonValue>, astNode: ListNode) : KsonValue(ast
 
 class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     private val embedTagNode = embedBlockNode.embedTagNode
-    private val metadataTagNode = embedBlockNode.metadataTagNode
     private val embedContentNode = embedBlockNode.embedContentNode
 
     val embedTag: KsonString? = embedTagNode?.let { KsonString(it) }
-    val metadataTag: KsonString? = metadataTagNode?.let { KsonString(it) }
     val embedContent: KsonString = KsonString(embedContentNode)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is EmbedBlock) return false
         
-        return embedTag == other.embedTag && metadataTag == other.metadataTag && embedContent == other.embedContent
+        return embedTag == other.embedTag && embedContent == other.embedContent
     }
 
     fun asKsonObject(): KsonObject {
@@ -105,15 +103,6 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
                     }
                     put(EmbedObjectKeys.EMBED_TAG.key,
                         KsonObjectProperty(KsonString(embedTagStringNode),
-                            KsonString(it)))
-                }
-                metadataTagNode?.let {
-                    val metadataTagStringNode = object: UnquotedStringNode(metadataTagNode.sourceTokens) {
-                        override val stringContent = EmbedObjectKeys.EMBED_METADATA.key
-                        override val processedStringContent = EmbedObjectKeys.EMBED_METADATA.key
-                    }
-                    put(EmbedObjectKeys.EMBED_METADATA.key,
-                        KsonObjectProperty(KsonString(metadataTagStringNode),
                             KsonString(it)))
                 }
                 val embedContentStringNode = object: UnquotedStringNode(embedContentNode.sourceTokens) {
@@ -129,7 +118,7 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
     }
 
     override fun hashCode(): Int {
-        return 31 * embedTag.hashCode() + 31 * metadataTag.hashCode() + 31 * embedContent.hashCode()
+        return 31 * embedTag.hashCode() + 31 * embedContent.hashCode()
     }
 }
 

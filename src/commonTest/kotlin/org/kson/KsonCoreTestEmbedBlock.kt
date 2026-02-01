@@ -284,17 +284,17 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 content%%
             """.trimIndent(),
             """
-                %: meta
+                %:meta
                 content%%
             """.trimIndent(),
             """
-                embedMetadata: "meta"
+                embedTag: ":meta"
                 embedContent: |
                   content
             """.trimIndent(),
             """
                 {
-                  "embedMetadata": "meta",
+                  "embedTag": ":meta",
                   "embedContent": "content"
                 }
             """.trimIndent(), compileSettings = compileSettings

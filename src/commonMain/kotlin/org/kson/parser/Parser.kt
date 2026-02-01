@@ -34,8 +34,7 @@ import org.kson.stdlibx.exceptions.FatalParseException
  * literal -> string | NUMBER | "true" | "false" | "null"
  * keyword -> string ":"
  * string -> (STRING_OPEN_QUOTE STRING_CONTENT STRING_CLOSE_QUOTE) | UNQUOTED_STRING
- * embedBlock -> EMBED_OPEN_DELIM EMBED_PREAMBLE EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
- * EMBED_PREAMBLE -> EMBED_TAG (":" EMBED_METADATA)?
+ * embedBlock -> EMBED_OPEN_DELIM EMBED_TAG EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
  * ```
  *
  * See [section 5.1 here](https://craftinginterpreters.com/representing-code.html#context-free-grammars)
@@ -587,48 +586,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
-     * EMBED_PREAMBLE -> EMBED_TAG (":" EMBED_METADATA)?
-     *
-     * Note: the preamble may be empty, so this always "succeeds" in parsing its rule
-     * @return the text of the parsed embed preamble (possibly empty)
-     */
-    private fun embedPreamble(): String {
-        val embedTagMark = builder.mark()
-        val embedTag = if (builder.getTokenType() == EMBED_TAG) {
-            val tagText = builder.getTokenText()
-            builder.advanceLexer()
-            embedTagMark.done(EMBED_TAG)
-            
-            // Check for optional meta tag
-            val embedMeta = if (builder.getTokenType() == EMBED_TAG_STOP) {
-                val embedTagDelim = builder.mark()
-                builder.advanceLexer()
-                embedTagDelim.done(EMBED_TAG_STOP)
-
-                val metaTagMark = builder.mark()
-                val metaText = builder.getTokenText()
-                builder.advanceLexer()
-                metaTagMark.done(EMBED_METADATA)
-                metaText
-            } else {
-                ""
-            }
-            
-            // Combine tags if both present
-            if (embedMeta.isNotEmpty()) {
-                "$tagText:$embedMeta"
-            } else {
-                tagText
-            }
-        } else {
-            embedTagMark.drop()
-            ""
-        }
-        
-        return embedTag
-    }
-
-    /**
      * embedBlock -> EMBED_OPEN_DELIM (EMBED_TAG) EMBED_PREAMBLE_NEWLINE CONTENT EMBED_CLOSE_DELIM
      */
     private fun embedBlock(): Boolean {
@@ -640,7 +597,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             builder.advanceLexer()
             embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
 
-            val embedPreambleText = embedPreamble()
+            val embedTagMark = builder.mark()
+            val embedTagText = if (builder.getTokenType() == EMBED_TAG) {
+                val tagText = builder.getTokenText()
+                builder.advanceLexer()
+                embedTagMark.done(EMBED_TAG)
+                tagText
+            } else {
+                embedTagMark.drop()
+                ""
+            }
 
             val prematureEndMark = builder.mark()
             if (builder.getTokenType() == EMBED_CLOSE_DELIM) {
@@ -649,7 +615,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                  * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
                  * so give an error to help the user fix this construct
                  */
-                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedPreambleText))
+                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
                 embedBlockMark.done(EMBED_BLOCK)
                 return true
             } else {
