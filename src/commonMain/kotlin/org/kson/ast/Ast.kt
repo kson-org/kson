@@ -936,7 +936,7 @@ class EmbedBlockNode(
      */
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\",\n"
+            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"${DoubleQuote.escapeQuotes(embedTag)}\",\n"
         } else ""
 
         return """
@@ -954,7 +954,7 @@ class EmbedBlockNode(
      */
     private fun renderYamlObject(indent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"$embedTag\"\n"
+            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(embedTag)}\"\n"
         } else ""
 
         return embedTagLine +
