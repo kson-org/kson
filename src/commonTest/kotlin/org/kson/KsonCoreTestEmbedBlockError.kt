@@ -31,6 +31,37 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     }
 
     @Test
+    fun testEmbedTagBadEscape() {
+        assertParserRejectsSource(
+            """
+                %my\xtag
+                content%%
+            """.trimIndent(),
+            listOf(STRING_BAD_ESCAPE)
+        )
+    }
+
+    @Test
+    fun testEmbedTagBadUnicodeEscape() {
+        assertParserRejectsSource(
+            """
+                %\u12
+                content%%
+            """.trimIndent(),
+            listOf(STRING_BAD_UNICODE_ESCAPE)
+        )
+    }
+
+    @Test
+    fun testEmbedTagControlCharacter() {
+        // Control character (0x01) in embed tag
+        assertParserRejectsSource(
+            "%my\u0001tag\ncontent%%",
+            listOf(STRING_CONTROL_CHARACTER)
+        )
+    }
+
+    @Test
     fun testEmbedBlockPartialDelim() {
         assertParserRejectsSource(
             """

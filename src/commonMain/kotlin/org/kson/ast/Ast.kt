@@ -639,6 +639,11 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
     /**
      * The value of [rawStringContent] with delimiter-specific escaping removed (e.g. quote escapes for quoted strings,
      * embed delimiter escapes for embed blocks) but all other escapes intact. Identity for unquoted strings.
+     *
+     * The remaining escapes are valid JSON string escapes, since KSON strings follow JSON string escaping rules
+     * (see [RFC 8259 Section 7](https://datatracker.ietf.org/doc/html/rfc8259#section-7)). This means the value
+     * can be safely interpolated into JSON or YAML string contexts with only delimiter (quote) escaping and
+     * raw whitespace escaping (see [escapeRawWhitespace]) applied.
      */
     abstract val delimiterUnescapedRawContent: String
 
@@ -858,7 +863,7 @@ class EmbedBlockNode(
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
-    private val embedTag: String = embedTagNode?.processedStringContent ?: ""
+    private val embedTag: String = embedTagNode?.delimiterUnescapedRawContent ?: ""
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {

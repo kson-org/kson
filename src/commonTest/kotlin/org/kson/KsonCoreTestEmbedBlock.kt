@@ -422,6 +422,220 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     }
 
     @Test
+    fun testEmbedContentWithUnrelatedKeyNotDecodedAsEmbedBlock() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // An object with "embedContent" and a non-embed key should remain an object, not decode as an embed block
+        assertParsesTo(
+            """
+               wrapper:
+                 "embedContent": "content"
+                 "other": "value"
+            """.trimIndent(),
+            """
+                wrapper:
+                  embedContent: content
+                  other: value
+            """.trimIndent(),
+            """
+                wrapper:
+                  embedContent: content
+                  other: value
+            """.trimIndent(),
+            """
+                {
+                  "wrapper": {
+                    "embedContent": "content",
+                    "other": "value"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockTagWithValidEscapes() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // Tag with \t escape — raw text "my\ttag" is preserved as the tag value
+        assertParsesTo(
+            """
+                %my\ttag
+                content%%
+            """.trimIndent(),
+            """
+                %my\ttag
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "my\ttag"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "my\ttag",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // Tag with unicode escape — raw text "\u0041tag" is preserved as the tag value
+        assertParsesTo(
+            """
+                %\u0041tag
+                content%%
+            """.trimIndent(),
+            """
+                %\u0041tag
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "\u0041tag"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "\u0041tag",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // Tag with escaped backslash — raw text "path\\to" is preserved as the tag value
+        assertParsesTo(
+            """
+                %path\\to
+                content%%
+            """.trimIndent(),
+            """
+                %path\\to
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "path\\to"
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "path\\to",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockTagWithMetadataAndEscapes() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // Tag with metadata containing escapes — the full raw tag text including
+        // the metadata portion is preserved, with backslashes and quotes intact
+        assertParsesTo(
+            """
+                %sql: "conn\tstring"
+                content%%
+            """.trimIndent(),
+            """
+                %sql: "conn\tstring"
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "sql: \"conn\tstring\""
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "sql: \"conn\tstring\"",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockTagFromObjectWithEscapes() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // Verify bijection: object with embedTag containing escapes roundtrips through embed block form
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "my\ttag"
+                 "embedContent": "content"
+            """.trimIndent(),
+            """
+                embedBlock: %my\ttag
+                  content%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "my\ttag"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "my\ttag",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockTagFromObjectWithUnquotedTag() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // Verify that an object with an unquoted embedTag value decodes as an embed block
+        assertParsesTo(
+            """
+                embedBlock:
+                  embedTag: sql
+                  "embedContent": "content"
+            """.trimIndent(),
+            """
+                embedBlock: %sql
+                  content%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "sql"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "sql",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
     fun testEmbeddedEmbedBlockFromObject(){
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),

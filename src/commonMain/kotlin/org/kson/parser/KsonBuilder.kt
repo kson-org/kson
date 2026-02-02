@@ -365,33 +365,38 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         propertyNodes: List<ObjectPropertyNode>,
         marker: KsonMarker
     ): EmbedBlockNode? {
-        if (propertyNodes.size > 3){ return null }
+        if (propertyNodes.size > 2) { return null }
 
-        // Create a map of property keys to string values (if possible)
-        val propertiesMap = propertyNodes.mapNotNull { prop ->
-            (prop as? ObjectPropertyNodeImpl)?.let { property ->
-                val keyString = (property.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
-                keyString?.processedStringContent?.let { key ->
-                    key to (property.value as? StringNodeImpl)
-                }
-            }
-        }.toMap()
+        val embedTagNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_TAG)
 
-        /**
-         * Check whether this object follows all the rules for decoding specified in [EmbedObjectKeys]
-         */
-        if (!EmbedObjectKeys.canBeDecoded(propertiesMap)) { return null }
+        if (embedTagNode == null && propertyNodes.size > 1) {
+            // if embed tag is null, then in order to be decoded as an embed block,
+            // the object must have exactly one property: the embed content
+            return null
+        }
 
-        val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]
-
-        val embedContentProperty = propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key] ?:
-            throw ShouldNotHappenException("should have been validated for nullability above")
+        val embedContentNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_CONTENT)
+            ?: return null
 
         return EmbedBlockNode(
-                embedTagValue,
-                embedContentProperty,
+                embedTagNode,
+                embedContentNode,
                 marker.getSourceTokens()
             )
+    }
+
+    /**
+     * Finds a property in [propertyNodes] whose key matches [embedKey] and whose value is a [StringNodeImpl],
+     * returning the value node if found.
+     */
+    private fun findEmbedStringValue(
+        propertyNodes: List<ObjectPropertyNode>,
+        embedKey: EmbedObjectKeys
+    ): StringNodeImpl? {
+        return propertyNodes.filterIsInstance<ObjectPropertyNodeImpl>().find { prop ->
+            val keyString = (prop.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
+            keyString?.rawStringContent == embedKey.key && prop.value is StringNodeImpl
+        }?.value as? StringNodeImpl
     }
 
     /**
