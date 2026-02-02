@@ -76,7 +76,7 @@ class KsonStringValidator {
     }
 
     private fun validateQuotedString(node: QuotedStringNode, messageSink: MessageSink) {
-        val rawContent = node.stringContent
+        val rawContent = node.rawStringContent
         validateRawStringContent(rawContent, node.location, messageSink)
     }
 

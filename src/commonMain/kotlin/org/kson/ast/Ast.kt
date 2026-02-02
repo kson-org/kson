@@ -299,7 +299,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
                     result.last() != '\n' &&
                     when (property.value) {
                         is QuotedStringNode -> {
-                            StringUnquoted.isUnquotable(property.value.stringContent)
+                            StringUnquoted.isUnquotable(property.value.rawStringContent)
                         }
 
                         is UnquotedStringNode,
@@ -630,8 +630,21 @@ class ListElementNodeImpl(val value: KsonValueNode,
 
 interface StringNode : KsonValueNode
 abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValueNodeImpl(sourceTokens) {
-    abstract val stringContent: String
+    /**
+     * The raw KSON source content of this string with ALL escapes still embedded in the string, including escaped
+     * quotes. See [processedStringContent] for an evaluated version that can be shared externally as data
+     */
+    abstract val rawStringContent: String
 
+    /**
+     * The value of [rawStringContent] with delimiter-specific escaping removed (e.g. quote escapes for quoted strings,
+     * embed delimiter escapes for embed blocks) but all other escapes intact. Identity for unquoted strings.
+     */
+    abstract val delimiterUnescapedRawContent: String
+
+    /**
+     * The processed data value of this string, with ALL escapes evaluated, ready for external consumption
+     */
     abstract val processedStringContent: String
 
     abstract val contentTransformer: KsonContentTransformer
@@ -644,24 +657,23 @@ class QuotedStringNode(
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
-        QuotedStringContentTransformer(stringContent, location)
+        QuotedStringContentTransformer(rawStringContent, location)
     }
 
     override val processedStringContent: String by lazy {
         if (stringQuote != null) {
             contentTransformer.processedContent
         } else {
-            stringContent
-
+            rawStringContent
         }
     }
 
     /**
-     * Note: [stringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
+     * Note: [rawStringContent] is the exact content of a [stringQuote]-delimited [Kson] string,
      *   including all escapes, but excluding the outer quotes.  A [Kson] string is escaped identically to a Json string,
      *   except that [Kson] allows raw whitespace to be embedded in strings
      */
-    override val stringContent: String by lazy {
+    override val rawStringContent: String by lazy {
         renderTokens(sourceTokens)
     }
 
@@ -670,26 +682,26 @@ class QuotedStringNode(
      * This string must be [SingleQuote]'ed or [DoubleQuote]'ed and then quote-escaped with [StringQuote.escapeQuotes]
      * to obtain a fully valid KsonString
      */
-    private val unquotedString: String by lazy {
-        stringQuote?.unescapeQuotes(stringContent) ?: stringContent
+    override val delimiterUnescapedRawContent: String by lazy {
+        stringQuote?.unescapeQuotes(rawStringContent) ?: rawStringContent
     }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        if (StringUnquoted.isUnquotable(unquotedString)) {
+        if (StringUnquoted.isUnquotable(delimiterUnescapedRawContent)) {
             /**
              * This string does not require quotes in Kson, so we use the [renderUnquotableKsonString]
              * to get the best rendering for this string across all compile targets
              */
-            return renderUnquotableKsonString(unquotedString, indent, compileTarget)
+            return renderUnquotableKsonString(delimiterUnescapedRawContent, indent, compileTarget)
         }
 
         return when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(unquotedString))}\""
+                    return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(delimiterUnescapedRawContent))}\""
                 } else {
-                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
-                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
+                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
+                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
 
                     // prefer single-quotes unless double-quotes would require less escaping
                     val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
@@ -698,7 +710,7 @@ class QuotedStringNode(
                         SingleQuote
                     }
 
-                    val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)
+                    val escapedContent = chosenDelimiter.escapeQuotes(delimiterUnescapedRawContent)
                     indent.firstLineIndent() + "${chosenDelimiter}$escapedContent${chosenDelimiter}"
                 }
             }
@@ -706,7 +718,7 @@ class QuotedStringNode(
             is Yaml -> {
                 indent.firstLineIndent() + "\"${DoubleQuote.escapeQuotes(
                     // we ensure forward slashes are unescaped here since YAML does not allow escaping them
-                    unescapeForwardSlashes(unquotedString))}\""
+                    unescapeForwardSlashes(delimiterUnescapedRawContent))}\""
             }
         }
     }
@@ -714,19 +726,23 @@ class QuotedStringNode(
 
 open class UnquotedStringNode(sourceTokens: List<Token>) : StringNodeImpl(sourceTokens) {
     override val processedStringContent: String by lazy {
-        stringContent
+        rawStringContent
     }
 
     override val contentTransformer: IdentityContentTransformer by lazy {
-        IdentityContentTransformer(stringContent, location)
+        IdentityContentTransformer(rawStringContent, location)
     }
 
-    override val stringContent: String by lazy {
+    override val rawStringContent: String by lazy {
         renderTokens(sourceTokens)
     }
 
+    override val delimiterUnescapedRawContent: String by lazy {
+        rawStringContent
+    }
+
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return renderUnquotableKsonString(stringContent, indent, compileTarget)
+        return renderUnquotableKsonString(rawStringContent, indent, compileTarget)
     }
 }
 
@@ -997,13 +1013,17 @@ class EmbedBlockContentNode(
     sourceTokens: List<Token>,
     private val embedDelim: EmbedDelim
 ) : StringNodeImpl(sourceTokens) {
-    override val stringContent: String by lazy {
+    override val rawStringContent: String by lazy {
         renderTokens(sourceTokens)
+    }
+
+    override val delimiterUnescapedRawContent: String by lazy {
+        embedDelim.unescapeEmbedContent(rawStringContent)
     }
 
     override val contentTransformer: EmbedContentTransformer by lazy {
         EmbedContentTransformer(
-            rawContent = stringContent,
+            rawContent = rawStringContent,
             embedDelim = embedDelim,
             rawLocation = this.location
         )
