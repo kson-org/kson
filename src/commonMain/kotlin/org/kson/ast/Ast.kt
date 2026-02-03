@@ -192,7 +192,7 @@ class KsonRootImpl(
      */
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 var ksonDocument = rootNode.toSourceWithNext(indent, trailingContent.firstOrNull(), compileTarget)
 
                 trailingContent.forEachIndexed { index, trailingValue ->
@@ -762,10 +762,6 @@ private fun renderUnquotableKsonString(unquotedKsonString: String, indent: Inden
                 unquotedKsonString
             }
         }
-
-        is Json -> {
-            indent.firstLineIndent() + "\"${renderForJsonString(unquotedKsonString)}\""
-        }
     }
 }
 
@@ -792,7 +788,7 @@ class NumberNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + value.asString
             }
         }
@@ -808,7 +804,7 @@ class TrueNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "true"
             }
         }
@@ -820,7 +816,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "false"
             }
         }
@@ -830,7 +826,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "null"
             }
         }
