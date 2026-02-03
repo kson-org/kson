@@ -704,7 +704,9 @@ class QuotedStringNode(
             }
 
             is Yaml -> {
-                indent.firstLineIndent() + "\"" + DoubleQuote.escapeQuotes(unquotedString) + "\""
+                indent.firstLineIndent() + "\"${DoubleQuote.escapeQuotes(
+                    // we ensure forward slashes are unescaped here since YAML does not allow escaping them
+                    unescapeForwardSlashes(unquotedString))}\""
             }
         }
     }

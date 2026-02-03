@@ -1,6 +1,7 @@
 package org.kson.parser
 
 import org.kson.ast.renderForJsonString
+import org.kson.ast.unescapeForwardSlashes
 import org.kson.parser.behavior.quotedstring.unescapeStringContent
 import org.kson.testSupport.validateJson
 import kotlin.test.Test
@@ -45,9 +46,8 @@ class EscapingTest {
 
     @Test
     fun testJsonOptionalEscapes() {
-        // Forward slash can be escaped but isn't required to be, we escape it for completeness
-        // and hopes of broad compatibility
-        assertJsonStringEscaping("/", "\\/")
+        // Forward slash can be escaped in JSON but isn't required to be, we prefer the cleaner output
+        assertJsonStringEscaping("/", "/")
     }
 
     @Test
@@ -170,6 +170,27 @@ class EscapingTest {
         assertEquals("\\u12", unescapeStringContent("\\u12"))
         assertEquals("\\u", unescapeStringContent("\\u"))
         assertEquals("\\uXYZ", unescapeStringContent("\\uXYZ"))
+    }
+
+    @Test
+    fun testUnescapeForwardSlashes() {
+        // Simple \/ becomes /
+        assertEquals("/", unescapeForwardSlashes("\\/"))
+
+        // \\/ (escaped backslash + literal slash) is preserved
+        assertEquals("\\\\/", unescapeForwardSlashes("\\\\/"))
+
+        // Mixed: `\` `\/` and `\\/`
+        assertEquals("/ / \\\\/", unescapeForwardSlashes("\\/ / \\\\/"))
+
+        // No slashes at all — passthrough
+        assertEquals("hello\\nworld", unescapeForwardSlashes("hello\\nworld"))
+
+        // Trailing backslash (no next char) — preserved as-is
+        assertEquals("trailing\\", unescapeForwardSlashes("trailing\\"))
+
+        // Multiple consecutive \/
+        assertEquals("//", unescapeForwardSlashes("\\/\\/"))
     }
 
     @Test
