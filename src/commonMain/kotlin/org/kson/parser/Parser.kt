@@ -566,73 +566,24 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val stringMark = builder.mark()
         val possiblyUnclosedString = builder.mark()
+
         // consume our open quote
         builder.advanceLexer()
 
-        while (builder.getTokenType() != STRING_CLOSE_QUOTE && !builder.eof()) {
-            when (builder.getTokenType()) {
-                STRING_CONTENT -> builder.advanceLexer()
-                STRING_UNICODE_ESCAPE -> {
-                    val unicodeEscapeMark = builder.mark()
-                    val unicodeEscapeText = builder.getTokenText()
-                    builder.advanceLexer()
-                    if (isValidUnicodeEscape(unicodeEscapeText)) {
-                        unicodeEscapeMark.drop()
-                    } else {
-                        unicodeEscapeMark.error(STRING_BAD_UNICODE_ESCAPE.create(unicodeEscapeText))
-                    }
-                }
-
-                STRING_ESCAPE -> {
-                    val stringEscapeMark = builder.mark()
-                    val stringEscapeText = builder.getTokenText()
-                    builder.advanceLexer()
-                    if (isValidStringEscape(stringEscapeText)) {
-                        stringEscapeMark.drop()
-                    } else {
-                        stringEscapeMark.error(STRING_BAD_ESCAPE.create(stringEscapeText))
-                    }
-                }
-
-                STRING_ILLEGAL_CONTROL_CHARACTER -> {
-                    val controlCharacterMark = builder.mark()
-                    val badControlChar = builder.getTokenText()
-                    builder.advanceLexer()
-                    controlCharacterMark.error(STRING_CONTROL_CHARACTER.create(badControlChar))
-                }
-
-                else -> {
-                    stringMark.rollbackTo()
-                    return false
-                }
-            }
+        if (builder.getTokenType() == STRING_CONTENT) {
+            builder.advanceLexer()
         }
 
         if (builder.eof()) {
             possiblyUnclosedString.error(STRING_NO_CLOSE.create())
         } else {
-            // string is closed, don't need this marker
-            possiblyUnclosedString.drop()
             // consume our close quote
             builder.advanceLexer()
+            possiblyUnclosedString.drop()
         }
 
         stringMark.done(QUOTED_STRING)
         return true
-    }
-
-    private fun isValidStringEscape(stringEscapeText: String): Boolean {
-        if (!stringEscapeText.startsWith('\\') || stringEscapeText.length > 2) {
-            throw FatalParseException("Should only be asked to validate one-char string escapes, but was passed: $stringEscapeText")
-        }
-
-        // detect incomplete escapes (perhaps this escape bumped up against EOF)
-        if (stringEscapeText.length == 1) {
-            return false
-        }
-
-        val escapedChar = stringEscapeText[1]
-        return validStringEscapes.contains(escapedChar)
     }
 
     /**
@@ -675,28 +626,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
         
         return embedTag
-    }
-
-    private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
-        if (!unicodeEscapeText.startsWith("\\u")) {
-            throw FatalParseException("Should only be asked to validate unicode escapes")
-        }
-
-        // clip off the `\u` to make this code point easier to inspect
-        val unicodeCodePoint = unicodeEscapeText.replaceFirst("\\u", "")
-
-        if (unicodeCodePoint.length != 4) {
-            // must have four chars
-            return false
-        }
-
-        for (codePointChar in unicodeCodePoint) {
-            if (!validHexChars.contains(codePointChar)) {
-                return false
-            }
-        }
-
-        return true
     }
 
     /**
@@ -821,13 +750,3 @@ const val DEFAULT_MAX_NESTING_LEVEL = 128
  * Used to bail out of parsing when excessive nesting is detected
  */
 class ExcessiveNestingException : RuntimeException()
-
-/**
- * Enumerate the set of valid Kson string escapes for easy validation `\u` is also supported,
- * but is validated separately against [validHexChars]
- */
-private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
-private val validHexChars = setOf(
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'
-)

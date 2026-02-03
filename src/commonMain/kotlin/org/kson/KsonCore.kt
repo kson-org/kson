@@ -13,6 +13,7 @@ import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.tools.FormattingStyle
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
+import org.kson.parser.behavior.quotedstring.KsonStringValidator
 import org.kson.tools.KsonFormatterConfig
 import org.kson.validation.Validator
 import org.kson.value.KsonValue
@@ -74,6 +75,7 @@ object KsonCore {
         if (!coreCompileConfig.ignoreErrors) {
             IndentValidator().validate(ast, messageSink)
             DuplicateKeyValidator().validate(ast, messageSink)
+            KsonStringValidator().validate(ast, messageSink)
         }
 
         if (!coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
