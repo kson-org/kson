@@ -69,8 +69,14 @@ private data class EscapeInfo(
     val processedLength: Int
 )
 
-@Deprecated("Only supports testing to ensure behavior after a refactor. Will be removed.")
-fun unescapeStringContent(content: String): String {
+/**
+ * Unescape the given string according to KSON's escaping rules.
+ *
+ * NOTE: this is unlikely to be called directly outside of tests. [QuotedStringContentTransformer] performs this
+ * unescaping into its [QuotedStringContentTransformer.processedContent] property, maintaining a [Location] source map
+ * between the unescaped string and original escaped source
+ */
+internal fun unescapeStringContent(content: String): String {
     return unescapeAndTrackEscapes(content).first
 }
 
