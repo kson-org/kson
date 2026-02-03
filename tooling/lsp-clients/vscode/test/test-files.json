@@ -6,7 +6,7 @@
     "language-config.test",
     "formatting-settings.test",
     "editing.test",
-    "dialect-support.test",
+    "language-support.test",
     "diagnostics.test"
   ]
 }

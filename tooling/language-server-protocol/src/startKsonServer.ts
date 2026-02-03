@@ -12,8 +12,20 @@ import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
 import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
+import {BundledSchemaProvider, BundledSchemaConfig} from './core/schema/BundledSchemaProvider.js';
+import {CompositeSchemaProvider} from './core/schema/CompositeSchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
 import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
+
+/**
+ * Initialization options passed from the VSCode client.
+ */
+interface KsonInitializationOptions {
+    /** Bundled schemas to be loaded */
+    bundledSchemas?: BundledSchemaConfig[];
+    /** Whether bundled schemas are enabled */
+    enableBundledSchemas?: boolean;
+}
 
 type SchemaProviderFactory = (
     workspaceRootUri: URI | undefined,
@@ -45,6 +57,7 @@ export function startKsonServer(
     // Initialize core components (documentManager will be created after onInitialize)
     let documentManager: KsonDocumentsManager;
     let textDocumentService: KsonTextDocumentService;
+    let bundledSchemaProvider: BundledSchemaProvider | undefined;
 
     // Setup connection event handlers
     connection.onInitialize(async (params): Promise<InitializeResult> => {
@@ -54,8 +67,31 @@ export function startKsonServer(
             workspaceRootUri = URI.parse(stringUri)
         }
 
-        // Create the appropriate schema provider for this environment
-        const schemaProvider = await createSchemaProvider(workspaceRootUri, logger);
+        // Extract bundled schema configuration from initialization options
+        const initOptions = params.initializationOptions as KsonInitializationOptions | undefined;
+        const bundledSchemas = initOptions?.bundledSchemas ?? [];
+        const enableBundledSchemas = initOptions?.enableBundledSchemas ?? true;
+
+        // Create the appropriate schema provider for this environment (file system or no-op)
+        const fileSystemSchemaProvider = await createSchemaProvider(workspaceRootUri, logger);
+
+        // Create bundled schema provider if schemas are configured
+        let schemaProvider: SchemaProvider | undefined;
+        if (bundledSchemas.length > 0) {
+            bundledSchemaProvider = new BundledSchemaProvider(bundledSchemas, enableBundledSchemas, logger);
+
+            // Create composite provider: file system takes priority over bundled
+            const providers: SchemaProvider[] = [];
+            if (fileSystemSchemaProvider) {
+                providers.push(fileSystemSchemaProvider);
+            }
+            providers.push(bundledSchemaProvider);
+
+            schemaProvider = new CompositeSchemaProvider(providers, logger);
+            logger.info(`Created composite schema provider with ${providers.length} providers`);
+        } else {
+            schemaProvider = fileSystemSchemaProvider;
+        }
 
         // Now that we have workspace root and schema provider, create the document manager
         documentManager = new KsonDocumentsManager(schemaProvider);
@@ -142,25 +178,30 @@ export function startKsonServer(
             const schemaDocument = documentManager.get(params.uri)?.getSchemaDocument();
             if (schemaDocument) {
                 const schemaUri = schemaDocument.uri;
+                // Check if this is a bundled schema (uses bundled:// scheme)
+                const isBundled = schemaUri.startsWith('bundled://');
                 // Extract readable path from URI
                 const schemaPath = schemaUri.startsWith('file://') ? URI.parse(schemaUri).fsPath : schemaUri;
                 return {
                     schemaUri,
                     schemaPath,
-                    hasSchema: true
+                    hasSchema: true,
+                    isBundled
                 };
             }
             return {
                 schemaUri: undefined,
                 schemaPath: undefined,
-                hasSchema: false
+                hasSchema: false,
+                isBundled: false
             };
         } catch (error) {
             logger.error(`Error getting schema for document: ${error}`);
             return {
                 schemaUri: undefined,
                 schemaPath: undefined,
-                hasSchema: false
+                hasSchema: false,
+                isBundled: false
             };
         }
     });
@@ -198,7 +239,33 @@ export function startKsonServer(
         const configuration = ksonSettingsWithDefaults(change.settings);
         textDocumentService.updateConfiguration(configuration);
 
+        // Check if bundled schema setting changed
+        if (bundledSchemaProvider && change.settings?.kson?.enableBundledSchemas !== undefined) {
+            const enabled = change.settings.kson.enableBundledSchemas;
+            bundledSchemaProvider.setEnabled(enabled);
+            // Refresh all documents to apply the change
+            documentManager.refreshDocumentSchemas();
+            // Notify client that schema configuration changed
+            connection.sendNotification('kson/schemaConfigurationChanged');
+            // Refresh diagnostics
+            connection.sendRequest('workspace/diagnostic/refresh');
+        }
+
         connection.console.info('Configuration updated');
+    });
+
+    // Handle notification to update bundled schema settings
+    connection.onNotification('kson/updateBundledSchemaSettings', (params: { enabled: boolean }) => {
+        if (bundledSchemaProvider) {
+            bundledSchemaProvider.setEnabled(params.enabled);
+            // Refresh all documents to apply the change
+            documentManager.refreshDocumentSchemas();
+            // Notify client that schema configuration changed
+            connection.sendNotification('kson/schemaConfigurationChanged');
+            // Refresh diagnostics
+            connection.sendRequest('workspace/diagnostic/refresh');
+            logger.info(`Bundled schemas ${params.enabled ? 'enabled' : 'disabled'}`);
+        }
     });
 
     // Start listening for requests

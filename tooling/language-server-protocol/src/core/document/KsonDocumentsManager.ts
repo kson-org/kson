@@ -26,8 +26,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
 
-                // Try to get schema from provider
-                let schemaDocument = provider.getSchemaForDocument(uri);
+                // Try to get schema from provider, passing languageId for bundled schema support
+                let schemaDocument = provider.getSchemaForDocument(uri, languageId);
 
                 const parseResult = Kson.getInstance().analyze(content, uri);
                 return new KsonDocument(textDocument, parseResult, schemaDocument);
@@ -43,10 +43,12 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     version
                 );
                 const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
+                // Pass languageId for bundled schema support
+                const languageId = textDocument.languageId;
                 return new KsonDocument(
                     textDocument,
                     parseResult,
-                    provider.getSchemaForDocument(ksonDocument.uri)
+                    provider.getSchemaForDocument(ksonDocument.uri, languageId)
                 );
             }
         });
@@ -83,7 +85,9 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
         for (const doc of allDocs) {
             const textDocument = doc.textDocument;
             const parseResult = doc.getAnalysisResult();
-            const updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri);
+            // Pass languageId for bundled schema support
+            const languageId = textDocument.languageId;
+            const updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri, languageId);
 
             // Create new document instance with updated schema
             const updatedDoc = new KsonDocument(textDocument, parseResult, updatedSchema);

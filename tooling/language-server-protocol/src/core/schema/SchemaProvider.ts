@@ -10,9 +10,10 @@ export interface SchemaProvider {
      * Get the schema document for a given KSON document URI.
      *
      * @param documentUri The URI of the KSON document
+     * @param languageId Optional language ID for bundled schema lookup
      * @returns TextDocument containing the schema, or undefined if no schema is available
      */
-    getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined;
+    getSchemaForDocument(documentUri: DocumentUri, languageId?: string): TextDocument | undefined;
 
     /**
      * Reload the schema configuration.
@@ -34,7 +35,7 @@ export interface SchemaProvider {
  * Used as a fallback when no schema configuration is available.
  */
 export class NoOpSchemaProvider implements SchemaProvider {
-    getSchemaForDocument(_documentUri: DocumentUri): TextDocument | undefined {
+    getSchemaForDocument(_documentUri: DocumentUri, _languageId?: string): TextDocument | undefined {
         return undefined;
     }
 

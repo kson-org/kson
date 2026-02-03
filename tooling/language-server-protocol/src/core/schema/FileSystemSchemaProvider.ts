@@ -67,9 +67,10 @@ export class FileSystemSchemaProvider implements SchemaProvider {
      * Get the schema for a given document URI.
      *
      * @param documentUri The URI of the KSON document
+     * @param _languageId Optional language ID (unused by file system provider)
      * @returns TextDocument containing the schema, or undefined if no schema is configured
      */
-    getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined {
+    getSchemaForDocument(documentUri: DocumentUri, _languageId?: string): TextDocument | undefined {
         if (!this.config || !this.workspaceRoot) {
             return undefined;
         }

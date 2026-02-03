@@ -16,9 +16,9 @@ export function getLanguageConfiguration(): LanguageConfiguration {
 }
 
 /**
- * Check if a language ID is a KSON dialect.
+ * Check if a language ID is a KSON language.
  */
-export function isKsonDialect(languageId: string): boolean {
+export function isKsonLanguage(languageId: string): boolean {
     return getLanguageConfiguration().languageIds.includes(languageId);
 }
 
