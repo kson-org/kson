@@ -12,7 +12,8 @@ import {
 } from '../../config/clientOptions';
 import {StatusBarManager} from '../common/StatusBarManager';
 import { isKsonLanguage, initializeLanguageConfig } from '../../config/languageConfig';
-import { loadBundledSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 
 /**
  * Node.js-specific activation function for the KSON extension.
@@ -41,21 +42,29 @@ export async function activate(context: vscode.ExtensionContext) {
             debug: {module: serverModule, transport: TransportKind.ipc, options: debugOptions}
         };
 
-        // Load bundled schemas
-        const bundledSchemas = await loadBundledSchemas(context.extensionUri, {
-            info: (msg) => logOutputChannel.info(msg),
-            warn: (msg) => logOutputChannel.warn(msg),
-            error: (msg) => logOutputChannel.error(msg)
-        });
+        // Load bundled schemas and metaschemas
+        const schemaLogger = {
+            info: (msg: string) => logOutputChannel.info(msg),
+            warn: (msg: string) => logOutputChannel.warn(msg),
+            error: (msg: string) => logOutputChannel.error(msg)
+        };
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, schemaLogger);
+        const bundledMetaSchemas = await loadBundledMetaSchemas(context.extensionUri, schemaLogger);
 
         const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel, {
             bundledSchemas,
+            bundledMetaSchemas,
             enableBundledSchemas: areBundledSchemasEnabled()
         });
         let languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
 
         await languageClient.start();
         console.log('Kson Language Server started');
+
+        // Register content provider for bundled:// URIs so users can navigate to bundled schemas
+        context.subscriptions.push(
+            registerBundledSchemaContentProvider(context, bundledSchemas, bundledMetaSchemas)
+        );
 
         // Create status bar manager
         const statusBarManager = new StatusBarManager(languageClient);

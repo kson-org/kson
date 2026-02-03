@@ -6,14 +6,16 @@ import {
     DocumentSelector,
 } from 'vscode-languageclient';
 import { getLanguageConfiguration } from './languageConfig';
-import { BundledSchemaConfig } from './bundledSchemaLoader';
+import { BundledSchemaConfig, BundledMetaSchemaConfig } from './bundledSchemaLoader';
 
 /**
  * Initialization options passed to the LSP server.
  */
 export interface KsonInitializationOptions {
-    /** Bundled schemas to be loaded */
+    /** Bundled schemas to be loaded (matched by file extension) */
     bundledSchemas: BundledSchemaConfig[];
+    /** Bundled metaschemas to be loaded (matched by document $schema content) */
+    bundledMetaSchemas?: BundledMetaSchemaConfig[];
     /** Whether bundled schemas are enabled */
     enableBundledSchemas: boolean;
 }
@@ -32,7 +34,8 @@ export const createClientOptions = (
     // Build document selector for all supported language IDs
     const documentSelector: DocumentSelector = languageIds.flatMap(languageId => [
         { scheme: 'file', language: languageId },
-        { scheme: 'untitled', language: languageId }
+        { scheme: 'untitled', language: languageId },
+        { scheme: 'bundled', language: languageId }
     ]);
 
     // Build file watcher pattern for all file extensions

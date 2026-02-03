@@ -1,8 +1,27 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Kson} from 'kson';
+import {Analysis, Kson, KsonValue, KsonValueType} from 'kson';
 import {KsonDocument} from "./KsonDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
 import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
+
+/**
+ * Extract the $schema field value from a parsed KSON analysis result.
+ *
+ * @param analysis The KSON analysis result
+ * @returns The $schema string value, or undefined if not present or not a string
+ */
+function extractSchemaId(analysis: Analysis): string | undefined {
+    const ksonValue = analysis.ksonValue;
+    if (!ksonValue || ksonValue.type !== KsonValueType.OBJECT) {
+        return undefined;
+    }
+    const obj = ksonValue as KsonValue.KsonObject;
+    const schemaValue = obj.properties.asJsReadonlyMapView().get('$schema');
+    if (!schemaValue || schemaValue.type !== KsonValueType.STRING) {
+        return undefined;
+    }
+    return (schemaValue as KsonValue.KsonString).value;
+}
 
 /**
  * Document management for the Kson Language Server.
@@ -26,10 +45,19 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
 
-                // Try to get schema from provider, passing languageId for bundled schema support
-                let schemaDocument = provider.getSchemaForDocument(uri, languageId);
+                // Try to get schema from provider based on file extension/URI
+                let schemaDocument = provider.getSchemaForDocument(uri);
 
                 const parseResult = Kson.getInstance().analyze(content, uri);
+
+                // If no schema from URI-based resolution, try content-based metaschema resolution
+                if (!schemaDocument) {
+                    const schemaId = extractSchemaId(parseResult);
+                    if (schemaId) {
+                        schemaDocument = provider.getMetaSchemaForId(schemaId);
+                    }
+                }
+
                 return new KsonDocument(textDocument, parseResult, schemaDocument);
             },
             update: (
@@ -43,12 +71,20 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     version
                 );
                 const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
-                // Pass languageId for bundled schema support
-                const languageId = textDocument.languageId;
+
+                // Try URI-based resolution first, then content-based metaschema resolution
+                let schemaDocument = provider.getSchemaForDocument(ksonDocument.uri);
+                if (!schemaDocument) {
+                    const schemaId = extractSchemaId(parseResult);
+                    if (schemaId) {
+                        schemaDocument = provider.getMetaSchemaForId(schemaId);
+                    }
+                }
+
                 return new KsonDocument(
                     textDocument,
                     parseResult,
-                    provider.getSchemaForDocument(ksonDocument.uri, languageId)
+                    schemaDocument
                 );
             }
         });
@@ -85,9 +121,15 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
         for (const doc of allDocs) {
             const textDocument = doc.textDocument;
             const parseResult = doc.getAnalysisResult();
-            // Pass languageId for bundled schema support
-            const languageId = textDocument.languageId;
-            const updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri, languageId);
+
+            // Try URI-based resolution first, then content-based metaschema resolution
+            let updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri);
+            if (!updatedSchema) {
+                const schemaId = extractSchemaId(parseResult);
+                if (schemaId) {
+                    updatedSchema = this.schemaProvider.getMetaSchemaForId(schemaId);
+                }
+            }
 
             // Create new document instance with updated schema
             const updatedDoc = new KsonDocument(textDocument, parseResult, updatedSchema);

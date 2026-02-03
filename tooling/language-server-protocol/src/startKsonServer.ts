@@ -12,7 +12,7 @@ import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
 import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
-import {BundledSchemaProvider, BundledSchemaConfig} from './core/schema/BundledSchemaProvider.js';
+import {BundledSchemaProvider, BundledSchemaConfig, BundledMetaSchemaConfig} from './core/schema/BundledSchemaProvider.js';
 import {CompositeSchemaProvider} from './core/schema/CompositeSchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
 import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
@@ -21,8 +21,10 @@ import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
  * Initialization options passed from the VSCode client.
  */
 interface KsonInitializationOptions {
-    /** Bundled schemas to be loaded */
+    /** Bundled schemas to be loaded (matched by file extension) */
     bundledSchemas?: BundledSchemaConfig[];
+    /** Bundled metaschemas to be loaded (matched by document $schema content) */
+    bundledMetaSchemas?: BundledMetaSchemaConfig[];
     /** Whether bundled schemas are enabled */
     enableBundledSchemas?: boolean;
 }
@@ -70,15 +72,16 @@ export function startKsonServer(
         // Extract bundled schema configuration from initialization options
         const initOptions = params.initializationOptions as KsonInitializationOptions | undefined;
         const bundledSchemas = initOptions?.bundledSchemas ?? [];
+        const bundledMetaSchemas = initOptions?.bundledMetaSchemas ?? [];
         const enableBundledSchemas = initOptions?.enableBundledSchemas ?? true;
 
         // Create the appropriate schema provider for this environment (file system or no-op)
         const fileSystemSchemaProvider = await createSchemaProvider(workspaceRootUri, logger);
 
-        // Create bundled schema provider if schemas are configured
+        // Create bundled schema provider if schemas or metaschemas are configured
         let schemaProvider: SchemaProvider | undefined;
-        if (bundledSchemas.length > 0) {
-            bundledSchemaProvider = new BundledSchemaProvider(bundledSchemas, enableBundledSchemas, logger);
+        if (bundledSchemas.length > 0 || bundledMetaSchemas.length > 0) {
+            bundledSchemaProvider = new BundledSchemaProvider(bundledSchemas, enableBundledSchemas, logger, bundledMetaSchemas);
 
             // Create composite provider: file system takes priority over bundled
             const providers: SchemaProvider[] = [];

@@ -39,7 +39,6 @@ describeNode('Status Bar Schema Association Tests', () => {
         // Create a schema file
         schemaFileUri = vscode.Uri.joinPath(workspaceFolder.uri, TEST_SCHEMA_FILENAME);
         const schemaContent = [
-            '\'$schema\': \'http://json-schema.org/draft-07/schema#\'',
             'type: object',
             'title: \'Test Configuration\'',
             'description: \'Schema for testing status bar association\'',

@@ -58,6 +58,23 @@ export class CompositeSchemaProvider implements SchemaProvider {
     }
 
     /**
+     * Get a bundled metaschema by its schema ID.
+     * Queries all providers in order and returns the first non-undefined result.
+     *
+     * @param schemaId The $id of the metaschema to look up
+     * @returns TextDocument containing the metaschema, or undefined if no provider has a match
+     */
+    getMetaSchemaForId(schemaId: string): TextDocument | undefined {
+        for (const provider of this.providers) {
+            const metaSchema = provider.getMetaSchemaForId(schemaId);
+            if (metaSchema) {
+                return metaSchema;
+            }
+        }
+        return undefined;
+    }
+
+    /**
      * Check if a given file URI is a schema file in any provider.
      *
      * @param fileUri The URI of the file to check

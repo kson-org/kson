@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
 import { initializeLanguageConfig } from '../../config/languageConfig';
-import { loadBundledSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 import {deactivate} from '../common/deactivate';
 
 /**
@@ -22,16 +23,19 @@ export async function activate(context: vscode.ExtensionContext) {
         const serverModule = vscode.Uri.joinPath(context.extensionUri, 'dist', 'browserServer.js');
         const worker = new Worker(serverModule.toString(true));
 
-        // Load bundled schemas (works in browser via vscode.workspace.fs)
-        const bundledSchemas = await loadBundledSchemas(context.extensionUri, {
-            info: (msg) => logOutputChannel.info(msg),
-            warn: (msg) => logOutputChannel.warn(msg),
-            error: (msg) => logOutputChannel.error(msg)
-        });
+        // Load bundled schemas and metaschemas (works in browser via vscode.workspace.fs)
+        const schemaLogger = {
+            info: (msg: string) => logOutputChannel.info(msg),
+            warn: (msg: string) => logOutputChannel.warn(msg),
+            error: (msg: string) => logOutputChannel.error(msg)
+        };
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, schemaLogger);
+        const bundledMetaSchemas = await loadBundledMetaSchemas(context.extensionUri, schemaLogger);
 
         // Create the language client options with bundled schemas
         const clientOptions = createClientOptions(logOutputChannel, {
             bundledSchemas,
+            bundledMetaSchemas,
             enableBundledSchemas: areBundledSchemasEnabled()
         });
 
@@ -58,6 +62,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
         // Start the client and language server
         await languageClient.start();
+
+        // Register content provider for bundled:// URIs so users can navigate to bundled schemas
+        context.subscriptions.push(
+            registerBundledSchemaContentProvider(context, bundledSchemas, bundledMetaSchemas)
+        );
 
         logOutputChannel.info('KSON Browser extension activated successfully');
         if (bundledSchemas.length > 0) {
