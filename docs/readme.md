@@ -548,7 +548,7 @@ by [JsonSuiteTest.kt](../src/commonTest/kotlin/org/kson/parser/json/generated/Js
 #### JSON Schema support
 
 Kson is compatible with JsonSchema (Draft7, more to come), verified
-  by [SchemaSuiteTest.kt](../src/commonTest/kotlin/org/kson/parser/json/generated/SchemaSuiteTest.kt), generated
+  by  the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated
   from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
 
 #### Commas in Kson
