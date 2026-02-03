@@ -12,6 +12,7 @@ import {
 } from '../../config/clientOptions';
 import {StatusBarManager} from '../common/StatusBarManager';
 import { isKsonLanguage, initializeLanguageConfig } from '../../config/languageConfig';
+import { loadBundledSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
 
 /**
  * Node.js-specific activation function for the KSON extension.
@@ -39,7 +40,18 @@ export async function activate(context: vscode.ExtensionContext) {
             run: {module: serverModule, transport: TransportKind.ipc},
             debug: {module: serverModule, transport: TransportKind.ipc, options: debugOptions}
         };
-        const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel)
+
+        // Load bundled schemas
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, {
+            info: (msg) => logOutputChannel.info(msg),
+            warn: (msg) => logOutputChannel.warn(msg),
+            error: (msg) => logOutputChannel.error(msg)
+        });
+
+        const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel, {
+            bundledSchemas,
+            enableBundledSchemas: areBundledSchemasEnabled()
+        });
         let languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
 
         await languageClient.start();

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
 import { initializeLanguageConfig } from '../../config/languageConfig';
+import { loadBundledSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
 import {deactivate} from '../common/deactivate';
 
 /**
@@ -21,8 +22,18 @@ export async function activate(context: vscode.ExtensionContext) {
         const serverModule = vscode.Uri.joinPath(context.extensionUri, 'dist', 'browserServer.js');
         const worker = new Worker(serverModule.toString(true));
 
-        // Create the language client options
-        const clientOptions = createClientOptions(logOutputChannel);
+        // Load bundled schemas (works in browser via vscode.workspace.fs)
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, {
+            info: (msg) => logOutputChannel.info(msg),
+            warn: (msg) => logOutputChannel.warn(msg),
+            error: (msg) => logOutputChannel.error(msg)
+        });
+
+        // Create the language client options with bundled schemas
+        const clientOptions = createClientOptions(logOutputChannel, {
+            bundledSchemas,
+            enableBundledSchemas: areBundledSchemasEnabled()
+        });
 
         // In test environments, we need to support the vscode-test-web scheme
         // This is only needed for the test runner, not in production
@@ -49,7 +60,11 @@ export async function activate(context: vscode.ExtensionContext) {
         await languageClient.start();
 
         logOutputChannel.info('KSON Browser extension activated successfully');
-        logOutputChannel.info('Note: Schema features are not available in browser environment');
+        if (bundledSchemas.length > 0) {
+            logOutputChannel.info(`Loaded ${bundledSchemas.length} bundled schemas for browser environment`);
+        } else {
+            logOutputChannel.info('Note: No bundled schemas configured. User-defined schemas require file system access.');
+        }
         console.log('KSON Language Server (Browser) started');
 
     } catch (error) {

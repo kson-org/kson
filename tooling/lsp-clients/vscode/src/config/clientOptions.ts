@@ -6,9 +6,27 @@ import {
     DocumentSelector,
 } from 'vscode-languageclient';
 import { getLanguageConfiguration } from './languageConfig';
+import { BundledSchemaConfig } from './bundledSchemaLoader';
 
-// Create shared client options
-export const createClientOptions = (outputChannel: vscode.OutputChannel): LanguageClientOptions => {
+/**
+ * Initialization options passed to the LSP server.
+ */
+export interface KsonInitializationOptions {
+    /** Bundled schemas to be loaded */
+    bundledSchemas: BundledSchemaConfig[];
+    /** Whether bundled schemas are enabled */
+    enableBundledSchemas: boolean;
+}
+
+/**
+ * Create shared client options.
+ * @param outputChannel The output channel for logging
+ * @param initializationOptions Optional initialization options including bundled schemas
+ */
+export const createClientOptions = (
+    outputChannel: vscode.OutputChannel,
+    initializationOptions?: KsonInitializationOptions
+): LanguageClientOptions => {
     const { languageIds, fileExtensions } = getLanguageConfiguration();
 
     // Build document selector for all supported language IDs
@@ -24,6 +42,7 @@ export const createClientOptions = (outputChannel: vscode.OutputChannel): Langua
 
     return {
         documentSelector,
+        initializationOptions,
         synchronize: {
             /**
              * TODO - Even though this setting is deprecated it is the easiest way to get configuration going.

@@ -1,6 +1,18 @@
+/**
+ * Configuration for bundled schemas mapped by language ID.
+ */
+export interface BundledSchemaMapping {
+    /** Language ID this schema applies to */
+    languageId: string;
+    /** Relative path to the bundled schema file (from extension root) */
+    schemaPath: string;
+}
+
 export interface LanguageConfiguration {
     languageIds: string[];
     fileExtensions: string[];
+    /** Bundled schema mappings extracted from package.json */
+    bundledSchemas: BundledSchemaMapping[];
 }
 
 let cachedConfig: LanguageConfiguration | null = null;
@@ -28,12 +40,22 @@ export function isKsonLanguage(languageId: string): boolean {
  */
 export function initializeLanguageConfig(packageJson: any): void {
     const languages = packageJson?.contributes?.languages || [];
+
+    // Extract bundled schema mappings
+    const bundledSchemas: BundledSchemaMapping[] = languages
+        .filter((lang: any) => lang.id && lang.bundledSchema)
+        .map((lang: any) => ({
+            languageId: lang.id,
+            schemaPath: lang.bundledSchema
+        }));
+
     cachedConfig = {
         languageIds: languages.map((lang: any) => lang.id).filter(Boolean),
         fileExtensions: languages
             .flatMap((lang: any) => lang.extensions || [])
             .filter(Boolean)
-            .map((ext: string) => ext.replace(/^\./, ''))
+            .map((ext: string) => ext.replace(/^\./, '')),
+        bundledSchemas
     };
 }
 
