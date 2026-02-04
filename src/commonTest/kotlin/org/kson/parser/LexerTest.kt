@@ -426,7 +426,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertTokenizesTo(
@@ -435,7 +435,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
         assertTokenizesTo(
             """
@@ -443,7 +443,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
     }
 
@@ -548,7 +548,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
 
         assertTokenizesTo(
@@ -557,7 +557,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_TAG_STOP, EMBED_METADATA, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
         )
     }
 
@@ -648,16 +648,13 @@ class LexerTest {
     @Test
     fun testStringEscapes() {
         val tokens = assertTokenizesTo(
-            """   
+            """
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
-        // sanity check the tokens are lexing to what we expect
-        assertEquals("string with 'unescaped' and ", tokens[1].lexeme.text)
-        assertEquals("\\\"", tokens[2].lexeme.text)
-        assertEquals("embedded", tokens[3].lexeme.text)
+        assertEquals("string with 'unescaped' and \\\"embedded\\\" quotes", tokens[1].lexeme.text)
     }
 
     @Test
@@ -666,20 +663,18 @@ class LexerTest {
             """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
         )
 
         // sanity check the tokens are lexing to what we expect
-        assertEquals("string with \"unescaped\" and ", tokens[1].lexeme.text)
-        assertEquals("\\'", tokens[2].lexeme.text)
-        assertEquals("embedded", tokens[3].lexeme.text)
+        assertEquals("string with \"unescaped\" and \\'embedded\\' quotes", tokens[1].lexeme.text)
     }
 
     @Test
     fun testStringWhitespaceAfterEscape() {
         assertTokenizesTo(
             """'string with \' whitespace after an escape'""",
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE),
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
             testGapFreeLexing = true
         )
 
@@ -687,7 +682,7 @@ class LexerTest {
             """
                 'string with \' whitespace after an escape'
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
 
@@ -695,18 +690,18 @@ class LexerTest {
             """
                 'string with all whitespace after escape: \'     '
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ESCAPE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }
 
     @Test
-    fun testStringWhitespaceAfterIllegalControlCharacter() {
+    fun testStringWithControlCharacter() {
         assertTokenizesTo(
             """
                 'string with   whitespace after an illegal escape char'
             """,
-            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_ILLEGAL_CONTROL_CHARACTER, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
+            listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
             testGapFreeLexing = true
         )
     }

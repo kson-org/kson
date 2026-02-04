@@ -21,6 +21,26 @@ class KsonCoreTestString : KsonCoreTest {
     }
 
     @Test
+    fun testQuotedSimpleString() {
+        assertParsesTo(
+            """
+                "simpleKey": "simpleValue"
+            """.trimIndent(),
+            """
+                simpleKey: simpleValue
+            """.trimIndent(),
+            """
+                simpleKey: simpleValue
+            """.trimIndent(),
+            """
+                {
+                  "simpleKey": "simpleValue"
+                }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
     fun testStringWithRawWhitespace() {
         assertParsesTo(
             """
@@ -260,6 +280,98 @@ class KsonCoreTestString : KsonCoreTest {
             """
                 "No"
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testValidEscapeSequences() {
+        assertParsesTo(
+            """ 
+                "\" ' \\ \/ \b \f \n \r \t\""
+             """.trimIndent(),
+            """
+                '" \' \\ \/ \b \f \n \r \t"'
+             """.trimIndent(),
+            """
+                "\" ' \\ / \b \f \n \r \t\""
+                """.trimIndent(),
+            """
+                "\" ' \\ \/ \b \f \n \r \t\""
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testForwardSlashEscapeHandling() {
+        /**
+         * For KSON and JSON, we maintain whatever the user input: it's consistent, legal, and computationally
+         * beneficial since we don't have to do a full unescape/re-escape loop for every KSON/JSON format or
+         * transpile. YAML on the other hand does not allow escaped forward slashes, so we must be careful to
+         * remove any we find
+         */
+        assertParsesTo(
+            """ 
+                "\/ / \\/"
+             """.trimIndent(),
+            """
+                '\/ / \\/'
+             """.trimIndent(),
+            """
+                "/ / \\/"
+                """.trimIndent(),
+            """
+                "\/ / \\/"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testValidUnicodeEscape() {
+        assertParsesTo(
+            "\"\\u0041\\uFFFF\\u1234\"",
+            "'\\u0041\\uFFFF\\u1234'",
+            "\"\\u0041\\uFFFF\\u1234\"",
+            "\"\\u0041\\uFFFF\\u1234\""
+        )
+    }
+
+    @Test
+    fun testWhitespaceControlCharactersAllowed() {
+        assertParsesTo(
+            "\"hello\tworld\"",
+            "'hello\tworld'",
+            "\"hello\tworld\"",
+            "\"hello\\tworld\""
+        )
+    }
+
+    @Test
+    fun testStringWithValidEscapesInContext() {
+        assertParsesTo(
+            "\"line1\\nline2\\ttabbed\"",
+            "'line1\\nline2\\ttabbed'",
+            "\"line1\\nline2\\ttabbed\"",
+            "\"line1\\nline2\\ttabbed\""
+        )
+    }
+
+    @Test
+    fun testUnicodeEscapeFollowedByValidEscape() {
+        assertParsesTo(
+            "\"\\u0041\\n\"",
+            "'\\u0041\\n'",
+            "\"\\u0041\\n\"",
+            "\"\\u0041\\n\""
+        )
+    }
+
+    @Test
+    fun testConsecutiveUnicodeEscapes() {
+        assertParsesTo(
+            "\"\\u0041\\u0042\\u0043\"",
+            "'\\u0041\\u0042\\u0043'",
+            "\"\\u0041\\u0042\\u0043\"",
+            "\"\\u0041\\u0042\\u0043\""
         )
     }
 }

@@ -149,7 +149,7 @@ class KsonCoreTestObject : KsonCoreTest {
                 '
             """.trimIndent(),
             """
-                first: "value"
+                first: value
                 second: "this is a string with a
                 raw newline in it and at its end
                 "

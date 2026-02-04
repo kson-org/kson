@@ -287,8 +287,6 @@ enum class TokenType {
     EMBED_OPEN_DELIM,
     EMBED_CLOSE_DELIM,
     EMBED_TAG,
-    EMBED_TAG_STOP,
-    EMBED_METADATA,
     EMBED_PREAMBLE_NEWLINE,
     EMBED_CONTENT,
     FALSE,
@@ -338,59 +336,21 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
     while (i < internalTokens.size) {
         val currentToken = internalTokens[i]
 
+        /**
+         * Map internal tokens to external representations.  This positions us to refactor internals underneath this.
+         * The mapping may appear to be 1-to-1, but it has not always been and this setup allowed us to refactor in
+         * a fully backwards compatible manner
+         */
         when (currentToken.tokenType) {
             InternalTokenType.STRING_OPEN_QUOTE -> {
-                // we collapse all string content tokens into one for the public API (our internals track more
-                // refined string content tokens to produce better errors, but those refined tokens are
-                // not needed by outside clients)
-                val contentBuilder = StringBuilder()
-                var contentStart: Coordinates? = null
-                var contentEnd: Coordinates? = null
-
-                while (i++ < internalTokens.size &&
-                    internalTokens[i].tokenType !in setOf(InternalTokenType.STRING_CLOSE_QUOTE, InternalTokenType.EOF)) {
-
-                    val contentToken = internalTokens[i]
-                    if (contentStart == null) {
-                        contentStart = contentToken.lexeme.location.start
-                    }
-                    contentEnd = contentToken.lexeme.location.end
-                    contentBuilder.append(contentToken.lexeme.text)
-                }
-
-                // Add the open quote token
                 tokens.add(createPublicToken(TokenType.STRING_OPEN_QUOTE, currentToken))
-
-                // Add consolidated string content if any
-                if (contentBuilder.isNotEmpty() && contentStart != null && contentEnd != null) {
-                    tokens.add(Token(
-                        TokenType.STRING_CONTENT,
-                        contentBuilder.toString(),
-                        Position(contentStart),
-                        Position(contentEnd)
-                    ))
-                }
-
-                // Add the close quote token if present
-                if (i < internalTokens.size) {
-                    if (internalTokens[i].tokenType == InternalTokenType.STRING_CLOSE_QUOTE) {
-                        val closeQuoteToken = internalTokens[i]
-                        tokens.add(createPublicToken(TokenType.STRING_CLOSE_QUOTE, closeQuoteToken))
-                    } else if (internalTokens[i].tokenType != InternalTokenType.EOF) {
-                        throw IllegalStateException("Bug: a string must end with a closing quote token or EOF")
-                    }
-                }
-
             }
-            // String content tokens are handled above in STRING_OPEN_QUOTE case
-            InternalTokenType.STRING_CONTENT,
-            InternalTokenType.STRING_CLOSE_QUOTE,
-            InternalTokenType.STRING_ILLEGAL_CONTROL_CHARACTER,
-            InternalTokenType.STRING_UNICODE_ESCAPE,
-            InternalTokenType.STRING_ESCAPE -> {
-                throw IllegalStateException("String content tokens should be handled in STRING_OPEN_QUOTE case")
+            InternalTokenType.STRING_CONTENT -> {
+                tokens.add(createPublicToken(TokenType.STRING_CONTENT, currentToken))
             }
-            // Regular token conversions - direct mapping
+            InternalTokenType.STRING_CLOSE_QUOTE -> {
+                tokens.add(createPublicToken(TokenType.STRING_CLOSE_QUOTE, currentToken))
+            }
             InternalTokenType.CURLY_BRACE_L -> {
                 tokens.add(createPublicToken(TokenType.CURLY_BRACE_L, currentToken))
             }
@@ -465,12 +425,6 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
             }
             InternalTokenType.EOF -> {
                 tokens.add(createPublicToken(TokenType.EOF, currentToken))
-            }
-            InternalTokenType.EMBED_METADATA -> {
-                tokens.add(createPublicToken(TokenType.EMBED_METADATA, currentToken))
-            }
-            InternalTokenType.EMBED_TAG_STOP -> {
-                tokens.add(createPublicToken(TokenType.EMBED_TAG_STOP, currentToken))
             }
         }
         i++
@@ -558,7 +512,6 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         is InternalEmbedBlock -> {
             KsonValue.KsonEmbed(
                 tag = ksonValue.embedTag?.value,
-                metadata = ksonValue.metadataTag?.value,
                 content = ksonValue.embedContent.value,
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -673,7 +626,6 @@ sealed class KsonValue(val start: Position, val end: Position) {
      */
     class KsonEmbed internal constructor(
         val tag: String?,
-        val metadata: String?,
         val content: String,
         internalStart: Position,
         internalEnd: Position

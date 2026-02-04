@@ -61,16 +61,13 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
     }
 
     @Test
-    fun testEmbedBlockWithMetadataTag() {
+    fun testEmbedBlockWithMetadataInTag() {
         val schema = """
         {
           "${'$'}schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "embedTag": {
-              "type": "string"
-            },
-            "embedMetadata": {
               "type": "string"
             },
             "embedContent": {
@@ -89,19 +86,17 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             %%
             """,
             schema,
-            true,
-            "EmbedBlock with metadata tag should validate"
+            true
         )
 
         assertKsonEnforcesSchema(
             """
-            %: just_metadata
+            %: some_metadata
               some content here
             %%
             """,
             schema,
-            true,
-            "EmbedBlock with only metadata tag should validate"
+            true
         )
     }
 

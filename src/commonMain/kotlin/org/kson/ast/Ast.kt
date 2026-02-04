@@ -192,7 +192,7 @@ class KsonRootImpl(
      */
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 var ksonDocument = rootNode.toSourceWithNext(indent, trailingContent.firstOrNull(), compileTarget)
 
                 trailingContent.forEachIndexed { index, trailingValue ->
@@ -264,7 +264,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
     }
 
     private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val seperator = when (compileTarget) {
+        val separator = when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
                     ",\n"
@@ -278,7 +278,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
         return """
             |${indent.firstLineIndent()}{
             |${
-            properties.withIndex().joinToString(seperator) { (index, property) ->
+            properties.withIndex().joinToString(separator) { (index, property) ->
                 val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
                 property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
             }
@@ -497,7 +497,7 @@ class ListNode(
         compileTarget: CompileTarget,
         listDelimiters: ListDelimiters
     ): String {
-        val seperator = when (compileTarget) {
+        val separator = when (compileTarget) {
             is Kson -> if(compileTarget.formatConfig.formattingStyle == CLASSIC) {
                 ",\n"
             }else{
@@ -509,7 +509,7 @@ class ListNode(
         // We pad our list bracket with newlines if our list is non-empty
         val bracketPadding = "\n"
         return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
-                elements.withIndex().joinToString(seperator) { (index, element) ->
+                elements.withIndex().joinToString(separator) { (index, element) ->
                     val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
                     element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
                 } +
@@ -675,36 +675,38 @@ class QuotedStringNode(
     }
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+        if (StringUnquoted.isUnquotable(unquotedString)) {
+            /**
+             * This string does not require quotes in Kson, so we use the [renderUnquotableKsonString]
+             * to get the best rendering for this string across all compile targets
+             */
+            return renderUnquotableKsonString(unquotedString, indent, compileTarget)
+        }
+
         return when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
                     return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(unquotedString))}\""
                 } else {
-                    // Check if we can use this string unquoted
-                    val isSimple = StringUnquoted.isUnquotable(unquotedString)
+                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
+                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
 
-                    indent.firstLineIndent() +
-                            if (isSimple) {
-                                unquotedString
-                            } else {
-                                val singleQuoteCount = SingleQuote.countDelimiterOccurrences(unquotedString)
-                                val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(unquotedString)
+                    // prefer single-quotes unless double-quotes would require less escaping
+                    val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
+                        DoubleQuote
+                    } else {
+                        SingleQuote
+                    }
 
-                                // prefer single-quotes unless double-quotes would require less escaping
-                                val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
-                                    DoubleQuote
-                                } else {
-                                    SingleQuote
-                                }
-
-                                val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)
-                                "${chosenDelimiter}$escapedContent${chosenDelimiter}"
-                            }
+                    val escapedContent = chosenDelimiter.escapeQuotes(unquotedString)
+                    indent.firstLineIndent() + "${chosenDelimiter}$escapedContent${chosenDelimiter}"
                 }
             }
 
             is Yaml -> {
-                indent.firstLineIndent() + "\"" + DoubleQuote.escapeQuotes(unquotedString) + "\""
+                indent.firstLineIndent() + "\"${DoubleQuote.escapeQuotes(
+                    // we ensure forward slashes are unescaped here since YAML does not allow escaping them
+                    unescapeForwardSlashes(unquotedString))}\""
             }
         }
     }
@@ -723,35 +725,43 @@ open class UnquotedStringNode(sourceTokens: List<Token>) : StringNodeImpl(source
         renderTokens(sourceTokens)
     }
 
-    val yamlReservedKeywords = setOf(
-        // Boolean true values
-        "y", "Y", "yes", "Yes", "YES",
-        "true", "True", "TRUE",
-        "on", "On", "ON",
-        // Boolean false values
-        "n", "N", "no", "No", "NO",
-        "false", "False", "FALSE",
-        "off", "Off", "OFF",
-        // Null values
-        "null", "Null", "NULL"
-    )
-
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return when (compileTarget) {
-            is Kson -> {
-                if (compileTarget.formatConfig.formattingStyle == CLASSIC){
-                    return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(stringContent))}\""
-                }else{
-                    indent.firstLineIndent() + stringContent
-                }
-            }
+        return renderUnquotableKsonString(stringContent, indent, compileTarget)
+    }
+}
 
-            is Yaml -> {
-                indent.firstLineIndent() + if (yamlReservedKeywords.contains(stringContent)) {
-                    "$DoubleQuote$stringContent$DoubleQuote"
-                } else {
-                    stringContent
-                }
+private val yamlReservedKeywords = setOf(
+    // Boolean true values
+    "y", "Y", "yes", "Yes", "YES",
+    "true", "True", "TRUE",
+    "on", "On", "ON",
+    // Boolean false values
+    "n", "N", "no", "No", "NO",
+    "false", "False", "FALSE",
+    "off", "Off", "OFF",
+    // Null values
+    "null", "Null", "NULL"
+)
+
+/**
+ * Render helper for unquoted KSON strings, i.e. [String]s for which [StringUnquoted.isUnquotable] returns true.
+ * NOTE: the caller is responsible for ensuring [StringUnquoted.isUnquotable] returns true on [unquotedKsonString]
+ */
+private fun renderUnquotableKsonString(unquotedKsonString: String, indent: Indent, compileTarget: CompileTarget): String {
+    return when (compileTarget) {
+        is Kson -> {
+            if (compileTarget.formatConfig.formattingStyle == CLASSIC){
+                return indent.firstLineIndent() + "\"${unquotedKsonString}\""
+            }else{
+                indent.firstLineIndent() + unquotedKsonString
+            }
+        }
+
+        is Yaml -> {
+            indent.firstLineIndent() + if (yamlReservedKeywords.contains(unquotedKsonString)) {
+                "$DoubleQuote$unquotedKsonString$DoubleQuote"
+            } else {
+                unquotedKsonString
             }
         }
     }
@@ -780,7 +790,7 @@ class NumberNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + value.asString
             }
         }
@@ -796,7 +806,7 @@ class TrueNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "true"
             }
         }
@@ -808,7 +818,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "false"
             }
         }
@@ -818,7 +828,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "null"
             }
         }
@@ -827,14 +837,12 @@ class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
 
 class EmbedBlockNode(
     val embedTagNode: StringNodeImpl?,
-    val metadataTagNode: StringNodeImpl?,
     val embedContentNode: StringNodeImpl,
     sourceTokens: List<Token>
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
     private val embedTag: String = embedTagNode?.processedStringContent ?: ""
-    private val metadataTag: String = metadataTagNode?.processedStringContent ?: ""
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -853,16 +861,15 @@ class EmbedBlockNode(
      */
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
         val (delimiter, content) = selectOptimalDelimiter()
-        val embedPreamble = embedTag + if (metadataTag.isNotEmpty()) ": $metadataTag" else ""
 
         return when (compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED -> {
                 val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}") { it }
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}$embedPreamble\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$embedTag\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
             }
             COMPACT -> {
                 val compactContent = content.lines().joinToString("\n") { it }
-                "${delimiter.openDelimiter}$embedPreamble\n$compactContent${delimiter.closeDelimiter}"
+                "${delimiter.openDelimiter}$embedTag\n$compactContent${delimiter.closeDelimiter}"
             }
             CLASSIC -> {
                 renderJsonFormat(indent, compileTarget as? Json ?: Json())
@@ -929,16 +936,12 @@ class EmbedBlockNode(
      */
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\",\n"
-        } else ""
-
-        val metadataTagLine = if (metadataTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\",\n"
+            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"${DoubleQuote.escapeQuotes(embedTag)}\",\n"
         } else ""
 
         return """
             |${indent.firstLineIndent()}{
-            |$embedTagLine$metadataTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
+            |$embedTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
             |${indent.bodyLinesIndent()}}
         """.trimMargin()
     }
@@ -951,14 +954,10 @@ class EmbedBlockNode(
      */
     private fun renderYamlObject(indent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"$embedTag\"\n"
+            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(embedTag)}\"\n"
         } else ""
 
-        val metadataTagLine = if (metadataTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_METADATA.key}: \"$metadataTag\"\n"
-        } else ""
-
-        return embedTagLine + metadataTagLine +
+        return embedTagLine +
                 "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                 renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }

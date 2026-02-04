@@ -1,4 +1,5 @@
 import * as cp from 'child_process';
+import * as os from 'os';
 import * as path from 'path';
 import {
   downloadAndUnzipVSCode,
@@ -22,10 +23,13 @@ async function main() {
     const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
     console.log('VS Code download complete.');
 
-    const [cliPath, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+    const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+
+    // Use a short user-data-dir path (must be < 128 characters)
+    const userDataDir = path.join(os.tmpdir(), 'vscode-kson');
 
     console.log('Installing VSIX...');
-    const installResult = cp.spawnSync(cliPath, [...args, '--install-extension', vsixPath], {
+    const installResult = cp.spawnSync(cliPath, ['--user-data-dir', userDataDir, '--install-extension', vsixPath], {
       encoding: 'utf-8',
       stdio: 'inherit',
       shell: process.platform === 'win32',
@@ -40,12 +44,13 @@ async function main() {
     console.log('Launching VS Code with extension...');
 
     // Don't use extensionDevelopmentPath since we installed the VSIX
-    const launchArgs = [workspacePath];
+    // --wait keeps the CLI process running until VS Code is closed
+    const launchArgs = ['--user-data-dir', userDataDir, '--wait', workspacePath];
 
     console.log('Launching command:', cliPath);
-    console.log('With args:', [...args, ...launchArgs]);
+    console.log('With args:', launchArgs);
 
-    const vscodeProcess = cp.spawn(cliPath, [...args, ...launchArgs], {
+    const vscodeProcess = cp.spawn(cliPath, launchArgs, {
       stdio: 'inherit',
       detached: false,
       shell: process.platform === 'win32',
