@@ -12,6 +12,7 @@ import org.kson.tools.InternalEmbedRule
 import org.kson.tools.FormattingStyle as InternalFormattingStyle
 import org.kson.tools.IndentType as InternalIndentType
 import org.kson.tools.KsonFormatterConfig
+import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.parser.TokenType as InternalTokenType
 import org.kson.parser.Token as InternalToken
@@ -192,17 +193,21 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
  *
  * @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
  * @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+ * @throws IllegalArgumentException if [pathPattern] is not a valid JsonPointerGlob
  *
  * Example:
  * ```kotlin
  * EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
- * EmbedRule("/config/description")        // Match exact path, no tag
+ * EmbedRule("/config/description")       // Match exact path, no tag
  * ```
  */
 class EmbedRule(
     val pathPattern: String,
     val tag: String? = null
-)
+) {
+    @OptIn(ExperimentalJsonPointerGlobLanguage::class)
+    internal val parsedPathPattern: JsonPointerGlob = JsonPointerGlob(pathPattern)
+}
 
 /**
  * Options for formatting Kson output.
@@ -234,7 +239,7 @@ class FormatOptions(
 
         val internalEmbedRules = embedBlockRules.map { rule ->
             InternalEmbedRule(
-                pathPattern = JsonPointerGlob(rule.pathPattern),
+                pathPattern = rule.parsedPathPattern,
                 tag = rule.tag
             )
         }
