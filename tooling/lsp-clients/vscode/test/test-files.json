@@ -3,10 +3,11 @@
     "syntax-highlighting.test",
     "status-bar-schema-association.test",
     "schema-loading.test",
+    "language-support.test",
     "language-config.test",
     "formatting-settings.test",
     "editing.test",
-    "language-support.test",
-    "diagnostics.test"
+    "diagnostics.test",
+    "bundled-schema.test"
   ]
 }

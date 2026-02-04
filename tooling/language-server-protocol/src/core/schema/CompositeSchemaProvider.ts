@@ -35,12 +35,11 @@ export class CompositeSchemaProvider implements SchemaProvider {
      * Returns the first non-undefined result.
      *
      * @param documentUri The URI of the KSON document
-     * @param languageId Optional language ID for bundled schema lookup
      * @returns TextDocument containing the schema, or undefined if no provider has a schema
      */
-    getSchemaForDocument(documentUri: DocumentUri, languageId?: string): TextDocument | undefined {
+    getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined {
         for (const provider of this.providers) {
-            const schema = provider.getSchemaForDocument(documentUri, languageId);
+            const schema = provider.getSchemaForDocument(documentUri);
             if (schema) {
                 return schema;
             }
