@@ -2076,8 +2076,8 @@ impl SchemaValidator {
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
-        let filepath_ptr = filepath.map(|v| v.to_kotlin_object());
-        let filepath = filepath_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
@@ -3156,8 +3156,8 @@ impl Kson {
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
-        let filepath_ptr = filepath.map(|v| v.to_kotlin_object());
-        let filepath = filepath_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(

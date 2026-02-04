@@ -207,7 +207,25 @@ def _from_kotlin_list(
     return python_list
 
 def _to_kotlin_list(list: List[Any]) -> Any:
-    raise RuntimeError("not implemented")
+    env = _attach_jni_thread()
+
+    # Create a new ArrayList
+    array_list_class = _get_class(env, b"java/util/ArrayList")
+    constructor = _get_method(env, array_list_class, b"<init>", b"()V")
+    array_list = env[0].NewObject(env, array_list_class, constructor)
+    _raise_exception_if_any(env)
+    array_list = _to_gc_global_ref(env, array_list)
+
+    # Add each element to the list
+    for item in list:
+        if not hasattr(item, '_jni_ref'):
+            raise TypeError(f"Cannot convert item to Kotlin: expected object with _jni_ref attribute, got {type(item).__name__}")
+        item_ref = item._jni_ref
+        _call_method_raw(env, b"java/util/ArrayList", array_list, b"add", b"(Ljava/lang/Object;)Z", "BooleanMethod", [item_ref])
+        _raise_exception_if_any(env)
+
+    _detach_jni_thread()
+    return array_list
 
 def _to_kotlin_map(list: Dict[Any, Any]) -> Any:
     raise RuntimeError("not implemented")
