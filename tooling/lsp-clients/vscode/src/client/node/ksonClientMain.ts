@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {deactivate} from '../common/deactivate';
 import {
     ServerOptions,
     TransportKind,
@@ -56,9 +55,12 @@ export async function activate(context: vscode.ExtensionContext) {
             bundledMetaSchemas,
             enableBundledSchemas: areBundledSchemasEnabled()
         });
-        let languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
+        const languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
 
         await languageClient.start();
+
+        // Add the client to subscriptions so it gets disposed on deactivation
+        context.subscriptions.push(languageClient);
         console.log('Kson Language Server started');
 
         // Register content provider for bundled:// URIs so users can navigate to bundled schemas
@@ -203,7 +205,3 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage('Failed to activate KSON language support.');
     }
 }
-
-deactivate().catch(error => {
-    console.error('Deactivation failed:', error);
-});
