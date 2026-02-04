@@ -51,14 +51,6 @@ enum class TokenType : ElementType {
      */
     EMBED_TAG,
     /**
-     * The divider between the [EMBED_TAG] and [EMBED_METADATA]
-     */
-    EMBED_TAG_STOP,
-    /**
-     * The part of the [EMBED_TAG] which can be used as metadata
-     */
-    EMBED_METADATA,
-    /**
      * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
@@ -95,20 +87,6 @@ enum class TokenType : ElementType {
      * A [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] delimited chunk of text, i.e. "This is a string"
      */
     STRING_CONTENT,
-    /**
-     * Control character prohibited from appearing in a Kson [String]
-     */
-    STRING_ILLEGAL_CONTROL_CHARACTER,
-    /**
-     * A unicode escape sequence embedded in a [STRING_CONTENT] as "\uXXXX", where "X" is a hex digit.
-     * Used to give helpful errors to the user when their escape sequence is incorrect.
-     */
-    STRING_UNICODE_ESCAPE,
-    /**
-     * A "\x" escape embedded in a [STRING_CONTENT], where "x" is a legal escape (see [validStringEscapes])
-     * Used to give helpful errors to the user when their escape is incorrect.
-     */
-    STRING_ESCAPE,
     // true
     TRUE,
     /**

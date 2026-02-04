@@ -284,17 +284,39 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 content%%
             """.trimIndent(),
             """
-                %: meta
+                %:meta
                 content%%
             """.trimIndent(),
             """
-                embedMetadata: "meta"
+                embedTag: ":meta"
                 embedContent: |
                   content
             """.trimIndent(),
             """
                 {
-                  "embedMetadata": "meta",
+                  "embedTag": ":meta",
+                  "embedContent": "content"
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        assertParsesTo(
+            """
+                %sql: "server=10.0.1.174;uid=root;database=company"
+                content%%
+            """.trimIndent(),
+            """
+                %sql: "server=10.0.1.174;uid=root;database=company"
+                content%%
+            """.trimIndent(),
+            """
+                embedTag: "sql: \"server=10.0.1.174;uid=root;database=company\""
+                embedContent: |
+                  content
+            """.trimIndent(),
+            """
+                {
+                  "embedTag": "sql: \"server=10.0.1.174;uid=root;database=company\"",
                   "embedContent": "content"
                 }
             """.trimIndent(), compileSettings = compileSettings

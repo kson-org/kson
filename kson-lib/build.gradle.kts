@@ -10,7 +10,7 @@ plugins {
     kotlin("multiplatform")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
-    id("nl.ochagavia.krossover") version "1.0.4"
+    id("nl.ochagavia.krossover") version "1.0.5"
 }
 
 repositories {
@@ -18,8 +18,9 @@ repositories {
 }
 
 group = "org.kson"
-// [[kson-version-num]]
-version = "0.3.0-SNAPSHOT"
+// [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
+val isRelease = project.findProperty("release") == "true"
+version = org.kson.KsonVersion.getVersion(rootProject.projectDir, isRelease = isRelease)
 
 kotlin {
     jvm {

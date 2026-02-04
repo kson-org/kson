@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kson.KsonVersion
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -115,7 +116,9 @@ group = "org.kson"
  *   versioning that this should not be depended on
  * [[kson-version-num]]
  */
-version = "x.4-SNAPSHOT"
+val internalBaseVersion = "x.4"
+val isRelease = project.findProperty("release") == "true"
+version = KsonVersion.getVersion(projectDir, internalBaseVersion, isRelease)
 
 kotlin {
     jvm()

@@ -193,7 +193,7 @@ class KsonRootImpl(
      */
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 var ksonDocument = rootNode.toSourceWithNext(indent, trailingContent.firstOrNull(), compileTarget)
 
                 trailingContent.forEachIndexed { index, trailingValue ->
@@ -742,7 +742,9 @@ class QuotedStringNode(
             }
 
             is Yaml -> {
-                indent.firstLineIndent() + "\"" + DoubleQuote.escapeQuotes(unquotedString) + "\""
+                indent.firstLineIndent() + "\"${DoubleQuote.escapeQuotes(
+                    // we ensure forward slashes are unescaped here since YAML does not allow escaping them
+                    unescapeForwardSlashes(unquotedString))}\""
             }
         }
     }
@@ -806,10 +808,6 @@ private fun StringNodeImpl.renderUnquotableKsonString(
                 unquotedKsonString
             }
         }
-
-        is Json -> {
-            indent.firstLineIndent() + "\"${renderForJsonString(unquotedKsonString)}\""
-        }
     }
 }
 
@@ -836,7 +834,7 @@ class NumberNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + value.asString
             }
         }
@@ -852,7 +850,7 @@ class TrueNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "true"
             }
         }
@@ -864,7 +862,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "false"
             }
         }
@@ -874,7 +872,7 @@ class FalseNode(sourceTokens: List<Token>) : BooleanNode(sourceTokens) {
 class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
-            is Kson, is Yaml, is Json -> {
+            is Kson, is Yaml -> {
                 indent.firstLineIndent() + "null"
             }
         }
@@ -883,14 +881,12 @@ class NullNode(sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
 
 class EmbedBlockNode(
     val embedTagNode: StringNodeImpl?,
-    val metadataTagNode: StringNodeImpl?,
     val embedContentNode: StringNodeImpl,
     sourceTokens: List<Token>
 ) :
     KsonValueNodeImpl(sourceTokens) {
 
     private val embedTag: String = embedTagNode?.processedStringContent ?: ""
-    private val metadataTag: String = metadataTagNode?.processedStringContent ?: ""
     private val embedContent: String = embedContentNode.processedStringContent
 
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -908,11 +904,41 @@ class EmbedBlockNode(
      * @return The rendered KSON source string
      */
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
-        val preamble = embedTag + if (metadataTag.isNotEmpty()) ": $metadataTag" else ""
+        val (delimiter, content) = selectOptimalDelimiter()
 
-        return EmbedBlockRenderer.renderKsonEmbedBlock(
-            embedContent, preamble, indent, compileTarget.formatConfig.formattingStyle
-        ) ?: renderJsonFormat(indent, compileTarget as? Json ?: Json())
+        return when (compileTarget.formatConfig.formattingStyle) {
+            PLAIN, DELIMITED -> {
+                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}") { it }
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$embedTag\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+            }
+            COMPACT -> {
+                val compactContent = content.lines().joinToString("\n") { it }
+                "${delimiter.openDelimiter}$embedTag\n$compactContent${delimiter.closeDelimiter}"
+            }
+            CLASSIC -> {
+                renderJsonFormat(indent, compileTarget as? Json ?: Json())
+            }
+        }
+    }
+
+    /**
+     * Selects the optimal delimiter for the embed block content, preferring delimiters that don't appear in the content
+     * to avoid escaping. Returns a pair of the chosen delimiter and the content (escaped if necessary).
+     *
+     * @return A pair of the chosen [EmbedDelim] and the content string (escaped if the delimiter appears in content)
+     */
+    private fun selectOptimalDelimiter(): Pair<EmbedDelim, String> {
+        val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
+        val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
+
+        return when {
+            percentCount == 0 -> EmbedDelim.Percent to embedContent
+            dollarCount == 0 -> EmbedDelim.Dollar to embedContent
+            else -> {
+                val delimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
+                delimiter to delimiter.escapeEmbedContent(embedContent)
+            }
+        }
     }
 
     /**
@@ -954,16 +980,12 @@ class EmbedBlockNode(
      */
     private fun renderJsonObject(indent: Indent, nextIndent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"$embedTag\",\n"
-        } else ""
-
-        val metadataTagLine = if (metadataTag.isNotEmpty()) {
-            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_METADATA.key}\": \"$metadataTag\",\n"
+            "${nextIndent.bodyLinesIndent()}\"${EmbedObjectKeys.EMBED_TAG.key}\": \"${DoubleQuote.escapeQuotes(embedTag)}\",\n"
         } else ""
 
         return """
             |${indent.firstLineIndent()}{
-            |$embedTagLine$metadataTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
+            |$embedTagLine${nextIndent.bodyLinesIndent()}"${EmbedObjectKeys.EMBED_CONTENT.key}": "${renderForJsonString(embedContent)}"
             |${indent.bodyLinesIndent()}}
         """.trimMargin()
     }
@@ -976,14 +998,10 @@ class EmbedBlockNode(
      */
     private fun renderYamlObject(indent: Indent): String {
         val embedTagLine = if (embedTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"$embedTag\"\n"
+            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_TAG.key}: \"${DoubleQuote.escapeQuotes(embedTag)}\"\n"
         } else ""
 
-        val metadataTagLine = if (metadataTag.isNotEmpty()) {
-            "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_METADATA.key}: \"$metadataTag\"\n"
-        } else ""
-
-        return embedTagLine + metadataTagLine +
+        return embedTagLine +
                 "${indent.firstLineIndent()}${EmbedObjectKeys.EMBED_CONTENT.key}: " +
                 renderMultilineYamlString(embedContent, indent.clone(true), indent.next(true))
     }

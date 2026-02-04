@@ -9,24 +9,28 @@ When `main` is ready to have a release cut from it:
 
 #### On the `main` branch:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:
-  * [kson-lib](../kson-lib/build.gradle.kts): `X.(Y+1).0-SNAPSHOT`
-  * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version)
+  * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
+    - Update `BASE_VERSION` to `X.(Y+1).0` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
+    - Snapshot versions are computed as `{BASE_VERSION}-{gitSha}-SNAPSHOT`
+  * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version, update `internalBaseVersion` there)
   * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
-  * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
-  * [tooling/jetbrains](../tooling/jetbrains/gradle.properties): `X.(Y+1).0-SNAPSHOT`
 
 #### On the `release/X.Y.Z` branch:
 
 - Search the codebase for `[[kson-version-num]]` to find and update all the development/snapshot versions to the new `X.Y.Z` version.  Here's a hopefully complete checklist of the artifacts we version and publish that should marked `[[kson-version-num]]`:
-  * [kson-lib](../kson-lib/build.gradle.kts)
-  * [KSON Core internals](../build.gradle.kts) (**NOTE:** the root [`build.gradle.kts`](../build.gradle.kts) uses a different versioning scheme and will NOT be set to `X.Y.Z`.  See the comments there for details)
-  * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
-  * [lib-python](../lib-python/pyproject.toml)
-  * [tooling/cli](../tooling/cli/build.gradle.kts): TODO we do not currently embed a version in the CLI
-  * [tooling/lsp-clients](../tooling/lsp-clients/package.json)
-  * [tooling/jetbrains](../tooling/jetbrains/gradle.properties)
+  * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
+    - Update `BASE_VERSION` to `X.Y.Z` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
+    - Build with `-Prelease=true` flag to produce release versions (without git SHA or SNAPSHOT suffix):
+      ```bash
+      ./gradlew build -Prelease=true
+      ```
+  * [KSON Core internals](../build.gradle.kts) (**NOTE:** uses a different versioning scheme and will NOT be set to `X.Y.Z`.  See the comments there for details)
+  * lib-rust, lib-python, tooling/lsp-clients: These require manual version updates (no `-Prelease` flag support yet):
+    - [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs)
+    - [lib-python](../lib-python/pyproject.toml)
+    - [tooling/lsp-clients](../tooling/lsp-clients/package.json)
 - Commit and push the `release-X.Y.Z-prep` branch
 - Run CircleCI across ALL supported platforms on the `release-X.Y.Z-prep` branch (only linux builds are run on every pull request)
   * Fix any platform specific issues found (hopefully this is rare... if it is common and painful, we may need to reconsider running cross-platform CI more often)

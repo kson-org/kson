@@ -187,13 +187,12 @@ export class DocumentSymbolService {
      */
     private createEmbedSymbol(embed: KsonValue.KsonEmbed, name: string, range: Range, parent?: DocumentSymbolWithParent): DocumentSymbolWithParent {
         const tag = embed.tag || 'embed';
-        const detail = embed.metadata ? `<<<${tag} ${embed.metadata}>>>` : `<<<${tag}>>>`;
 
         return new DocumentSymbolWithParent(
             name,
             SymbolKind.Module,
             range,
-            detail,
+            tag,
             range,
             parent
         );

@@ -19,6 +19,10 @@ pub struct OwnedKotlinPtr {
 
 impl Drop for OwnedKotlinPtr {
     fn drop(&mut self) {
+        if self.inner.is_null() {
+            return;
+        }
+
         let (env, _detach_guard) = attach_thread_to_java_vm();
         unsafe {
             let delete = (**env).DeleteGlobalRef.unwrap();
@@ -287,6 +291,19 @@ impl ToKotlinObject for &'_ str {
 impl<T: ToKotlinObject> ToKotlinObject for &T {
     fn to_kotlin_object(&self) -> KotlinPtr {
         (*self).to_kotlin_object()
+    }
+}
+
+impl<T: ToKotlinObject> ToKotlinObject for Option<T> {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        match self {
+            None => KotlinPtr {
+                inner: Arc::new(OwnedKotlinPtr {
+                    inner: std::ptr::null_mut(),
+                })
+            },
+            Some(v) => v.to_kotlin_object()
+        }
     }
 }
 

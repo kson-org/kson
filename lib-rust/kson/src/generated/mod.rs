@@ -910,28 +910,6 @@ pub mod kson_value {
         }
 
 
-        pub fn metadata(
-            &self,
-        ) -> Option<String> {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonEmbed",
-                c"getMetadata",
-                c"()Ljava/lang/String;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn content(
             &self,
         ) -> String {
@@ -2094,26 +2072,31 @@ impl SchemaValidator {
 
     /// Validates the given Kson source against this validator's schema.
     /// @param kson The Kson source to validate
+    /// @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
     ///
     /// @return A list of validation error messages, or empty list if valid
     pub fn validate(
         &self,
         kson: &str,
+        filepath: Option<&str>,
     ) -> Vec<Message> {
         let self_ptr = self.to_kotlin_object();
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/SchemaValidator",
             c"validate",
-            c"(Ljava/lang/String;)Ljava/util/List;",
+            c"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;",
             CallObjectMethod,
             self_obj,
             kson,
+            filepath,
         );
 
         util::from_kotlin_list(result)
@@ -3171,23 +3154,29 @@ impl Kson {
 
     /// Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
     /// tokenized version of the source.  Useful for tooling/editor support.
+    /// @param kson The Kson source to analyze
+    /// @param filepath Filepath of the document being analyzed
     pub fn analyze(
         kson: &str,
+        filepath: Option<&str>,
     ) -> Analysis {
         let self_ptr = util::access_static_field(c"org/kson/Kson", c"INSTANCE", c"Lorg/kson/Kson;");
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/Kson",
             c"analyze",
-            c"(Ljava/lang/String;)Lorg/kson/Analysis;",
+            c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/Analysis;",
             CallObjectMethod,
             self_obj,
             kson,
+            filepath,
         );
 
         FromKotlinObject::from_kotlin_object(result)
@@ -3725,8 +3714,6 @@ pub enum TokenType {
     EmbedOpenDelim,
     EmbedCloseDelim,
     EmbedTag,
-    EmbedTagStop,
-    EmbedMetadata,
     EmbedPreambleNewline,
     EmbedContent,
     False,
@@ -3760,22 +3747,20 @@ impl FromKotlinObject for TokenType {
             11 => TokenType::EmbedOpenDelim,
             12 => TokenType::EmbedCloseDelim,
             13 => TokenType::EmbedTag,
-            14 => TokenType::EmbedTagStop,
-            15 => TokenType::EmbedMetadata,
-            16 => TokenType::EmbedPreambleNewline,
-            17 => TokenType::EmbedContent,
-            18 => TokenType::False,
-            19 => TokenType::UnquotedString,
-            20 => TokenType::IllegalChar,
-            21 => TokenType::ListDash,
-            22 => TokenType::Null,
-            23 => TokenType::Number,
-            24 => TokenType::StringOpenQuote,
-            25 => TokenType::StringCloseQuote,
-            26 => TokenType::StringContent,
-            27 => TokenType::True,
-            28 => TokenType::Whitespace,
-            29 => TokenType::Eof,
+            14 => TokenType::EmbedPreambleNewline,
+            15 => TokenType::EmbedContent,
+            16 => TokenType::False,
+            17 => TokenType::UnquotedString,
+            18 => TokenType::IllegalChar,
+            19 => TokenType::ListDash,
+            20 => TokenType::Null,
+            21 => TokenType::Number,
+            22 => TokenType::StringOpenQuote,
+            23 => TokenType::StringCloseQuote,
+            24 => TokenType::StringContent,
+            25 => TokenType::True,
+            26 => TokenType::Whitespace,
+            27 => TokenType::Eof,
             _ => unreachable!(),
         }
     }
@@ -3798,8 +3783,6 @@ impl ToKotlinObject for TokenType {
             TokenType::EmbedOpenDelim => util::access_static_field(c"org/kson/TokenType", c"EMBED_OPEN_DELIM", c"Lorg/kson/TokenType;"),
             TokenType::EmbedCloseDelim => util::access_static_field(c"org/kson/TokenType", c"EMBED_CLOSE_DELIM", c"Lorg/kson/TokenType;"),
             TokenType::EmbedTag => util::access_static_field(c"org/kson/TokenType", c"EMBED_TAG", c"Lorg/kson/TokenType;"),
-            TokenType::EmbedTagStop => util::access_static_field(c"org/kson/TokenType", c"EMBED_TAG_STOP", c"Lorg/kson/TokenType;"),
-            TokenType::EmbedMetadata => util::access_static_field(c"org/kson/TokenType", c"EMBED_METADATA", c"Lorg/kson/TokenType;"),
             TokenType::EmbedPreambleNewline => util::access_static_field(c"org/kson/TokenType", c"EMBED_PREAMBLE_NEWLINE", c"Lorg/kson/TokenType;"),
             TokenType::EmbedContent => util::access_static_field(c"org/kson/TokenType", c"EMBED_CONTENT", c"Lorg/kson/TokenType;"),
             TokenType::False => util::access_static_field(c"org/kson/TokenType", c"FALSE", c"Lorg/kson/TokenType;"),

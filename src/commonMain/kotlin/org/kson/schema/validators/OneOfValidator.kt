@@ -5,9 +5,10 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
+import org.kson.validation.SourceContext
 
 class OneOfValidator(private val oneOf: List<JsonSchema>) : JsonSchemaValidator {
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink) {
+    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val hasExactlyOneOf = oneOf.count {
             val oneOfMessageSink = MessageSink()
             it.isValid(ksonValue, oneOfMessageSink)

@@ -423,69 +423,23 @@ class Lexer(source: String, gapFree: Boolean = false) {
     }
 
     private fun quotedString(delimiter: Char) {
-        var hasUntokenizedStringCharacters = false
+        while (sourceScanner.peek() != delimiter && !sourceScanner.eof()) {
+            val nextChar = sourceScanner.peek()
 
-        if (sourceScanner.peek() == delimiter || sourceScanner.eof()) {
-            // empty string
-            addLiteralToken(STRING_CONTENT)
-            if (sourceScanner.peek() == delimiter) {
+            if (nextChar == '\\') {
+                // Advance past the backslash
                 sourceScanner.advance()
-                addLiteralToken(STRING_CLOSE_QUOTE)
-            }
-            return
-        }
-        while (sourceScanner.peek() != delimiter) {
-            val nextStringChar = sourceScanner.peek() ?: break
-
-            // check for illegal control characters
-            if (nextStringChar.code in 0x00..0x1F
-                // unlike JSON, we allow all whitespace control characters
-                && !isWhitespace(nextStringChar)
-            ) {
-                if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(STRING_CONTENT)
-                    hasUntokenizedStringCharacters = false
-                }
-                // advance past the illegal char and tokenize it
-                sourceScanner.advance()
-                addLiteralToken(STRING_ILLEGAL_CONTROL_CHARACTER)
-            } else if (nextStringChar == '\\') {
-                if (hasUntokenizedStringCharacters) {
-                    addLiteralToken(STRING_CONTENT)
-                    hasUntokenizedStringCharacters = false
-                }
-
-                // advance past the backslash
-                sourceScanner.advance()
-
-                if (sourceScanner.peek() == 'u') {
+                // Advance past the escaped character
+                if (!sourceScanner.eof()) {
                     sourceScanner.advance()
-
-                    // a '\u' unicode escape must be 4 chars long
-                    for (c in 1..4) {
-                        if (sourceScanner.peek() == delimiter || sourceScanner.eof()) {
-                            break
-                        }
-                        sourceScanner.advance()
-                    }
-                    addLiteralToken(STRING_UNICODE_ESCAPE)
-                } else {
-                    // otherwise, this must be a one-char string escape, provided we're
-                    // not up against EOF
-                    if (!sourceScanner.eof()) {
-                        sourceScanner.advance()
-                    }
-                    addLiteralToken(STRING_ESCAPE)
                 }
             } else {
                 sourceScanner.advance()
-                hasUntokenizedStringCharacters = true
             }
         }
 
-        if (hasUntokenizedStringCharacters) {
-            addLiteralToken(STRING_CONTENT)
-        }
+        // Note: STRING_CONTENT may be empty for empty strings
+        addLiteralToken(STRING_CONTENT)
 
         if (sourceScanner.eof()) {
             return
@@ -513,17 +467,16 @@ class Lexer(source: String, gapFree: Boolean = false) {
             return
         } else {
             /**
-             * Our source scanner is still in the embed preamble so long as this condition holds
+             * Our source scanner is still in an embed tag so long as this condition holds
              */
-            val stillInEmbedPreamble:(delimChar: Char) -> Boolean = {
+            val stillInEmbedTag:(delimChar: Char) -> Boolean = {
                 !sourceScanner.eof()
                         && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
                         && sourceScanner.peek() != '\n'
             }
 
             // we have an embed tag, let's scan it
-            while (stillInEmbedPreamble(delimChar)
-                && sourceScanner.peek() != ':') {
+            while (stillInEmbedTag(delimChar)) {
                 sourceScanner.advance()
             }
 
@@ -532,22 +485,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
             addToken(
                 EMBED_TAG, embedTagLexeme
             )
-
-            if(sourceScanner.peek() == ':') {
-                sourceScanner.advance()
-                addLiteralToken(EMBED_TAG_STOP)
-
-                // scan any metadata given in the preamble
-                while (stillInEmbedPreamble(delimChar)) {
-                    sourceScanner.advance()
-                }
-
-                // extract our embed metadata (note: may be empty, that's supported)
-                val embedMetadataLexeme = sourceScanner.extractLexeme()
-                addToken(
-                    EMBED_METADATA, embedMetadataLexeme
-                )
-            }
 
             // lex this premature embed end
             if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
@@ -646,9 +583,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
             || currentTokenType == WHITESPACE
             || currentTokenType == EMBED_PREAMBLE_NEWLINE
             || currentTokenType == STRING_CONTENT
-            || currentTokenType == STRING_ESCAPE
-            || currentTokenType == STRING_UNICODE_ESCAPE
-            || currentTokenType == STRING_ILLEGAL_CONTROL_CHARACTER
         ) {
             return CommentMetadata(emptyList(), emptyList())
         }
