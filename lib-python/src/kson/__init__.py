@@ -1123,23 +1123,6 @@ class _KsonValue_KsonEmbed(KsonValue):
 
         return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
-    def metadata(
-        self,
-    ) -> Optional[str]:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonEmbed",
-            jni_ref,
-            b"getMetadata",
-            b"()Ljava/lang/String;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
-
     def content(
         self,
     ) -> str:
@@ -1845,6 +1828,8 @@ class EmbedRule:
 
     When formatting KSON, strings at paths matching [pathPattern] will be rendered
     as embed blocks instead of regular strings.
+
+    **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
 
     @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
     @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")

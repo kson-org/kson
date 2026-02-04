@@ -3237,6 +3237,8 @@ impl std::hash::Hash for Kson {
 /// When formatting KSON, strings at paths matching [pathPattern] will be rendered
 /// as embed blocks instead of regular strings.
 ///
+/// **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
+///
 /// @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
 /// @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
 ///
@@ -3281,8 +3283,8 @@ impl EmbedRule {
 
         let path_pattern_ptr = path_pattern.to_kotlin_object();
         let path_pattern = path_pattern_ptr.as_kotlin_object();
-        let tag_ptr = tag.map(|v| v.to_kotlin_object());
-        let tag = tag_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());
+        let tag_ptr = tag.to_kotlin_object();
+        let tag = tag_ptr.as_kotlin_object();
 
         let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
             path_pattern,
