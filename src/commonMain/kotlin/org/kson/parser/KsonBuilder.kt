@@ -207,15 +207,6 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             )
                         }
 
-                        val metadataNode = childMarkers.find { it.element == EMBED_METADATA }?.let{
-                            QuotedStringNode(
-                                it.getSourceTokens(),
-                                // TODO this needs to be formalized as a "quoted" string, even if the quotes are novel
-                                //   then this should pass the quote type, not null
-                                null
-                            )
-                        }
-
                         val embedDelim = EmbedDelim.fromString(embedDelimChar)
 
                         val embedContentNode = childMarkers.find { it.element == EMBED_CONTENT }?.let{
@@ -227,7 +218,6 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
 
                         EmbedBlockNode(
                             embedTagNode,
-                            metadataNode,
                             embedContentNode,
                             marker.getSourceTokens())
                     }
@@ -392,7 +382,6 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
          */
         if (!EmbedObjectKeys.canBeDecoded(propertiesMap)) { return null }
 
-        val embedMetadataValue = propertiesMap[EmbedObjectKeys.EMBED_METADATA.key]
         val embedTagValue = propertiesMap[EmbedObjectKeys.EMBED_TAG.key]
 
         val embedContentProperty = propertiesMap[EmbedObjectKeys.EMBED_CONTENT.key] ?:
@@ -400,7 +389,6 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
 
         return EmbedBlockNode(
                 embedTagValue,
-                embedMetadataValue,
                 embedContentProperty,
                 marker.getSourceTokens()
             )
@@ -421,7 +409,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
             // drop the open quote token
             .drop(1)
             // and take everything up to the close quote (or the end, whichever comes first)
-            .takeWhile { it.tokenType != TokenType.STRING_CLOSE_QUOTE }
+            .takeWhile { it.tokenType != STRING_CLOSE_QUOTE }
 
         return QuotedStringNode(stringContentTokens, StringQuote.fromChar(stringDelim))
     }

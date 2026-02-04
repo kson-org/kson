@@ -321,8 +321,6 @@ function fibonacci(n: number): number {
 %%
 ```
 
-See [Embed Preamble](#the-embed-preamble) for full details on the metadata supported by [Embed Blocks](#embed-blocks)
-
 ### Escaping Embed Delimiters
 The rules for escaping embed block delimiters are as follows:
 ```kson
@@ -349,27 +347,16 @@ alternate_embed: $kson
 $$
 ```
 
-
-### The Embed Preamble
-
-The Embed Preamble may be provided to annotate the embedded content. An Embed Preamble is made of two parts:
-
-- the [Embed Tag](#embed-tags), which denotes the content type
-- the [Embed Metadata](#embed-metadata), arbitrary metadata given after the first colon `:` in
-  the [Embed Preamble](#the-embed-preamble)
-
-```
-%text: sample block
-This is a sample block of type `text`, as noted in its Embed Preamble.
-%% 
-```
-
-An empty [Embed Preamble](#the-embed-preamble) simply indicates an embed of raw text. When appropriate, it's recommended to include a tag or metadata to provide context about the embedded content.
-
 #### Embed Tags
 
-[Embed Blocks](#embed-blocks) can denote the type of content being embedded using an Embed Tag. Embed Tags appear at the
-beginning of the [Embed Preamble](#the-embed-preamble) and may not contain newlines or colons.
+ An [Embed Tag](#embed-tags) adds metadata to an [Embed Block](#embed-blocks). An [Embed Tag](#embed-tags) may be any legal KSON [String](#strings), but rather than be quoted, an embed tag starts immediately after the opening `%` and ends at the first raw newline.
+
+```kson
+%this is an "embed tag": it is arbitrary metadata related to this content. In this case, the content is empty.
+%%
+```
+
+[Embed Tags](#embed-tags) are often used to denote the embed content's type, which is particularly useful to enable tooling enhancements for the embedded content&mdash;for instance to properly highlight the embedded content, or to automatically inject a [full-on embedded editor](https://www.jetbrains.com/help/idea/using-language-injections.html#language_annotation).  Examples:
 
 ```kson
 %sql
@@ -381,16 +368,15 @@ ORDER BY hire_date ASC;
 %%
 ```
 
-While KSON does not specify which tags are legal, KSON does specify that [Embed Tags](#embed-tags) are intended to
-denote the type of embedded content, and they intended to enable tooling enhancements for the embedded content&mdash;for
-instance to properly highlight the embedded content, or to automatically inject
-a [full-on embedded editor](https://www.jetbrains.com/help/idea/using-language-injections.html#language_annotation).
-See [Embed Metadata](#embed-metadata) for syntax to arbitrarily embellish this tag.
-
-#### Embed Metadata
-
-[Embed Blocks](#embed-blocks) may have a string of arbitrary metadata associated with them. Embed Metadata is given
-after the first colon in the [Embed Preamble](#the-embed-preamble):
+```kson
+%sql "server=10.0.1.174;uid=root;database=company"
+SELECT first_name, last_name, hire_date
+  FROM employees
+ WHERE department = 'Sales'
+   AND hire_date < '2020-01-01'
+ ORDER BY hire_date ASC;
+%%
+```
 
 ```kson
 %:Captain's log, Stardate 4523.3 
@@ -400,24 +386,10 @@ the station. We're going in armed for battle.
 %%
 ```
 
-[//]: # (Discuss: the preamble can contain both an embed tag and embed metadata?)
-[Embed Metadata](#embed-metadata) is often used in conjunction with an [Embed Tag](#embed-tags):
-
-```kson
-%sql: "server=10.0.1.174;uid=root;database=company"
-SELECT first_name, last_name, hire_date
-  FROM employees
- WHERE department = 'Sales'
-   AND hire_date < '2020-01-01'
- ORDER BY hire_date ASC;
-%%
-```
-
 ## Formatting Styles
 
 KSON has a built-in auto-formatter that supports **three opinionated styles**. These three "views" on the same data
-serve
-different roles:
+serve different roles:
 
 - [Plain format](#plain-format-example), a lean format reminiscent of YAML. This is KSON's default format, useful for
   clarity

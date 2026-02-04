@@ -1079,23 +1079,6 @@ class _KsonValue_KsonEmbed(KsonValue):
 
         return cast(Any, (_java_string_to_python_str)(result))
 
-    def metadata(
-        self,
-    ) -> str:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonEmbed",
-            jni_ref,
-            b"getMetadata",
-            b"()Ljava/lang/String;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (_java_string_to_python_str)(result))
-
     def content(
         self,
     ) -> str:
@@ -1991,10 +1974,6 @@ class TokenType(Enum):
                 return _access_static_field(b"org/kson/TokenType", b"EMBED_CLOSE_DELIM", b"Lorg/kson/TokenType;")
             case TokenType.EMBED_TAG:
                 return _access_static_field(b"org/kson/TokenType", b"EMBED_TAG", b"Lorg/kson/TokenType;")
-            case TokenType.EMBED_TAG_STOP:
-                return _access_static_field(b"org/kson/TokenType", b"EMBED_TAG_STOP", b"Lorg/kson/TokenType;")
-            case TokenType.EMBED_METADATA:
-                return _access_static_field(b"org/kson/TokenType", b"EMBED_METADATA", b"Lorg/kson/TokenType;")
             case TokenType.EMBED_PREAMBLE_NEWLINE:
                 return _access_static_field(b"org/kson/TokenType", b"EMBED_PREAMBLE_NEWLINE", b"Lorg/kson/TokenType;")
             case TokenType.EMBED_CONTENT:
@@ -2042,20 +2021,18 @@ class TokenType(Enum):
     EMBED_OPEN_DELIM = 11
     EMBED_CLOSE_DELIM = 12
     EMBED_TAG = 13
-    EMBED_TAG_STOP = 14
-    EMBED_METADATA = 15
-    EMBED_PREAMBLE_NEWLINE = 16
-    EMBED_CONTENT = 17
-    FALSE = 18
-    UNQUOTED_STRING = 19
-    ILLEGAL_CHAR = 20
-    LIST_DASH = 21
-    NULL = 22
-    NUMBER = 23
-    STRING_OPEN_QUOTE = 24
-    STRING_CLOSE_QUOTE = 25
-    STRING_CONTENT = 26
-    TRUE = 27
-    WHITESPACE = 28
-    EOF = 29
+    EMBED_PREAMBLE_NEWLINE = 14
+    EMBED_CONTENT = 15
+    FALSE = 16
+    UNQUOTED_STRING = 17
+    ILLEGAL_CHAR = 18
+    LIST_DASH = 19
+    NULL = 20
+    NUMBER = 21
+    STRING_OPEN_QUOTE = 22
+    STRING_CLOSE_QUOTE = 23
+    STRING_CONTENT = 24
+    TRUE = 25
+    WHITESPACE = 26
+    EOF = 27
 

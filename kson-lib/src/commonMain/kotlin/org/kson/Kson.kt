@@ -277,8 +277,6 @@ enum class TokenType {
     EMBED_OPEN_DELIM,
     EMBED_CLOSE_DELIM,
     EMBED_TAG,
-    EMBED_TAG_STOP,
-    EMBED_METADATA,
     EMBED_PREAMBLE_NEWLINE,
     EMBED_CONTENT,
     FALSE,
@@ -418,12 +416,6 @@ private fun convertTokens(internalTokens: List<InternalToken>): List<Token> {
             InternalTokenType.EOF -> {
                 tokens.add(createPublicToken(TokenType.EOF, currentToken))
             }
-            InternalTokenType.EMBED_METADATA -> {
-                tokens.add(createPublicToken(TokenType.EMBED_METADATA, currentToken))
-            }
-            InternalTokenType.EMBED_TAG_STOP -> {
-                tokens.add(createPublicToken(TokenType.EMBED_TAG_STOP, currentToken))
-            }
         }
         i++
     }
@@ -510,7 +502,6 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
         is InternalEmbedBlock -> {
             KsonValue.KsonEmbed(
                 tag = ksonValue.embedTag?.value,
-                metadata = ksonValue.metadataTag?.value,
                 content = ksonValue.embedContent.value,
                 internalStart = Position(ksonValue.location.start),
                 internalEnd = Position(ksonValue.location.end)
@@ -625,7 +616,6 @@ sealed class KsonValue(val start: Position, val end: Position) {
      */
     class KsonEmbed internal constructor(
         val tag: String?,
-        val metadata: String?,
         val content: String,
         internalStart: Position,
         internalEnd: Position
