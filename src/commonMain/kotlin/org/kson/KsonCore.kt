@@ -11,6 +11,7 @@ import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.tools.FormattingStyle
+import org.kson.tools.InternalEmbedRule
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
 import org.kson.parser.behavior.quotedstring.KsonStringValidator
@@ -259,13 +260,21 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
      * Compile target for serializing a Kson AST out to Kson source
      *
      * @param formatConfig the settings for formatting the compiler Kson output
+     * @param embedBlockResolution pre-computed resolution of nodes to their matching embed block rules
      * @param coreCompileConfig the [CoreCompileConfig] for this compile
      */
     open class Kson(
         override val preserveComments: Boolean = true,
         val formatConfig: KsonFormatterConfig = KsonFormatterConfig(),
+        val embedBlockResolution: EmbedBlockResolution = EmbedBlockResolution.EMPTY,
         coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
-    ) : CompileTarget(coreCompileConfig)
+    ) : CompileTarget(coreCompileConfig) {
+        /**
+         * Gets the embed rule for a StringNode, if one matches.
+         */
+        fun getEmbedRule(node: StringNode): InternalEmbedRule? =
+            embedBlockResolution.stringNodes[node]
+    }
 
     /**
      * Compile target for Yaml transpilation

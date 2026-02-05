@@ -22,6 +22,7 @@ import org.kson.parser.behavior.embedblock.EmbedContentTransformer
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
+import org.kson.tools.FormattingStyle
 import org.kson.tools.FormattingStyle.*
 
 interface AstNode {
@@ -612,7 +613,10 @@ class ListElementNodeImpl(val value: KsonValueNode,
         compileTarget: CompileTarget,
         isDelimited: Boolean = false
     ): String {
-        return if ((value is ListNode && value.elements.isNotEmpty()) && !isDelimited) {
+        val isNonEmptyList = (value is ListNode && value.elements.isNotEmpty()) && !isDelimited
+
+        return if (isNonEmptyList) {
+            // For nested lists, use "- \n" (with trailing space for existing behavior)
             indent.bodyLinesIndent() + "- \n" + value.toSourceWithNext(
                 indent.next(false),
                 nextNode,
@@ -635,6 +639,38 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
     abstract val processedStringContent: String
 
     abstract val contentTransformer: KsonContentTransformer
+
+    /**
+     * Renders this string as an embed block with the given tag.
+     *
+     * @param indent The indentation to apply
+     * @param compileTarget The Kson compile target with formatting configuration
+     * @param embedTag Optional embed tag to include (e.g., "yaml", "sql")
+     * @return The rendered embed block string
+     */
+    private fun renderAsEmbedBlock(indent: Indent, compileTarget: Kson, embedTag: String?): String {
+        val content = processedStringContent
+        val preamble = embedTag ?: ""
+
+        return EmbedBlockRenderer.renderKsonEmbedBlock(
+            content, preamble, indent, compileTarget.formatConfig.formattingStyle,
+            nestedContentIndent = false
+        ) ?: run {
+            // CLASSIC format doesn't use embed blocks, render as JSON string
+            indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(content))}\""
+        }
+    }
+
+    /**
+     * Attempts to render this string as an embed block if it matches an embed rule.
+     *
+     * @return The rendered embed block string, or null if this node is not an embed block
+     */
+    internal fun tryRenderAsEmbedBlock(indent: Indent, compileTarget: Kson): String? {
+        val matchingRule = compileTarget.getEmbedRule(this)
+            ?: return null
+        return renderAsEmbedBlock(indent, compileTarget, matchingRule.tag)
+    }
 }
 
 class QuotedStringNode(
@@ -685,6 +721,8 @@ class QuotedStringNode(
 
         return when (compileTarget) {
             is Kson -> {
+                tryRenderAsEmbedBlock(indent, compileTarget)?.let { return it }
+
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
                     return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(unquotedString))}\""
                 } else {
@@ -747,12 +785,18 @@ private val yamlReservedKeywords = setOf(
  * Render helper for unquoted KSON strings, i.e. [String]s for which [StringUnquoted.isUnquotable] returns true.
  * NOTE: the caller is responsible for ensuring [StringUnquoted.isUnquotable] returns true on [unquotedKsonString]
  */
-private fun renderUnquotableKsonString(unquotedKsonString: String, indent: Indent, compileTarget: CompileTarget): String {
+private fun StringNodeImpl.renderUnquotableKsonString(
+    unquotedKsonString: String,
+    indent: Indent,
+    compileTarget: CompileTarget
+): String {
     return when (compileTarget) {
         is Kson -> {
-            if (compileTarget.formatConfig.formattingStyle == CLASSIC){
+            tryRenderAsEmbedBlock(indent, compileTarget)?.let { return it }
+
+            if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
                 return indent.firstLineIndent() + "\"${unquotedKsonString}\""
-            }else{
+            } else {
                 indent.firstLineIndent() + unquotedKsonString
             }
         }
@@ -1029,4 +1073,66 @@ private fun renderTokens(sourceTokens: List<Token>): String {
     return sourceTokens
         .filter { it.tokenType != WHITESPACE && it.tokenType != COMMENT }
         .joinToString("") { it.lexeme.text }
+}
+
+/**
+ * Shared utilities for rendering embed blocks.
+ */
+internal object EmbedBlockRenderer {
+    /**
+     * Selects the optimal delimiter for embed block content, preferring delimiters that don't appear
+     * in the content to avoid escaping.
+     *
+     * @param content The embed block content
+     * @return A pair of the chosen delimiter and the content (escaped if necessary)
+     */
+    fun selectOptimalDelimiter(content: String): Pair<EmbedDelim, String> {
+        val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(content)
+        val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(content)
+
+        return when {
+            percentCount == 0 -> EmbedDelim.Percent to content
+            dollarCount == 0 -> EmbedDelim.Dollar to content
+            else -> {
+                val delimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
+                delimiter to delimiter.escapeEmbedContent(content)
+            }
+        }
+    }
+
+    /**
+     * Renders content as a KSON embed block.
+     *
+     * @param content The string content to render
+     * @param preamble The embed block preamble (tag and optional metadata)
+     * @param indent The indentation to apply
+     * @param formattingStyle The formatting style to use
+     * @param nestedContentIndent If true, content is indented one level deeper than the delimiter.
+     *                            If false, content uses the same indentation level.
+     * @return The rendered embed block string, or null if CLASSIC style (caller should handle)
+     */
+    fun renderKsonEmbedBlock(
+        content: String,
+        preamble: String,
+        indent: Indent,
+        formattingStyle: FormattingStyle,
+        nestedContentIndent: Boolean = false
+    ): String? {
+        val (delimiter, escapedContent) = selectOptimalDelimiter(content)
+
+        return when (formattingStyle) {
+            PLAIN, DELIMITED -> {
+                val contentIndent = if (nestedContentIndent) indent.next(false) else indent
+                val indentedContent = escapedContent.lines()
+                    .joinToString("\n${contentIndent.bodyLinesIndent()}") { it }
+
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$preamble\n" +
+                    "${contentIndent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+            }
+            COMPACT -> {
+                "${delimiter.openDelimiter}$preamble\n$escapedContent${delimiter.closeDelimiter}"
+            }
+            CLASSIC -> null // Caller handles CLASSIC format
+        }
+    }
 }

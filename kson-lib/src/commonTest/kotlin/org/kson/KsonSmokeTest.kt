@@ -359,4 +359,42 @@ class KsonSmokeTest {
         assertEquals(0, value.propertyKeys.size)
         assertEquals(0, value.properties.size)
     }
+
+    @Test
+    fun testEmbedRule_validPattern() {
+        // Should not throw
+        val rule = EmbedRule("/scripts/*", tag = "bash")
+        assertEquals("/scripts/*", rule.pathPattern)
+        assertEquals("bash", rule.tag)
+    }
+
+    @Test
+    fun testEmbedRule_invalidPattern_throwsImmediately() {
+        // Invalid pattern should throw IllegalArgumentException at construction time
+        assertFailsWith<IllegalArgumentException> {
+            EmbedRule("invalid[pattern")
+        }
+    }
+
+    @Test
+    fun testFormat_withEmbedBlockRules() {
+        val input = """
+            scripts:
+              build: "make all"
+        """.trimIndent()
+        val formatted = Kson.format(
+            input,
+            FormatOptions(
+                embedBlockRules = listOf(EmbedRule("/scripts/build", tag = "bash"))
+            )
+        )
+        assertEquals(
+            """
+            scripts:
+              build: %bash
+                make all%%
+            """.trimIndent(),
+            formatted
+        )
+    }
 }

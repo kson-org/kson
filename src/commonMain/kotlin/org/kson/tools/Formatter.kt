@@ -6,8 +6,12 @@ import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
 import org.kson.ast.AstNode
+import org.kson.ast.EmbedBlockResolution
+import org.kson.ast.resolveEmbedBlocks
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedBlockIndent
+import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.json_pointer.JsonPointerGlob
 
 /**
  * Format the given Kson source according to [formatterConfig]
@@ -17,9 +21,19 @@ import org.kson.parser.behavior.embedblock.EmbedBlockIndent
  */
 fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
     if (ksonSource.isBlank()) return ""
+
+    val astParseResult = parseToAst(ksonSource, CoreCompileConfig(ignoreErrors = true))
+
+    // Pre-process: find all nodes that should be formatted as embed blocks
+    val embedBlockResolution = if (formatterConfig.embedBlockRules.isNotEmpty() && astParseResult.ast != null) {
+        resolveEmbedBlocks(astParseResult.ast, formatterConfig.embedBlockRules)
+    } else {
+        EmbedBlockResolution.EMPTY
+    }
+
     return KsonParseResult(
-        parseToAst(ksonSource, CoreCompileConfig(ignoreErrors = true)),
-        CompileTarget.Kson(preserveComments = true, formatterConfig)
+        astParseResult,
+        CompileTarget.Kson(preserveComments = true, formatterConfig, embedBlockResolution)
     ).kson ?: ksonSource
 }
 
@@ -30,9 +44,21 @@ enum class FormattingStyle {
     CLASSIC,
 }
 
+/**
+ * Internal representation of an embed block formatting rule.
+ *
+ * @param pathPattern The JsonPointerGlob pattern to match against document paths
+ * @param tag Optional embed tag to include in the output
+ */
+data class InternalEmbedRule @OptIn(ExperimentalJsonPointerGlobLanguage::class) constructor(
+    val pathPattern: JsonPointerGlob,
+    val tag: String? = null
+)
+
 data class KsonFormatterConfig(
     val indentType: IndentType = IndentType.Space(2),
-    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN
+    val formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
+    val embedBlockRules: List<InternalEmbedRule> = emptyList()
 )
 
 /**
