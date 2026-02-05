@@ -339,6 +339,22 @@ jobs:
           .
         .
     .
+  'test-python-sdist-linux-arm64':
+    machine:
+      image: 'ubuntu-2204:current'
+      .
+    resource_class: 'arm.large'
+    working_directory: '~/repo'
+    steps:
+      - 'setup-python-test':
+          platform: linux
+      - 'run-python-tests-unix'
+      - store_artifacts:
+          path: 'lib-python/dist'
+          destination: 'python-linux-arm64'
+          .
+        .
+    .
   'test-python-sdist-macos':
     macos:
       xcode: '14.2.0'
@@ -417,6 +433,13 @@ workflows:
             branches:
               only: '/release.*\\d+\\.\\d+\\.\\d+$/'
       - 'test-python-sdist-linux-amd64':
+          requires:
+            - 'build-python-sdist'
+          filters:
+            branches:
+              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
+
+      - 'test-python-sdist-linux-arm64':
           requires:
             - 'build-python-sdist'
           filters:
