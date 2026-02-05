@@ -19,6 +19,10 @@ pub struct OwnedKotlinPtr {
 
 impl Drop for OwnedKotlinPtr {
     fn drop(&mut self) {
+        if self.inner.is_null() {
+            return;
+        }
+
         let (env, _detach_guard) = attach_thread_to_java_vm();
         unsafe {
             let delete = (**env).DeleteGlobalRef.unwrap();
@@ -290,6 +294,19 @@ impl<T: ToKotlinObject> ToKotlinObject for &T {
     }
 }
 
+impl<T: ToKotlinObject> ToKotlinObject for Option<T> {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        match self {
+            None => KotlinPtr {
+                inner: Arc::new(OwnedKotlinPtr {
+                    inner: std::ptr::null_mut(),
+                })
+            },
+            Some(v) => v.to_kotlin_object()
+        }
+    }
+}
+
 pub(super) trait AsKotlinObject {
     fn as_kotlin_object(&self) -> jobject;
 }
@@ -338,7 +355,30 @@ pub(super) fn enum_ordinal(class_name: &CStr, obj: jobject) -> i32 {
 }
 
 pub(super) fn to_kotlin_list<T: ToKotlinObject>(list: &[T]) -> KotlinPtr {
-    unimplemented!()
+    let (env, _detach_guard) = attach_thread_to_java_vm();
+
+    // Create a new ArrayList
+    let array_list_class = get_class(env, c"java/util/ArrayList");
+    let constructor = get_method(env, array_list_class.as_kotlin_object(), c"<init>", c"()V");
+    let array_list = unsafe {
+        let new_object = (**env).NewObjectA.unwrap();
+        new_object(env, array_list_class.as_kotlin_object(), constructor, std::ptr::null())
+    };
+    panic_upon_exception(env);
+    let array_list = to_gc_global_ref(env, array_list);
+
+    // Add each element to the list
+    let add_method = get_method(env, array_list_class.as_kotlin_object(), c"add", c"(Ljava/lang/Object;)Z");
+    for item in list {
+        let item_ptr = item.to_kotlin_object();
+        unsafe {
+            let call_boolean = (**env).CallBooleanMethod.unwrap();
+            call_boolean(env, array_list.as_kotlin_object(), add_method, item_ptr.as_kotlin_object());
+        }
+        panic_upon_exception(env);
+    }
+
+    array_list
 }
 
 pub(super) fn from_kotlin_list<T: FromKotlinObject>(list: jobject) -> Vec<T> {

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 import threading
-from typing import cast, Any, Callable, Dict, List, Type, TypeAlias
+from typing import cast, Any, Callable, Dict, List, Optional, Type, TypeAlias
 from cffi import FFI
 from pathlib import Path
 from enum import Enum
@@ -207,7 +207,25 @@ def _from_kotlin_list(
     return python_list
 
 def _to_kotlin_list(list: List[Any]) -> Any:
-    raise RuntimeError("not implemented")
+    env = _attach_jni_thread()
+
+    # Create a new ArrayList
+    array_list_class = _get_class(env, b"java/util/ArrayList")
+    constructor = _get_method(env, array_list_class, b"<init>", b"()V")
+    array_list = env[0].NewObject(env, array_list_class, constructor)
+    _raise_exception_if_any(env)
+    array_list = _to_gc_global_ref(env, array_list)
+
+    # Add each element to the list
+    for item in list:
+        if not hasattr(item, '_jni_ref'):
+            raise TypeError(f"Cannot convert item to Kotlin: expected object with _jni_ref attribute, got {type(item).__name__}")
+        item_ref = item._jni_ref
+        _call_method_raw(env, b"java/util/ArrayList", array_list, b"add", b"(Ljava/lang/Object;)Z", "BooleanMethod", [item_ref])
+        _raise_exception_if_any(env)
+
+    _detach_jni_thread()
+    return array_list
 
 def _to_kotlin_map(list: Dict[Any, Any]) -> Any:
     raise RuntimeError("not implemented")
@@ -1064,7 +1082,7 @@ class _KsonValue_KsonEmbed(KsonValue):
 
     def tag(
         self,
-    ) -> str:
+    ) -> Optional[str]:
 
 
         jni_ref = self._jni_ref
@@ -1077,7 +1095,24 @@ class _KsonValue_KsonEmbed(KsonValue):
             []
         )
 
-        return cast(Any, (_java_string_to_python_str)(result))
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
+
+    def metadata(
+        self,
+    ) -> Optional[str]:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/KsonValue$KsonEmbed",
+            jni_ref,
+            b"getMetadata",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
     def content(
         self,
@@ -1131,10 +1166,12 @@ class SchemaValidator:
     def validate(
         self,
         kson: str,
+        filepath: Optional[str],
 
     ) -> List[Message]:
         """Validates the given Kson source against this validator's schema.
         @param kson The Kson source to validate
+        @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
 
         @return A list of validation error messages, or empty list if valid
         """
@@ -1146,11 +1183,12 @@ class SchemaValidator:
             b"org/kson/SchemaValidator",
             jni_ref,
             b"validate",
-            b"(Ljava/lang/String;)Ljava/util/List;",
+            b"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(kson),
+                _python_str_to_java_string(filepath) if filepath is not None else ffi.NULL,
             ]
         )
 
@@ -1205,7 +1243,7 @@ class Analysis:
 
     def kson_value(
         self,
-    ) -> KsonValue:
+    ) -> Optional[KsonValue]:
 
 
         jni_ref = self._jni_ref
@@ -1218,7 +1256,7 @@ class Analysis:
             []
         )
 
-        return cast(Any, (lambda x0: KsonValue._downcast(x0))(result))
+        return cast(Any, (lambda x0: None if x0 == ffi.NULL else (lambda x0: KsonValue._downcast(x0))(x0))(result))
 
 
 class Result:
@@ -1720,10 +1758,13 @@ class Kson:
     @staticmethod
     def analyze(
         kson: str,
+        filepath: Optional[str],
 
     ) -> Analysis:
         """Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
         tokenized version of the source.  Useful for tooling/editor support.
+        @param kson The Kson source to analyze
+        @param filepath Filepath of the document being analyzed
         """
 
         if kson is None:
@@ -1733,11 +1774,12 @@ class Kson:
             b"org/kson/Kson",
             jni_ref,
             b"analyze",
-            b"(Ljava/lang/String;)Lorg/kson/Analysis;",
+            b"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/Analysis;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(kson),
+                _python_str_to_java_string(filepath) if filepath is not None else ffi.NULL,
             ]
         )
 

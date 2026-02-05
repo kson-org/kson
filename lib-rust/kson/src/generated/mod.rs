@@ -2042,26 +2042,31 @@ impl SchemaValidator {
 
     /// Validates the given Kson source against this validator's schema.
     /// @param kson The Kson source to validate
+    /// @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
     ///
     /// @return A list of validation error messages, or empty list if valid
     pub fn validate(
         &self,
         kson: &str,
+        filepath: Option<&str>,
     ) -> Vec<Message> {
         let self_ptr = self.to_kotlin_object();
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/SchemaValidator",
             c"validate",
-            c"(Ljava/lang/String;)Ljava/util/List;",
+            c"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;",
             CallObjectMethod,
             self_obj,
             kson,
+            filepath,
         );
 
         util::from_kotlin_list(result)
@@ -3119,23 +3124,29 @@ impl Kson {
 
     /// Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
     /// tokenized version of the source.  Useful for tooling/editor support.
+    /// @param kson The Kson source to analyze
+    /// @param filepath Filepath of the document being analyzed
     pub fn analyze(
         kson: &str,
+        filepath: Option<&str>,
     ) -> Analysis {
         let self_ptr = util::access_static_field(c"org/kson/Kson", c"INSTANCE", c"Lorg/kson/Kson;");
         let self_obj = self_ptr.as_kotlin_object();
         let kson_ptr = kson.to_kotlin_object();
         let kson = kson_ptr.as_kotlin_object();
+        let filepath_ptr = filepath.to_kotlin_object();
+        let filepath = filepath_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/Kson",
             c"analyze",
-            c"(Ljava/lang/String;)Lorg/kson/Analysis;",
+            c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/Analysis;",
             CallObjectMethod,
             self_obj,
             kson,
+            filepath,
         );
 
         FromKotlinObject::from_kotlin_object(result)
