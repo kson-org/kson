@@ -696,7 +696,149 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     }
 
     @Test
-    fun testEmbeddedEmbedBlockFromObject(){
+    fun testEmbedBlockFromObjectWithDelimiterSequenceInTag() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "has %% embed $$ delims"
+                 "embedContent": "content"
+            """.trimIndent(),
+            """
+                embedBlock: %has %% embed $$ delims
+                  content%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "has %% embed $$ delims"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "has %% embed $$ delims",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // alternate delimter
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "has %% embed $$ delims"
+                 "embedContent": "content with %% to force dollar-delimiters"
+            """.trimIndent(),
+            $$"""
+                embedBlock: $has %% embed $$ delims
+                  content with %% to force dollar-delimiters$$
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "has %% embed $$ delims"
+                  embedContent: |
+                    content with %% to force dollar-delimiters
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "has %% embed $$ delims",
+                    "embedContent": "content with %% to force dollar-delimiters"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // tag is entirely a delimiter sequence
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "%%"
+                 "embedContent": "content"
+            """.trimIndent(),
+            """
+                embedBlock: %%%
+                  content%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "%%"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "%%",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // tag ends with a delimiter sequence
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "tag%%"
+                 "embedContent": "content"
+            """.trimIndent(),
+            """
+                embedBlock: %tag%%
+                  content%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "tag%%"
+                  embedContent: |
+                    content
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "tag%%",
+                    "embedContent": "content"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+
+        // both delimiters in both tag and content, requiring escaping
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedTag": "%%$$"
+                 "embedContent": "has %% and $$"
+            """.trimIndent(),
+            $$"""
+                embedBlock: %%%$$
+                  has %\% and $$%%
+            """.trimIndent(),
+            """
+                embedBlock:
+                  embedTag: "%%$$"
+                  embedContent: |
+                    has %% and $$
+            """.trimIndent(),
+            """
+                {
+                  "embedBlock": {
+                    "embedTag": "%%$$",
+                    "embedContent": "has %% and $$"
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbeddedEmbedBlockFromObject() {
         val compileSettings = KsonCoreTest.CompileSettings(
             yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
             jsonSettings = Json(retainEmbedTags = true)

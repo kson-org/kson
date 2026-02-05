@@ -466,17 +466,8 @@ class Lexer(source: String, gapFree: Boolean = false) {
         } else if (sourceScanner.eof()) {
             return
         } else {
-            /**
-             * Our source scanner is still in an embed tag so long as this condition holds
-             */
-            val stillInEmbedTag:(delimChar: Char) -> Boolean = {
-                !sourceScanner.eof()
-                        && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
-                        && sourceScanner.peek() != '\n'
-            }
-
             // we have an embed tag, let's scan it
-            while (stillInEmbedTag(delimChar)) {
+            while (!sourceScanner.eof() && sourceScanner.peek() != '\n') {
                 sourceScanner.advance()
             }
 
@@ -485,14 +476,6 @@ class Lexer(source: String, gapFree: Boolean = false) {
             addToken(
                 EMBED_TAG, embedTagLexeme
             )
-
-            // lex this premature embed end
-            if (sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar) {
-                sourceScanner.advance()
-                sourceScanner.advance()
-                addLiteralToken(EMBED_CLOSE_DELIM)
-                return
-            }
 
             // consume the newline from after this embed tag
             if (sourceScanner.peek() == '\n') {
