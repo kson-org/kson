@@ -22,17 +22,21 @@ export class DiagnosticService {
     }
 
     private getDiagnostics(document: KsonDocument): Diagnostic[] {
-        const schema = document.getSchemaDocument()
+        // Schema validation already includes parse errors, so use it exclusively when
+        // available to avoid duplicate diagnostics.
+        const messages = this.getSchemaValidationMessages(document)
+            ?? document.getAnalysisResult().errors.asJsReadonlyArrayView();
+        return this.loggedMessagesToDiagnostics(messages);
+    }
 
-        const schemaMessages = schema ? (() => {
-            const parsedSchema = Kson.getInstance().parseSchema(schema.getText())
-            if(parsedSchema instanceof SchemaResult.Success){
-                return parsedSchema.schemaValidator.validate(document.getText(), document.uri).asJsReadonlyArrayView()
-            }
-            return []
-        })() : []
-        const documentMessages = document.getAnalysisResult().errors.asJsReadonlyArrayView()
-        return this.loggedMessagesToDiagnostics([...schemaMessages, ...documentMessages]);
+    private getSchemaValidationMessages(document: KsonDocument): readonly Message[] | null {
+        const schema = document.getSchemaDocument();
+        if (!schema) return null;
+
+        const parsedSchema = Kson.getInstance().parseSchema(schema.getText());
+        if (!(parsedSchema instanceof SchemaResult.Success)) return null;
+
+        return parsedSchema.schemaValidator.validate(document.getText(), document.uri).asJsReadonlyArrayView();
     }
 
     /**
