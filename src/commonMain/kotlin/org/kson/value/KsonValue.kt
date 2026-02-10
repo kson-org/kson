@@ -98,7 +98,8 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
             buildMap {
                 embedTagNode?.let {
                     val embedTagStringNode = object: UnquotedStringNode(embedTagNode.sourceTokens) {
-                        override val stringContent = EmbedObjectKeys.EMBED_TAG.key
+                        override val rawStringContent = EmbedObjectKeys.EMBED_TAG.key
+                        override val delimiterUnescapedRawContent = EmbedObjectKeys.EMBED_TAG.key
                         override val processedStringContent = EmbedObjectKeys.EMBED_TAG.key
                     }
                     put(EmbedObjectKeys.EMBED_TAG.key,
@@ -106,7 +107,8 @@ class EmbedBlock(embedBlockNode: EmbedBlockNode) : KsonValue(embedBlockNode) {
                             KsonString(it)))
                 }
                 val embedContentStringNode = object: UnquotedStringNode(embedContentNode.sourceTokens) {
-                    override val stringContent = EmbedObjectKeys.EMBED_CONTENT.key
+                    override val rawStringContent = EmbedObjectKeys.EMBED_CONTENT.key
+                    override val delimiterUnescapedRawContent = EmbedObjectKeys.EMBED_CONTENT.key
                     override val processedStringContent = EmbedObjectKeys.EMBED_CONTENT.key
                 }
                 put(EmbedObjectKeys.EMBED_CONTENT.key,

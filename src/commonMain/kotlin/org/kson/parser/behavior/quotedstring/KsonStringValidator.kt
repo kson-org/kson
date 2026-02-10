@@ -26,7 +26,8 @@ import org.kson.stdlibx.exceptions.FatalParseException
  * the JSON String rules specified in [Section 7. Strings of RFC8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7),
  * with a KSON-specific allowance for raw whitespace characters
  *
- * [KsonStringValidator] walks the AST rooted to find [org.kson.ast.QuotedStringNode] instances and validates their
+ * [KsonStringValidator] walks the AST rooted to find [org.kson.ast.QuotedStringNode] instances ([UnquotedStringNode]s
+ * need no validation since due to their character restrictinos, they cannot be lexed in error) and validates their
  * raw string content for:
  * - Invalid escape sequences (`\x` where x is not a valid escape character)
  * - Invalid unicode escapes (`\uXXXX` where XXXX is not 4 valid hex digits)
@@ -66,8 +67,14 @@ class KsonStringValidator {
             is QuotedStringNode -> {
                 validateQuotedString(node, messageSink)
             }
+            is EmbedBlockNode -> {
+                val tagNode = node.embedTagNode
+                if (tagNode is QuotedStringNode) {
+                    validateQuotedString(tagNode, messageSink)
+                }
+            }
             // No validation needed for other node types
-            is EmbedBlockNode, is UnquotedStringNode,
+            is UnquotedStringNode,
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
             is KsonValueNodeError -> {
                 // No string validation needed
@@ -76,7 +83,7 @@ class KsonStringValidator {
     }
 
     private fun validateQuotedString(node: QuotedStringNode, messageSink: MessageSink) {
-        val rawContent = node.stringContent
+        val rawContent = node.rawStringContent
         validateRawStringContent(rawContent, node.location, messageSink)
     }
 

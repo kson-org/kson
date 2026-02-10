@@ -598,28 +598,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             embedBlockStartDelimMark.done(EMBED_OPEN_DELIM)
 
             val embedTagMark = builder.mark()
-            val embedTagText = if (builder.getTokenType() == EMBED_TAG) {
-                val tagText = builder.getTokenText()
+            if (builder.getTokenType() == EMBED_TAG) {
                 builder.advanceLexer()
                 embedTagMark.done(EMBED_TAG)
-                tagText
             } else {
                 embedTagMark.drop()
-                ""
-            }
-
-            val prematureEndMark = builder.mark()
-            if (builder.getTokenType() == EMBED_CLOSE_DELIM) {
-                builder.advanceLexer()
-                /**
-                 * We are seeing a closing [EMBED_CLOSE_DELIM] before we encountered an [EMBED_PREAMBLE_NEWLINE],
-                 * so give an error to help the user fix this construct
-                 */
-                prematureEndMark.error(EMBED_BLOCK_NO_NEWLINE.create(embedStartDelimiter, embedTagText))
-                embedBlockMark.done(EMBED_BLOCK)
-                return true
-            } else {
-                prematureEndMark.drop()
             }
 
             if (builder.eof()) {
