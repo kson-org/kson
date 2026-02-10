@@ -20,7 +20,7 @@ import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
 /**
  * Initialization options passed from the VSCode client.
  */
-interface KsonInitializationOptions {
+export interface KsonInitializationOptions {
     /** Bundled schemas to be loaded (matched by file extension) */
     bundledSchemas?: BundledSchemaConfig[];
     /** Bundled metaschemas to be loaded (matched by document $schema content) */
