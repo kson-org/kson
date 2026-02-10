@@ -67,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         // Register content provider for bundled:// URIs so users can navigate to bundled schemas
         context.subscriptions.push(
-            registerBundledSchemaContentProvider(context, bundledSchemas, bundledMetaSchemas)
+            registerBundledSchemaContentProvider(bundledSchemas, bundledMetaSchemas)
         );
 
         logOutputChannel.info('KSON Browser extension activated successfully');

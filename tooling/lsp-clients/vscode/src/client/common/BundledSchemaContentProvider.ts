@@ -57,13 +57,11 @@ export class BundledSchemaContentProvider implements vscode.TextDocumentContentP
 /**
  * Register the bundled schema content provider.
  *
- * @param context Extension context for disposable registration
  * @param bundledSchemas The loaded bundled schemas
  * @param bundledMetaSchemas The loaded bundled metaschemas
  * @returns The registered disposable
  */
 export function registerBundledSchemaContentProvider(
-    context: vscode.ExtensionContext,
     bundledSchemas: BundledSchemaConfig[],
     bundledMetaSchemas: BundledMetaSchemaConfig[] = []
 ): vscode.Disposable {

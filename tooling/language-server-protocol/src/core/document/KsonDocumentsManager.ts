@@ -24,6 +24,20 @@ function extractSchemaId(analysis: Analysis): string | undefined {
 }
 
 /**
+ * Resolve a schema for a document by trying URI-based resolution first,
+ * then falling back to content-based metaschema resolution via $schema.
+ */
+function resolveSchema(provider: SchemaProvider, uri: DocumentUri, analysis: Analysis): TextDocument | undefined {
+    const schema = provider.getSchemaForDocument(uri);
+    if (schema) return schema;
+
+    const schemaId = extractSchemaId(analysis);
+    if (schemaId) return provider.getMetaSchemaForId(schemaId);
+
+    return undefined;
+}
+
+/**
  * Document management for the Kson Language Server.
  * The {@link KsonDocumentsManager} keeps track of all {@link KsonDocument}'s that
  * we are watching. It extends {@link TextDocuments} to handle {@link KsonDocument}
@@ -44,20 +58,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-
-                // Try to get schema from provider based on file extension/URI
-                let schemaDocument = provider.getSchemaForDocument(uri);
-
                 const parseResult = Kson.getInstance().analyze(content, uri);
-
-                // If no schema from URI-based resolution, try content-based metaschema resolution
-                if (!schemaDocument) {
-                    const schemaId = extractSchemaId(parseResult);
-                    if (schemaId) {
-                        schemaDocument = provider.getMetaSchemaForId(schemaId);
-                    }
-                }
-
+                const schemaDocument = resolveSchema(provider, uri, parseResult);
                 return new KsonDocument(textDocument, parseResult, schemaDocument);
             },
             update: (
@@ -71,21 +73,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     version
                 );
                 const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
-
-                // Try URI-based resolution first, then content-based metaschema resolution
-                let schemaDocument = provider.getSchemaForDocument(ksonDocument.uri);
-                if (!schemaDocument) {
-                    const schemaId = extractSchemaId(parseResult);
-                    if (schemaId) {
-                        schemaDocument = provider.getMetaSchemaForId(schemaId);
-                    }
-                }
-
-                return new KsonDocument(
-                    textDocument,
-                    parseResult,
-                    schemaDocument
-                );
+                const schemaDocument = resolveSchema(provider, ksonDocument.uri, parseResult);
+                return new KsonDocument(textDocument, parseResult, schemaDocument);
             }
         });
 
@@ -122,14 +111,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
             const textDocument = doc.textDocument;
             const parseResult = doc.getAnalysisResult();
 
-            // Try URI-based resolution first, then content-based metaschema resolution
-            let updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri);
-            if (!updatedSchema) {
-                const schemaId = extractSchemaId(parseResult);
-                if (schemaId) {
-                    updatedSchema = this.schemaProvider.getMetaSchemaForId(schemaId);
-                }
-            }
+            const updatedSchema = resolveSchema(this.schemaProvider, doc.uri, parseResult);
 
             // Create new document instance with updated schema
             const updatedDoc = new KsonDocument(textDocument, parseResult, updatedSchema);
