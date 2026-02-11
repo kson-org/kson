@@ -261,15 +261,6 @@ export function startKsonServer(
         connection.console.info('Configuration updated');
     });
 
-    // Handle notification to update bundled schema settings
-    connection.onNotification('kson/updateBundledSchemaSettings', (params: { enabled: boolean }) => {
-        if (bundledSchemaProvider) {
-            bundledSchemaProvider.setEnabled(params.enabled);
-            notifySchemaChange();
-            logger.info(`Bundled schemas ${params.enabled ? 'enabled' : 'disabled'}`);
-        }
-    });
-
     // Start listening for requests
     connection.listen();
     connection.console.info('Kson Language Server started and listening');
