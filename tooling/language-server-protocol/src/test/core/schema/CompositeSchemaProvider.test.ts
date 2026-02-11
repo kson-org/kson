@@ -57,8 +57,8 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should create provider with multiple providers', () => {
-            const p1 = new BundledSchemaProvider([], true, logger);
-            const p2 = new BundledSchemaProvider([], true, logger);
+            const p1 = new BundledSchemaProvider({ schemas: [], logger });
+            const p2 = new BundledSchemaProvider({ schemas: [], logger });
             const provider = new CompositeSchemaProvider([p1, p2], logger);
 
             assert.strictEqual(provider.getProviders().length, 2);
@@ -73,8 +73,8 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should return undefined when no provider has schema', () => {
-            const p1 = new BundledSchemaProvider([], true, logger);
-            const p2 = new BundledSchemaProvider([], true, logger);
+            const p1 = new BundledSchemaProvider({ schemas: [], logger });
+            const p2 = new BundledSchemaProvider({ schemas: [], logger });
             const provider = new CompositeSchemaProvider([p1, p2], logger);
 
             const schema = provider.getSchemaForDocument('file:///test.kson');
@@ -114,10 +114,11 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should match by file extension via BundledSchemaProvider', () => {
-            const emptyProvider = new BundledSchemaProvider([], true, logger);
-            const bundledProvider = new BundledSchemaProvider([
-                { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
-            ], true, logger);
+            const emptyProvider = new BundledSchemaProvider({ schemas: [], logger });
+            const bundledProvider = new BundledSchemaProvider({
+                schemas: [{ fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }],
+                logger
+            });
 
             const provider = new CompositeSchemaProvider([emptyProvider, bundledProvider], logger);
             const result = provider.getSchemaForDocument('file:///test.kxt');
@@ -133,9 +134,10 @@ describe('CompositeSchemaProvider', () => {
             fileSystemProvider.addSchema('file:///test.kxt', fsSchema);
 
             // Bundled provider (has schema by extension) - lower priority
-            const bundledProvider = new BundledSchemaProvider([
-                { fileExtension: 'kxt', schemaContent: '{ "from": "bundled" }' }
-            ], true, logger);
+            const bundledProvider = new BundledSchemaProvider({
+                schemas: [{ fileExtension: 'kxt', schemaContent: '{ "from": "bundled" }' }],
+                logger
+            });
 
             const provider = new CompositeSchemaProvider([fileSystemProvider, bundledProvider], logger);
             const result = provider.getSchemaForDocument('file:///test.kxt');
@@ -149,9 +151,10 @@ describe('CompositeSchemaProvider', () => {
             const fileSystemProvider = new UriSchemaProvider();
 
             // Bundled provider has schema
-            const bundledProvider = new BundledSchemaProvider([
-                { fileExtension: 'kxt', schemaContent: '{ "from": "bundled" }' }
-            ], true, logger);
+            const bundledProvider = new BundledSchemaProvider({
+                schemas: [{ fileExtension: 'kxt', schemaContent: '{ "from": "bundled" }' }],
+                logger
+            });
 
             const provider = new CompositeSchemaProvider([fileSystemProvider, bundledProvider], logger);
             const result = provider.getSchemaForDocument('file:///test.kxt');
@@ -172,12 +175,12 @@ describe('CompositeSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "from": "first" }' }
             ];
-            const provider1 = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const provider1 = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             const metaSchemas2: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "from": "second" }' }
             ];
-            const provider2 = new BundledSchemaProvider([], true, logger, metaSchemas2);
+            const provider2 = new BundledSchemaProvider({ schemas: [], metaSchemas: metaSchemas2, logger });
 
             const composite = new CompositeSchemaProvider([provider1, provider2], logger);
             const result = composite.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
@@ -187,12 +190,12 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should try next provider when first has no match', () => {
-            const provider1 = new BundledSchemaProvider([], true, logger);
+            const provider1 = new BundledSchemaProvider({ schemas: [], logger });
 
             const metaSchemas2: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "from": "second" }' }
             ];
-            const provider2 = new BundledSchemaProvider([], true, logger, metaSchemas2);
+            const provider2 = new BundledSchemaProvider({ schemas: [], metaSchemas: metaSchemas2, logger });
 
             const composite = new CompositeSchemaProvider([provider1, provider2], logger);
             const result = composite.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
@@ -202,8 +205,8 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should return undefined when no provider has match', () => {
-            const provider1 = new BundledSchemaProvider([], true, logger);
-            const provider2 = new BundledSchemaProvider([], true, logger);
+            const provider1 = new BundledSchemaProvider({ schemas: [], logger });
+            const provider2 = new BundledSchemaProvider({ schemas: [], logger });
 
             const composite = new CompositeSchemaProvider([provider1, provider2], logger);
             const result = composite.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
@@ -216,7 +219,7 @@ describe('CompositeSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "metaschema": true }' }
             ];
-            const bundledProvider = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const bundledProvider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             const composite = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
             const result = composite.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
@@ -234,24 +237,25 @@ describe('CompositeSchemaProvider', () => {
 
         it('should return true when any provider considers it a schema file', () => {
             const uriProvider = new UriSchemaProvider();
-            const bundledProvider = new BundledSchemaProvider([
-                { fileExtension: 'kxt', schemaContent: '{}' }
-            ], true, logger);
+            const bundledProvider = new BundledSchemaProvider({
+                schemas: [{ fileExtension: 'kxt', schemaContent: '{}' }],
+                logger
+            });
 
             const provider = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
             assert.strictEqual(provider.isSchemaFile('bundled://schema/kxt.schema.kson'), true);
         });
 
         it('should return true for metaschema URIs', () => {
-            const bundledProvider = new BundledSchemaProvider([], true, logger);
+            const bundledProvider = new BundledSchemaProvider({ schemas: [], logger });
 
             const provider = new CompositeSchemaProvider([bundledProvider], logger);
             assert.strictEqual(provider.isSchemaFile('bundled://metaschema/draft-07.schema.kson'), true);
         });
 
         it('should return false when no provider considers it a schema file', () => {
-            const p1 = new BundledSchemaProvider([], true, logger);
-            const p2 = new BundledSchemaProvider([], true, logger);
+            const p1 = new BundledSchemaProvider({ schemas: [], logger });
+            const p2 = new BundledSchemaProvider({ schemas: [], logger });
 
             const provider = new CompositeSchemaProvider([p1, p2], logger);
             assert.strictEqual(provider.isSchemaFile('file:///random.kson'), false);
@@ -261,9 +265,10 @@ describe('CompositeSchemaProvider', () => {
             const uriProvider = new UriSchemaProvider();
             uriProvider.addSchema('file:///test.kson', TextDocument.create('file:///my-schema.kson', 'kson', 1, '{}'));
 
-            const bundledProvider = new BundledSchemaProvider([
-                { fileExtension: 'kxt', schemaContent: '{}' }
-            ], true, logger);
+            const bundledProvider = new BundledSchemaProvider({
+                schemas: [{ fileExtension: 'kxt', schemaContent: '{}' }],
+                logger
+            });
 
             const provider = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
 
@@ -298,8 +303,8 @@ describe('CompositeSchemaProvider', () => {
 
     describe('getProviders', () => {
         it('should return readonly array of providers', () => {
-            const p1 = new BundledSchemaProvider([], true, logger);
-            const p2 = new BundledSchemaProvider([], true, logger);
+            const p1 = new BundledSchemaProvider({ schemas: [], logger });
+            const p2 = new BundledSchemaProvider({ schemas: [], logger });
             const provider = new CompositeSchemaProvider([p1, p2], logger);
 
             const providers = provider.getProviders();
@@ -312,7 +317,7 @@ describe('CompositeSchemaProvider', () => {
 
     describe('integration with NoOpSchemaProvider', () => {
         it('should work with NoOpSchemaProvider as fallback', () => {
-            const bundled = new BundledSchemaProvider([], true, logger);
+            const bundled = new BundledSchemaProvider({ schemas: [], logger });
             const noOp = new NoOpSchemaProvider();
 
             const provider = new CompositeSchemaProvider([bundled, noOp], logger);

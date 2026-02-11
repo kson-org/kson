@@ -26,6 +26,24 @@ export interface BundledMetaSchemaConfig {
 }
 
 /**
+ * Options for creating a BundledSchemaProvider.
+ */
+export interface BundledSchemaProviderOptions {
+    /** Array of bundled schema configurations (matched by file extension) */
+    schemas: BundledSchemaConfig[];
+    /** Array of bundled metaschema configurations (matched by $schema content) */
+    metaSchemas?: BundledMetaSchemaConfig[];
+    /** Whether bundled schemas are enabled (default: true) */
+    enabled?: boolean;
+    /** Optional logger for warnings and errors */
+    logger?: {
+        info: (message: string) => void;
+        warn: (message: string) => void;
+        error: (message: string) => void;
+    };
+}
+
+/**
  * Schema provider for bundled schemas that are shipped with the extension.
  * Works in both browser and Node.js environments since it doesn't require file system access.
  *
@@ -42,26 +60,12 @@ export class BundledSchemaProvider implements SchemaProvider {
     private schemas: Map<string, TextDocument>;
     private metaSchemas: Map<string, TextDocument>;
     private enabled: boolean;
+    private logger?: BundledSchemaProviderOptions['logger'];
 
-    /**
-     * Creates a new BundledSchemaProvider.
-     *
-     * @param schemas Array of bundled schema configurations (matched by file extension)
-     * @param enabled Whether bundled schemas are enabled (default: true)
-     * @param logger Optional logger for warnings and errors
-     * @param metaSchemas Array of bundled metaschema configurations (matched by $schema content)
-     */
-    constructor(
-        schemas: BundledSchemaConfig[],
-        enabled: boolean = true,
-        private logger?: {
-            info: (message: string) => void;
-            warn: (message: string) => void;
-            error: (message: string) => void;
-        },
-        metaSchemas: BundledMetaSchemaConfig[] = []
-    ) {
+    constructor(options: BundledSchemaProviderOptions) {
+        const { schemas, metaSchemas = [], enabled = true, logger } = options;
         this.enabled = enabled;
+        this.logger = logger;
         this.schemas = new Map();
         this.metaSchemas = new Map();
 

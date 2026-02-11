@@ -17,7 +17,7 @@ describe('BundledSchemaProvider', () => {
 
     describe('constructor', () => {
         it('should create provider with no schemas', () => {
-            const provider = new BundledSchemaProvider([], true, logger);
+            const provider = new BundledSchemaProvider({ schemas: [], logger });
             assert.ok(provider);
             assert.strictEqual(provider.getAvailableFileExtensions().length, 0);
             assert.ok(logs.some(msg => msg.includes('initialized with 0 schemas and 0 metaschemas')));
@@ -27,7 +27,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             assert.ok(provider);
             assert.strictEqual(provider.getAvailableFileExtensions().length, 1);
@@ -40,7 +40,7 @@ describe('BundledSchemaProvider', () => {
                 { fileExtension: 'ext-a', schemaContent: '{ "type": "object" }' },
                 { fileExtension: 'ext-b', schemaContent: '{ "type": "array" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             assert.strictEqual(provider.getAvailableFileExtensions().length, 2);
             assert.ok(provider.hasBundledSchema('ext-a'));
@@ -51,7 +51,7 @@ describe('BundledSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const provider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             assert.ok(provider);
             assert.ok(logs.some(msg => msg.includes('Loaded bundled metaschema: draft-07')));
@@ -62,7 +62,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, false, logger);
+            const provider = new BundledSchemaProvider({ schemas, enabled: false, logger });
 
             assert.strictEqual(provider.isEnabled(), false);
             assert.ok(logs.some(msg => msg.includes('enabled: false')));
@@ -74,7 +74,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, false, logger);
+            const provider = new BundledSchemaProvider({ schemas, enabled: false, logger });
 
             const schema = provider.getSchemaForDocument('file:///test.kxt');
             assert.strictEqual(schema, undefined);
@@ -84,7 +84,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             const schema = provider.getSchemaForDocument('file:///test');
             assert.strictEqual(schema, undefined);
@@ -94,7 +94,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             const schema = provider.getSchemaForDocument('file:///test.unknown');
             assert.strictEqual(schema, undefined);
@@ -105,7 +105,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             const schema = provider.getSchemaForDocument('file:///test.kxt');
             assert.ok(schema);
@@ -118,7 +118,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             const schema1 = provider.getSchemaForDocument('file:///a.kxt');
             const schema2 = provider.getSchemaForDocument('file:///b.kxt');
@@ -135,7 +135,7 @@ describe('BundledSchemaProvider', () => {
                 { fileExtension: 'kson', schemaContent: ksonSchema },
                 { fileExtension: 'orchestra.kson', schemaContent: orchestraSchema }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             // Simple .kson file should match 'kson' extension
             const simpleSchema = provider.getSchemaForDocument('file:///test.kson');
@@ -153,7 +153,7 @@ describe('BundledSchemaProvider', () => {
                 { fileExtension: 'kson', schemaContent: '{ "short": true }' },
                 { fileExtension: 'config.kson', schemaContent: '{ "long": true }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             // File ending in .config.kson should match the longer extension
             const schema = provider.getSchemaForDocument('file:///app.config.kson');
@@ -168,7 +168,7 @@ describe('BundledSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: metaSchemaContent }
             ];
-            const provider = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const provider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             const result = provider.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
             assert.ok(result);
@@ -180,7 +180,7 @@ describe('BundledSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{}' }
             ];
-            const provider = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const provider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             const result = provider.getMetaSchemaForId('http://json-schema.org/draft-04/schema#');
             assert.strictEqual(result, undefined);
@@ -190,14 +190,14 @@ describe('BundledSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{}' }
             ];
-            const provider = new BundledSchemaProvider([], false, logger, metaSchemas);
+            const provider = new BundledSchemaProvider({ schemas: [], metaSchemas, enabled: false, logger });
 
             const result = provider.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
             assert.strictEqual(result, undefined);
         });
 
         it('should return undefined when no metaschemas configured', () => {
-            const provider = new BundledSchemaProvider([], true, logger);
+            const provider = new BundledSchemaProvider({ schemas: [], logger });
 
             const result = provider.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
             assert.strictEqual(result, undefined);
@@ -206,20 +206,20 @@ describe('BundledSchemaProvider', () => {
 
     describe('isSchemaFile', () => {
         it('should return true for bundled schema URIs', () => {
-            const provider = new BundledSchemaProvider([], true, logger);
+            const provider = new BundledSchemaProvider({ schemas: [], logger });
 
             assert.strictEqual(provider.isSchemaFile('bundled://schema/test-lang.schema.kson'), true);
             assert.strictEqual(provider.isSchemaFile('bundled://schema/other.schema.kson'), true);
         });
 
         it('should return true for bundled metaschema URIs', () => {
-            const provider = new BundledSchemaProvider([], true, logger);
+            const provider = new BundledSchemaProvider({ schemas: [], logger });
 
             assert.strictEqual(provider.isSchemaFile('bundled://metaschema/draft-07.schema.kson'), true);
         });
 
         it('should return false for non-bundled URIs', () => {
-            const provider = new BundledSchemaProvider([], true, logger);
+            const provider = new BundledSchemaProvider({ schemas: [], logger });
 
             assert.strictEqual(provider.isSchemaFile('file:///test.kson'), false);
             assert.strictEqual(provider.isSchemaFile('untitled:///test.kson'), false);
@@ -231,7 +231,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             assert.strictEqual(provider.isEnabled(), true);
 
@@ -254,7 +254,7 @@ describe('BundledSchemaProvider', () => {
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{}' }
             ];
-            const provider = new BundledSchemaProvider([], true, logger, metaSchemas);
+            const provider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
             assert.ok(provider.getMetaSchemaForId('http://json-schema.org/draft-07/schema#'));
 
@@ -271,7 +271,7 @@ describe('BundledSchemaProvider', () => {
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kxt', schemaContent: '{ "type": "object" }' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             // reload should not throw or change anything
             provider.reload();
@@ -287,7 +287,7 @@ describe('BundledSchemaProvider', () => {
                 { fileExtension: 'ext-a', schemaContent: '{}' },
                 { fileExtension: 'ext-b', schemaContent: '{}' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             assert.strictEqual(provider.hasBundledSchema('ext-a'), true);
             assert.strictEqual(provider.hasBundledSchema('ext-b'), true);
@@ -302,7 +302,7 @@ describe('BundledSchemaProvider', () => {
                 { fileExtension: 'beta', schemaContent: '{}' },
                 { fileExtension: 'gamma', schemaContent: '{}' }
             ];
-            const provider = new BundledSchemaProvider(schemas, true, logger);
+            const provider = new BundledSchemaProvider({ schemas, logger });
 
             const extensions = provider.getAvailableFileExtensions();
             assert.strictEqual(extensions.length, 3);

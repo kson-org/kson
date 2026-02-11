@@ -82,7 +82,12 @@ export function startKsonServer(
         // Create bundled schema provider if schemas or metaschemas are configured
         let schemaProvider: SchemaProvider | undefined;
         if (bundledSchemas.length > 0 || bundledMetaSchemas.length > 0) {
-            bundledSchemaProvider = new BundledSchemaProvider(bundledSchemas, enableBundledSchemas, logger, bundledMetaSchemas);
+            bundledSchemaProvider = new BundledSchemaProvider({
+                schemas: bundledSchemas,
+                metaSchemas: bundledMetaSchemas,
+                enabled: enableBundledSchemas,
+                logger
+            });
 
             // Create composite provider: file system takes priority over bundled
             const providers: SchemaProvider[] = [];
