@@ -213,6 +213,16 @@ export function startKsonServer(
         }
     });
 
+    /**
+     * Refresh all documents with updated schemas, notify the client,
+     * and trigger diagnostic refresh.
+     */
+    function notifySchemaChange(): void {
+        documentManager.refreshDocumentSchemas();
+        connection.sendNotification('kson/schemaConfigurationChanged');
+        connection.sendRequest('workspace/diagnostic/refresh');
+    }
+
     // Handle changes to watched files
     connection.onDidChangeWatchedFiles((params) => {
         const schemaProvider = documentManager.getSchemaProvider();
@@ -231,12 +241,7 @@ export function startKsonServer(
         }
 
         if (schemaChanged) {
-            // Refresh all open documents with the updated schemas
-            documentManager.refreshDocumentSchemas();
-            // Notify client that schema configuration changed so it can update UI (e.g., status bar)
-            connection.sendNotification('kson/schemaConfigurationChanged');
-            // Rerun diagnostics for open files, so we immediately see errors of schema
-            connection.sendRequest('workspace/diagnostic/refresh');
+            notifySchemaChange();
         }
     });
 
@@ -250,12 +255,7 @@ export function startKsonServer(
         if (bundledSchemaProvider && change.settings?.kson?.enableBundledSchemas !== undefined) {
             const enabled = change.settings.kson.enableBundledSchemas;
             bundledSchemaProvider.setEnabled(enabled);
-            // Refresh all documents to apply the change
-            documentManager.refreshDocumentSchemas();
-            // Notify client that schema configuration changed
-            connection.sendNotification('kson/schemaConfigurationChanged');
-            // Refresh diagnostics
-            connection.sendRequest('workspace/diagnostic/refresh');
+            notifySchemaChange();
         }
 
         connection.console.info('Configuration updated');
@@ -265,12 +265,7 @@ export function startKsonServer(
     connection.onNotification('kson/updateBundledSchemaSettings', (params: { enabled: boolean }) => {
         if (bundledSchemaProvider) {
             bundledSchemaProvider.setEnabled(params.enabled);
-            // Refresh all documents to apply the change
-            documentManager.refreshDocumentSchemas();
-            // Notify client that schema configuration changed
-            connection.sendNotification('kson/schemaConfigurationChanged');
-            // Refresh diagnostics
-            connection.sendRequest('workspace/diagnostic/refresh');
+            notifySchemaChange();
             logger.info(`Bundled schemas ${params.enabled ? 'enabled' : 'disabled'}`);
         }
     });
