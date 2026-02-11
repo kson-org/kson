@@ -10,8 +10,6 @@ interface SchemaInfo {
     schemaUri?: string;
     schemaPath?: string;
     hasSchema: boolean;
-    /** Whether the schema is bundled with the extension */
-    isBundled: boolean;
 }
 
 /**
@@ -50,17 +48,19 @@ export class StatusBarManager {
             );
 
             if (schemaInfo.hasSchema && schemaInfo.schemaPath) {
+                const isBundled = schemaInfo.schemaUri?.startsWith('bundled://') ?? false;
+
                 // Extract just the filename for display
-                const schemaFileName = schemaInfo.isBundled
+                const schemaFileName = isBundled
                     ? this.extractBundledSchemaName(schemaInfo.schemaPath)
                     : path.basename(schemaInfo.schemaPath);
 
                 // Show bundled indicator
-                const bundledSuffix = schemaInfo.isBundled ? ' (bundled)' : '';
-                const icon = schemaInfo.isBundled ? '$(package)' : '$(file-code)';
+                const bundledSuffix = isBundled ? ' (bundled)' : '';
+                const icon = isBundled ? '$(package)' : '$(file-code)';
 
                 this.statusBarItem.text = `${icon} Schema: ${schemaFileName}${bundledSuffix}`;
-                this.statusBarItem.tooltip = schemaInfo.isBundled
+                this.statusBarItem.tooltip = isBundled
                     ? `Bundled schema for this language\nClick to override with custom schema`
                     : `Schema: ${schemaInfo.schemaPath}\nClick to change schema`;
             } else {
