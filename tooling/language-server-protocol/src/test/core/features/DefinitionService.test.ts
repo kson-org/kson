@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import {Kson} from 'kson';
 import {DefinitionService} from '../../../core/features/DefinitionService.js';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
+import {KsonSchemaDocument} from '../../../core/document/KsonSchemaDocument.js';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {Position} from 'vscode-languageserver';
 
@@ -149,7 +150,7 @@ describe('DefinitionService', () => {
 }`;
             const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
             const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, metaSchemaDocument);
+            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
 
             // Position on the $ref value "#/$defs/User"
             const position: Position = {line: 5, character: 24}; // Inside the ref string
@@ -188,7 +189,7 @@ describe('DefinitionService', () => {
 }`;
             const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
             const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, metaSchemaDocument);
+            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
 
             // Position on the $ref value
             const position: Position = {line: 5, character: 25}; // Inside the ref string
@@ -218,7 +219,7 @@ describe('DefinitionService', () => {
 }`;
             const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
             const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, metaSchemaDocument);
+            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
 
             // Position on the $ref value "#"
             const position: Position = {line: 5, character: 21}; // Inside the ref string
@@ -329,7 +330,7 @@ describe('DefinitionService', () => {
 }`;
             const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
             const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, metaSchemaDocument);
+            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
 
             // Position on the $ref value
             const position: Position = {line: 5, character: 25}; // Inside the ref string
@@ -367,7 +368,7 @@ describe('DefinitionService', () => {
 }`;
             const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
             const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, metaSchemaDocument);
+            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
 
             // Position on the first $ref value
             const position: Position = {line: 5, character: 23}; // Inside the ref string

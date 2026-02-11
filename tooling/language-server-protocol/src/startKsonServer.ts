@@ -7,6 +7,7 @@ import {
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri'
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
+import {isKsonSchemaDocument} from './core/document/KsonSchemaDocument.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
 import {getAllCommandIds} from './core/commands/CommandType.js';
@@ -178,7 +179,10 @@ export function startKsonServer(
     // Handle custom request to get schema information for a document
     connection.onRequest('kson/getDocumentSchema', (params: { uri: string }) => {
         try {
-            const schemaDocument = documentManager.get(params.uri)?.getSchemaDocument();
+            const doc = documentManager.get(params.uri);
+            const schemaDocument = doc
+                ? isKsonSchemaDocument(doc) ? doc.getMetaSchemaDocument() : doc.getSchemaDocument()
+                : undefined;
             if (schemaDocument) {
                 const schemaUri = schemaDocument.uri;
                 // Check if this is a bundled schema (uses bundled:// scheme)

@@ -6,6 +6,7 @@ import {
     RelatedFullDocumentDiagnosticReport
 } from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument';
+import {isKsonSchemaDocument} from '../document/KsonSchemaDocument';
 import {Message, Kson, SchemaResult} from 'kson';
 
 /**
@@ -30,7 +31,9 @@ export class DiagnosticService {
     }
 
     private getSchemaValidationMessages(document: KsonDocument): readonly Message[] | null {
-        const schema = document.getSchemaDocument();
+        const schema = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaDocument()
+            : document.getSchemaDocument();
         if (!schema) return null;
 
         const parsedSchema = Kson.getInstance().parseSchema(schema.getText());

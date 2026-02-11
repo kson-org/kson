@@ -21,6 +21,10 @@ class UriSchemaProvider implements SchemaProvider {
         return this.schemas.get(documentUri);
     }
 
+    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
+        return undefined;
+    }
+
     reload(): void {}
 
     isSchemaFile(fileUri: DocumentUri): boolean {
@@ -30,9 +34,6 @@ class UriSchemaProvider implements SchemaProvider {
         return false;
     }
 
-    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
-        return undefined;
-    }
 }
 
 describe('CompositeSchemaProvider', () => {
@@ -278,9 +279,9 @@ describe('CompositeSchemaProvider', () => {
 
             class CountingProvider implements SchemaProvider {
                 getSchemaForDocument(): TextDocument | undefined { return undefined; }
+                getMetaSchemaForId(): TextDocument | undefined { return undefined; }
                 reload(): void { reloadCount++; }
                 isSchemaFile(): boolean { return false; }
-                getMetaSchemaForId(): TextDocument | undefined { return undefined; }
             }
 
             const provider = new CompositeSchemaProvider([

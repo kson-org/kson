@@ -1,5 +1,6 @@
 import {DefinitionLink, Position, Range} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
+import {isKsonSchemaDocument} from '../document/KsonSchemaDocument.js';
 import {KsonTooling} from 'kson-tooling';
 
 /**
@@ -30,7 +31,9 @@ export class DefinitionService {
         results.push(...this.convertRangesToDefinitionLinks(refLocations, document.uri));
 
         // Try document-to-schema navigation (if schema is configured)
-        const schemaDocument = document.getSchemaDocument();
+        const schemaDocument = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaDocument()
+            : document.getSchemaDocument();
         if (schemaDocument) {
             const locations = tooling.getSchemaLocationAtLocation(
                 document.getText(),
