@@ -18,6 +18,50 @@ describe('Bundled Schema Support Tests', () => {
         return vscode.extensions.getExtension('kson.kson');
     }
 
+    /**
+     * Poll until diagnostics reach the expected count, or timeout.
+     */
+    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < timeout) {
+            const diagnostics = vscode.languages.getDiagnostics(uri);
+            if (diagnostics.length === expectedCount) {
+                return diagnostics;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
+    }
+
+    /**
+     * Poll until Go to Definition returns results, or timeout.
+     */
+    async function waitForDefinitions(
+        uri: vscode.Uri,
+        position: vscode.Position,
+        timeout: number = 5000
+    ): Promise<vscode.Location[] | vscode.LocationLink[]> {
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < timeout) {
+            const definitions = await vscode.commands.executeCommand<
+                vscode.Location[] | vscode.LocationLink[]
+            >(
+                'vscode.executeDefinitionProvider',
+                uri,
+                position
+            );
+            if (definitions && definitions.length > 0) {
+                return definitions;
+            }
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        throw new Error(`Timeout waiting for definitions at ${uri.toString()}:${position.line}:${position.character}`);
+    }
+
     describe('Configuration', () => {
         it('Should have enableBundledSchemas setting defined', async function () {
             const extension = getExtension();
@@ -74,12 +118,8 @@ describe('Bundled Schema Support Tests', () => {
                 assert.ok(document, 'Document should be created');
                 assert.strictEqual(document.languageId, 'kson', 'Should have kson language ID');
 
-                // Wait a bit for the language server to process
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                // No errors should occur - this is a basic sanity check
-                const diagnostics = vscode.languages.getDiagnostics(document.uri);
-                // Should have 0 diagnostics for valid KSON
+                // Wait for diagnostics to settle (0 expected for valid KSON)
+                const diagnostics = await waitForDiagnostics(document.uri, 0);
                 assert.strictEqual(diagnostics.length, 0, 'Valid KSON should have no diagnostics');
             } finally {
                 await cleanUp(testFileUri);
@@ -102,8 +142,8 @@ describe('Bundled Schema Support Tests', () => {
                 // Make sure the document is shown
                 await vscode.window.showTextDocument(document);
 
-                // Wait for status bar to update
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Wait for diagnostics to settle (ensures server has processed)
+                await waitForDiagnostics(document.uri, 0);
 
                 // We can't directly test the status bar content from tests,
                 // but we verify the document is properly set up
@@ -214,31 +254,14 @@ describe('Bundled Schema Support Tests', () => {
                     'Document should have language ID \'kson\''
                 );
 
-                // Wait for the language server to process the document and associate the schema
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
                 // Position the cursor on the "type" property (line 1)
                 const position = new vscode.Position(1, 1);
 
-                // Execute Go to Definition command
-                const definitions = await vscode.commands.executeCommand<
-                    vscode.Location[] | vscode.LocationLink[]
-                >(
-                    'vscode.executeDefinitionProvider',
-                    document.uri,
-                    position
-                );
+                // Poll until definitions become available (schema association may take time)
+                const definitions = await waitForDefinitions(document.uri, position, 10000);
 
                 // Log results for debugging
                 console.log('Definition results for file with $schema:', JSON.stringify(definitions, null, 2));
-
-                // Verify definitions were returned
-                if (!definitions || definitions.length === 0) {
-                    console.log('No definitions returned - schema may not be associated yet');
-                    // This isn't necessarily a failure - the schema association might not be complete
-                    // The important thing is that when definitions ARE returned, they work
-                    return;
-                }
 
                 // Get the definition URI (handle both Location and LocationLink types)
                 const firstDef = definitions[0];
