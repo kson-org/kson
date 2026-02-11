@@ -46,11 +46,10 @@ export class BundledSchemaContentProvider implements vscode.TextDocumentContentP
     provideTextDocumentContent(uri: vscode.Uri): string | undefined {
         // URI format: bundled://{authority}/{path}
         // uri.authority = "schema" or "metaschema"
-        // uri.path = "/{name}.schema.kson"
-        const key = `${uri.authority}${uri.path}`;
-        // Remove leading slash from path: "schema//ext.schema.kson" → "schema/ext.schema.kson"
-        const normalizedKey = key.replace(/^([^/]+)\/\//, '$1/');
-        return this.contentByKey.get(normalizedKey);
+        // uri.path = "/{name}.schema.kson" (VS Code adds a leading slash)
+        const path = uri.path.startsWith('/') ? uri.path.substring(1) : uri.path;
+        const key = `${uri.authority}/${path}`;
+        return this.contentByKey.get(key);
     }
 }
 

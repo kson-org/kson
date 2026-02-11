@@ -71,6 +71,12 @@ export class BundledSchemaProvider implements SchemaProvider {
 
         // Create TextDocuments from the provided schema content
         for (const config of schemas) {
+            if (config.fileExtension.startsWith('.') || config.fileExtension.includes('*')) {
+                this.logger?.warn(
+                    `Bundled schema fileExtension "${config.fileExtension}" looks incorrect ` +
+                    `(should be e.g. "kson" not ".kson" or "*.kson")`
+                );
+            }
             try {
                 // Include .schema.kson suffix so VS Code recognizes it as KSON for syntax highlighting
                 const schemaUri = `bundled://schema/${config.fileExtension}.schema.kson`;
@@ -154,7 +160,7 @@ export class BundledSchemaProvider implements SchemaProvider {
      */
     private findMatchingExtension(uri: string): string | undefined {
         // Extract just the filename part (after last slash)
-        const lastSlash = Math.max(uri.lastIndexOf('/'), uri.lastIndexOf('\\'));
+        const lastSlash = uri.lastIndexOf('/');
         const filename = lastSlash >= 0 ? uri.substring(lastSlash + 1) : uri;
 
         // Find all extensions that match the end of the filename
