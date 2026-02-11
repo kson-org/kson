@@ -381,4 +381,192 @@ class EmbedContentTransformerTest {
         assertEquals(Coordinates(0, 0), result.start)
         assertEquals(Coordinates(0, rawEmbedContent.length), result.end)
     }
+
+    @Test
+    fun testCloseDelimOnOwnLineStripsTrailingNewline() {
+        // Raw content ends with \n followed by whitespace only (close delim on own line)
+        val rawEmbedContent = "    hello\n    "
+        val processed = "hello"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 4),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testCloseDelimNotOnOwnLinePreservesContent() {
+        // Raw content does not end with \n — close delim is inline
+        val rawEmbedContent = "    hello"
+        val processed = "hello"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(0, rawEmbedContent.length),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testCloseDelimInlineAfterNewlinePreservesContent() {
+        // Raw content has newlines, but non-whitespace after the last \n — close delim is inline
+        val rawEmbedContent = "  hello\n  world"
+        val processed = "hello\nworld"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 7),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testCloseDelimOnOwnLineWithBlankLinePreservesNewline() {
+        // Raw content has a blank indented line before close delim line
+        // Content should preserve the inner \n
+        val rawEmbedContent = "    hello\n    \n    "
+        val processed = "hello\n"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(2, 4),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testTrailingSpacesContent() {
+        // The key fix: a line of spaces followed by close delim on own line
+        // produces just the spaces as content
+        val rawEmbedContent = "      \n  "
+        val processed = "    "
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 2),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testCloseDelimOnOwnLineWithTabsAndCR() {
+        // Close delim on own line with mixed whitespace (tabs, CR)
+        val rawEmbedContent = "  hello\n  \t\r"
+        val processed = "hello"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 3),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testSourceMappingWithTrailingNewlineStripping() {
+        // Verify source mapping still works when trailing newline is stripped
+        val rawEmbedContent = "    hello\n    "
+        val processed = "hello"
+        val baseLocation = Location(
+            Coordinates(5, 0),
+            Coordinates(6, 4),
+            50,
+            50 + rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // Map "ello" in processed (offsets 1-5)
+        val result = transformer.mapToOriginal(1, 5)
+
+        // In rawEmbedContent: "    hello" → "ello" starts at offset 5
+        assertEquals(Coordinates(5, 5), result.start)
+        assertEquals(Coordinates(5, 9), result.end)
+        assertEquals(55, result.startOffset)
+        assertEquals(59, result.endOffset)
+    }
+
+    @Test
+    fun testSourceMappingMultiLineWithTrailingNewlineStripping() {
+        // Multi-line content with trailing newline stripped — verify mapping across line boundary
+        val rawEmbedContent = "  line1\n  line2\n  "
+        val processed = "line1\nline2"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(2, 2),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // Map "line2" in processed (offsets 6-11, on second line)
+        val result = transformer.mapToOriginal(6, 11)
+
+        // In rawEmbedContent: "  line2" starts at offset 10 (after "  line1\n  ")
+        assertEquals(Coordinates(1, 2), result.start)
+        assertEquals(Coordinates(1, 7), result.end)
+        assertEquals(10, result.startOffset)
+        assertEquals(15, result.endOffset)
+    }
 }

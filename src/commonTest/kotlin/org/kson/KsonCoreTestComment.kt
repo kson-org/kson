@@ -507,10 +507,9 @@ class KsonCoreTestComment : KsonCoreTest {
                # a comment on an embed block
                |
                  embedded stuff
-                 
             """.trimIndent(),
             """
-              "embedded stuff\n"
+              "embedded stuff"
             """.trimIndent()
         )
     }

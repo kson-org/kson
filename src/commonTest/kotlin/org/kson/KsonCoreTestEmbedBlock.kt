@@ -19,10 +19,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                |2
                      this is a raw embed
-                 
             """.trimIndent(),
             """
-                "    this is a raw embed\n"
+                "    this is a raw embed"
             """.trimIndent()
         )
 
@@ -40,10 +39,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 |2
                       select * from something
-                  
             """.trimIndent(),
             """
-                "    select * from something\n"
+                "    select * from something"
             """.trimIndent()
         )
 
@@ -62,10 +60,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 |2
                       select * from something
-                  
             """.trimIndent(),
             """
-                "    select * from something\n"
+                "    select * from something"
             """.trimIndent()
         )
 
@@ -83,10 +80,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 |2
                       select * from something
-                  
             """.trimIndent(),
             """
-                "    select * from something\n"
+                "    select * from something"
             """.trimIndent()
         )
     }
@@ -108,10 +104,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 |2
                       this is a raw embed with alternative delimiter
-                  
             """.trimIndent(),
             """
-                "    this is a raw embed with alternative delimiter\n"
+                "    this is a raw embed with alternative delimiter"
             """.trimIndent()
         )
 
@@ -129,10 +124,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 |2
                       select * from something
-                  
             """.trimIndent(),
             """
-                "    select * from something\n"
+                "    select * from something"
             """.trimIndent()
         )
     }
@@ -156,10 +150,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             |
               this is an escaped delim %%
               whereas in this case, this is not $\$
-              
             """.trimIndent(),
             """
-            "this is an escaped delim %%\nwhereas in this case, this is not $\\$\n"
+            "this is an escaped delim %%\nwhereas in this case, this is not $\\$"
             """.trimIndent()
         )
 
@@ -177,10 +170,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
             |
               more %% %% %% than $$ should yield a $$-delimited block
-              
             """.trimIndent(),
             """
-            "more %% %% %% than $$ should yield a $$-delimited block\n"
+            "more %% %% %% than $$ should yield a $$-delimited block"
             """.trimIndent()
         )
     }
@@ -201,10 +193,9 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
             |
               these double $$ dollars are %%%% embedded but escaped
-              
             """.trimIndent(),
             """
-            "these double $$ dollars are %%%% embedded but escaped\n"
+            "these double $$ dollars are %%%% embedded but escaped"
             """.trimIndent()
         )
     }
@@ -218,7 +209,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %
-                %\%%
+                %\
+                %%
             """.trimIndent(),
             """
                 |
@@ -243,7 +235,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedContent: |
@@ -263,7 +256,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %sql
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "sql"
@@ -285,7 +279,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %:meta
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: ":meta"
@@ -307,7 +302,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %sql: "server=10.0.1.174;uid=root;database=company"
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "sql: \"server=10.0.1.174;uid=root;database=company\""
@@ -338,6 +334,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """
                 embedBlock: %
                   content
+                  
                   %%
             """.trimIndent(),
             """
@@ -471,7 +468,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %my\ttag
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "my\ttag"
@@ -494,7 +492,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %\u0041tag
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "\u0041tag"
@@ -517,7 +516,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %path\\to
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "path\\to"
@@ -549,7 +549,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 %sql: "conn\tstring"
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                 embedTag: "sql: \"conn\tstring\""
@@ -581,7 +582,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock: %my\ttag
-                  content%%
+                  content
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -616,7 +618,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock: %sql
-                  content%%
+                  content
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -650,7 +653,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   embedContent: content""".trimIndent(),
             """
                 embedBlock: %line1\nline2
-                  content%%""".trimIndent(),
+                  content
+                  %%""".trimIndent(),
             """
                 embedBlock:
                   embedTag: "line1\nline2"
@@ -679,7 +683,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             "%my\ttag\ncontent%%",
             """
                 %my\ttag
-                content%%
+                content
+                %%
             """.trimIndent(),
             """
                   embedTag: "my\ttag"
@@ -710,7 +715,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock: %has %% embed $$ delims
-                  content%%
+                  content
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -737,7 +743,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             $$"""
                 embedBlock: $has %% embed $$ delims
-                  content with %% to force dollar-delimiters$$
+                  content with %% to force dollar-delimiters
+                  $$
             """.trimIndent(),
             """
                 embedBlock:
@@ -764,7 +771,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock: %%%
-                  content%%
+                  content
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -791,7 +799,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
                 embedBlock: %tag%%
-                  content%%
+                  content
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -818,7 +827,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             $$"""
                 embedBlock: %%%$$
-                  has %\% and $$%%
+                  has %\% and $$
+                  %%
             """.trimIndent(),
             """
                 embedBlock:
@@ -854,6 +864,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   embeddedEmbed: %
                   EMBED CONTENT
                   %%
+                  
                   $$
             """.trimIndent(),
             """
@@ -883,6 +894,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   embeddedEmbed: $
                   EMBED WITH %\\% CONTENT
                   $$
+                  
                   %%
             """.trimIndent(),
             """
@@ -902,4 +914,131 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(), compileSettings = compileSettings
         )
     }
-} 
+    @Test
+    fun testEmbedBlockTrailingNewlineStripping() {
+        // %% on own line with no trailing newline — content has no trailing \n
+        assertParsesTo(
+            """
+                %
+                hello
+                %%
+            """.trimIndent(),
+            """
+                %
+                hello
+                %%
+            """.trimIndent(),
+            """
+                |
+                  hello
+            """.trimIndent(),
+            """
+                "hello"
+            """.trimIndent()
+        )
+
+        // %% on own line with indented blank line — content preserves trailing \n
+        assertParsesTo(
+            """
+                    %
+                    hello
+                    
+                    %%
+                    """.trimIndent(),
+            """
+                    %
+                    hello
+                    
+                    %%""".trimIndent(),
+            """
+                    |
+                      hello
+                      
+                    """.trimIndent(),
+            """
+                "hello\n"
+            """.trimIndent()
+        )
+
+        // inline %% — content has no trailing \n (unchanged behavior)
+        assertParsesTo(
+            """
+                %
+                hello%%
+            """.trimIndent(),
+            """
+                %
+                hello
+                %%
+            """.trimIndent(),
+            """
+                |
+                  hello
+            """.trimIndent(),
+            """
+                "hello"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockTrailingSpaces() {
+        val compileSettings = KsonCoreTest.CompileSettings(
+            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+            jsonSettings = Json(retainEmbedTags = true)
+        )
+
+        // The key fix: a string of spaces is representable and roundtrips correctly
+        assertParsesTo(
+            """
+               embedBlock:
+                 "embedContent": "    "
+            """.trimIndent(),
+            "embedBlock: %\n      \n  %%",
+            "embedBlock:\n  embedContent: |4\n        ",
+            """
+                {
+                  "embedBlock": {
+                    "embedContent": "    "
+                  }
+                }
+            """.trimIndent(), compileSettings = compileSettings
+        )
+    }
+
+    @Test
+    fun testEmbedBlockCloseDelimDefinesMinIndent() {
+        // %% line defining minimum indent (less indent than content)
+        assertParsesTo(
+            "%\n      hello\n  %%",
+            "%\n    hello\n%%",
+            "|2\n      hello",
+            """
+                "    hello"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockEdgeCases() {
+        // Empty content with inline %%
+        assertParsesTo(
+            "%\n%%",
+            "%\n\n%%",
+            "|\n  ",
+            """
+                ""
+            """.trimIndent()
+        )
+
+        // Content = "\n" — needs two blank content lines (one real, one stripped by %% on own line)
+        assertParsesTo(
+            "  %\n  \n  \n  %%",
+            "%\n\n\n%%",
+            "|\n  \n  ",
+            """
+                "\n"
+            """.trimIndent()
+        )
+    }
+}

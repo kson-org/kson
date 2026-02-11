@@ -31,13 +31,31 @@ class EmbedContentTransformer(
          * Transformation pipeline:
          * 1. Unescape the content
          * 2. Trim the minimum indent
+         * 3. If %% was on its own line, strip the trailing \n (and residual whitespace)
          */
         val unescapedContent = embedDelim.unescapeEmbedContent(rawContent)
         val indentTrimmer = EmbedBlockIndent(unescapedContent)
         minIndent = indentTrimmer.computeMinimumIndent()
-        processedContent = indentTrimmer.trimMinimumIndent()
+        val indentTrimmed = indentTrimmer.trimMinimumIndent()
+
+        processedContent = if (isCloseDelimOnOwnLine(rawContent)) {
+            val lastNewline = indentTrimmed.lastIndexOf('\n')
+            if (lastNewline >= 0) indentTrimmed.substring(0, lastNewline) else indentTrimmed
+        } else {
+            indentTrimmed
+        }
     }
 
+    /**
+     * Checks whether the close delimiter (%% or $$) is on its own line in the raw content.
+     * This is true when the last \n in the raw content is followed by only inline whitespace
+     * (spaces, tabs, or CR).
+     */
+    private fun isCloseDelimOnOwnLine(content: String): Boolean {
+        val lastNewline = content.lastIndexOf('\n')
+        if (lastNewline < 0) return false
+        return content.substring(lastNewline + 1).all { it == ' ' || it == '\t' || it == '\r' }
+    }
 
     /**
      * Maps a single offset in processed content to an offset in raw content.

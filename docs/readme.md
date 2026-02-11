@@ -296,7 +296,9 @@ This style is used in Kson's [delimited format](#delimited-format-example)
 
 The KSON Embed Block is designed for ergonomically embedding complex content such as code
 blocks. These blocks start on the first newline after the opening `%`, run all the way up
-to the closing `%%` and always strip their minimum indent:
+to the closing `%%` and always strip their minimum indent. When `%%` is on its own line,
+the newline preceding it is not part of the content—this is a formatting choice that keeps
+the closing delimiter visually distinct without affecting the value:
 
 ```kson
 embed_block: %
