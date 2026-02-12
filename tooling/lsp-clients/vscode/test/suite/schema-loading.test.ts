@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import {createTestFile, cleanUp} from './common';
+import {createTestFile, cleanUp, waitForDiagnostics, waitForHover, waitForCompletions} from './common';
 import { v4 as uuid } from 'uuid';
 
 
@@ -147,77 +147,6 @@ describeNode('Schema Loading Tests', () => {
     after(async () => {
         await cleanUpSchemaFiles();
     });
-
-    /**
-     * Wait for hover information to be available at a specific position.
-     */
-    async function waitForHover(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        timeout: number = 5000
-    ): Promise<vscode.Hover[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
-                'vscode.executeHoverProvider',
-                document.uri,
-                position
-            );
-
-            if (hovers && hovers.length > 0) {
-                return hovers;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for hover information at position ${position.line}:${position.character}`);
-    }
-
-    /**
-     * Wait for completion items to be available at a specific position.
-     */
-    async function waitForCompletions(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        timeout: number = 5000
-    ): Promise<vscode.CompletionList> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
-                'vscode.executeCompletionItemProvider',
-                document.uri,
-                position
-            );
-
-            if (completions && completions.items.length > 0) {
-                return completions;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for completions at position ${position.line}:${position.character}`);
-    }
-
-    /**
-     * Wait for diagnostics to be available.
-     */
-    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const diagnostics = vscode.languages.getDiagnostics(uri);
-            if (diagnostics.length === expectedCount) {
-                return diagnostics;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
-    }
 
     it('Should load schema for files matching fileMatch pattern', async () => {
         // Create a test file that matches the pattern "**/*.config.kson"

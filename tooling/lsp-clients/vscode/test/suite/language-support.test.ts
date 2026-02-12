@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import { createTestFile, cleanUp } from './common';
+import { createTestFile, cleanUp, waitForDiagnostics } from './common';
 
 /**
  * Tests for KSON language support.
@@ -9,20 +9,6 @@ import { createTestFile, cleanUp } from './common';
  * language server features as .kson files.
  */
 describe('Language Support Tests', () => {
-
-    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const diagnostics = vscode.languages.getDiagnostics(uri);
-            if (diagnostics.length === expectedCount) {
-                return diagnostics;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
-    }
 
     it('Should report diagnostics for invalid language file', async function() {
         // Skip this test if no languages are configured

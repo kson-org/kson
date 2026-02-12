@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import { createTestFile, cleanUp } from './common';
+import { createTestFile, cleanUp, waitForDiagnostics, waitForDefinitions } from './common';
 
 /**
  * Tests for bundled schema support.
@@ -16,50 +16,6 @@ describe('Bundled Schema Support Tests', () => {
      */
     function getExtension(): vscode.Extension<any> | undefined {
         return vscode.extensions.getExtension('kson.kson');
-    }
-
-    /**
-     * Poll until diagnostics reach the expected count, or timeout.
-     */
-    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const diagnostics = vscode.languages.getDiagnostics(uri);
-            if (diagnostics.length === expectedCount) {
-                return diagnostics;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
-    }
-
-    /**
-     * Poll until Go to Definition returns results, or timeout.
-     */
-    async function waitForDefinitions(
-        uri: vscode.Uri,
-        position: vscode.Position,
-        timeout: number = 5000
-    ): Promise<vscode.Location[] | vscode.LocationLink[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const definitions = await vscode.commands.executeCommand<
-                vscode.Location[] | vscode.LocationLink[]
-            >(
-                'vscode.executeDefinitionProvider',
-                uri,
-                position
-            );
-            if (definitions && definitions.length > 0) {
-                return definitions;
-            }
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-
-        throw new Error(`Timeout waiting for definitions at ${uri.toString()}:${position.line}:${position.character}`);
     }
 
     describe('Configuration', () => {
