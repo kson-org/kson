@@ -300,6 +300,29 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedBlockWithInlineEndDelimiter() {
+        assertFormatting(
+            """
+            {
+            code: %sql
+                  -- should preserve the minimum indent
+                  SELECT * 
+                    FROM table
+                      WHERE x = 1%%
+            }
+            """.trimIndent(),
+            """
+            code: %sql
+              -- should preserve the minimum indent
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testEmbedBlockWithPartialEmbedDelim() {
         assertFormatting(
             """

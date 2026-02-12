@@ -124,4 +124,18 @@ class EmbedBlockIndentTest {
         assertEquals(0, embedBlockIndent.computeMinimumIndent())
         assertEquals("", embedBlockIndent.trimMinimumIndent())
     }
+
+    @Test
+    fun `test trimMinimumIndent determined by trailing end-delim`() {
+        val input = """
+            %
+                this should stay indented
+                
+            %%
+        """.trimIndent()
+        val embedBlockIndent = EmbedBlockIndent(input)
+
+        assertEquals(0, embedBlockIndent.computeMinimumIndent())
+        assertEquals(input, embedBlockIndent.trimMinimumIndent())
+    }
 } 

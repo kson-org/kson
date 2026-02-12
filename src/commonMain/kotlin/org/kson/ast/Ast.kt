@@ -935,12 +935,14 @@ class EmbedBlockNode(
 
         return when (compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED -> {
-                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}") { it }
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}$rawEmbedTag\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}")
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$rawEmbedTag\n" +
+                        "${indent.bodyLinesIndent()}$indentedContent\n" +
+                        "${indent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                val compactContent = content.lines().joinToString("\n") { it }
-                "${delimiter.openDelimiter}$rawEmbedTag\n$compactContent${delimiter.closeDelimiter}"
+                val compactContent = content.lines().joinToString("\n")
+                "${delimiter.openDelimiter}$rawEmbedTag\n$compactContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> {
                 renderJsonFormat(indent, compileTarget as? Json ?: Json())

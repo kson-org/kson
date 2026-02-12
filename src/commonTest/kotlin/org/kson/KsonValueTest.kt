@@ -100,7 +100,6 @@ class KsonValueTest {
             """
             This is an embed block
             with multiple lines
-            
         """.trimIndent(), embedProp.embedContent.value
         )
 
