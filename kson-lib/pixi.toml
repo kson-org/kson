@@ -15,3 +15,6 @@ version = "0.1.0"
 
 [target.win-64.dependencies]
 vs2022_win-64 = ">=19.44.35207,<20"
+
+[dependencies]
+nodejs = ">=18"

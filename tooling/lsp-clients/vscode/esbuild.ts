@@ -50,6 +50,14 @@ async function build() {
         join(__dirname, 'dist', 'extension'),
         {recursive: true});
 
+    // Copy bundled schemas if they exist
+    const schemasDir = join(__dirname, 'schemas');
+    const distSchemasDir = join(__dirname, 'dist', 'extension', 'schemas');
+    if (require('fs').existsSync(schemasDir)) {
+        cpSync(schemasDir, distSchemasDir, {recursive: true});
+        console.log('📄 Copied bundled schemas to dist/extension/schemas');
+    }
+
     const testEntries = await getTestEntries();
 
     // Common build options

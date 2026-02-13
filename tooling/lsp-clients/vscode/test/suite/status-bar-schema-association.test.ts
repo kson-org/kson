@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import { createTestFile, cleanUp } from './common';
+import { createTestFile, cleanUp, waitForCompletions, waitForHover } from './common';
 import { v4 as uuid } from 'uuid';
 
 const TEST_SCHEMA_FILENAME = `${uuid()}.schema.kson`;
@@ -39,7 +39,6 @@ describeNode('Status Bar Schema Association Tests', () => {
         // Create a schema file
         schemaFileUri = vscode.Uri.joinPath(workspaceFolder.uri, TEST_SCHEMA_FILENAME);
         const schemaContent = [
-            '\'$schema\': \'http://json-schema.org/draft-07/schema#\'',
             'type: object',
             'title: \'Test Configuration\'',
             'description: \'Schema for testing status bar association\'',
@@ -109,60 +108,6 @@ describeNode('Status Bar Schema Association Tests', () => {
                 () => {} // Ignore errors if file doesn't exist
             );
         }
-    }
-
-    /**
-     * Wait for completion items to be available at a specific position.
-     */
-    async function waitForCompletions(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        timeout: number = 5000
-    ): Promise<vscode.CompletionList> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const completions = await vscode.commands.executeCommand<vscode.CompletionList>(
-                'vscode.executeCompletionItemProvider',
-                document.uri,
-                position
-            );
-
-            if (completions && completions.items.length > 0) {
-                return completions;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for completions at position ${position.line}:${position.character}`);
-    }
-
-    /**
-     * Wait for hover information to be available at a specific position.
-     */
-    async function waitForHover(
-        document: vscode.TextDocument,
-        position: vscode.Position,
-        timeout: number = 5000
-    ): Promise<vscode.Hover[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
-                'vscode.executeHoverProvider',
-                document.uri,
-                position
-            );
-
-            if (hovers && hovers.length > 0) {
-                return hovers;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for hover information at position ${position.line}:${position.character}`);
     }
 
     /**

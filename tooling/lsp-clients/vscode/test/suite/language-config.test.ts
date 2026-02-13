@@ -69,4 +69,52 @@ describe('Language Configuration Tests', () => {
             assert.strictEqual(isKsonDialect('python'), false);
         });
     });
+
+    describe('bundledSchemas', () => {
+        it('Should extract bundled schema mappings using file extension', () => {
+            initWithLanguages([
+                { id: 'kson', extensions: ['.kson'], bundledSchema: null },
+                { id: 'kxt', extensions: ['.kxt'], bundledSchema: './dist/extension/schemas/kxt.schema.kson' }
+            ]);
+            const config = getLanguageConfiguration();
+
+            assert.ok(config.bundledSchemas, 'bundledSchemas should be defined');
+            assert.strictEqual(config.bundledSchemas.length, 1, 'Should have 1 bundled schema');
+            assert.strictEqual(config.bundledSchemas[0].fileExtension, 'kxt');
+            assert.strictEqual(config.bundledSchemas[0].schemaPath, './dist/extension/schemas/kxt.schema.kson');
+        });
+
+        it('Should handle no bundled schemas', () => {
+            initWithLanguages([
+                { id: 'kson', extensions: ['.kson'], bundledSchema: null }
+            ]);
+            const config = getLanguageConfiguration();
+
+            assert.ok(config.bundledSchemas, 'bundledSchemas should be defined');
+            assert.strictEqual(config.bundledSchemas.length, 0, 'Should have 0 bundled schemas');
+        });
+
+        it('Should handle missing bundledSchema field', () => {
+            initWithLanguages([
+                { id: 'kson', extensions: ['.kson'] }
+            ]);
+            const config = getLanguageConfiguration();
+
+            assert.ok(config.bundledSchemas, 'bundledSchemas should be defined');
+            assert.strictEqual(config.bundledSchemas.length, 0, 'Should have 0 bundled schemas');
+        });
+
+        it('Should handle multiple bundled schemas', () => {
+            initWithLanguages([
+                { id: 'kson', extensions: ['.kson'], bundledSchema: null },
+                { id: 'kxt', extensions: ['.kxt'], bundledSchema: './schemas/kxt.schema.kson' },
+                { id: 'config', extensions: ['.config'], bundledSchema: './schemas/config.schema.kson' }
+            ]);
+            const config = getLanguageConfiguration();
+
+            assert.strictEqual(config.bundledSchemas.length, 2, 'Should have 2 bundled schemas');
+            assert.ok(config.bundledSchemas.some(s => s.fileExtension === 'kxt'));
+            assert.ok(config.bundledSchemas.some(s => s.fileExtension === 'config'));
+        });
+    });
 });

@@ -63,6 +63,10 @@ export class FileSystemSchemaProvider implements SchemaProvider {
         });
     }
 
+    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
+        return undefined;
+    }
+
     /**
      * Get the schema for a given document URI.
      *

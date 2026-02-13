@@ -1,5 +1,6 @@
 import {DefinitionLink, Position, Range} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
+import {isKsonSchemaDocument} from '../document/KsonSchemaDocument.js';
 import {KsonTooling} from 'kson-tooling';
 
 /**
@@ -19,11 +20,20 @@ export class DefinitionService {
      */
     getDefinition(document: KsonDocument, position: Position): DefinitionLink[] {
         const tooling = KsonTooling.getInstance();
+        const results: DefinitionLink[] = [];
 
-        // Get the schema for this document
-        const schemaDocument = document.getSchemaDocument();
+        // Try $ref resolution within the same document
+        const refLocations = tooling.resolveRefAtLocation(
+            document.getText(),
+            position.line,
+            position.character
+        );
+        results.push(...this.convertRangesToDefinitionLinks(refLocations, document.uri));
 
-        // Try document-to-schema navigation first (if schema is configured)
+        // Try document-to-schema navigation (if schema is configured)
+        const schemaDocument = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaDocument()
+            : document.getSchemaDocument();
         if (schemaDocument) {
             const locations = tooling.getSchemaLocationAtLocation(
                 document.getText(),
@@ -31,17 +41,10 @@ export class DefinitionService {
                 position.line,
                 position.character
             );
-            return this.convertRangesToDefinitionLinks(locations, schemaDocument.uri);
+            results.push(...this.convertRangesToDefinitionLinks(locations, schemaDocument.uri));
         }
 
-        // Try schema $ref resolution (within the same document)
-        // This handles the case where we're editing a schema file and want to jump to internal refs
-        const refLocations = tooling.resolveRefAtLocation(
-            document.getText(),
-            position.line,
-            position.character
-        );
-        return this.convertRangesToDefinitionLinks(refLocations, document.uri);
+        return results;
     }
 
     /**

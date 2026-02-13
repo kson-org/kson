@@ -1,5 +1,6 @@
 import {Hover, Position, MarkupKind} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
+import {isKsonSchemaDocument} from '../document/KsonSchemaDocument.js';
 import {KsonTooling} from 'kson-tooling';
 
 /**
@@ -16,7 +17,9 @@ export class HoverService {
      */
     getHover(document: KsonDocument, position: Position): Hover | null {
         // Get the schema for this document
-        const schemaDocument = document.getSchemaDocument();
+        const schemaDocument = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaDocument()
+            : document.getSchemaDocument();
         if (!schemaDocument) {
             // No schema configured, no hover info available
             return null;

@@ -1,24 +1,10 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import {createTestFile, cleanUp} from './common';
+import {createTestFile, cleanUp, waitForDiagnostics} from './common';
 import {DiagnosticSeverity} from "vscode";
 
 
 describe('Diagnostic Tests', () => {
-
-    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const diagnostics = vscode.languages.getDiagnostics(uri);
-            if (diagnostics.length === expectedCount) {
-                return diagnostics;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
-    }
 
     it('Should report errors for an invalid Kson file', async () => {
         const errorContent = 'key: "value" extraValue';

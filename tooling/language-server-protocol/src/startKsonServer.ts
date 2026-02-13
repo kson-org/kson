@@ -7,13 +7,28 @@ import {
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri'
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
+import {isKsonSchemaDocument} from './core/document/KsonSchemaDocument.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
 import {getAllCommandIds} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
+import {BundledSchemaProvider, BundledSchemaConfig, BundledMetaSchemaConfig} from './core/schema/BundledSchemaProvider.js';
+import {CompositeSchemaProvider} from './core/schema/CompositeSchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
 import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
+
+/**
+ * Initialization options passed from the VSCode client.
+ */
+export interface KsonInitializationOptions {
+    /** Bundled schemas to be loaded (matched by file extension) */
+    bundledSchemas?: BundledSchemaConfig[];
+    /** Bundled metaschemas to be loaded (matched by document $schema content) */
+    bundledMetaSchemas?: BundledMetaSchemaConfig[];
+    /** Whether bundled schemas are enabled */
+    enableBundledSchemas?: boolean;
+}
 
 type SchemaProviderFactory = (
     workspaceRootUri: URI | undefined,
@@ -45,6 +60,7 @@ export function startKsonServer(
     // Initialize core components (documentManager will be created after onInitialize)
     let documentManager: KsonDocumentsManager;
     let textDocumentService: KsonTextDocumentService;
+    let bundledSchemaProvider: BundledSchemaProvider | undefined;
 
     // Setup connection event handlers
     connection.onInitialize(async (params): Promise<InitializeResult> => {
@@ -54,8 +70,37 @@ export function startKsonServer(
             workspaceRootUri = URI.parse(stringUri)
         }
 
-        // Create the appropriate schema provider for this environment
-        const schemaProvider = await createSchemaProvider(workspaceRootUri, logger);
+        // Extract bundled schema configuration from initialization options
+        const initOptions = params.initializationOptions as KsonInitializationOptions | undefined;
+        const bundledSchemas = initOptions?.bundledSchemas ?? [];
+        const bundledMetaSchemas = initOptions?.bundledMetaSchemas ?? [];
+        const enableBundledSchemas = initOptions?.enableBundledSchemas ?? true;
+
+        // Create the appropriate schema provider for this environment (file system or no-op)
+        const fileSystemSchemaProvider = await createSchemaProvider(workspaceRootUri, logger);
+
+        // Create bundled schema provider if schemas or metaschemas are configured
+        let schemaProvider: SchemaProvider | undefined;
+        if (bundledSchemas.length > 0 || bundledMetaSchemas.length > 0) {
+            bundledSchemaProvider = new BundledSchemaProvider({
+                schemas: bundledSchemas,
+                metaSchemas: bundledMetaSchemas,
+                enabled: enableBundledSchemas,
+                logger
+            });
+
+            // Create composite provider: file system takes priority over bundled
+            const providers: SchemaProvider[] = [];
+            if (fileSystemSchemaProvider) {
+                providers.push(fileSystemSchemaProvider);
+            }
+            providers.push(bundledSchemaProvider);
+
+            schemaProvider = new CompositeSchemaProvider(providers, logger);
+            logger.info(`Created composite schema provider with ${providers.length} providers`);
+        } else {
+            schemaProvider = fileSystemSchemaProvider;
+        }
 
         // Now that we have workspace root and schema provider, create the document manager
         documentManager = new KsonDocumentsManager(schemaProvider);
@@ -139,7 +184,10 @@ export function startKsonServer(
     // Handle custom request to get schema information for a document
     connection.onRequest('kson/getDocumentSchema', (params: { uri: string }) => {
         try {
-            const schemaDocument = documentManager.get(params.uri)?.getSchemaDocument();
+            const doc = documentManager.get(params.uri);
+            const schemaDocument = doc
+                ? isKsonSchemaDocument(doc) ? doc.getMetaSchemaDocument() : doc.getSchemaDocument()
+                : undefined;
             if (schemaDocument) {
                 const schemaUri = schemaDocument.uri;
                 // Extract readable path from URI
@@ -165,6 +213,16 @@ export function startKsonServer(
         }
     });
 
+    /**
+     * Refresh all documents with updated schemas, notify the client,
+     * and trigger diagnostic refresh.
+     */
+    function notifySchemaChange(): void {
+        documentManager.refreshDocumentSchemas();
+        connection.sendNotification('kson/schemaConfigurationChanged');
+        connection.sendRequest('workspace/diagnostic/refresh');
+    }
+
     // Handle changes to watched files
     connection.onDidChangeWatchedFiles((params) => {
         const schemaProvider = documentManager.getSchemaProvider();
@@ -183,12 +241,7 @@ export function startKsonServer(
         }
 
         if (schemaChanged) {
-            // Refresh all open documents with the updated schemas
-            documentManager.refreshDocumentSchemas();
-            // Notify client that schema configuration changed so it can update UI (e.g., status bar)
-            connection.sendNotification('kson/schemaConfigurationChanged');
-            // Rerun diagnostics for open files, so we immediately see errors of schema
-            connection.sendRequest('workspace/diagnostic/refresh');
+            notifySchemaChange();
         }
     });
 
@@ -197,6 +250,13 @@ export function startKsonServer(
         // Update the text document service with new configuration
         const configuration = ksonSettingsWithDefaults(change.settings);
         textDocumentService.updateConfiguration(configuration);
+
+        // Check if bundled schema setting changed
+        if (bundledSchemaProvider && change.settings?.kson?.enableBundledSchemas !== undefined) {
+            const enabled = change.settings.kson.enableBundledSchemas;
+            bundledSchemaProvider.setEnabled(enabled);
+            notifySchemaChange();
+        }
 
         connection.console.info('Configuration updated');
     });
