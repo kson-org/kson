@@ -21,9 +21,6 @@ export const KSON_LEGEND: SemanticTokensLegend = {
         SemanticTokenTypes.decorator,
         SemanticTokenTypes.macro,
         SemanticTokenTypes.function,
-
-        // EOF, Whitespace, IllegalChar
-        SemanticTokenTypes.modifier,
     ],
     tokenModifiers: []
 };
@@ -74,8 +71,8 @@ export class SemanticTokensService {
         token: Token,
         tokenType: string | undefined
     ): void {
-        if (token.tokenType === TokenType.EMBED_CONTENT) {
-            // Skip EMBED_CONTENT tokens - let TextMate grammars handle embedded language highlighting
+        if (tokenType === undefined || token.tokenType === TokenType.EMBED_CONTENT) {
+            // Skip tokens without semantic meaning and EMBED_CONTENT (handled by TextMate grammars)
             return;
         } else {
             semanticTokenBuilder.push(
@@ -156,12 +153,11 @@ export class SemanticTokensService {
                 semanticType = SemanticTokenTypes.function;
                 break;
 
-            // Whitespace, illegal chars, EOF – not semantically relevant
+            // Whitespace, illegal chars, EOF – skip, not semantically relevant
             case TokenType.WHITESPACE:
             case TokenType.ILLEGAL_CHAR:
             case TokenType.EOF:
-                semanticType = SemanticTokenTypes.modifier;
-                break
+                return undefined;
         }
 
         return semanticType;

@@ -70,7 +70,6 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 0, length: 3, type: SemanticTokenTypes.variable, modifiers: []}, // key
             {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
             {deltaLine: 0, deltaStart: 2, length: 6, type: SemanticTokenTypes.string, modifiers: []}, // string
-            {deltaLine: 0, deltaStart: 6, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ]
         assertSemanticTokens(content, expectedTokens);
     })
@@ -82,7 +81,6 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 0, length: 6, type: SemanticTokenTypes.variable, modifiers: []},
             {deltaLine: 0, deltaStart: 6, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
             {deltaLine: 0, deltaStart: 2, length: 2, type: SemanticTokenTypes.number, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -96,7 +94,6 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 0, length: 4, type: SemanticTokenTypes.variable, modifiers: []},
             {deltaLine: 0, deltaStart: 4, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
             {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.keyword, modifiers: []},
-            {deltaLine: 0, deltaStart: 4, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -120,7 +117,6 @@ describe('KSON Semantic Tokens', () => {
             // line 2
             {deltaLine: 1, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
             {deltaLine: 0, deltaStart: 2, length: 6, type: SemanticTokenTypes.string, modifiers: []},
-            {deltaLine: 0, deltaStart: 6, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -142,7 +138,6 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
             {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // \n
             {deltaLine: 3, deltaStart: 3, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
-            {deltaLine: 0, deltaStart: 2, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -167,7 +162,6 @@ describe('KSON Semantic Tokens', () => {
             {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.string, modifiers: []},  // "
             {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // ]
             {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // }
-            {deltaLine: 0, deltaStart: 1, length: 0, type: SemanticTokenTypes.modifier, modifiers: []} // EOF
 
         ];
 
