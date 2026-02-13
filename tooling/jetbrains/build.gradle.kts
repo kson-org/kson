@@ -40,7 +40,6 @@ intellijPlatform {
         name = properties("pluginName")
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
-            untilBuild = properties("pluginUntilBuild")
         }
     }
     signing {
