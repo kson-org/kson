@@ -158,7 +158,7 @@ export class KsonTextDocumentService {
             this.connection.console.info(`Diagnostics requested for ${params.textDocument.uri}`);
             const document = this.documentManager.get(params.textDocument.uri);
             const result = this.diagnosticService.createDocumentDiagnosticReport(document);
-            this.connection.console.info(`Diagnostics result: ${JSON.stringify(result)}`);
+            this.connection.console.info(`Diagnostics result: ${'items' in result ? result.items.length : 0} items`);
             return result;
         } catch (error) {
             this.connection.console.error(`Error providing diagnostics: ${error}`);
@@ -228,7 +228,6 @@ export class KsonTextDocumentService {
                 return null;
             }
             const result = this.hoverService.getHover(document, params.position);
-            this.connection.console.info(`Hover result: ${JSON.stringify(result)}`);
             return result;
         } catch (error) {
             this.connection.console.error(`Error providing hover info: ${error}`);
@@ -243,7 +242,6 @@ export class KsonTextDocumentService {
                 return null;
             }
             const result = this.completionService.getCompletions(document, params.position);
-            this.connection.console.info(`Completion result: ${JSON.stringify(result)}`);
             return result;
         } catch (error) {
             this.connection.console.error(`Error providing completions: ${error}`);
@@ -258,7 +256,6 @@ export class KsonTextDocumentService {
                 return null;
             }
             const result = this.definitionService.getDefinition(document, params.position);
-            this.connection.console.info(`Definition result: ${JSON.stringify(result)}`);
             return result;
         } catch (error) {
             this.connection.console.error(`Error providing definition: ${error}`);
