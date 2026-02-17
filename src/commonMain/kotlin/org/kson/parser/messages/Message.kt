@@ -489,6 +489,16 @@ enum class MessageType(
             return "Value must match exactly one of the specified schemas"
         }
     },
+    SCHEMA_ONE_OF_MULTIPLE_MATCHES(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Matched schemas")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val matchedSchemas = parsedArgs.getArg("Matched schemas")
+            return "Must match only ONE schema, but matched: $matchedSchemas"
+        }
+    },
     SCHEMA_REQUIRED_PROPERTY_MISSING(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return listOf("Missing Properties")
