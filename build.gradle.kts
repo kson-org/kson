@@ -44,6 +44,8 @@ tasks {
         yamlFile.set(project.file(".circleci/config.yml"))
     }
 
+    register<VerifyCleanCheckoutTask>("verifyCleanCheckout")
+
     withType<Task> {
         // make every task except itself depend on generateJsonTestSuiteTask and transpileCircleCIConfigTask to
         // ensure it's always up-to-date before any other build steps
