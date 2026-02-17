@@ -392,7 +392,8 @@ class KsonSmokeTest {
             """
             scripts:
               build: %bash
-                make all%%
+                make all
+                %%
             """.trimIndent(),
             formatted
         )
