@@ -1157,13 +1157,14 @@ internal object EmbedBlockRenderer {
             PLAIN, DELIMITED -> {
                 val contentIndent = if (nestedContentIndent) indent.next(false) else indent
                 val indentedContent = escapedContent.lines()
-                    .joinToString("\n${contentIndent.bodyLinesIndent()}") { it }
+                    .joinToString("\n${contentIndent.bodyLinesIndent()}")
 
                 "${indent.firstLineIndent()}${delimiter.openDelimiter}$preamble\n" +
-                    "${contentIndent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+                    "${contentIndent.bodyLinesIndent()}$indentedContent\n" +
+                    "${contentIndent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                "${delimiter.openDelimiter}$preamble\n$escapedContent${delimiter.closeDelimiter}"
+                "${delimiter.openDelimiter}$preamble\n$escapedContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> null // Caller handles CLASSIC format
         }
