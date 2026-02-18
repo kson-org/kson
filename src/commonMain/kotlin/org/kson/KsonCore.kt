@@ -218,10 +218,14 @@ class KsonParseResult(
      * The Kson compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val kson: String? = astParseResult.ast?.toSource(
-        AstNode.Indent(compileConfig.formatConfig.indentType),
-        compileConfig
-    )
+    val kson: String? = if (astParseResult.hasErrors()) {
+        null
+    } else {
+        astParseResult.ast?.toSource(
+            AstNode.Indent(compileConfig.formatConfig.indentType),
+            compileConfig
+        )
+    }
 }
 
 class YamlParseResult(

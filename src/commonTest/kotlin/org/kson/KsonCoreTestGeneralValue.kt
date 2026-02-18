@@ -3,6 +3,7 @@ package org.kson
 import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests
@@ -49,6 +50,17 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
         // under no circumstances should these parse results be the same
         assertNotEquals(doubleParseTwoOuterKeys, parseTwoInnerKeys,
             "should never format two different data structures into identical Kson")
+    }
+
+    @Test
+    fun testParseTrailingContentRegression() {
+        val result = KsonCore.parseToKson("""
+            "outer_key": 42
+              }
+            """.trimIndent(), CompileSettings().ksonSettings
+        )
+
+        assertNull(result.kson)
     }
 
     @Test
