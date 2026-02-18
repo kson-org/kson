@@ -53,17 +53,6 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
     }
 
     @Test
-    fun testParseTrailingContentRegression() {
-        val result = KsonCore.parseToKson("""
-            "outer_key": 42
-              }
-            """.trimIndent(), CompileSettings().ksonSettings
-        )
-
-        assertNull(result.kson)
-    }
-
-    @Test
     fun testNestedListAndObjectFormatting() {
         assertParsesTo("""
             {

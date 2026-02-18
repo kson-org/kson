@@ -4,7 +4,6 @@ import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.value.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class KsonValueTest {
@@ -16,10 +15,8 @@ class KsonValueTest {
         """.trimIndent()
 
         val parseResult = KsonCore.parseToAst(source)
-        val ast = parseResult.ast
-        assertNotNull(ast, "should not be null for this test's valid Kson")
 
-        val serverConfig = ast.toKsonValue()
+        val serverConfig = parseResult.ast.toKsonValue()
         assertTrue(serverConfig is KsonObject)
 
         assertTrue(serverConfig.propertyLookup["host"] is KsonString)
@@ -68,7 +65,7 @@ class KsonValueTest {
         val parseResult = KsonCore.parseToAst(source)
         assertTrue(!parseResult.hasErrors(), "Parse should succeed without errors")
 
-        val objectNode = parseResult.ast!!.toKsonValue()
+        val objectNode = parseResult.ast.toKsonValue()
         assertTrue(objectNode is KsonObject, "Root node should be ObjectNodeApi")
 
         val properties = objectNode.propertyLookup
@@ -164,10 +161,8 @@ class KsonValueTest {
         """.trimIndent()
 
         val parseResult = KsonCore.parseToAst(source)
-        val ast = parseResult.ast
-        assertNotNull(ast, "should not be null for this test's valid Kson")
 
-        val rootObject = ast.toKsonValue() as KsonObject
+        val rootObject = parseResult.ast.toKsonValue() as KsonObject
         val properties = rootObject.propertyLookup
 
         // Test basic escapes - newline, tab, and quotes should be unescaped
