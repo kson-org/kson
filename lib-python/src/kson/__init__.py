@@ -1833,11 +1833,12 @@ class EmbedRule:
 
     @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
     @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+    @throws IllegalArgumentException if [pathPattern] is not a valid JsonPointerGlob
 
     Example:
     ```kotlin
     EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
-    EmbedRule("/config/description")        // Match exact path, no tag
+    EmbedRule("/config/description")       // Match exact path, no tag
     ```
     """
 

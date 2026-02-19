@@ -1,11 +1,27 @@
 package org.kson
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.Status
 import java.io.File
 import java.nio.file.Path
 
 class NoRepoException(msg: String) : RuntimeException(msg)
 class DirtyRepoException(msg: String) : RuntimeException(msg)
+
+/**
+ * Formats a human-readable report of the dirty entries in a JGit [Status].
+ *
+ * @param untracked optionally provide a (possibly filtered) set of untracked file paths to include
+ */
+internal fun formatGitStatusReport(status: Status, untracked: Set<String> = emptySet()): String = buildString {
+    if (status.added.isNotEmpty()) appendLine("  Added: ${status.added}")
+    if (status.changed.isNotEmpty()) appendLine("  Modified (staged): ${status.changed}")
+    if (status.removed.isNotEmpty()) appendLine("  Removed: ${status.removed}")
+    if (status.modified.isNotEmpty()) appendLine("  Modified (unstaged): ${status.modified}")
+    if (status.missing.isNotEmpty()) appendLine("  Missing: ${status.missing}")
+    if (untracked.isNotEmpty()) appendLine("  Untracked: $untracked")
+    if (status.conflicting.isNotEmpty()) appendLine("  Conflicting: ${status.conflicting}")
+}
 
 /**
  * Ensures there is a clean git checkout of [repoUri] in [cloneParentDir] at SHA [checkoutSHA]
@@ -52,15 +68,7 @@ open class CleanGitCheckout(private val repoUri: String,
             status.uncommittedChanges.isNotEmpty() || status.untracked.minus(acceptableUntrackedFiles).isNotEmpty()
 
         if(isDirty) {
-            val statusReport = buildString {
-                if (status.added.isNotEmpty()) appendLine("Added files: ${status.added}")
-                if (status.changed.isNotEmpty()) appendLine("Modified files: ${status.changed}")
-                if (status.removed.isNotEmpty()) appendLine("Removed files: ${status.removed}")
-                if (status.untracked.isNotEmpty()) appendLine("Untracked files: ${status.untracked.minus(acceptableUntrackedFiles)}")
-                if (status.modified.isNotEmpty()) appendLine("Modified files (not staged): ${status.modified}")
-                if (status.missing.isNotEmpty()) appendLine("Missing files: ${status.missing}")
-                if (status.conflicting.isNotEmpty()) appendLine("Conflicting files: ${status.conflicting}")
-            }
+            val statusReport = formatGitStatusReport(status, status.untracked.minus(acceptableUntrackedFiles))
 
             val customDirtyMessage = if (dirtyMessage != null) { dirtyMessage + "\n" } else { "" }
 
