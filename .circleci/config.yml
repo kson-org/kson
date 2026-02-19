@@ -227,11 +227,6 @@ jobs:
 
       - "restore-gradle-caches":
           platform: "linux-amd64"
-      # Linux-specific installations
-      - run:
-          name: "Install system dependencies"
-          command: "sudo apt update\nsudo apt install libncurses-dev\n"
-
       - "clean-git-config":
           shell: bash
       # Cross-platform Gradle tasks
