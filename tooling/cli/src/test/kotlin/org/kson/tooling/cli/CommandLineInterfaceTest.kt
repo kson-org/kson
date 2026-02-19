@@ -550,6 +550,50 @@ class CommandLineInterfaceTest {
     }
 
     @Test
+    fun testValidateCommandPassesFilePath() {
+        val inputFile = File.createTempFile("test-input", ".kson")
+        inputFile.deleteOnExit()
+        inputFile.writeText("""key: "value"""")
+        val outputFile = File.createTempFile("output", ".txt")
+        outputFile.deleteOnExit()
+
+        try {
+            val result = ValidateCommand().test(
+                listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath)
+            )
+
+            assertEquals(0, result.statusCode)
+            assert(outputFile.readText().contains("No errors")) {
+                "Validate with file input should succeed, but got: ${outputFile.readText()}"
+            }
+        } finally {
+            inputFile.delete()
+            outputFile.delete()
+        }
+    }
+
+    @Test
+    fun testValidateCommandWorksFromStdin() {
+        val input = """key: "value"""".byteInputStream()
+        val originalIn = System.`in`
+        System.setIn(input)
+        val outputFile = File.createTempFile("output", ".txt")
+        outputFile.deleteOnExit()
+
+        try {
+            val result = ValidateCommand().test(listOf("-o", outputFile.absolutePath))
+
+            assertEquals(0, result.statusCode)
+            assert(outputFile.readText().contains("No errors")) {
+                "Validate from stdin should succeed, but got: ${outputFile.readText()}"
+            }
+        } finally {
+            System.setIn(originalIn)
+            outputFile.delete()
+        }
+    }
+
+    @Test
     fun testVersionFlag() {
         val flags = listOf("--version", "-V")
 
