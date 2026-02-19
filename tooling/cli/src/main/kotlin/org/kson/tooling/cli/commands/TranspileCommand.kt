@@ -38,7 +38,7 @@ abstract class TranspileCommand(
         |${"\u0085"}  $CLI_NAME $cmdName -i input.$FILE_EXTENSION -s schema.$FILE_EXTENSION -o output.${targetFormat.lowercase()}
     """.trimMargin()
 
-    val retainEmbedTags by option("--retain-tags", help = "Retain the embed tags of embed blocks")
+    private val retainEmbedTags by option("--retain-tags", help = "Retain the embed tags of embed blocks")
             .flag()
 
     override fun run() {
@@ -69,7 +69,7 @@ abstract class TranspileCommand(
                 result.errors.forEach { error ->
                     echo("  ${errorFormat(error)}", err = true)
                 }
-                throw ProgramResult(0)
+                throw ProgramResult(1)
             }
         }
     }

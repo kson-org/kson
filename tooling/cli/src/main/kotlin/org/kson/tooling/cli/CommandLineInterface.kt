@@ -20,7 +20,7 @@ class KsonCli : CliktCommand(name = CLI_NAME) {
         |$CLI_DISPLAY_NAME CLI - A tool for working with $CLI_DISPLAY_NAME files.
         |
         |$CLI_DISPLAY_NAME is a human-friendly data serialization format that supports JSON and YAML conversion.
-        |Use the subcommands to transpile, analyze, or validate $CLI_DISPLAY_NAME documents.
+        |Use the subcommands to transpile, format, or validate $CLI_DISPLAY_NAME documents.
         |
         |Examples:
         |${"\u0085"}Convert $CLI_DISPLAY_NAME to JSON:
@@ -32,13 +32,13 @@ class KsonCli : CliktCommand(name = CLI_NAME) {
         |${"\u0085"}Format $CLI_DISPLAY_NAME with custom formatting options:
         |${"\u0085"}  $CLI_NAME format -i input.$FILE_EXTENSION --indent-spaces 4 -o formatted.$FILE_EXTENSION
         |${"\u0085"}
-        |${"\u0085"}Analyze $CLI_DISPLAY_NAME for errors:
-        |${"\u0085"}  $CLI_NAME analyze -i file.$FILE_EXTENSION
+        |${"\u0085"}Validate $CLI_DISPLAY_NAME for errors:
+        |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION
         |${"\u0085"}
         |${"\u0085"}Validate against a schema:
         |${"\u0085"}  $CLI_NAME json -i input.$FILE_EXTENSION -s schema.$FILE_EXTENSION -o output.json
         |${"\u0085"}
-        |${"\u0085"}Read from stdin (use - or omit filename):
+        |${"\u0085"}Read from stdin (omit -i flag):
         |${"\u0085"}  cat data.$FILE_EXTENSION | $CLI_NAME json
         |
         |For more help on a specific command, use: $CLI_NAME <command> --help

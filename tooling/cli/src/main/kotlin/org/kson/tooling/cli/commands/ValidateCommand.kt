@@ -20,13 +20,13 @@ class ValidateCommand : BaseKsonCommand() {
         |${"\u0085"}Validate a $CLI_DISPLAY_NAME file:
         |${"\u0085"}  $CLI_NAME validate -i document.$FILE_EXTENSION
         |${"\u0085"}
-        |${"\u0085"}Analyze from stdin:
+        |${"\u0085"}Validate from stdin:
         |${"\u0085"}  cat file.$FILE_EXTENSION | $CLI_NAME validate
         |${"\u0085"}
         |${"\u0085"}Show lexical tokens for debugging:
         |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION --show-tokens
         |${"\u0085"}
-        |${"\u0085"}Validate against schema before analyzing:
+        |${"\u0085"}Validate against a schema:
         |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION -s schema.$FILE_EXTENSION
         |
         |Exit codes:
@@ -57,7 +57,7 @@ class ValidateCommand : BaseKsonCommand() {
         validateWithSchema(ksonContent)
 
         // Perform analysis
-        val analysis = Kson.analyze(ksonContent)
+        val analysis = Kson.analyze(ksonContent, getFilePath())
         var outputString = ""
         if (analysis.errors.isEmpty()) {
             outputString += "✓ No errors or warnings found"
@@ -74,7 +74,7 @@ class ValidateCommand : BaseKsonCommand() {
 
         if (analysis.errors.isEmpty()) {
             writeOutput(outputString)
-        }else{
+        } else {
             echo(outputString.trimEnd(), err = true)
             throw ProgramResult(1)
         }
