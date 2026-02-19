@@ -42,6 +42,13 @@ function resolveDocument(
 export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
     private schemaProvider: SchemaProvider;
 
+    /**
+     * Typed reference to the parent's internal document map.
+     * Stored once during construction so we fail fast if the internal
+     * property name ever changes in a library upgrade.
+     */
+    private readonly syncedDocuments: Map<string, KsonDocument>;
+
     constructor(schemaProvider?: SchemaProvider) {
         // Use provided schema provider or default to no-op
         const provider = schemaProvider ?? new NoOpSchemaProvider();
@@ -74,6 +81,17 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
 
         // Assign the schema provider after super() is called
         this.schemaProvider = provider;
+
+        // Grab typed reference to parent's internal document map.
+        // Fails fast during construction if the property is renamed.
+        const internal = (this as any)._syncedDocuments as Map<string, KsonDocument> | undefined;
+        if (!internal || typeof internal.set !== 'function') {
+            throw new Error(
+                'TextDocuments internal API changed: _syncedDocuments not found. ' +
+                'Update KsonDocumentsManager to match the new vscode-languageserver version.'
+            );
+        }
+        this.syncedDocuments = internal;
     }
 
     /**
@@ -108,8 +126,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
             const updatedDoc = resolveDocument(this.schemaProvider, textDocument, parseResult);
 
             // Replace in the internal document cache
-            // Access the protected _syncedDocuments property from parent class
-            (this as any)._syncedDocuments.set(doc.uri, updatedDoc);
+            this.syncedDocuments.set(doc.uri, updatedDoc);
         }
     }
 }
