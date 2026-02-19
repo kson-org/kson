@@ -53,7 +53,7 @@ object KsonCore {
         }
         if (tokens[initialTokenIndex].tokenType == TokenType.EOF) {
             messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
-            return AstParseResult(null, tokens, messageSink)
+            return AstParseResult(KsonRootError(tokens), tokens, messageSink)
         }
 
         val builder = KsonBuilder(tokens, coreCompileConfig.ignoreErrors)
@@ -70,7 +70,7 @@ object KsonCore {
 
         } catch (ex: FatalParseException) {
             println("Fatal parsing error: ${ex.message}")
-            return AstParseResult(null, tokens, messageSink)
+            return AstParseResult(KsonRootError(tokens), tokens, messageSink)
         }
 
         // If we are not interested in errors we don't have to run extra validations.
@@ -181,7 +181,7 @@ interface ParseResult {
  * from some Kson source
  */
 data class AstParseResult(
-    override val ast: KsonRoot?,
+    override val ast: KsonRoot,
     override val lexedTokens: List<Token>,
     private val messageSink: MessageSink
 ) : ParseResult {
@@ -192,15 +192,27 @@ data class AstParseResult(
      * (consult [messageSink] for information on any errors)
      */
     val ksonValue: KsonValue? by lazy {
-        if (ast == null || hasErrors()) {
+        if (hasErrors()) {
             null
         } else {
             ast.toKsonValue()
         }
     }
 
+    /**
+     * Utility method that internally calls [AstNode.toSource] on this AST, or returns null if
+     * there wre errors trying to parse (consult [messageSink] for information on any errors)
+     */
+    fun toSourceOrNull(indent: AstNode.Indent, compileTarget: CompileTarget): String? {
+        return if (hasErrors()) {
+            null
+        } else {
+            ast.toSource(indent, compileTarget)
+        }
+    }
+
     override fun hasErrors(): Boolean {
-        return messageSink.hasErrors()
+        return ast is AstNodeError || messageSink.hasErrors()
     }
 }
 
@@ -218,10 +230,10 @@ class KsonParseResult(
      * The Kson compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val kson: String? = astParseResult.ast?.toSource(
-        AstNode.Indent(compileConfig.formatConfig.indentType),
-        compileConfig
-    )
+    val kson: String? = astParseResult.toSourceOrNull(
+            AstNode.Indent(compileConfig.formatConfig.indentType),
+            compileConfig
+        )
 }
 
 class YamlParseResult(
@@ -232,7 +244,7 @@ class YamlParseResult(
      * The Yaml compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val yaml: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
+    val yaml: String? = astParseResult.toSourceOrNull(AstNode.Indent(), compileConfig)
 }
 
 class JsonParseResult(
@@ -243,7 +255,7 @@ class JsonParseResult(
      * The Json compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val json: String? = astParseResult.ast?.toSource(AstNode.Indent(), compileConfig)
+    val json: String? = astParseResult.toSourceOrNull(AstNode.Indent(), compileConfig)
 }
 
 

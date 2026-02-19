@@ -1,9 +1,11 @@
 package org.kson
 
+import org.kson.KsonCoreTest.CompileSettings
 import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonBooleanSchema
 import kotlin.test.Test
+import kotlin.test.assertNull
 
 /**
  * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTestError] tests
@@ -89,5 +91,22 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
               }
             ]
         """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 7)
+    }
+
+    @Test
+    fun testParseTrailingContentRegression() {
+        val source = """
+            "outer_key": 42
+              }
+            """.trimIndent()
+
+        val ksonResult = KsonCore.parseToKson(source, CompileSettings().ksonSettings)
+        assertNull(ksonResult.kson)
+
+        val jsonResult = KsonCore.parseToJson(source, CompileSettings().jsonSettings)
+        assertNull(jsonResult.json)
+
+        val yamlResult = KsonCore.parseToYaml(source, CompileSettings().yamlSettings)
+        assertNull(yamlResult.yaml)
     }
 }
