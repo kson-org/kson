@@ -14,6 +14,20 @@ import {RelatedFullDocumentDiagnosticReport} from "vscode-languageserver-protoco
 describe('KSON Diagnostics', () => {
     const diagnosticService = new DiagnosticService();
 
+    function createDoc(content: string, schemaContent?: string): KsonDocument {
+        const uri = 'test://test.kson';
+        const textDoc = TextDocument.create(uri, 'kson', 0, content);
+        const schemaDoc = schemaContent
+            ? TextDocument.create('test://schema.kson', 'kson', 0, schemaContent)
+            : undefined;
+        return new KsonDocument(textDoc, Kson.getInstance().analyze(content), schemaDoc);
+    }
+
+    function getDiagnostics(content: string, schemaContent?: string): Diagnostic[] {
+        const report = diagnosticService.createDocumentDiagnosticReport(createDoc(content, schemaContent));
+        return (report as RelatedFullDocumentDiagnosticReport).items;
+    }
+
     function assertDiagnostic(unformatted: string, expected: Diagnostic[]): void {
         const uri = 'test://test.kson';
         const document = TextDocument.create(uri, 'kson', 0, unformatted);
@@ -25,7 +39,7 @@ describe('KSON Diagnostics', () => {
         const diagnosticReport = diagnosticService.createDocumentDiagnosticReport(ksonDocument);
 
         // We simplify diagnosticReport to a list of Diagnostic without message.
-        const getDiagnostics = (report: RelatedFullDocumentDiagnosticReport): Diagnostic[] => (
+        const getItems = (report: RelatedFullDocumentDiagnosticReport): Diagnostic[] => (
             report.items.map(diagnostic =>
                 Diagnostic.create(
                     diagnostic.range
@@ -37,7 +51,7 @@ describe('KSON Diagnostics', () => {
             )
         );
 
-        const simplifiedDiagnostics = getDiagnostics(diagnosticReport as RelatedFullDocumentDiagnosticReport);
+        const simplifiedDiagnostics = getItems(diagnosticReport as RelatedFullDocumentDiagnosticReport);
 
         assert.deepStrictEqual(simplifiedDiagnostics, expected, 'Diagnostic mismatch');
     }
@@ -58,5 +72,42 @@ describe('KSON Diagnostics', () => {
             ];
 
         assertDiagnostic(content, expected);
+    });
+
+    // ---- Schema cache correctness ----
+
+    it('should produce identical diagnostics on repeated calls with same schema', () => {
+        const schema = `{
+            type: object
+            properties: {
+                age: { type: number }
+            }
+        }`;
+        const first = getDiagnostics('{ age: "not a number" }', schema);
+        const second = getDiagnostics('{ age: "not a number" }', schema);
+
+        assert.ok(first.length > 0, 'Should have schema validation errors');
+        assert.deepStrictEqual(first, second, 'Repeated calls should produce identical results');
+    });
+
+    it('should produce correct diagnostics when schema changes between calls', () => {
+        const numberSchema = `{
+            type: object
+            properties: {
+                age: { type: number }
+            }
+        }`;
+        const stringSchema = `{
+            type: object
+            properties: {
+                age: { type: string }
+            }
+        }`;
+
+        const withNumberSchema = getDiagnostics('{ age: "hello" }', numberSchema);
+        assert.ok(withNumberSchema.length > 0, 'String value should fail number schema');
+
+        const withStringSchema = getDiagnostics('{ age: "hello" }', stringSchema);
+        assert.strictEqual(withStringSchema.length, 0, 'String value should pass string schema');
     });
 });
