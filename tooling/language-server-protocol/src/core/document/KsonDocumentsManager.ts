@@ -75,7 +75,12 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     version
                 );
                 const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
-                return resolveDocument(provider, textDocument, parseResult);
+                // Reuse the existing schema/metaschema — it only changes when schema
+                // config changes, which triggers refreshDocumentSchemas() separately.
+                if (ksonDocument instanceof KsonSchemaDocument) {
+                    return new KsonSchemaDocument(textDocument, parseResult, ksonDocument.getMetaSchemaDocument());
+                }
+                return new KsonDocument(textDocument, parseResult, ksonDocument.getSchemaDocument());
             }
         });
 
