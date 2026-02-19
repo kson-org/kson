@@ -12,6 +12,7 @@ pluginManagement {
 }
 
 rootProject.name = "kson"
+include("native-tests")
 include("kson-lib")
 include("kson-tooling-lib")
 include("lib-python")
