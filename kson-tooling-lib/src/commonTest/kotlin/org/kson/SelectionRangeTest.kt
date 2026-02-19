@@ -1,0 +1,151 @@
+package org.kson
+
+import kotlin.test.*
+
+class SelectionRangeTest {
+
+    @Test
+    fun testEmptyDocumentReturnsEmpty() {
+        val ranges = KsonTooling.getEnclosingRanges("", 0, 0)
+        assertEquals(0, ranges.size)
+    }
+
+    @Test
+    fun testSimpleStringValue() {
+        val ranges = KsonTooling.getEnclosingRanges("\"hello\"", 0, 2)
+        assertEquals(1, ranges.size)
+        assertEquals(Range(0, 1, 0, 6), ranges[0])
+    }
+
+    @Test
+    fun testObjectPropertyValue() {
+        val content = """
+            {
+              name: "Alice"
+              age: 30
+            }
+        """.trimIndent()
+
+        // Cursor on "Alice" string value (line 1, inside the string)
+        val ranges = KsonTooling.getEnclosingRanges(content, 1, 10)
+
+        assertEquals(3, ranges.size)
+        assertEquals(Range(1, 9, 1, 14), ranges[0])  // string "Alice"
+        assertEquals(Range(1, 2, 1, 14), ranges[1])   // property name: "Alice"
+        assertEquals(Range(0, 0, 3, 1), ranges[2])    // object
+    }
+
+    @Test
+    fun testCursorOnPropertyKey() {
+        val content = """
+            {
+              name: "Alice"
+            }
+        """.trimIndent()
+
+        // Cursor on "name" key (line 1, character 3)
+        val ranges = KsonTooling.getEnclosingRanges(content, 1, 3)
+
+        assertEquals(3, ranges.size)
+        assertEquals(Range(1, 2, 1, 6), ranges[0])   // key "name"
+        assertEquals(Range(1, 2, 1, 14), ranges[1])   // property name: "Alice"
+        assertEquals(Range(0, 0, 2, 1), ranges[2])    // object
+    }
+
+    @Test
+    fun testNestedObjects() {
+        val content = """
+            {
+              person: {
+                name: "Alice"
+              }
+            }
+        """.trimIndent()
+
+        // Cursor on "Alice" (line 2, character 12)
+        val ranges = KsonTooling.getEnclosingRanges(content, 2, 12)
+
+        assertEquals(5, ranges.size)
+        assertEquals(Range(2, 11, 2, 16), ranges[0])  // string "Alice"
+        assertEquals(Range(2, 4, 2, 16), ranges[1])    // property name: "Alice"
+        assertEquals(Range(1, 10, 3, 3), ranges[2])    // inner object
+        assertEquals(Range(1, 2, 3, 3), ranges[3])     // property person: {...}
+        assertEquals(Range(0, 0, 4, 1), ranges[4])     // outer object
+    }
+
+    @Test
+    fun testArrayElements() {
+        val content = """
+            [
+              "one"
+              "two"
+              "three"
+            ]
+        """.trimIndent()
+
+        // Cursor on "two" (line 2, character 3)
+        val ranges = KsonTooling.getEnclosingRanges(content, 2, 3)
+
+        assertEquals(2, ranges.size)
+        assertEquals(Range(2, 3, 2, 6), ranges[0])   // string "two"
+        assertEquals(Range(0, 0, 4, 1), ranges[1])    // array
+    }
+
+    @Test
+    fun testCursorOnContainerDelimiter() {
+        val content = """
+            {
+              name: "Alice"
+            }
+        """.trimIndent()
+
+        // Cursor on opening brace (line 0, character 0)
+        val ranges = KsonTooling.getEnclosingRanges(content, 0, 0)
+
+        assertEquals(1, ranges.size)
+        assertEquals(Range(0, 0, 2, 1), ranges[0])
+    }
+
+    @Test
+    fun testStrictlyExpandingChain() {
+        val content = """
+            {
+              items: [
+                "hello"
+              ]
+            }
+        """.trimIndent()
+
+        // Cursor on "hello" (line 2, character 6)
+        val ranges = KsonTooling.getEnclosingRanges(content, 2, 6)
+
+        // Verify each range is contained within the next
+        for (i in 0 until ranges.size - 1) {
+            val inner = ranges[i]
+            val outer = ranges[i + 1]
+
+            val innerStartsBefore = inner.startLine < outer.startLine ||
+                (inner.startLine == outer.startLine && inner.startColumn < outer.startColumn)
+            val innerEndsAfter = inner.endLine > outer.endLine ||
+                (inner.endLine == outer.endLine && inner.endColumn > outer.endColumn)
+
+            assertFalse(innerStartsBefore,
+                "Level $i starts before level ${i + 1}: (${inner.startLine}:${inner.startColumn}) vs (${outer.startLine}:${outer.startColumn})")
+            assertFalse(innerEndsAfter,
+                "Level $i ends after level ${i + 1}: (${inner.endLine}:${inner.endColumn}) vs (${outer.endLine}:${outer.endColumn})")
+        }
+    }
+
+    @Test
+    fun testDeduplication() {
+        // A bare string "hello" is the root value — the string and root share the same range,
+        // so deduplication should collapse them into a single entry
+        val ranges = KsonTooling.getEnclosingRanges("\"hello\"", 0, 2)
+        assertEquals(1, ranges.size)
+
+        // Verify no adjacent ranges are identical
+        for (i in 0 until ranges.size - 1) {
+            assertNotEquals(ranges[i], ranges[i + 1], "Adjacent ranges at index $i and ${i + 1} should not be identical")
+        }
+    }
+}

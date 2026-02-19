@@ -9,6 +9,7 @@ import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.value.KsonValue
 import org.kson.value.navigation.KsonValueNavigation
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -196,6 +197,21 @@ object KsonTooling {
     }
 
     /**
+     * Get enclosing ranges for a cursor position in a KSON document.
+     *
+     * Returns a list of ranges from innermost to outermost that contain
+     * the cursor position. Used for smart expand/shrink selection.
+     *
+     * @param content The KSON source text
+     * @param line Zero-based line number
+     * @param column Zero-based column number
+     * @return List of ranges from innermost to outermost, deduplicated
+     */
+    fun getEnclosingRanges(content: String, line: Int, column: Int): List<Range> {
+        return SelectionRangeBuilder.build(content, line, column)
+    }
+
+    /**
      * Internal helper data class to hold the result of schema resolution and filtering.
      */
     private data class ResolvedSchemaContext(
@@ -264,7 +280,12 @@ enum class CompletionKind {
  * @param endLine line where range ends
  * @param endColumn column where range ends
  */
-class Range(val startLine: Int, val startColumn: Int, val  endLine: Int, val endColumn: Int)
+data class Range(val startLine: Int, val startColumn: Int, val endLine: Int, val endColumn: Int)
+
+internal fun KsonValue.toRange(): Range = Range(
+    location.start.line, location.start.column,
+    location.end.line, location.end.column
+)
 
 /**
  * Represents a document symbol for the IDE outline view.
@@ -320,7 +341,7 @@ enum class SemanticTokenKind {
 /**
  * A structural range representing a foldable region in a KSON document.
  */
-class StructuralRange(val startLine: Int, val endLine: Int, val kind: StructuralRangeKind)
+data class StructuralRange(val startLine: Int, val endLine: Int, val kind: StructuralRangeKind)
 
 /**
  * Kind of structural range.

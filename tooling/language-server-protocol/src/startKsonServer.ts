@@ -156,6 +156,9 @@ export function startKsonServer(
             // Folding ranges
             foldingRangeProvider: true,
 
+            // Selection ranges (smart expand/shrink)
+            selectionRangeProvider: true,
+
             // Document highlight
             documentHighlightProvider: true,
 

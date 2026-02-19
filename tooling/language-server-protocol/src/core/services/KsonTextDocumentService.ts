@@ -21,6 +21,8 @@ import {
     DefinitionLink,
     FoldingRange,
     FoldingRangeParams,
+    SelectionRange,
+    SelectionRangeParams,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
@@ -33,6 +35,7 @@ import {HoverService} from '../features/HoverService.js';
 import {CompletionService} from '../features/CompletionService.js';
 import {DefinitionService} from '../features/DefinitionService.js';
 import {FoldingRangeService} from '../features/FoldingRangeService.js';
+import {SelectionRangeService} from '../features/SelectionRangeService.js';
 import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
 import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
@@ -54,6 +57,7 @@ export class KsonTextDocumentService {
     private completionService: CompletionService;
     private definitionService: DefinitionService;
     private foldingRangeService: FoldingRangeService;
+    private selectionRangeService: SelectionRangeService;
     private commandExecutor!: CommandExecutorBase;
     private configuration: Required<KsonSettings>;
 
@@ -72,6 +76,7 @@ export class KsonTextDocumentService {
         this.completionService = new CompletionService();
         this.definitionService = new DefinitionService();
         this.foldingRangeService = new FoldingRangeService();
+        this.selectionRangeService = new SelectionRangeService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -127,6 +132,7 @@ export class KsonTextDocumentService {
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onDefinition(this.onDefinition.bind(this));
         this.connection.onFoldingRanges(this.onFoldingRanges.bind(this));
+        this.connection.onSelectionRanges(this.onSelectionRanges.bind(this));
     }
 
 
@@ -281,6 +287,19 @@ export class KsonTextDocumentService {
             return this.foldingRangeService.getFoldingRanges(document.getText());
         } catch (error) {
             this.connection.console.error(`Error providing folding ranges: ${error}`);
+            return [];
+        }
+    }
+
+    private async onSelectionRanges(params: SelectionRangeParams): Promise<SelectionRange[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            return this.selectionRangeService.getSelectionRanges(document, params.positions);
+        } catch (error) {
+            this.connection.console.error(`Error providing selection ranges: ${error}`);
             return [];
         }
     }

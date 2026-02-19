@@ -212,6 +212,20 @@ describe('KsonTextDocumentService', () => {
         });
     });
 
+    describe('Selection Ranges', () => {
+        it('should return empty array when document is not found', async () => {
+            const result = await connection.requestSelectionRanges('file:///nonexistent.kson', [pos(0, 0)]);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return selection ranges for a document', async () => {
+            openDocument('{ name: "test" }');
+            const result = await connection.requestSelectionRanges(TEST_URI, [pos(0, 3)]) as any[];
+            assert.strictEqual(result.length, 1, "Should have one selection range per position");
+            assert.ok(result[0].range, "Selection range should have a range");
+        });
+    });
+
     describe('Error Handling', () => {
         // Monkey-patch a service to throw, verify the handler catches and returns a safe default.
         function breakService(serviceName: string) {
@@ -291,6 +305,13 @@ describe('KsonTextDocumentService', () => {
             openDocument('{\n  name: "test"\n}');
             breakService('foldingRangeService');
             const result = await connection.requestFoldingRanges(TEST_URI);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return [] when selectionRangeService throws', async () => {
+            openDocument('{ name: "test" }');
+            breakService('selectionRangeService');
+            const result = await connection.requestSelectionRanges(TEST_URI, [pos(0, 3)]);
             assert.deepStrictEqual(result, []);
         });
 

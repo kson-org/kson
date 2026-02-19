@@ -12,7 +12,7 @@ internal object DocumentSymbolBuilder {
     }
 
     private fun createSymbol(name: String, value: KsonValue): DocumentSymbol {
-        val range = toRange(value)
+        val range = value.toRange()
         return when (value) {
             is KsonObject -> createObjectSymbol(value, name, range)
             is KsonList -> createArraySymbol(value, name, range)
@@ -39,7 +39,7 @@ internal object DocumentSymbolBuilder {
     }
 
     private fun createPropertySymbol(keyString: KsonString, value: KsonValue): DocumentSymbol {
-        val keyRange = toRange(keyString)
+        val keyRange = keyString.toRange()
         return DocumentSymbol(
             name = keyString.value,
             kind = DocumentSymbolKind.KEY,
@@ -87,12 +87,4 @@ internal object DocumentSymbolBuilder {
         )
     }
 
-    private fun toRange(value: KsonValue): Range {
-        return Range(
-            value.location.start.line,
-            value.location.start.column,
-            value.location.end.line,
-            value.location.end.column
-        )
-    }
 }
