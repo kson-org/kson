@@ -42,15 +42,24 @@ graalvmNative {
     }
 }
 
+// We use a `Sync` task instead of directly adding a `srcDir` to `sourceSets`
+// because it allows fine-grained file exclusion and integrates better with
+// IDEs (using `srcDir` here made IntelliJ IDEA report bogus errors)
+val syncCommonTestSources by tasks.registering(Sync::class) {
+    dependsOn(":generateJsonTestSuite")
+    from(project(":").file("src/commonTest/kotlin")) {
+        // Exclude the `YamlValidator.kt` from the root project, because it
+        // uses `expect` syntax and therefore cannot be compiled by this
+        // Kotlin/JVM build. We use a no-op implementation instead.
+        exclude("**/testSupport/YamlValidator.kt")
+    }
+    into(layout.buildDirectory.dir("commonTestSources"))
+}
+
 sourceSets {
     test {
         kotlin {
-            srcDir(project(":").file("src/commonTest/kotlin"))
-
-            // Exclude expect/actual YamlValidator, because that syntax is only supported in
-            // multiplatform Kotlin (and this is a Kotlin/JVM project). We use a no-op
-            // implementation instead.
-            exclude("**/testSupport/YamlValidator.kt")
+            srcDir(syncCommonTestSources)
         }
     }
 }
