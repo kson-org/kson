@@ -101,6 +101,21 @@
           ],
           "default": "plain",
           "description": "Formatting style for Kson documents"
+        },
+        "kson.codeLens.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show formatting style buttons at the top of KSON documents"
+        },
+        "kson.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace communication with the KSON language server"
         }
       }
     }

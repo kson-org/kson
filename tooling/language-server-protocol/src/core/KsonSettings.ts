@@ -7,6 +7,7 @@ import {FormatOptions, FormattingStyle, IndentType} from "kson";
 export interface KsonSettings {
     kson: {
         formatOptions: FormatOptions;
+        codeLensEnabled: boolean;
     };
 }
 
@@ -51,9 +52,13 @@ export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettin
         formatStyle = FormattingStyle.PLAIN;
     }
 
+    // CodeLens enabled by default
+    const codeLensEnabled = settings?.kson?.codeLens?.enable !== false;
+
     return {
         kson: {
-            formatOptions: new FormatOptions(indentType, formatStyle)
+            formatOptions: new FormatOptions(indentType, formatStyle),
+            codeLensEnabled
         }
     };
 }

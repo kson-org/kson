@@ -23,6 +23,7 @@ import {KsonDocumentsManager} from "../../../core/document/KsonDocumentsManager.
 import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentService.js";
 import {FullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
+import {ksonSettingsWithDefaults} from "../../../core/KsonSettings.js";
 
 describe('KsonTextDocumentService', () => {
     let connection: ConnectionStub;
@@ -196,6 +197,20 @@ describe('KsonTextDocumentService', () => {
         it('should return empty array when document is not found', async () => {
             const params: CodeLensParams = {
                 textDocument: {uri: 'file:///nonexistent.kson'}
+            };
+            const result = await connection.codeLensHandler(params, {} as any, {} as any, undefined);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return empty array when codeLens is disabled', async () => {
+            openDocument('key: value');
+
+            // Disable codeLens via configuration
+            const config = ksonSettingsWithDefaults({kson: {codeLens: {enable: false}}});
+            service.updateConfiguration(config);
+
+            const params: CodeLensParams = {
+                textDocument: {uri: TEST_URI}
             };
             const result = await connection.codeLensHandler(params, {} as any, {} as any, undefined);
             assert.deepStrictEqual(result, []);

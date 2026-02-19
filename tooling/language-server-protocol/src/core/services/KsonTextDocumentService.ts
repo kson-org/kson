@@ -171,6 +171,9 @@ export class KsonTextDocumentService {
 
     private async onCodeLens(params: CodeLensParams): Promise<CodeLens[]> {
         try {
+            if (!this.configuration.kson.codeLensEnabled) {
+                return [];
+            }
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return [];
