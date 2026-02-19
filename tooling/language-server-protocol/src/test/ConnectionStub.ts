@@ -21,7 +21,9 @@ import {
     Hover,
     HoverParams,
     CompletionParams,
-    CompletionList, DefinitionParams
+    CompletionList, DefinitionParams,
+    FoldingRange,
+    FoldingRangeParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
@@ -58,6 +60,7 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     public hoverHandler: ServerRequestHandler<HoverParams, Hover | null | undefined, never, void>;
     public completionHandler: ServerRequestHandler<CompletionParams, CompletionList | null | undefined, never, void>;
     public onDefinitionHandler: ServerRequestHandler<DefinitionParams, Definition | DefinitionLink[] | undefined | null, Location[] | DefinitionLink[], void>;
+    public foldingRangeHandler: ServerRequestHandler<FoldingRangeParams, FoldingRange[] | null | undefined, FoldingRange[], void>;
 
     languages: Languages;
 
@@ -162,7 +165,13 @@ export class ConnectionStub extends BoilerplateConnectionStub {
         this.onDefinitionHandler = handler;
         return NOOP_DISPOSABLE;
     }
-    
+
+
+    override onFoldingRanges(handler: ServerRequestHandler<FoldingRangeParams, FoldingRange[] | null | undefined, FoldingRange[], void>): Disposable {
+        this.foldingRangeHandler = handler;
+        return NOOP_DISPOSABLE;
+    }
+
     async requestFormatting(uri: string, tabSize = 2, insertSpaces = true) {
         return this.formattingHandler(
             {textDocument: {uri}, options: {tabSize, insertSpaces}},
@@ -221,6 +230,13 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     async requestDocumentSymbol(uri: string) {
         return this.documentSymbolHandler(
+            {textDocument: {uri}},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestFoldingRanges(uri: string) {
+        return this.foldingRangeHandler(
             {textDocument: {uri}},
             {} as any, {} as any, undefined
         );

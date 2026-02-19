@@ -183,6 +183,19 @@ object KsonTooling {
     }
 
     /**
+     * Get structural ranges (foldable regions) from KSON source.
+     *
+     * Identifies multi-line objects, arrays, and embed blocks that can
+     * be collapsed in an editor. Single-line constructs are excluded.
+     *
+     * @param content The KSON source text
+     * @return List of structural ranges, each spanning at least two lines
+     */
+    fun getStructuralRanges(content: String): List<StructuralRange> {
+        return FoldingRangeBuilder.build(content)
+    }
+
+    /**
      * Internal helper data class to hold the result of schema resolution and filtering.
      */
     private data class ResolvedSchemaContext(
@@ -302,4 +315,31 @@ enum class SemanticTokenKind {
     EMBED_TAG,
     EMBED_CONTENT,
     EMBED_DELIM
+}
+
+/**
+ * A structural range representing a foldable region in a KSON document.
+ */
+class StructuralRange(val startLine: Int, val endLine: Int, val kind: StructuralRangeKind)
+
+/**
+ * Kind of structural range.
+ */
+enum class StructuralRangeKind {
+    OBJECT,
+    ARRAY,
+    EMBED
+}
+
+/**
+ * A diagnostic message from document validation.
+ */
+data class DiagnosticMessage(val message: String, val severity: DiagnosticSeverity, val range: Range)
+
+/**
+ * Severity of a diagnostic message.
+ */
+enum class DiagnosticSeverity {
+    ERROR,
+    WARNING
 }

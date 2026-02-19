@@ -153,6 +153,9 @@ export function startKsonServer(
                 commands: getAllCommandIds()
             },
 
+            // Folding ranges
+            foldingRangeProvider: true,
+
             // Document highlight
             documentHighlightProvider: true,
 
