@@ -70,6 +70,12 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "kson",
+        "path": "./dist/extension/snippets/kson.code-snippets"
+      }
+    ],
     "configuration": {
       "title": "Kson",
       "properties": {
