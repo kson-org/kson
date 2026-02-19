@@ -18,6 +18,9 @@
   },
   "main": "./dist/client.js",
   "browser": "./dist/browserClient.js",
+  "activationEvents": [
+    "workspaceContains:**/.kson-schema.kson"
+  ],
   "contributes": {
     "commands": [
       {
