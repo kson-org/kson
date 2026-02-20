@@ -216,7 +216,7 @@ class EmbedRule private constructor(
             return try {
                 EmbedRuleResult.Success(EmbedRule(pathPattern, tag))
             } catch (e: IllegalArgumentException) {
-                EmbedRuleResult.Failure(e.toString())
+                EmbedRuleResult.Failure(e.message ?: "")
             }
         }
     }
