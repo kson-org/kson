@@ -39,7 +39,7 @@ import {SelectionRangeService} from '../features/SelectionRangeService.js';
 import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
 import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
-import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
+
 
 /**
  * This is the coordinator for all the service classes.
@@ -212,7 +212,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.documentHighlightService.getDocumentHighlights(document, params.position);
+            return this.documentHighlightService.getDocumentHighlights(document.getText(), params.position);
         } catch (error) {
             this.connection.console.error(`Error providing document highlights: ${error}`);
             return [];
@@ -227,7 +227,6 @@ export class KsonTextDocumentService {
                 return [];
             }
             const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getText())
-            document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
             this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
         } catch (error) {

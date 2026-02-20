@@ -1,7 +1,6 @@
 import {Analysis, KsonValue, KsonValueType} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 
 /**
  * Kson Document Entry.
@@ -13,8 +12,6 @@ export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
     private schemaDocument?: TextDocument;
     private readonly parseAnalysis: Analysis;
-    private indexedDocumentSymbols?: IndexedDocumentSymbols;
-
     constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
         this.schemaDocument = schemaDocument;
         this.textDocument = textDocument;
@@ -73,20 +70,6 @@ export class KsonDocument implements TextDocument {
         };
     }
     
-    /**
-     * Get cached symbols with index, or undefined if not cached
-     */
-    getSymbolsWithIndex(): IndexedDocumentSymbols | undefined {
-        return this.indexedDocumentSymbols;
-    }
-    
-    /**
-     * Set cached symbols with index
-     */
-    setSymbolsWithIndex(symbolsWithIndex: IndexedDocumentSymbols): void {
-        this.indexedDocumentSymbols = symbolsWithIndex;
-    }
-
     /**
      * Get the schema document for this document, if one is configured.
      */

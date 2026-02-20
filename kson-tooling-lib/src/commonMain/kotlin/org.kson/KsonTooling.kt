@@ -227,6 +227,22 @@ object KsonTooling {
     }
 
     /**
+     * Get sibling key ranges for a cursor position in a KSON document.
+     *
+     * If the cursor is on a property key, returns the selection ranges of all
+     * sibling keys within the same parent object. Returns an empty list if the
+     * cursor is not on a key.
+     *
+     * @param content The KSON source text
+     * @param line Zero-based line number
+     * @param column Zero-based column number
+     * @return List of ranges for sibling key symbols
+     */
+    fun getSiblingKeys(content: String, line: Int, column: Int): List<Range> {
+        return SiblingKeyBuilder.build(content, line, column)
+    }
+
+    /**
      * Internal helper data class to hold the result of schema resolution and filtering.
      */
     private data class ResolvedSchemaContext(
