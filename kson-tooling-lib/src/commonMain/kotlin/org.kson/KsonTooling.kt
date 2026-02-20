@@ -212,6 +212,21 @@ object KsonTooling {
     }
 
     /**
+     * Validate a KSON document and return diagnostic messages.
+     *
+     * If [schemaContent] is provided, the document is validated against the schema.
+     * Schema validation includes both parse errors and schema violations.
+     * If no schema is provided (or it fails to parse), only parse errors are returned.
+     *
+     * @param content The KSON source text
+     * @param schemaContent Optional schema document as KSON source text
+     * @return List of diagnostic messages
+     */
+    fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
+        return DiagnosticBuilder.build(content, schemaContent)
+    }
+
+    /**
      * Internal helper data class to hold the result of schema resolution and filtering.
      */
     private data class ResolvedSchemaContext(
