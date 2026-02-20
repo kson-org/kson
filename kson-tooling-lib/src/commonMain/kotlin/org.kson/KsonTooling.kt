@@ -162,6 +162,27 @@ object KsonTooling {
     }
 
     /**
+     * Build document symbols from KSON source.
+     *
+     * @param content The KSON source text
+     * @return List of document symbols, or empty list if parsing fails
+     */
+    fun getDocumentSymbols(content: String): List<DocumentSymbol> {
+        val ksonValue = KsonCore.parseToAst(content).ksonValue ?: return emptyList()
+        return DocumentSymbolBuilder.build(ksonValue)
+    }
+
+    /**
+     * Build semantic tokens from KSON source.
+     *
+     * @param content The KSON source text
+     * @return List of semantic tokens with absolute positions
+     */
+    fun getSemanticTokens(content: String): List<SemanticToken> {
+        return SemanticTokenBuilder.build(content)
+    }
+
+    /**
      * Internal helper data class to hold the result of schema resolution and filtering.
      */
     private data class ResolvedSchemaContext(
@@ -231,3 +252,54 @@ enum class CompletionKind {
  * @param endColumn column where range ends
  */
 class Range(val startLine: Int, val startColumn: Int, val  endLine: Int, val endColumn: Int)
+
+/**
+ * Represents a document symbol for the IDE outline view.
+ */
+data class DocumentSymbol(
+    val name: String,
+    val kind: DocumentSymbolKind,
+    val range: Range,
+    val selectionRange: Range,
+    val detail: String?,
+    val children: List<DocumentSymbol>
+)
+
+/**
+ * Kind of a document symbol. Domain-level classification of KSON values.
+ */
+enum class DocumentSymbolKind {
+    OBJECT,
+    ARRAY,
+    STRING,
+    NUMBER,
+    BOOLEAN,
+    NULL,
+    KEY,
+    EMBED
+}
+
+/**
+ * Represents a semantic token with absolute position.
+ */
+data class SemanticToken(
+    val line: Int,
+    val column: Int,
+    val length: Int,
+    val tokenType: SemanticTokenKind
+)
+
+/**
+ * Kind of a semantic token. Domain-level classification of KSON tokens.
+ */
+enum class SemanticTokenKind {
+    STRING,
+    KEY,
+    NUMBER,
+    KEYWORD,
+    OPERATOR,
+    COMMENT,
+    EMBED_TAG,
+    EMBED_CONTENT,
+    EMBED_DELIM
+}
