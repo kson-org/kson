@@ -38,11 +38,6 @@ export const createClientOptions = (
         documentSelector,
         initializationOptions,
         synchronize: {
-            /**
-             * TODO - Even though this setting is deprecated it is the easiest way to get configuration going.
-             * We should find a way in the future to replace this with the /pull model.
-             */
-            configurationSection: 'kson',
             fileEvents: vscode.workspace.createFileSystemWatcher(fileWatcherPattern)
         },
         outputChannel,

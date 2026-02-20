@@ -62,7 +62,7 @@ export class ConnectionStub extends BoilerplateConnectionStub {
 
     constructor() {
         super();
-        
+
         // Initialize console with mock implementation
         this.console = {
             error: () => {},
@@ -84,6 +84,12 @@ export class ConnectionStub extends BoilerplateConnectionStub {
                 }
             }
         } as Languages;
+        this.workspace = {
+            getConfiguration: () => Promise.resolve({})
+        } as any;
+        this.client = {
+            register: () => Promise.resolve()
+        } as any;
     }
 
     override onDocumentFormatting(handler: ServerRequestHandler<DocumentFormattingParams, TextEdit[] | undefined | null, never, void>): Disposable {
