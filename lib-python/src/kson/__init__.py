@@ -1204,6 +1204,127 @@ class SchemaValidator:
         return cast(Any, (lambda x0: _from_kotlin_list(x0, lambda x1: _from_kotlin_object(Message, x1)))(result))
 
 
+class EmbedRuleResult:
+
+    _jni_ref: Any
+
+    Success: TypeAlias
+    Failure: TypeAlias
+    def __init__(
+        self,
+
+    ):
+
+        self._jni_ref = _construct(
+            b"org/kson/EmbedRuleResult",
+            b"()V",
+            []
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+    @staticmethod
+    def _downcast(jni_ref) -> Any:
+        match _jni_class_name(jni_ref):
+
+            case "org.kson.EmbedRuleResult$Success":
+                return _from_kotlin_object(_EmbedRuleResult_Success, jni_ref)
+
+            case "org.kson.EmbedRuleResult$Failure":
+                return _from_kotlin_object(_EmbedRuleResult_Failure, jni_ref)
+
+class _EmbedRuleResult_Success(EmbedRuleResult):
+
+    _jni_ref: Any
+
+    def __init__(
+        self,
+        embed_rule: EmbedRule,
+    ):
+        if embed_rule is None:
+            raise ValueError("`embed_rule` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/EmbedRuleResult$Success",
+            b"(Lorg/kson/EmbedRule;)V",
+            [
+
+                embed_rule._jni_ref,
+            ]
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def embed_rule(
+        self,
+    ) -> EmbedRule:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/EmbedRuleResult$Success",
+            jni_ref,
+            b"getEmbedRule",
+            b"()Lorg/kson/EmbedRule;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: _from_kotlin_object(EmbedRule, x0))(result))
+EmbedRuleResult.Success = _EmbedRuleResult_Success
+
+
+class _EmbedRuleResult_Failure(EmbedRuleResult):
+
+    _jni_ref: Any
+
+    def __init__(
+        self,
+        message: str,
+    ):
+        if message is None:
+            raise ValueError("`message` cannot be None")
+        self._jni_ref = _construct(
+            b"org/kson/EmbedRuleResult$Failure",
+            b"(Ljava/lang/String;)V",
+            [
+
+                _python_str_to_java_string(message),
+            ]
+        )
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
+
+    def message(
+        self,
+    ) -> str:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/EmbedRuleResult$Failure",
+            jni_ref,
+            b"getMessage",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (_java_string_to_python_str)(result))
+EmbedRuleResult.Failure = _EmbedRuleResult_Failure
+
+
+
 class Analysis:
     """The result of statically analyzing a Kson document"""
 
@@ -1830,36 +1951,10 @@ class EmbedRule:
     as embed blocks instead of regular strings.
 
     **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
-
-    @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
-    @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
-    @throws IllegalArgumentException if [pathPattern] is not a valid JsonPointerGlob
-
-    Example:
-    ```kotlin
-    EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
-    EmbedRule("/config/description")       // Match exact path, no tag
-    ```
     """
 
     _jni_ref: Any
 
-    def __init__(
-        self,
-        path_pattern: str,
-        tag: Optional[str],
-    ):
-        if path_pattern is None:
-            raise ValueError("`path_pattern` cannot be None")
-        self._jni_ref = _construct(
-            b"org/kson/EmbedRule",
-            b"(Ljava/lang/String;Ljava/lang/String;)V",
-            [
-
-                _python_str_to_java_string(path_pattern),
-                _python_str_to_java_string(tag) if tag is not None else ffi.NULL,
-            ]
-        )
     def __eq__(self, other):
         return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
 
@@ -1900,6 +1995,43 @@ class EmbedRule:
         )
 
         return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
+
+    @staticmethod
+    def from_path_pattern(
+        path_pattern: str,
+        tag: Optional[str],
+
+    ) -> EmbedRuleResult:
+        """Builds a new [EmbedRule].
+
+        @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+        @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+        @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
+
+        Example:
+        ```kotlin
+        EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+        EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+        ```
+        """
+
+        if path_pattern is None:
+            raise ValueError("`path_pattern` cannot be None")
+        jni_ref = _access_static_field(b"org/kson/EmbedRule", b"INSTANCE", b"Lorg/kson/EmbedRule;")
+        result = _call_method(
+            b"org/kson/EmbedRule",
+            jni_ref,
+            b"fromPathPattern",
+            b"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
+            "ObjectMethod",
+            [
+
+                _python_str_to_java_string(path_pattern),
+                _python_str_to_java_string(tag) if tag is not None else ffi.NULL,
+            ]
+        )
+
+        return cast(Any, (lambda x0: EmbedRuleResult._downcast(x0))(result))
 
 
 class IndentType:
