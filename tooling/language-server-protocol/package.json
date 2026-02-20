@@ -10,7 +10,8 @@
       "email": "dmarcotte@gmail.com"
     }
   ],
-  "version": "0.0.1",
+  "//": "[[kson-version-num]]",
+  "version": "0.3.0-dev.0",
   "description": "Kson Language Server implementation in TypeScript",
   "type": "module",
   "exports": {

@@ -1,6 +1,7 @@
 {
   "name": "@kson/lsp-shared",
-  "version": "0.0.1",
+  "//": "[[kson-version-num]]",
+  "version": "0.3.0-dev.0",
   "description": "Shared configurations and utilities for KSON LSP extensions",
   "type": "module",
   "main": "./dist/src/index.js",
