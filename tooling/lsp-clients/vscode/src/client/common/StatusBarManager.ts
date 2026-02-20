@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {BaseLanguageClient} from 'vscode-languageclient';
 import * as path from 'path';
+import { isKsonLanguage } from '../../config/languageConfig';
 
 /**
  * Response from the LSP server for schema information
@@ -33,7 +34,7 @@ export class StatusBarManager {
      * Queries the LSP server for schema information and updates the display.
      */
     async updateForDocument(document: vscode.TextDocument): Promise<void> {
-        if (document.languageId !== 'kson') {
+        if (!isKsonLanguage(document.languageId)) {
             this.hide();
             return;
         }
@@ -47,10 +48,21 @@ export class StatusBarManager {
             );
 
             if (schemaInfo.hasSchema && schemaInfo.schemaPath) {
+                const isBundled = schemaInfo.schemaUri?.startsWith('bundled://') ?? false;
+
                 // Extract just the filename for display
-                const schemaFileName = path.basename(schemaInfo.schemaPath);
-                this.statusBarItem.text = `$(file-code) Schema: ${schemaFileName}`;
-                this.statusBarItem.tooltip = `Schema: ${schemaInfo.schemaPath}\nClick to change schema`;
+                const schemaFileName = isBundled
+                    ? this.extractBundledSchemaName(schemaInfo.schemaPath)
+                    : path.basename(schemaInfo.schemaPath);
+
+                // Show bundled indicator
+                const bundledSuffix = isBundled ? ' (bundled)' : '';
+                const icon = isBundled ? '$(package)' : '$(file-code)';
+
+                this.statusBarItem.text = `${icon} Schema: ${schemaFileName}${bundledSuffix}`;
+                this.statusBarItem.tooltip = isBundled
+                    ? `Bundled schema for this language\nClick to override with custom schema`
+                    : `Schema: ${schemaInfo.schemaPath}\nClick to change schema`;
             } else {
                 this.statusBarItem.text = '$(warning) No Schema';
                 this.statusBarItem.tooltip = 'No schema associated. Click to select a schema';
@@ -77,6 +89,19 @@ export class StatusBarManager {
      */
     hide(): void {
         this.statusBarItem.hide();
+    }
+
+    /**
+     * Extract a display name from a bundled schema URI.
+     * Bundled schema URIs have the format: bundled://schema/{fileExtension}.schema.kson
+     */
+    private extractBundledSchemaName(schemaPath: string): string {
+        if (schemaPath.startsWith('bundled://schema/')) {
+            return schemaPath
+                .replace('bundled://schema/', '')
+                .replace(/\.schema\.kson$/, '');
+        }
+        return path.basename(schemaPath);
     }
 
     /**

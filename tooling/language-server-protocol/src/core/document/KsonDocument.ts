@@ -1,4 +1,4 @@
-import {Analysis} from 'kson';
+import {Analysis, KsonValue, KsonValueType} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
@@ -92,5 +92,33 @@ export class KsonDocument implements TextDocument {
      */
     getSchemaDocument(): TextDocument | undefined {
         return this.schemaDocument;
+    }
+
+    /**
+     * Extract the $schema field value from this document's parse analysis.
+     *
+     * @returns The $schema string value, or undefined if not present or not a string
+     */
+    getSchemaId(): string | undefined {
+        return KsonDocument.extractSchemaId(this.parseAnalysis);
+    }
+
+    /**
+     * Extract the $schema field value from a parsed KSON analysis result.
+     *
+     * @param analysis The KSON analysis result
+     * @returns The $schema string value, or undefined if not present or not a string
+     */
+    static extractSchemaId(analysis: Analysis): string | undefined {
+        const ksonValue = analysis.ksonValue;
+        if (!ksonValue || ksonValue.type !== KsonValueType.OBJECT) {
+            return undefined;
+        }
+        const obj = ksonValue as KsonValue.KsonObject;
+        const schemaValue = obj.properties.asJsReadonlyMapView().get('$schema');
+        if (!schemaValue || schemaValue.type !== KsonValueType.STRING) {
+            return undefined;
+        }
+        return (schemaValue as KsonValue.KsonString).value;
     }
 }

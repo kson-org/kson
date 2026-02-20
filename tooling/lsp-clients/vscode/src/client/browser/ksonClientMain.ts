@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
 import { initializeLanguageConfig } from '../../config/languageConfig';
-import {deactivate} from '../common/deactivate';
+import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 
 /**
  * Browser-specific activation function for the KSON extension.
@@ -21,8 +22,21 @@ export async function activate(context: vscode.ExtensionContext) {
         const serverModule = vscode.Uri.joinPath(context.extensionUri, 'dist', 'browserServer.js');
         const worker = new Worker(serverModule.toString(true));
 
-        // Create the language client options
-        const clientOptions = createClientOptions(logOutputChannel);
+        // Load bundled schemas and metaschemas (works in browser via vscode.workspace.fs)
+        const schemaLogger = {
+            info: (msg: string) => logOutputChannel.info(msg),
+            warn: (msg: string) => logOutputChannel.warn(msg),
+            error: (msg: string) => logOutputChannel.error(msg)
+        };
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, schemaLogger);
+        const bundledMetaSchemas = await loadBundledMetaSchemas(context.extensionUri, schemaLogger);
+
+        // Create the language client options with bundled schemas
+        const clientOptions = createClientOptions(logOutputChannel, {
+            bundledSchemas,
+            bundledMetaSchemas,
+            enableBundledSchemas: areBundledSchemasEnabled()
+        });
 
         // In test environments, we need to support the vscode-test-web scheme
         // This is only needed for the test runner, not in production
@@ -38,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
             ];
         }
 
-        let languageClient = new LanguageClient(
+        const languageClient = new LanguageClient(
             'kson-browser',
             'KSON Language Server (Browser)',
             clientOptions,
@@ -48,8 +62,20 @@ export async function activate(context: vscode.ExtensionContext) {
         // Start the client and language server
         await languageClient.start();
 
+        // Add the client to subscriptions so it gets disposed on deactivation
+        context.subscriptions.push(languageClient);
+
+        // Register content provider for bundled:// URIs so users can navigate to bundled schemas
+        context.subscriptions.push(
+            registerBundledSchemaContentProvider(bundledSchemas, bundledMetaSchemas)
+        );
+
         logOutputChannel.info('KSON Browser extension activated successfully');
-        logOutputChannel.info('Note: Schema features are not available in browser environment');
+        if (bundledSchemas.length > 0) {
+            logOutputChannel.info(`Loaded ${bundledSchemas.length} bundled schemas for browser environment`);
+        } else {
+            logOutputChannel.info('Note: No bundled schemas configured. User-defined schemas require file system access.');
+        }
         console.log('KSON Language Server (Browser) started');
 
     } catch (error) {
@@ -58,7 +84,3 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage('Failed to activate KSON language support.');
     }
 }
-
-deactivate().catch(error => {
-    console.error('Deactivation failed:', error);
-});

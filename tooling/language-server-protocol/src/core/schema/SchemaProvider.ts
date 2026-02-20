@@ -15,6 +15,15 @@ export interface SchemaProvider {
     getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined;
 
     /**
+     * Get a bundled metaschema by its schema ID (e.g., the $id field value).
+     * Used for content-based schema resolution when a document declares $schema.
+     *
+     * @param schemaId The $id of the metaschema to look up
+     * @returns TextDocument containing the metaschema, or undefined if no match
+     */
+    getMetaSchemaForId(schemaId: string): TextDocument | undefined;
+
+    /**
      * Reload the schema configuration.
      * Should be called when configuration changes are detected.
      */
@@ -35,6 +44,10 @@ export interface SchemaProvider {
  */
 export class NoOpSchemaProvider implements SchemaProvider {
     getSchemaForDocument(_documentUri: DocumentUri): TextDocument | undefined {
+        return undefined;
+    }
+
+    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
         return undefined;
     }
 

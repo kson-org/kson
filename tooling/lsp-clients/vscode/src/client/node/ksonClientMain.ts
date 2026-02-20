@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {deactivate} from '../common/deactivate';
 import {
     ServerOptions,
     TransportKind,
@@ -11,7 +10,9 @@ import {
     createClientOptions
 } from '../../config/clientOptions';
 import {StatusBarManager} from '../common/StatusBarManager';
-import { isKsonDialect, initializeLanguageConfig } from '../../config/languageConfig';
+import { isKsonLanguage, initializeLanguageConfig } from '../../config/languageConfig';
+import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
+import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 
 /**
  * Node.js-specific activation function for the KSON extension.
@@ -39,11 +40,33 @@ export async function activate(context: vscode.ExtensionContext) {
             run: {module: serverModule, transport: TransportKind.ipc},
             debug: {module: serverModule, transport: TransportKind.ipc, options: debugOptions}
         };
-        const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel)
-        let languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
+
+        // Load bundled schemas and metaschemas
+        const schemaLogger = {
+            info: (msg: string) => logOutputChannel.info(msg),
+            warn: (msg: string) => logOutputChannel.warn(msg),
+            error: (msg: string) => logOutputChannel.error(msg)
+        };
+        const bundledSchemas = await loadBundledSchemas(context.extensionUri, schemaLogger);
+        const bundledMetaSchemas = await loadBundledMetaSchemas(context.extensionUri, schemaLogger);
+
+        const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel, {
+            bundledSchemas,
+            bundledMetaSchemas,
+            enableBundledSchemas: areBundledSchemasEnabled()
+        });
+        const languageClient = new LanguageClient("kson", serverOptions, clientOptions, false)
 
         await languageClient.start();
+
+        // Add the client to subscriptions so it gets disposed on deactivation
+        context.subscriptions.push(languageClient);
         console.log('Kson Language Server started');
+
+        // Register content provider for bundled:// URIs so users can navigate to bundled schemas
+        context.subscriptions.push(
+            registerBundledSchemaContentProvider(bundledSchemas, bundledMetaSchemas)
+        );
 
         // Create status bar manager
         const statusBarManager = new StatusBarManager(languageClient);
@@ -54,7 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
             languageClient.onNotification('kson/schemaConfigurationChanged', async () => {
                 // Refresh status bar for current editor when schema config changes
                 const editor = vscode.window.activeTextEditor;
-                if (editor && isKsonDialect(editor.document.languageId)) {
+                if (editor && isKsonLanguage(editor.document.languageId)) {
                     await statusBarManager.updateForDocument(editor.document);
                 }
             })
@@ -64,8 +87,8 @@ export async function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.commands.registerCommand('kson.selectSchema', async () => {
                 const editor = vscode.window.activeTextEditor;
-                if (!editor || !isKsonDialect(editor.document.languageId)) {
-                    vscode.window.showWarningMessage('Please open a KSON dialect file first.');
+                if (!editor || !isKsonLanguage(editor.document.languageId)) {
+                    vscode.window.showWarningMessage('Please open a KSON file first.');
                     return;
                 }
 
@@ -147,7 +170,7 @@ export async function activate(context: vscode.ExtensionContext) {
         // Update status bar when active editor changes
         context.subscriptions.push(
             vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor && isKsonDialect(editor.document.languageId)) {
+                if (editor && isKsonLanguage(editor.document.languageId)) {
                     await statusBarManager.updateForDocument(editor.document);
                 } else {
                     statusBarManager.hide();
@@ -161,7 +184,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 if (doc.fileName.endsWith('.kson-schema.kson')) {
                     // Schema config changed, refresh status bar for current editor
                     const editor = vscode.window.activeTextEditor;
-                    if (editor && isKsonDialect(editor.document.languageId)) {
+                    if (editor && isKsonLanguage(editor.document.languageId)) {
                         await statusBarManager.updateForDocument(editor.document);
                     }
 
@@ -171,7 +194,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         // Initialize status bar for currently active editor
         const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor && isKsonDialect(activeEditor.document.languageId)) {
+        if (activeEditor && isKsonLanguage(activeEditor.document.languageId)) {
             await statusBarManager.updateForDocument(activeEditor.document);
         }
 
@@ -182,7 +205,3 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage('Failed to activate KSON language support.');
     }
 }
-
-deactivate().catch(error => {
-    console.error('Deactivation failed:', error);
-});

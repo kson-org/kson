@@ -1,8 +1,37 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {Kson} from 'kson';
 import {KsonDocument} from "./KsonDocument.js";
+import {KsonSchemaDocument} from "./KsonSchemaDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
 import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
+
+/**
+ * Resolve the appropriate KsonDocument type for a given document.
+ *
+ * First tries URI-based schema resolution. If that fails, tries content-based
+ * metaschema resolution via $schema — but only returns a KsonSchemaDocument
+ * in that case, encoding the domain rule that only schema files have metaschemas.
+ */
+function resolveDocument(
+    provider: SchemaProvider,
+    textDocument: TextDocument,
+    parseResult: ReturnType<ReturnType<typeof Kson.getInstance>['analyze']>
+): KsonDocument {
+    const schema = provider.getSchemaForDocument(textDocument.uri);
+    if (schema) {
+        return new KsonDocument(textDocument, parseResult, schema);
+    }
+
+    const schemaId = KsonDocument.extractSchemaId(parseResult);
+    if (schemaId) {
+        const metaSchema = provider.getMetaSchemaForId(schemaId);
+        if (metaSchema) {
+            return new KsonSchemaDocument(textDocument, parseResult, metaSchema);
+        }
+    }
+
+    return new KsonDocument(textDocument, parseResult);
+}
 
 /**
  * Document management for the Kson Language Server.
@@ -25,12 +54,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-
-                // Try to get schema from provider
-                let schemaDocument = provider.getSchemaForDocument(uri);
-
                 const parseResult = Kson.getInstance().analyze(content, uri);
-                return new KsonDocument(textDocument, parseResult, schemaDocument);
+                return resolveDocument(provider, textDocument, parseResult);
             },
             update: (
                 ksonDocument: KsonDocument,
@@ -43,11 +68,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     version
                 );
                 const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
-                return new KsonDocument(
-                    textDocument,
-                    parseResult,
-                    provider.getSchemaForDocument(ksonDocument.uri)
-                );
+                return resolveDocument(provider, textDocument, parseResult);
             }
         });
 
@@ -83,10 +104,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
         for (const doc of allDocs) {
             const textDocument = doc.textDocument;
             const parseResult = doc.getAnalysisResult();
-            const updatedSchema = this.schemaProvider.getSchemaForDocument(doc.uri);
 
-            // Create new document instance with updated schema
-            const updatedDoc = new KsonDocument(textDocument, parseResult, updatedSchema);
+            const updatedDoc = resolveDocument(this.schemaProvider, textDocument, parseResult);
 
             // Replace in the internal document cache
             // Access the protected _syncedDocuments property from parent class

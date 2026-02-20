@@ -6,15 +6,24 @@ import {
     DocumentSelector,
 } from 'vscode-languageclient';
 import { getLanguageConfiguration } from './languageConfig';
+import type { KsonInitializationOptions } from 'kson-language-server';
 
-// Create shared client options
-export const createClientOptions = (outputChannel: vscode.OutputChannel): LanguageClientOptions => {
+/**
+ * Create shared client options.
+ * @param outputChannel The output channel for logging
+ * @param initializationOptions Optional initialization options including bundled schemas
+ */
+export const createClientOptions = (
+    outputChannel: vscode.OutputChannel,
+    initializationOptions?: KsonInitializationOptions
+): LanguageClientOptions => {
     const { languageIds, fileExtensions } = getLanguageConfiguration();
 
     // Build document selector for all supported language IDs
     const documentSelector: DocumentSelector = languageIds.flatMap(languageId => [
         { scheme: 'file', language: languageId },
-        { scheme: 'untitled', language: languageId }
+        { scheme: 'untitled', language: languageId },
+        { scheme: 'bundled', language: languageId }
     ]);
 
     // Build file watcher pattern for all file extensions
@@ -24,6 +33,7 @@ export const createClientOptions = (outputChannel: vscode.OutputChannel): Langua
 
     return {
         documentSelector,
+        initializationOptions,
         synchronize: {
             /**
              * TODO - Even though this setting is deprecated it is the easiest way to get configuration going.

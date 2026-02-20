@@ -39,7 +39,8 @@
           "light": "./dist/extension/assets/kson-icon.png",
           "dark": "./dist/extension/assets/kson-icon.png"
         },
-        "configuration": "./dist/extension/config/language-configuration.json"
+        "configuration": "./dist/extension/config/language-configuration.json",
+        "bundledSchema": null
       }
     ],
     "grammars": [
@@ -71,6 +72,11 @@
     "configuration": {
       "title": "Kson",
       "properties": {
+        "kson.enableBundledSchemas": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable bundled schemas for configured KSON languages. When enabled, KSON languages with bundled schemas will automatically provide hover, completions, and validation."
+        },
         "kson.format.tabSize": {
           "type": "number",
           "default": 2,

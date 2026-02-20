@@ -1,31 +1,17 @@
 import * as vscode from 'vscode';
 import { assert } from './assert';
-import { createTestFile, cleanUp } from './common';
+import { createTestFile, cleanUp, waitForDiagnostics } from './common';
 
 /**
- * Tests for KSON dialect support.
+ * Tests for KSON language support.
  *
- * These tests verify that dialect files (e.g., .KuStON) get the same
+ * These tests verify that language files (e.g., .KuStON) get the same
  * language server features as .kson files.
  */
-describe('Dialect Support Tests', () => {
+describe('Language Support Tests', () => {
 
-    async function waitForDiagnostics(uri: vscode.Uri, expectedCount: number, timeout: number = 5000): Promise<vscode.Diagnostic[]> {
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-            const diagnostics = vscode.languages.getDiagnostics(uri);
-            if (diagnostics.length === expectedCount) {
-                return diagnostics;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-
-        throw new Error(`Timeout waiting for ${expectedCount} diagnostics, found ${vscode.languages.getDiagnostics(uri).length}`);
-    }
-
-    it('Should report diagnostics for invalid dialect file', async function() {
-        // Skip this test if no dialects are configured
+    it('Should report diagnostics for invalid language file', async function() {
+        // Skip this test if no languages are configured
         const extension = vscode.extensions.getExtension('kson.kson');
         if (!extension) {
             this.skip();
@@ -34,34 +20,34 @@ describe('Dialect Support Tests', () => {
 
         const packageJson = extension.packageJSON;
         const languages = packageJson?.contributes?.languages || [];
-        const dialectLanguages = languages.filter((lang: any) => lang.id !== 'kson');
+        const additionalLanguages = languages.filter((lang: any) => lang.id !== 'kson');
 
-        if (dialectLanguages.length === 0) {
-            console.log('No dialects configured, skipping dialect test');
+        if (additionalLanguages.length === 0) {
+            console.log('No additional languages configured, skipping test');
             this.skip();
             return;
         }
 
-        // Test with the first configured dialect
-        const dialect = dialectLanguages[0];
-        const extension_suffix = dialect.extensions?.[0] || '.dialect';
+        // Test with the first configured language
+        const language = additionalLanguages[0];
+        const extension_suffix = language.extensions?.[0] || '.test';
         const fileName = `test${extension_suffix}`;
 
         const errorContent = 'key: "value" extraValue'; // Invalid KSON
         const [testFileUri, document] = await createTestFile(errorContent, fileName);
 
         // Verify the document has the correct language ID
-        assert.strictEqual(document.languageId, dialect.id, `Document should have language ID: ${dialect.id}`);
+        assert.strictEqual(document.languageId, language.id, `Document should have language ID: ${language.id}`);
 
         // Should get diagnostics just like a .kson file
         const diagnostics = await waitForDiagnostics(document.uri, 1);
-        assert.ok(diagnostics.length === 1, `Dialect file should receive diagnostics`);
+        assert.ok(diagnostics.length === 1, `Language file should receive diagnostics`);
 
         await cleanUp(testFileUri);
     }).timeout(10000);
 
-    it('Should not report diagnostics for valid dialect file', async function() {
-        // Skip this test if no dialects are configured
+    it('Should not report diagnostics for valid language file', async function() {
+        // Skip this test if no languages are configured
         const extension = vscode.extensions.getExtension('kson.kson');
         if (!extension) {
             this.skip();
@@ -70,33 +56,33 @@ describe('Dialect Support Tests', () => {
 
         const packageJson = extension.packageJSON;
         const languages = packageJson?.contributes?.languages || [];
-        const dialectLanguages = languages.filter((lang: any) => lang.id !== 'kson');
+        const additionalLanguages = languages.filter((lang: any) => lang.id !== 'kson');
 
-        if (dialectLanguages.length === 0) {
-            console.log('No dialects configured, skipping dialect test');
+        if (additionalLanguages.length === 0) {
+            console.log('No additional languages configured, skipping test');
             this.skip();
             return;
         }
 
-        // Test with the first configured dialect
-        const dialect = dialectLanguages[0];
-        const extension_suffix = dialect.extensions?.[0] || '.dialect';
+        // Test with the first configured language
+        const language = additionalLanguages[0];
+        const extension_suffix = language.extensions?.[0] || '.test';
         const fileName = `test${extension_suffix}`;
 
         const validContent = 'key: "value"'; // Valid KSON
         const [testFileUri, document] = await createTestFile(validContent, fileName);
 
         // Verify the document has the correct language ID
-        assert.strictEqual(document.languageId, dialect.id, `Document should have language ID: ${dialect.id}`);
+        assert.strictEqual(document.languageId, language.id, `Document should have language ID: ${language.id}`);
 
         // Should not get diagnostics
         const diagnostics = await waitForDiagnostics(document.uri, 0);
-        assert.ok(diagnostics.length === 0, `Valid dialect file should not have diagnostics`);
+        assert.ok(diagnostics.length === 0, `Valid language file should not have diagnostics`);
 
         await cleanUp(testFileUri);
     }).timeout(10000);
 
-    it('Should support multiple dialects if configured', async function() {
+    it('Should support multiple languages if configured', async function() {
         const extension = vscode.extensions.getExtension('kson.kson');
         if (!extension) {
             this.skip();
