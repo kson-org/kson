@@ -25,7 +25,7 @@ describe('DocumentHighlightService', () => {
 
     function createKsonDocument(content: string): KsonDocument {
         const document = createDoc(content);
-        symbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue);
+        symbolService.getDocumentSymbols(document.getText());
         return document;
     }
 

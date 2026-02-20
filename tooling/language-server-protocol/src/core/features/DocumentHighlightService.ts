@@ -19,7 +19,7 @@ export class DocumentHighlightService {
         if (!symbolsWithIndex) {
             // Create and cache symbols
             const documentSymbols = new DocumentSymbolService()
-                .getDocumentSymbols(document.getAnalysisResult().ksonValue);
+                .getDocumentSymbols(document.getText());
             symbolsWithIndex = new IndexedDocumentSymbols(documentSymbols)
             document.setSymbolsWithIndex(symbolsWithIndex)
         }

@@ -214,7 +214,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue)
+            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getText())
             document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
             this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
