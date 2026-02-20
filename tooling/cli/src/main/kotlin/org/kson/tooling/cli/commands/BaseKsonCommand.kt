@@ -5,18 +5,17 @@ import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.github.ajalt.clikt.parameters.types.inputStream
 import com.github.ajalt.clikt.parameters.types.outputStream
 import org.kson.Kson
 import org.kson.Message
 import org.kson.SchemaResult
+import java.io.File
 
 abstract class BaseKsonCommand(
     name: String? = null
 ) : CliktCommand(name = name) {
-    private val input by option("-i", "--input", help = "Input file (default: stdin)")
-        .inputStream()
-        .default(System.`in`)
+    private val inputFile by option("-i", "--input", help = "Input file (default: stdin)")
+        .file(mustExist = true, canBeDir = false, mustBeReadable = true)
 
     private val output by option("-o", "--output", help = "Output file (default: stdout)")
         .outputStream(truncateExisting = true)
@@ -29,6 +28,8 @@ abstract class BaseKsonCommand(
         "[${error.severity}] ${error.message} at ${error.start.line}:${error.start.column}\n"
     }
 
+    protected fun getFilePath(): String? = inputFile?.path
+
     /**
      * Checks if we should show help instead of processing.
      * Shows help when:
@@ -39,7 +40,7 @@ abstract class BaseKsonCommand(
      * Subclasses should call super.run() at the beginning of their run() method.
      */
     override fun run() {
-        if (input == System.`in` && System.`in`.available() == 0 && System.console() != null) {
+        if (inputFile == null && System.`in`.available() == 0 && System.console() != null) {
             echo(getFormattedHelp())
             throw ProgramResult(0)
         }
@@ -50,21 +51,22 @@ abstract class BaseKsonCommand(
      * @return The content read from the input source
      */
     protected fun readInput(): String {
-        return input.bufferedReader().use { it.readText() }
+        val source = inputFile?.inputStream() ?: System.`in`
+        return source.bufferedReader().use { it.readText() }
     }
 
     protected fun writeOutput(content: String) {
         output.bufferedWriter().use { it.write(content) }
     }
 
-    protected fun validateWithSchema(ksonContent: String): Boolean {
-        val schemaFile = schema ?: return false
+    protected fun validateWithSchema(ksonContent: String) {
+        val schemaFile = schema ?: return
 
         val schemaContent = schemaFile.readText()
 
         when (val schemaResult = Kson.parseSchema(schemaContent)) {
             is SchemaResult.Success -> {
-                val validationErrors = schemaResult.schemaValidator.validate(ksonContent)
+                val validationErrors = schemaResult.schemaValidator.validate(ksonContent, getFilePath())
 
                 if (validationErrors.isEmpty()) {
                     echo("✓ Document is valid according to the schema")
@@ -85,6 +87,5 @@ abstract class BaseKsonCommand(
                 throw ProgramResult(1)
             }
         }
-        return true
     }
 }

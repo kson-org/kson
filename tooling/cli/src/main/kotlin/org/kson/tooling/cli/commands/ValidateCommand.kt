@@ -5,26 +5,29 @@ import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.kson.Kson
+import org.kson.tooling.cli.generated.CLI_DISPLAY_NAME
+import org.kson.tooling.cli.generated.FILE_EXTENSION
+import org.kson.tooling.cli.generated.CLI_NAME
 
 class ValidateCommand : BaseKsonCommand() {
     override fun help(context: Context) = """
-        |Validate KSON documents for syntax errors, warnings and tokens.
+        |Validate $CLI_DISPLAY_NAME documents for syntax errors, warnings and tokens.
         |
         |Performs static analysis to detect issues without executing or converting the document.
         |Reports errors and warnings with line and column information.
         |
         |Examples:
-        |${"\u0085"}Validate a KSON file:
-        |${"\u0085"}  kson validate -i document.kson
+        |${"\u0085"}Validate a $CLI_DISPLAY_NAME file:
+        |${"\u0085"}  $CLI_NAME validate -i document.$FILE_EXTENSION
         |${"\u0085"}
-        |${"\u0085"}Analyze from stdin:
-        |${"\u0085"}  cat file.kson | kson validate
+        |${"\u0085"}Validate from stdin:
+        |${"\u0085"}  cat file.$FILE_EXTENSION | $CLI_NAME validate
         |${"\u0085"}
         |${"\u0085"}Show lexical tokens for debugging:
-        |${"\u0085"}  kson validate -i file.kson --show-tokens
+        |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION --show-tokens
         |${"\u0085"}
-        |${"\u0085"}Validate against schema before analyzing:
-        |${"\u0085"}  kson validate -i file.kson -s schema.kson
+        |${"\u0085"}Validate against a schema:
+        |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION -s schema.$FILE_EXTENSION
         |
         |Exit codes:
         |${"\u0085"}  0 - No errors found
@@ -45,8 +48,8 @@ class ValidateCommand : BaseKsonCommand() {
         }
 
         if (ksonContent.isBlank()) {
-            echo("Error: Input is empty. Provide a KSON document to validate.", err = true)
-            echo("\nUse 'kson validate --help' for usage information.", err = true)
+            echo("Error: Input is empty. Provide a $CLI_DISPLAY_NAME document to validate.", err = true)
+            echo("\nUse '$CLI_NAME validate --help' for usage information.", err = true)
             throw ProgramResult(1)
         }
 
@@ -54,7 +57,7 @@ class ValidateCommand : BaseKsonCommand() {
         validateWithSchema(ksonContent)
 
         // Perform analysis
-        val analysis = Kson.analyze(ksonContent)
+        val analysis = Kson.analyze(ksonContent, getFilePath())
         var outputString = ""
         if (analysis.errors.isEmpty()) {
             outputString += "✓ No errors or warnings found"
@@ -71,7 +74,7 @@ class ValidateCommand : BaseKsonCommand() {
 
         if (analysis.errors.isEmpty()) {
             writeOutput(outputString)
-        }else{
+        } else {
             echo(outputString.trimEnd(), err = true)
             throw ProgramResult(1)
         }

@@ -6,6 +6,7 @@ import org.kson.tooling.cli.commands.JsonCommand
 import org.kson.tooling.cli.commands.KsonFormatCommand
 import org.kson.tooling.cli.commands.ValidateCommand
 import org.kson.tooling.cli.commands.YamlCommand
+import org.kson.tooling.cli.generated.CLI_NAME
 import org.kson.tooling.cli.generated.KSON_VERSION
 import java.io.File
 import kotlin.test.assertEquals
@@ -549,6 +550,50 @@ class CommandLineInterfaceTest {
     }
 
     @Test
+    fun testValidateCommandPassesFilePath() {
+        val inputFile = File.createTempFile("test-input", ".kson")
+        inputFile.deleteOnExit()
+        inputFile.writeText("""key: "value"""")
+        val outputFile = File.createTempFile("output", ".txt")
+        outputFile.deleteOnExit()
+
+        try {
+            val result = ValidateCommand().test(
+                listOf("-i", inputFile.absolutePath, "-o", outputFile.absolutePath)
+            )
+
+            assertEquals(0, result.statusCode)
+            assert(outputFile.readText().contains("No errors")) {
+                "Validate with file input should succeed, but got: ${outputFile.readText()}"
+            }
+        } finally {
+            inputFile.delete()
+            outputFile.delete()
+        }
+    }
+
+    @Test
+    fun testValidateCommandWorksFromStdin() {
+        val input = """key: "value"""".byteInputStream()
+        val originalIn = System.`in`
+        System.setIn(input)
+        val outputFile = File.createTempFile("output", ".txt")
+        outputFile.deleteOnExit()
+
+        try {
+            val result = ValidateCommand().test(listOf("-o", outputFile.absolutePath))
+
+            assertEquals(0, result.statusCode)
+            assert(outputFile.readText().contains("No errors")) {
+                "Validate from stdin should succeed, but got: ${outputFile.readText()}"
+            }
+        } finally {
+            System.setIn(originalIn)
+            outputFile.delete()
+        }
+    }
+
+    @Test
     fun testVersionFlag() {
         val flags = listOf("--version", "-V")
 
@@ -556,8 +601,8 @@ class CommandLineInterfaceTest {
             val result = KsonCli().test(argv = flag)
 
             assertEquals(0, result.statusCode)
-            assert(result.output.contains("kson version")) {
-                "Version output for '$flag' should contain 'kson version', but was: ${result.output}"
+            assert(result.output.contains("$CLI_NAME version")) {
+                "Version output for '$flag' should contain '$CLI_NAME version', but was: ${result.output}"
             }
             assert(result.output.contains(KSON_VERSION)) {
                 "Version output for '$flag' should contain version number, but was: ${result.output}"
