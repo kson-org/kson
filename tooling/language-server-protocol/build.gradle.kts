@@ -4,14 +4,15 @@ plugins {
 
 tasks {
     val npmInstall = register<PixiExecTask>("npmInstall") {
-        command=listOf("npm", "install")
+        // Use `npm ci` for reproducible installs from the lock file
+        command=listOf("npm", "ci")
+        dependsOn(":kson-lib:jsNodeProductionLibraryDistribution")
+        dependsOn(":kson-tooling-lib:jsNodeProductionLibraryDistribution")
         doNotTrackState("npm already tracks its own state")
     }
 
     register<PixiExecTask>("npm_run_compile") {
         command=listOf("npm", "run", "compile")
-        dependsOn(":kson-lib:jsNodeProductionLibraryDistribution")
-        dependsOn(":kson-tooling-lib:jsNodeProductionLibraryDistribution")
         dependsOn(npmInstall)
     }
 

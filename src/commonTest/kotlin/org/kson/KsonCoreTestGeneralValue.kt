@@ -3,6 +3,7 @@ package org.kson
 import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests

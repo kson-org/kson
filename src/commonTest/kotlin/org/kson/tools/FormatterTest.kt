@@ -300,6 +300,29 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedBlockWithInlineEndDelimiter() {
+        assertFormatting(
+            """
+            {
+            code: %sql
+                  -- should preserve the minimum indent
+                  SELECT * 
+                    FROM table
+                      WHERE x = 1%%
+            }
+            """.trimIndent(),
+            """
+            code: %sql
+              -- should preserve the minimum indent
+              SELECT * 
+                FROM table
+                  WHERE x = 1
+              %%
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testEmbedBlockWithPartialEmbedDelim() {
         assertFormatting(
             """
@@ -2117,7 +2140,8 @@ class FormatterTest {
             """
             config:
               script: %
-                echo hello%%
+                echo hello
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/config/script")),
         )
@@ -2133,7 +2157,8 @@ class FormatterTest {
             """
             scripts:
               build: %bash
-                make all%%
+                make all
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
         )
@@ -2150,9 +2175,11 @@ class FormatterTest {
             """
             scripts:
               build: %bash
-                make all%%
+                make all
+                %%
               deploy: %bash
-                rsync -av%%
+                rsync -av
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
         )
@@ -2170,7 +2197,8 @@ class FormatterTest {
               build: %bash
                 #!/bin/bash
                 echo 'Building...'
-                make all%%
+                make all
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
         )
@@ -2188,7 +2216,8 @@ class FormatterTest {
             name: value
             scripts:
               build: %bash
-                make all%%
+                make all
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
         )
@@ -2208,7 +2237,8 @@ class FormatterTest {
               level1:
                 level2:
                   code: %python
-                    print('hello')%%
+                    print('hello')
+                    %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/data/**/code", "python")),
         )
@@ -2225,7 +2255,8 @@ class FormatterTest {
             """
             scripts:
               - %
-                echo first%%
+                echo first
+                %%
               - 'echo second'
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/0")),
@@ -2243,9 +2274,11 @@ class FormatterTest {
             """
             scripts:
               - %bash
-                echo first%%
+                echo first
+                %%
               - %bash
-                echo second%%
+                echo second
+                %%
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/*", "bash")),
         )
@@ -2294,7 +2327,8 @@ class FormatterTest {
             """
             scripts:
               build: $
-                echo 100%% complete$$
+                echo 100%% complete
+                $$
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/build")),
         )

@@ -44,6 +44,8 @@ tasks {
         yamlFile.set(project.file(".circleci/config.yml"))
     }
 
+    register<VerifyCleanCheckoutTask>("verifyCleanCheckout")
+
     withType<Task> {
         // make every task except itself depend on generateJsonTestSuiteTask and transpileCircleCIConfigTask to
         // ensure it's always up-to-date before any other build steps
@@ -118,7 +120,7 @@ group = "org.kson"
  */
 val internalBaseVersion = "x.4"
 val isRelease = project.findProperty("release") == "true"
-version = KsonVersion.getVersion(projectDir, internalBaseVersion, isRelease)
+version = KsonVersion.getVersion(internalBaseVersion, isRelease)
 
 kotlin {
     jvm()
@@ -169,7 +171,7 @@ mavenPublishing {
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
     signAllPublications()
 
-    coordinates("org.kson", "kson-internals", version.toString())
+    coordinates("org.kson", "kson-internals", KsonVersion.getPublishVersion(projectDir, internalBaseVersion, isRelease))
 
     pom {
         name.set("KSON Internals")

@@ -1,5 +1,0 @@
-package org.kson.testSupport
-
-actual fun validateYaml(yamlString: String) {
-    // No-op implementation for Native, we verify our test Yaml in the JVM impl
-} 

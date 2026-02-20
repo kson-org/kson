@@ -935,12 +935,14 @@ class EmbedBlockNode(
 
         return when (compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED -> {
-                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}") { it }
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}$rawEmbedTag\n${indent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}")
+                "${indent.firstLineIndent()}${delimiter.openDelimiter}$rawEmbedTag\n" +
+                        "${indent.bodyLinesIndent()}$indentedContent\n" +
+                        "${indent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                val compactContent = content.lines().joinToString("\n") { it }
-                "${delimiter.openDelimiter}$rawEmbedTag\n$compactContent${delimiter.closeDelimiter}"
+                val compactContent = content.lines().joinToString("\n")
+                "${delimiter.openDelimiter}$rawEmbedTag\n$compactContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> {
                 renderJsonFormat(indent, compileTarget as? Json ?: Json())
@@ -1155,13 +1157,14 @@ internal object EmbedBlockRenderer {
             PLAIN, DELIMITED -> {
                 val contentIndent = if (nestedContentIndent) indent.next(false) else indent
                 val indentedContent = escapedContent.lines()
-                    .joinToString("\n${contentIndent.bodyLinesIndent()}") { it }
+                    .joinToString("\n${contentIndent.bodyLinesIndent()}")
 
                 "${indent.firstLineIndent()}${delimiter.openDelimiter}$preamble\n" +
-                    "${contentIndent.bodyLinesIndent()}$indentedContent${delimiter.closeDelimiter}"
+                    "${contentIndent.bodyLinesIndent()}$indentedContent\n" +
+                    "${contentIndent.bodyLinesIndent()}${delimiter.closeDelimiter}"
             }
             COMPACT -> {
-                "${delimiter.openDelimiter}$preamble\n$escapedContent${delimiter.closeDelimiter}"
+                "${delimiter.openDelimiter}$preamble\n$escapedContent\n${delimiter.closeDelimiter}"
             }
             CLASSIC -> null // Caller handles CLASSIC format
         }

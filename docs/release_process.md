@@ -11,7 +11,7 @@ When `main` is ready to have a release cut from it:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:
   * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
     - Update `BASE_VERSION` to `X.(Y+1).0` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
-    - Snapshot versions are computed as `{BASE_VERSION}-{gitSha}-SNAPSHOT`
+    - Snapshot versions use stable `{BASE_VERSION}-SNAPSHOT` for builds, and SHA-qualified `{BASE_VERSION}-{gitSha}-SNAPSHOT` for Maven publishing
   * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version, update `internalBaseVersion` there)
   * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
@@ -22,7 +22,7 @@ When `main` is ready to have a release cut from it:
 - Search the codebase for `[[kson-version-num]]` to find and update all the development/snapshot versions to the new `X.Y.Z` version.  Here's a hopefully complete checklist of the artifacts we version and publish that should marked `[[kson-version-num]]`:
   * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
     - Update `BASE_VERSION` to `X.Y.Z` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
-    - Build with `-Prelease=true` flag to produce release versions (without git SHA or SNAPSHOT suffix):
+    - Build with `-Prelease=true` flag to produce release versions (without SNAPSHOT suffix):
       ```bash
       ./gradlew build -Prelease=true
       ```

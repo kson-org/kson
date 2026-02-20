@@ -20,7 +20,7 @@ repositories {
 group = "org.kson"
 // [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
 val isRelease = project.findProperty("release") == "true"
-version = org.kson.KsonVersion.getVersion(rootProject.projectDir, isRelease = isRelease)
+version = org.kson.KsonVersion.getVersion(isRelease = isRelease)
 
 kotlin {
     jvm {
@@ -227,7 +227,7 @@ mavenPublishing {
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
     signAllPublications()
 
-    coordinates("org.kson", "kson", version.toString())
+    coordinates("org.kson", "kson", org.kson.KsonVersion.getPublishVersion(rootProject.projectDir, isRelease = isRelease))
 
     pom {
         name.set("KSON")
