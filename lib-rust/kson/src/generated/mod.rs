@@ -2126,6 +2126,259 @@ impl std::hash::Hash for SchemaValidator {
 }
 
 
+#[derive(Clone)]
+pub enum EmbedRuleResult {
+    Failure(embed_rule_result::Failure),
+    Success(embed_rule_result::Success),
+}
+
+pub mod embed_rule_result {
+    use super::*;
+
+
+
+    #[derive(Clone)]
+    pub struct Failure {
+        kotlin_ptr: KotlinPtr,
+    }
+
+    impl FromKotlinObject for Failure {
+        fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let kotlin_ptr = util::to_gc_global_ref(env, obj);
+            Self { kotlin_ptr }
+        }
+    }
+
+    impl ToKotlinObject for Failure {
+        fn to_kotlin_object(&self) -> KotlinPtr {
+            self.kotlin_ptr.clone()
+        }
+    }
+
+    impl AsKotlinObject for Failure {
+        fn as_kotlin_object(&self) -> self::sys::jobject {
+            self.kotlin_ptr.inner.inner
+        }
+    }
+
+    impl Failure {
+        pub fn new(
+            message: &str,
+        ) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let class = util::get_class(env, c"org/kson/EmbedRuleResult$Failure");
+            let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Ljava/lang/String;)V");
+
+            let message_ptr = message.to_kotlin_object();
+            let message = message_ptr.as_kotlin_object();
+
+            let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
+                message,
+            )};
+            util::panic_upon_exception(env);
+            Self {
+                kotlin_ptr: util::to_gc_global_ref(env, jobject)
+            }
+        }
+    }
+
+
+    impl Failure {
+
+
+        pub fn message(
+            &self,
+        ) -> String {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/EmbedRuleResult$Failure",
+                c"getMessage",
+                c"()Ljava/lang/String;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+    }
+
+    impl std::fmt::Debug for Failure {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let obj = self.to_kotlin_object();
+            write!(f, "{}", util::call_to_string(c"org/kson/EmbedRuleResult$Failure", &obj))
+        }
+    }
+
+    impl Eq for Failure {}
+    impl PartialEq for Failure {
+        fn eq(&self, other: &Failure) -> bool {
+            util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+        }
+    }
+    impl std::hash::Hash for Failure {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            util::apply_hash_code(self.to_kotlin_object(), state)
+        }
+    }
+
+
+    #[derive(Clone)]
+    pub struct Success {
+        kotlin_ptr: KotlinPtr,
+    }
+
+    impl FromKotlinObject for Success {
+        fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let kotlin_ptr = util::to_gc_global_ref(env, obj);
+            Self { kotlin_ptr }
+        }
+    }
+
+    impl ToKotlinObject for Success {
+        fn to_kotlin_object(&self) -> KotlinPtr {
+            self.kotlin_ptr.clone()
+        }
+    }
+
+    impl AsKotlinObject for Success {
+        fn as_kotlin_object(&self) -> self::sys::jobject {
+            self.kotlin_ptr.inner.inner
+        }
+    }
+
+    impl Success {
+        pub fn new(
+            embed_rule: EmbedRule,
+        ) -> Self {
+            let (env, _detach_guard) = util::attach_thread_to_java_vm();
+            let class = util::get_class(env, c"org/kson/EmbedRuleResult$Success");
+            let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Lorg/kson/EmbedRule;)V");
+
+            let embed_rule_ptr = embed_rule.to_kotlin_object();
+            let embed_rule = embed_rule_ptr.as_kotlin_object();
+
+            let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
+                embed_rule,
+            )};
+            util::panic_upon_exception(env);
+            Self {
+                kotlin_ptr: util::to_gc_global_ref(env, jobject)
+            }
+        }
+    }
+
+
+    impl Success {
+
+
+        pub fn embed_rule(
+            &self,
+        ) -> EmbedRule {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/EmbedRuleResult$Success",
+                c"getEmbedRule",
+                c"()Lorg/kson/EmbedRule;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+    }
+
+    impl std::fmt::Debug for Success {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let obj = self.to_kotlin_object();
+            write!(f, "{}", util::call_to_string(c"org/kson/EmbedRuleResult$Success", &obj))
+        }
+    }
+
+    impl Eq for Success {}
+    impl PartialEq for Success {
+        fn eq(&self, other: &Success) -> bool {
+            util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+        }
+    }
+    impl std::hash::Hash for Success {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            util::apply_hash_code(self.to_kotlin_object(), state)
+        }
+    }
+}
+impl FromKotlinObject for EmbedRuleResult {
+    fn from_kotlin_object(obj: jobject) -> Self {
+        match util::class_name(obj).as_str() {
+            "org.kson.EmbedRuleResult$Failure" => EmbedRuleResult::Failure(embed_rule_result::Failure::from_kotlin_object(obj)),
+            "org.kson.EmbedRuleResult$Success" => EmbedRuleResult::Success(embed_rule_result::Success::from_kotlin_object(obj)),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl ToKotlinObject for EmbedRuleResult {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        match self {
+            Self::Failure(inner) => inner.to_kotlin_object(),
+            Self::Success(inner) => inner.to_kotlin_object(),
+        }
+    }
+}
+
+impl EmbedRuleResult {
+    pub fn name(self) -> String {
+        let obj = self.to_kotlin_object();
+        util::enum_name(&obj)
+    }
+}
+
+
+impl EmbedRuleResult {
+}
+
+impl std::fmt::Debug for EmbedRuleResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let obj = self.to_kotlin_object();
+        write!(f, "{}", util::call_to_string(c"org/kson/EmbedRuleResult", &obj))
+    }
+}
+
+impl Eq for EmbedRuleResult {}
+impl PartialEq for EmbedRuleResult {
+    fn eq(&self, other: &EmbedRuleResult) -> bool {
+        util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+    }
+}
+impl std::hash::Hash for EmbedRuleResult {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self.to_kotlin_object(), state)
+    }
+}
+
+
 /// The result of statically analyzing a Kson document
 #[derive(Clone)]
 pub struct Analysis {
@@ -3238,16 +3491,6 @@ impl std::hash::Hash for Kson {
 /// as embed blocks instead of regular strings.
 ///
 /// **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
-///
-/// @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
-/// @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
-/// @throws IllegalArgumentException if [pathPattern] is not a valid JsonPointerGlob
-///
-/// Example:
-/// ```kotlin
-/// EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
-/// EmbedRule("/config/description")       // Match exact path, no tag
-/// ```
 #[derive(Clone)]
 pub struct EmbedRule {
     kotlin_ptr: KotlinPtr,
@@ -3274,28 +3517,6 @@ impl AsKotlinObject for EmbedRule {
 }
 
 impl EmbedRule {
-    pub fn new(
-        path_pattern: &str,
-        tag: Option<&str>,
-    ) -> Self {
-        let (env, _detach_guard) = util::attach_thread_to_java_vm();
-        let class = util::get_class(env, c"org/kson/EmbedRule");
-        let constructor = util::get_method(env, class.as_kotlin_object(), c"<init>", c"(Ljava/lang/String;Ljava/lang/String;)V");
-
-        let path_pattern_ptr = path_pattern.to_kotlin_object();
-        let path_pattern = path_pattern_ptr.as_kotlin_object();
-        let tag_ptr = tag.to_kotlin_object();
-        let tag = tag_ptr.as_kotlin_object();
-
-        let jobject = unsafe { (**env).NewObject.unwrap()(env, class.as_kotlin_object(), constructor,
-            path_pattern,
-            tag,
-        )};
-        util::panic_upon_exception(env);
-        Self {
-            kotlin_ptr: util::to_gc_global_ref(env, jobject)
-        }
-    }
 }
 
 
@@ -3340,6 +3561,43 @@ impl EmbedRule {
             CallObjectMethod,
             self_obj,
 
+        );
+
+        FromKotlinObject::from_kotlin_object(result)
+    }
+
+    /// Builds a new [EmbedRule].
+    ///
+    /// @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+    /// @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+    /// @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
+    ///
+    /// Example:
+    /// ```kotlin
+    /// EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+    /// EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+    /// ```
+    pub fn from_path_pattern(
+        path_pattern: &str,
+        tag: Option<&str>,
+    ) -> EmbedRuleResult {
+        let self_ptr = util::access_static_field(c"org/kson/EmbedRule", c"INSTANCE", c"Lorg/kson/EmbedRule;");
+        let self_obj = self_ptr.as_kotlin_object();
+        let path_pattern_ptr = path_pattern.to_kotlin_object();
+        let path_pattern = path_pattern_ptr.as_kotlin_object();
+        let tag_ptr = tag.to_kotlin_object();
+        let tag = tag_ptr.as_kotlin_object();
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/EmbedRule",
+            c"fromPathPattern",
+            c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
+            CallObjectMethod,
+            self_obj,
+            path_pattern,
+            tag,
         );
 
         FromKotlinObject::from_kotlin_object(result)

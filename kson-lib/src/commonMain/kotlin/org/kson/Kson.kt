@@ -190,24 +190,43 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
  * as embed blocks instead of regular strings.
  *
  * **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
- *
- * @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
- * @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
- * @throws IllegalArgumentException if [pathPattern] is not a valid JsonPointerGlob
- *
- * Example:
- * ```kotlin
- * EmbedRule("/scripts/ *", tag = "bash")  // Match all values under "scripts"
- * EmbedRule("/config/description")       // Match exact path, no tag
- * ```
  */
-class EmbedRule(
+class EmbedRule private constructor(
     val pathPattern: String,
     val tag: String? = null
 ) {
     @OptIn(ExperimentalJsonPointerGlobLanguage::class)
     internal val parsedPathPattern: JsonPointerGlob = JsonPointerGlob(pathPattern)
+
+    companion object {
+        /**
+         * Builds a new [EmbedRule].
+         *
+         * @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
+         * @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+         * @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
+         *
+         * Example:
+         * ```kotlin
+         * EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
+         * EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+         * ```
+         */
+        fun fromPathPattern(pathPattern: String, tag: String? = null): EmbedRuleResult {
+            return try {
+                EmbedRuleResult.Success(EmbedRule(pathPattern, tag))
+            } catch (e: IllegalArgumentException) {
+                EmbedRuleResult.Failure(e.toString())
+            }
+        }
+    }
 }
+
+sealed class EmbedRuleResult {
+    data class Success(val embedRule: EmbedRule) : EmbedRuleResult()
+    data class Failure(val message: String) : EmbedRuleResult()
+}
+
 
 /**
  * Options for formatting Kson output.
