@@ -4,7 +4,8 @@ plugins {
 
 tasks {
     val npmInstall = register<PixiExecTask>("npmInstall") {
-        command=listOf("npm", "install")
+        // Use `npm ci` for reproducible installs from the lock file
+        command=listOf("npm", "ci")
         doNotTrackState("npm already tracks its own state")
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
