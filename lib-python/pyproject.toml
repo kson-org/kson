@@ -48,11 +48,15 @@ package-dir = {"" = "src"}
 [tool.setuptools.package-data]
 kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified.h"]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",
     "pytest>=8.4.1",
     "ruff>=0.12.8",
+    "setuptools>=61.0",
     "cibuildwheel>=2.16.0",
     "twine>=6.2.0",
 ]
