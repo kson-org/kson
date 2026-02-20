@@ -2017,9 +2017,9 @@ class EmbedRule:
 
         if path_pattern is None:
             raise ValueError("`path_pattern` cannot be None")
-        jni_ref = _access_static_field(b"org/kson/EmbedRule", b"INSTANCE", b"Lorg/kson/EmbedRule;")
+        jni_ref = _access_static_field(b"org/kson/EmbedRule", b"Companion", b"Lorg/kson/EmbedRule$Companion;")
         result = _call_method(
-            b"org/kson/EmbedRule",
+            b"org/kson/EmbedRule$Companion",
             jni_ref,
             b"fromPathPattern",
             b"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
@@ -2117,6 +2117,8 @@ class _IndentType_Tabs(IndentType):
 
     _jni_ref: Any
 
+    def __init__(self):
+        self._jni_ref = _access_static_field(b"org/kson/IndentType$Tabs", b"INSTANCE", b"Lorg/kson/IndentType$Tabs;")
     def __eq__(self, other):
         return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
 
