@@ -267,6 +267,18 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     val ksonCoreJarTask = project.rootProject.tasks.named<Jar>("jvmJar")
     dependsOn(ksonLibJarTask, ksonCoreJarTask, "generateJniBindingsJvm")
 
+    val nativeImageOutputDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage")
+    val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
+
+    // ksonLibJarTask is this project's own JAR (not in its own runtime classpath).
+    // ksonCoreJarTask (root project) is a dependency, so it's covered by jvmRuntimeClasspath.
+    inputs.files(ksonLibJarTask.map { it.archiveFile })
+    inputs.files(configurations.named("jvmRuntimeClasspath"))
+    inputs.file(jniConfig)
+    // Declare the specific binary rather than the whole directory, since krossover's
+    // generateJniBindingsJvm also writes jni_simplified.h into nativeImageOutputDir.
+    outputs.file(nativeImageOutputDir.resolve(BinaryArtifactPaths.binaryFileName()))
+
     // Configure the command at configuration time using providers
     command.set(provider {
         val graalHome = GraalVmHelper.getGraalVMHome()
@@ -277,7 +289,7 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
         }
 
         // Ensure build dir exists
-        val buildDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage").toPath()
+        val buildDir = nativeImageOutputDir.toPath()
         buildDir.createDirectories()
         val buildArtifactPath = buildDir.resolve(BinaryArtifactPaths.binaryFileNameWithoutExtension()).toAbsolutePath().pathString
 
@@ -304,9 +316,6 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
             ":"
         }
         val classPath = jars.joinToString(cpSeparator)
-
-        // The `jniConfig` file tells graal which classes should be publicly exposed
-        val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
 
         listOf(
             nativeImageExe.absolutePath,
