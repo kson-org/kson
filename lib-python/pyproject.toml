@@ -51,6 +51,20 @@ kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
+[tool.cibuildwheel]
+# One wheel targeting 3.10 is sufficient: the abi3 stable ABI tag (see setup.py)
+# makes it installable on any CPython >= 3.10.
+build = "cp310-*"
+skip = "*-musllinux_*"
+archs = "native"
+test-requires = "pytest"
+test-command = "pytest -v {project}/tests --ignore={project}/tests/test_build_backend.py"
+
+[tool.cibuildwheel.macos]
+# Pin deployment target so builds don't break when the host macOS is
+# newer than what the Python packaging tools recognize yet.
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",

@@ -138,12 +138,7 @@ tasks {
         errorOutput = System.err
         isIgnoreExitValue = false
 
-        // Configure cibuildwheel
-        environment("CIBW_BUILD", "cp310-*")  // Build for Python 3.10+
-        environment("CIBW_SKIP", "*-musllinux_*")  // Skip musl Linux builds
-        environment("CIBW_ARCHS", "native")  // Build only for native architecture
-        environment("CIBW_TEST_REQUIRES", "pytest")  // Install pytest for testing
-        environment("CIBW_TEST_COMMAND", "pytest -v {project}/tests --ignore={project}/tests/test_build_backend.py")
+        // cibuildwheel configuration lives in pyproject.toml under [tool.cibuildwheel]
 
         doLast {
             println("Successfully built platform-specific wheel using cibuildwheel")
