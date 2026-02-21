@@ -156,6 +156,8 @@ Every value also has `.start()` and `.end()` returning a `Position` with `.line(
 ### Token access
 
 ```python
+from kson import Kson
+
 analysis = Kson.analyze("key: value", None)
 for token in analysis.tokens():
     print(f"{token.token_type().name}: {repr(token.text())}")
@@ -215,6 +217,8 @@ Use embed rules to tell the formatter which string values should be rendered as 
 ```python
 from kson import Kson, FormatOptions, IndentType, FormattingStyle, EmbedRule, EmbedRuleResult
 
+source = 'scripts:\n  deploy: "#!/bin/bash\\necho hello"'
+
 rule_result = EmbedRule.from_path_pattern("/scripts/*", "bash")
 assert isinstance(rule_result, EmbedRuleResult.Success)
 
@@ -232,6 +236,9 @@ formatted = Kson.format(source, options)
 All conversion methods (`to_json`, `to_yaml`) return a `Result`:
 
 ```python
+from kson import Kson, TranspileOptions, Result
+
+source = "name: Alice\nage: 30"
 result = Kson.to_json(source, TranspileOptions.Json(retain_embed_tags=False))
 
 match result:
@@ -247,6 +254,7 @@ match result:
 
 ## Build from source
 
+<!-- pytest-codeblocks:skip -->
 ```bash
 git clone https://github.com/kson-org/kson.git
 cd kson && ./gradlew :lib-python:build

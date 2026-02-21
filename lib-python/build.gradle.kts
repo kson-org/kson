@@ -3,6 +3,7 @@ import org.gradle.internal.os.OperatingSystem
 val build = "build"
 val copyNativeArtifacts = "copyNativeArtifacts"
 val test = "test"
+val validateReadme = "validateReadme"
 val typeCheck = "typeCheck"
 val prepareSdistBuildEnvironment = "prepareSdistBuildEnvironment"
 val createSdistBuildEnvironment = "createSdistBuildEnvironment"
@@ -33,6 +34,17 @@ tasks {
         isIgnoreExitValue = false
     }
 
+    register<Exec>(validateReadme) {
+        dependsOn(build)
+
+        group = "verification"
+        description = "Validates Python code blocks in readme.md"
+        commandLine = "$uvwPath run pytest --codeblocks readme.md".split(" ")
+        standardOutput = System.out
+        errorOutput = System.err
+        isIgnoreExitValue = false
+    }
+
     register<Exec>(typeCheck) {
         group = "verification"
         commandLine = "$uvwPath run pyright".split(" ")
@@ -43,6 +55,7 @@ tasks {
 
     register<Task>("check") {
         dependsOn(test)
+        dependsOn(validateReadme)
         dependsOn(typeCheck)
     }
 
