@@ -48,6 +48,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.package-data]
 kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified.h"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",
