@@ -7,7 +7,9 @@ repositories {
 }
 
 group = "org.kson"
-version = "0.1.2-SNAPSHOT"
+// [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
+val isRelease = project.findProperty("release") == "true"
+version = org.kson.KsonVersion.getVersion(isRelease = isRelease)
 kotlin {
     jvm {
         testRuns["test"].executionTask.configure {
