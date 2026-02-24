@@ -26,6 +26,7 @@ import {
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
 import {Languages} from "vscode-languageserver/lib/common/server";
 import {Definition, DefinitionLink, Location} from "vscode-languageserver-protocol";
+import {Position} from "vscode-languageserver-types";
 
 /**
  * A stub implementation of the `Connection` interface for testing purposes.
@@ -160,6 +161,69 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     override onDefinition(handler: ServerRequestHandler<DefinitionParams, Definition | DefinitionLink[] | undefined | null, Location[] | DefinitionLink[], void>): Disposable {
         this.onDefinitionHandler = handler;
         return NOOP_DISPOSABLE;
+    }
+    
+    async requestFormatting(uri: string, tabSize = 2, insertSpaces = true) {
+        return this.formattingHandler(
+            {textDocument: {uri}, options: {tabSize, insertSpaces}},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestSemanticTokens(uri: string) {
+        return this.semanticTokensHandler(
+            {textDocument: {uri}},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestDiagnostics(uri: string) {
+        return this.diagnosticsHandler(
+            {textDocument: {uri}},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestCodeLens(uri: string) {
+        return this.codeLensHandler(
+            {textDocument: {uri}},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestHover(uri: string, position: Position) {
+        return this.hoverHandler(
+            {textDocument: {uri}, position},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestCompletion(uri: string, position: Position) {
+        return this.completionHandler(
+            {textDocument: {uri}, position},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestDefinition(uri: string, position: Position) {
+        return this.onDefinitionHandler(
+            {textDocument: {uri}, position},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestDocumentHighlight(uri: string, position: Position) {
+        return this.documentHighlightHandler(
+            {textDocument: {uri}, position},
+            {} as any, {} as any, undefined
+        );
+    }
+
+    async requestDocumentSymbol(uri: string) {
+        return this.documentSymbolHandler(
+            {textDocument: {uri}},
+            {} as any, {} as any, undefined
+        );
     }
 }
 

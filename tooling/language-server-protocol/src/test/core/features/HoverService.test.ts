@@ -1,94 +1,155 @@
 import {describe, it} from 'mocha';
-import * as assert from 'assert';
-import {Kson, KsonValue, KsonValueType} from 'kson';
+import assert from 'assert';
+import {Hover, MarkupKind, Position} from 'vscode-languageserver';
 import {HoverService} from '../../../core/features/HoverService.js';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Position} from 'vscode-languageserver';
+import {createKsonDocument, pos} from '../../TestHelpers.js';
+
+const PORT_SCHEMA = `{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "The name of the service",
+            "title": "Service Name"
+        },
+        "port": {
+            "type": "number",
+            "description": "Port number",
+            "minimum": 1024,
+            "maximum": 65535
+        }
+    }
+}`;
 
 describe('HoverService', () => {
     const hoverService = new HoverService();
 
+    function getHover(content: string, position: Position, schema?: string): Hover | null {
+        const document = createKsonDocument(content, schema);
+        return hoverService.getHover(document, position);
+    }
+
     it('should return null when no schema is configured', () => {
-        // Create a document without a schema
-        const content = '{ "name": "test" }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const document = new KsonDocument(textDoc, analysis, undefined);
-
-        const position: Position = {line: 0, character: 4}; // Position on "name"
-        const hover = hoverService.getHover(document, position);
-
+        const hover = getHover('{ "name": "test" }', pos(0, 4));
         assert.strictEqual(hover, null);
     });
 
     it('should return hover info for a schema-matched property', () => {
-        // Create a simple schema
-        const schemaContent = `{
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "The name of the service",
-                    "title": "Service Name"
-                },
-                "port": {
-                    "type": "number",
-                    "description": "Port number",
-                    "minimum": 1024,
-                    "maximum": 65535
-                }
-            }
-        }`;
+        const hover = getHover('{ "name": "test", "port": 8080 }', pos(0, 28), PORT_SCHEMA);
 
-        const schemaDocument = TextDocument.create("file:///schema.kson'", 'kson', 1, schemaContent)
-
-        // Create a document that matches the schema
-        const docContent = '{ "name": "test", "port": 8080 }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
-
-        // Try hovering over the port property key
-        const position: Position = {line: 0, character: 28}; // Position on "8080" key
-        const hover = hoverService.getHover(document, position);
-
-        // Verify hover info is returned
-        assert.ok(hover !== null, 'Hover should not be null for schema-matched property');
-        if (hover) {
-            // Check that contents is a MarkupContent object
-            const markupContent = hover.contents as {kind: string, value: string};
-            assert.strictEqual(markupContent.kind, 'markdown', 'Hover should use markdown format');
-            assert.ok(markupContent.value.includes('Port number'), 'Hover should contain the schema description');
-        }
+        assert.ok(hover, 'Hover should not be null for schema-matched property');
+        const markupContent = hover.contents as {kind: string, value: string};
+        assert.strictEqual(markupContent.kind, MarkupKind.Markdown);
+        assert.ok(markupContent.value.includes('Port number'));
     });
 
-    it('should return null for position outside of schema-matched properties', () => {
-        // Create a simple schema
+    it('should return hover with markdown format', () => {
         const schemaContent = `{
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
+            type: object
+            properties: {
+                name: {
+                    type: string
+                    description: "The name of the service"
+                    title: "Service Name"
                 }
             }
         }`;
 
-        const schemaDocument = TextDocument.create("file:///schema.kson'", 'kson', 1, schemaContent)
+        const hover = getHover('{ name: "test" }', pos(0, 3), schemaContent);
 
-        // Create a document with an extra property not in schema
-        const docContent = '{ "name": "test", "age": 25 }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
+        assert.ok(hover, 'Hover should not be null for schema-matched property');
+        const markupContent = hover.contents as {kind: string, value: string};
+        assert.strictEqual(markupContent.kind, MarkupKind.Markdown);
+    });
 
-        // Hover over "age" which isn't in the schema
-        // Note: This might still return something if additionalProperties is allowed
-        const position: Position = {line: 0, character: 24}; // Position on 25
-        const hover = hoverService.getHover(document, position);
+    it('should return hover for a nested property', () => {
+        const schemaContent = `{
+            type: object
+            properties: {
+                server: {
+                    type: object
+                    properties: {
+                        host: {
+                            type: string
+                            description: "Server hostname"
+                        }
+                    }
+                }
+            }
+        }`;
 
-        // The result depends on schema navigation logic - it might be null or might have info
-        // This test documents the current behavior
-        assert.ok(true, 'Test completes without error');
+        const docContent = [
+            '{',
+            '  server: {',
+            '    host: "localhost"',
+            '  }',
+            '}'
+        ].join('\n');
+
+        const hover = getHover(docContent, pos(2, 5), schemaContent);
+
+        assert.ok(hover, 'Hover should work for nested properties');
+        const content = hover.contents as {kind: string, value: string};
+        assert.strictEqual(content.kind, MarkupKind.Markdown);
+        assert.ok(content.value.includes('Server hostname'), 'Hover should contain nested property description');
+    });
+
+    it('should include description text in hover content', () => {
+        const schemaContent = `{
+            type: object
+            properties: {
+                level: {
+                    type: string
+                    description: "The logging level for output"
+                }
+            }
+        }`;
+
+        const hover = getHover('{ level: "info" }', pos(0, 3), schemaContent);
+
+        assert.ok(hover, 'Hover should not be null');
+        const content = hover.contents as {kind: string, value: string};
+        assert.ok(content.value.includes('logging level'), 'Hover should contain the schema description');
+    });
+
+    it('should show type information in hover', () => {
+        const schemaContent = `{
+            type: object
+            properties: {
+                count: {
+                    type: number
+                    description: "Total count"
+                    minimum: 0
+                    maximum: 100
+                }
+            }
+        }`;
+
+        const hover = getHover('{ count: 42 }', pos(0, 3), schemaContent);
+
+        assert.ok(hover, 'Hover should show info for typed property');
+        const content = hover.contents as {kind: string, value: string};
+        assert.strictEqual(content.kind, MarkupKind.Markdown);
+        assert.ok(content.value.includes('Total count'), 'Hover should contain the description');
+    });
+
+    it('should handle enum values in hover', () => {
+        const schemaContent = `{
+            type: object
+            properties: {
+                status: {
+                    type: string
+                    description: "Current status"
+                    enum: ["active", "inactive"]
+                }
+            }
+        }`;
+
+        const hover = getHover('{ status: "active" }', pos(0, 3), schemaContent);
+
+        assert.ok(hover, 'Hover should return info for enum property');
+        const content = hover.contents as {kind: string, value: string};
+        assert.strictEqual(content.kind, MarkupKind.Markdown);
+        assert.ok(content.value.includes('Current status'), 'Hover should contain the description');
     });
 });

@@ -1,25 +1,11 @@
 import assert from 'assert';
 import { DocumentSymbolService } from '../../../core/features/DocumentSymbolService.js';
-import { KsonDocument } from '../../../core/document/KsonDocument.js';
-import { TextDocument } from 'vscode-languageserver-textdocument';
-import { Kson } from 'kson';
 import { SymbolKind } from 'vscode-languageserver';
 import {IndexedDocumentSymbols} from "../../../core/features/IndexedDocumentSymbols";
+import {createKsonDocument} from '../../TestHelpers.js';
 
 describe('DocumentSymbolService', () => {
     const documentSymbolService = new DocumentSymbolService();
-    const kson = Kson.getInstance();
-
-    function createKsonDocument(content: string): KsonDocument {
-        const textDocument = TextDocument.create(
-            'file:///test.kson',
-            'kson',
-            1,
-            content
-        );
-        const analysis = kson.analyze(content);
-        return new KsonDocument(textDocument, analysis);
-    }
 
     it('should return empty array for invalid document', () => {
         const document = createKsonDocument('{ invalid json }');

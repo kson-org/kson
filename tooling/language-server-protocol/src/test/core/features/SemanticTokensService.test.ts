@@ -1,10 +1,8 @@
-import {TextDocument} from 'vscode-languageserver-textdocument';
 import {describe, it} from 'mocha';
 import assert from "assert"
 import {SemanticTokenTypes} from 'vscode-languageserver';
-import {Kson} from 'kson';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {KSON_LEGEND, SemanticTokensService} from '../../../core/features/SemanticTokensService';
+import {createKsonDocument} from '../../TestHelpers.js';
 
 describe('KSON Semantic Tokens', () => {
     interface DecodedToken {
@@ -18,23 +16,19 @@ describe('KSON Semantic Tokens', () => {
     const semanticTokensService = new SemanticTokensService();
 
     function assertSemanticTokens(text: string, expectedTokens: DecodedToken[]): void {
-        const uri = 'test://test.kson';
-        const document = TextDocument.create(uri, 'kson', 0, text);
-        const analysisResult = Kson.getInstance().analyze(text);
-
-        // Create a mock document entry for the semantic tokens
-        const documentEntry: KsonDocument = new KsonDocument(
-            document,
-            analysisResult,
-        );
-
-        // Get the unprocessed tokens for debugging
+        const documentEntry = createKsonDocument(text);
         const result = semanticTokensService.getSemanticTokens(documentEntry);
 
         // Convert the encoded tokens to decoded format for comparison
         const tokens = decodeTokens(result.data);
 
         assert.deepStrictEqual(tokens, expectedTokens, "should have matching semantic tokens.");
+    }
+
+    function getTokens(text: string): DecodedToken[] {
+        const documentEntry = createKsonDocument(text);
+        const result = semanticTokensService.getSemanticTokens(documentEntry);
+        return decodeTokens(result.data);
     }
 
     function decodeTokens(data: number[]): DecodedToken[] {
@@ -99,7 +93,6 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     });
 
-    // Array token tests
     it('should handle a simple array', () => {
         const content = [
             'items:',
@@ -143,6 +136,52 @@ describe('KSON Semantic Tokens', () => {
         assertSemanticTokens(content, expectedTokens);
     });
 
+    it('should handle a decimal number', () => {
+        assertSemanticTokens('value: 3.14', [
+            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
+            {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.number, modifiers: []},
+        ]);
+    });
+
+    it('should handle a negative number', () => {
+        assertSemanticTokens('value: -42', [
+            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
+            {deltaLine: 0, deltaStart: 2, length: 3, type: SemanticTokenTypes.number, modifiers: []},
+        ]);
+    });
+
+    it('should handle null value', () => {
+        assertSemanticTokens('value: null', [
+            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
+            {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.keyword, modifiers: []},
+        ]);
+    });
+
+    it('should handle false value', () => {
+        assertSemanticTokens('value: false', [
+            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
+            {deltaLine: 0, deltaStart: 2, length: 5, type: SemanticTokenTypes.keyword, modifiers: []},
+        ]);
+    });
+
+    it('should handle empty document', () => {
+        assertSemanticTokens('', []);
+    });
+
+    it('should handle nested objects with keys at different levels', () => {
+        assertSemanticTokens('outer:\n  inner: value', [
+            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []}, // outer
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
+            {deltaLine: 1, deltaStart: 2, length: 5, type: SemanticTokenTypes.variable, modifiers: []}, // inner
+            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
+            {deltaLine: 0, deltaStart: 2, length: 5, type: SemanticTokenTypes.string, modifiers: []},   // value
+        ]);
+    });
+
     it('should handle all punctuation', () => {
         const content = '{ "key": [ "v1", "v2" ] }';
 
@@ -166,5 +205,35 @@ describe('KSON Semantic Tokens', () => {
         ];
 
         assertSemanticTokens(content, expectedTokens);
+    });
+
+    it('should not produce tokens for whitespace or EOF', () => {
+        const content = 'key: value';
+        const tokens = getTokens(content);
+
+        // 'key: value' has 3 meaningful tokens: key, colon, value.
+        // Whitespace between them and the trailing EOF must be skipped.
+        assert.strictEqual(tokens.length, 3, 'Should have exactly 3 tokens (no whitespace or EOF)');
+    });
+
+    it('should handle mixed content with multiple token types', () => {
+        const content = [
+            '{',
+            '  name: "Alice"',
+            '  age: 30',
+            '  active: true',
+            '  role: null',
+            '  tags:',
+            '    - admin',
+            '}'
+        ].join('\n');
+        const tokens = getTokens(content);
+
+        const types = new Set(tokens.map(t => t.type));
+        assert.ok(types.has(SemanticTokenTypes.variable), 'Should have variable (keys)');
+        assert.ok(types.has(SemanticTokenTypes.string), 'Should have string');
+        assert.ok(types.has(SemanticTokenTypes.number), 'Should have number');
+        assert.ok(types.has(SemanticTokenTypes.keyword), 'Should have keyword (true/null)');
+        assert.ok(types.has(SemanticTokenTypes.operator), 'Should have operator');
     });
 });
