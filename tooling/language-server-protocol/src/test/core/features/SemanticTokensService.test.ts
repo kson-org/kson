@@ -15,6 +15,10 @@ describe('KSON Semantic Tokens', () => {
 
     const semanticTokensService = new SemanticTokensService();
 
+    function token(deltaLine: number, deltaStart: number, length: number, type: string): DecodedToken {
+        return {deltaLine, deltaStart, length, type, modifiers: []};
+    }
+
     function assertSemanticTokens(text: string, expectedTokens: DecodedToken[]): void {
         const documentEntry = createKsonDocument(text);
         const result = semanticTokensService.getSemanticTokens(documentEntry);
@@ -61,9 +65,9 @@ describe('KSON Semantic Tokens', () => {
     it('should distinguish between a key and a string', () => {
         const content = 'key: string';
         const expectedTokens: DecodedToken[] = [
-            {deltaLine: 0, deltaStart: 0, length: 3, type: SemanticTokenTypes.variable, modifiers: []}, // key
-            {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 0, deltaStart: 2, length: 6, type: SemanticTokenTypes.string, modifiers: []}, // string
+            token(0, 0, 3, SemanticTokenTypes.variable), // key
+            token(0, 3, 1, SemanticTokenTypes.operator), // :
+            token(0, 2, 6, SemanticTokenTypes.string),   // string
         ]
         assertSemanticTokens(content, expectedTokens);
     })
@@ -72,9 +76,9 @@ describe('KSON Semantic Tokens', () => {
         const content = 'number: 42';
 
         const expectedTokens: DecodedToken[] = [
-            {deltaLine: 0, deltaStart: 0, length: 6, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 6, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 2, type: SemanticTokenTypes.number, modifiers: []},
+            token(0, 0, 6, SemanticTokenTypes.variable),
+            token(0, 6, 1, SemanticTokenTypes.operator),
+            token(0, 2, 2, SemanticTokenTypes.number),
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -85,9 +89,9 @@ describe('KSON Semantic Tokens', () => {
 
         const expectedTokens: DecodedToken[] = [
             // line 0
-            {deltaLine: 0, deltaStart: 0, length: 4, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 4, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.keyword, modifiers: []},
+            token(0, 0, 4, SemanticTokenTypes.variable),
+            token(0, 4, 1, SemanticTokenTypes.operator),
+            token(0, 2, 4, SemanticTokenTypes.keyword),
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -102,14 +106,14 @@ describe('KSON Semantic Tokens', () => {
 
         const expectedTokens: DecodedToken[] = [
             // line 0
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
+            token(0, 0, 5, SemanticTokenTypes.variable),
+            token(0, 5, 1, SemanticTokenTypes.operator),
             // line 1
-            {deltaLine: 1, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 5, type: SemanticTokenTypes.string, modifiers: []},
+            token(1, 2, 1, SemanticTokenTypes.operator),
+            token(0, 2, 5, SemanticTokenTypes.string),
             // line 2
-            {deltaLine: 1, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 6, type: SemanticTokenTypes.string, modifiers: []},
+            token(1, 2, 1, SemanticTokenTypes.operator),
+            token(0, 2, 6, SemanticTokenTypes.string),
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -125,12 +129,12 @@ describe('KSON Semantic Tokens', () => {
 
         const expectedTokens: DecodedToken[] = [
             // line 0
-            {deltaLine: 0, deltaStart: 0, length: 10, type: SemanticTokenTypes.variable, modifiers: []}, // embedBlock
-            {deltaLine: 0, deltaStart: 10, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // $
-            {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.decorator, modifiers: []}, // tag
-            {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.function, modifiers: []}, // \n
-            {deltaLine: 3, deltaStart: 3, length: 2, type: SemanticTokenTypes.function, modifiers: []}, // $$
+            token(0, 0, 10, SemanticTokenTypes.variable),  // embedBlock
+            token(0, 10, 1, SemanticTokenTypes.operator),   // :
+            token(0, 2, 1, SemanticTokenTypes.function),    // $
+            token(0, 1, 3, SemanticTokenTypes.decorator),   // tag
+            token(0, 3, 1, SemanticTokenTypes.function),    // \n
+            token(3, 3, 2, SemanticTokenTypes.function),    // $$
         ];
 
         assertSemanticTokens(content, expectedTokens);
@@ -138,33 +142,33 @@ describe('KSON Semantic Tokens', () => {
 
     it('should handle a decimal number', () => {
         assertSemanticTokens('value: 3.14', [
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.number, modifiers: []},
+            token(0, 0, 5, SemanticTokenTypes.variable),
+            token(0, 5, 1, SemanticTokenTypes.operator),
+            token(0, 2, 4, SemanticTokenTypes.number),
         ]);
     });
 
     it('should handle a negative number', () => {
         assertSemanticTokens('value: -42', [
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 3, type: SemanticTokenTypes.number, modifiers: []},
+            token(0, 0, 5, SemanticTokenTypes.variable),
+            token(0, 5, 1, SemanticTokenTypes.operator),
+            token(0, 2, 3, SemanticTokenTypes.number),
         ]);
     });
 
     it('should handle null value', () => {
         assertSemanticTokens('value: null', [
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 4, type: SemanticTokenTypes.keyword, modifiers: []},
+            token(0, 0, 5, SemanticTokenTypes.variable),
+            token(0, 5, 1, SemanticTokenTypes.operator),
+            token(0, 2, 4, SemanticTokenTypes.keyword),
         ]);
     });
 
     it('should handle false value', () => {
         assertSemanticTokens('value: false', [
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []},
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []},
-            {deltaLine: 0, deltaStart: 2, length: 5, type: SemanticTokenTypes.keyword, modifiers: []},
+            token(0, 0, 5, SemanticTokenTypes.variable),
+            token(0, 5, 1, SemanticTokenTypes.operator),
+            token(0, 2, 5, SemanticTokenTypes.keyword),
         ]);
     });
 
@@ -174,11 +178,11 @@ describe('KSON Semantic Tokens', () => {
 
     it('should handle nested objects with keys at different levels', () => {
         assertSemanticTokens('outer:\n  inner: value', [
-            {deltaLine: 0, deltaStart: 0, length: 5, type: SemanticTokenTypes.variable, modifiers: []}, // outer
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 1, deltaStart: 2, length: 5, type: SemanticTokenTypes.variable, modifiers: []}, // inner
-            {deltaLine: 0, deltaStart: 5, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 0, deltaStart: 2, length: 5, type: SemanticTokenTypes.string, modifiers: []},   // value
+            token(0, 0, 5, SemanticTokenTypes.variable), // outer
+            token(0, 5, 1, SemanticTokenTypes.operator), // :
+            token(1, 2, 5, SemanticTokenTypes.variable), // inner
+            token(0, 5, 1, SemanticTokenTypes.operator), // :
+            token(0, 2, 5, SemanticTokenTypes.string),   // value
         ]);
     });
 
@@ -186,54 +190,55 @@ describe('KSON Semantic Tokens', () => {
         const content = '{ "key": [ "v1", "v2" ] }';
 
         const expectedTokens: DecodedToken[] = [
-            {deltaLine: 0, deltaStart: 0, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // {
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.variable, modifiers: []}, // "
-            {deltaLine: 0, deltaStart: 1, length: 3, type: SemanticTokenTypes.variable, modifiers: []}, // key
-            {deltaLine: 0, deltaStart: 3, length: 1, type: SemanticTokenTypes.variable, modifiers: []}, // "
-            {deltaLine: 0, deltaStart: 1, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // :
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // [
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.string, modifiers: []},  // "
-            {deltaLine: 0, deltaStart: 1, length: 2, type: SemanticTokenTypes.string, modifiers: []},  // v1
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.string, modifiers: []},  // "
-            {deltaLine: 0, deltaStart: 1, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // ,
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.string, modifiers: []},  // "
-            {deltaLine: 0, deltaStart: 1, length: 2, type: SemanticTokenTypes.string, modifiers: []},  // v2
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.string, modifiers: []},  // "
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // ]
-            {deltaLine: 0, deltaStart: 2, length: 1, type: SemanticTokenTypes.operator, modifiers: []}, // }
-
+            token(0, 0, 1, SemanticTokenTypes.operator), // {
+            token(0, 2, 1, SemanticTokenTypes.variable), // "
+            token(0, 1, 3, SemanticTokenTypes.variable), // key
+            token(0, 3, 1, SemanticTokenTypes.variable), // "
+            token(0, 1, 1, SemanticTokenTypes.operator), // :
+            token(0, 2, 1, SemanticTokenTypes.operator), // [
+            token(0, 2, 1, SemanticTokenTypes.string),   // "
+            token(0, 1, 2, SemanticTokenTypes.string),   // v1
+            token(0, 2, 1, SemanticTokenTypes.string),   // "
+            token(0, 1, 1, SemanticTokenTypes.operator), // ,
+            token(0, 2, 1, SemanticTokenTypes.string),   // "
+            token(0, 1, 2, SemanticTokenTypes.string),   // v2
+            token(0, 2, 1, SemanticTokenTypes.string),   // "
+            token(0, 2, 1, SemanticTokenTypes.operator), // ]
+            token(0, 2, 1, SemanticTokenTypes.operator), // }
         ];
 
         assertSemanticTokens(content, expectedTokens);
     });
 
-    it('should not produce tokens for whitespace or EOF', () => {
-        const content = 'key: value';
-        const tokens = getTokens(content);
+    describe('token presence', () => {
+        it('should not produce tokens for whitespace or EOF', () => {
+            const content = 'key: value';
+            const tokens = getTokens(content);
 
-        // 'key: value' has 3 meaningful tokens: key, colon, value.
-        // Whitespace between them and the trailing EOF must be skipped.
-        assert.strictEqual(tokens.length, 3, 'Should have exactly 3 tokens (no whitespace or EOF)');
-    });
+            // 'key: value' has 3 meaningful tokens: key, colon, value.
+            // Whitespace between them and the trailing EOF must be skipped.
+            assert.strictEqual(tokens.length, 3, 'Should have exactly 3 tokens (no whitespace or EOF)');
+        });
 
-    it('should handle mixed content with multiple token types', () => {
-        const content = [
-            '{',
-            '  name: "Alice"',
-            '  age: 30',
-            '  active: true',
-            '  role: null',
-            '  tags:',
-            '    - admin',
-            '}'
-        ].join('\n');
-        const tokens = getTokens(content);
+        it('should handle mixed content with multiple token types', () => {
+            const content = [
+                '{',
+                '  name: "Alice"',
+                '  age: 30',
+                '  active: true',
+                '  role: null',
+                '  tags:',
+                '    - admin',
+                '}'
+            ].join('\n');
+            const tokens = getTokens(content);
 
-        const types = new Set(tokens.map(t => t.type));
-        assert.ok(types.has(SemanticTokenTypes.variable), 'Should have variable (keys)');
-        assert.ok(types.has(SemanticTokenTypes.string), 'Should have string');
-        assert.ok(types.has(SemanticTokenTypes.number), 'Should have number');
-        assert.ok(types.has(SemanticTokenTypes.keyword), 'Should have keyword (true/null)');
-        assert.ok(types.has(SemanticTokenTypes.operator), 'Should have operator');
+            const types = new Set(tokens.map(t => t.type));
+            assert.ok(types.has(SemanticTokenTypes.variable), 'Should have variable (keys)');
+            assert.ok(types.has(SemanticTokenTypes.string), 'Should have string');
+            assert.ok(types.has(SemanticTokenTypes.number), 'Should have number');
+            assert.ok(types.has(SemanticTokenTypes.keyword), 'Should have keyword (true/null)');
+            assert.ok(types.has(SemanticTokenTypes.operator), 'Should have operator');
+        });
     });
 });
