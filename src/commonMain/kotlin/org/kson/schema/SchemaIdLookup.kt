@@ -630,16 +630,17 @@ private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, cur
  */
 data object Draft7MetaSchema {
     const val ID = "http://json-schema.org/draft-07/schema"
-    val schemaValue = KsonCore.parseToAst("""
-        '${'$'}schema': 'http://json-schema.org/draft-07/schema#'
-        '${'$'}id': 'http://json-schema.org/draft-07/schema#'
+    val schemaValue = KsonCore.parseToAst(
+        $$"""
+        '$schema': 'http://json-schema.org/draft-07/schema#'
+        '$id': 'http://json-schema.org/draft-07/schema#'
         title: 'Core schema meta-schema'
         definitions:
           schemaArray:
             type: array
             minItems: 1
             items:
-              '${'$'}ref': '#'
+              '$ref': '#'
               .
             .
           nonNegativeInteger:
@@ -648,7 +649,7 @@ data object Draft7MetaSchema {
             .
           nonNegativeIntegerDefault0:
             allOf:
-              - '${'$'}ref': '#/definitions/nonNegativeInteger'
+              - '$ref': '#/definitions/nonNegativeInteger'
               - default: 0
                 .
             .
@@ -676,19 +677,19 @@ data object Draft7MetaSchema {
           - object
           - boolean
         properties:
-          '${'$'}id':
+          '$id':
             type: string
             format: 'uri-reference'
             .
-          '${'$'}schema':
+          '$schema':
             type: string
             format: uri
             .
-          '${'$'}ref':
+          '$ref':
             type: string
             format: 'uri-reference'
             .
-          '${'$'}comment':
+          '$comment':
             type: string
             .
           title:
@@ -727,54 +728,54 @@ data object Draft7MetaSchema {
             type: number
             .
           maxLength:
-            '${'$'}ref': '#/definitions/nonNegativeInteger'
+            '$ref': '#/definitions/nonNegativeInteger'
             .
           minLength:
-            '${'$'}ref': '#/definitions/nonNegativeIntegerDefault0'
+            '$ref': '#/definitions/nonNegativeIntegerDefault0'
             .
           pattern:
             type: string
             format: regex
             .
           additionalItems:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           items:
             anyOf:
-              - '${'$'}ref': '#'
-              - '${'$'}ref': '#/definitions/schemaArray'
+              - '$ref': '#'
+              - '$ref': '#/definitions/schemaArray'
                 .
             default: true
             .
           maxItems:
-            '${'$'}ref': '#/definitions/nonNegativeInteger'
+            '$ref': '#/definitions/nonNegativeInteger'
             .
           minItems:
-            '${'$'}ref': '#/definitions/nonNegativeIntegerDefault0'
+            '$ref': '#/definitions/nonNegativeIntegerDefault0'
             .
           uniqueItems:
             type: boolean
             default: false
             .
           contains:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           maxProperties:
-            '${'$'}ref': '#/definitions/nonNegativeInteger'
+            '$ref': '#/definitions/nonNegativeInteger'
             .
           minProperties:
-            '${'$'}ref': '#/definitions/nonNegativeIntegerDefault0'
+            '$ref': '#/definitions/nonNegativeIntegerDefault0'
             .
           required:
-            '${'$'}ref': '#/definitions/stringArray'
+            '$ref': '#/definitions/stringArray'
             .
           additionalProperties:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           definitions:
             type: object
             additionalProperties:
-              '${'$'}ref': '#'
+              '$ref': '#'
               .
             default:
               {}
@@ -782,7 +783,7 @@ data object Draft7MetaSchema {
           properties:
             type: object
             additionalProperties:
-              '${'$'}ref': '#'
+              '$ref': '#'
               .
             default:
               {}
@@ -790,7 +791,7 @@ data object Draft7MetaSchema {
           patternProperties:
             type: object
             additionalProperties:
-              '${'$'}ref': '#'
+              '$ref': '#'
               .
             propertyNames:
               format: regex
@@ -802,13 +803,13 @@ data object Draft7MetaSchema {
             type: object
             additionalProperties:
               anyOf:
-                - '${'$'}ref': '#'
-                - '${'$'}ref': '#/definitions/stringArray'
+                - '$ref': '#'
+                - '$ref': '#/definitions/stringArray'
                   .
               .
             .
           propertyNames:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           const: true
           enum:
@@ -819,10 +820,10 @@ data object Draft7MetaSchema {
             .
           type:
             anyOf:
-              - '${'$'}ref': '#/definitions/simpleTypes'
+              - '$ref': '#/definitions/simpleTypes'
               - type: array
                 items:
-                  '${'$'}ref': '#/definitions/simpleTypes'
+                  '$ref': '#/definitions/simpleTypes'
                   .
                 minItems: 1
                 uniqueItems: true
@@ -838,27 +839,28 @@ data object Draft7MetaSchema {
             type: string
             .
           if:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           then:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           else:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           allOf:
-            '${'$'}ref': '#/definitions/schemaArray'
+            '$ref': '#/definitions/schemaArray'
             .
           anyOf:
-            '${'$'}ref': '#/definitions/schemaArray'
+            '$ref': '#/definitions/schemaArray'
             .
           oneOf:
-            '${'$'}ref': '#/definitions/schemaArray'
+            '$ref': '#/definitions/schemaArray'
             .
           not:
-            '${'$'}ref': '#'
+            '$ref': '#'
             .
           .
         default: true
-    """).ksonValue!!
+    """
+    ).ksonValue!!
 }
