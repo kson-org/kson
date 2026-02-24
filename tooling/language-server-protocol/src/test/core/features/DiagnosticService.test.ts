@@ -120,12 +120,10 @@ describe('KSON Diagnostics', () => {
         });
     });
 
-    describe('null/undefined document', () => {
-        it('should return empty report for null document', () => {
-            const report = diagnosticService.createDocumentDiagnosticReport(null);
-            const items = (report as RelatedFullDocumentDiagnosticReport).items;
-            assert.strictEqual(items.length, 0);
-        });
+    it('should return empty report for null document', () => {
+        const report = diagnosticService.createDocumentDiagnosticReport(null);
+        const items = (report as RelatedFullDocumentDiagnosticReport).items;
+        assert.strictEqual(items.length, 0);
     });
 
     describe('schema parse failure', () => {
@@ -150,15 +148,13 @@ describe('KSON Diagnostics', () => {
         });
     });
 
-    describe('document without schema', () => {
-        it('should return only parse errors when no schema is configured', () => {
-            const diagnostics = getDiagnostics('key: "value" extra');
-            assert.ok(diagnostics.length > 0);
-            // All diagnostics should come from parse errors only
-            for (const d of diagnostics) {
-                assert.strictEqual(d.source, 'kson');
-            }
-        });
+    it('should return only parse errors when no schema is configured', () => {
+        const diagnostics = getDiagnostics('key: "value" extra');
+        assert.ok(diagnostics.length > 0);
+        // All diagnostics should come from parse errors only
+        for (const d of diagnostics) {
+            assert.strictEqual(d.source, 'kson');
+        }
     });
 
     describe('schema cache correctness', () => {
