@@ -1,48 +1,30 @@
 import {describe, it} from 'mocha';
 import assert from 'assert';
-import {Position} from 'vscode-languageserver';
+import {CompletionList, Position} from 'vscode-languageserver';
 import {CompletionService} from '../../../core/features/CompletionService.js';
 import {createKsonDocument, pos} from '../../TestHelpers.js';
-
-const ENUM_SCHEMA = `{
-    type: object
-    properties: {
-        status: {
-            type: string
-            description: "The current status"
-            enum: ["active", "inactive", "pending"]
-        }
-    }
-}`;
-
-const BOOLEAN_SCHEMA = `{
-    type: object
-    properties: {
-        enabled: {
-            type: boolean
-            description: "Whether the feature is enabled"
-        }
-    }
-}`;
-
-const DOCUMENTED_ENUM_SCHEMA = `{
-    type: object
-    properties: {
-        level: {
-            type: string
-            title: "Log Level"
-            description: "The logging level for the application"
-            enum: ["debug", "info", "warn", "error"]
-        }
-    }
-}`;
 
 describe('CompletionService', () => {
     const completionService = new CompletionService();
 
-    function getCompletionLabels(content: string, position: Position, schema?: string): string[] | null {
+    const ENUM_SCHEMA = `{
+        type: object
+        properties: {
+            status: {
+                type: string
+                description: "The current status"
+                enum: ["active", "inactive", "pending"]
+            }
+        }
+    }`;
+
+    function getCompletions(content: string, position: Position, schema?: string): CompletionList | null {
         const document = createKsonDocument(content, schema);
-        const completions = completionService.getCompletions(document, position);
+        return completionService.getCompletions(document, position);
+    }
+
+    function getCompletionLabels(content: string, position: Position, schema?: string): string[] | null {
+        const completions = getCompletions(content, position, schema);
         if (!completions) return null;
         return completions.items.map(item => item.label);
     }
@@ -71,7 +53,17 @@ describe('CompletionService', () => {
     });
 
     it('should return boolean value completions', () => {
-        const labels = getCompletionLabels('{ enabled: true }', pos(0, 13), BOOLEAN_SCHEMA);
+        const schema = `{
+            type: object
+            properties: {
+                enabled: {
+                    type: boolean
+                    description: "Whether the feature is enabled"
+                }
+            }
+        }`;
+
+        const labels = getCompletionLabels('{ enabled: true }', pos(0, 13), schema);
 
         assert.ok(labels, 'Completions should not be null');
         assert.ok(labels.includes('true'));
@@ -79,8 +71,19 @@ describe('CompletionService', () => {
     });
 
     it('should include documentation in completion items', () => {
-        const document = createKsonDocument('{ level: "info" }', DOCUMENTED_ENUM_SCHEMA);
-        const completions = completionService.getCompletions(document, pos(0, 11));
+        const schema = `{
+            type: object
+            properties: {
+                level: {
+                    type: string
+                    title: "Log Level"
+                    description: "The logging level for the application"
+                    enum: ["debug", "info", "warn", "error"]
+                }
+            }
+        }`;
+
+        const completions = getCompletions('{ level: "info" }', pos(0, 11), schema);
 
         assert.ok(completions, 'Completions should not be null');
         const hasDocumentation = completions.items.some(item =>
@@ -92,7 +95,7 @@ describe('CompletionService', () => {
     });
 
     it('should return completions with isIncomplete set to false', () => {
-        const schemaContent = `{
+        const schema = `{
             type: object
             properties: {
                 color: {
@@ -102,8 +105,7 @@ describe('CompletionService', () => {
             }
         }`;
 
-        const document = createKsonDocument('{ color: "red" }', schemaContent);
-        const completions = completionService.getCompletions(document, pos(0, 11));
+        const completions = getCompletions('{ color: "red" }', pos(0, 11), schema);
 
         assert.ok(completions, 'Completions should not be null');
         assert.strictEqual(completions.isIncomplete, false, 'Completion list should be marked as complete');
