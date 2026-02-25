@@ -1,6 +1,20 @@
 '$schema': 'http://json-schema.org/draft-07/schema#'
 '$id': 'http://json-schema.org/draft-07/schema#'
 title: 'Core schema meta-schema'
+description: %markdown
+  KSON adaptation of the JSON Schema Draft-07 meta-schema.
+
+  This meta-schema extends the [original](http://json-schema.org/draft-07/schema#)
+  with KSON-native features:
+
+  - **`description`** and **`$comment`** accept embed blocks in addition to
+    plain strings, via the `stringOrEmbedBlock` definition.  This allows schema
+    authors to write rich, tagged, multi-line documentation using KSON's embed
+    block syntax.
+
+  For JSON Schema compatibility, transpile with `retainEmbedTags = false` to
+  collapse embed blocks back to plain strings.
+  %%
 definitions:
   schemaArray:
     type: array
@@ -37,6 +51,23 @@ definitions:
     uniqueItems: true
     default: <>
     .
+  stringOrEmbedBlock:
+    anyOf:
+      - type: string
+      - type: object
+        properties:
+          embedTag:
+            type: string
+            .
+          embedContent:
+            type: string
+            .
+          .
+        required:
+          - embedContent
+        additionalProperties: false
+        .
+    .
   .
 type:
   - object
@@ -55,13 +86,13 @@ properties:
     format: 'uri-reference'
     .
   '$comment':
-    type: string
+    '$ref': '#/definitions/stringOrEmbedBlock'
     .
   title:
     type: string
     .
   description:
-    type: string
+    '$ref': '#/definitions/stringOrEmbedBlock'
     .
   default: true
   readOnly:
