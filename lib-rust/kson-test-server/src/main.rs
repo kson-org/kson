@@ -3,7 +3,7 @@ use serde::Deserialize;
 use serde_json::Value;
 
 use kson::{
-    EmbedRule, EmbedRuleResult, FormatOptions, FormattingStyle, IndentType, Kson, KsonValue,
+    EmbedRule, FormatOptions, FormattingStyle, IndentType, Kson, KsonValue,
     indent_type, kson_value, transpile_options,
 };
 
@@ -46,11 +46,6 @@ enum Request {
         schema_kson: String,
         kson: String,
         filepath: Option<String>,
-    },
-    #[serde(rename = "validateEmbedRule")]
-    ValidateEmbedRule {
-        #[serde(rename = "embedBlockRule")]
-        embed_block_rule: EmbedRuleDto,
     },
 }
 
@@ -259,15 +254,7 @@ fn convert_format_options(dto: Option<&FormatOptionsDto>) -> FormatOptions {
         .map(|rules| {
             rules
                 .iter()
-                .filter_map(|r| {
-                    match EmbedRule::from_path_pattern(
-                        &r.path_pattern,
-                        r.tag.as_deref(),
-                    ) {
-                        EmbedRuleResult::Success(s) => Some(s.embed_rule()),
-                        EmbedRuleResult::Failure(_) => None,
-                    }
-                })
+                .map(|r| EmbedRule::new(&r.path_pattern, r.tag.as_deref()))
                 .collect()
         })
         .unwrap_or_default();
@@ -398,22 +385,6 @@ fn handle_request(request: Request) -> Value {
                     "success": false,
                     "errors": errors,
                 })
-            }
-        },
-        Request::ValidateEmbedRule { embed_block_rule } => {
-            match EmbedRule::from_path_pattern(
-                &embed_block_rule.path_pattern,
-                embed_block_rule.tag.as_deref(),
-            ) {
-                EmbedRuleResult::Success(_) => serde_json::json!({
-                    "command": "validateEmbedRule",
-                    "success": true,
-                }),
-                EmbedRuleResult::Failure(failure) => serde_json::json!({
-                    "command": "validateEmbedRule",
-                    "success": false,
-                    "error": failure.message(),
-                }),
             }
         }
     }

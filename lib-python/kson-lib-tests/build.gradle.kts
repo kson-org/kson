@@ -6,16 +6,6 @@ repositories {
     mavenCentral()
 }
 
-val syncCommonTestSources by tasks.registering(Sync::class) {
-    from(project(":kson-lib").file("src/commonTest/kotlin"))
-    into(layout.buildDirectory.dir("commonTestSources"))
-}
-
-val syncJvmTestSources by tasks.registering(Sync::class) {
-    from(project(":kson-lib").file("src/jvmTest/kotlin"))
-    into(layout.buildDirectory.dir("jvmTestSources"))
-}
-
 tasks.withType<Test> {
     dependsOn(":lib-python:build")
 
@@ -31,22 +21,17 @@ kotlin {
     sourceSets {
         commonTest {
             dependencies {
-                implementation(project(":kson-lib-http"))
-                implementation(kotlin("test"))
-            }
-
-            kotlin {
-                srcDir(syncCommonTestSources)
+                implementation(project(":kson-service-tests"))
+                implementation(project(":kson-http"))
             }
         }
         jvmTest {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter-api:5.14.2")
-                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.14.2")
-            }
+                implementation(kotlin("test-junit5"))
 
-            kotlin {
-                srcDir(syncJvmTestSources)
+                // Important: this ensures we have a recent-enough version of JUnit, supporting the `AutoCloseable`
+                // interface (otherwise test runs never finish because the HTTP server doesn't get closed)
+                implementation(project.dependencies.platform("org.junit:junit-bom:5.14.3"))
             }
         }
     }

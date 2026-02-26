@@ -1,4 +1,4 @@
-# kson-lib-http
+# kson-http
 
 A reimplementation of KSON's public API (see [kson-lib](../kson-lib)) based on
 HTTP requests to a server that respects the [kson-api-schema](./kson-api-schema.json).

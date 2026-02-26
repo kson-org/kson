@@ -2,9 +2,10 @@
 
 import json
 import sys
+import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from kson import (
-    Kson, FormatOptions, IndentType, FormattingStyle, EmbedRule, EmbedRuleResult,
+    Kson, FormatOptions, IndentType, FormattingStyle, EmbedRule,
     TranspileOptions, Result, SchemaResult, KsonValue, KsonValueType,
     MessageSeverity,
 )
@@ -114,9 +115,7 @@ def _parse_formatting_style(name):
 
 
 def _parse_embed_rule(obj):
-    result = EmbedRule.from_path_pattern(obj["pathPattern"], obj.get("tag"))
-    assert isinstance(result, EmbedRuleResult.Success)
-    return result.embed_rule()
+    return EmbedRule(obj["pathPattern"], obj.get("tag"))
 
 
 def _parse_format_options(obj):
@@ -183,15 +182,6 @@ def handle_parse_schema(req):
         }
 
 
-def handle_validate_embed_rule(req):
-    rule_obj = req["embedBlockRule"]
-    result = EmbedRule.from_path_pattern(rule_obj["pathPattern"], rule_obj.get("tag"))
-    if isinstance(result, EmbedRuleResult.Success):
-        return {"command": "validateEmbedRule", "success": True}
-    else:
-        return {"command": "validateEmbedRule", "success": False, "error": result.message()}
-
-
 def handle_validate(req):
     schema_result = Kson.parse_schema(req["schemaKson"])
     if isinstance(schema_result, SchemaResult.Failure):
@@ -217,7 +207,6 @@ HANDLERS = {
     "analyze": handle_analyze,
     "parseSchema": handle_parse_schema,
     "validate": handle_validate,
-    "validateEmbedRule": handle_validate_embed_rule,
 }
 
 
@@ -241,7 +230,8 @@ class KsonHandler(BaseHTTPRequestHandler):
         try:
             response = handler(req)
         except Exception as e:
-            self._send_error(500, str(e))
+            stack_trace = traceback.format_exc()
+            self._send_error(500, stack_trace)
             return
 
         self._send_json(200, response)
