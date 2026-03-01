@@ -13,10 +13,15 @@ pluginManagement {
 
 rootProject.name = "kson"
 include("native-tests")
+include("kson-service-api")
+include("kson-service-tests")
 include("kson-lib")
+include("kson-http")
 include("kson-tooling-lib")
 include("lib-python")
+include("lib-python:kson-lib-tests")
 include("lib-rust")
+include("lib-rust:kson-lib-tests")
 include("tooling:jetbrains")
 include("tooling:language-server-protocol")
 include("tooling:lsp-clients")

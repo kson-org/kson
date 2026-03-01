@@ -401,6 +401,40 @@ pub(super) fn from_kotlin_list<T: FromKotlinObject>(list: jobject) -> Vec<T> {
     elements
 }
 
+pub(super) fn to_kotlin_map<
+   K: ToKotlinObject + Eq + std::hash::Hash,
+   V: ToKotlinObject,
+>(
+    items: &std::collections::HashMap<K, V>
+) -> KotlinPtr {
+    let (env, _detach_guard) = attach_thread_to_java_vm();
+
+    // Create a new map
+    let map_class = get_class(env, c"java/util/HashMap");
+    let constructor = get_method(env, map_class.as_kotlin_object(), c"<init>", c"()V");
+    let map = unsafe {
+        let new_object = (**env).NewObjectA.unwrap();
+        new_object(env, map_class.as_kotlin_object(), constructor, std::ptr::null())
+    };
+    panic_upon_exception(env);
+    let map = to_gc_global_ref(env, map);
+
+    // Add entries to it
+    let put_method = get_method(env, map_class.as_kotlin_object(), c"put", c"(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+    for (key, value) in items {
+        let key = key.to_kotlin_object();
+        let value = value.to_kotlin_object();
+        let args = &[jvalue { l: key.as_kotlin_object() }, jvalue { l: value.as_kotlin_object() }];
+        unsafe {
+            let call_object = (**env).CallObjectMethodA.unwrap();
+            call_object(env, map.as_kotlin_object(), put_method, args.as_ptr());
+        }
+        panic_upon_exception(env);
+    }
+
+    map
+}
+
 pub(super) fn from_kotlin_value_map<
     K: FromKotlinObject + Eq + std::hash::Hash,
     V: FromKotlinObject,
