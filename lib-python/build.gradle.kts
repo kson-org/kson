@@ -105,11 +105,16 @@ tasks {
             exclude(".gradle/**")
         }
 
-        // Copy lib-python (build files and source)
+        // Copy lib-python (build files and source, excluding native binaries
+        // which are platform-specific and must be built from source)
+        // Keep in sync with PLATFORM_NATIVE_LIBRARIES in build_backend.py
         from(project.projectDir) {
             into("lib-python")
             include("build.gradle.kts")
             include("src/**")
+            exclude("src/kson/kson.dll")
+            exclude("src/kson/libkson.dylib")
+            exclude("src/kson/libkson.so")
         }
     }
 
@@ -133,12 +138,7 @@ tasks {
         errorOutput = System.err
         isIgnoreExitValue = false
 
-        // Configure cibuildwheel
-        environment("CIBW_BUILD", "cp310-*")  // Build for Python 3.10+
-        environment("CIBW_SKIP", "*-musllinux_*")  // Skip musl Linux builds
-        environment("CIBW_ARCHS", "native")  // Build only for native architecture
-        environment("CIBW_TEST_REQUIRES", "pytest")  // Install pytest for testing
-        environment("CIBW_TEST_COMMAND", "pytest -v {project}/tests")
+        // cibuildwheel configuration lives in pyproject.toml under [tool.cibuildwheel]
 
         doLast {
             println("Successfully built platform-specific wheel using cibuildwheel")
