@@ -6,6 +6,7 @@ Available on Linux, macOS, and Windows. Requires Python 3.10+.
 
 ## Installation
 
+<!--pytest-codeblocks:skip-->
 ```bash
 pip install kson-lang
 ```
