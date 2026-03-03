@@ -1,13 +1,5 @@
 import org.gradle.internal.os.OperatingSystem
 
-val build = "build"
-val copyNativeArtifacts = "copyNativeArtifacts"
-val test = "test"
-val typeCheck = "typeCheck"
-val prepareSdistBuildEnvironment = "prepareSdistBuildEnvironment"
-val createSdistBuildEnvironment = "createSdistBuildEnvironment"
-val buildWheel = "buildWheel"
-
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
        "cmd /c uvw.bat"
@@ -15,15 +7,15 @@ tasks {
         "./uvw"
     }
 
-    register<CopyNativeArtifactsTask>(copyNativeArtifacts) {
+    val copyNativeArtifacts by register<CopyNativeArtifactsTask>("copyNativeArtifacts") {
         dependsOn(":kson-lib:buildWithGraalVmNativeImage")
     }
 
-    register<Task>(build) {
+    val build by register<Task>("build") {
         dependsOn(copyNativeArtifacts)
     }
 
-    register<Exec>(test) {
+    val test by register<Exec>("test") {
         dependsOn(build)
 
         group = "verification"
@@ -33,7 +25,18 @@ tasks {
         isIgnoreExitValue = false
     }
 
-    register<Exec>(typeCheck) {
+    val validateReadme by register<Exec>("validateReadme") {
+        dependsOn(build)
+
+        group = "verification"
+        description = "Validates Python code blocks in readme.md"
+        commandLine = "$uvwPath run pytest --codeblocks readme.md".split(" ")
+        standardOutput = System.out
+        errorOutput = System.err
+        isIgnoreExitValue = false
+    }
+
+    val typeCheck by register<Exec>("typeCheck") {
         group = "verification"
         commandLine = "$uvwPath run pyright".split(" ")
         standardOutput = System.out
@@ -43,10 +46,11 @@ tasks {
 
     register<Task>("check") {
         dependsOn(test)
+        dependsOn(validateReadme)
         dependsOn(typeCheck)
     }
 
-    register<Copy>(prepareSdistBuildEnvironment) {
+    val prepareSdistBuildEnvironment by register<Copy>("prepareSdistBuildEnvironment") {
         group = "build"
         description = "Prepare kson-sdist directory with necessary Gradle files for sdist"
 
@@ -113,7 +117,7 @@ tasks {
         }
     }
 
-    register<Exec>(createSdistBuildEnvironment){
+    register<Exec>("createSdistBuildEnvironment"){
         dependsOn(prepareSdistBuildEnvironment)
         group = "build"
         commandLine = "$uvwPath build --sdist".split(" ")
@@ -124,7 +128,7 @@ tasks {
         into(project.projectDir)
     }
 
-    register<Exec>(buildWheel) {
+    register<Exec>("buildWheel") {
         dependsOn(copyNativeArtifacts, "copyLicense")
         group = "build"
         description = "Build platform-specific wheel distribution with cibuildwheel"

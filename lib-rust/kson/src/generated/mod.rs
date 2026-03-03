@@ -266,6 +266,62 @@ impl std::hash::Hash for Position {
 }
 
 
+
+#[derive(Clone)]
+pub struct Companion {
+    kotlin_ptr: KotlinPtr,
+}
+
+impl FromKotlinObject for Companion {
+    fn from_kotlin_object(obj: self::sys::jobject) -> Self {
+        let (env, _detach_guard) = util::attach_thread_to_java_vm();
+        let kotlin_ptr = util::to_gc_global_ref(env, obj);
+        Self { kotlin_ptr }
+    }
+}
+
+impl ToKotlinObject for Companion {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        self.kotlin_ptr.clone()
+    }
+}
+
+impl AsKotlinObject for Companion {
+    fn as_kotlin_object(&self) -> self::sys::jobject {
+        self.kotlin_ptr.inner.inner
+    }
+}
+
+impl Companion {
+}
+
+
+impl Companion {
+}
+
+impl std::fmt::Debug for Companion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let obj = self.to_kotlin_object();
+        write!(f, "{}", util::call_to_string(c"org/kson/EmbedRule$Companion", &obj))
+    }
+}
+
+impl Eq for Companion {}
+impl PartialEq for Companion {
+    fn eq(&self, other: &Companion) -> bool {
+        util::equals(self.to_kotlin_object(), other.to_kotlin_object())
+    }
+}
+impl std::hash::Hash for Companion {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        util::apply_hash_code(self.to_kotlin_object(), state)
+    }
+}
+
+
 /// Represents a message logged during Kson processing
 #[derive(Clone)]
 pub struct Message {
@@ -3581,7 +3637,7 @@ impl EmbedRule {
         path_pattern: &str,
         tag: Option<&str>,
     ) -> EmbedRuleResult {
-        let self_ptr = util::access_static_field(c"org/kson/EmbedRule", c"INSTANCE", c"Lorg/kson/EmbedRule;");
+        let self_ptr = util::access_static_field(c"org/kson/EmbedRule", c"Companion", c"Lorg/kson/EmbedRule$Companion;");
         let self_obj = self_ptr.as_kotlin_object();
         let path_pattern_ptr = path_pattern.to_kotlin_object();
         let path_pattern = path_pattern_ptr.as_kotlin_object();
@@ -3591,7 +3647,7 @@ impl EmbedRule {
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
-            c"org/kson/EmbedRule",
+            c"org/kson/EmbedRule$Companion",
             c"fromPathPattern",
             c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
             CallObjectMethod,
@@ -3758,6 +3814,10 @@ pub mod indent_type {
     }
 
     impl Tabs {
+        pub fn new() -> Self {
+            let kotlin_ptr = util::access_static_field(c"org/kson/IndentType$Tabs", c"INSTANCE", c"Lorg/kson/IndentType$Tabs;");
+            Self { kotlin_ptr }
+        }
     }
 
 

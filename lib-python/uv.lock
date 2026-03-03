@@ -504,6 +504,7 @@ dev = [
     { name = "cibuildwheel", version = "3.1.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pyright" },
     { name = "pytest" },
+    { name = "pytest-codeblocks" },
     { name = "ruff" },
     { name = "twine" },
 ]
@@ -516,6 +517,7 @@ dev = [
     { name = "cibuildwheel", specifier = ">=2.16.0" },
     { name = "pyright", specifier = ">=1.1.403" },
     { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-codeblocks", specifier = ">=0.17.0" },
     { name = "ruff", specifier = ">=0.12.8" },
     { name = "twine", specifier = ">=6.2.0" },
 ]
@@ -699,6 +701,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/ba/45911d754e8eba3d5a841a5ce61a65a685ff1798421ac054f85aa8747dfb/pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c", size = 1517714, upload-time = "2025-06-18T05:48:06.109Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/16/c8a903f4c4dffe7a12843191437d7cd8e32751d5de349d45d3fe69544e87/pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7", size = 365474, upload-time = "2025-06-18T05:48:03.955Z" },
+]
+
+[[package]]
+name = "pytest-codeblocks"
+version = "0.17.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/99/1ee3017a525dcb36566f0523938fbc20fb33ef8bf957205fafe6659f3a60/pytest_codeblocks-0.17.0.tar.gz", hash = "sha256:446e1babd182f54b4f113d567737a22f5405cade144c08a0085b2985247943d5", size = 11176, upload-time = "2023-09-17T19:17:31.05Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/2c/503f797c7ac1e35d81944f8fbcf3ea7a1965e435676570a833035d8d0937/pytest_codeblocks-0.17.0-py3-none-any.whl", hash = "sha256:b2aed8e66c3ce65435630783b391e7c7ae46f80b8220d3fa1bb7c689b36e78ad", size = 7716, upload-time = "2023-09-17T19:17:29.506Z" },
 ]
 
 [[package]]

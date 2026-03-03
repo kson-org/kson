@@ -6,7 +6,7 @@ authors = [
   { name="KSON", email="kson@kson.org" },
 ]
 description = "KSON: a next-gen configuration language and love letter to the humans maintaining computer configuration"
-readme = "README.md"
+readme = "readme.md"
 requires-python = ">=3.10"
 dependencies = [
     "cffi>=1.17.1",
@@ -48,10 +48,14 @@ package-dir = {"" = "src"}
 [tool.setuptools.package-data]
 kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified.h"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",
     "pytest>=8.4.1",
+    "pytest-codeblocks>=0.17.0",
     "ruff>=0.12.8",
     "cibuildwheel>=2.16.0",
     "twine>=6.2.0",
