@@ -175,7 +175,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         }
 
         // Track all current schema nodes we're exploring (can branch out due to combinators)
-        var currentNodes = listOf(ResolvedRef(schemaRootValue, startingBaseUri))
+        var currentNodes = listOf(resolveRefIfPresent(schemaRootValue, startingBaseUri))
 
         for (token in documentPathTokens) {
             val nextNodes = mutableListOf<ResolvedRef>()
