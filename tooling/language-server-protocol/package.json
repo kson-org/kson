@@ -39,7 +39,7 @@
     "typescript"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.19.4"
   },
   "dependencies": {
     "kson": "file:../../kson-lib/build/dist/js/productionLibrary",

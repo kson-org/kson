@@ -96,7 +96,8 @@
             "delimited"
           ],
           "enumDescriptions": [
-            "Plain formatting with minimal delimiters", "Delimited formatting"
+            "Plain formatting with minimal delimiters",
+            "Delimited formatting"
           ],
           "default": "plain",
           "description": "Formatting style for Kson documents"
@@ -106,7 +107,7 @@
   },
   "engines": {
     "vscode": "^1.99.3",
-    "node": "^20.18.1"
+    "node": "20.19.4"
   },
   "scripts": {
     "package": "npm run check-types && tsx esbuild.ts --production",
@@ -135,7 +136,7 @@
     "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
-    "oniguruma": "^7.2.3",
+    "vscode-oniguruma": "^2.0.1",
     "process": "^0.11.10",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.3",
