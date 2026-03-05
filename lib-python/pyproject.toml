@@ -48,6 +48,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.package-data]
 kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified.h"]
 
+[tool.pyright]
+include = ["src", "build_backend.py", "tests"]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",
