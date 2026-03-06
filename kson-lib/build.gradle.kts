@@ -10,7 +10,7 @@ plugins {
     kotlin("multiplatform")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
-    id("nl.ochagavia.krossover") version "1.0.5"
+    id("nl.ochagavia.krossover") version "1.0.7"
 }
 
 repositories {
@@ -40,11 +40,22 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":"))
+                implementation(project(":kson-service-api"))
             }
         }
         val commonTest by getting {
             dependencies {
+                implementation(project(":kson-service-tests"))
+            }
+        }
+        val jsTest by getting {
+            dependencies {
                 implementation(kotlin("test"))
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test-junit5"))
             }
         }
     }
@@ -65,8 +76,8 @@ krossover {
         jniSysModule = "kson_sys"
         outputDir = Path("${rootProject.projectDir}/lib-rust/kson/src/generated")
         returnTypeMappings = listOf(
-            ReturnTypeMapping("org.kson.Result", "std::result::Result<result::Success, result::Failure>", "crate::kson_result_into_rust_result"),
-            ReturnTypeMapping("org.kson.SchemaResult", "std::result::Result<schema_result::Success, schema_result::Failure>", "crate::kson_schema_result_into_rust_result")
+            ReturnTypeMapping("org.kson.api.Result", "std::result::Result<result::Success, result::Failure>", "crate::kson_result_into_rust_result"),
+            ReturnTypeMapping("org.kson.api.SchemaResult", "std::result::Result<schema_result::Success, schema_result::Failure>", "crate::kson_schema_result_into_rust_result")
         )
     }
 }
@@ -114,7 +125,7 @@ tasks.register("copyNodeDistribution") {
  *
  * This task is used when you need to prepare the production library with its dependencies
  * installed.
- * 
+ *
  * This will:
  * 1. Build the production library (via jsNodeProductionLibraryDistribution)
  * 2. Run 'npm install' in build/dist/js/productionLibrary

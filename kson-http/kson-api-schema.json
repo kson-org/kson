@@ -1,0 +1,595 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kson.org/api/schema",
+  "title": "KSON API Schema",
+  "description": "Schema for the KSON public API, supporting format, toJson, toYaml, analyze, parseSchema, validate, and validateEmbedRule commands.",
+
+  "$defs": {
+    "Position": {
+      "type": "object",
+      "description": "A zero-based line/column position in a document.",
+      "properties": {
+        "line": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The line number (0-based)"
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The column number (0-based)"
+        }
+      },
+      "required": ["line", "column"],
+      "additionalProperties": false
+    },
+
+    "Message": {
+      "type": "object",
+      "description": "A message logged during KSON processing.",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/MessageSeverity"
+        },
+        "start": {
+          "$ref": "#/$defs/Position"
+        },
+        "end": {
+          "$ref": "#/$defs/Position"
+        }
+      },
+      "required": ["message", "severity", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "MessageSeverity": {
+      "type": "string",
+      "enum": ["ERROR", "WARNING"]
+    },
+
+    "IndentType": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Use spaces for indentation.",
+          "properties": {
+            "type": { "const": "spaces" },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 2,
+              "description": "Number of spaces per indent level"
+            }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "description": "Use tabs for indentation.",
+          "properties": {
+            "type": { "const": "tabs" }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "FormattingStyle": {
+      "type": "string",
+      "enum": ["PLAIN", "DELIMITED", "COMPACT", "CLASSIC"]
+    },
+
+    "EmbedRule": {
+      "type": "object",
+      "description": "A rule for formatting string values at specific paths as embed blocks.",
+      "properties": {
+        "pathPattern": {
+          "type": "string",
+          "description": "A JsonPointerGlob pattern (e.g., \"/scripts/*\", \"/queries/**\")"
+        },
+        "tag": {
+          "type": ["string", "null"],
+          "description": "Optional embed tag (e.g., \"yaml\", \"sql\", \"bash\")"
+        }
+      },
+      "required": ["pathPattern"],
+      "additionalProperties": false
+    },
+
+    "FormatOptions": {
+      "type": "object",
+      "description": "Options for formatting KSON output.",
+      "properties": {
+        "indentType": {
+          "$ref": "#/$defs/IndentType"
+        },
+        "formattingStyle": {
+          "$ref": "#/$defs/FormattingStyle"
+        },
+        "embedBlockRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EmbedRule" }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "TokenType": {
+      "type": "string",
+      "enum": [
+        "CURLY_BRACE_L",
+        "CURLY_BRACE_R",
+        "SQUARE_BRACKET_L",
+        "SQUARE_BRACKET_R",
+        "ANGLE_BRACKET_L",
+        "ANGLE_BRACKET_R",
+        "COLON",
+        "DOT",
+        "END_DASH",
+        "COMMA",
+        "COMMENT",
+        "EMBED_OPEN_DELIM",
+        "EMBED_CLOSE_DELIM",
+        "EMBED_TAG",
+        "EMBED_PREAMBLE_NEWLINE",
+        "EMBED_CONTENT",
+        "FALSE",
+        "UNQUOTED_STRING",
+        "ILLEGAL_CHAR",
+        "LIST_DASH",
+        "NULL",
+        "NUMBER",
+        "STRING_OPEN_QUOTE",
+        "STRING_CLOSE_QUOTE",
+        "STRING_CONTENT",
+        "TRUE",
+        "WHITESPACE",
+        "EOF"
+      ]
+    },
+
+    "Token": {
+      "type": "object",
+      "description": "A token produced by the lexing phase.",
+      "properties": {
+        "tokenType": { "$ref": "#/$defs/TokenType" },
+        "text": { "type": "string" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["tokenType", "text", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonValue": {
+      "oneOf": [
+        { "$ref": "#/$defs/KsonObject" },
+        { "$ref": "#/$defs/KsonArray" },
+        { "$ref": "#/$defs/KsonString" },
+        { "$ref": "#/$defs/KsonInteger" },
+        { "$ref": "#/$defs/KsonDecimal" },
+        { "$ref": "#/$defs/KsonBoolean" },
+        { "$ref": "#/$defs/KsonNull" },
+        { "$ref": "#/$defs/KsonEmbed" }
+      ]
+    },
+
+    "KsonObject": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "OBJECT" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/KsonValue" },
+          "description": "Key-value pairs of the object"
+        },
+        "propertyKeys": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/KsonString" },
+          "description": "Property key metadata (including positions)"
+        },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "properties", "propertyKeys", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonArray": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "ARRAY" },
+        "elements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/KsonValue" }
+        },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "elements", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonString": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "STRING" },
+        "value": { "type": "string" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "value", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonInteger": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "INTEGER" },
+        "value": { "type": "integer" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "value", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonDecimal": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "DECIMAL" },
+        "value": { "type": "number" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "value", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonBoolean": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "BOOLEAN" },
+        "value": { "type": "boolean" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "value", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonNull": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "NULL" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "KsonEmbed": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "EMBED" },
+        "tag": {
+          "type": ["string", "null"],
+          "description": "Optional embed tag"
+        },
+        "content": { "type": "string" },
+        "start": { "$ref": "#/$defs/Position" },
+        "end": { "$ref": "#/$defs/Position" }
+      },
+      "required": ["type", "content", "start", "end"],
+      "additionalProperties": false
+    },
+
+    "FormatCommand": {
+      "type": "object",
+      "description": "Formats KSON source with the specified formatting options.",
+      "properties": {
+        "command": { "const": "format" },
+        "kson": {
+          "type": "string",
+          "description": "The KSON source to format"
+        },
+        "formatOptions": {
+          "$ref": "#/$defs/FormatOptions"
+        }
+      },
+      "required": ["command", "kson"],
+      "additionalProperties": false
+    },
+
+    "ToJsonCommand": {
+      "type": "object",
+      "description": "Converts KSON to JSON.",
+      "properties": {
+        "command": { "const": "toJson" },
+        "kson": {
+          "type": "string",
+          "description": "The KSON source to convert"
+        },
+        "retainEmbedTags": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to retain embed tags in the JSON output"
+        }
+      },
+      "required": ["command", "kson"],
+      "additionalProperties": false
+    },
+
+    "ToYamlCommand": {
+      "type": "object",
+      "description": "Converts KSON to YAML, preserving comments.",
+      "properties": {
+        "command": { "const": "toYaml" },
+        "kson": {
+          "type": "string",
+          "description": "The KSON source to convert"
+        },
+        "retainEmbedTags": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to retain embed tags in the YAML output"
+        }
+      },
+      "required": ["command", "kson"],
+      "additionalProperties": false
+    },
+
+    "AnalyzeCommand": {
+      "type": "object",
+      "description": "Statically analyze KSON and return messages, tokens, and parsed value.",
+      "properties": {
+        "command": { "const": "analyze" },
+        "kson": {
+          "type": "string",
+          "description": "The KSON source to analyze"
+        },
+        "filepath": {
+          "type": ["string", "null"],
+          "description": "Optional filepath of the document being analyzed"
+        }
+      },
+      "required": ["command", "kson"],
+      "additionalProperties": false
+    },
+
+    "ParseSchemaCommand": {
+      "type": "object",
+      "description": "Parses a KSON schema definition.",
+      "properties": {
+        "command": { "const": "parseSchema" },
+        "schemaKson": {
+          "type": "string",
+          "description": "The KSON source defining a JSON Schema"
+        }
+      },
+      "required": ["command", "schemaKson"],
+      "additionalProperties": false
+    },
+
+    "ValidateCommand": {
+      "type": "object",
+      "description": "Parses a schema and validates a KSON document against it in a single step.",
+      "properties": {
+        "command": { "const": "validate" },
+        "schemaKson": {
+          "type": "string",
+          "description": "The KSON source defining a JSON Schema"
+        },
+        "kson": {
+          "type": "string",
+          "description": "The KSON source to validate against the schema"
+        },
+        "filepath": {
+          "type": ["string", "null"],
+          "description": "Optional filepath of the document being validated"
+        }
+      },
+      "required": ["command", "schemaKson", "kson"],
+      "additionalProperties": false
+    },
+
+    "ValidateEmbedRuleCommand": {
+      "type": "object",
+      "description": "Validates that the given EmbedRule has a valid JsonPointerGlob pathPattern.",
+      "properties": {
+        "command": { "const": "validateEmbedRule" },
+        "embedBlockRule": {
+          "$ref": "#/$defs/EmbedRule",
+          "description": "The embed rule to validate"
+        }
+      },
+      "required": ["command", "embedBlockRule"],
+      "additionalProperties": false
+    },
+
+    "FormatResult": {
+      "type": "object",
+      "description": "Result of the format command.",
+      "properties": {
+        "command": { "const": "format" },
+        "success": { "const": true },
+        "output": {
+          "type": "string",
+          "description": "The formatted KSON source"
+        }
+      },
+      "required": ["command", "success", "output"],
+      "additionalProperties": false
+    },
+
+    "TranspileSuccessResult": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "enum": ["toJson", "toYaml"]
+        },
+        "success": { "const": true },
+        "output": {
+          "type": "string",
+          "description": "The transpiled output (JSON or YAML)"
+        }
+      },
+      "required": ["command", "success", "output"],
+      "additionalProperties": false
+    },
+
+    "TranspileFailureResult": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "enum": ["toJson", "toYaml"]
+        },
+        "success": { "const": false },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Message" }
+        }
+      },
+      "required": ["command", "success", "errors"],
+      "additionalProperties": false
+    },
+
+    "AnalyzeResult": {
+      "type": "object",
+      "description": "Result of the analyze command.",
+      "properties": {
+        "command": { "const": "analyze" },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Message" }
+        },
+        "tokens": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Token" }
+        },
+        "ksonValue": {
+          "oneOf": [
+            { "$ref": "#/$defs/KsonValue" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "required": ["command", "errors", "tokens", "ksonValue"],
+      "additionalProperties": false
+    },
+
+    "ParseSchemaSuccessResult": {
+      "type": "object",
+      "properties": {
+        "command": { "const": "parseSchema" },
+        "success": { "const": true }
+      },
+      "required": ["command", "success"],
+      "additionalProperties": false
+    },
+
+    "ParseSchemaFailureResult": {
+      "type": "object",
+      "properties": {
+        "command": { "const": "parseSchema" },
+        "success": { "const": false },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Message" }
+        }
+      },
+      "required": ["command", "success", "errors"],
+      "additionalProperties": false
+    },
+
+    "ValidateResult": {
+      "type": "object",
+      "description": "Result of the validate command.",
+      "properties": {
+        "command": { "const": "validate" },
+        "success": {
+          "type": "boolean",
+          "description": "True if both schema parsing and validation succeeded with no errors"
+        },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Message" },
+          "description": "Schema parsing errors or validation errors"
+        }
+      },
+      "required": ["command", "success", "errors"],
+      "additionalProperties": false
+    },
+
+    "EmbedRuleSuccessResult": {
+      "type": "object",
+      "description": "Successful result of the validateEmbedRule command.",
+      "properties": {
+        "command": { "const": "validateEmbedRule" },
+        "success": { "const": true }
+      },
+      "required": ["command", "success"],
+      "additionalProperties": false
+    },
+
+    "EmbedRuleFailureResult": {
+      "type": "object",
+      "description": "Failed result of the validateEmbedRule command.",
+      "properties": {
+        "command": { "const": "validateEmbedRule" },
+        "success": { "const": false },
+        "error": {
+          "type": "string",
+          "description": "Error message for the invalid pathPattern"
+        }
+      },
+      "required": ["command", "success", "error"],
+      "additionalProperties": false
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "request": {
+      "description": "A KSON API command request.",
+      "oneOf": [
+        { "$ref": "#/$defs/FormatCommand" },
+        { "$ref": "#/$defs/ToJsonCommand" },
+        { "$ref": "#/$defs/ToYamlCommand" },
+        { "$ref": "#/$defs/AnalyzeCommand" },
+        { "$ref": "#/$defs/ParseSchemaCommand" },
+        { "$ref": "#/$defs/ValidateCommand" },
+        { "$ref": "#/$defs/ValidateEmbedRuleCommand" }
+      ],
+      "discriminator": {
+        "propertyName": "command"
+      }
+    },
+    "response": {
+      "description": "A KSON API command response.",
+      "oneOf": [
+        { "$ref": "#/$defs/FormatResult" },
+        { "$ref": "#/$defs/TranspileSuccessResult" },
+        { "$ref": "#/$defs/TranspileFailureResult" },
+        { "$ref": "#/$defs/AnalyzeResult" },
+        { "$ref": "#/$defs/ParseSchemaSuccessResult" },
+        { "$ref": "#/$defs/ParseSchemaFailureResult" },
+        { "$ref": "#/$defs/ValidateResult" },
+        { "$ref": "#/$defs/EmbedRuleSuccessResult" },
+        { "$ref": "#/$defs/EmbedRuleFailureResult" }
+      ],
+      "discriminator": {
+        "propertyName": "command"
+      }
+    }
+  },
+  "additionalProperties": false
+}
