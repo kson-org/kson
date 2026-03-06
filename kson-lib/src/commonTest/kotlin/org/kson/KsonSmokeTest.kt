@@ -398,4 +398,14 @@ class KsonSmokeTest {
             formatted
         )
     }
+
+    @Test
+    fun testAnalyze_largeInteger() {
+        val input = "9007199254740991"
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonNumber.Integer)
+        assertEquals(9007199254740991L, value.value)
+    }
 }

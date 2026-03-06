@@ -1329,7 +1329,7 @@ pub mod kson_value {
 
             pub fn value(
                 &self,
-            ) -> i32 {
+            ) -> i64 {
                 let self_ptr = self.to_kotlin_object();
                 let self_obj = self_ptr.as_kotlin_object();
 
@@ -1339,8 +1339,8 @@ pub mod kson_value {
                     util,
                     c"org/kson/KsonValue$KsonNumber$Integer",
                     c"getValue",
-                    c"()I",
-                    CallIntMethod,
+                    c"()J",
+                    CallLongMethod,
                     self_obj,
 
                 );
