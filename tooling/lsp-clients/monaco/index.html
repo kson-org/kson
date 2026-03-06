@@ -22,39 +22,34 @@
     </div>
 
     <div id="monaco-editor-root"></div>
-    
-    <script type="module">
-        import { createKsonEditor, } from './src/index.js';
 
-        let currentWrapper = null;
+    <script type="module">
+        import { createKsonEditor } from './src/index.js';
+
+        let currentEditor = null;
 
         async function startEditor() {
-            if (currentWrapper) {
+            if (currentEditor) {
                 console.log('Editor already started');
                 return;
             }
 
             const rootElement = document.getElementById('monaco-editor-root');
 
-            currentWrapper = await createKsonEditor(
-                {
-                    rootElement,
-                    editorAppConfig: {
-                        codeResources: {
-                            modified: {
-                                text: '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}',
-                                uri: '/test.kson'
-                            }
+            const editor = await createKsonEditor({
+                editorAppConfig: {
+                    codeResources: {
+                        modified: {
+                            text: '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}',
+                            uri: '/test.kson'
                         }
                     }
-                });
-
-
-            currentWrapper.start(rootElement).then(() => {
-                console.log(`${currentLanguage.toUpperCase()} editor started successfully`);
-            }).catch((error) => {
-                console.error(`Failed to start ${currentLanguage} editor:`, error);
+                }
             });
+
+            await editor.start(rootElement);
+            currentEditor = editor;
+            console.log('KSON editor started successfully');
         }
         // Start the editor automatically
         startEditor();
