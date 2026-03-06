@@ -549,13 +549,13 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
             val isInteger = ksonValue.value is NumberParser.ParsedNumber.Integer
             if (isInteger) {
                 KsonValue.KsonNumber.Integer(
-                    value = ksonValue.value.asString.toInt(),
+                    value = (ksonValue.value as NumberParser.ParsedNumber.Integer).value,
                     internalStart = Position(ksonValue.location.start),
                     internalEnd = Position(ksonValue.location.end)
                 )
             } else {
                 KsonValue.KsonNumber.Decimal(
-                    value = ksonValue.value.asString.toDouble(),
+                    value = (ksonValue.value as NumberParser.ParsedNumber.Decimal).value,
                     internalStart = Position(ksonValue.location.start),
                     internalEnd = Position(ksonValue.location.end)
                 )
@@ -648,7 +648,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
 
           class Integer internal constructor(
-              val value: Int,
+              val value: Long,
               val internalStart: Position,
               val internalEnd: Position
           ) : KsonNumber(internalStart, internalEnd){

@@ -907,8 +907,8 @@ class _KsonValue_KsonNumber_Integer(KsonValue.KsonNumber):
             b"org/kson/KsonValue$KsonNumber$Integer",
             jni_ref,
             b"getValue",
-            b"()I",
-            "IntMethod",
+            b"()J",
+            "LongMethod",
             []
         )
 

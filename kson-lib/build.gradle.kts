@@ -34,6 +34,9 @@ kotlin {
         binaries.library()
         useEsModules()
         generateTypeScriptDefinitions()
+        compilerOptions {
+            freeCompilerArgs.add("-Xes-long-as-bigint")
+        }
     }
 
     sourceSets {
