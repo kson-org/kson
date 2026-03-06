@@ -14,4 +14,4 @@ version = "0.1.0"
 [tasks]
 
 [dependencies]
-nodejs = "22.21.1.*"
+nodejs = "24.*"
