@@ -47,6 +47,7 @@ tasks {
     }
 
     register<Copy>(prepareSdistBuildEnvironment) {
+        dependsOn("copyLicense", copyNativeArtifacts, ":kson-lib:generateJniBindingsJvm")
         group = "build"
         description = "Prepare kson-sdist directory with necessary Gradle files for sdist"
 
