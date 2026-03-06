@@ -49,10 +49,12 @@ enum class FormattingStyle {
  *
  * @param pathPattern The JsonPointerGlob pattern to match against document paths
  * @param tag Optional embed tag to include in the output
+ * @param minLength Minimum string length — strings shorter than this won't be converted to embed blocks. Defaults to 0 (no restriction).
  */
 data class InternalEmbedRule @OptIn(ExperimentalJsonPointerGlobLanguage::class) constructor(
     val pathPattern: JsonPointerGlob,
-    val tag: String? = null
+    val tag: String? = null,
+    val minLength: Int = 0
 )
 
 data class KsonFormatterConfig(

@@ -44,6 +44,9 @@ fun resolveEmbedBlocks(
         val matchingValues = KsonValueNavigation.navigateWithJsonPointerGlob(rootValue, rule.pathPattern)
         for (value in matchingValues) {
             if (value is KsonString) {
+                if (value.value.length < rule.minLength) {
+                    continue
+                }
                 stringResult[value.stringNode] = rule
             }
         }
