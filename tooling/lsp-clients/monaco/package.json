@@ -15,12 +15,12 @@
   "license": "ISC",
   "dependencies": {
     "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
-    "@codingame/monaco-vscode-typescript-basics-default-extension": "~18.1.0",
-    "@codingame/monaco-vscode-javascript-default-extension": "~18.1.0",
-    "@codingame/monaco-vscode-sql-default-extension": "~18.1.0",
-    "@codingame/monaco-vscode-python-default-extension": "~18.1.0",
+    "@codingame/monaco-vscode-typescript-basics-default-extension": "^25.1.2",
+    "@codingame/monaco-vscode-javascript-default-extension": "^25.1.2",
+    "@codingame/monaco-vscode-sql-default-extension": "^25.1.2",
+    "@codingame/monaco-vscode-python-default-extension": "^25.1.2",
     "@kson/lsp-shared": "file:../shared",
-    "monaco-editor-wrapper": "^6.9.0",
+    "monaco-languageclient": "^10.7.0",
     "vscode-languageserver": "^9.0.1"
   },
   "devDependencies": {

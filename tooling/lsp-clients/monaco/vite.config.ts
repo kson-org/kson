@@ -5,6 +5,9 @@ import { resolve } from 'path';
 export default defineConfig(({  }) => {
     return {
         base: './',
+        resolve: {
+            dedupe: ['vscode']
+        },
         optimizeDeps: {
             esbuildOptions: {
                 plugins: [
@@ -12,10 +15,7 @@ export default defineConfig(({  }) => {
                 ]
             },
             include: [
-                'monaco-editor-wrapper',
-                'vscode-languageclient',
                 'vscode-textmate',
-                '@codingame/monaco-vscode-textmate-service-override',
                 'vscode-oniguruma'
             ]
         },
@@ -37,7 +37,6 @@ export default defineConfig(({  }) => {
                     inlineDynamicImports: false
                 }
             },
-            // Enable code splitting for better lazy loading
             minify: 'esbuild',
             sourcemap: true,
         },

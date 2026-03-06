@@ -1,5 +1,6 @@
-import type { WrapperConfig } from 'monaco-editor-wrapper';
-import { configureDefaultWorkerFactory } from "monaco-editor-wrapper/workers/workerLoaders";
+import type { MonacoVscodeApiConfig } from 'monaco-languageclient/vscodeApiWrapper';
+import type { EditorAppConfig } from 'monaco-languageclient/editorApp';
+import { configureDefaultWorkerFactory } from 'monaco-languageclient/workerFactory';
 import getTextmateServiceOverride from "@codingame/monaco-vscode-textmate-service-override";
 import yamlTmLanguage from './yaml.tmLanguage.xml?raw';
 
@@ -29,48 +30,53 @@ const yamlLanguageConfiguration = {
     }
 };
 
-export function createYamlConfig(overrides: Partial<WrapperConfig> = {}): WrapperConfig {
+export interface YamlEditorConfig {
+    vscodeApiConfig: MonacoVscodeApiConfig;
+    editorAppConfig: EditorAppConfig;
+}
+
+export function createYamlConfig(overrides?: { editorAppConfig?: Partial<EditorAppConfig> }): YamlEditorConfig {
     const extensionFilesOrContents = new Map<string, string>();
     extensionFilesOrContents.set('/yaml-configuration.json', JSON.stringify(yamlLanguageConfiguration, null, 2));
     extensionFilesOrContents.set('/yaml.tmLanguage.xml', yamlTmLanguage);
-    
+
     return {
-        $type: 'extended',
-        ...overrides,
         vscodeApiConfig: {
-            ...overrides.vscodeApiConfig,
-            vscodeApiInitPerformExternally: false,
+            $type: 'extended',
+            viewsConfig: {
+                $type: 'EditorService',
+            },
             serviceOverrides: {
                 ...getTextmateServiceOverride()
-            }
-        },
-        extensions: [{
-            config: {
-                name: 'yaml-monaco',
-                publisher: 'yaml.org',
-                version: '0.0.1',
-                engines: {
-                    vscode: '*'
-                },
-                contributes: {
-                    languages: [{
-                        id: 'yaml',
-                        extensions: ['.yaml', '.yml'],
-                        aliases: ['YAML', 'yaml'],
-                        configuration: './yaml-configuration.json'
-                    }],
-                    grammars: [{
-                        language: 'yaml',
-                        scopeName: 'source.yaml',
-                        path: '/yaml.tmLanguage.xml'
-                    }]
-                }
             },
-            filesOrContents: extensionFilesOrContents
-        }],
+            extensions: [{
+                config: {
+                    name: 'yaml-monaco',
+                    publisher: 'yaml.org',
+                    version: '0.0.1',
+                    engines: {
+                        vscode: '*'
+                    },
+                    contributes: {
+                        languages: [{
+                            id: 'yaml',
+                            extensions: ['.yaml', '.yml'],
+                            aliases: ['YAML', 'yaml'],
+                            configuration: './yaml-configuration.json'
+                        }],
+                        grammars: [{
+                            language: 'yaml',
+                            scopeName: 'source.yaml',
+                            path: '/yaml.tmLanguage.xml'
+                        }]
+                    }
+                },
+                filesOrContents: extensionFilesOrContents
+            }],
+            monacoWorkerFactory: configureDefaultWorkerFactory
+        },
         editorAppConfig: {
-            monacoWorkerFactory: configureDefaultWorkerFactory,
-            ...overrides.editorAppConfig
+            ...overrides?.editorAppConfig
         }
     };
 }
