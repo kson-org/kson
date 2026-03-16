@@ -213,15 +213,28 @@ object KsonTooling {
      *
      * Returns a list of ranges from innermost to outermost that contain
      * the cursor position. Used for smart expand/shrink selection.
+     * Includes the full-document range as the outermost entry.
      *
      * @param document The pre-parsed KSON document
      * @param line Zero-based line number
      * @param column Zero-based column number
-     * @return List of ranges from innermost to outermost, deduplicated
+     * @return List of ranges from innermost to outermost, deduplicated,
+     *         with the full-document range as the last element
      */
     fun getEnclosingRanges(document: ToolingDocument, line: Int, column: Int): List<Range> {
-        val ksonValue = document.ksonValue ?: return emptyList()
-        return SelectionRangeBuilder.build(ksonValue, line, column)
+        val ksonValue = document.ksonValue
+        val ancestors = if (ksonValue != null) {
+            SelectionRangeBuilder.build(ksonValue, line, column).toMutableList()
+        } else {
+            mutableListOf()
+        }
+        // The lexer always produces at least an EOF token
+        val eof = document.tokens.last()
+        val documentRange = Range(0, 0, eof.lexeme.location.end.line, eof.lexeme.location.end.column)
+        if (ancestors.lastOrNull() != documentRange) {
+            ancestors.add(documentRange)
+        }
+        return ancestors
     }
 
     /**

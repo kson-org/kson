@@ -2,12 +2,13 @@ import assert from 'assert';
 import {describe, it} from 'mocha';
 import { DocumentSymbolService } from '../../../core/features/DocumentSymbolService.js';
 import { SymbolKind } from 'vscode-languageserver';
+import { KsonTooling } from 'kson-tooling';
 
 describe('DocumentSymbolService', () => {
     const documentSymbolService = new DocumentSymbolService();
 
     it('should return empty array for invalid document', () => {
-        const symbols = documentSymbolService.getDocumentSymbols('{ invalid json }');
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse('{ invalid json }'));
 
         assert.deepStrictEqual(symbols, []);
     });
@@ -18,7 +19,7 @@ describe('DocumentSymbolService', () => {
             "age": 30,
             "active": true
         }`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(symbols.length, 1);
         assert.strictEqual(symbols[0].name, 'root');
@@ -58,7 +59,7 @@ describe('DocumentSymbolService', () => {
                 }
             }
         }`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(symbols.length, 1);
         const rootSymbol = symbols[0];
@@ -98,7 +99,7 @@ describe('DocumentSymbolService', () => {
                 { "nested": true }
             ]
         }`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         const rootSymbol = symbols[0];
         const itemsSymbol = rootSymbol.children![0];
@@ -131,7 +132,7 @@ describe('DocumentSymbolService', () => {
             "emptyObject": {},
             "emptyArray": []
         }`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         const rootSymbol = symbols[0];
         assert.strictEqual(rootSymbol.children!.length, 2);
@@ -157,7 +158,7 @@ describe('DocumentSymbolService', () => {
 
     it('should create symbols for root array', () => {
         const content = `["item1", "item2", "item3"]`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(symbols.length, 1);
         const rootSymbol = symbols[0];
@@ -167,22 +168,22 @@ describe('DocumentSymbolService', () => {
     });
 
     it('should create symbols for primitive root values', () => {
-        const stringSymbols = documentSymbolService.getDocumentSymbols('"hello"');
+        const stringSymbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse('"hello"'));
         assert.strictEqual(stringSymbols.length, 1);
         assert.strictEqual(stringSymbols[0].kind, SymbolKind.String);
         assert.strictEqual(stringSymbols[0].detail, 'hello');
 
-        const numberSymbols = documentSymbolService.getDocumentSymbols('42');
+        const numberSymbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse('42'));
         assert.strictEqual(numberSymbols.length, 1);
         assert.strictEqual(numberSymbols[0].kind, SymbolKind.Number);
         assert.strictEqual(numberSymbols[0].detail, '42');
 
-        const boolSymbols = documentSymbolService.getDocumentSymbols('false');
+        const boolSymbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse('false'));
         assert.strictEqual(boolSymbols.length, 1);
         assert.strictEqual(boolSymbols[0].kind, SymbolKind.Boolean);
         assert.strictEqual(boolSymbols[0].detail, 'false');
 
-        const nullSymbols = documentSymbolService.getDocumentSymbols('null');
+        const nullSymbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse('null'));
         assert.strictEqual(nullSymbols.length, 1);
         assert.strictEqual(nullSymbols[0].kind, SymbolKind.Null);
         assert.strictEqual(nullSymbols[0].detail, 'null');
@@ -197,7 +198,7 @@ describe('DocumentSymbolService', () => {
                 }
             }
         }`;
-        const symbols = documentSymbolService.getDocumentSymbols(content);
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
 
         const rootSymbol = symbols[0];
         assert.strictEqual(rootSymbol.name, 'root');

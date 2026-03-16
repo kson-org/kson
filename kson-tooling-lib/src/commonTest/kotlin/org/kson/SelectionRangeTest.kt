@@ -5,16 +5,22 @@ import kotlin.test.*
 class SelectionRangeTest {
 
     @Test
-    fun testEmptyDocumentReturnsEmpty() {
+    fun testEmptyDocumentReturnsDocumentRange() {
         val ranges = KsonTooling.getEnclosingRanges(KsonTooling.parse(""), 0, 0)
-        assertEquals(0, ranges.size)
+        // Even an empty document returns the full-document range
+        assertEquals(1, ranges.size)
+        assertEquals(0, ranges[0].startLine)
+        assertEquals(0, ranges[0].startColumn)
+        assertEquals(0, ranges[0].endLine)
+        assertEquals(0, ranges[0].endColumn)
     }
 
     @Test
     fun testSimpleStringValue() {
         val ranges = KsonTooling.getEnclosingRanges(KsonTooling.parse("\"hello\""), 0, 2)
-        assertEquals(1, ranges.size)
-        assertEquals(Range(0, 1, 0, 6), ranges[0])
+        assertEquals(2, ranges.size)
+        assertEquals(Range(0, 1, 0, 6), ranges[0])  // string content
+        assertEquals(Range(0, 0, 0, 7), ranges[1])   // document range
     }
 
     @Test
@@ -70,7 +76,7 @@ class SelectionRangeTest {
         assertEquals(Range(2, 4, 2, 16), ranges[1])    // property name: "Alice"
         assertEquals(Range(1, 10, 4, 0), ranges[2])    // inner object
         assertEquals(Range(1, 2, 4, 0), ranges[3])     // property person: {...}
-        assertEquals(Range(0, 0, 4, 1), ranges[4])     // outer object
+        assertEquals(Range(0, 0, 4, 1), ranges[4])     // outer object (= document range after dedup)
     }
 
     @Test
@@ -138,10 +144,10 @@ class SelectionRangeTest {
 
     @Test
     fun testDeduplication() {
-        // A bare string "hello" is the root value — the string and root share the same range,
-        // so deduplication should collapse them into a single entry
+        // A bare string "hello" — the string range and document range differ,
+        // so we get 2 entries (dedup only removes adjacent identical ranges)
         val ranges = KsonTooling.getEnclosingRanges(KsonTooling.parse("\"hello\""), 0, 2)
-        assertEquals(1, ranges.size)
+        assertEquals(2, ranges.size)
 
         // Verify no adjacent ranges are identical
         for (i in 0 until ranges.size - 1) {

@@ -2,12 +2,13 @@ import {describe, it} from 'mocha';
 import assert from 'assert';
 import {FoldingRangeKind} from 'vscode-languageserver';
 import {FoldingRangeService} from '../../../core/features/FoldingRangeService.js';
+import {KsonTooling} from 'kson-tooling';
 
 describe('FoldingRangeService', () => {
     const service = new FoldingRangeService();
 
     it('should return no folding ranges for single-line document', () => {
-        const ranges = service.getFoldingRanges('key: value');
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse('key: value'));
         assert.strictEqual(ranges.length, 0);
     });
 
@@ -18,7 +19,7 @@ describe('FoldingRangeService', () => {
             '  age: 30',
             '}'
         ].join('\n');
-        const ranges = service.getFoldingRanges(content);
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(ranges.length, 1);
         assert.strictEqual(ranges[0].startLine, 0);
@@ -34,7 +35,7 @@ describe('FoldingRangeService', () => {
             '  }',
             '}'
         ].join('\n');
-        const ranges = service.getFoldingRanges(content);
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(ranges.length, 2);
         // Inner object folds from line 1 to line 3
@@ -55,7 +56,7 @@ describe('FoldingRangeService', () => {
             '  3',
             ']'
         ].join('\n');
-        const ranges = service.getFoldingRanges(content);
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(ranges.length, 1);
         assert.strictEqual(ranges[0].startLine, 0);
@@ -69,7 +70,7 @@ describe('FoldingRangeService', () => {
             '  FROM users',
             '  $$'
         ].join('\n');
-        const ranges = service.getFoldingRanges(content);
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(ranges.length, 1);
         assert.strictEqual(ranges[0].startLine, 0);
@@ -77,12 +78,12 @@ describe('FoldingRangeService', () => {
     });
 
     it('should not fold single-line objects', () => {
-        const ranges = service.getFoldingRanges('{ name: "Alice", age: 30 }');
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse('{ name: "Alice", age: 30 }'));
         assert.strictEqual(ranges.length, 0);
     });
 
     it('should handle empty document', () => {
-        const ranges = service.getFoldingRanges('');
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(''));
         assert.strictEqual(ranges.length, 0);
     });
 
@@ -98,7 +99,7 @@ describe('FoldingRangeService', () => {
             '    $$',
             '}'
         ].join('\n');
-        const ranges = service.getFoldingRanges(content);
+        const ranges = service.getFoldingRanges(KsonTooling.getInstance().parse(content));
 
         assert.strictEqual(ranges.length, 3);
 

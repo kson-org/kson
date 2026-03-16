@@ -1,6 +1,5 @@
 import {Position, Range, SelectionRange} from 'vscode-languageserver';
-import {KsonDocument} from '../document/KsonDocument.js';
-import {KsonTooling, Range as KtRange} from 'kson-tooling';
+import {KsonTooling, ToolingDocument, Range as KtRange} from 'kson-tooling';
 
 /**
  * Service responsible for providing selection ranges (smart expand/shrink selection)
@@ -8,19 +7,14 @@ import {KsonTooling, Range as KtRange} from 'kson-tooling';
  */
 export class SelectionRangeService {
 
-    getSelectionRanges(document: KsonDocument, positions: Position[]): SelectionRange[] {
-        const content = document.getText();
-        const fullRange = document.getFullDocumentRange();
+    getSelectionRanges(document: ToolingDocument, positions: Position[]): SelectionRange[] {
         const tooling = KsonTooling.getInstance();
 
         return positions.map(position => {
-            const ktRanges = tooling.getEnclosingRanges(content, position.line, position.character)
+            const ktRanges = tooling.getEnclosingRanges(document, position.line, position.character)
                 .asJsReadonlyArrayView();
 
             const ancestors: Range[] = ktRanges.map(r => toRange(r));
-
-            // Add full document range as outermost
-            ancestors.push(fullRange);
 
             return buildChain(ancestors);
         });

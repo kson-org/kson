@@ -3,6 +3,7 @@ import assert from 'assert';
 import {DocumentHighlightKind} from 'vscode-languageserver';
 import {DocumentHighlightService} from '../../../core/features/DocumentHighlightService.js';
 import {pos} from '../../TestHelpers.js';
+import {KsonTooling} from 'kson-tooling';
 
 describe('DocumentHighlightService', () => {
     const highlightService = new DocumentHighlightService();
@@ -28,7 +29,7 @@ describe('DocumentHighlightService', () => {
         ].join('\n');
 
         // Position on "name" key
-        const highlights = highlightService.getDocumentHighlights(content, pos(0, 3));
+        const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(0, 3));
 
         assert.strictEqual(highlights.length, 3);
         assert.strictEqual(highlights.every(h => h.kind === DocumentHighlightKind.Read), true);
@@ -50,7 +51,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position after opening brace
-            const highlights = highlightService.getDocumentHighlights(content, pos(0, 1));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(0, 1));
 
             // Should return empty array since we only highlight property keys
             assert.strictEqual(highlights.length, 0);
@@ -63,7 +64,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "John" value
-            const highlights = highlightService.getDocumentHighlights(content, pos(1, 7));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(1, 7));
 
             // Should return empty array since we only highlight property keys
             assert.strictEqual(highlights.length, 0);
@@ -81,7 +82,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "inner2" key
-            const highlights = highlightService.getDocumentHighlights(content, pos(3, 4));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(3, 4));
 
             assert.strictEqual(highlights.length, 2);
 
@@ -99,7 +100,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "nested" key
-            const highlights = highlightService.getDocumentHighlights(content, pos(1, 1));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(1, 1));
 
             assert.strictEqual(highlights.length, 2);
 
@@ -123,7 +124,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "prop2" key
-            const highlights = highlightService.getDocumentHighlights(content, pos(4, 14));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(4, 14));
 
             assert.strictEqual(highlights.length, 3);
 
@@ -151,7 +152,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "id" in first object
-            const highlights = highlightService.getDocumentHighlights(content, pos(2, 9));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(2, 9));
 
             assert.strictEqual(highlights.length, 2);
 
@@ -176,7 +177,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "id" in second object
-            const highlights = highlightService.getDocumentHighlights(content, pos(6, 9));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(6, 9));
 
             assert.strictEqual(highlights.length, 2);
 
@@ -200,7 +201,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on "complex" key (which has an object value)
-            const highlights = highlightService.getDocumentHighlights(content, pos(2, 6));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(2, 6));
 
             assert.strictEqual(highlights.length, 3);
 
@@ -222,7 +223,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on the last "value" key
-            const highlights = highlightService.getDocumentHighlights(content, pos(3, 6));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(3, 6));
 
             // KSON may deduplicate keys, so we check for at least 2 highlights
             assert.ok(highlights.length == 2, `Expected at least 2 highlights, got ${highlights.length}`);
@@ -243,7 +244,7 @@ describe('DocumentHighlightService', () => {
 
     describe('Edge cases', () => {
         it('should return empty array for empty object', () => {
-            const highlights = highlightService.getDocumentHighlights('{}', pos(0, 1));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse('{}'), pos(0, 1));
 
             // Should return empty array since there are no property keys to highlight
             assert.strictEqual(highlights.length, 0);
@@ -258,13 +259,13 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position after closing brace on empty line
-            const highlights = highlightService.getDocumentHighlights(content, pos(3, 0));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(3, 0));
 
             assert.strictEqual(highlights.length, 0);
         });
 
         it('should handle invalid JSON gracefully', () => {
-            const highlights = highlightService.getDocumentHighlights('{ invalid }', pos(0, 5));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse('{ invalid }'), pos(0, 5));
 
             assert.strictEqual(highlights.length, 0);
         });
@@ -278,7 +279,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on unquoted key
-            const highlights = highlightService.getDocumentHighlights(content, pos(1, 5));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(1, 5));
 
             assert.strictEqual(highlights.length, 2);
 
@@ -296,7 +297,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position in array element "b"
-            const highlights = highlightService.getDocumentHighlights(content, pos(1, 20));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(1, 20));
 
             // Should return empty array since we only highlight property keys
             assert.strictEqual(highlights.length, 0);
@@ -310,7 +311,7 @@ describe('DocumentHighlightService', () => {
             ].join('\n');
 
             // Position on the only key
-            const highlights = highlightService.getDocumentHighlights(content, pos(1, 6));
+            const highlights = highlightService.getDocumentHighlights(KsonTooling.getInstance().parse(content), pos(1, 6));
 
             // Should still highlight the single key
             assert.strictEqual(highlights.length, 1);

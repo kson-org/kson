@@ -1,5 +1,5 @@
 import {DocumentSymbol, Range, SymbolKind} from 'vscode-languageserver';
-import {KsonTooling, DocumentSymbol as KtDocumentSymbol, DocumentSymbolKind} from 'kson-tooling';
+import {KsonTooling, DocumentSymbol as KtDocumentSymbol, DocumentSymbolKind, ToolingDocument} from 'kson-tooling';
 
 // Extended DocumentSymbol that includes parent reference
 export class DocumentSymbolWithParent implements DocumentSymbol {
@@ -52,11 +52,11 @@ function mapSymbolKind(kind: DocumentSymbolKind): SymbolKind {
 
 export class DocumentSymbolService {
     /**
-     * Create document symbols from KSON content.
+     * Create document symbols from a pre-parsed KSON document.
      */
-    getDocumentSymbols(content: string): DocumentSymbolWithParent[] {
+    getDocumentSymbols(document: ToolingDocument): DocumentSymbolWithParent[] {
         const tooling = KsonTooling.getInstance();
-        const ktSymbols = tooling.getDocumentSymbols(content).asJsReadonlyArrayView();
+        const ktSymbols = tooling.getDocumentSymbols(document).asJsReadonlyArrayView();
         return ktSymbols.map(s => this.convertSymbol(s));
     }
 

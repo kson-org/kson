@@ -1,6 +1,7 @@
 import {Analysis, KsonValue, KsonValueType} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
  * Kson Document Entry.
@@ -11,7 +12,10 @@ import {TextDocument} from "vscode-languageserver-textdocument";
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
     private schemaDocument?: TextDocument;
+    // parseAnalysis uses strict parsing for value extraction (schema IDs, etc.)
+    // _toolingDocument uses error-tolerant parsing for editor features (symbols, tokens, etc.)
     private readonly parseAnalysis: Analysis;
+    private _toolingDocument: ToolingDocument | null = null;
     constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
         this.schemaDocument = schemaDocument;
         this.textDocument = textDocument;
@@ -44,6 +48,18 @@ export class KsonDocument implements TextDocument {
 
     offsetAt(position: Position): number {
         return this.textDocument.offsetAt(position);
+    }
+
+    /**
+     * Returns a lazily-created {@link ToolingDocument} for use with tooling operations.
+     * Created on first access and cached for the lifetime of this document instance,
+     * so multiple tooling calls on the same version share one parse.
+     */
+    getToolingDocument(): ToolingDocument {
+        if (!this._toolingDocument) {
+            this._toolingDocument = KsonTooling.getInstance().parse(this.getText());
+        }
+        return this._toolingDocument;
     }
 
     /**

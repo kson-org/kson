@@ -143,7 +143,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return {data: []};
             }
-            const result = this.semanticTokensService.getSemanticTokens(document);
+            const result = this.semanticTokensService.getSemanticTokens(document.getToolingDocument());
             this.connection.console.info(`Semantic tokens result: ${result.data.length} tokens`);
             return result;
         } catch (error) {
@@ -212,7 +212,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.documentHighlightService.getDocumentHighlights(document.getText(), params.position);
+            return this.documentHighlightService.getDocumentHighlights(document.getToolingDocument(), params.position);
         } catch (error) {
             this.connection.console.error(`Error providing document highlights: ${error}`);
             return [];
@@ -226,7 +226,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getText())
+            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getToolingDocument())
             this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
         } catch (error) {
@@ -283,7 +283,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.foldingRangeService.getFoldingRanges(document.getText());
+            return this.foldingRangeService.getFoldingRanges(document.getToolingDocument());
         } catch (error) {
             this.connection.console.error(`Error providing folding ranges: ${error}`);
             return [];
@@ -296,7 +296,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.selectionRangeService.getSelectionRanges(document, params.positions);
+            return this.selectionRangeService.getSelectionRanges(document.getToolingDocument(), params.positions);
         } catch (error) {
             this.connection.console.error(`Error providing selection ranges: ${error}`);
             return [];

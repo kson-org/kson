@@ -1,5 +1,5 @@
 import {FoldingRange, FoldingRangeKind} from 'vscode-languageserver';
-import {KsonTooling} from 'kson-tooling';
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
  * Service responsible for providing folding ranges for KSON documents.
@@ -7,8 +7,8 @@ import {KsonTooling} from 'kson-tooling';
  */
 export class FoldingRangeService {
 
-    getFoldingRanges(content: string): FoldingRange[] {
-        return KsonTooling.getInstance().getStructuralRanges(content).asJsReadonlyArrayView().map(sr => ({
+    getFoldingRanges(document: ToolingDocument): FoldingRange[] {
+        return KsonTooling.getInstance().getStructuralRanges(document).asJsReadonlyArrayView().map(sr => ({
             startLine: sr.startLine,
             endLine: sr.endLine,
             kind: FoldingRangeKind.Region

@@ -3,7 +3,7 @@ import {
     DocumentHighlightKind,
     Position,
 } from 'vscode-languageserver';
-import {KsonTooling} from 'kson-tooling';
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
  * Service responsible for providing document highlights for KSON documents.
@@ -12,11 +12,11 @@ import {KsonTooling} from 'kson-tooling';
 export class DocumentHighlightService {
 
     getDocumentHighlights(
-        content: string,
+        document: ToolingDocument,
         position: Position
     ): DocumentHighlight[] {
         const ranges = KsonTooling.getInstance()
-            .getSiblingKeys(content, position.line, position.character)
+            .getSiblingKeys(document, position.line, position.character)
             .asJsReadonlyArrayView();
 
         return ranges.map(r => ({

@@ -28,14 +28,14 @@ describe('SelectionRangeService', () => {
 
     it('should return document range for empty document', () => {
         const doc = createKsonDocument('');
-        const results = service.getSelectionRanges(doc, [{line: 0, character: 0}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 0, character: 0}]);
         assert.strictEqual(results.length, 1);
         assert.ok(results[0].range);
     });
 
     it('should return a chain for simple string value', () => {
         const doc = createKsonDocument('"hello"');
-        const results = service.getSelectionRanges(doc, [{line: 0, character: 2}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 0, character: 2}]);
         assert.strictEqual(results.length, 1);
         const chain = flattenChain(results[0]);
         // innermost: the string value (0:1-0:6), outermost: document (0:0-0:7)
@@ -53,12 +53,12 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on "Alice" string value (line 1, inside the string)
-        const results = service.getSelectionRanges(doc, [{line: 1, character: 10}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 1, character: 10}]);
         assert.strictEqual(results.length, 1);
 
         const chain = flattenChain(results[0]);
-        // string -> property -> object -> document
-        assert.strictEqual(chain.length, 4);
+        // string -> property -> object (= document range after dedup)
+        assert.strictEqual(chain.length, 3);
         assert.deepStrictEqual(chain[0], {startLine: 1, startChar: 9, endLine: 1, endChar: 14});
         assert.deepStrictEqual(chain[1], {startLine: 1, startChar: 2, endLine: 1, endChar: 14});
         assert.deepStrictEqual(chain[2], {startLine: 0, startChar: 0, endLine: 3, endChar: 1});
@@ -73,12 +73,12 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on "name" key (line 1, character 3)
-        const results = service.getSelectionRanges(doc, [{line: 1, character: 3}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 1, character: 3}]);
         assert.strictEqual(results.length, 1);
 
         const chain = flattenChain(results[0]);
-        // key -> property -> object -> document
-        assert.strictEqual(chain.length, 4);
+        // key -> property -> object (= document range after dedup)
+        assert.strictEqual(chain.length, 3);
         assert.deepStrictEqual(chain[0], {startLine: 1, startChar: 2, endLine: 1, endChar: 6});
         assert.deepStrictEqual(chain[1], {startLine: 1, startChar: 2, endLine: 1, endChar: 14});
         assert.deepStrictEqual(chain[2], {startLine: 0, startChar: 0, endLine: 2, endChar: 1});
@@ -97,11 +97,11 @@ describe('SelectionRangeService', () => {
             {line: 1, character: 10},  // on "Alice"
             {line: 2, character: 8}    // on 30
         ];
-        const results = service.getSelectionRanges(doc, positions);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), positions);
         assert.strictEqual(results.length, 2);
 
-        assert.strictEqual(flattenChain(results[0]).length, 4);
-        assert.strictEqual(flattenChain(results[1]).length, 4);
+        assert.strictEqual(flattenChain(results[0]).length, 3);
+        assert.strictEqual(flattenChain(results[1]).length, 3);
     });
 
     it('should handle nested objects', () => {
@@ -115,11 +115,11 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on "Alice" (line 2, character 12)
-        const results = service.getSelectionRanges(doc, [{line: 2, character: 12}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 2, character: 12}]);
         const chain = flattenChain(results[0]);
 
-        // string -> property (name:Alice) -> inner object -> property (person:{...}) -> outer object -> document
-        assert.strictEqual(chain.length, 6);
+        // string -> property (name:Alice) -> inner object -> property (person:{...}) -> outer object (= document)
+        assert.strictEqual(chain.length, 5);
         assert.deepStrictEqual(chain[0], {startLine: 2, startChar: 11, endLine: 2, endChar: 16});
     });
 
@@ -134,11 +134,11 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on "two" (line 2, character 3)
-        const results = service.getSelectionRanges(doc, [{line: 2, character: 3}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 2, character: 3}]);
         const chain = flattenChain(results[0]);
 
-        // string -> array -> document
-        assert.strictEqual(chain.length, 3);
+        // string -> array (= document range after dedup)
+        assert.strictEqual(chain.length, 2);
         assert.deepStrictEqual(chain[0], {startLine: 2, startChar: 3, endLine: 2, endChar: 6});
         assert.deepStrictEqual(chain[1], {startLine: 0, startChar: 0, endLine: 4, endChar: 1});
     });
@@ -152,11 +152,11 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on opening brace (line 0, character 0)
-        const results = service.getSelectionRanges(doc, [{line: 0, character: 0}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 0, character: 0}]);
         const chain = flattenChain(results[0]);
 
-        // object range -> document range
-        assert.strictEqual(chain.length, 2);
+        // object (= document range after dedup)
+        assert.strictEqual(chain.length, 1);
         assert.deepStrictEqual(chain[0], {startLine: 0, startChar: 0, endLine: 2, endChar: 1});
     });
 
@@ -171,7 +171,7 @@ describe('SelectionRangeService', () => {
         const doc = createKsonDocument(content);
 
         // Cursor on "hello" (line 2, character 6)
-        const results = service.getSelectionRanges(doc, [{line: 2, character: 6}]);
+        const results = service.getSelectionRanges(doc.getToolingDocument(), [{line: 2, character: 6}]);
         const chain = flattenChain(results[0]);
 
         // Verify each range is contained within (or equal to) the next

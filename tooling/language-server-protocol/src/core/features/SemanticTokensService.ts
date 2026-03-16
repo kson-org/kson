@@ -1,6 +1,5 @@
 import {SemanticTokens, SemanticTokensBuilder, SemanticTokensLegend, SemanticTokenTypes} from 'vscode-languageserver';
-import {KsonDocument} from '../document/KsonDocument';
-import {KsonTooling, SemanticTokenKind} from 'kson-tooling';
+import {KsonTooling, ToolingDocument, SemanticTokenKind} from 'kson-tooling';
 
 export const KSON_LEGEND: SemanticTokensLegend = {
     tokenTypes: [
@@ -44,11 +43,11 @@ function mapTokenKind(kind: SemanticTokenKind): number | undefined {
 export class SemanticTokensService {
 
     /**
-     * Return the {@link SemanticTokens} of a {@link KsonDocument}.
+     * Return the {@link SemanticTokens} of a pre-parsed {@link ToolingDocument}.
      */
-    getSemanticTokens(document: KsonDocument): SemanticTokens {
+    getSemanticTokens(document: ToolingDocument): SemanticTokens {
         const tooling = KsonTooling.getInstance();
-        const ktTokens = tooling.getSemanticTokens(document.getText()).asJsReadonlyArrayView();
+        const ktTokens = tooling.getSemanticTokens(document).asJsReadonlyArrayView();
         const builder = new SemanticTokensBuilder();
 
         for (const ktToken of ktTokens) {

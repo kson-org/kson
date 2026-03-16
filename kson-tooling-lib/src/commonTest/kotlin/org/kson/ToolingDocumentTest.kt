@@ -60,7 +60,8 @@ class ToolingDocumentTest {
         assertEquals(0, symbols.size, "Document symbols should be empty for broken documents")
 
         val selectionRanges = KsonTooling.getEnclosingRanges(doc, 0, 2)
-        assertEquals(0, selectionRanges.size, "Selection ranges should be empty for broken documents")
+        // Still returns the full-document range even when ksonValue is null
+        assertEquals(1, selectionRanges.size, "Selection ranges should have document range for broken documents")
 
         val siblingKeys = KsonTooling.getSiblingKeys(doc, 0, 2)
         assertEquals(0, siblingKeys.size, "Sibling keys should be empty for broken documents")
