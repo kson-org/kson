@@ -52,12 +52,20 @@ export interface KsonEditor {
     dispose(): void;
 }
 
+/** Tracks whether a primary (non-shared) bridge has been created. */
+let activeBridge: KsonLspBridge | null = null;
+
 /**
  * Creates a KSON editor backed by a full language server running in a Web Worker.
  *
  * The language server is the same one used by the VSCode extension — completions,
  * diagnostics, hover, go-to-definition, formatting, semantic tokens, etc. all work
  * via a lightweight JSON-RPC bridge (no @codingame or monaco-languageclient dependency).
+ *
+ * The first call creates the language server.  Additional editors must share it by
+ * passing `shared: firstEditor` — creating a second independent server would cause
+ * duplicate language providers in Monaco, leading to doubled completions and other
+ * confusing behavior.
  */
 export async function createKsonEditor(
     container: HTMLElement,
@@ -78,6 +86,13 @@ export async function createKsonEditor(
         bridge = options.shared.bridge;
         capabilities = options.shared.serverCapabilities;
     } else {
+        if (activeBridge) {
+            throw new Error(
+                'A KSON language server is already running. ' +
+                'Pass { shared: existingEditor } to share it instead of creating a second one.',
+            );
+        }
+
         worker = new Worker(workerUrl, {
             type: 'module',
             name: 'KsonLanguageServer',
@@ -86,6 +101,7 @@ export async function createKsonEditor(
         bridge = new KsonLspBridge(worker);
         const result = await bridge.initialize({ initializationOptions: options?.lspOptions });
         capabilities = result.capabilities;
+        activeBridge = bridge;
     }
 
     // Create model and editor
@@ -192,6 +208,7 @@ export async function createKsonEditor(
                 bridge.dispose();
                 worker.terminate();
                 for (const m of schemaModels) m.dispose();
+                activeBridge = null;
             }
             editor.dispose();
             model.dispose();

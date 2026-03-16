@@ -76,6 +76,7 @@ export class KsonLspBridge {
     }>();
     private readonly readOnlyDocumentUris = new Set<string>();
     private diagnosticTimer?: ReturnType<typeof setTimeout>;
+    /** Guards against re-registering global Monaco providers when multiple editors share this bridge. */
     private providersRegistered = false;
 
     constructor(worker: Worker) {
