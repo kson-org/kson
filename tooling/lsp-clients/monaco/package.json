@@ -8,23 +8,22 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "playwright test",
+    "test": "vitest run && playwright test",
+    "test:unit": "vitest run",
     "test:headed": "playwright test --headed"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
-    "@codingame/monaco-vscode-typescript-basics-default-extension": "^25.1.2",
-    "@codingame/monaco-vscode-javascript-default-extension": "^25.1.2",
-    "@codingame/monaco-vscode-sql-default-extension": "^25.1.2",
-    "@codingame/monaco-vscode-python-default-extension": "^25.1.2",
-    "@kson/lsp-shared": "file:../shared",
-    "monaco-languageclient": "^10.7.0",
-    "vscode-languageserver": "^9.0.1"
+    "@kson/lsp-shared": "file:../shared"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.50.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.53.2",
-    "vite": "^7.0.2"
+    "monaco-editor": "^0.52.0",
+    "vite": "^7.0.2",
+    "vitest": "^3.2.1"
   }
 }
