@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
-    "test:headed": "playwright test --headed"
+    "test:headed": "playwright test --headed",
+    "build:iframe": "vite build --config vite.iframe.config.ts && vite build --config vite.iframe-client.config.ts"
   },
   "author": "",
   "license": "ISC",

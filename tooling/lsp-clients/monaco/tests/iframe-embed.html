@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>KSON Iframe Embed Test</title>
+    <meta charset="UTF-8" />
+    <style>
+        body { margin: 0; font-family: system-ui, sans-serif; }
+        #editor { width: 800px; height: 400px; border: 1px solid #ccc; }
+        #output { padding: 16px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+
+<body>
+    <div id="editor"></div>
+    <pre id="output"></pre>
+
+    <script src="../dist-iframe/kson-editor.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        function log(msg) {
+            output.textContent += msg + '\n';
+        }
+
+        (async () => {
+            try {
+                const editor = await KsonEditor.create(
+                    document.getElementById('editor'),
+                    {
+                        value: '{ name: "test-value" }',
+                        uri: 'inmemory://kson/test.kson',
+                        schema: {
+                            fileExtension: 'kson',
+                            schemaContent: JSON.stringify({
+                                "$schema": "http://json-schema.org/draft-07/schema#",
+                                type: "object",
+                                properties: {
+                                    name: { type: "string" },
+                                },
+                                required: ["name"],
+                                additionalProperties: false,
+                            }),
+                        },
+                        onChange(value) {
+                            log('change:' + value);
+                        },
+                        baseUrl: '../dist-iframe',
+                    },
+                );
+
+                log('ready');
+                log('value:' + editor.getValue());
+
+                // Expose editor handle for Playwright to interact with
+                window.__ksonEditor = editor;
+            } catch (err) {
+                log('error:' + err.message);
+            }
+        })();
+    </script>
+</body>
+
+</html>

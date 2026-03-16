@@ -12,6 +12,7 @@
   "scripts": {
     "buildMonaco": "npm run compile && npm run build -w monaco",
     "buildVSCode": "npm run compile && npm run packagePlugin -w vscode",
+    "buildMonacoIframe": "npm run compile && npm run build:iframe -w monaco",
     "buildPlugins": "npm run buildMonaco && npm run buildVSCode",
     "compile": "npm run compile -w shared && npm run compile -w vscode",
     "clean": "npm run clean --workspaces --if-present",

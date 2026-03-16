@@ -30,6 +30,7 @@ tasks {
         command=listOf("npm", "run", "test")
         dependsOn(npmInstall)
         dependsOn(playwrightInstall)
+        dependsOn("npm_run_buildMonacoIframe")
     }
 
     val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {
@@ -40,6 +41,80 @@ tasks {
     val buildMonaco = register<PixiExecTask>("npm_run_buildMonaco") {
         command=listOf("npm", "run", "buildMonaco")
         dependsOn(npmInstall)
+        doLast {
+            val distDir = file("monaco/dist")
+            val bundle = File(distDir, "kson-monaco.js")
+            if (bundle.exists()) {
+                println()
+                println("=".repeat(60))
+                println("@kson/monaco-editor built successfully!")
+                println("  Output: ${distDir.absolutePath}")
+                println()
+                println("Dev server (with demo):")
+                println("  ./gradlew tooling:lsp-clients:npm_run_monaco")
+                println()
+                println("Usage:")
+                println("""
+                    |  import { createKsonEditor } from '@kson/monaco-editor';
+                    |
+                    |  await createKsonEditor(container, {
+                    |      lspOptions: {
+                    |          bundledSchemas: [{
+                    |              fileExtension: 'myformat.kson',
+                    |              schemaContent: myJsonSchemaString,
+                    |          }],
+                    |          enableBundledSchemas: true,
+                    |      },
+                    |  });
+                """.trimMargin())
+                println()
+                println("Adding schemas:")
+                println("  Each entry in bundledSchemas maps a file extension to a")
+                println("  JSON Schema (draft-07) string. Documents whose URI ends")
+                println("  in .{fileExtension} get that schema's validation,")
+                println("  completions, and hover. The most specific extension wins")
+                println("  (e.g. 'orchestra.kson' beats 'kson' for a .orchestra.kson file).")
+                println("=".repeat(60))
+            }
+        }
+    }
+
+    register<PixiExecTask>("npm_run_buildMonacoIframe") {
+        command=listOf("npm", "run", "buildMonacoIframe")
+        dependsOn(npmInstall)
+        doLast {
+            val iframeDir = file("monaco/dist-iframe")
+            val editorHtml = File(iframeDir, "kson-editor.html")
+            if (editorHtml.exists()) {
+                println()
+                println("=".repeat(60))
+                println("KSON Monaco iframe built successfully!")
+                println("  Output: ${iframeDir.absolutePath}")
+                println()
+                println("Copy dist-iframe/ to your static assets, then:")
+                println("""
+                    |  <script src="kson-editor.js"></script>
+                    |  <script>
+                    |    const editor = await KsonEditor.create(
+                    |      document.getElementById('editor'),
+                    |      {
+                    |        value: '{ name: "hello" }',
+                    |        schema: {
+                    |          fileExtension: 'kson',
+                    |          schemaContent: myJsonSchemaString,
+                    |        },
+                    |        onChange(value) { console.log('changed:', value); },
+                    |      },
+                    |    );
+                    |
+                    |    editor.getValue();    // synchronous
+                    |    editor.setValue('{}'); // update content
+                    |    editor.dispose();     // clean up
+                    |  </script>
+                """.trimMargin())
+                println("=".repeat(60))
+            }
+        }
     }
 
     check {
@@ -58,6 +133,7 @@ tasks {
         delete("vscode/node_modules")
         delete("monaco/dist")
         delete("monaco/node_modules")
+        delete("monaco/dist-iframe")
         delete("shared/out")
     }
 }
