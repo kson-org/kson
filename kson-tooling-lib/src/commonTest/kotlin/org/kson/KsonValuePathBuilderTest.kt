@@ -19,7 +19,7 @@ class KsonValuePathBuilderTest {
      */
     private fun assertPathAtCaret(
         documentWithCaret: String,
-        expectedPath: JsonPointer,
+        expectedPath: JsonPointer?,
         includePropertyKeys: Boolean = true
     ) {
         val caretMarker = "<caret>"
@@ -34,7 +34,7 @@ class KsonValuePathBuilderTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        val actualPath = KsonValuePathBuilder(document, Coordinates(line, column))
+        val actualPath = KsonValuePathBuilder(KsonTooling.parse(document), Coordinates(line, column))
             .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
         assertEquals(expectedPath, actualPath, "Path does not match expected value")
@@ -127,7 +127,7 @@ class KsonValuePathBuilderTest {
     fun testBuildJsonPointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
+            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
         )
     }
 
@@ -253,7 +253,7 @@ class KsonValuePathBuilderTest {
     fun testBuildJsonPointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
+            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
         )
     }
 
@@ -328,48 +328,48 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testGapFreePreParsedValueProducesSamePathAsStrictParse() {
-        val document = """
+    fun testBuildJsonPointerToPosition_classic_repeatedPropertyName_afterColon() {
+        // When a property name appears at multiple nesting levels, the path builder
+        // should still correctly add the inner property name after its colon.
+        // Regression test: previously the string comparison guard against duplicate
+        // pointer tokens would false-negative when the same name appeared at both levels.
+        assertPathAtCaret(
+            """
             {
-              "person": {
-                "name": "Alice",
-                "age": 25
+              "name": {
+                "name": <caret>
               }
             }
-        """.trimIndent()
-        val location = Coordinates(3, 14) // on "Alice"
-
-        val withoutPreParsed = KsonValuePathBuilder(document, location)
-            .buildJsonPointerToPosition()
-        // Use gap-free (error-tolerant) ksonValue, matching the production path
-        // where callers pass ToolingDocument.ksonValue
-        val gapFreeValue = KsonTooling.parse(document).ksonValue
-        val withPreParsed = KsonValuePathBuilder(document, location, gapFreeValue)
-            .buildJsonPointerToPosition()
-
-        assertEquals(withoutPreParsed, withPreParsed, "Gap-free pre-parsed value should produce the same path")
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("name", "name"))
+        )
     }
 
     @Test
-    fun testPreLexedTokensProduceSamePathAsStrictParse() {
-        val document = """
+    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_afterColon() {
+        // Property key with escape sequences — the path should use the processed
+        // (unescaped) key, matching what the AST walker produces.
+        assertPathAtCaret(
+            """
             {
-              "person": {
-                "name": "Alice",
-                "age": 25
-              }
+              "key\twith\ttabs": <caret>
             }
-        """.trimIndent()
-        val location = Coordinates(3, 14) // on "Alice"
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs"))
+        )
+    }
 
-        val withoutTokens = KsonValuePathBuilder(document, location)
-            .buildJsonPointerToPosition()
-        // Use gap-free tokens and value from ToolingDocument, matching the
-        // production path where KsonTooling passes document.tokens
-        val toolingDoc = KsonTooling.parse(document)
-        val withTokens = KsonValuePathBuilder(document, location, toolingDoc.ksonValue, toolingDoc.tokens)
-            .buildJsonPointerToPosition()
-
-        assertEquals(withoutTokens, withTokens, "Pre-lexed gap-free tokens should produce the same path as strict parse")
+    @Test
+    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_onKey() {
+        // Cursor on a quoted key with escapes — definition lookup should use processed name
+        assertPathAtCaret(
+            """
+            {
+              "key<caret>\twith\ttabs": "value"
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs")),
+            includePropertyKeys = true
+        )
     }
 }

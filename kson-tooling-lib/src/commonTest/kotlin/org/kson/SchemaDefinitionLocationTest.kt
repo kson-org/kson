@@ -258,11 +258,14 @@ class SchemaDefinitionLocationTest {
 
     @Test
     fun testGetSchemaLocationAtLocation_invalidDocument() {
+        // Error-tolerant parsing + AST-based navigation means we can still
+        // navigate broken documents. The cursor is inside the root object,
+        // so the schema location for the root object type is returned.
         assertDefinitionLocation(
             schemaWithCaret = """
-                {
+                <caret>{
                   "type": "object"
-                }
+                }<caret>
             """.trimIndent(),
             documentWithCaret = """
                 {inva<caret>lid kson
