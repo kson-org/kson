@@ -2,6 +2,7 @@ import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { KsonLspBridge, type KsonLspBridgeOptions, type ServerCapabilities } from './bridge/index.js';
 import { registerKsonLanguage, KSON_LANGUAGE_ID } from './language/ksonLanguage.js';
+import { TabBar } from './TabBar.js';
 import workerUrl from './worker/ksonServer?worker&url';
 
 // Monaco needs a worker factory for its built-in editor features (tokenization, etc.).
@@ -55,6 +56,12 @@ export interface KsonEditor {
 /** Tracks whether a primary (non-shared) bridge has been created. */
 let activeBridge: KsonLspBridge | null = null;
 
+/** Extracts a human-readable label from a document URI (e.g. "project.kson"). */
+function labelFromUri(uri: monaco.Uri): string {
+    const path = uri.path || uri.toString();
+    return path.split('/').pop() || path;
+}
+
 /**
  * Creates a KSON editor backed by a full language server running in a Web Worker.
  *
@@ -104,6 +111,48 @@ export async function createKsonEditor(
         activeBridge = bridge;
     }
 
+    // Wrap the container in a flex column so the tab bar and editor stack vertically.
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex; flex-direction:column; width:100%; height:100%;';
+    container.appendChild(wrapper);
+
+    const editorContainer = document.createElement('div');
+    editorContainer.style.cssText = 'flex:1; min-height:0;';
+
+    // Saved editor view states (scroll position, cursor, etc.) per document URI,
+    // so switching tabs restores exactly where the user left off.
+    const viewStates = new Map<string, monaco.editor.ICodeEditorViewState>();
+
+    // URIs of bundled schema models, used to style their tabs as read-only.
+    const schemaUris = new Set<string>();
+
+    /** Save current view state, switch to the target model, and restore its view state. */
+    function switchToModel(targetModel: monaco.editor.ITextModel): void {
+        const currentModel = editor.getModel();
+        if (currentModel) {
+            const vs = editor.saveViewState();
+            if (vs) viewStates.set(currentModel.uri.toString(), vs);
+        }
+
+        editor.setModel(targetModel);
+        editor.updateOptions({ readOnly: schemaUris.has(targetModel.uri.toString()) });
+        const vs = viewStates.get(targetModel.uri.toString());
+        if (vs) editor.restoreViewState(vs);
+    }
+
+    const tabBar = new TabBar({
+        onActivate(targetUri) {
+            const targetModel = monaco.editor.getModel(monaco.Uri.parse(targetUri));
+            if (targetModel) switchToModel(targetModel);
+        },
+        onClose(closedUri) {
+            viewStates.delete(closedUri);
+        },
+    });
+
+    wrapper.appendChild(tabBar.element);
+    wrapper.appendChild(editorContainer);
+
     // Create model and editor
     const model = monaco.editor.createModel(
         options?.value ?? '',
@@ -111,13 +160,16 @@ export async function createKsonEditor(
         uri,
     );
 
-    const editor = monaco.editor.create(container, {
+    const editor = monaco.editor.create(editorContainer, {
         model,
         automaticLayout: true,
         minimap: { enabled: false },
         'semanticHighlighting.enabled': true,
         ...options?.editorOptions,
     });
+
+    // Open the initial document as a non-closeable tab.
+    tabBar.open(uri.toString(), labelFromUri(uri), false);
 
     // Create read-only models for bundled schemas so go-to-definition can navigate to them.
     // The LSP server uses URIs like bundled://schema/kson.schema.kson for these.
@@ -128,12 +180,14 @@ export async function createKsonEditor(
             const schemaUri = monaco.Uri.parse(`bundled://schema/${schema.fileExtension}.schema.kson`);
             if (!monaco.editor.getModel(schemaUri)) {
                 schemaModels.push(monaco.editor.createModel(schema.schemaContent, KSON_LANGUAGE_ID, schemaUri));
+                schemaUris.add(schemaUri.toString());
             }
         }
         for (const meta of options?.lspOptions?.bundledMetaSchemas ?? []) {
             const metaUri = monaco.Uri.parse(`bundled://metaschema/${meta.name}.schema.kson`);
             if (!monaco.editor.getModel(metaUri)) {
                 schemaModels.push(monaco.editor.createModel(meta.schemaContent, KSON_LANGUAGE_ID, metaUri));
+                schemaUris.add(metaUri.toString());
             }
         }
 
@@ -143,27 +197,23 @@ export async function createKsonEditor(
         }
     }
 
-    // Navigation stack for go-to-definition / go-back across models.
-    const navigationStack: Array<{ uri: monaco.Uri; selection: monaco.Selection }> = [];
-
     // Standalone Monaco doesn't know how to open a different model (no IEditorService).
-    // Register a global opener so go-to-definition can navigate to schema models.
+    // Register a global opener so go-to-definition can navigate to schema models,
+    // opening a tab for each navigated document.
     const openerDisposable = monaco.editor.registerEditorOpener({
-        openCodeEditor(_source, resource, selectionOrPosition) {
+        openCodeEditor(source, resource, selectionOrPosition) {
+            // Only handle navigations originating from this editor instance.
+            // registerEditorOpener is global, so without this guard a second
+            // editor's opener could intercept navigations from the first.
+            if (source !== editor) return false;
+
             const targetModel = monaco.editor.getModel(resource);
             if (!targetModel) return false;
 
-            // Save current position before navigating
-            const currentModel = editor.getModel();
-            const currentSelection = editor.getSelection();
-            if (currentModel && currentSelection) {
-                navigationStack.push({
-                    uri: currentModel.uri,
-                    selection: currentSelection,
-                });
-            }
+            // Open (or activate) a tab for the target document
+            tabBar.open(resource.toString(), labelFromUri(resource), true, schemaUris.has(resource.toString()));
 
-            editor.setModel(targetModel);
+            switchToModel(targetModel);
             if (selectionOrPosition) {
                 if ('startLineNumber' in selectionOrPosition) {
                     editor.setSelection(selectionOrPosition);
@@ -177,22 +227,6 @@ export async function createKsonEditor(
         },
     });
 
-    // Register Alt+Left (Go Back) to pop the navigation stack
-    editor.addAction({
-        id: 'kson.goBack',
-        label: 'Go Back',
-        keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.LeftArrow],
-        run: () => {
-            const prev = navigationStack.pop();
-            if (!prev) return;
-            const prevModel = monaco.editor.getModel(prev.uri);
-            if (!prevModel) return;
-            editor.setModel(prevModel);
-            editor.setSelection(prev.selection);
-            editor.revealRangeInCenter(prev.selection);
-        },
-    });
-
     // Wire up the bridge
     const trackingDisposable = bridge.attachToEditor(editor, KSON_LANGUAGE_ID, capabilities);
 
@@ -202,6 +236,7 @@ export async function createKsonEditor(
         worker,
         serverCapabilities: capabilities,
         dispose() {
+            tabBar.dispose();
             openerDisposable.dispose();
             trackingDisposable.dispose();
             if (!isShared) {
@@ -212,6 +247,7 @@ export async function createKsonEditor(
             }
             editor.dispose();
             model.dispose();
+            wrapper.remove();
         },
     };
 }
