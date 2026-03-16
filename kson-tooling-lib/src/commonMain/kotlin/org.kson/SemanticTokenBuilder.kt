@@ -12,14 +12,12 @@ import org.kson.parser.TokenType
  */
 internal object SemanticTokenBuilder {
 
-    fun build(content: String): List<SemanticToken> {
-        val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true))
-
+    fun build(tokens: List<Token>, ast: KsonRoot): List<SemanticToken> {
         val keyTokens = mutableSetOf<Token>()
-        collectKeyTokens(parseResult.ast, keyTokens)
+        collectKeyTokens(ast, keyTokens)
 
         val result = mutableListOf<SemanticToken>()
-        for (token in parseResult.lexedTokens) {
+        for (token in tokens) {
             val kind = classifyToken(token, keyTokens) ?: continue
             result.add(
                 SemanticToken(

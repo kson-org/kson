@@ -12,8 +12,7 @@ import org.kson.value.*
  */
 internal object SelectionRangeBuilder {
 
-    fun build(content: String, line: Int, column: Int): List<Range> {
-        val ksonValue = KsonCore.parseToAst(content).ksonValue ?: return emptyList()
+    fun build(ksonValue: KsonValue, line: Int, column: Int): List<Range> {
         val ancestors = mutableListOf<Range>()
         collectAncestors(ksonValue, Coordinates(line, column), ancestors)
         return deduplicate(ancestors)

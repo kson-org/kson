@@ -12,9 +12,7 @@ import org.kson.parser.TokenType
  */
 internal object FoldingRangeBuilder {
 
-    fun build(content: String): List<StructuralRange> {
-        val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true))
-        val tokens = parseResult.lexedTokens
+    fun build(tokens: List<Token>): List<StructuralRange> {
         val ranges = mutableListOf<StructuralRange>()
 
         val stack = mutableListOf<OpenToken>()

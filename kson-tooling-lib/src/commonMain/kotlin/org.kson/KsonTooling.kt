@@ -163,56 +163,73 @@ object KsonTooling {
     }
 
     /**
-     * Build document symbols from KSON source.
+     * Parse KSON source into a [ToolingDocument] that can be reused across
+     * multiple tooling operations, avoiding redundant parsing.
+     *
+     * The document is parsed with error tolerance so that partial results
+     * are available even for documents with syntax errors.
      *
      * @param content The KSON source text
-     * @return List of document symbols, or empty list if parsing fails
+     * @return A reusable [ToolingDocument]
      */
-    fun getDocumentSymbols(content: String): List<DocumentSymbol> {
-        val ksonValue = KsonCore.parseToAst(content).ksonValue ?: return emptyList()
+    fun parse(content: String): ToolingDocument = ToolingDocument(content)
+
+    /**
+     * Build document symbols from a pre-parsed [ToolingDocument].
+     *
+     * @param document The pre-parsed KSON document
+     * @return List of document symbols, or empty list if parsing failed
+     */
+    fun getDocumentSymbols(document: ToolingDocument): List<DocumentSymbol> {
+        val ksonValue = document.ksonValue ?: return emptyList()
         return DocumentSymbolBuilder.build(ksonValue)
     }
 
     /**
-     * Build semantic tokens from KSON source.
+     * Build semantic tokens from a pre-parsed [ToolingDocument].
      *
-     * @param content The KSON source text
+     * @param document The pre-parsed KSON document
      * @return List of semantic tokens with absolute positions
      */
-    fun getSemanticTokens(content: String): List<SemanticToken> {
-        return SemanticTokenBuilder.build(content)
+    fun getSemanticTokens(document: ToolingDocument): List<SemanticToken> {
+        return SemanticTokenBuilder.build(document.tokens, document.ast)
     }
 
     /**
-     * Get structural ranges (foldable regions) from KSON source.
+     * Get structural ranges (foldable regions) from a pre-parsed [ToolingDocument].
      *
      * Identifies multi-line objects, arrays, and embed blocks that can
      * be collapsed in an editor. Single-line constructs are excluded.
      *
-     * @param content The KSON source text
+     * @param document The pre-parsed KSON document
      * @return List of structural ranges, each spanning at least two lines
      */
-    fun getStructuralRanges(content: String): List<StructuralRange> {
-        return FoldingRangeBuilder.build(content)
+    fun getStructuralRanges(document: ToolingDocument): List<StructuralRange> {
+        return FoldingRangeBuilder.build(document.tokens)
     }
 
     /**
-     * Get enclosing ranges for a cursor position in a KSON document.
+     * Get enclosing ranges for a cursor position in a pre-parsed [ToolingDocument].
      *
      * Returns a list of ranges from innermost to outermost that contain
      * the cursor position. Used for smart expand/shrink selection.
      *
-     * @param content The KSON source text
+     * @param document The pre-parsed KSON document
      * @param line Zero-based line number
      * @param column Zero-based column number
      * @return List of ranges from innermost to outermost, deduplicated
      */
-    fun getEnclosingRanges(content: String, line: Int, column: Int): List<Range> {
-        return SelectionRangeBuilder.build(content, line, column)
+    fun getEnclosingRanges(document: ToolingDocument, line: Int, column: Int): List<Range> {
+        val ksonValue = document.ksonValue ?: return emptyList()
+        return SelectionRangeBuilder.build(ksonValue, line, column)
     }
 
     /**
      * Validate a KSON document and return diagnostic messages.
+     *
+     * This method does its own strict parse (without error tolerance) to
+     * produce accurate error messages, so it accepts raw content rather
+     * than a [ToolingDocument].
      *
      * If [schemaContent] is provided, the document is validated against the schema.
      * Schema validation includes both parse errors and schema violations.
@@ -227,19 +244,20 @@ object KsonTooling {
     }
 
     /**
-     * Get sibling key ranges for a cursor position in a KSON document.
+     * Get sibling key ranges for a cursor position in a pre-parsed [ToolingDocument].
      *
      * If the cursor is on a property key, returns the selection ranges of all
      * sibling keys within the same parent object. Returns an empty list if the
      * cursor is not on a key.
      *
-     * @param content The KSON source text
+     * @param document The pre-parsed KSON document
      * @param line Zero-based line number
      * @param column Zero-based column number
      * @return List of ranges for sibling key symbols
      */
-    fun getSiblingKeys(content: String, line: Int, column: Int): List<Range> {
-        return SiblingKeyBuilder.build(content, line, column)
+    fun getSiblingKeys(document: ToolingDocument, line: Int, column: Int): List<Range> {
+        val ksonValue = document.ksonValue ?: return emptyList()
+        return SiblingKeyBuilder.build(ksonValue, line, column)
     }
 
     /**

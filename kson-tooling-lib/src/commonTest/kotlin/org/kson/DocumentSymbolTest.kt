@@ -6,13 +6,14 @@ class DocumentSymbolTest {
 
     @Test
     fun testSimpleObject() {
-        val symbols = KsonTooling.getDocumentSymbols("""
+        val doc = KsonTooling.parse("""
             {
                 "name": "John",
                 "age": 30,
                 "active": true
             }
         """.trimIndent())
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
@@ -45,7 +46,7 @@ class DocumentSymbolTest {
 
     @Test
     fun testNestedObjects() {
-        val symbols = KsonTooling.getDocumentSymbols("""
+        val doc = KsonTooling.parse("""
             {
                 "user": {
                     "name": "Jane",
@@ -55,6 +56,7 @@ class DocumentSymbolTest {
                 }
             }
         """.trimIndent())
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
@@ -81,7 +83,7 @@ class DocumentSymbolTest {
 
     @Test
     fun testArrays() {
-        val symbols = KsonTooling.getDocumentSymbols("""
+        val doc = KsonTooling.parse("""
             {
                 "items": [
                     "apple",
@@ -91,6 +93,7 @@ class DocumentSymbolTest {
                 ]
             }
         """.trimIndent())
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         val itemsKey = root.children[0]
@@ -118,12 +121,13 @@ class DocumentSymbolTest {
 
     @Test
     fun testEmptyObjectsAndArrays() {
-        val symbols = KsonTooling.getDocumentSymbols("""
+        val doc = KsonTooling.parse("""
             {
                 "emptyObject": {},
                 "emptyArray": []
             }
         """.trimIndent())
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         assertEquals(2, root.children.size)
@@ -145,7 +149,8 @@ class DocumentSymbolTest {
 
     @Test
     fun testRootArray() {
-        val symbols = KsonTooling.getDocumentSymbols("""["item1", "item2", "item3"]""")
+        val doc = KsonTooling.parse("""["item1", "item2", "item3"]""")
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
@@ -156,22 +161,22 @@ class DocumentSymbolTest {
 
     @Test
     fun testPrimitiveRoots() {
-        val stringSymbols = KsonTooling.getDocumentSymbols("\"hello\"")
+        val stringSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("\"hello\""))
         assertEquals(1, stringSymbols.size)
         assertEquals(DocumentSymbolKind.STRING, stringSymbols[0].kind)
         assertEquals("hello", stringSymbols[0].detail)
 
-        val numberSymbols = KsonTooling.getDocumentSymbols("42")
+        val numberSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("42"))
         assertEquals(1, numberSymbols.size)
         assertEquals(DocumentSymbolKind.NUMBER, numberSymbols[0].kind)
         assertEquals("42", numberSymbols[0].detail)
 
-        val boolSymbols = KsonTooling.getDocumentSymbols("false")
+        val boolSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("false"))
         assertEquals(1, boolSymbols.size)
         assertEquals(DocumentSymbolKind.BOOLEAN, boolSymbols[0].kind)
         assertEquals("false", boolSymbols[0].detail)
 
-        val nullSymbols = KsonTooling.getDocumentSymbols("null")
+        val nullSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("null"))
         assertEquals(1, nullSymbols.size)
         assertEquals(DocumentSymbolKind.NULL, nullSymbols[0].kind)
         assertEquals("null", nullSymbols[0].detail)
@@ -179,25 +184,26 @@ class DocumentSymbolTest {
 
     @Test
     fun testEmptyDocument() {
-        val symbols = KsonTooling.getDocumentSymbols("")
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse(""))
         assertEquals(0, symbols.size)
     }
 
     @Test
     fun testInvalidDocument() {
-        val symbols = KsonTooling.getDocumentSymbols("{ invalid json }")
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("{ invalid json }"))
         assertEquals(0, symbols.size)
     }
 
     @Test
     fun testEmbedBlock() {
-        val symbols = KsonTooling.getDocumentSymbols("""
+        val doc = KsonTooling.parse("""
             {
                 "code": ${"$"}bash
                     echo hello
                 ${"$$"}
             }
         """.trimIndent())
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         val codeKey = root.children[0]
@@ -211,7 +217,7 @@ class DocumentSymbolTest {
 
     @Test
     fun testUnquotedKeys() {
-        val symbols = KsonTooling.getDocumentSymbols("name: John")
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("name: John"))
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
@@ -223,7 +229,7 @@ class DocumentSymbolTest {
 
     @Test
     fun testRangesArePopulated() {
-        val symbols = KsonTooling.getDocumentSymbols("{\"key\": \"value\"}")
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("{\"key\": \"value\"}"))
 
         val root = symbols[0]
         assertEquals(0, root.range.startLine)

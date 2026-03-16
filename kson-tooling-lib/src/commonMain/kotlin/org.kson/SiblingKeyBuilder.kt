@@ -1,5 +1,7 @@
 package org.kson
 
+import org.kson.value.KsonValue
+
 /**
  * Finds sibling key ranges for a cursor position in a KSON document.
  *
@@ -9,8 +11,7 @@ package org.kson
  */
 internal object SiblingKeyBuilder {
 
-    fun build(content: String, line: Int, column: Int): List<Range> {
-        val ksonValue = KsonCore.parseToAst(content).ksonValue ?: return emptyList()
+    fun build(ksonValue: KsonValue, line: Int, column: Int): List<Range> {
         val symbols = DocumentSymbolBuilder.build(ksonValue)
 
         // Flatten the tree, collecting each symbol with its parent
