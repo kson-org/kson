@@ -138,8 +138,6 @@ tasks {
         errorOutput = System.err
         isIgnoreExitValue = false
 
-        // cibuildwheel configuration lives in pyproject.toml under [tool.cibuildwheel]
-
         doLast {
             println("Successfully built platform-specific wheel using cibuildwheel")
         }
