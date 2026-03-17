@@ -18,6 +18,9 @@
   },
   "main": "./dist/client.js",
   "browser": "./dist/browserClient.js",
+  "activationEvents": [
+    "workspaceContains:**/.kson-schema.kson"
+  ],
   "contributes": {
     "commands": [
       {
@@ -70,6 +73,12 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "kson",
+        "path": "./dist/extension/snippets/kson.code-snippets"
+      }
+    ],
     "configuration": {
       "title": "Kson",
       "properties": {
@@ -101,6 +110,21 @@
           ],
           "default": "plain",
           "description": "Formatting style for Kson documents"
+        },
+        "kson.codeLens.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show formatting style buttons at the top of KSON documents"
+        },
+        "kson.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace communication with the KSON language server"
         }
       }
     }

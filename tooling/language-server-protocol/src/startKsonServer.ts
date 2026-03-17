@@ -4,6 +4,7 @@ import {
     TextDocumentSyncKind,
     ServerCapabilities,
     DiagnosticRegistrationOptions,
+    DidChangeConfigurationNotification,
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri'
 import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
@@ -49,6 +50,7 @@ export function startKsonServer(
 ): void {
     // Variables to store state during initialization
     let workspaceRootUri: URI | undefined;
+    let hasConfigurationCapability = false;
 
     // Create logger that uses the connection
     const logger = {
@@ -69,6 +71,9 @@ export function startKsonServer(
         if (stringUri) {
             workspaceRootUri = URI.parse(stringUri)
         }
+
+        // Detect if the client supports workspace/configuration requests
+        hasConfigurationCapability = !!(params.capabilities.workspace?.configuration);
 
         // Extract bundled schema configuration from initialization options
         const initOptions = params.initializationOptions as KsonInitializationOptions | undefined;
@@ -176,8 +181,23 @@ export function startKsonServer(
         return {capabilities};
     });
 
+    // Pull configuration from the client
+    async function pullConfiguration(): Promise<void> {
+        const settings = await connection.workspace.getConfiguration('kson');
+        const configuration = ksonSettingsWithDefaults({ kson: settings });
+        textDocumentService.updateConfiguration(configuration);
+    }
+
     // Called after initialization is complete
-    connection.onInitialized(() => {
+    connection.onInitialized(async () => {
+        if (hasConfigurationCapability) {
+            // Register for configuration change notifications
+            connection.client.register(DidChangeConfigurationNotification.type, {
+                section: 'kson'
+            });
+            // Pull initial configuration
+            await pullConfiguration();
+        }
         logger.info('Kson Language Server initialized');
     });
 
@@ -246,10 +266,15 @@ export function startKsonServer(
     });
 
     // Handle configuration changes
-    connection.onDidChangeConfiguration((change) => {
-        // Update the text document service with new configuration
-        const configuration = ksonSettingsWithDefaults(change.settings);
-        textDocumentService.updateConfiguration(configuration);
+    connection.onDidChangeConfiguration(async (change) => {
+        if (hasConfigurationCapability) {
+            // Pull configuration from the client (pull model)
+            await pullConfiguration();
+        } else {
+            // Fallback to reading pushed settings
+            const configuration = ksonSettingsWithDefaults(change.settings);
+            textDocumentService.updateConfiguration(configuration);
+        }
 
         // Check if bundled schema setting changed
         if (bundledSchemaProvider && change.settings?.kson?.enableBundledSchemas !== undefined) {

@@ -1,30 +1,20 @@
 import {describe, it} from 'mocha';
-import * as assert from 'assert';
-import {Kson} from 'kson';
+import assert from 'assert';
 import {DefinitionService} from '../../../core/features/DefinitionService.js';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {KsonSchemaDocument} from '../../../core/document/KsonSchemaDocument.js';
-import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Position} from 'vscode-languageserver';
+import {createKsonDocument, createKsonSchemaDocument, pos, SCHEMA_URI} from '../../TestHelpers.js';
 
 describe('DefinitionService', () => {
     const definitionService = new DefinitionService();
 
     it('should return empty list when no schema is configured', () => {
-        // Create a document without a schema
-        const content = '{ "name": "test" }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const document = new KsonDocument(textDoc, analysis, undefined);
+        const document = createKsonDocument('{ "name": "test" }');
 
-        const position: Position = {line: 0, character: 4}; // Position on "name"
-        const definition = definitionService.getDefinition(document, position);
+        const definition = definitionService.getDefinition(document, pos(0, 4));
 
         assert.deepStrictEqual(definition, []);
     });
 
     it('should return null when definition not found', () => {
-        // Create a simple schema
         const schemaContent = `{
             "type": "object",
             "properties": {
@@ -34,25 +24,14 @@ describe('DefinitionService', () => {
             }
         }`;
 
-        const schemaDocument = TextDocument.create("file:///schema.kson", 'kson', 1, schemaContent);
+        const document = createKsonDocument('{ "unknown": "test" }', schemaContent);
 
-        // Create a document with a property not in schema
-        const docContent = '{ "unknown": "test" }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
+        const definition = definitionService.getDefinition(document, pos(0, 4));
 
-        // Try to get definition for the "unknown" property
-        const position: Position = {line: 0, character: 4}; // Position on "unknown"
-        const definition = definitionService.getDefinition(document, position);
-
-        // Should return null if no definition found
-        // Note: This depends on whether the tooling-lib returns a location for properties not in schema
         assert.ok(definition === null || Array.isArray(definition), 'Definition should be null or an array');
     });
 
     it('should return DefinitionLink when definition exists', () => {
-        // Create a simple schema
         const schemaContent = `{
             "type": "object",
             "properties": {
@@ -66,51 +45,30 @@ describe('DefinitionService', () => {
             }
         }`;
 
-        const schemaDocument = TextDocument.create("file:///schema.kson", 'kson', 1, schemaContent);
+        const document = createKsonDocument('{ "name": "test", "port": 8080 }', schemaContent);
 
-        // Create a document that matches the schema
-        const docContent = '{ "name": "test", "port": 8080 }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
+        const definition = definitionService.getDefinition(document, pos(0, 20));
 
-        // Try to get definition for the "port" property
-        const position: Position = {line: 0, character: 20}; // Position on "port"
-        const definition = definitionService.getDefinition(document, position);
-
-        // Verify definition link is returned if the tooling lib supports it
         assert.ok(Array.isArray(definition), 'Definition should be an array');
         assert.ok(definition.length > 0, 'Definition array should not be empty');
 
         const firstDef = definition[0];
         assert.ok(firstDef.targetUri, 'Definition should have targetUri');
-        assert.strictEqual(firstDef.targetUri, schemaDocument.uri, 'Target URI should be schema document');
+        assert.strictEqual(firstDef.targetUri, SCHEMA_URI, 'Target URI should be schema document');
         assert.ok(firstDef.targetRange, 'Definition should have targetRange');
         assert.ok(firstDef.targetSelectionRange, 'Definition should have targetSelectionRange');
     });
 
     it('should handle errors gracefully', () => {
-        // Create an invalid document
-        const content = '{ invalid json';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const document = new KsonDocument(textDoc, analysis, undefined);
+        const document = createKsonDocument('{ invalid json');
 
-        const position: Position = {line: 0, character: 4};
-
-        // Should not throw an error
         assert.doesNotThrow(() => {
-            definitionService.getDefinition(document, position);
+            definitionService.getDefinition(document, pos(0, 4));
         });
     });
 
     describe('$ref resolution within schema documents', () => {
-        // Minimal metaschema simulating the bundled JSON Schema Draft-07 metaschema.
-        // Schema files that declare $schema get this assigned as their schema document,
-        // which exercises the code path where both $ref resolution and schema-to-metaschema
-        // navigation are attempted (the bug was that schema navigation early-returned,
-        // preventing $ref resolution from ever running).
-        const metaSchemaContent = `{
+        const META_SCHEMA = `{
     "$id": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
@@ -123,12 +81,8 @@ describe('DefinitionService', () => {
         "description": { "type": "string" }
     }
 }`;
-        const metaSchemaDocument = TextDocument.create(
-            'bundled://metaschema/draft-07.schema.kson', 'kson', 1, metaSchemaContent
-        );
 
         it('should resolve $ref to $defs definition', () => {
-            // Create a schema document with a $ref and a bundled metaschema
             const schemaContent = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -148,28 +102,19 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
+            const document = createKsonSchemaDocument(schemaContent, META_SCHEMA);
 
-            // Position on the $ref value "#/$defs/User"
-            const position: Position = {line: 5, character: 24}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(5, 24));
 
-            // Should return definitions from both $ref resolution and schema navigation
             assert.ok(Array.isArray(definition), 'Definition should be an array');
             assert.strictEqual(definition.length, 2, 'Should have results from both $ref resolution and schema navigation');
 
-            const refDef = definition.find(d => d.targetUri === textDoc.uri);
+            const refDef = definition.find(d => d.targetUri === document.uri);
             assert.ok(refDef, 'Should have a $ref resolution result pointing to same document');
-            assert.ok(refDef.targetRange, 'Definition should have targetRange');
-
-            // Verify it points to the User definition
             assert.strictEqual(refDef.targetRange.start.line, 9, 'Should point to User definition');
         });
 
         it('should resolve $ref with JSON Pointer to nested property', () => {
-            // Create a schema with a ref to a nested property
             const schemaContent = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -187,27 +132,19 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
+            const document = createKsonSchemaDocument(schemaContent, META_SCHEMA);
 
-            // Position on the $ref value
-            const position: Position = {line: 5, character: 25}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(5, 25));
 
-            // Should return definitions from both $ref resolution and schema navigation
             assert.ok(Array.isArray(definition), 'Definition should be an array');
             assert.strictEqual(definition.length, 2, 'Should have results from both $ref resolution and schema navigation');
 
-            const refDef = definition.find(d => d.targetUri === textDoc.uri);
+            const refDef = definition.find(d => d.targetUri === document.uri);
             assert.ok(refDef, 'Should have a $ref resolution result pointing to same document');
-
-            // Verify it points to the name property definition
             assert.strictEqual(refDef.targetRange.start.line, 10, 'Should point to name property');
         });
 
         it('should resolve $ref to root schema', () => {
-            // Create a schema with a ref to root
             const schemaContent = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -217,27 +154,19 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
+            const document = createKsonSchemaDocument(schemaContent, META_SCHEMA);
 
-            // Position on the $ref value "#"
-            const position: Position = {line: 5, character: 21}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(5, 21));
 
-            // Should return definitions from both $ref resolution and schema navigation
             assert.ok(Array.isArray(definition), 'Definition should be an array');
             assert.strictEqual(definition.length, 2, 'Should have results from both $ref resolution and schema navigation');
 
-            const refDef = definition.find(d => d.targetUri === textDoc.uri);
+            const refDef = definition.find(d => d.targetUri === document.uri);
             assert.ok(refDef, 'Should have a $ref resolution result pointing to same document');
-
-            // Verify it points to the root (line 0)
             assert.strictEqual(refDef.targetRange.start.line, 0, 'Should point to root');
         });
 
         it('should return empty list when $ref target not found', () => {
-            // Create a schema with an invalid ref (no metaschema - simple negative case)
             const schemaContent = `{
     "type": "object",
     "properties": {
@@ -251,20 +180,14 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, undefined);
+            const document = createKsonDocument(schemaContent);
 
-            // Position on the invalid $ref value
-            const position: Position = {line: 4, character: 25}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(4, 25));
 
-            // Should return null or empty array when ref cannot be resolved
             assert.ok(definition === null || (Array.isArray(definition) && definition.length === 0));
         });
 
         it('should return empty list for external $ref', () => {
-            // Create a schema with an external ref (no metaschema - simple negative case)
             const schemaContent = `{
     "type": "object",
     "properties": {
@@ -273,20 +196,14 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, undefined);
+            const document = createKsonDocument(schemaContent);
 
-            // Position on the external $ref value
-            const position: Position = {line: 4, character: 25}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(4, 25));
 
-            // Should return null or empty array for external refs
             assert.ok(definition === null || (Array.isArray(definition) && definition.length === 0));
         });
 
         it('should return empty list when not on a $ref', () => {
-            // Create a schema document without $ref usage (no metaschema - simple negative case)
             const schemaContent = `{
     "type": "object",
     "properties": {
@@ -295,20 +212,14 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonDocument(textDoc, analysis, undefined);
+            const document = createKsonDocument(schemaContent);
 
-            // Position on a regular property (not a $ref)
-            const position: Position = {line: 4, character: 20}; // On "type": "string"
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(4, 20));
 
-            // Should return null or empty array
             assert.ok(definition === null || (Array.isArray(definition) && definition.length === 0));
         });
 
         it('should resolve $ref using definitions instead of $defs', () => {
-            // Test with JSON Schema Draft 4 style "definitions" instead of "$defs"
             const schemaContent = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -328,27 +239,19 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
+            const document = createKsonSchemaDocument(schemaContent, META_SCHEMA);
 
-            // Position on the $ref value
-            const position: Position = {line: 5, character: 25}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(5, 25));
 
-            // Should return definitions from both $ref resolution and schema navigation
             assert.ok(Array.isArray(definition), 'Definition should be an array');
             assert.strictEqual(definition.length, 2, 'Should have results from both $ref resolution and schema navigation');
 
-            const refDef = definition.find(d => d.targetUri === textDoc.uri);
+            const refDef = definition.find(d => d.targetUri === document.uri);
             assert.ok(refDef, 'Should have a $ref resolution result pointing to same document');
-
-            // Verify it points to the Item definition
             assert.strictEqual(refDef.targetRange.start.line, 9, 'Should point to Item definition');
         });
 
         it('should work with transitive $refs', () => {
-            // Test case where a $ref points to another $ref
             const schemaContent = `{
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -366,22 +269,15 @@ describe('DefinitionService', () => {
         }
     }
 }`;
-            const textDoc = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-            const analysis = Kson.getInstance().analyze(schemaContent);
-            const document = new KsonSchemaDocument(textDoc, analysis, metaSchemaDocument);
+            const document = createKsonSchemaDocument(schemaContent, META_SCHEMA);
 
-            // Position on the first $ref value
-            const position: Position = {line: 5, character: 23}; // Inside the ref string
-            const definition = definitionService.getDefinition(document, position);
+            const definition = definitionService.getDefinition(document, pos(5, 23));
 
-            // Should return definitions from both $ref resolution and schema navigation
             assert.ok(Array.isArray(definition), 'Definition should be an array');
             assert.strictEqual(definition.length, 2, 'Should have results from both $ref resolution and schema navigation');
 
-            const refDef = definition.find(d => d.targetUri === textDoc.uri);
+            const refDef = definition.find(d => d.targetUri === document.uri);
             assert.ok(refDef, 'Should have a $ref resolution result pointing to same document');
-
-            // Verify it points to the Alias definition (line 9 with $schema shift)
             assert.strictEqual(refDef.targetRange.start.line, 9, 'Should point to Alias definition');
         });
     });

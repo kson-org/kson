@@ -1,111 +1,59 @@
 import {describe, it} from 'mocha';
-import * as assert from 'assert';
-import {Kson} from 'kson';
+import assert from 'assert';
+import {CompletionList, Position} from 'vscode-languageserver';
 import {CompletionService} from '../../../core/features/CompletionService.js';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
-import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Position} from 'vscode-languageserver';
+import {createKsonDocument, pos} from '../../TestHelpers.js';
 
 describe('CompletionService', () => {
     const completionService = new CompletionService();
 
+    const ENUM_SCHEMA = `{
+        type: object
+        properties: {
+            status: {
+                type: string
+                description: "The current status"
+                enum: ["active", "inactive", "pending"]
+            }
+        }
+    }`;
+
+    function getCompletions(content: string, position: Position, schema?: string): CompletionList | null {
+        const document = createKsonDocument(content, schema);
+        return completionService.getCompletions(document, position);
+    }
+
+    function getCompletionLabels(content: string, position: Position, schema?: string): string[] | null {
+        const completions = getCompletions(content, position, schema);
+        if (!completions) return null;
+        return completions.items.map(item => item.label);
+    }
+
     it('should return null when no schema is configured', () => {
-        // Create a document without a schema
-        const content = '{ name: "test" }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const document = new KsonDocument(textDoc, analysis, undefined);
-
-        const position: Position = {line: 0, character: 10}; // Position in value
-        const completions = completionService.getCompletions(document, position);
-
-        assert.strictEqual(completions, null);
+        const labels = getCompletionLabels('{ name: "test" }', pos(0, 10));
+        assert.strictEqual(labels, null);
     });
 
-    it('should return enum value completions', () => {
-        // Create a schema with enum values
-        const schemaContent = `{
-            type: object
-            properties: {
-                status: {
-                    type: string
-                    description: "The current status"
-                    enum: ["active", "inactive", "pending"]
-                }
-            }
-        }`;
+    it('should return enum value completions for quoted strings', () => {
+        const labels = getCompletionLabels('{\n    status: "active"\n}', pos(1, 20), ENUM_SCHEMA);
 
-        const schemaDocument = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-
-        // Create a document that matches the schema - use multi-line format like Kotlin tests
-        const docContent = `{
-    status: "active"
-}`;
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
-
-        // Try getting completions at the value position (on "active")
-        const position: Position = {line: 1, character: 20}; // Position on the value
-        const completions = completionService.getCompletions(document, position);
-
-        // Verify completions are returned
-        assert.ok(completions !== null, 'Completions should not be null for enum property');
-        if (completions) {
-            assert.ok(completions.items.length > 0, 'Should have completion items');
-
-            // Check that enum values are included
-            const labels = completions.items.map(item => item.label);
-            assert.ok(labels.includes('active'), 'Should include "active" enum value');
-            assert.ok(labels.includes('inactive'), 'Should include "inactive" enum value');
-            assert.ok(labels.includes('pending'), 'Should include "pending" enum value');
-        }
+        assert.ok(labels, 'Completions should not be null');
+        assert.ok(labels.includes('active'));
+        assert.ok(labels.includes('inactive'));
+        assert.ok(labels.includes('pending'));
     });
 
-    it('should return enum value completions', () => {
-        // Create a schema with enum values
-        const schemaContent = `{
-            type: object
-            properties: {
-                status: {
-                    type: string
-                    description: "The current status"
-                    enum: ["active", "inactive", "pending"]
-                }
-            }
-        }`;
+    it('should return enum value completions for unquoted values', () => {
+        const labels = getCompletionLabels('\nstatus:\n  value: key\n', pos(1, 9), ENUM_SCHEMA);
 
-        const schemaDocument = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
-
-        // Create a document that matches the schema - use multi-line format like Kotlin tests
-        const docContent = `
-status:    
-  value: key   
-`;
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
-
-        // Try getting completions at the value position (on "active")
-        const position: Position = {line: 1, character: 9}; // Position after the key
-        const completions = completionService.getCompletions(document, position);
-
-        // Verify completions are returned
-        assert.ok(completions !== null, 'Completions should not be null for enum property');
-        if (completions) {
-            assert.ok(completions.items.length > 0, 'Should have completion items');
-
-            // Check that enum values are included
-            const labels = completions.items.map(item => item.label);
-            assert.ok(labels.includes('active'), 'Should include "active" enum value');
-            assert.ok(labels.includes('inactive'), 'Should include "inactive" enum value');
-            assert.ok(labels.includes('pending'), 'Should include "pending" enum value');
-        }
+        assert.ok(labels, 'Completions should not be null');
+        assert.ok(labels.includes('active'));
+        assert.ok(labels.includes('inactive'));
+        assert.ok(labels.includes('pending'));
     });
 
     it('should return boolean value completions', () => {
-        // Create a schema with boolean type
-        const schemaContent = `{
+        const schema = `{
             type: object
             properties: {
                 enabled: {
@@ -115,33 +63,15 @@ status:
             }
         }`;
 
-        const schemaDocument = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
+        const labels = getCompletionLabels('{ enabled: true }', pos(0, 13), schema);
 
-        // Create a document
-        const docContent = '{ enabled: true }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
-
-        // Try getting completions for the boolean value
-        const position: Position = {line: 0, character: 13}; // Position on "true"
-        const completions = completionService.getCompletions(document, position);
-
-        // Verify completions are returned
-        assert.ok(completions !== null, 'Completions should not be null for boolean property');
-        if (completions) {
-            assert.ok(completions.items.length > 0, 'Should have completion items');
-
-            // Check that boolean values are included
-            const labels = completions.items.map(item => item.label);
-            assert.ok(labels.includes('true'), 'Should include "true" value');
-            assert.ok(labels.includes('false'), 'Should include "false" value');
-        }
+        assert.ok(labels, 'Completions should not be null');
+        assert.ok(labels.includes('true'));
+        assert.ok(labels.includes('false'));
     });
 
     it('should include documentation in completion items', () => {
-        // Create a schema with enum and description
-        const schemaContent = `{
+        const schema = `{
             type: object
             properties: {
                 level: {
@@ -153,55 +83,36 @@ status:
             }
         }`;
 
-        const schemaDocument = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
+        const completions = getCompletions('{ level: "info" }', pos(0, 11), schema);
 
-        // Create a document
-        const docContent = '{ level: "info" }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
-
-        // Try getting completions for the level value
-        const position: Position = {line: 0, character: 11}; // Position on "info"
-        const completions = completionService.getCompletions(document, position);
-
-        // Verify completions have documentation
-        assert.ok(completions !== null, 'Completions should not be null');
-        if (completions && completions.items.length > 0) {
-            // At least one item should have documentation
-            const hasDocumentation = completions.items.some(item =>
-                item.documentation &&
-                typeof item.documentation === 'object' &&
-                'value' in item.documentation
-            );
-            assert.ok(hasDocumentation, 'At least one completion item should have documentation');
-        }
+        assert.ok(completions, 'Completions should not be null');
+        const hasDocumentation = completions.items.some(item =>
+            item.documentation &&
+            typeof item.documentation === 'object' &&
+            'value' in item.documentation
+        );
+        assert.ok(hasDocumentation, 'At least one completion item should have documentation');
     });
 
-    it('should handle documents with no matching schema gracefully', () => {
-        // Create a simple schema
-        const schemaContent = `{
+    it('should return completions with isIncomplete set to false', () => {
+        const schema = `{
             type: object
             properties: {
-                name: {
+                color: {
                     type: string
+                    enum: ["red", "blue", "green"]
                 }
             }
         }`;
 
-        const schemaDocument = TextDocument.create('file:///schema.kson', 'kson', 1, schemaContent);
+        const completions = getCompletions('{ color: "red" }', pos(0, 11), schema);
 
-        // Create a document with a property not in the schema
-        const docContent = '{ unknownProp: 123 }';
-        const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, docContent);
-        const analysis = Kson.getInstance().analyze(docContent);
-        const document = new KsonDocument(textDoc, analysis, schemaDocument);
+        assert.ok(completions, 'Completions should not be null');
+        assert.strictEqual(completions.isIncomplete, false, 'Completion list should be marked as complete');
+    });
 
-        // Try getting completions for unknown property value
-        const position: Position = {line: 0, character: 17}; // Position on 123
-        const completions = completionService.getCompletions(document, position);
-
-        // Should not throw error - might return null or empty list
-        assert.ok(true, 'Should handle unknown properties without error');
+    it('should return null for document without schema even with valid content', () => {
+        const labels = getCompletionLabels('{ name: "test", age: 30, active: true }', pos(0, 5));
+        assert.strictEqual(labels, null);
     });
 });

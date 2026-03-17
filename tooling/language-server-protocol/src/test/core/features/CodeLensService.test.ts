@@ -1,63 +1,88 @@
 import {CodeLensService} from '../../../core/features/CodeLensService.js';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {CommandType} from '../../../core/commands/CommandType.js';
-import {Kson} from 'kson';
 import {describe, it} from 'mocha';
 import assert from 'assert';
-import {TextDocument} from 'vscode-languageserver-textdocument';
 import {FormattingStyle} from 'kson'
+import {createKsonDocument, TEST_URI} from '../../TestHelpers.js';
+import {TextDocument} from 'vscode-languageserver-textdocument';
+import {Kson} from 'kson';
+import {KsonDocument} from '../../../core/document/KsonDocument.js';
 
 describe('CodeLensService', () => {
     const service = new CodeLensService();
 
-    it('should return code lenses at the top of the document', () => {
-        const content = '{ "name": "test" }';
-        const textDocument = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysisResult = Kson.getInstance().analyze(content);
-        const document = new KsonDocument(textDocument, analysisResult);
+    it('should return exactly 4 code lenses', () => {
+        const document = createKsonDocument('{ "name": "test" }');
+        const lenses = service.getCodeLenses(document);
+        assert.strictEqual(lenses.length, 4);
+    });
+
+    it('should have correct command IDs for all formatting styles', () => {
+        const document = createKsonDocument('key: value');
+        const lenses = service.getCodeLenses(document);
+
+        const commandIds = lenses.map(l => l.command?.command);
+        assert.deepStrictEqual(commandIds, [
+            CommandType.PLAIN_FORMAT,
+            CommandType.DELIMITED_FORMAT,
+            CommandType.CLASSIC_FORMAT,
+            CommandType.COMPACT_FORMAT
+        ]);
+    });
+
+    it('should include document URI in each lens argument', () => {
+        const document = createKsonDocument('{ "name": "test" }');
+        const lenses = service.getCodeLenses(document);
+
+        for (const lens of lenses) {
+            const args = lens.command?.arguments;
+            assert.ok(args && args.length === 1);
+            assert.strictEqual(args[0].documentUri, TEST_URI);
+        }
+    });
+
+    it('should include the correct FormattingStyle in each lens argument', () => {
+        const document = createKsonDocument('key: value');
+        const lenses = service.getCodeLenses(document);
+
+        assert.strictEqual(lenses[0].command?.arguments?.[0].formattingStyle, FormattingStyle.PLAIN);
+        assert.strictEqual(lenses[1].command?.arguments?.[0].formattingStyle, FormattingStyle.DELIMITED);
+        assert.strictEqual(lenses[2].command?.arguments?.[0].formattingStyle, FormattingStyle.CLASSIC);
+        assert.strictEqual(lenses[3].command?.arguments?.[0].formattingStyle, FormattingStyle.COMPACT);
+    });
+
+    it('should place all lenses at line 0, character 0', () => {
+        const document = createKsonDocument('key: value');
+        const lenses = service.getCodeLenses(document);
+
+        for (const lens of lenses) {
+            assert.deepStrictEqual(lens.range.start, { line: 0, character: 0 });
+            assert.deepStrictEqual(lens.range.end, { line: 0, character: 0 });
+        }
+    });
+
+    it('should return lenses for an empty document', () => {
+        const document = createKsonDocument('');
+        const lenses = service.getCodeLenses(document);
+        assert.strictEqual(lenses.length, 4);
+    });
+
+    it('should return lenses for an invalid document', () => {
+        const document = createKsonDocument('{ broken {{{{');
+        const lenses = service.getCodeLenses(document);
+        assert.strictEqual(lenses.length, 4);
+    });
+
+    it('should use the document URI from the provided document', () => {
+        const customUri = 'file:///custom/path/doc.kson';
+        const textDoc = TextDocument.create(customUri, 'kson', 1, 'key: value');
+        const analysis = Kson.getInstance().analyze('key: value');
+        const document = new KsonDocument(textDoc, analysis);
 
         const lenses = service.getCodeLenses(document);
 
-        assert.strictEqual(lenses.length, 4);
-
-        // First lens should be "plain"
-        assert.strictEqual(lenses[0].command?.title, 'plain');
-        assert.strictEqual(lenses[0].command?.command, CommandType.PLAIN_FORMAT);
-        assert.deepStrictEqual(lenses[0].command?.arguments, [{
-            documentUri: 'file:///test.kson',
-            formattingStyle: FormattingStyle.PLAIN
-        }]);
-        assert.deepStrictEqual(lenses[0].range.start, { line: 0, character: 0 });
-        assert.deepStrictEqual(lenses[0].range.end, { line: 0, character: 0 });
-
-        // Second lens should be "delimited"
-        assert.strictEqual(lenses[1].command?.title, 'delimited');
-        assert.strictEqual(lenses[1].command?.command, CommandType.DELIMITED_FORMAT);
-        assert.deepStrictEqual(lenses[1].command?.arguments, [{
-            documentUri: 'file:///test.kson',
-            formattingStyle: FormattingStyle.DELIMITED
-        }]);
-        assert.deepStrictEqual(lenses[1].range.start, { line: 0, character: 0 });
-        assert.deepStrictEqual(lenses[1].range.end, { line: 0, character: 0 });
-
-        // Third lens should be "classic"
-        assert.strictEqual(lenses[2].command?.title, 'classic');
-        assert.strictEqual(lenses[2].command?.command, CommandType.CLASSIC_FORMAT);
-        assert.deepStrictEqual(lenses[2].command?.arguments, [{
-            documentUri: 'file:///test.kson',
-            formattingStyle: FormattingStyle.CLASSIC
-        }]);
-        assert.deepStrictEqual(lenses[2].range.start, { line: 0, character: 0 });
-        assert.deepStrictEqual(lenses[2].range.end, { line: 0, character: 0 });
-
-        // Fourth lens should be "compact"
-        assert.strictEqual(lenses[3].command?.title, 'compact');
-        assert.strictEqual(lenses[3].command?.command, CommandType.COMPACT_FORMAT);
-        assert.deepStrictEqual(lenses[3].command?.arguments, [{
-            documentUri: 'file:///test.kson',
-            formattingStyle: FormattingStyle.COMPACT
-        }]);
-        assert.deepStrictEqual(lenses[3].range.start, { line: 0, character: 0 });
-        assert.deepStrictEqual(lenses[3].range.end, { line: 0, character: 0 });
+        for (const lens of lenses) {
+            assert.strictEqual(lens.command?.arguments?.[0].documentUri, customUri);
+        }
     });
 });
