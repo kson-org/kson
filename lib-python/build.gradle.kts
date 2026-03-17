@@ -51,6 +51,7 @@ tasks {
     }
 
     val prepareSdistBuildEnvironment by register<Copy>("prepareSdistBuildEnvironment") {
+        dependsOn("copyLicense", copyNativeArtifacts, ":kson-lib:generateJniBindingsJvm")
         group = "build"
         description = "Prepare kson-sdist directory with necessary Gradle files for sdist"
 
@@ -109,11 +110,16 @@ tasks {
             exclude(".gradle/**")
         }
 
-        // Copy lib-python (build files and source)
+        // Copy lib-python (build files and source, excluding native binaries
+        // which are platform-specific and must be built from source)
+        // Keep in sync with PLATFORM_NATIVE_LIBRARIES in build_backend.py
         from(project.projectDir) {
             into("lib-python")
             include("build.gradle.kts")
             include("src/**")
+            exclude("src/kson/kson.dll")
+            exclude("src/kson/libkson.dylib")
+            exclude("src/kson/libkson.so")
         }
     }
 
@@ -142,7 +148,7 @@ tasks {
         environment("CIBW_SKIP", "*-musllinux_*")  // Skip musl Linux builds
         environment("CIBW_ARCHS", "native")  // Build only for native architecture
         environment("CIBW_TEST_REQUIRES", "pytest")  // Install pytest for testing
-        environment("CIBW_TEST_COMMAND", "pytest -v {project}/tests")
+        environment("CIBW_TEST_COMMAND", "pytest -v {project}/tests --ignore={project}/tests/test_build_backend.py")
 
         doLast {
             println("Successfully built platform-specific wheel using cibuildwheel")

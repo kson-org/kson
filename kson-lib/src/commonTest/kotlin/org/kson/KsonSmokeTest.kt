@@ -366,6 +366,22 @@ class KsonSmokeTest {
         val rule = assertIs<EmbedRuleResult.Success>(ruleResult).embedRule
         assertEquals("/scripts/*", rule.pathPattern)
         assertEquals("bash", rule.tag)
+        assertEquals(0, rule.minLength)
+    }
+
+    @Test
+    fun testEmbedRule_validPatternWithMinLength() {
+        val ruleResult = EmbedRule.fromPathPattern("/scripts/*", tag = "bash", minLength = 40)
+        val rule = assertIs<EmbedRuleResult.Success>(ruleResult).embedRule
+        assertEquals("/scripts/*", rule.pathPattern)
+        assertEquals("bash", rule.tag)
+        assertEquals(40, rule.minLength)
+    }
+
+    @Test
+    fun testEmbedRule_negativeMinLength() {
+        val ruleResult = EmbedRule.fromPathPattern("/scripts/*", minLength = -1)
+        assertIs<EmbedRuleResult.Failure>(ruleResult)
     }
 
     @Test
@@ -397,5 +413,15 @@ class KsonSmokeTest {
             """.trimIndent(),
             formatted
         )
+    }
+
+    @Test
+    fun testAnalyze_largeInteger() {
+        val input = "9007199254740991"
+        val analysis = Kson.analyze(input)
+        val value = analysis.ksonValue
+        assertNotNull(value)
+        assertTrue(value is KsonValue.KsonNumber.Integer)
+        assertEquals(9007199254740991L, value.value)
     }
 }

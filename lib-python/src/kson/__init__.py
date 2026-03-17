@@ -907,8 +907,8 @@ class _KsonValue_KsonNumber_Integer(KsonValue.KsonNumber):
             b"org/kson/KsonValue$KsonNumber$Integer",
             jni_ref,
             b"getValue",
-            b"()I",
-            "IntMethod",
+            b"()J",
+            "LongMethod",
             []
         )
 
@@ -1948,7 +1948,10 @@ class EmbedRule:
     """A rule for formatting string values at specific paths as embed blocks.
 
     When formatting KSON, strings at paths matching [pathPattern] will be rendered
-    as embed blocks instead of regular strings.
+    as embed blocks instead of regular strings. Only string values are eligible —
+    non-string values at matching paths are ignored. Strings shorter than [minLength]
+    are ignored too ([minLength] defaults to 0, meaning that all matching strings
+    become embed blocks regardless of their length).
 
     **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
     """
@@ -1996,38 +1999,61 @@ class EmbedRule:
 
         return cast(Any, (lambda x0: None if x0 == ffi.NULL else (_java_string_to_python_str)(x0))(result))
 
+    def min_length(
+        self,
+    ) -> int:
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/EmbedRule",
+            jni_ref,
+            b"getMinLength",
+            b"()I",
+            "IntMethod",
+            []
+        )
+
+        return cast(Any, (lambda x0: x0)(result))
+
     @staticmethod
     def from_path_pattern(
         path_pattern: str,
         tag: Optional[str],
+        min_length: int,
 
     ) -> EmbedRuleResult:
         """Builds a new [EmbedRule].
 
         @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
         @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+        @param minLength Minimum string length — strings shorter than this won't be converted to embed blocks (defaults to 0, no restriction)
         @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
 
         Example:
         ```kotlin
         EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
         EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+        EmbedRule.fromPathPattern("/templates/ *", minLength = 40)  // Only embed strings >= 40 chars
         ```
         """
 
         if path_pattern is None:
             raise ValueError("`path_pattern` cannot be None")
+        if min_length is None:
+            raise ValueError("`min_length` cannot be None")
         jni_ref = _access_static_field(b"org/kson/EmbedRule", b"Companion", b"Lorg/kson/EmbedRule$Companion;")
         result = _call_method(
             b"org/kson/EmbedRule$Companion",
             jni_ref,
             b"fromPathPattern",
-            b"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
+            b"(Ljava/lang/String;Ljava/lang/String;I)Lorg/kson/EmbedRuleResult;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(path_pattern),
                 _python_str_to_java_string(tag) if tag is not None else ffi.NULL,
+                ffi.cast('jint', min_length),
             ]
         )
 

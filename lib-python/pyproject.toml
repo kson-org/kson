@@ -50,6 +50,10 @@ kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.pyright]
+include = ["src", "build_backend.py", "tests"]
 
 [dependency-groups]
 dev = [
@@ -57,6 +61,7 @@ dev = [
     "pytest>=8.4.1",
     "pytest-codeblocks>=0.17.0",
     "ruff>=0.12.8",
+    "setuptools>=61.0",
     "cibuildwheel>=2.16.0",
     "twine>=6.2.0",
 ]

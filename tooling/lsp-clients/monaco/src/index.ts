@@ -1,4 +1,3 @@
-export { createKsonEditor } from './KsonEditorManager.js';
-export { createYamlEditor } from './YamlEditorManager.js';
-// Re-export useful types from monaco-editor-wrapper
-export type { WrapperConfig, MonacoEditorLanguageClientWrapper } from 'monaco-editor-wrapper';
+export { createKsonEditor, type KsonEditor } from './KsonEditorManager.js';
+export { createYamlEditor, type YamlEditor } from './YamlEditorManager.js';
+export type { EditorAppConfig, EditorApp } from 'monaco-languageclient/editorApp';

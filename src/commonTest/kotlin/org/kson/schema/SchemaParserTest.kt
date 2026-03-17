@@ -66,6 +66,85 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testParseSchemaWithEmbedBlockDescription() {
+        val schema = assertValidObjectSchema(
+            """
+            description: %markdown
+              A **rich** description of this schema.
+              %%
+            type: object
+            """.trimIndent()
+        )
+        assertEquals("A **rich** description of this schema.", schema.description)
+    }
+
+    @Test
+    fun testParseSchemaWithMultilineEmbedBlockDescription() {
+        val schema = assertValidObjectSchema(
+            """
+            |description: %markdown
+            |  A **person** object representing a user in the system.
+            |  
+            |  Must include at least a `name` and `email`.
+            |  %%
+            |type: object
+            """.trimMargin()
+        )
+        assertEquals(
+            "A **person** object representing a user in the system.\n\nMust include at least a `name` and `email`.",
+            schema.description
+        )
+    }
+
+    @Test
+    fun testParseSchemaWithTaglessEmbedBlockDescription() {
+        val schema = assertValidObjectSchema(
+            """
+            description: %
+              A plain embed block description.
+              %%
+            type: object
+            """.trimIndent()
+        )
+        assertEquals("A plain embed block description.", schema.description)
+    }
+
+    @Test
+    fun testParseSchemaWithInvalidDescriptionType() {
+        assertSchemaHasValidationErrors(
+            """{"description": 123}""",
+            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
+        )
+    }
+
+    @Test
+    fun testParseSchemaWithComment() {
+        val schema = assertValidObjectSchema("""{"${'$'}comment": "A comment on this schema"}""")
+        assertEquals("A comment on this schema", schema.comment)
+    }
+
+    @Test
+    fun testParseSchemaWithEmbedBlockComment() {
+        val schema = assertValidObjectSchema(
+            """
+            |'${'$'}comment': %markdown
+            |  A **rich** comment on this schema.
+            |  %%
+            |type: object
+            """.trimMargin()
+        )
+        assertEquals("A **rich** comment on this schema.", schema.comment)
+    }
+
+    @Test
+    fun testParseSchemaWithInvalidCommentType() {
+        assertSchemaHasValidationErrors(
+            """{"${'$'}comment": 123}""",
+            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
+        )
+    }
+
+    @Test
     fun testParseSchemaWithTypeString() {
         assertValidObjectSchema("""{"type": "string"}""")
     }

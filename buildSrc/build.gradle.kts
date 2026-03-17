@@ -55,7 +55,7 @@ tasks {
         }
     }
 
-    val javaVersion = "11"
+    val javaVersion = "17"
     withType<JavaCompile> {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -103,7 +103,7 @@ tasks {
 dependencies {
     implementation(gradleApi())
     testImplementation(kotlin("test"))
-    implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
     
     // Add Kotlin Gradle Plugin for multiplatform configuration
