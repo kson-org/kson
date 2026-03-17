@@ -187,14 +187,22 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
  * A rule for formatting string values at specific paths as embed blocks.
  *
  * When formatting KSON, strings at paths matching [pathPattern] will be rendered
- * as embed blocks instead of regular strings.
+ * as embed blocks instead of regular strings. Only string values are eligible —
+ * non-string values at matching paths are ignored. Strings shorter than [minLength]
+ * are ignored too ([minLength] defaults to 0, meaning that all matching strings
+ * become embed blocks regardless of their length).
  *
  * **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
  */
 class EmbedRule private constructor(
     val pathPattern: String,
-    val tag: String? = null
+    val tag: String? = null,
+    val minLength: Int = 0
 ) {
+    init {
+        require(minLength >= 0) { "minLength must be non-negative, got $minLength" }
+    }
+
     @OptIn(ExperimentalJsonPointerGlobLanguage::class)
     internal val parsedPathPattern: JsonPointerGlob = JsonPointerGlob(pathPattern)
 
@@ -204,17 +212,19 @@ class EmbedRule private constructor(
          *
          * @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
          * @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+         * @param minLength Minimum string length — strings shorter than this won't be converted to embed blocks (defaults to 0, no restriction)
          * @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
          *
          * Example:
          * ```kotlin
          * EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
          * EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+         * EmbedRule.fromPathPattern("/templates/ *", minLength = 40)  // Only embed strings >= 40 chars
          * ```
          */
-        fun fromPathPattern(pathPattern: String, tag: String? = null): EmbedRuleResult {
+        fun fromPathPattern(pathPattern: String, tag: String? = null, minLength: Int = 0): EmbedRuleResult {
             return try {
-                EmbedRuleResult.Success(EmbedRule(pathPattern, tag))
+                EmbedRuleResult.Success(EmbedRule(pathPattern, tag, minLength))
             } catch (e: IllegalArgumentException) {
                 EmbedRuleResult.Failure(e.toString())
             }
@@ -243,6 +253,7 @@ class FormatOptions(
     /**
      * Map [FormatOptions] to [KsonFormatterConfig] that is used internally to format a Kson document.
      */
+    @OptIn(ExperimentalJsonPointerGlobLanguage::class)
     internal fun toInternal(): KsonFormatterConfig {
         val indentType = when (indentType) {
             is IndentType.Spaces -> InternalIndentType.Space(indentType.size)
@@ -259,7 +270,8 @@ class FormatOptions(
         val internalEmbedRules = embedBlockRules.map { rule ->
             InternalEmbedRule(
                 pathPattern = rule.parsedPathPattern,
-                tag = rule.tag
+                tag = rule.tag,
+                minLength = rule.minLength
             )
         }
 
@@ -549,13 +561,13 @@ internal fun convertValue(ksonValue: InternalKsonValue): KsonValue {
             val isInteger = ksonValue.value is NumberParser.ParsedNumber.Integer
             if (isInteger) {
                 KsonValue.KsonNumber.Integer(
-                    value = ksonValue.value.asString.toInt(),
+                    value = (ksonValue.value as NumberParser.ParsedNumber.Integer).value,
                     internalStart = Position(ksonValue.location.start),
                     internalEnd = Position(ksonValue.location.end)
                 )
             } else {
                 KsonValue.KsonNumber.Decimal(
-                    value = ksonValue.value.asString.toDouble(),
+                    value = (ksonValue.value as NumberParser.ParsedNumber.Decimal).value,
                     internalStart = Position(ksonValue.location.start),
                     internalEnd = Position(ksonValue.location.end)
                 )
@@ -648,7 +660,7 @@ sealed class KsonValue(val start: Position, val end: Position) {
     sealed class KsonNumber(start: Position, end: Position) : KsonValue(start, end) {
 
           class Integer internal constructor(
-              val value: Int,
+              val value: Long,
               val internalStart: Position,
               val internalEnd: Position
           ) : KsonNumber(internalStart, internalEnd){

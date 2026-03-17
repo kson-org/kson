@@ -10,7 +10,8 @@
       "email": "dmarcotte@gmail.com"
     }
   ],
-  "version": "0.0.1",
+  "//": "[[kson-version-num]]",
+  "version": "0.3.0-dev.0",
   "description": "Kson Language Server implementation in TypeScript",
   "type": "module",
   "exports": {
@@ -38,7 +39,7 @@
     "typescript"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": "24.x"
   },
   "dependencies": {
     "kson": "file:../../kson-lib/build/dist/js/productionLibrary",
@@ -49,7 +50,7 @@
   },
   "devDependencies": {
     "@types/mocha": "10.0.10",
-    "@types/node": "20.0.0",
+    "@types/node": "24.0.0",
     "mocha": "^10.0.10",
     "tsx": "^4.20.2",
     "typescript": "^5.8.3"

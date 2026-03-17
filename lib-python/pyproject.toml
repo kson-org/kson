@@ -51,6 +51,9 @@ kson = ["kson_api.h", "kson.dll", "libkson.dylib", "libkson.so", "jni_simplified
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
+[tool.pyright]
+include = ["src", "build_backend.py", "tests"]
+
 [dependency-groups]
 dev = [
     "pyright>=1.1.403",

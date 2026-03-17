@@ -1,56 +1,56 @@
-import { MonacoEditorLanguageClientWrapper, WrapperConfig } from 'monaco-editor-wrapper';
+import { MonacoVscodeApiWrapper } from 'monaco-languageclient/vscodeApiWrapper';
+import { LanguageClientWrapper } from 'monaco-languageclient/lcwrapper';
+import { EditorApp, type EditorAppConfig } from 'monaco-languageclient/editorApp';
 import { createKsonLanguageConfig } from './config/ksonConfig.js';
 import workerUrl from './worker/ksonServer?worker&url';
 
+export interface KsonEditor {
+    editorApp: EditorApp;
+    languageClient: LanguageClientWrapper;
+    start(container: HTMLElement): Promise<void>;
+    dispose(): Promise<void>;
+}
 
 /**
- * Creates a Kson-specific WrapperConfig with sensible defaults.
- * You can override any properties by spreading your own config.
+ * Creates a KSON editor with full language server support.
+ *
+ * Initializes the VSCode API, starts the language client, and returns
+ * an editor ready to be mounted via `start(container)`.
  */
-async function createKsonConfig(overrides: Partial<WrapperConfig> = {}): Promise<WrapperConfig> {
-    // Create a dedicated worker for this editor
+export async function createKsonEditor(overrides?: {
+    editorAppConfig?: Partial<EditorAppConfig>;
+}): Promise<KsonEditor> {
     const worker = new Worker(workerUrl, {
         type: 'module',
         name: `Kson LS (${Math.random().toString(36).substring(2, 15)})`,
     });
 
-    const baseConfig = createKsonLanguageConfig({
-        worker
-    });
-    
-    // Deep merge base config with overrides
-    const finalConfig: WrapperConfig = {
-        ...baseConfig,
-        ...overrides,
-        vscodeApiConfig: {
-            ...baseConfig.vscodeApiConfig,
-            ...overrides.vscodeApiConfig
+    const config = createKsonLanguageConfig({ worker });
+
+    const mergedEditorConfig: EditorAppConfig = {
+        ...config.editorAppConfig,
+        ...overrides?.editorAppConfig,
+    };
+
+    const apiWrapper = new MonacoVscodeApiWrapper(config.vscodeApiConfig);
+    await apiWrapper.start();
+
+    const lcWrapper = new LanguageClientWrapper(config.languageClientConfig);
+    await lcWrapper.start();
+
+    const editorApp = new EditorApp(mergedEditorConfig);
+
+    return {
+        editorApp,
+        languageClient: lcWrapper,
+        async start(container: HTMLElement) {
+            await editorApp.start(container);
         },
-        languageClientConfigs: {
-            ...baseConfig.languageClientConfigs,
-            ...overrides.languageClientConfigs
-        },
-        editorAppConfig: {
-            ...baseConfig.editorAppConfig,
-            ...overrides.editorAppConfig,
+        async dispose() {
+            await editorApp.dispose();
+            await lcWrapper.dispose();
+            apiWrapper.dispose();
+            worker.terminate();
         }
     };
-    
-    // Attach worker reference for cleanup
-    (finalConfig as any).__worker = worker;
-    
-    return finalConfig;
-}
-
-/**
- * Creates a Kson editor wrapper using the standard monaco-editor-wrapper.
- * Returns the wrapper which can be managed using its native API.
- */
-export async function createKsonEditor(config: Partial<WrapperConfig> = {}): Promise<MonacoEditorLanguageClientWrapper> {
-    const ksonConfig = await createKsonConfig(config);
-    
-    const wrapper = new MonacoEditorLanguageClientWrapper();
-    await wrapper.init(ksonConfig);
-    
-    return wrapper;
 }

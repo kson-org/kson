@@ -10,6 +10,12 @@ tasks {
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
 
+    val playwrightInstall = register<PixiExecTask>("playwrightInstall") {
+        command=listOf("npx", "playwright", "install", "chromium")
+        doNotTrackState("playwright already tracks its own state")
+        dependsOn(npmInstall)
+    }
+
     register<PixiExecTask>("npm_run_vscode") {
         command=listOf("npm", "run", "vscode")
         dependsOn(npmInstall)
@@ -23,6 +29,7 @@ tasks {
     val test = register<PixiExecTask>("npm_run_test") {
         command=listOf("npm", "run", "test")
         dependsOn(npmInstall)
+        dependsOn(playwrightInstall)
     }
 
     val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {

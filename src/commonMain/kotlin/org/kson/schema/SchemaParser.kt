@@ -70,7 +70,7 @@ object SchemaParser {
 
                 val refValidator = RefValidator(resolvedValue, idLookup)
 
-                return JsonObjectSchema(null, refString.value, null, null, null, listOf(refValidator))
+                return JsonObjectSchema(null, refString.value, null, null, null, null, listOf(refValidator))
             } else {
                 messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             }
@@ -93,11 +93,23 @@ object SchemaParser {
             }
         }
         val description = schemaProperties["description"]?.let { description ->
-            if (description is KsonString) {
-                description.value
-            } else {
-                messageSink.error(description.location, SCHEMA_STRING_REQUIRED.create("description"))
-                null
+            when (description) {
+                is KsonString -> description.value
+                is EmbedBlock -> description.embedContent.value
+                else -> {
+                    messageSink.error(description.location, SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED.create("description"))
+                    null
+                }
+            }
+        }
+        val comment = schemaProperties["\$comment"]?.let { comment ->
+            when (comment) {
+                is KsonString -> comment.value
+                is EmbedBlock -> comment.embedContent.value
+                else -> {
+                    messageSink.error(comment.location, SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED.create("\$comment"))
+                    null
+                }
             }
         }
 
@@ -460,7 +472,7 @@ object SchemaParser {
             )
         }
 
-        return JsonObjectSchema(title, description, default, definitions, typeValidator, validators)
+        return JsonObjectSchema(title, description, comment, default, definitions, typeValidator, validators)
     }
 }
 

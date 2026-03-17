@@ -14,7 +14,7 @@ version = "0.1.0"
 [tasks]
 
 [dependencies]
-nodejs = "20.19.4.*"
+nodejs = "24.*"
 python = "3.13.*"
 
 [target.win-64.dependencies]

@@ -33,6 +33,7 @@ sealed interface JsonSchema: Validator {
 class JsonObjectSchema(
     val title: String?,
     val description: String?,
+    val comment: String?,
     val default: KsonValue?,
     val definitions: Map<KsonString, JsonSchema?>?,
 
