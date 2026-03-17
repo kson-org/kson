@@ -573,6 +573,46 @@ class SchemaNavigationTest {
     }
 
     @Test
+    fun testNavigateWithRootRef() {
+        // When the root schema is a $ref, navigation must resolve the $ref
+        // before trying to navigate into properties
+        val schema = """
+            '${'$'}ref': '#/${'$'}defs/PromptfooConfigSchema'
+            '${'$'}defs':
+              PromptfooConfigSchema:
+                type: object
+                properties:
+                  prompts:
+                    type: array
+                    items:
+                      type: string
+                      .
+                    .
+                  description:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        // Verify that navigation succeeds despite the root being a $ref
+        val results = navigateSchema(schema, listOf("prompts"))
+        assertEquals(1, results.size, "Should find prompts property through root \$ref")
+
+        val promptsSchema = results.single() as InternalKsonObject
+        assertEquals("array", (promptsSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // Also verify deeper navigation works
+        val itemResults = navigateSchema(schema, listOf("prompts", "0"))
+        assertEquals(1, itemResults.size, "Should navigate through root \$ref into array items")
+        assertEquals(
+            "string",
+            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+        )
+    }
+
+    @Test
     fun testNavigateNestedCombinators() {
         val schema = """
             {
