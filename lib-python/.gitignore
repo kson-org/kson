@@ -8,6 +8,7 @@ kson-sdist
 *.h
 *.egg-info
 *.pyd
+LICENSE
 
 # uvw generated files
 .uv
