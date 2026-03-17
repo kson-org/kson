@@ -6,7 +6,7 @@ Available on Linux, macOS, and Windows. Requires Python 3.10+.
 
 ## Installation
 
-<!--pytest-codeblocks:skip-->
+<!--pytest.mark.skip-->
 ```bash
 pip install kson-lang
 ```
@@ -220,7 +220,7 @@ from kson import Kson, FormatOptions, IndentType, FormattingStyle, EmbedRule, Em
 
 source = 'scripts:\n  deploy: "#!/bin/bash\\necho hello"'
 
-rule_result = EmbedRule.from_path_pattern("/scripts/*", "bash")
+rule_result = EmbedRule.from_path_pattern("/scripts/*", "bash", 0)
 assert isinstance(rule_result, EmbedRuleResult.Success)
 
 options = FormatOptions(
@@ -255,7 +255,7 @@ match result:
 
 ## Build from source
 
-<!-- pytest-codeblocks:skip -->
+<!-- pytest.mark.skip -->
 ```bash
 git clone https://github.com/kson-org/kson.git
 cd kson && ./gradlew :lib-python:build
