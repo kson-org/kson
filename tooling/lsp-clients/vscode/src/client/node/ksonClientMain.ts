@@ -110,7 +110,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
                 if (selection.action === 'file') {
                     // Find KSON files in workspace
-                    const files = await vscode.workspace.findFiles('**/*.[k|j]son', '**/node_modules/**');
+                    const files = await vscode.workspace.findFiles('**/*.{kson,json}', '**/node_modules/**');
                     if (files.length === 0) {
                         vscode.window.showInformationMessage('No .kson or .json files found in workspace.');
                         return;

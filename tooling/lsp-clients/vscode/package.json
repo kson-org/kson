@@ -9,7 +9,8 @@
     }
   ],
   "publisher": "kson",
-  "version": "0.1.0",
+  "//": "[[kson-version-num]]",
+  "version": "0.3.0-dev.0",
   "icon": "dist/extension/assets/kson-icon.png",
   "repository": {
     "type": "git",
@@ -17,6 +18,9 @@
   },
   "main": "./dist/client.js",
   "browser": "./dist/browserClient.js",
+  "activationEvents": [
+    "workspaceContains:**/.kson-schema.kson"
+  ],
   "contributes": {
     "commands": [
       {
@@ -69,6 +73,12 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "kson",
+        "path": "./dist/extension/snippets/kson.code-snippets"
+      }
+    ],
     "configuration": {
       "title": "Kson",
       "properties": {
@@ -95,17 +105,33 @@
             "delimited"
           ],
           "enumDescriptions": [
-            "Plain formatting with minimal delimiters", "Delimited formatting"
+            "Plain formatting with minimal delimiters",
+            "Delimited formatting"
           ],
           "default": "plain",
           "description": "Formatting style for Kson documents"
+        },
+        "kson.codeLens.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show formatting style buttons at the top of KSON documents"
+        },
+        "kson.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace communication with the KSON language server"
         }
       }
     }
   },
   "engines": {
     "vscode": "^1.99.3",
-    "node": "^20.18.1"
+    "node": "24.x"
   },
   "scripts": {
     "package": "npm run check-types && tsx esbuild.ts --production",
@@ -126,7 +152,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",
-    "@types/node": "20.0.0",
+    "@types/node": "24.0.0",
     "@types/uuid": "^9.0.8",
     "@types/vscode": "1.99.0",
     "@vscode/test-electron": "^2.5.2",
@@ -134,7 +160,7 @@
     "@vscode/vsce": "^3.6.0",
     "esbuild": "^0.25.5",
     "mocha": "^11.7.1",
-    "oniguruma": "^7.2.3",
+    "vscode-oniguruma": "^2.0.1",
     "process": "^0.11.10",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.3",

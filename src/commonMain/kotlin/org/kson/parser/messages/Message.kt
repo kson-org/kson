@@ -529,6 +529,16 @@ enum class MessageType(
             return "Schema property \"$schemaPropertyName\" must be a string"
         }
     },
+    SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            return "Schema property \"$schemaPropertyName\" must be a string or embed block"
+        }
+    },
     SCHEMA_TYPE_ARRAY_ENTRY_ERROR(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()

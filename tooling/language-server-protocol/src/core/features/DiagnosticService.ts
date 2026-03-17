@@ -13,6 +13,8 @@ import {Message, Kson, SchemaResult} from 'kson';
  * Service responsible for providing diagnostic information for Kson documents.
  */
 export class DiagnosticService {
+    private cachedSchemaContent: string | null = null;
+    private cachedSchemaResult: SchemaResult | null = null;
 
     createDocumentDiagnosticReport(document: KsonDocument): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];
@@ -36,7 +38,7 @@ export class DiagnosticService {
             : document.getSchemaDocument();
         if (!schema) return null;
 
-        const parsedSchema = Kson.getInstance().parseSchema(schema.getText());
+        const parsedSchema = this.parseSchemaWithCache(schema.getText());
         if (!(parsedSchema instanceof SchemaResult.Success)) return null;
 
         return parsedSchema.schemaValidator.validate(document.getText(), document.uri).asJsReadonlyArrayView();
@@ -91,5 +93,18 @@ export class DiagnosticService {
                 character: message.end.column
             }
         };
+    }
+
+    /**
+     * Parse schema content, returning cached result if content hasn't changed.
+     */
+    private parseSchemaWithCache(schemaContent: string): SchemaResult {
+        if (this.cachedSchemaResult && this.cachedSchemaContent === schemaContent) {
+            return this.cachedSchemaResult;
+        }
+        const result = Kson.getInstance().parseSchema(schemaContent);
+        this.cachedSchemaContent = schemaContent;
+        this.cachedSchemaResult = result;
+        return result;
     }
 } 

@@ -39,9 +39,10 @@ class FormatterTest {
         )
     }
 
-    private fun embedRule(pathPattern: String, tag: String? = null) = InternalEmbedRule(
+    private fun embedRule(pathPattern: String, tag: String? = null, minLength: Int = 0) = InternalEmbedRule(
         pathPattern = JsonPointerGlob(pathPattern),
-        tag = tag
+        tag = tag,
+        minLength = minLength
     )
 
     @Test
@@ -2314,6 +2315,40 @@ class FormatterTest {
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
             formattingStyle = FormattingStyle.CLASSIC,
             roundTrip = false
+        )
+    }
+
+    @Test
+    fun testMinLengthSkipsShortStrings() {
+        assertFormatting(
+            """
+            scripts:
+              build: "make all"
+              deploy: "rsync -av --delete /src/ /dst/"
+            """.trimIndent(),
+            """
+            scripts:
+              build: 'make all'
+              deploy: 'rsync -av --delete /src/ /dst/'
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/scripts/*", "bash", minLength = 80)),
+        )
+    }
+
+    @Test
+    fun testMinLengthIncludesStringsAtExactLength() {
+        assertFormatting(
+            """
+            config:
+              cmd: "abc"
+            """.trimIndent(),
+            """
+            config:
+              cmd: %
+                abc
+                %%
+            """.trimIndent(),
+            embedBlockRules = listOf(embedRule("/config/cmd", minLength = 3)),
         )
     }
 

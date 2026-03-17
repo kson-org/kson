@@ -1329,7 +1329,7 @@ pub mod kson_value {
 
             pub fn value(
                 &self,
-            ) -> i32 {
+            ) -> i64 {
                 let self_ptr = self.to_kotlin_object();
                 let self_obj = self_ptr.as_kotlin_object();
 
@@ -1339,8 +1339,8 @@ pub mod kson_value {
                     util,
                     c"org/kson/KsonValue$KsonNumber$Integer",
                     c"getValue",
-                    c"()I",
-                    CallIntMethod,
+                    c"()J",
+                    CallLongMethod,
                     self_obj,
 
                 );
@@ -3488,7 +3488,10 @@ impl std::hash::Hash for Kson {
 /// A rule for formatting string values at specific paths as embed blocks.
 ///
 /// When formatting KSON, strings at paths matching [pathPattern] will be rendered
-/// as embed blocks instead of regular strings.
+/// as embed blocks instead of regular strings. Only string values are eligible —
+/// non-string values at matching paths are ignored. Strings shorter than [minLength]
+/// are ignored too ([minLength] defaults to 0, meaning that all matching strings
+/// become embed blocks regardless of their length).
 ///
 /// **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
 #[derive(Clone)]
@@ -3566,20 +3569,45 @@ impl EmbedRule {
         FromKotlinObject::from_kotlin_object(result)
     }
 
+
+    pub fn min_length(
+        &self,
+    ) -> i32 {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/EmbedRule",
+            c"getMinLength",
+            c"()I",
+            CallIntMethod,
+            self_obj,
+
+        );
+
+        result
+    }
+
     /// Builds a new [EmbedRule].
     ///
     /// @param pathPattern A JsonPointerGlob pattern (e.g., "/scripts/ *", "/queries/ **")
     /// @param tag Optional embed tag to include (e.g., "yaml", "sql", "bash")
+    /// @param minLength Minimum string length — strings shorter than this won't be converted to embed blocks (defaults to 0, no restriction)
     /// @return [EmbedRuleResult.Success] if [pathPattern] is a valid JsonPointerGlob, otherwise [EmbedRuleResult.Failure]
     ///
     /// Example:
     /// ```kotlin
     /// EmbedRule.fromPathPattern("/scripts/ *", tag = "bash")  // Match all values under "scripts"
     /// EmbedRule.fromPathPattern("/config/description")        // Match exact path, no tag
+    /// EmbedRule.fromPathPattern("/templates/ *", minLength = 40)  // Only embed strings >= 40 chars
     /// ```
     pub fn from_path_pattern(
         path_pattern: &str,
         tag: Option<&str>,
+        min_length: i32,
     ) -> EmbedRuleResult {
         let self_ptr = util::access_static_field(c"org/kson/EmbedRule", c"INSTANCE", c"Lorg/kson/EmbedRule;");
         let self_obj = self_ptr.as_kotlin_object();
@@ -3593,11 +3621,12 @@ impl EmbedRule {
             util,
             c"org/kson/EmbedRule",
             c"fromPathPattern",
-            c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/EmbedRuleResult;",
+            c"(Ljava/lang/String;Ljava/lang/String;I)Lorg/kson/EmbedRuleResult;",
             CallObjectMethod,
             self_obj,
             path_pattern,
             tag,
+            min_length,
         );
 
         FromKotlinObject::from_kotlin_object(result)

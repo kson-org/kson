@@ -10,18 +10,22 @@ When `main` is ready to have a release cut from it:
 #### On the `main` branch:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:
   * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
-    - Update `BASE_VERSION` to `X.(Y+1).0` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
+    - Update `BASE_VERSION` to `X.(Y+1).0` - this applies to kson-lib, kson-tooling-lib, tooling/jetbrains, and tooling/cli
     - Snapshot versions use stable `{BASE_VERSION}-SNAPSHOT` for builds, and SHA-qualified `{BASE_VERSION}-{gitSha}-SNAPSHOT` for Maven publishing
   * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version, update `internalBaseVersion` there)
   * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
+  * [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json): `X.(Y+1).0-dev.0`
+  * [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json): `X.(Y+1).0-dev.0`
+  * [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json): `X.(Y+1).0-dev.0`
+  * [tooling/language-server-protocol](../tooling/language-server-protocol/package.json): `X.(Y+1).0-dev.0`
 
 #### On the `release/X.Y.Z` branch:
 
 - Search the codebase for `[[kson-version-num]]` to find and update all the development/snapshot versions to the new `X.Y.Z` version.  Here's a hopefully complete checklist of the artifacts we version and publish that should marked `[[kson-version-num]]`:
   * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
-    - Update `BASE_VERSION` to `X.Y.Z` - this applies to kson-lib, tooling/jetbrains, and tooling/cli
+    - Update `BASE_VERSION` to `X.Y.Z` - this applies to kson-lib, kson-tooling-lib, tooling/jetbrains, and tooling/cli
     - Build with `-Prelease=true` flag to produce release versions (without SNAPSHOT suffix):
       ```bash
       ./gradlew build -Prelease=true
@@ -31,6 +35,10 @@ When `main` is ready to have a release cut from it:
     - [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs)
     - [lib-python](../lib-python/pyproject.toml)
     - [tooling/lsp-clients](../tooling/lsp-clients/package.json)
+    - [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json)
+    - [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json)
+    - [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json)
+    - [tooling/language-server-protocol](../tooling/language-server-protocol/package.json)
 - Commit and push the `release-X.Y.Z-prep` branch
 - Run CircleCI across ALL supported platforms on the `release-X.Y.Z-prep` branch (only linux builds are run on every pull request)
   * Fix any platform specific issues found (hopefully this is rare... if it is common and painful, we may need to reconsider running cross-platform CI more often)

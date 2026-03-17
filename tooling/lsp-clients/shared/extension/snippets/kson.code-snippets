@@ -1,0 +1,37 @@
+{
+  "Key-Value Pair": {
+    "prefix": "kv",
+    "body": [
+      "${1:key}: ${2:value}"
+    ],
+    "description": "Key-value pair"
+  },
+  "Embed Block (%)": {
+    "prefix": "embed%",
+    "body": [
+      "%${1:lang}",
+      "  $0",
+      "  %%"
+    ],
+    "description": "Embed block with % delimiter"
+  },
+  "Embed Block ($)": {
+    "prefix": "embed$",
+    "body": [
+      "\\$${1:lang}",
+      "  $0",
+      "  \\$\\$"
+    ],
+    "description": "Embed block with $ delimiter"
+  },
+  "Array (list)": {
+    "prefix": "list",
+    "body": [
+      "${1:key}:",
+      "  - ${2:item}",
+      "  - $0",
+      "  ="
+    ],
+    "description": "KSON list with dash syntax"
+  }
+}

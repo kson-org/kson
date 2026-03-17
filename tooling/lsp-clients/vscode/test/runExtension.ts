@@ -25,11 +25,14 @@ async function main() {
 
     const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
-    // Use a short user-data-dir path (must be < 128 characters)
+    // Use short paths (must be < 128 characters) to fully isolate this
+    // instance from the user's regular VS Code, including any already-installed
+    // extensions that would conflict (e.g. duplicate kson.* command registrations).
     const userDataDir = path.join(os.tmpdir(), 'vscode-kson');
+    const extensionsDir = path.join(os.tmpdir(), 'vscode-kson-ext');
 
     console.log('Installing VSIX...');
-    const installResult = cp.spawnSync(cliPath, ['--user-data-dir', userDataDir, '--install-extension', vsixPath], {
+    const installResult = cp.spawnSync(cliPath, ['--user-data-dir', userDataDir, '--extensions-dir', extensionsDir, '--install-extension', vsixPath], {
       encoding: 'utf-8',
       stdio: 'inherit',
       shell: process.platform === 'win32',
@@ -45,7 +48,7 @@ async function main() {
 
     // Don't use extensionDevelopmentPath since we installed the VSIX
     // --wait keeps the CLI process running until VS Code is closed
-    const launchArgs = ['--user-data-dir', userDataDir, '--wait', workspacePath];
+    const launchArgs = ['--user-data-dir', userDataDir, '--extensions-dir', extensionsDir, '--wait', workspacePath];
 
     console.log('Launching command:', cliPath);
     console.log('With args:', launchArgs);
