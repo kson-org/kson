@@ -11,7 +11,9 @@
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
     "test:headed": "playwright test --headed",
-    "build:iframe": "vite build --config vite.iframe.config.ts && vite build --config vite.iframe-client.config.ts"
+    "build:iframe": "vite build --config vite.iframe.config.ts && vite build --config vite.iframe-client.config.ts",
+    "demo:library": "vite --config vite.demo-library.config.ts",
+    "demo:iframe": "vite --config vite.demo-iframe.config.ts"
   },
   "author": "",
   "license": "ISC",
