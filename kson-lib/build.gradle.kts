@@ -11,7 +11,7 @@ plugins {
     kotlin("multiplatform")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
-    id("nl.ochagavia.krossover") version "1.0.6"
+    id("nl.ochagavia.krossover") version "1.0.7"
 }
 
 repositories {
