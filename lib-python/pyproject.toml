@@ -61,11 +61,6 @@ archs = "native"
 test-requires = "pytest"
 test-command = "pytest -v {project}/tests --ignore={project}/tests/test_build_backend.py"
 
-[tool.cibuildwheel.macos]
-# Pin deployment target so builds don't break when the host macOS is
-# newer than what the Python packaging tools recognize yet.
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
-
 [tool.pyright]
 include = ["src", "build_backend.py", "tests"]
 

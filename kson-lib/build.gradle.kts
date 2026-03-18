@@ -1,5 +1,6 @@
 import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.kson.BinaryArtifactPaths
+import org.gradle.internal.os.OperatingSystem
 import org.kson.GraalVmHelper
 
 import kotlin.io.path.Path
@@ -320,13 +321,18 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
         }
         val classPath = jars.joinToString(cpSeparator)
 
-        listOf(
-            nativeImageExe.absolutePath,
-            "--shared",
-            "-cp", classPath,
-            "-H:+UnlockExperimentalVMOptions", // Necessary to use JNIConfigurationFiles option below
-            "-H:JNIConfigurationFiles=$jniConfig",
-            "-o", buildArtifactPath
-        )
+        buildList {
+            add(nativeImageExe.absolutePath)
+            add("--shared")
+            add("-cp"); add(classPath)
+            add("-H:+UnlockExperimentalVMOptions") // Necessary to use JNIConfigurationFiles option below
+            add("-H:JNIConfigurationFiles=$jniConfig")
+            // Pin the macOS deployment target so the dylib doesn't inherit the host's
+            // macOS version, which would make wheels unnecessarily require the latest OS.
+            if (OperatingSystem.current().isMacOsX) {
+                add("-H:NativeLinkerOption=-mmacosx-version-min=11.0")
+            }
+            add("-o"); add(buildArtifactPath)
+        }
     })
 }
