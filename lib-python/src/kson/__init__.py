@@ -8,7 +8,6 @@ from pathlib import Path
 from enum import Enum
 
 tls = threading.local()
-tls.attached_jni_thread = None
 
 JNI_OK = 0
 
@@ -61,31 +60,38 @@ jvm = ffi.gc(jvm_ptr[0], lambda x: x[0].DestroyJavaVM(x))
 # JNI Helpers #
 ###############
 
-def _attach_jni_thread() -> Any:
-    if tls.attached_jni_thread:
-        return tls.attached_jni_thread
+class AttachedJniThread:
+    """Automatically attaches/detaches the thread to the JNI."""
 
-    env_ptr = ffi.new("JNIEnv **")
-    if jvm[0].AttachCurrentThread(jvm, ffi.cast("void **", env_ptr), ffi.NULL) != JNI_OK:
-        raise RuntimeError("failed to attach JNI thread")
+    should_detach: bool
 
-    tls.attached_jni_thread = env_ptr[0]
-    return env_ptr[0]
+    def __enter__(self):
+        self.should_detach = False
 
-def _detach_jni_thread():
-    if jvm[0].DetachCurrentThread(jvm) != JNI_OK:
-        raise RuntimeError("failed to detach JNI thread")
-    tls.attached_jni_thread = None
+        if getattr(tls, 'attached_jni_thread', None):
+            return tls.attached_jni_thread
+
+        env_ptr = ffi.new("JNIEnv **")
+        if jvm[0].AttachCurrentThread(jvm, ffi.cast("void **", env_ptr), ffi.NULL) != JNI_OK:
+            raise RuntimeError("failed to attach JNI thread")
+
+        tls.attached_jni_thread = env_ptr[0]
+        self.should_detach = True
+        return env_ptr[0]
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.should_detach:
+            if jvm[0].DetachCurrentThread(jvm) != JNI_OK:
+                raise RuntimeError("failed to detach JNI thread")
+            tls.attached_jni_thread = None
+
 
 def _delete_local_ref(env, jni_ref: Any):
     env[0].DeleteLocalRef(env, ffi.cast("jobject", jni_ref))
 
 def _delete_global_ref(jni_ref):
-    should_detach = tls.attached_jni_thread is None
-    env = _attach_jni_thread()
-    env[0].DeleteGlobalRef(env, ffi.cast("jobject", jni_ref))
-    if should_detach:
-        _detach_jni_thread()
+    with AttachedJniThread() as env:
+        env[0].DeleteGlobalRef(env, ffi.cast("jobject", jni_ref))
 
 def _to_gc_global_ref(env, jni_ref: Any) -> Any:
     global_jni_ref = env[0].NewGlobalRef(env, jni_ref)
@@ -106,30 +112,27 @@ def _get_method(env, clazz: Any, method_name: bytes, method_signature: bytes) ->
     return method
 
 def _construct(class_name: bytes, constructor_signature: bytes, args: Any) -> Any:
-    env = _attach_jni_thread()
-    clazz = _get_class(env, class_name)
-    constructor = _get_method(env, clazz, b"<init>", constructor_signature)
-    jni_ref = env[0].NewObject(env, clazz, constructor, *args)
-    _raise_exception_if_any(env)
-    jni_ref_global = _to_gc_global_ref(env, jni_ref)
-    _detach_jni_thread()
-    return jni_ref_global
+    with AttachedJniThread() as env:
+        clazz = _get_class(env, class_name)
+        constructor = _get_method(env, clazz, b"<init>", constructor_signature)
+        jni_ref = env[0].NewObject(env, clazz, constructor, *args)
+        _raise_exception_if_any(env)
+        return _to_gc_global_ref(env, jni_ref)
 
 def _access_static_field(class_name: bytes, field_name: bytes, field_type: bytes) -> Any:
-    env = _attach_jni_thread()
-    c = _get_class(env, class_name)
-    signature_cstr = ffi.new("char[]", field_type)
-    field_name_cstr = ffi.new("char[]", field_name)
+    with AttachedJniThread() as env:
+        c = _get_class(env, class_name)
+        signature_cstr = ffi.new("char[]", field_type)
+        field_name_cstr = ffi.new("char[]", field_name)
 
-    # Get static id
-    field = env[0].GetStaticFieldID(env, c, field_name_cstr, signature_cstr)
-    _raise_if_null(env, field)
+        # Get static id
+        field = env[0].GetStaticFieldID(env, c, field_name_cstr, signature_cstr)
+        _raise_if_null(env, field)
 
-    # Access field
-    field_value = _to_gc_global_ref(env, env[0].GetStaticObjectField(env, c, field))
-    _raise_if_null(env, field_value)
-    _detach_jni_thread()
-    return field_value
+        # Access field
+        field_value = _to_gc_global_ref(env, env[0].GetStaticObjectField(env, c, field))
+        _raise_if_null(env, field_value)
+        return field_value
 
 def _call_method_raw(env: Any, class_name: bytes, jni_ref: Any, func_name: bytes, func_signature: bytes, jni_call_name: str, args: List[Any]) -> Any:
     clazz = _get_class(env, class_name)
@@ -139,12 +142,11 @@ def _call_method_raw(env: Any, class_name: bytes, jni_ref: Any, func_name: bytes
     return result
 
 def _call_method(class_name: bytes, jni_ref: Any, func_name: bytes, func_signature: bytes, jni_call_name: str, args: List[Any]) -> Any:
-    env = _attach_jni_thread()
-    result = _call_method_raw(env, class_name, jni_ref, func_name, func_signature, jni_call_name, args)
-    if jni_call_name == "ObjectMethod":
-        result = _to_gc_global_ref(env, result)
-    _detach_jni_thread()
-    return result
+    with AttachedJniThread() as env:
+        result = _call_method_raw(env, class_name, jni_ref, func_name, func_signature, jni_call_name, args)
+        if jni_call_name == "ObjectMethod":
+            result = _to_gc_global_ref(env, result)
+        return result
 
 def _python_str_to_java_string(s: str) -> Any:
     utf16_bytes = s.encode("utf-16-le")
@@ -155,40 +157,45 @@ def _python_str_to_java_string(s: str) -> Any:
         raise RuntimeError("entered unreachable code: raw string length was not divisible by 2")
     utf16_str = ffi.new("char[]", utf16_bytes)
 
-    env = _attach_jni_thread()
-    jni_ref = env[0].NewString(env, ffi.cast("jchar *", utf16_str), utf16_str_len)
-    _raise_if_null(env, jni_ref)
-    jni_ref = _to_gc_global_ref(env, jni_ref)
-    _detach_jni_thread()
-    return jni_ref
+    with AttachedJniThread() as env:
+        jni_ref = env[0].NewString(env, ffi.cast("jchar *", utf16_str), utf16_str_len)
+        _raise_if_null(env, jni_ref)
+        return _to_gc_global_ref(env, jni_ref)
 
 def _java_string_to_python_str(jni_ref: Any) -> str:
-    env = _attach_jni_thread()
-    native_chars = env[0].GetStringChars(env, jni_ref, ffi.NULL)
-    _raise_if_null(env, native_chars)
-    native_chars_byte_len = env[0].GetStringLength(env, jni_ref) * 2
-    python_str = bytes(cast(Any, ffi.buffer(native_chars, native_chars_byte_len))).decode("utf-16-le", "strict")
-    env[0].ReleaseStringChars(env, jni_ref, native_chars)
-    _detach_jni_thread()
-    return python_str
+    with AttachedJniThread() as env:
+        native_chars = env[0].GetStringChars(env, jni_ref, ffi.NULL)
+        _raise_if_null(env, native_chars)
+        native_chars_byte_len = env[0].GetStringLength(env, jni_ref) * 2
+        python_str = bytes(cast(Any, ffi.buffer(native_chars, native_chars_byte_len))).decode("utf-16-le", "strict")
+        env[0].ReleaseStringChars(env, jni_ref, native_chars)
+        return python_str
 
 def _jni_class_name(jni_ref: Any):
     if jni_ref == ffi.NULL:
         raise RuntimeError("entered unreachable code: attempted to obtain class name of null object")
 
-    env = _attach_jni_thread()
-    clazz = env[0].GetObjectClass(env, jni_ref)
-    _raise_if_null(env, clazz)
-    name_local = _call_method_raw(env, b"java/lang/Class", clazz, b"getName", b"()Ljava/lang/String;", "ObjectMethod", [])
-    name = _to_gc_global_ref(env, name_local)
-    _delete_local_ref(env, clazz)
-    _detach_jni_thread()
-    return _java_string_to_python_str(name)
+    with AttachedJniThread() as env:
+        clazz = env[0].GetObjectClass(env, jni_ref)
+        _raise_if_null(env, clazz)
+        name_local = _call_method_raw(env, b"java/lang/Class", clazz, b"getName", b"()Ljava/lang/String;", "ObjectMethod", [])
+        name = _to_gc_global_ref(env, name_local)
+        _delete_local_ref(env, clazz)
+        return _java_string_to_python_str(name)
 
 def _from_kotlin_object(python_class, jni_ref):
     obj = object.__new__(python_class)
     obj._jni_ref = jni_ref
     return obj
+
+def _get_jni_ref(object) -> Any:
+    if hasattr(object, '_jni_ref'):
+        return object._jni_ref
+
+    if isinstance(object, str):
+        return _python_str_to_java_string(object)
+
+    raise TypeError(f"Cannot convert value to Kotlin: expected object with _jni_ref attribute or something convertible to a Kotlin type, got {type(object).__name__}")
 
 def _from_kotlin_list(
     jni_ref: Any, wrap_item_fn: Callable[[Any], Any]
@@ -207,28 +214,24 @@ def _from_kotlin_list(
     return python_list
 
 def _to_kotlin_list(list: List[Any]) -> Any:
-    env = _attach_jni_thread()
+    with AttachedJniThread() as env:
 
-    # Create a new ArrayList
-    array_list_class = _get_class(env, b"java/util/ArrayList")
-    constructor = _get_method(env, array_list_class, b"<init>", b"()V")
-    array_list = env[0].NewObject(env, array_list_class, constructor)
-    _raise_exception_if_any(env)
-    array_list = _to_gc_global_ref(env, array_list)
-
-    # Add each element to the list
-    for item in list:
-        if not hasattr(item, '_jni_ref'):
-            raise TypeError(f"Cannot convert item to Kotlin: expected object with _jni_ref attribute, got {type(item).__name__}")
-        item_ref = item._jni_ref
-        _call_method_raw(env, b"java/util/ArrayList", array_list, b"add", b"(Ljava/lang/Object;)Z", "BooleanMethod", [item_ref])
+        # Create a new ArrayList
+        array_list_class = _get_class(env, b"java/util/ArrayList")
+        constructor = _get_method(env, array_list_class, b"<init>", b"()V")
+        array_list = env[0].NewObject(env, array_list_class, constructor)
         _raise_exception_if_any(env)
+        array_list = _to_gc_global_ref(env, array_list)
 
-    _detach_jni_thread()
-    return array_list
+        # Add each element to the list
+        for item in list:
+            if not hasattr(item, '_jni_ref'):
+                raise TypeError(f"Cannot convert item to Kotlin: expected object with _jni_ref attribute, got {type(item).__name__}")
+            item_ref = item._jni_ref
+            _call_method_raw(env, b"java/util/ArrayList", array_list, b"add", b"(Ljava/lang/Object;)Z", "BooleanMethod", [item_ref])
+            _raise_exception_if_any(env)
 
-def _to_kotlin_map(list: Dict[Any, Any]) -> Any:
-    raise RuntimeError("not implemented")
+        return array_list
 
 def _from_kotlin_map(
     jni_ref: Any,
@@ -252,6 +255,25 @@ def _from_kotlin_map(
         python_dict[wrap_key_fn(_key_ref)] = wrap_value_fn(_value_ref)
 
     return python_dict
+
+def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
+    with AttachedJniThread() as env:
+
+        # Create a new HashMap
+        map_class = _get_class(env, b"java/util/HashMap")
+        constructor = _get_method(env, map_class, b"<init>", b"()V")
+        map = env[0].NewObject(env, map_class, constructor)
+        _raise_exception_if_any(env)
+        map = _to_gc_global_ref(env, map)
+
+        # Add entries to it
+        for key, value in items.items():
+            key_ref = _get_jni_ref(key)
+            value_ref = _get_jni_ref(value)
+            _call_method_raw(env, b"java/util/HashMap", map, b"put", b"(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", "ObjectMethod", [key_ref, value_ref])
+            _raise_exception_if_any(env)
+
+        return map
 
 ############
 # Wrappers #
