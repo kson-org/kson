@@ -16,8 +16,8 @@ data class TreeProperty<N>(val name: String, val value: N)
  * This interface decouples tree-navigation algorithms (JSON Pointer traversal,
  * location-based lookup, path building) from any specific tree representation.
  *
- * Generic algorithms that operate on any tree representation are provided by
- * [TreeNavigation].
+ * Generic algorithms that operate on any tree representation are provided as
+ * extension functions in TreeNavigation.kt.
  *
  * Note: [org.kson.value.EmbedBlock] nodes are treated as leaves by the walker.
  * They are not objects or arrays from the walker's perspective, even though

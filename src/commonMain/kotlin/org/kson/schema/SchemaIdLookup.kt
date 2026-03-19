@@ -6,7 +6,7 @@ import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
-import org.kson.walker.TreeNavigation
+import org.kson.walker.navigateWithJsonPointer
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.
@@ -160,7 +160,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * val schemaRefs = idLookup.navigateByDocumentPath(listOf("users", "0", "name"))
      * ```
      *
-     * @param documentPointer Pointer through the document (from [TreeNavigation.navigateToLocationWithPointer])
+     * @param documentPointer Pointer through the document (from [org.kson.walker.navigateToLocationWithPointer])
      * @return List of [ResolvedRef] containing all sub-schemas at that location (empty if not found)
      */
     fun navigateByDocumentPointer(
@@ -562,7 +562,7 @@ private fun decodeUriEncoding(encoded: String): String {
  * @return The [KsonValue] at the pointer location, or null if not found
  */
 private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
-    val resolvedValue = TreeNavigation.navigateWithJsonPointer(KsonValueWalker, ksonValue, pointer)
+    val resolvedValue = KsonValueWalker.navigateWithJsonPointer(ksonValue, pointer)
     val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, pointer, currentBaseUri)
     return resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
 }
@@ -619,7 +619,7 @@ private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, cur
         }
 
         // Navigate to next node
-        node = TreeNavigation.navigateWithJsonPointer(KsonValueWalker, node, JsonPointer.fromTokens(listOf(token))) ?: break
+        node = KsonValueWalker.navigateWithJsonPointer(node, JsonPointer.fromTokens(listOf(token))) ?: break
     }
 
     return updatedBaseUri

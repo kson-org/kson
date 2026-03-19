@@ -10,7 +10,7 @@ import org.kson.parser.TokenType
 import org.kson.parser.behavior.StringQuote
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
-import org.kson.walker.TreeNavigation
+import org.kson.walker.navigateToLocationWithPointer
 
 /**
  * Context information about a token at a specific location.
@@ -30,7 +30,7 @@ private data class TokenContext(
  * Operates entirely on a pre-parsed [ToolingDocument]—no re-parsing is
  * performed. Token-context analysis uses the document's [ToolingDocument.meaningfulTokens]
  * (WHITESPACE and COMMENT filtered out), and tree navigation uses the document's
- * raw AST via [TreeNavigation] and [AstNodeWalker].
+ * raw AST via [AstNodeWalker] and its navigation extensions.
  *
  * Using the AST directly (rather than [org.kson.value.KsonValue]) means path
  * building works even on broken documents — error nodes in the AST are treated
@@ -69,8 +69,8 @@ class KsonValuePathBuilder(
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
         // Navigate to the target node and build the path via the AST walker
-        val navResult = TreeNavigation.navigateToLocationWithPointer(
-            AstNodeWalker, rootNode, searchPosition
+        val navResult = AstNodeWalker.navigateToLocationWithPointer(
+            rootNode, searchPosition
         ) ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)
@@ -117,9 +117,8 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * Processes escape sequences in a STRING_CONTENT token, so the returned
-     * name matches what [AstNodeWalker.getObjectProperties] returns via
-     * `processedStringContent`.
+     * Processes escape sequences in a STRING_CONTENT token to produce
+     * the logical property name.
      */
     private fun processedStringContent(token: Token): String =
         QuotedStringNode(

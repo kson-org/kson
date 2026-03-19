@@ -12,7 +12,7 @@ import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.*
 
 /**
- * Tests for [TreeNavigation] algorithms with [KsonValueWalker].
+ * Tests for tree navigation extensions with [KsonValueWalker].
  */
 class TreeNavigationTest {
 
@@ -37,7 +37,7 @@ class TreeNavigationTest {
         val document = documentWithMatch.replace(matchMarker, "").replace(endMatchMarker, "")
 
         val ksonValue = parse(document)
-        val result = TreeNavigation.navigateWithJsonPointer(walker, ksonValue, pointer)
+        val result = walker.navigateWithJsonPointer(ksonValue, pointer)
 
         // Build actual document with markers at the result's location
         val actualDocumentWithMarkers = if (result != null) {
@@ -205,8 +205,7 @@ class TreeNavigationTest {
             .
         """.trimIndent())
 
-        val result = TreeNavigation.navigateWithJsonPointer(
-            walker,
+        val result = walker.navigateWithJsonPointer(
             complexKson,
             JsonPointer("/users/0/roles/1")
         )
@@ -224,8 +223,8 @@ class TreeNavigationTest {
               age: 25
         """.trimIndent())
 
-        val result = TreeNavigation.navigateToLocationWithPointer(
-            walker, root, Coordinates(1, 8)
+        val result = walker.navigateToLocationWithPointer(
+            root, Coordinates(1, 8)
         )
         assertNotNull(result)
         assertIs<KsonString>(result.value)
@@ -241,8 +240,8 @@ class TreeNavigationTest {
               - multiplatform
         """.trimIndent())
 
-        val result = TreeNavigation.navigateToLocationWithPointer(
-            walker, root, Coordinates(1, 4)
+        val result = walker.navigateToLocationWithPointer(
+            root, Coordinates(1, 4)
         )
         assertNotNull(result)
         assertEquals(JsonPointer.fromTokens(listOf("tags", "0")), result.pointerFromRoot)
@@ -252,8 +251,8 @@ class TreeNavigationTest {
     fun `navigateToLocation returns null outside bounds`() {
         val root = parse("name: Alice")
 
-        val result = TreeNavigation.navigateToLocationWithPointer(
-            walker, root, Coordinates(100, 0)
+        val result = walker.navigateToLocationWithPointer(
+            root, Coordinates(100, 0)
         )
         assertNull(result)
     }
@@ -266,8 +265,8 @@ class TreeNavigationTest {
               age: 25
         """.trimIndent())
 
-        val result = TreeNavigation.navigateToLocationWithPointer(
-            walker, root, Coordinates(0, 0)
+        val result = walker.navigateToLocationWithPointer(
+            root, Coordinates(0, 0)
         )
         assertNotNull(result)
         assertEquals(JsonPointer.ROOT, result.pointerFromRoot)
@@ -281,8 +280,8 @@ class TreeNavigationTest {
                 city: Boston
         """.trimIndent())
 
-        val result = TreeNavigation.navigateToLocationWithPointer(
-            walker, root, Coordinates(2, 10)
+        val result = walker.navigateToLocationWithPointer(
+            root, Coordinates(2, 10)
         )
         assertNotNull(result)
         assertEquals(
@@ -306,7 +305,7 @@ class TreeNavigationTest {
         val document = documentWithMatches.replace(matchMarker, "").replace(endMatchMarker, "")
 
         val ksonValue = parse(document)
-        val results = TreeNavigation.navigateWithJsonPointerGlob(walker, ksonValue, pointer)
+        val results = walker.navigateWithJsonPointerGlob(ksonValue, pointer)
 
         // Build actual document with markers at the results' locations
         val actualDocumentWithMarkers = insertMatchMarkers(document, results)

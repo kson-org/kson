@@ -10,7 +10,8 @@ import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
 import org.kson.schema.SchemaResolutionType
-import org.kson.value.navigation.KsonValueNavigation
+import org.kson.walker.KsonValueWalker
+import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -35,7 +36,9 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * 3. Returns all branches for allOf and direct properties (no filtering needed)
      *
      * @param candidateSchemas The schemas found at the document path
-     * @param documentValue The pre-parsed document value, or null if the document has errors
+     * @param documentValue The pre-parsed document value, or null if the document
+     *   couldn't be parsed. When null, combinator filtering is skipped and all
+     *   expanded schemas are returned.
      * @param documentPointer The [JsonPointer] to the location in the document
      * @return List of valid schemas after expansion and filtering
      */
@@ -59,7 +62,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         return if (hasCombinatorsThatRequireValidation && documentValue != null) {
             filterByValidation(expandedSchemas, documentValue, documentPointer)
         } else {
-            // No filtering needed, or document didn't parse — use all expanded schemas
+            // No filtering needed (no combinators, or document unavailable)
             expandedSchemas
         }
     }
@@ -102,7 +105,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
     ): List<ResolvedRef> {
         // Get the object to validate against
         // For completions, we validate the object where we're adding properties
-        val targetValue = KsonValueNavigation.navigateWithJsonPointer(documentValue, documentPointer) ?: documentValue
+        val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer) ?: documentValue
 
         return candidateSchemas.filter { ref ->
             when (ref.resolutionType) {

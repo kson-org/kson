@@ -11,7 +11,7 @@ import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
-import org.kson.walker.TreeNavigation
+import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -111,7 +111,7 @@ object KsonTooling {
         if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
 
         // Navigate to the value at the cursor position
-        val valueAtPosition = TreeNavigation.navigateWithJsonPointer(KsonValueWalker, parsedSchema, documentPointer) ?: return emptyList()
+        val valueAtPosition = KsonValueWalker.navigateWithJsonPointer(parsedSchema, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
         val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return emptyList()
 
