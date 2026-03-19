@@ -26,6 +26,13 @@ interface KsonTreeWalker<N> {
     /** Returns (propertyName, valueNode) pairs for an object node. Empty if not an object. */
     fun getObjectProperties(node: N): List<Pair<String, N>>
 
+    /**
+     * Look up a single property by key. Implementations with O(1) map lookup
+     * should override this; the default falls back to a linear scan of [getObjectProperties].
+     */
+    fun getObjectProperty(node: N, key: String): N? =
+        getObjectProperties(node).firstOrNull { it.first == key }?.second
+
     /** Returns child elements for an array node. Empty if not an array. */
     fun getArrayElements(node: N): List<N>
 

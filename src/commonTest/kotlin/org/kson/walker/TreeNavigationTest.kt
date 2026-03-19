@@ -1,24 +1,30 @@
 @file:OptIn(ExperimentalJsonPointerGlobLanguage::class)
 
-package org.kson.value.navigation
+package org.kson.walker
 
 import org.kson.KsonCore
+import org.kson.parser.Coordinates
 import org.kson.value.KsonString
-import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import org.kson.value.KsonValue
 import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.*
 
-class KsonValueNavigationTest {
+/**
+ * Tests for [TreeNavigation] algorithms with [KsonValueWalker].
+ */
+class TreeNavigationTest {
 
-    // ========================================
-    // Tests for navigateWithJsonPointer()
-    // ========================================
+    private val walker = KsonValueWalker
+
+    private fun parse(source: String): KsonValue =
+        KsonCore.parseToAst(source).ksonValue
+            ?: error("Parse failed")
 
     /**
-     * Helper to test navigation with JsonPointer using <match></match> markers.
-     * The documentWithMatch contains a single <match></match> pair indicating the expected matched value.
+     * Helper to test navigation with JsonPointer using `<match></match>` markers.
+     * The documentWithMatch contains a single `<match></match>` pair indicating the expected matched value.
      */
     private fun assertJsonPointerNavigation(
         documentWithMatch: String,
@@ -30,20 +36,16 @@ class KsonValueNavigationTest {
         // Remove markers to get the actual document
         val document = documentWithMatch.replace(matchMarker, "").replace(endMatchMarker, "")
 
-        // Parse and navigate
-        val parseResult = KsonCore.parseToAst(document)
-        val ksonValue = parseResult.ksonValue
-            ?: error("Parse failed: ${parseResult.messages}")
-        val result = KsonValueNavigation.navigateWithJsonPointer(ksonValue, pointer)
+        val ksonValue = parse(document)
+        val result = TreeNavigation.navigateWithJsonPointer(walker, ksonValue, pointer)
 
         // Build actual document with markers at the result's location
         val actualDocumentWithMarkers = if (result != null) {
             insertMatchMarkers(document, listOf(result))
         } else {
-            document // No markers if null result
+            document
         }
 
-        // Compare expected vs actual with markers
         assertEquals(
             documentWithMatch,
             actualDocumentWithMarkers,
@@ -187,33 +189,128 @@ class KsonValueNavigationTest {
         )
     }
 
-    // ========================================
-    // Tests for navigateWithJsonPointerGlob() - Wildcard and Pattern Matching
-    // ========================================
+    @Test
+    fun `navigateWithJsonPointer handles complex nested structure`() {
+        val complexKson = parse("""
+            users:
+              - name: 'Alice'
+                roles:
+                  - 'admin'
+                  - 'editor'
+                .
+              - name: 'Bob'
+                roles:
+                  - 'viewer'
+                .
+            .
+        """.trimIndent())
+
+        val result = TreeNavigation.navigateWithJsonPointer(
+            walker,
+            complexKson,
+            JsonPointer("/users/0/roles/1")
+        )
+
+        assertNotNull(result)
+        assertTrue(result is KsonString)
+        assertEquals("editor", result.value)
+    }
+
+    @Test
+    fun testNavigateToLocationFindsDeepestNode() {
+        val root = parse("""
+            person:
+              name: Alice
+              age: 25
+        """.trimIndent())
+
+        val result = TreeNavigation.navigateToLocationWithPointer(
+            walker, root, Coordinates(1, 8)
+        )
+        assertNotNull(result)
+        assertIs<KsonString>(result.value)
+        assertEquals("Alice", walker.getStringValue(result.value))
+        assertEquals(JsonPointer.fromTokens(listOf("person", "name")), result.pointerFromRoot)
+    }
+
+    @Test
+    fun testNavigateToLocationInArray() {
+        val root = parse("""
+            tags:
+              - kotlin
+              - multiplatform
+        """.trimIndent())
+
+        val result = TreeNavigation.navigateToLocationWithPointer(
+            walker, root, Coordinates(1, 4)
+        )
+        assertNotNull(result)
+        assertEquals(JsonPointer.fromTokens(listOf("tags", "0")), result.pointerFromRoot)
+    }
+
+    @Test
+    fun testNavigateToLocationReturnsNullOutsideBounds() {
+        val root = parse("name: Alice")
+
+        val result = TreeNavigation.navigateToLocationWithPointer(
+            walker, root, Coordinates(100, 0)
+        )
+        assertNull(result)
+    }
+
+    @Test
+    fun testNavigateToLocationReturnsParentWhenNotInChild() {
+        val root = parse("""
+            person:
+              name: Alice
+              age: 25
+        """.trimIndent())
+
+        val result = TreeNavigation.navigateToLocationWithPointer(
+            walker, root, Coordinates(0, 0)
+        )
+        assertNotNull(result)
+        assertEquals(JsonPointer.ROOT, result.pointerFromRoot)
+    }
+
+    @Test
+    fun testNavigateToLocationDeepNesting() {
+        val root = parse("""
+            company:
+              address:
+                city: Boston
+        """.trimIndent())
+
+        val result = TreeNavigation.navigateToLocationWithPointer(
+            walker, root, Coordinates(2, 10)
+        )
+        assertNotNull(result)
+        assertEquals(
+            JsonPointer.fromTokens(listOf("company", "address", "city")),
+            result.pointerFromRoot
+        )
+    }
 
     /**
-     * Helper to test navigation with JsonPointerGlob using multiple <match></match> markers.
-     * Each matched value should be wrapped in <match></match> tags.
+     * Helper to test navigation with JsonPointerGlob using multiple `<match></match>` markers.
+     * Each matched value should be wrapped in `<match></match>` tags.
      */
     private fun assertJsonPointerGlobNavigation(
         documentWithMatches: String,
         pointer: JsonPointerGlob
     ) {
-        // Remove markers to get the actual document
         val matchMarker = "<match>"
         val endMatchMarker = "</match>"
+
+        // Remove markers to get the actual document
         val document = documentWithMatches.replace(matchMarker, "").replace(endMatchMarker, "")
 
-        // Parse and navigate
-          val parseResult = KsonCore.parseToAst(document)
-          val ksonValue = parseResult.ksonValue
-              ?: error("Parse failed: ${parseResult.messages}")
-        val results = KsonValueNavigation.navigateWithJsonPointerGlob(ksonValue, pointer)
+        val ksonValue = parse(document)
+        val results = TreeNavigation.navigateWithJsonPointerGlob(walker, ksonValue, pointer)
 
         // Build actual document with markers at the results' locations
         val actualDocumentWithMarkers = insertMatchMarkers(document, results)
 
-        // Compare expected vs actual with markers
         assertEquals(
             documentWithMatches,
             actualDocumentWithMarkers,
@@ -222,14 +319,14 @@ class KsonValueNavigationTest {
     }
 
     /**
-     * Helper function to insert <match></match> markers into the document at the locations of the results.
+     * Insert `<match></match>` markers into the document at the locations of the results.
      * This allows for easy visual comparison of expected vs actual locations.
      */
     private fun insertMatchMarkers(document: String, results: List<KsonValue>): String {
         val matchMarker = "<match>"
         val endMatchMarker = "</match>"
 
-        // Sort results by position (descending) so we can insert from end to start without affecting indices
+        // Sort descending so insertions don't shift indices of earlier results
         val sortedResults = results.sortedWith(
             compareByDescending<KsonValue> { it.location.start.line }
                 .thenByDescending { it.location.start.column }
@@ -237,20 +334,14 @@ class KsonValueNavigationTest {
 
         val lines = document.lines().toMutableList()
 
-        // Insert markers from end to start to preserve indices
         for (result in sortedResults) {
             val startLine = result.location.start.line
             val startColumn = result.location.start.column
             val endLine = result.location.end.line
             val endColumn = result.location.end.column
 
-            // Insert end marker
-            val endLineContent = lines[endLine]
-            lines[endLine] = endLineContent.take(endColumn) + endMatchMarker + endLineContent.substring(endColumn)
-
-            // Insert start marker
-            val startLineContent = lines[startLine]
-            lines[startLine] = startLineContent.take(startColumn) + matchMarker + startLineContent.substring(startColumn)
+            lines[endLine] = lines[endLine].take(endColumn) + endMatchMarker + lines[endLine].substring(endColumn)
+            lines[startLine] = lines[startLine].take(startColumn) + matchMarker + lines[startLine].substring(startColumn)
         }
 
         return lines.joinToString("\n")
@@ -421,32 +512,6 @@ class KsonValueNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer handles complex nested structure`() {
-        val complexKson = KsonCore.parseToAst("""
-            users:
-              - name: 'Alice'
-                roles:
-                  - 'admin'
-                  - 'editor'
-                .
-              - name: 'Bob'
-                roles:
-                  - 'viewer'
-                .
-            .
-        """.trimIndent()).ksonValue!!
-
-        val result = KsonValueNavigation.navigateWithJsonPointer(
-            complexKson,
-            JsonPointer("/users/0/roles/1")
-        )
-
-        assertNotNull(result)
-        assertTrue(result is KsonString)
-        assertEquals("editor", result.value)
-    }
-
-    @Test
     fun `navigateWithJsonPointerGlob pattern on array indices`() {
         assertJsonPointerGlobNavigation(
             documentWithMatches = """
@@ -489,10 +554,6 @@ class KsonValueNavigationTest {
             pointer = JsonPointerGlob("/api/v1/*/admin_panel/endpoint")
         )
     }
-
-    // ========================================
-    // Tests for RecursiveDescent (**) token
-    // ========================================
 
     @Test
     fun `navigateWithJsonPointerGlob recursive descent zero levels`() {
@@ -743,7 +804,7 @@ class KsonValueNavigationTest {
 
     @Test
     fun `navigateWithJsonPointerGlob recursive descent with intermediate literal match`() {
-        // Pattern: /root/**/config/value should match config at any depth, but only if followed by value
+        // /root/**/config/value should match config at any depth, but only if followed by value
         assertJsonPointerGlobNavigation(
             documentWithMatches = """
                 root:
@@ -766,5 +827,4 @@ class KsonValueNavigationTest {
             pointer = JsonPointerGlob("/root/**/config/value")
         )
     }
-
 }

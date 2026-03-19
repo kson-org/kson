@@ -17,6 +17,10 @@ object KsonValueWalker : KsonTreeWalker<KsonValue> {
             ?: emptyList()
     }
 
+    /** O(1) map lookup via [KsonObject.propertyLookup]. */
+    override fun getObjectProperty(node: KsonValue, key: String): KsonValue? =
+        (node as? KsonObject)?.propertyLookup?.get(key)
+
     override fun getArrayElements(node: KsonValue): List<KsonValue> {
         return (node as? KsonList)?.elements ?: emptyList()
     }

@@ -2,9 +2,10 @@ package org.kson.ast
 
 import org.kson.tools.InternalEmbedRule
 import org.kson.value.KsonString
-import org.kson.value.navigation.KsonValueNavigation
 import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
 import org.kson.value.toKsonValue
+import org.kson.walker.KsonValueWalker
+import org.kson.walker.TreeNavigation
 
 /**
  * Result of resolving embed block rules against an AST.
@@ -41,7 +42,7 @@ fun resolveEmbedBlocks(
     val rootValue = root.toKsonValue()
     val stringResult = mutableMapOf<StringNode, InternalEmbedRule>()
     for (rule in rules) {
-        val matchingValues = KsonValueNavigation.navigateWithJsonPointerGlob(rootValue, rule.pathPattern)
+        val matchingValues = TreeNavigation.navigateWithJsonPointerGlob(KsonValueWalker, rootValue, rule.pathPattern)
         for (value in matchingValues) {
             if (value is KsonString) {
                 if (value.value.length < rule.minLength) {
