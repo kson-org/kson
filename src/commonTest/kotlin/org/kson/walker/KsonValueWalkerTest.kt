@@ -46,10 +46,10 @@ class KsonValueWalkerTest {
         val value = parse("name: Alice\nage: 30")
         val props = walker.getObjectProperties(value)
         assertEquals(2, props.size)
-        assertEquals("name", props[0].first)
-        assertEquals("age", props[1].first)
-        assertIs<KsonString>(props[0].second)
-        assertIs<KsonNumber>(props[1].second)
+        assertEquals("name", props[0].name)
+        assertEquals("age", props[1].name)
+        assertIs<KsonString>(props[0].value)
+        assertIs<KsonNumber>(props[1].value)
     }
 
     @Test

@@ -88,10 +88,10 @@ object TreeNavigation {
         }
 
         if (walker.isObject(root)) {
-            for ((key, child) in walker.getObjectProperties(root)) {
+            for (prop in walker.getObjectProperties(root)) {
                 val childResult = navigateToLocationWithPointer(
-                    walker, child, targetLocation,
-                    JsonPointer.fromTokens(currentPointer.tokens + key)
+                    walker, prop.value, targetLocation,
+                    JsonPointer.fromTokens(currentPointer.tokens + prop.name)
                 )
                 if (childResult != null) return childResult
             }
@@ -198,7 +198,7 @@ object TreeNavigation {
             is PointerParser.Tokens.Wildcard -> {
                 currentNodes.flatMap { node ->
                     when {
-                        walker.isObject(node) -> walker.getObjectProperties(node).map { it.second }
+                        walker.isObject(node) -> walker.getObjectProperties(node).map { it.value }
                         walker.isArray(node) -> walker.getArrayElements(node)
                         else -> emptyList()
                     }
@@ -210,8 +210,8 @@ object TreeNavigation {
                     when {
                         walker.isObject(node) -> {
                             walker.getObjectProperties(node)
-                                .filter { (key, _) -> GlobMatcher.matches(token.pattern, key) }
-                                .map { it.second }
+                                .filter { GlobMatcher.matches(token.pattern, it.name) }
+                                .map { it.value }
                         }
 
                         walker.isArray(node) -> {
@@ -241,8 +241,8 @@ object TreeNavigation {
 
         when {
             walker.isObject(node) -> {
-                for ((_, child) in walker.getObjectProperties(node)) {
-                    result.addAll(collectAllDescendants(walker, child))
+                for (prop in walker.getObjectProperties(node)) {
+                    result.addAll(collectAllDescendants(walker, prop.value))
                 }
             }
 

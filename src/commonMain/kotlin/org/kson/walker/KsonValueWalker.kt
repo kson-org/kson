@@ -12,8 +12,8 @@ object KsonValueWalker : KsonTreeWalker<KsonValue> {
 
     override fun isArray(node: KsonValue): Boolean = node is KsonList
 
-    override fun getObjectProperties(node: KsonValue): List<Pair<String, KsonValue>> {
-        return (node as? KsonObject)?.propertyMap?.map { (key, prop) -> key to prop.propValue }
+    override fun getObjectProperties(node: KsonValue): List<TreeProperty<KsonValue>> {
+        return (node as? KsonObject)?.propertyMap?.map { (key, prop) -> TreeProperty(key, prop.propValue) }
             ?: emptyList()
     }
 

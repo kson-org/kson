@@ -217,7 +217,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun testNavigateToLocationFindsDeepestNode() {
+    fun `navigateToLocation finds deepest node`() {
         val root = parse("""
             person:
               name: Alice
@@ -234,7 +234,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun testNavigateToLocationInArray() {
+    fun `navigateToLocation navigates into array`() {
         val root = parse("""
             tags:
               - kotlin
@@ -249,7 +249,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun testNavigateToLocationReturnsNullOutsideBounds() {
+    fun `navigateToLocation returns null outside bounds`() {
         val root = parse("name: Alice")
 
         val result = TreeNavigation.navigateToLocationWithPointer(
@@ -259,7 +259,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun testNavigateToLocationReturnsParentWhenNotInChild() {
+    fun `navigateToLocation returns parent when not in child`() {
         val root = parse("""
             person:
               name: Alice
@@ -274,7 +274,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun testNavigateToLocationDeepNesting() {
+    fun `navigateToLocation handles deep nesting`() {
         val root = parse("""
             company:
               address:

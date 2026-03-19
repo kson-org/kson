@@ -23,13 +23,13 @@ object AstNodeWalker : KsonTreeWalker<AstNode> {
 
     override fun isArray(node: AstNode): Boolean = node is ListNode
 
-    override fun getObjectProperties(node: AstNode): List<Pair<String, AstNode>> {
+    override fun getObjectProperties(node: AstNode): List<TreeProperty<AstNode>> {
         if (node !is ObjectNode) return emptyList()
         return node.properties.mapNotNull { prop ->
             val propImpl = prop as? ObjectPropertyNodeImpl ?: return@mapNotNull null
             val keyImpl = propImpl.key as? ObjectKeyNodeImpl ?: return@mapNotNull null
             val keyString = (keyImpl.key as? StringNodeImpl)?.processedStringContent ?: return@mapNotNull null
-            keyString to propImpl.value as AstNode
+            TreeProperty(keyString, propImpl.value as AstNode)
         }
     }
 

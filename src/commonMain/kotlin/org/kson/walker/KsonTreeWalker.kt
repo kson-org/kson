@@ -3,6 +3,14 @@ package org.kson.walker
 import org.kson.parser.Location
 
 /**
+ * A property in a JSON-like tree: a named value.
+ *
+ * @param name The property key
+ * @param value The property value node
+ */
+data class TreeProperty<N>(val name: String, val value: N)
+
+/**
  * Abstraction for walking JSON-like tree structures.
  *
  * This interface decouples tree-navigation algorithms (JSON Pointer traversal,
@@ -23,15 +31,15 @@ interface KsonTreeWalker<N> {
     fun isObject(node: N): Boolean
     fun isArray(node: N): Boolean
 
-    /** Returns (propertyName, valueNode) pairs for an object node. Empty if not an object. */
-    fun getObjectProperties(node: N): List<Pair<String, N>>
+    /** Returns properties for an object node. Empty if not an object. */
+    fun getObjectProperties(node: N): List<TreeProperty<N>>
 
     /**
      * Look up a single property by key. Implementations with O(1) map lookup
      * should override this; the default falls back to a linear scan of [getObjectProperties].
      */
     fun getObjectProperty(node: N, key: String): N? =
-        getObjectProperties(node).firstOrNull { it.first == key }?.second
+        getObjectProperties(node).firstOrNull { it.name == key }?.value
 
     /** Returns child elements for an array node. Empty if not an array. */
     fun getArrayElements(node: N): List<N>

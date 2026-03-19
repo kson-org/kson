@@ -117,6 +117,17 @@ class KsonValuePathBuilder(
     }
 
     /**
+     * Processes escape sequences in a STRING_CONTENT token, so the returned
+     * name matches what [AstNodeWalker.getObjectProperties] returns via
+     * `processedStringContent`.
+     */
+    private fun processedStringContent(token: Token): String =
+        QuotedStringNode(
+            sourceTokens = listOf(token),
+            stringQuote = StringQuote.DoubleQuote
+        ).processedStringContent
+
+    /**
      * Checks if the given position falls within the bounds of a token.
      */
     private fun isPositionInsideToken(
@@ -145,10 +156,7 @@ class KsonValuePathBuilder(
             val token = meaningfulTokens[i]
             when (token.tokenType) {
                 TokenType.UNQUOTED_STRING -> return token.lexeme.text
-                TokenType.STRING_CONTENT -> return QuotedStringNode(
-                        sourceTokens = listOf(token),
-                        stringQuote = StringQuote.DoubleQuote
-                    ).processedStringContent
+                TokenType.STRING_CONTENT -> return processedStringContent(token)
                 TokenType.STRING_CLOSE_QUOTE -> continue // skip quote, look for content
                 else -> return null
             }
@@ -214,10 +222,7 @@ class KsonValuePathBuilder(
                     includePropertyKeys -> {
                 // Extract the property name from the token, processing escapes for quoted keys
                 val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)
-                    QuotedStringNode(
-                        sourceTokens = listOf(lastToken),
-                        stringQuote = StringQuote.DoubleQuote
-                    ).processedStringContent
+                    processedStringContent(lastToken)
                 else
                     lastToken.lexeme.text
                 pointer.tokens + propertyName
