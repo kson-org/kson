@@ -24,32 +24,11 @@ class ToolingDocument internal constructor(content: String) {
     /**
      * The parsed [KsonValue], or null if the document has parse errors or is empty.
      *
-     * With ignoreErrors = true, the error-walking step is skipped, so
-     * [AstParseResult.hasErrors] may return false even when the AST contains
-     * error nodes. A [KsonRootError] root means the document is completely
-     * unparseable. But the parser can also produce a valid-looking root with
-     * [org.kson.ast.AstNodeError] nodes deeper inside — in which case
-     * [org.kson.ast.AstNode.toKsonValue] throws during the tree walk.
-     *
      * Value-based features (document symbols, selection ranges, sibling keys)
      * return empty results when this is null. Token-based features (semantic
      * tokens, folding ranges) still work via [tokens] and [ast].
      */
-    val ksonValue: KsonValue? by lazy {
-        if (parseResult.ast is KsonRootError) {
-            null
-        } else {
-            try {
-                parseResult.ksonValue
-            } catch (_: RuntimeException) {
-                // toKsonValue() throws when it encounters an AstNodeError
-                // anywhere in the tree. This happens with ignoreErrors = true
-                // because error messages aren't walked, so hasErrors() returns
-                // false even though the AST contains error nodes.
-                null
-            }
-        }
-    }
+    val ksonValue: KsonValue? get() = parseResult.ksonValue
 
     internal val tokens: List<Token> get() = parseResult.lexedTokens
     internal val ast: KsonRoot get() = parseResult.ast

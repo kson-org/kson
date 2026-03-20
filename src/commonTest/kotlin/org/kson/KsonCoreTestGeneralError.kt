@@ -5,6 +5,7 @@ import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonBooleanSchema
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 /**
@@ -108,5 +109,23 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
 
         val yamlResult = KsonCore.parseToYaml(source, CompileSettings().yamlSettings)
         assertNull(yamlResult.yaml)
+    }
+
+    @Test
+    fun testKsonValueReturnsNullForErrorTolerantParseWithDeepErrors() {
+        // With ignoreErrors=true, the parser produces an AST with error nodes
+        // deeper inside (not at the root). ksonValue should return null rather
+        // than throw when toKsonValue() encounters these error nodes.
+        val result = KsonCore.parseToAst(
+            """{"key": , "other": 42}""",
+            CoreCompileConfig(ignoreErrors = true)
+        )
+        // The root is valid (KsonRootImpl) and hasErrors() returns false because
+        // error-walking is skipped — this is the exact gap ksonValue must handle.
+        assertFalse(result.hasErrors(), "hasErrors() should be false with ignoreErrors=true")
+        assertNull(
+            result.ksonValue,
+            "ksonValue should return null when the AST contains deep error nodes"
+        )
     }
 }
