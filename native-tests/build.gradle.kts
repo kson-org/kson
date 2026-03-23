@@ -24,6 +24,11 @@ tasks.named("check") {
     dependsOn("nativeTest")
 }
 
+tasks.named("nativeTest") {
+    inputs.file(layout.buildDirectory.file("native/nativeTestCompile/native-tests-tests"))
+    outputs.dir(layout.buildDirectory.dir("test-results/test-native"))
+}
+
 // Allow access to `internal` declarations from kson core
 tasks.named<KotlinCompile>("compileTestKotlin") {
     val rootJar = project(":").tasks.named("jvmJar", Jar::class.java).flatMap { it.archiveFile }

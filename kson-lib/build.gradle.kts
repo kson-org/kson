@@ -130,7 +130,10 @@ tasks.register<PixiExecTask>("npmInstallProductionLibrary") {
 
     command.set(listOf("npm", "install"))
     workingDirectory.set(layout.buildDirectory.dir("dist/js/productionLibrary"))
-    doNotTrackState("npm already tracks its own state")
+
+    inputs.file(layout.buildDirectory.file("dist/js/productionLibrary/package.json"))
+    outputs.file(layout.buildDirectory.file("stamp/npmInstallProductionLibrary.stamp"))
+    doLast { layout.buildDirectory.file("stamp/npmInstallProductionLibrary.stamp").get().asFile.apply { parentFile.mkdirs(); writeText("${System.currentTimeMillis()}") } }
 }
 
 // Configure task ordering to ensure sequential execution
