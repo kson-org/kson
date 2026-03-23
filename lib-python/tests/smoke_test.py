@@ -1,5 +1,9 @@
 import pytest
+import typing
 from kson import *
+
+
+NoneAny = typing.cast(Any, None)
 
 
 def messages_to_string(msgs):
@@ -377,6 +381,7 @@ list: [1]
 obj: {a: b}"""
     analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
+    assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()
 
     assert props["str"].type() == KsonValueType.STRING
@@ -393,6 +398,7 @@ content here
 embed$$"""
     analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
+    assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()
     embed = props["key"]
     assert isinstance(embed, KsonValue.KsonEmbed)
@@ -426,11 +432,11 @@ def test_format_options_getters():
 
 def test_format_options_none_checks():
     with pytest.raises(ValueError):
-        FormatOptions(None, FormattingStyle.PLAIN, [])
+        FormatOptions(NoneAny, FormattingStyle.PLAIN, [])
     with pytest.raises(ValueError):
-        FormatOptions(IndentType.Spaces(2), None, [])
+        FormatOptions(IndentType.Spaces(2), NoneAny, [])
     with pytest.raises(ValueError):
-        FormatOptions(IndentType.Spaces(2), FormattingStyle.PLAIN, None)
+        FormatOptions(IndentType.Spaces(2), FormattingStyle.PLAIN, NoneAny)
 
 
 def test_indent_type_tabs():
@@ -558,33 +564,33 @@ def test_kson_format_none_checks():
     formatting = FormattingStyle.PLAIN
     opts = FormatOptions(indent, formatting, [])
     with pytest.raises(ValueError):
-        Kson.format(None, opts)
+        Kson.format(NoneAny, opts)
     with pytest.raises(ValueError):
-        Kson.format("key: value", None)
+        Kson.format("key: value", NoneAny)
 
 
 def test_kson_to_json_none_checks():
     with pytest.raises(ValueError):
-        Kson.to_json(None, TranspileOptions.Json(retain_embed_tags=True))
+        Kson.to_json(NoneAny, TranspileOptions.Json(retain_embed_tags=True))
     with pytest.raises(ValueError):
-        Kson.to_json("key: value", None)
+        Kson.to_json("key: value", NoneAny)
 
 
 def test_kson_to_yaml_none_checks():
     with pytest.raises(ValueError):
-        Kson.to_yaml(None, TranspileOptions.Yaml(retain_embed_tags=True))
+        Kson.to_yaml(NoneAny, TranspileOptions.Yaml(retain_embed_tags=True))
     with pytest.raises(ValueError):
-        Kson.to_yaml("key: value", None)
+        Kson.to_yaml("key: value", NoneAny)
 
 
 def test_kson_analyze_none_check():
     with pytest.raises(ValueError):
-        Kson.analyze(None, None)
+        Kson.analyze(NoneAny, NoneAny)
 
 
 def test_kson_parse_schema_none_check():
     with pytest.raises(ValueError):
-        Kson.parse_schema(None)
+        Kson.parse_schema(NoneAny)
 
 
 def test_indent_type_downcast_via_format_options():
@@ -592,6 +598,12 @@ def test_indent_type_downcast_via_format_options():
     opts = FormatOptions(tabs, FormattingStyle.PLAIN, [])
     retrieved = opts.indent_type()
     assert isinstance(retrieved, IndentType.Tabs)
+
+
+def test_indent_type_tabs_eq_and_hash():
+    tabs1 = IndentType.Tabs()
+    tabs2 = IndentType.Tabs()
+    assert tabs1 == tabs2
 
 
 def test_formatting_style_from_kotlin_enum():
@@ -609,6 +621,7 @@ def test_number_internal_start_end():
     input = "val: 42"
     analysis = Kson.analyze(input, None)
     value = analysis.kson_value()
+    assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()
     num = props["val"]
     assert isinstance(num, KsonValue.KsonNumber.Integer)
