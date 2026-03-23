@@ -82,6 +82,33 @@ class SubParseableTest: KsonCoreTestError {
     }
 
     @Test
+    fun testSubCoordinatesLocationInNumber() {
+        // "key: 12345" — the number "12345" starts at column 5
+        // Sub-columns 1..3 within "12345" (i.e. "234") map to original columns 6..8
+        val ksonNumber = """
+            key: 12345
+        """.trimIndent()
+
+        val parseResult = KsonCore.parseToAst(ksonNumber)
+        val ksonValue = parseResult.ksonValue
+        assertNotNull(ksonValue)
+        val numberValue = (ksonValue as KsonObject).propertyLookup["key"] as KsonNumber
+
+        val expectedOriginalLocation = Location.create(0, 6, 0, 8, 6, 8)
+
+        assertEquals(
+            expectedOriginalLocation,
+            numberValue.subOffsetLocation(1, 3),
+            "subOffsetLocation should map sub-offsets to original source location"
+        )
+        assertEquals(
+            expectedOriginalLocation,
+            numberValue.subCoordinatesLocation(0, 1, 0, 3),
+            "subCoordinatesLocation should map sub-coordinates to original source location"
+        )
+    }
+
+    @Test
     fun testSubLocationInSimpleStrings() {
         val ksonUnquotedString = """
             key: SRCa_simple_string
