@@ -680,28 +680,6 @@ pub mod kson_value {
         }
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonArray",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -737,6 +715,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -823,28 +823,6 @@ pub mod kson_value {
         }
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonBoolean",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -880,6 +858,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -988,28 +988,6 @@ pub mod kson_value {
         }
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonEmbed",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -1045,6 +1023,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -1109,28 +1109,6 @@ pub mod kson_value {
     impl KsonNull {
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonNull",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -1166,6 +1144,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -1262,28 +1262,6 @@ pub mod kson_value {
             }
 
 
-            pub fn type_(
-                &self,
-            ) -> KsonValueType {
-                let self_ptr = self.to_kotlin_object();
-                let self_obj = self_ptr.as_kotlin_object();
-
-
-                let (_, _detach_guard) = util::attach_thread_to_java_vm();
-                let result = call_jvm_function!(
-                    util,
-                    c"org/kson/KsonValue$KsonNumber$Decimal",
-                    c"getType",
-                    c"()Lorg/kson/KsonValueType;",
-                    CallObjectMethod,
-                    self_obj,
-
-                );
-
-                FromKotlinObject::from_kotlin_object(result)
-            }
-
-
             pub fn start(
                 &self,
             ) -> Position {
@@ -1319,6 +1297,28 @@ pub mod kson_value {
                     c"org/kson/KsonValue",
                     c"getEnd",
                     c"()Lorg/kson/Position;",
+                    CallObjectMethod,
+                    self_obj,
+
+                );
+
+                FromKotlinObject::from_kotlin_object(result)
+            }
+
+            /// Type discriminator for easier type checking in TypeScript/JavaScript
+            pub fn type_(
+                &self,
+            ) -> KsonValueType {
+                let self_ptr = self.to_kotlin_object();
+                let self_obj = self_ptr.as_kotlin_object();
+
+
+                let (_, _detach_guard) = util::attach_thread_to_java_vm();
+                let result = call_jvm_function!(
+                    util,
+                    c"org/kson/KsonValue",
+                    c"getType",
+                    c"()Lorg/kson/KsonValueType;",
                     CallObjectMethod,
                     self_obj,
 
@@ -1449,28 +1449,6 @@ pub mod kson_value {
             }
 
 
-            pub fn type_(
-                &self,
-            ) -> KsonValueType {
-                let self_ptr = self.to_kotlin_object();
-                let self_obj = self_ptr.as_kotlin_object();
-
-
-                let (_, _detach_guard) = util::attach_thread_to_java_vm();
-                let result = call_jvm_function!(
-                    util,
-                    c"org/kson/KsonValue$KsonNumber$Integer",
-                    c"getType",
-                    c"()Lorg/kson/KsonValueType;",
-                    CallObjectMethod,
-                    self_obj,
-
-                );
-
-                FromKotlinObject::from_kotlin_object(result)
-            }
-
-
             pub fn start(
                 &self,
             ) -> Position {
@@ -1506,6 +1484,28 @@ pub mod kson_value {
                     c"org/kson/KsonValue",
                     c"getEnd",
                     c"()Lorg/kson/Position;",
+                    CallObjectMethod,
+                    self_obj,
+
+                );
+
+                FromKotlinObject::from_kotlin_object(result)
+            }
+
+            /// Type discriminator for easier type checking in TypeScript/JavaScript
+            pub fn type_(
+                &self,
+            ) -> KsonValueType {
+                let self_ptr = self.to_kotlin_object();
+                let self_obj = self_ptr.as_kotlin_object();
+
+
+                let (_, _detach_guard) = util::attach_thread_to_java_vm();
+                let result = call_jvm_function!(
+                    util,
+                    c"org/kson/KsonValue",
+                    c"getType",
+                    c"()Lorg/kson/KsonValueType;",
                     CallObjectMethod,
                     self_obj,
 
@@ -1732,28 +1732,6 @@ pub mod kson_value {
         }
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonObject",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -1789,6 +1767,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -1875,28 +1875,6 @@ pub mod kson_value {
         }
 
 
-        pub fn type_(
-            &self,
-        ) -> KsonValueType {
-            let self_ptr = self.to_kotlin_object();
-            let self_obj = self_ptr.as_kotlin_object();
-
-
-            let (_, _detach_guard) = util::attach_thread_to_java_vm();
-            let result = call_jvm_function!(
-                util,
-                c"org/kson/KsonValue$KsonString",
-                c"getType",
-                c"()Lorg/kson/KsonValueType;",
-                CallObjectMethod,
-                self_obj,
-
-            );
-
-            FromKotlinObject::from_kotlin_object(result)
-        }
-
-
         pub fn start(
             &self,
         ) -> Position {
@@ -1932,6 +1910,28 @@ pub mod kson_value {
                 c"org/kson/KsonValue",
                 c"getEnd",
                 c"()Lorg/kson/Position;",
+                CallObjectMethod,
+                self_obj,
+
+            );
+
+            FromKotlinObject::from_kotlin_object(result)
+        }
+
+        /// Type discriminator for easier type checking in TypeScript/JavaScript
+        pub fn type_(
+            &self,
+        ) -> KsonValueType {
+            let self_ptr = self.to_kotlin_object();
+            let self_obj = self_ptr.as_kotlin_object();
+
+
+            let (_, _detach_guard) = util::attach_thread_to_java_vm();
+            let result = call_jvm_function!(
+                util,
+                c"org/kson/KsonValue",
+                c"getType",
+                c"()Lorg/kson/KsonValueType;",
                 CallObjectMethod,
                 self_obj,
 
@@ -3133,7 +3133,7 @@ pub mod transpile_options {
             let (_, _detach_guard) = util::attach_thread_to_java_vm();
             let result = call_jvm_function!(
                 util,
-                c"org/kson/TranspileOptions$Json",
+                c"org/kson/TranspileOptions",
                 c"getRetainEmbedTags",
                 c"()Z",
                 CallBooleanMethod,
@@ -3227,7 +3227,7 @@ pub mod transpile_options {
             let (_, _detach_guard) = util::attach_thread_to_java_vm();
             let result = call_jvm_function!(
                 util,
-                c"org/kson/TranspileOptions$Yaml",
+                c"org/kson/TranspileOptions",
                 c"getRetainEmbedTags",
                 c"()Z",
                 CallBooleanMethod,

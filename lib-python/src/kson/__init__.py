@@ -275,12 +275,25 @@ def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
 
         return map
 
+
+class KotlinObjectBase:
+    _jni_ref: Any
+
+    def __init__(self):
+        raise TypeError("This constructor cannot be called directly")
+
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
 ############
 # Wrappers #
 ############
 
 
-class FormatOptions:
+class FormatOptions(KotlinObjectBase):
     """Options for formatting Kson output.
 
     @param indentType The type of indentation to use (spaces or tabs)
@@ -288,7 +301,6 @@ class FormatOptions:
     @param embedBlockRules Rules for formatting specific paths as embed blocks
     """
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -312,12 +324,6 @@ class FormatOptions:
                 _to_kotlin_list(embed_block_rules),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def indent_type(
         self,
@@ -371,20 +377,13 @@ class FormatOptions:
         return cast(Any, (lambda x0: _from_kotlin_list(x0, lambda x1: _from_kotlin_object(EmbedRule, x1)))(result))
 
 
-class Position:
+class Position(KotlinObjectBase):
     """A zero-based line/column position in a document
 
     @param line The line number where the error occurred (0-based)
     @param column The column number where the error occurred (0-based)
     """
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def line(
@@ -422,16 +421,9 @@ class Position:
         return cast(Any, (lambda x0: x0)(result))
 
 
-class Message:
+class Message(KotlinObjectBase):
     """Represents a message logged during Kson processing"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def message(
@@ -503,16 +495,9 @@ class Message:
         return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
 
 
-class Token:
+class Token(KotlinObjectBase):
     """[Token] produced by the lexing phase of a Kson parse"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def token_type(
@@ -584,10 +569,9 @@ class Token:
         return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
 
 
-class KsonValue:
+class KsonValue(KotlinObjectBase):
     """Represents a parsed [InternalKsonValue] in the public API"""
 
-    _jni_ref: Any
 
     KsonNull: TypeAlias
     KsonArray: TypeAlias
@@ -616,12 +600,6 @@ class KsonValue:
                 end._jni_ref,
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def start(
         self,
@@ -708,13 +686,6 @@ class KsonValue:
 class _KsonValue_KsonObject(KsonValue):
     """A Kson object with key-value pairs"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def properties(
@@ -750,36 +721,12 @@ class _KsonValue_KsonObject(KsonValue):
         )
 
         return cast(Any, (lambda x0: _from_kotlin_map(x0, _java_string_to_python_str, lambda x1: _from_kotlin_object(KsonValue.KsonString, x1)))(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonObject",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonObject = _KsonValue_KsonObject
 
 
 class _KsonValue_KsonArray(KsonValue):
     """A Kson array with elements"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def elements(
@@ -798,36 +745,12 @@ class _KsonValue_KsonArray(KsonValue):
         )
 
         return cast(Any, (lambda x0: _from_kotlin_list(x0, lambda x1: KsonValue._downcast(x1)))(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonArray",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonArray = _KsonValue_KsonArray
 
 
 class _KsonValue_KsonString(KsonValue):
     """A Kson string value"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def value(
@@ -846,30 +769,12 @@ class _KsonValue_KsonString(KsonValue):
         )
 
         return cast(Any, (_java_string_to_python_str)(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonString",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonString = _KsonValue_KsonString
 
 
 class _KsonValue_KsonNumber(KsonValue):
     """A Kson number value."""
 
-    _jni_ref: Any
 
     Decimal: TypeAlias
     Integer: TypeAlias
@@ -891,12 +796,6 @@ class _KsonValue_KsonNumber(KsonValue):
                 end._jni_ref,
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -910,13 +809,6 @@ KsonValue.KsonNumber = _KsonValue_KsonNumber
 
 class _KsonValue_KsonNumber_Integer(KsonValue.KsonNumber):
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def value(
@@ -969,35 +861,11 @@ class _KsonValue_KsonNumber_Integer(KsonValue.KsonNumber):
         )
 
         return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonNumber$Integer",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonNumber.Integer = _KsonValue_KsonNumber_Integer
 
 
 class _KsonValue_KsonNumber_Decimal(KsonValue.KsonNumber):
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def value(
@@ -1016,23 +884,6 @@ class _KsonValue_KsonNumber_Decimal(KsonValue.KsonNumber):
         )
 
         return cast(Any, (lambda x0: x0)(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonNumber$Decimal",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonNumber.Decimal = _KsonValue_KsonNumber_Decimal
 
 
@@ -1040,13 +891,6 @@ KsonValue.KsonNumber.Decimal = _KsonValue_KsonNumber_Decimal
 class _KsonValue_KsonBoolean(KsonValue):
     """A Kson boolean value"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def value(
@@ -1064,68 +908,20 @@ class _KsonValue_KsonBoolean(KsonValue):
             []
         )
 
-        return cast(Any, (lambda x0: x0)(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonBoolean",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
+        return cast(Any, (lambda x0: x0 == 1)(result))
 KsonValue.KsonBoolean = _KsonValue_KsonBoolean
 
 
 class _KsonValue_KsonNull(KsonValue):
     """A Kson null value"""
 
-    _jni_ref: Any
 
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonNull",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonNull = _KsonValue_KsonNull
 
 
 class _KsonValue_KsonEmbed(KsonValue):
     """A Kson embed block"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def tag(
@@ -1161,37 +957,13 @@ class _KsonValue_KsonEmbed(KsonValue):
         )
 
         return cast(Any, (_java_string_to_python_str)(result))
-
-    def type(
-        self,
-    ) -> KsonValueType:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/KsonValue$KsonEmbed",
-            jni_ref,
-            b"getType",
-            b"()Lorg/kson/KsonValueType;",
-            "ObjectMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: KsonValueType._from_kotlin_enum(x0))(result))
 KsonValue.KsonEmbed = _KsonValue_KsonEmbed
 
 
 
-class SchemaValidator:
+class SchemaValidator(KotlinObjectBase):
     """A validator that can check if Kson source conforms to a schema."""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def validate(
@@ -1226,28 +998,11 @@ class SchemaValidator:
         return cast(Any, (lambda x0: _from_kotlin_list(x0, lambda x1: _from_kotlin_object(Message, x1)))(result))
 
 
-class EmbedRuleResult:
+class EmbedRuleResult(KotlinObjectBase):
 
-    _jni_ref: Any
 
     Success: TypeAlias
     Failure: TypeAlias
-    def __init__(
-        self,
-
-    ):
-
-        self._jni_ref = _construct(
-            b"org/kson/EmbedRuleResult",
-            b"()V",
-            []
-        )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -1260,7 +1015,6 @@ class EmbedRuleResult:
 
 class _EmbedRuleResult_Success(EmbedRuleResult):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1276,12 +1030,6 @@ class _EmbedRuleResult_Success(EmbedRuleResult):
                 embed_rule._jni_ref,
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def embed_rule(
         self,
@@ -1304,7 +1052,6 @@ EmbedRuleResult.Success = _EmbedRuleResult_Success
 
 class _EmbedRuleResult_Failure(EmbedRuleResult):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1320,12 +1067,6 @@ class _EmbedRuleResult_Failure(EmbedRuleResult):
                 _python_str_to_java_string(message),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def message(
         self,
@@ -1347,16 +1088,9 @@ EmbedRuleResult.Failure = _EmbedRuleResult_Failure
 
 
 
-class Analysis:
+class Analysis(KotlinObjectBase):
     """The result of statically analyzing a Kson document"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def errors(
@@ -1411,29 +1145,12 @@ class Analysis:
         return cast(Any, (lambda x0: None if x0 == ffi.NULL else (lambda x0: KsonValue._downcast(x0))(x0))(result))
 
 
-class Result:
+class Result(KotlinObjectBase):
     """Result of a Kson conversion operation"""
 
-    _jni_ref: Any
 
     Failure: TypeAlias
     Success: TypeAlias
-    def __init__(
-        self,
-
-    ):
-
-        self._jni_ref = _construct(
-            b"org/kson/Result",
-            b"()V",
-            []
-        )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -1446,7 +1163,6 @@ class Result:
 
 class _Result_Success(Result):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1462,12 +1178,6 @@ class _Result_Success(Result):
                 _python_str_to_java_string(output),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def output(
         self,
@@ -1490,7 +1200,6 @@ Result.Success = _Result_Success
 
 class _Result_Failure(Result):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1506,12 +1215,6 @@ class _Result_Failure(Result):
                 _to_kotlin_list(errors),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def errors(
         self,
@@ -1533,29 +1236,12 @@ Result.Failure = _Result_Failure
 
 
 
-class SchemaResult:
+class SchemaResult(KotlinObjectBase):
     """A [parseSchema] result"""
 
-    _jni_ref: Any
 
     Failure: TypeAlias
     Success: TypeAlias
-    def __init__(
-        self,
-
-    ):
-
-        self._jni_ref = _construct(
-            b"org/kson/SchemaResult",
-            b"()V",
-            []
-        )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -1568,7 +1254,6 @@ class SchemaResult:
 
 class _SchemaResult_Success(SchemaResult):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1584,12 +1269,6 @@ class _SchemaResult_Success(SchemaResult):
                 schema_validator._jni_ref,
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def schema_validator(
         self,
@@ -1612,7 +1291,6 @@ SchemaResult.Success = _SchemaResult_Success
 
 class _SchemaResult_Failure(SchemaResult):
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1628,12 +1306,6 @@ class _SchemaResult_Failure(SchemaResult):
                 _to_kotlin_list(errors),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def errors(
         self,
@@ -1655,29 +1327,12 @@ SchemaResult.Failure = _SchemaResult_Failure
 
 
 
-class TranspileOptions:
+class TranspileOptions(KotlinObjectBase):
     """Core interface for transpilation options shared across all output formats."""
 
-    _jni_ref: Any
 
     Json: TypeAlias
     Yaml: TypeAlias
-    def __init__(
-        self,
-
-    ):
-
-        self._jni_ref = _construct(
-            b"org/kson/TranspileOptions",
-            b"()V",
-            []
-        )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def retain_embed_tags(
         self,
@@ -1694,7 +1349,7 @@ class TranspileOptions:
             []
         )
 
-        return cast(Any, (lambda x0: x0)(result))
+        return cast(Any, (lambda x0: x0 == 1)(result))
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -1708,7 +1363,6 @@ class TranspileOptions:
 class _TranspileOptions_Json(TranspileOptions):
     """Options for transpiling Kson to JSON."""
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1724,36 +1378,12 @@ class _TranspileOptions_Json(TranspileOptions):
                 ffi.cast('jboolean', retain_embed_tags),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
-
-    def retain_embed_tags(
-        self,
-    ) -> bool:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/TranspileOptions$Json",
-            jni_ref,
-            b"getRetainEmbedTags",
-            b"()Z",
-            "BooleanMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: x0)(result))
 TranspileOptions.Json = _TranspileOptions_Json
 
 
 class _TranspileOptions_Yaml(TranspileOptions):
     """Options for transpiling Kson to YAML."""
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -1769,43 +1399,13 @@ class _TranspileOptions_Yaml(TranspileOptions):
                 ffi.cast('jboolean', retain_embed_tags),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
-
-    def retain_embed_tags(
-        self,
-    ) -> bool:
-
-
-        jni_ref = self._jni_ref
-        result = _call_method(
-            b"org/kson/TranspileOptions$Yaml",
-            jni_ref,
-            b"getRetainEmbedTags",
-            b"()Z",
-            "BooleanMethod",
-            []
-        )
-
-        return cast(Any, (lambda x0: x0)(result))
 TranspileOptions.Yaml = _TranspileOptions_Yaml
 
 
 
-class Kson:
+class Kson(KotlinObjectBase):
     """The [Kson](https://kson.org) language"""
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     @staticmethod
@@ -1966,7 +1566,7 @@ class Kson:
         return cast(Any, (lambda x0: SchemaResult._downcast(x0))(result))
 
 
-class EmbedRule:
+class EmbedRule(KotlinObjectBase):
     """A rule for formatting string values at specific paths as embed blocks.
 
     When formatting KSON, strings at paths matching [pathPattern] will be rendered
@@ -1978,13 +1578,6 @@ class EmbedRule:
     **Warning:** JsonPointerGlob syntax is experimental and may change in future versions.
     """
 
-    _jni_ref: Any
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
 
     def path_pattern(
@@ -2082,29 +1675,12 @@ class EmbedRule:
         return cast(Any, (lambda x0: EmbedRuleResult._downcast(x0))(result))
 
 
-class IndentType:
+class IndentType(KotlinObjectBase):
     """Options for indenting Kson Output"""
 
-    _jni_ref: Any
 
     Tabs: TypeAlias
     Spaces: TypeAlias
-    def __init__(
-        self,
-
-    ):
-
-        self._jni_ref = _construct(
-            b"org/kson/IndentType",
-            b"()V",
-            []
-        )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
     @staticmethod
     def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
@@ -2118,7 +1694,6 @@ class IndentType:
 class _IndentType_Spaces(IndentType):
     """Use spaces for indentation with the specified count"""
 
-    _jni_ref: Any
 
     def __init__(
         self,
@@ -2134,12 +1709,6 @@ class _IndentType_Spaces(IndentType):
                 ffi.cast('jint', size),
             ]
         )
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 
     def size(
         self,
@@ -2163,16 +1732,9 @@ IndentType.Spaces = _IndentType_Spaces
 class _IndentType_Tabs(IndentType):
     """Use tabs for indentation"""
 
-    _jni_ref: Any
 
     def __init__(self):
         self._jni_ref = _access_static_field(b"org/kson/IndentType$Tabs", b"INSTANCE", b"Lorg/kson/IndentType$Tabs;")
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
-
 IndentType.Tabs = _IndentType_Tabs
 
 

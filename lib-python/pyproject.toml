@@ -73,4 +73,5 @@ dev = [
     "setuptools>=61.0",
     "cibuildwheel>=2.16.0",
     "twine>=6.2.0",
+    "pytest-cov>=7.0.0",
 ]
