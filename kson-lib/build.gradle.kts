@@ -11,7 +11,7 @@ plugins {
     kotlin("multiplatform")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
-    id("nl.ochagavia.krossover") version "1.0.7"
+    id("nl.ochagavia.krossover") version "1.0.8"
 }
 
 repositories {
@@ -118,7 +118,7 @@ tasks.register("copyNodeDistribution") {
  *
  * This task is used when you need to prepare the production library with its dependencies
  * installed.
- * 
+ *
  * This will:
  * 1. Build the production library (via jsNodeProductionLibraryDistribution)
  * 2. Run 'npm install' in build/dist/js/productionLibrary
