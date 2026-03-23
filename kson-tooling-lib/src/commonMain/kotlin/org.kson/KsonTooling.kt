@@ -44,7 +44,7 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.strictKsonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition() ?: return null
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer) ?: return null
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Extract schema info from each valid schema
         val schemaInfos = context.validSchemas.mapNotNull { ref ->
@@ -75,7 +75,7 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.strictKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition() ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer) ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         return context.validSchemas.map {
             Range(
@@ -155,7 +155,7 @@ object KsonTooling {
     ): List<CompletionItem> {
         val parsedSchema = schema.strictKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer) ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties
         return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
@@ -297,7 +297,7 @@ object KsonTooling {
                 parsedSchema: org.kson.value.KsonValue,
                 documentValue: org.kson.value.KsonValue?,
                 documentPointer: JsonPointer
-            ): ResolvedSchemaContext? {
+            ): ResolvedSchemaContext {
                 val schemaIdLookup = SchemaIdLookup(parsedSchema)
                 val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
 

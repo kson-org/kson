@@ -16,7 +16,6 @@ export class HoverService {
      * @returns Hover information, or null if none available
      */
     getHover(document: KsonDocument, position: Position): Hover | null {
-        // Get the schema ToolingDocument for this document
         const schemaToolingDoc = isKsonSchemaDocument(document)
             ? document.getMetaSchemaToolingDocument()
             : document.getSchemaToolingDocument();

@@ -22,7 +22,7 @@ export class DefinitionService {
         const tooling = KsonTooling.getInstance();
         const results: DefinitionLink[] = [];
 
-        // Try $ref resolution within the same document (uses document as schema)
+        // Try $ref resolution within the same document
         const refLocations = tooling.resolveRefAtLocation(
             document.getToolingDocument(),
             position.line,
@@ -31,13 +31,16 @@ export class DefinitionService {
         results.push(...this.convertRangesToDefinitionLinks(refLocations, document.uri));
 
         // Try document-to-schema navigation (if schema is configured)
-        const schemaToolingDoc = isKsonSchemaDocument(document)
-            ? document.getMetaSchemaToolingDocument()
-            : document.getSchemaToolingDocument();
-        if (schemaToolingDoc) {
-            const schemaUri = isKsonSchemaDocument(document)
-                ? document.getMetaSchemaDocument()!.uri
-                : document.getSchemaDocument()!.uri;
+        let schemaToolingDoc;
+        let schemaUri;
+        if (isKsonSchemaDocument(document)) {
+            schemaToolingDoc = document.getMetaSchemaToolingDocument();
+            schemaUri = document.getMetaSchemaDocument()?.uri;
+        } else {
+            schemaToolingDoc = document.getSchemaToolingDocument();
+            schemaUri = document.getSchemaDocument()?.uri;
+        }
+        if (schemaToolingDoc && schemaUri) {
             const locations = tooling.getSchemaLocationAtLocation(
                 document.getToolingDocument(),
                 schemaToolingDoc,

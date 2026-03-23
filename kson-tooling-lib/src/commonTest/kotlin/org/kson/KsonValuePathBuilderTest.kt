@@ -328,7 +328,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testPreParsedValueProducesSamePathAsStringOnly() {
+    fun testGapFreePreParsedValueProducesSamePathAsStrictParse() {
         val document = """
             {
               "person": {
@@ -341,10 +341,12 @@ class KsonValuePathBuilderTest {
 
         val withoutPreParsed = KsonValuePathBuilder(document, location)
             .buildJsonPointerToPosition()
-        val preParsed = KsonCore.parseToAst(document).ksonValue
-        val withPreParsed = KsonValuePathBuilder(document, location, preParsed)
+        // Use gap-free (error-tolerant) ksonValue, matching the production path
+        // where callers pass ToolingDocument.ksonValue
+        val gapFreeValue = KsonTooling.parse(document).ksonValue
+        val withPreParsed = KsonValuePathBuilder(document, location, gapFreeValue)
             .buildJsonPointerToPosition()
 
-        assertEquals(withoutPreParsed, withPreParsed, "Pre-parsed value should produce the same path")
+        assertEquals(withoutPreParsed, withPreParsed, "Gap-free pre-parsed value should produce the same path")
     }
 }

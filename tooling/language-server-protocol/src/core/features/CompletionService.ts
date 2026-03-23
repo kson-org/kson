@@ -1,5 +1,6 @@
 import {CompletionItem, CompletionItemKind, CompletionList, Position, MarkupKind} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
+import {isKsonSchemaDocument} from '../document/KsonSchemaDocument.js';
 import {KsonTooling, CompletionItem as KsonCompletionItem, CompletionKind as KsonCompletionKind} from 'kson-tooling';
 
 /**
@@ -15,7 +16,9 @@ export class CompletionService {
      * @returns Completion list, or null if none available
      */
     getCompletions(document: KsonDocument, position: Position): CompletionList | null {
-        const schemaToolingDoc = document.getSchemaToolingDocument();
+        const schemaToolingDoc = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaToolingDocument()
+            : document.getSchemaToolingDocument();
         if (!schemaToolingDoc) {
             return null;
         }
