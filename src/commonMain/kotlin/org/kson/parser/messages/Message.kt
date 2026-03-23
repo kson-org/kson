@@ -817,6 +817,16 @@ enum class MessageType(
             return "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
         }
     },
+    FATAL_PARSE_ERROR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Error Detail")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val errorDetail = parsedArgs.getArg("Error Detail")
+            return "Fatal parsing error: $errorDetail"
+        }
+    },
     SCHEMA_REF_RESOLUTION_FAILED {
         override fun expectedArgs(): List<String> {
             return listOf("Reference")
