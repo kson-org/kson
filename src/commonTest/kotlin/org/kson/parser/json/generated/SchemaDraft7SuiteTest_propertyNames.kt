@@ -25,10 +25,8 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "f": {
-                    },
-                    "foo": {
-                    }
+                    "f": {},
+                    "foo": {}
                 }
             """,
             """
@@ -54,10 +52,8 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "foo": {
-                    },
-                    "foobar": {
-                    }
+                    "foo": {},
+                    "foobar": {}
                 }
             """,
             """
@@ -82,8 +78,7 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -185,12 +180,9 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "a": {
-                    },
-                    "aa": {
-                    },
-                    "aaa": {
-                    }
+                    "a": {},
+                    "aa": {},
+                    "aaa": {}
                 }
             """,
             """
@@ -216,8 +208,7 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "aaA": {
-                    }
+                    "aaA": {}
                 }
             """,
             """
@@ -242,8 +233,7 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -291,8 +281,7 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -338,8 +327,7 @@ class SchemaDraft7SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

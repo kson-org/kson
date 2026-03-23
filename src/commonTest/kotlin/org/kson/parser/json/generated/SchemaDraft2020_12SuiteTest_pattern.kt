@@ -139,8 +139,7 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -163,8 +162,7 @@ class SchemaDraft2020_12SuiteTest_pattern : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {

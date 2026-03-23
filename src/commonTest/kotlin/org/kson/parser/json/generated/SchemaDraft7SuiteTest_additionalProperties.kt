@@ -31,14 +31,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -67,14 +64,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -103,14 +97,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -135,14 +126,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -167,14 +155,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -202,14 +187,11 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -236,8 +218,7 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "patternProperties": {
-                        "^á": {
-                        }
+                        "^á": {}
                     },
                     "additionalProperties": false
                 }
@@ -264,8 +245,7 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "patternProperties": {
-                        "^á": {
-                        }
+                        "^á": {}
                     },
                     "additionalProperties": false
                 }
@@ -292,10 +272,8 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -326,10 +304,8 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -360,10 +336,8 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -446,10 +420,8 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     }
                 }
             """,
@@ -478,8 +450,7 @@ class SchemaDraft7SuiteTest_additionalProperties : JsonSchemaTest {
                     "allOf": [
                         {
                             "properties": {
-                                "foo": {
-                                }
+                                "foo": {}
                             }
                         }
                     ],

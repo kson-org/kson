@@ -427,8 +427,7 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -628,14 +627,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependentSchemas": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -665,14 +662,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependentSchemas": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -709,14 +704,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependentSchemas": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -746,14 +739,12 @@ class SchemaDraft2020_12SuiteTest_dependentSchemas : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependentSchemas": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
