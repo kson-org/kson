@@ -41,13 +41,21 @@ private data class TokenContext(
  * val path = builder.buildPathToPosition()  // Returns ["name"]
  * ```
  *
- * @param document The KSON document string to analyze
+ * @param document The KSON document string, used for token context analysis and
+ *        recovery (these require a strict, non-gap-free parse)
  * @param location The position (line and column, zero-based)
+ * @param preParsedValue Optional pre-parsed [KsonValue] for AST navigation. When
+ *        provided, avoids a redundant parse — the builder still does its own strict
+ *        parse for token context only. Falls back to recovery when null.
  *
  * @see buildJsonPointerToPosition Main method to build the path
  * @see KsonValueNavigation For navigation within parsed KSON values
  */
-class KsonValuePathBuilder(private val document: String, private val location: Coordinates) {
+class KsonValuePathBuilder(
+    private val document: String,
+    private val location: Coordinates,
+    private val preParsedValue: KsonValue? = null
+) {
 
     /**
      * Builds a path from the document root to the target location.
@@ -68,13 +76,16 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      *         or null if the path cannot be determined
      */
     fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): JsonPointer? {
-        val parsedDocument = KsonCore.parseToAst(document)
+        // Always do a strict parse for token context (gap-free tokens from error-tolerant
+        // parsing would find WHITESPACE instead of the meaningful token at the cursor).
+        val strictParse = KsonCore.parseToAst(document)
 
         // Analyze token context at the target location
-        val tokenContext = analyzeTokenContext(parsedDocument.lexedTokens, location)
+        val tokenContext = analyzeTokenContext(strictParse.lexedTokens, location)
 
-        // Parse the document, or attempt recovery if it contains syntax errors
-        val documentValue = parsedDocument.ksonValue
+        // Use the pre-parsed value when available, falling back to strict parse then recovery
+        val documentValue = preParsedValue
+            ?: strictParse.ksonValue
             ?: attemptDocumentRecovery(document, location)
             ?: return null
 

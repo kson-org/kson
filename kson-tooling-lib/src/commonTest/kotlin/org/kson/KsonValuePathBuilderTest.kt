@@ -326,4 +326,25 @@ class KsonValuePathBuilderTest {
             includePropertyKeys = true
         )
     }
+
+    @Test
+    fun testPreParsedValueProducesSamePathAsStringOnly() {
+        val document = """
+            {
+              "person": {
+                "name": "Alice",
+                "age": 25
+              }
+            }
+        """.trimIndent()
+        val location = Coordinates(3, 14) // on "Alice"
+
+        val withoutPreParsed = KsonValuePathBuilder(document, location)
+            .buildJsonPointerToPosition()
+        val preParsed = KsonCore.parseToAst(document).ksonValue
+        val withPreParsed = KsonValuePathBuilder(document, location, preParsed)
+            .buildJsonPointerToPosition()
+
+        assertEquals(withoutPreParsed, withPreParsed, "Pre-parsed value should produce the same path")
+    }
 }

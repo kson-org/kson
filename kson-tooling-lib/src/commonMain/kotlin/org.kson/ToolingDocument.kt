@@ -18,17 +18,27 @@ import kotlin.js.JsExport
  *
  */
 @JsExport
-class ToolingDocument internal constructor(content: String) {
+class ToolingDocument internal constructor(val content: String) {
     private val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true))
 
     /**
-     * The parsed [KsonValue], or null if the document has parse errors or is empty.
+     * The parsed [KsonValue] from error-tolerant parsing, or null if the
+     * document is empty. Partial results are available even with syntax errors.
      *
      * Value-based features (document symbols, selection ranges, sibling keys)
      * return empty results when this is null. Token-based features (semantic
      * tokens, folding ranges) still work via [tokens] and [ast].
      */
     val ksonValue: KsonValue? get() = parseResult.ksonValue
+
+    /**
+     * The parsed [KsonValue] from strict parsing, or null on parse errors.
+     *
+     * Schema-aware methods use this for accurate location information, since
+     * the error-tolerant (gap-free) lexer produces slightly different end
+     * positions on AST nodes.
+     */
+    internal val strictKsonValue: KsonValue? by lazy { KsonCore.parseToAst(content).ksonValue }
 
     internal val tokens: List<Token> get() = parseResult.lexedTokens
     internal val ast: KsonRoot get() = parseResult.ast
