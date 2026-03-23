@@ -524,8 +524,7 @@ class SchemaDraft7SuiteTest_oneOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -552,8 +551,7 @@ class SchemaDraft7SuiteTest_oneOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,

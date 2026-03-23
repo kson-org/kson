@@ -253,8 +253,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
                 {
                     "properties": {
                         "foo": {
-                            "not": {
-                            }
+                            "not": {}
                         }
                     }
                 }
@@ -283,8 +282,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
                 {
                     "properties": {
                         "foo": {
-                            "not": {
-                            }
+                            "not": {}
                         }
                     }
                 }
@@ -308,8 +306,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -331,8 +328,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -354,8 +350,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -377,8 +372,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -400,8 +394,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -425,8 +418,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -444,13 +436,11 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -474,8 +464,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -493,13 +482,11 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
-                    "not": {
-                    }
+                    "not": {}
                 }
             """,
             false,
@@ -651,8 +638,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -698,8 +684,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -855,8 +840,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -902,8 +886,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -930,8 +913,7 @@ class SchemaDraft7SuiteTest_not : JsonSchemaTest {
             """
                 {
                     "not": {
-                        "not": {
-                        }
+                        "not": {}
                     }
                 }
             """,

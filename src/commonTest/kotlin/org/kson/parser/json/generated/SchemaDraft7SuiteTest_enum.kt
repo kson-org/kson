@@ -76,16 +76,14 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -115,8 +113,7 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -148,8 +145,7 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -181,8 +177,7 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -215,8 +210,7 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -512,8 +506,7 @@ class SchemaDraft7SuiteTest_enum : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

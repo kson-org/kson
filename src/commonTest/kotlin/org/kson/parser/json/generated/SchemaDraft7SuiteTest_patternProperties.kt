@@ -640,8 +640,7 @@ class SchemaDraft7SuiteTest_patternProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

@@ -78,8 +78,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -87,8 +86,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -119,8 +117,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -153,8 +150,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -187,8 +183,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -222,8 +217,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
                     "enum": [
                         6,
                         "foo",
-                        [
-                        ],
+                        [],
                         true,
                         {
                             "foo": 12
@@ -527,8 +521,7 @@ class SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

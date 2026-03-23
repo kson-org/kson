@@ -24,8 +24,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -75,8 +74,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -167,8 +165,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -3249,8 +3246,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -3280,8 +3276,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "x": {
-                    }
+                    "x": {}
                 }
             """,
             """
@@ -3318,10 +3313,8 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "x": {
-                    },
-                    "y": {
-                    }
+                    "x": {},
+                    "y": {}
                 }
             """,
             """
@@ -3353,8 +3346,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {
                     "x": {
-                        "x": {
-                        }
+                        "x": {}
                     }
                 }
             """,
@@ -3393,10 +3385,8 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
             """
                 {
                     "x": {
-                        "x": {
-                        },
-                        "y": {
-                        }
+                        "x": {},
+                        "y": {}
                     }
                 }
             """,
@@ -3430,8 +3420,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 {
                     "x": {
                         "x": {
-                            "x": {
-                            }
+                            "x": {}
                         }
                     }
                 }
@@ -3472,10 +3461,8 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 {
                     "x": {
                         "x": {
-                            "x": {
-                            },
-                            "y": {
-                            }
+                            "x": {},
+                            "y": {}
                         }
                     }
                 }
@@ -3507,8 +3494,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -4037,8 +4023,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -5994,8 +5979,7 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -6241,16 +6225,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },
@@ -6286,16 +6267,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },
@@ -6326,16 +6304,13 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },
