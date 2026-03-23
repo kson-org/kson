@@ -227,8 +227,7 @@ class SchemaDraft2020_12SuiteTest_maxProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

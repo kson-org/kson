@@ -621,8 +621,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "foo": [
-                    ]
+                    "foo": []
                 }
             """,
             """

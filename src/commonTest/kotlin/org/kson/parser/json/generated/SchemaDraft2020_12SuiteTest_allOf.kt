@@ -629,8 +629,7 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -655,10 +654,8 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {}
                     ]
                 }
             """,
@@ -683,8 +680,7 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
-                        {
-                        },
+                        {},
                         {
                             "type": "number"
                         }
@@ -712,8 +708,7 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "allOf": [
-                        {
-                        },
+                        {},
                         {
                             "type": "number"
                         }
@@ -744,8 +739,7 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -773,8 +767,7 @@ class SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,

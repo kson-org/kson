@@ -32,14 +32,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -69,14 +66,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -106,14 +100,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -139,14 +130,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -172,14 +160,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -208,14 +193,11 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "patternProperties": {
-                        "^v": {
-                        }
+                        "^v": {}
                     },
                     "additionalProperties": false
                 }
@@ -243,8 +225,7 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^á": {
-                        }
+                        "^á": {}
                     },
                     "additionalProperties": false
                 }
@@ -272,8 +253,7 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "patternProperties": {
-                        "^á": {
-                        }
+                        "^á": {}
                     },
                     "additionalProperties": false
                 }
@@ -301,10 +281,8 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -336,10 +314,8 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -371,10 +347,8 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "additionalProperties": {
                         "type": "boolean"
@@ -460,10 +434,8 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     }
                 }
             """,
@@ -493,8 +465,7 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                     "allOf": [
                         {
                             "properties": {
-                                "foo": {
-                                }
+                                "foo": {}
                             }
                         }
                     ],
@@ -614,16 +585,13 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },
@@ -653,16 +621,13 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },
@@ -693,16 +658,13 @@ class SchemaDraft2020_12SuiteTest_additionalProperties : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo2": {
-                        }
+                        "foo2": {}
                     },
                     "dependentSchemas": {
-                        "foo": {
-                        },
+                        "foo": {},
                         "foo2": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             }
                         }
                     },

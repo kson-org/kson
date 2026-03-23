@@ -34,8 +34,7 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        }
+                        {}
                     ],
                     "additionalItems": {
                         "type": "integer"
@@ -67,8 +66,7 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        }
+                        {}
                     ],
                     "additionalItems": {
                         "type": "integer"
@@ -162,8 +160,7 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """,
             """
                 {
-                    "items": {
-                    },
+                    "items": {},
                     "additionalItems": false
                 }
             """,
@@ -182,18 +179,14 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
                     "items": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -220,12 +213,9 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -253,12 +243,9 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -287,12 +274,9 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -322,12 +306,9 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -583,8 +564,7 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        }
+                        {}
                     ],
                     "additionalItems": false
                 }
@@ -611,8 +591,7 @@ class SchemaDraft7SuiteTest_additionalItems : JsonSchemaTest {
             """
                 {
                     "items": [
-                        {
-                        }
+                        {}
                     ],
                     "additionalItems": false
                 }

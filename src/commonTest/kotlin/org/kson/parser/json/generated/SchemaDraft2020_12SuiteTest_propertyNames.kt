@@ -25,10 +25,8 @@ class SchemaDraft2020_12SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "f": {
-                    },
-                    "foo": {
-                    }
+                    "f": {},
+                    "foo": {}
                 }
             """,
             """
@@ -55,10 +53,8 @@ class SchemaDraft2020_12SuiteTest_propertyNames : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "foo": {
-                    },
-                    "foobar": {
-                    }
+                    "foo": {},
+                    "foobar": {}
                 }
             """,
             """
@@ -84,8 +80,7 @@ class SchemaDraft2020_12SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -215,8 +210,7 @@ class SchemaDraft2020_12SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -264,8 +258,7 @@ class SchemaDraft2020_12SuiteTest_propertyNames : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
