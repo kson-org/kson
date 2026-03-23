@@ -74,8 +74,8 @@ class SelectionRangeTest {
         assertEquals(5, ranges.size)
         assertEquals(Range(2, 11, 2, 16), ranges[0])  // string "Alice"
         assertEquals(Range(2, 4, 2, 16), ranges[1])    // property name: "Alice"
-        assertEquals(Range(1, 10, 4, 0), ranges[2])    // inner object
-        assertEquals(Range(1, 2, 4, 0), ranges[3])     // property person: {...}
+        assertEquals(Range(1, 10, 3, 3), ranges[2])    // inner object
+        assertEquals(Range(1, 2, 3, 3), ranges[3])     // property person: {...}
         assertEquals(Range(0, 0, 4, 1), ranges[4])     // outer object (= document range after dedup)
     }
 

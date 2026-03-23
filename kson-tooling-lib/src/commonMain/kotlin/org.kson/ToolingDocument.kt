@@ -31,15 +31,6 @@ class ToolingDocument internal constructor(val content: String) {
      */
     val ksonValue: KsonValue? get() = parseResult.ksonValue
 
-    /**
-     * The parsed [KsonValue] from strict parsing, or null on parse errors.
-     *
-     * Schema-aware methods use this for accurate location information, since
-     * the error-tolerant (gap-free) lexer produces slightly different end
-     * positions on AST nodes.
-     */
-    internal val strictKsonValue: KsonValue? by lazy { KsonCore.parseToAst(content).ksonValue }
-
     internal val tokens: List<Token> get() = parseResult.lexedTokens
     internal val ast: KsonRoot get() = parseResult.ast
 

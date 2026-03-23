@@ -42,8 +42,8 @@ object KsonTooling {
         line: Int,
         column: Int
     ): String? {
-        val parsedSchema = schema.strictKsonValue ?: return null
-        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition() ?: return null
+        val parsedSchema = schema.ksonValue ?: return null
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition() ?: return null
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Extract schema info from each valid schema
@@ -73,8 +73,8 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range> {
-        val parsedSchema = schema.strictKsonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition() ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition() ?: return emptyList()
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         return context.validSchemas.map {
@@ -104,8 +104,8 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range> {
-        val parsedSchema = schema.strictKsonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(schema.content, Coordinates(line, column), parsedSchema).buildJsonPointerToPosition() ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(schema.content, Coordinates(line, column), parsedSchema, schema.tokens).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
         if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
@@ -153,8 +153,8 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<CompletionItem> {
-        val parsedSchema = schema.strictKsonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties

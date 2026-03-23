@@ -55,6 +55,10 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         return tokens[tokenIndex].comments
     }
 
+    override fun getToken(index: Int): Token {
+        return tokens[index]
+    }
+
     override fun getTokenIndex(): Int {
         return currentToken
     }
@@ -297,7 +301,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             }
                         }
                         if (keyNode is ObjectKeyNodeError || ksonValueNode is KsonValueNodeError) {
-                            ObjectPropertyNodeError(marker.getSourceTokens().dropLastWhile { it.tokenType == WHITESPACE })
+                            ObjectPropertyNodeError(marker.getSourceTokens())
                         } else {
                             ObjectPropertyNodeImpl(
                                 keyNode,
@@ -466,6 +470,11 @@ private interface MarkerBuilderContext {
     fun getComments(tokenIndex: Int): List<String>
 
     /**
+     * Get the [Token] at raw [index] — in gap-free mode this may be WHITESPACE or COMMENT
+     */
+    fun getToken(index: Int): Token
+
+    /**
      * [KsonMarker]s mark token start and end indexes.  This returns the token index of the [KsonBuilder]
      * being marked
      */
@@ -624,8 +633,19 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun done(elementType: ElementType) {
-        // the last token we advanced past is our last token
         lastTokenIndex = context.getTokenIndex() - 1
+        // For non-error nodes, walk back past ignored tokens (WHITESPACE and COMMENT) so
+        // gap-free markers match strict positions.  In gap-free mode, trailing comments
+        // produce WHITESPACE + COMMENT lookahead tokens after the meaningful closing token;
+        // we must skip past all of these to land on the actual closing token (e.g. "}").
+        //
+        // Error nodes are exempt: they must retain all their tokens (including trailing
+        // whitespace) so they can faithfully reconstruct the original source.
+        if (elementType != ERROR) {
+            while (lastTokenIndex > firstTokenIndex && Lexer.ignoredTokens.contains(context.getToken(lastTokenIndex).tokenType)) {
+                lastTokenIndex--
+            }
+        }
         if (lastTokenIndex < firstTokenIndex) {
             /**
              * Raise an alarm if we accidentally make an empty mark. We want all markers to mark either
