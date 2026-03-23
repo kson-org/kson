@@ -16,6 +16,7 @@ export class KsonDocument implements TextDocument {
     // _toolingDocument uses error-tolerant parsing for editor features (symbols, tokens, etc.)
     private readonly parseAnalysis: Analysis;
     private _toolingDocument: ToolingDocument | null = null;
+    private _schemaToolingDocument: ToolingDocument | null = null;
     constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
         this.schemaDocument = schemaDocument;
         this.textDocument = textDocument;
@@ -60,6 +61,19 @@ export class KsonDocument implements TextDocument {
             this._toolingDocument = KsonTooling.getInstance().parse(this.getText());
         }
         return this._toolingDocument;
+    }
+
+    /**
+     * Returns a lazily-created {@link ToolingDocument} for the schema associated
+     * with this document. Cached for the lifetime of this document instance.
+     */
+    getSchemaToolingDocument(): ToolingDocument | undefined {
+        const schema = this.getSchemaDocument();
+        if (!schema) return undefined;
+        if (!this._schemaToolingDocument) {
+            this._schemaToolingDocument = KsonTooling.getInstance().parse(schema.getText());
+        }
+        return this._schemaToolingDocument;
     }
 
     /**

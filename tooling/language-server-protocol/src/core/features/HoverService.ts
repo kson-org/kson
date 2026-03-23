@@ -16,21 +16,18 @@ export class HoverService {
      * @returns Hover information, or null if none available
      */
     getHover(document: KsonDocument, position: Position): Hover | null {
-        // Get the schema for this document
-        const schemaDocument = isKsonSchemaDocument(document)
-            ? document.getMetaSchemaDocument()
-            : document.getSchemaDocument();
-        if (!schemaDocument) {
-            // No schema configured, no hover info available
+        // Get the schema ToolingDocument for this document
+        const schemaToolingDoc = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaToolingDocument()
+            : document.getSchemaToolingDocument();
+        if (!schemaToolingDoc) {
             return null;
         }
 
-        // Call the KsonTooling API to get schema hover info at this position
-        // The API now accepts line and column directly, avoiding the Location mangling issue
         const tooling = KsonTooling.getInstance();
         const hoverMarkdown = tooling.getSchemaInfoAtLocation(
-            document.getText(),
-            schemaDocument.getText(),
+            document.getToolingDocument(),
+            schemaToolingDoc,
             position.line,
             position.character
         );

@@ -15,18 +15,15 @@ export class CompletionService {
      * @returns Completion list, or null if none available
      */
     getCompletions(document: KsonDocument, position: Position): CompletionList | null {
-        // Get the schema for this document
-        const schemaDocument = document.getSchemaDocument();
-        if (!schemaDocument) {
-            // No schema configured, no completions available
+        const schemaToolingDoc = document.getSchemaToolingDocument();
+        if (!schemaToolingDoc) {
             return null;
         }
 
-        // Call the KsonTooling API to get completions at this position
         const tooling = KsonTooling.getInstance();
         const ksonCompletions = tooling.getCompletionsAtLocation(
-            document.getText(),
-            schemaDocument.getText(),
+            document.getToolingDocument(),
+            schemaToolingDoc,
             position.line,
             position.character
         );
