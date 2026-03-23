@@ -345,6 +345,33 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testMalformedNotSubSchemaDoesNotSilentlyAccept() {
+        // A "not" with a malformed sub-schema must not silently become permissive.
+        // Schema parse errors are already reported; the validator must not be created
+        // with a null schema that causes it to skip validation entirely.
+        assertSchemaHasValidationErrors(
+            """{"not": 42}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testMalformedIfSubSchemaDoesNotSilentlyAccept() {
+        assertSchemaHasValidationErrors(
+            """{"if": 42, "then": {"type": "string"}}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testMalformedPropertyNamesSubSchemaDoesNotSilentlyAccept() {
+        assertSchemaHasValidationErrors(
+            """{"propertyNames": 42}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
     fun testRefOnlyWithNoOtherProperties() {
         // Test that $ref alone works without errors
         assertValidObjectSchema(

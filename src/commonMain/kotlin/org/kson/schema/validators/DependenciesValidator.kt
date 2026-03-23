@@ -40,11 +40,8 @@ data class DependencyValidatorArray(val dependency: Set<KsonString>) : Dependenc
         }
     }
 }
-data class DependencyValidatorSchema(val dependency: JsonSchema?) : DependencyValidator {
+data class DependencyValidatorSchema(val dependency: JsonSchema) : DependencyValidator {
     override fun validate(ksonObject: KsonObject, requiredBy: KsonObjectProperty, messageSink: MessageSink) {
-        if (dependency == null) {
-            return
-        }
         val dependencyErrorsMessageSink = MessageSink()
         dependency.validate(ksonObject, dependencyErrorsMessageSink)
         if (dependencyErrorsMessageSink.loggedMessages().isNotEmpty()) {

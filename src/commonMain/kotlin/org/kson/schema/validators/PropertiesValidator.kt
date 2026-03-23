@@ -72,11 +72,8 @@ data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : Addition
     }
 }
 
-data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema?) : AdditionalPropertiesValidator {
+data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
-        if (schema == null) {
-            return
-        }
         remainingProperties.forEach { (_, property) ->
             schema.validate(property.propValue, messageSink)
         }
