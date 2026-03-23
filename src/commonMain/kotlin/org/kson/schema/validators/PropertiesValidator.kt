@@ -13,10 +13,19 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
                           private val patternPropertySchemas: Map<KsonString, JsonSchema?>?,
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
+
+    // Pre-compile pattern regexes once during construction rather than on every validation.
+    // SchemaParser validates regex syntax before constructing this validator, so compilation
+    // is guaranteed to succeed here.
+    private val compiledPatterns: List<Triple<Regex, KsonString, JsonSchema?>>? =
+        patternPropertySchemas?.map { (pattern, schema) ->
+            Triple(Regex(pattern.value), pattern, schema)
+        }
+
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val objectProperties = node.propertyLookup
         val seenKeys = mutableSetOf<String>()
-        
+
         // First, validate regular properties
         propertySchemas?.forEach { (key, schema) ->
             objectProperties[key.value]?.let { objectProperty ->
@@ -26,18 +35,17 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         }
 
         // Then validate pattern properties - need to check ALL patterns for each property
-        patternPropertySchemas?.let { patterns ->
+        compiledPatterns?.let { patterns ->
             objectProperties.forEach { (propertyName, propertyValue) ->
                 var matchedAnyPattern = false
-                
-                patterns.forEach { (pattern, schema) ->
-                    val patternMatcher = Regex(pattern.value)
-                    if (patternMatcher.containsMatchIn(propertyName)) {
+
+                patterns.forEach { (regex, _, schema) ->
+                    if (regex.containsMatchIn(propertyName)) {
                         matchedAnyPattern = true
                         schema?.validate(propertyValue, messageSink)
                     }
                 }
-                
+
                 if (matchedAnyPattern) {
                     seenKeys.add(propertyName)
                 }

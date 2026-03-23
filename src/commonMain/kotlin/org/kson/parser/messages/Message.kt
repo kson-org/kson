@@ -817,6 +817,17 @@ enum class MessageType(
             return "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
         }
     },
+    SCHEMA_INVALID_REGEX {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Property Name", "Pattern")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
+            val pattern = parsedArgs.getArg("Pattern")
+            return "Schema property \"$schemaPropertyName\" contains an invalid regex pattern: $pattern"
+        }
+    },
     FATAL_PARSE_ERROR {
         override fun expectedArgs(): List<String> {
             return listOf("Error Detail")

@@ -329,6 +329,22 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testInvalidRegexInPatternReportsError() {
+        assertSchemaHasValidationErrors(
+            """{"pattern": "*"}""",
+            listOf(MessageType.SCHEMA_INVALID_REGEX)
+        )
+    }
+
+    @Test
+    fun testInvalidRegexInPatternPropertiesReportsError() {
+        assertSchemaHasValidationErrors(
+            """{"patternProperties": {"*": {"type": "string"}}}""",
+            listOf(MessageType.SCHEMA_INVALID_REGEX)
+        )
+    }
+
+    @Test
     fun testRefOnlyWithNoOtherProperties() {
         // Test that $ref alone works without errors
         assertValidObjectSchema(

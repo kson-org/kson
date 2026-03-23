@@ -210,7 +210,9 @@ object SchemaParser {
 
         schemaProperties["pattern"]?.let { pattern ->
             if (pattern is KsonString) {
-                validators.add(PatternValidator(pattern.value))
+                runCatching { PatternValidator(pattern.value) }
+                    .onSuccess { validators.add(it) }
+                    .onFailure { messageSink.error(pattern.location, SCHEMA_INVALID_REGEX.create("pattern", pattern.value)) }
             } else {
                 messageSink.error(pattern.location, SCHEMA_STRING_REQUIRED.create("pattern"))
             }
@@ -306,9 +308,13 @@ object SchemaParser {
 
         val patternPropertySchemas = schemaProperties["patternProperties"]?.let { patternProperties ->
             if (patternProperties is KsonObject) {
-                patternProperties.propertyMap.entries.associate { (_, value) ->
-                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
+                val validEntries = mutableMapOf<KsonString, JsonSchema?>()
+                for ((_, prop) in patternProperties.propertyMap.entries) {
+                    runCatching { Regex(prop.propName.value) }
+                        .onSuccess { validEntries[prop.propName] = parseSchemaElement(prop.propValue, messageSink, updatedBaseUri, idLookup) }
+                        .onFailure { messageSink.error(prop.propName.location, SCHEMA_INVALID_REGEX.create("patternProperties", prop.propName.value)) }
                 }
+                validEntries
             } else {
                 messageSink.error(patternProperties.location, SCHEMA_OBJECT_REQUIRED.create("patternProperties"))
                 null
