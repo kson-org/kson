@@ -32,4 +32,12 @@ class ToolingDocument internal constructor(content: String) {
 
     internal val tokens: List<Token> get() = parseResult.lexedTokens
     internal val ast: KsonRoot get() = parseResult.ast
+
+    /**
+     * Cached document symbol tree, built lazily on first access.
+     */
+    internal val documentSymbols: List<DocumentSymbol> by lazy {
+        val kv = ksonValue ?: return@lazy emptyList()
+        DocumentSymbolBuilder.build(kv)
+    }
 }

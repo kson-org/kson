@@ -39,6 +39,14 @@ class ToolingDocumentTest {
     }
 
     @Test
+    fun testDocumentSymbolsCached() {
+        val doc = KsonTooling.parse("name: John\nage: 30")
+        val first = KsonTooling.getDocumentSymbols(doc)
+        val second = KsonTooling.getDocumentSymbols(doc)
+        assertSame(first, second, "Repeated calls should return the same cached list instance")
+    }
+
+    @Test
     fun testEmptyDocumentHasNullKsonValue() {
         val doc = KsonTooling.parse("")
         assertNull(doc.ksonValue, "Empty document should have null ksonValue")

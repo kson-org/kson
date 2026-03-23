@@ -175,14 +175,13 @@ object KsonTooling {
     fun parse(content: String): ToolingDocument = ToolingDocument(content)
 
     /**
-     * Build document symbols from a pre-parsed [ToolingDocument].
+     * Get document symbols from a pre-parsed [ToolingDocument].
      *
      * @param document The pre-parsed KSON document
      * @return List of document symbols, or empty list if parsing failed
      */
     fun getDocumentSymbols(document: ToolingDocument): List<DocumentSymbol> {
-        val ksonValue = document.ksonValue ?: return emptyList()
-        return DocumentSymbolBuilder.build(ksonValue)
+        return document.documentSymbols
     }
 
     /**
@@ -269,8 +268,9 @@ object KsonTooling {
      * @return List of ranges for sibling key symbols
      */
     fun getSiblingKeys(document: ToolingDocument, line: Int, column: Int): List<Range> {
-        val ksonValue = document.ksonValue ?: return emptyList()
-        return SiblingKeyBuilder.build(ksonValue, line, column)
+        val symbols = document.documentSymbols
+        if (symbols.isEmpty()) return emptyList()
+        return SiblingKeyBuilder.build(symbols, line, column)
     }
 
     /**

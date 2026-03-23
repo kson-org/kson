@@ -1,19 +1,15 @@
 package org.kson
 
-import org.kson.value.KsonValue
-
 /**
  * Finds sibling key ranges for a cursor position in a KSON document.
  *
- * Uses [DocumentSymbolBuilder] to get the symbol tree, then finds the most
- * specific KEY symbol containing the cursor and returns the selection ranges
- * of all sibling KEY symbols from the parent.
+ * Accepts a [DocumentSymbol] tree, finds the most specific KEY symbol
+ * containing the cursor, and returns the selection ranges of all sibling
+ * KEY symbols from the parent.
  */
 internal object SiblingKeyBuilder {
 
-    fun build(ksonValue: KsonValue, line: Int, column: Int): List<Range> {
-        val symbols = DocumentSymbolBuilder.build(ksonValue)
-
+    fun build(symbols: List<DocumentSymbol>, line: Int, column: Int): List<Range> {
         // Flatten the tree, collecting each symbol with its parent
         val allSymbols = mutableListOf<SymbolWithParent>()
         collectAll(symbols, null, allSymbols)
