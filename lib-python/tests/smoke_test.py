@@ -593,6 +593,11 @@ def test_kson_parse_schema_none_check():
         Kson.parse_schema(NoneAny)
 
 
+def test_indent_type_parent():
+    with pytest.raises(TypeError):
+        value = IndentType()
+
+
 def test_indent_type_downcast_via_format_options():
     tabs = IndentType.Tabs()
     opts = FormatOptions(tabs, FormattingStyle.PLAIN, [])
@@ -604,6 +609,7 @@ def test_indent_type_tabs_eq_and_hash():
     tabs1 = IndentType.Tabs()
     tabs2 = IndentType.Tabs()
     assert tabs1 == tabs2
+    assert hash(tabs1) == hash(tabs2)
 
 
 def test_formatting_style_from_kotlin_enum():
@@ -629,3 +635,57 @@ def test_number_internal_start_end():
     iend = num.internal_end()
     assert istart.line() == 0
     assert iend.line() == 0
+
+
+def test_result_success_direct_construction():
+    success = Result.Success("hello world")
+    assert success.output() == "hello world"
+
+
+def test_result_failure_direct_construction():
+    # Get a real Message object from a parse failure
+    result = Kson.to_json("key: [1, 2", TranspileOptions.Json(retain_embed_tags=True))
+    assert isinstance(result, Result.Failure)
+    errors = result.errors()
+
+    # Reconstruct a Failure from those errors
+    failure = Result.Failure(errors)
+    assert len(failure.errors()) > 0
+
+
+def test_schema_result_success_direct_construction():
+    # Get a real SchemaValidator from a successful parse
+    result = Kson.parse_schema("type: object")
+    assert isinstance(result, SchemaResult.Success)
+    validator = result.schema_validator()
+
+    # Reconstruct a Success from that validator
+    success = SchemaResult.Success(validator)
+    assert success.schema_validator() is not None
+
+
+def test_schema_result_failure_direct_construction():
+    # Get real Message objects from a parse failure
+    result = Kson.to_json("key: [1, 2", TranspileOptions.Json(retain_embed_tags=True))
+    assert isinstance(result, Result.Failure)
+    errors = result.errors()
+
+    # Construct a SchemaResult.Failure from those errors
+    failure = SchemaResult.Failure(errors)
+    assert len(failure.errors()) > 0
+
+
+def test_embed_rule_result_success_direct_construction():
+    # Get a real EmbedRule
+    rule_result = EmbedRule.from_path_pattern("/key", "txt", 0)
+    assert isinstance(rule_result, EmbedRuleResult.Success)
+    rule = rule_result.embed_rule()
+
+    # Reconstruct a Success from that rule
+    success = EmbedRuleResult.Success(rule)
+    assert success.embed_rule().path_pattern() == "/key"
+
+
+def test_embed_rule_result_failure_direct_construction():
+    failure = EmbedRuleResult.Failure("something went wrong")
+    assert failure.message() == "something went wrong"
