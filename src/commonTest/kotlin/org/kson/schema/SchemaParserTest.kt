@@ -307,6 +307,28 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefToMalformedDefinitionReportsError() {
+        // A $ref pointing to a definition that is not a valid schema (a number,
+        // where a schema object or boolean is required) must report an error.
+        val schema = """
+            {
+                "definitions": {
+                    "broken": 42
+                },
+                "${'$'}ref": "#/definitions/broken"
+            }
+        """
+        val ksonSource = """
+            key: value
+        """
+        assertKsonSchemaErrors(
+            ksonSource,
+            schema,
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
     fun testRefOnlyWithNoOtherProperties() {
         // Test that $ref alone works without errors
         assertValidObjectSchema(
