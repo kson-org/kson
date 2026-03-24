@@ -220,6 +220,7 @@ jobs:
     environment:
       JVM_OPTS: "-Xmx3200m"
       TERM: dumb
+      DISPLAY: ":99"
 
     resource_class: large
     steps:
@@ -228,6 +229,11 @@ jobs:
       - run:
           name: "Verify Chrome installation"
           command: "google-chrome --version"
+
+      - run:
+          name: "Start virtual display"
+          command: "Xvfb :99 -screen 0 1280x1024x24 &"
+          background: true
 
       - "restore-gradle-caches":
           platform: "linux-amd64"
