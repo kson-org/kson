@@ -1,5 +1,5 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Kson} from 'kson';
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 import {KsonDocument} from "./KsonDocument.js";
 import {KsonSchemaDocument} from "./KsonSchemaDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
@@ -8,29 +8,30 @@ import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
 /**
  * Resolve the appropriate KsonDocument type for a given document.
  *
- * First tries URI-based schema resolution. If that fails, tries content-based
- * metaschema resolution via $schema — but only returns a KsonSchemaDocument
- * in that case, encoding the domain rule that only schema files have metaschemas.
+ * Parses the content once into a {@link ToolingDocument}, then uses the
+ * parsed value tree to check for $schema if URI-based resolution fails.
+ * The single parse is shared with the returned document for all tooling
+ * operations.
  */
 function resolveDocument(
     provider: SchemaProvider,
     textDocument: TextDocument,
-    parseResult: ReturnType<ReturnType<typeof Kson.getInstance>['analyze']>
+    toolingDocument: ToolingDocument,
 ): KsonDocument {
     const schema = provider.getSchemaForDocument(textDocument.uri);
     if (schema) {
-        return new KsonDocument(textDocument, parseResult, schema);
+        return new KsonDocument(textDocument, toolingDocument, schema);
     }
 
-    const schemaId = KsonDocument.extractSchemaId(parseResult);
+    const schemaId = toolingDocument.schemaId ?? undefined;
     if (schemaId) {
         const metaSchema = provider.getMetaSchemaForId(schemaId);
         if (metaSchema) {
-            return new KsonSchemaDocument(textDocument, parseResult, metaSchema);
+            return new KsonSchemaDocument(textDocument, toolingDocument, metaSchema);
         }
     }
 
-    return new KsonDocument(textDocument, parseResult);
+    return new KsonDocument(textDocument, toolingDocument);
 }
 
 /**
@@ -61,8 +62,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-                const parseResult = Kson.getInstance().analyze(content, uri);
-                return resolveDocument(provider, textDocument, parseResult);
+                const toolingDocument = KsonTooling.getInstance().parse(content);
+                return resolveDocument(provider, textDocument, toolingDocument);
             },
             update: (
                 ksonDocument: KsonDocument,
@@ -74,13 +75,13 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     changes,
                     version
                 );
-                const parseResult = Kson.getInstance().analyze(textDocument.getText(), ksonDocument.uri);
+                const toolingDocument = KsonTooling.getInstance().parse(textDocument.getText());
                 // Reuse the existing schema/metaschema — it only changes when schema
                 // config changes, which triggers refreshDocumentSchemas() separately.
                 if (ksonDocument instanceof KsonSchemaDocument) {
-                    return new KsonSchemaDocument(textDocument, parseResult, ksonDocument.getMetaSchemaDocument());
+                    return new KsonSchemaDocument(textDocument, toolingDocument, ksonDocument.getMetaSchemaDocument());
                 }
-                return new KsonDocument(textDocument, parseResult, ksonDocument.getSchemaDocument());
+                return new KsonDocument(textDocument, toolingDocument, ksonDocument.getSchemaDocument());
             }
         });
 
@@ -123,12 +124,12 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
         // Get all currently open documents
         const allDocs = this.all();
 
-        // For each document, create a new KsonDocument instance with the updated schema
+        // For each document, create a new KsonDocument instance with the updated schema.
+        // Reuses the existing ToolingDocument since the content hasn't changed.
         for (const doc of allDocs) {
-            const textDocument = doc.textDocument;
-            const parseResult = doc.getAnalysisResult();
-
-            const updatedDoc = resolveDocument(this.schemaProvider, textDocument, parseResult);
+            const updatedDoc = resolveDocument(
+                this.schemaProvider, doc.textDocument, doc.getToolingDocument()
+            );
 
             // Replace in the internal document cache
             this.syncedDocuments.set(doc.uri, updatedDoc);

@@ -1,26 +1,24 @@
-import {Analysis, KsonValue, KsonValueType} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
  * Kson Document Entry.
- * This class wraps a standard {@link TextDocument} and adds KSON-specific information,
- * like the {@link parseAnalysis}. It implements the {@link TextDocument} so the {@link KsonDocumentsManager} can
- * implement the standard {@link TextDocuments} manager.
+ * This class wraps a standard {@link TextDocument} with its pre-parsed
+ * {@link ToolingDocument}, so every tooling operation on the same document
+ * version shares a single parse. It implements {@link TextDocument} so the
+ * {@link KsonDocumentsManager} can implement the standard {@link TextDocuments} manager.
  */
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
     private schemaDocument?: TextDocument;
-    // parseAnalysis uses strict parsing for value extraction (schema IDs, etc.)
-    // _toolingDocument uses error-tolerant parsing for editor features (symbols, tokens, etc.)
-    private readonly parseAnalysis: Analysis;
-    private _toolingDocument: ToolingDocument | null = null;
+    private readonly _toolingDocument: ToolingDocument;
     private _schemaToolingDocument: ToolingDocument | null = null;
-    constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
-        this.schemaDocument = schemaDocument;
+
+    constructor(textDocument: TextDocument, toolingDocument: ToolingDocument, schemaDocument?: TextDocument) {
         this.textDocument = textDocument;
-        this.parseAnalysis = parseAnalysis;
+        this._toolingDocument = toolingDocument;
+        this.schemaDocument = schemaDocument;
     }
 
     get uri(): DocumentUri {
@@ -52,14 +50,11 @@ export class KsonDocument implements TextDocument {
     }
 
     /**
-     * Returns a lazily-created {@link ToolingDocument} for use with tooling operations.
-     * Created on first access and cached for the lifetime of this document instance,
-     * so multiple tooling calls on the same version share one parse.
+     * Returns the {@link ToolingDocument} for use with tooling operations.
+     * Created eagerly during construction, so all tooling calls on the same
+     * version share a single parse.
      */
     getToolingDocument(): ToolingDocument {
-        if (!this._toolingDocument) {
-            this._toolingDocument = KsonTooling.getInstance().parse(this.getText());
-        }
         return this._toolingDocument;
     }
 
@@ -77,16 +72,6 @@ export class KsonDocument implements TextDocument {
     }
 
     /**
-     * Returns the parse result of this {@link KsonDocument}
-     */
-    getAnalysisResult(): Analysis {
-        if (!this.parseAnalysis) {
-            throw new Error(`No parse result for : ${this.uri}`);
-        }
-        return this.parseAnalysis;
-    }
-
-    /**
      * Returns the full {@link Range} of this {@link KsonDocument}
      */
     getFullDocumentRange(): Range {
@@ -99,7 +84,7 @@ export class KsonDocument implements TextDocument {
             end: lastPosition
         };
     }
-    
+
     /**
      * Get the schema document for this document, if one is configured.
      */
@@ -108,30 +93,11 @@ export class KsonDocument implements TextDocument {
     }
 
     /**
-     * Extract the $schema field value from this document's parse analysis.
+     * Extract the $schema field value from this document's parsed value tree.
      *
      * @returns The $schema string value, or undefined if not present or not a string
      */
     getSchemaId(): string | undefined {
-        return KsonDocument.extractSchemaId(this.parseAnalysis);
-    }
-
-    /**
-     * Extract the $schema field value from a parsed KSON analysis result.
-     *
-     * @param analysis The KSON analysis result
-     * @returns The $schema string value, or undefined if not present or not a string
-     */
-    static extractSchemaId(analysis: Analysis): string | undefined {
-        const ksonValue = analysis.ksonValue;
-        if (!ksonValue || ksonValue.type !== KsonValueType.OBJECT) {
-            return undefined;
-        }
-        const obj = ksonValue as KsonValue.KsonObject;
-        const schemaValue = obj.properties.asJsReadonlyMapView().get('$schema');
-        if (!schemaValue || schemaValue.type !== KsonValueType.STRING) {
-            return undefined;
-        }
-        return (schemaValue as KsonValue.KsonString).value;
+        return this._toolingDocument.schemaId ?? undefined;
     }
 }

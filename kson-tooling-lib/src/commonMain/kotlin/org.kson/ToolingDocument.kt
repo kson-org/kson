@@ -7,6 +7,8 @@ import org.kson.ast.KsonRoot
 import org.kson.ast.KsonRootImpl
 import org.kson.parser.Lexer
 import org.kson.parser.Token
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -52,6 +54,16 @@ class ToolingDocument internal constructor(val content: String) {
     internal val tokens: List<Token> get() = parseResult.lexedTokens
 
     internal val ast: KsonRoot get() = parseResult.ast
+
+    /**
+     * The `$schema` value from the root object, or null if the document is not
+     * an object or has no `$schema` string property.
+     */
+    val schemaId: String? by lazy {
+        val obj = ksonValue as? KsonObject ?: return@lazy null
+        val schemaValue = obj.propertyMap["\$schema"]?.propValue as? KsonString ?: return@lazy null
+        schemaValue.value
+    }
 
     /**
      * Cached document symbol tree, built lazily on first access.

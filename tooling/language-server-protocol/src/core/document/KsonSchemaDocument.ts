@@ -1,4 +1,3 @@
-import {Analysis} from 'kson';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {KsonTooling, ToolingDocument} from 'kson-tooling';
 import {KsonDocument} from './KsonDocument.js';
@@ -14,8 +13,8 @@ export class KsonSchemaDocument extends KsonDocument {
     private metaSchemaDocument?: TextDocument;
     private _metaSchemaToolingDocument: ToolingDocument | null = null;
 
-    constructor(textDocument: TextDocument, parseAnalysis: Analysis, metaSchemaDocument?: TextDocument) {
-        super(textDocument, parseAnalysis);
+    constructor(textDocument: TextDocument, toolingDocument: ToolingDocument, metaSchemaDocument?: TextDocument) {
+        super(textDocument, toolingDocument);
         this.metaSchemaDocument = metaSchemaDocument;
     }
 
