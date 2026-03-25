@@ -3,7 +3,7 @@
 	"tasks": [
 		{
             "label": "compile",
-            "type": "npm",
+            "type": "pnpm",
             "script": "compile-tests",
             "group": {
                 "kind": "build"

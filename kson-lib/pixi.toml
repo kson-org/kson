@@ -18,3 +18,4 @@ vs2022_win-64 = ">=19.44.35207,<20"
 
 [dependencies]
 nodejs = ">=18"
+pnpm = "10.*"

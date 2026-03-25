@@ -15,6 +15,7 @@ version = "0.1.0"
 
 [dependencies]
 nodejs = "24.*"
+pnpm = "10.*"
 python = "3.13.*"
 
 [target.win-64.dependencies]

@@ -128,9 +128,9 @@ tasks.register<PixiExecTask>("npmInstallProductionLibrary") {
     description = "Install npm dependencies in the production library output"
     dependsOn("jsNodeProductionLibraryDistribution")
 
-    command.set(listOf("npm", "install"))
+    command.set(listOf("pnpm", "install"))
     workingDirectory.set(layout.buildDirectory.dir("dist/js/productionLibrary"))
-    doNotTrackState("npm already tracks its own state")
+    doNotTrackState("pnpm already tracks its own state")
 }
 
 // Configure task ordering to ensure sequential execution

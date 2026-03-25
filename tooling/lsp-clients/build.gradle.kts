@@ -4,41 +4,40 @@ plugins {
 
 tasks {
     val npmInstall = register<PixiExecTask>("npmInstall") {
-        // Use `npm ci` for reproducible installs from the lock file
-        command=listOf("npm", "ci")
-        doNotTrackState("npm already tracks its own state")
+        command=listOf("pnpm", "install", "--frozen-lockfile")
+        doNotTrackState("pnpm already tracks its own state")
         dependsOn(":tooling:language-server-protocol:npm_run_test")
     }
 
     val playwrightInstall = register<PixiExecTask>("playwrightInstall") {
-        command=listOf("npx", "playwright", "install", "chromium")
+        command=listOf("pnpx", "playwright", "install", "chromium")
         doNotTrackState("playwright already tracks its own state")
         dependsOn(npmInstall)
     }
 
     register<PixiExecTask>("npm_run_vscode") {
-        command=listOf("npm", "run", "vscode")
+        command=listOf("pnpm", "run", "vscode")
         dependsOn(npmInstall)
     }
 
     register<PixiExecTask>("npm_run_monaco") {
-        command=listOf("npm", "run", "monaco")
+        command=listOf("pnpm", "run", "monaco")
         dependsOn(npmInstall)
     }
 
     val test = register<PixiExecTask>("npm_run_test") {
-        command=listOf("npm", "run", "test")
+        command=listOf("pnpm", "run", "test")
         dependsOn(npmInstall)
         dependsOn(playwrightInstall)
     }
 
     val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {
-        command=listOf("npm", "run", "buildVSCode")
+        command=listOf("pnpm", "run", "buildVSCode")
         dependsOn(npmInstall)
     }
 
     val buildMonaco = register<PixiExecTask>("npm_run_buildMonaco") {
-        command=listOf("npm", "run", "buildMonaco")
+        command=listOf("pnpm", "run", "buildMonaco")
         dependsOn(npmInstall)
     }
 
