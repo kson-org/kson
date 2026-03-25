@@ -317,7 +317,7 @@ object SchemaParser {
 
         val additionalPropertiesValidator = schemaProperties["additionalProperties"]?.let { additionalProperties ->
             when (additionalProperties) {
-                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value)
+                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value, title)
                 else -> AdditionalPropertiesSchemaValidator(
                     parseSchemaElement(
                         additionalProperties,
