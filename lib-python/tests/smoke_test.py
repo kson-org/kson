@@ -63,6 +63,32 @@ def test_kson_formatting_classic():
     )
 
 
+def test_formatting_style_delimited():
+    indent = IndentType.Spaces(2)
+    result = Kson.format(
+        "key: [1, 2]",
+        FormatOptions(indent, FormattingStyle.DELIMITED, []),
+    )
+    assert (
+        result
+        == """{
+  key: <
+    - 1
+    - 2
+  >
+}"""
+    )
+
+
+def test_formatting_style_compact():
+    indent = IndentType.Spaces(2)
+    result = Kson.format(
+        "key: [1, 2]",
+        FormatOptions(indent, FormattingStyle.COMPACT, []),
+    )
+    assert result == "key:[1 2]"
+
+
 def test_kson_to_json_success():
     result = Kson.to_json(
         "key: [1, 2, 3, 4]", TranspileOptions.Json(retain_embed_tags=True)
@@ -451,26 +477,6 @@ def test_indent_type_tabs():
 def test_indent_type_spaces_size():
     spaces = IndentType.Spaces(4)
     assert spaces.size() == 4
-
-
-def test_formatting_style_delimited():
-    indent = IndentType.Spaces(2)
-    result = Kson.format(
-        "key: [1, 2]",
-        FormatOptions(indent, FormattingStyle.DELIMITED, []),
-    )
-    assert result is not None
-    assert len(result) > 0
-
-
-def test_formatting_style_compact():
-    indent = IndentType.Spaces(2)
-    result = Kson.format(
-        "key: [1, 2]",
-        FormatOptions(indent, FormattingStyle.COMPACT, []),
-    )
-    assert result is not None
-    assert len(result) > 0
 
 
 def test_transpile_options_retain_embed_tags_getter():
