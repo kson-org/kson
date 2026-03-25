@@ -604,13 +604,15 @@ enum class MessageType(
     },
     SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Expected Types", "Actual Type")
+            return listOf("Property Name", "Expected Types", "Actual Type")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val propertyName = parsedArgs.getArg("Property Name")
             val expectedTypes = parsedArgs.getArg("Expected Types")
             val actualType = parsedArgs.getArg("Actual Type")
-            return "Expected one of: $expectedTypes, but got: $actualType"
+            val prefix = if (propertyName.isNullOrEmpty()) "" else "Property '$propertyName': "
+            return "${prefix}Expected one of: $expectedTypes, but got: $actualType"
         }
     },
     SCHEMA_ARRAY_ITEMS_NOT_UNIQUE(MessageSeverity.WARNING) {

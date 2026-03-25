@@ -38,11 +38,12 @@ object SchemaParser {
         schemaValue: KsonValue,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         return when (schemaValue) {
             is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup)
+            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup, propertyName = propertyName)
             else -> {
                 messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
                 null
@@ -54,7 +55,8 @@ object SchemaParser {
         schemaObject: KsonObject,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
 
@@ -127,7 +129,7 @@ object SchemaParser {
 
         val typeValidator = schemaProperties["type"]?.let { typeValue ->
             when (typeValue) {
-                is KsonString -> TypeValidator(typeValue.value)
+                is KsonString -> TypeValidator(typeValue.value, propertyName)
                 is KsonList -> {
                     val typeArrayEntries = ArrayList<String>()
                     for (element in typeValue.elements) {
@@ -137,7 +139,7 @@ object SchemaParser {
                             messageSink.error(element.location, SCHEMA_TYPE_ARRAY_ENTRY_ERROR.create())
                         }
                     }
-                    TypeValidator(typeArrayEntries)
+                    TypeValidator(typeArrayEntries, propertyName)
                 }
 
                 else -> {
@@ -296,7 +298,7 @@ object SchemaParser {
         val propertySchemas = schemaProperties["properties"]?.let { properties ->
             if (properties is KsonObject) {
                 properties.propertyMap.entries.associate { (_, value) ->
-                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup, value.propName.value)
                 }
             } else {
                 messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))

@@ -106,7 +106,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
         )
 
         val subSchemaMessage = errors[1].message.toString()
-        assertContains(subSchemaMessage, "'NumberModel': ['Expected one of: number, but got: string' at 2.8]")
-        assertContains(subSchemaMessage, "'BooleanModel': ['Expected one of: boolean, but got: string' at 2.8]")
+        assertContains(subSchemaMessage, "'NumberModel': ['Property 'value': Expected one of: number, but got: string' at 2.8]")
+        assertContains(subSchemaMessage, "'BooleanModel': ['Property 'value': Expected one of: boolean, but got: string' at 2.8]")
     }
 }
