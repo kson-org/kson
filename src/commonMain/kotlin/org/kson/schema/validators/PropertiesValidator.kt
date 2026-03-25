@@ -70,7 +70,20 @@ data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema?) : Additi
             return
         }
         remainingProperties.forEach { (_, property) ->
-            schema.validate(property.propValue, messageSink)
+            val propertyMessageSink = MessageSink()
+            schema.validate(property.propValue, propertyMessageSink)
+            if (propertyMessageSink.hasMessages()) {
+                messageSink.error(
+                    property.propName.location,
+                    MessageType.SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH.create(
+                        property.propName.value,
+                        schema.descriptionWithDefault()
+                    )
+                )
+                propertyMessageSink.loggedMessages().forEach {
+                    messageSink.error(it.location, it.message)
+                }
+            }
         }
     }
 }

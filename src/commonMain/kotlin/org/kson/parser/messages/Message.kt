@@ -351,6 +351,17 @@ enum class MessageType(
             return "Additional property '$propertyName' is not allowed$suffix"
         }
     },
+    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Property Name", "Schema Description")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val propertyName = parsedArgs.getArg("Property Name")
+            val schemaDescription = parsedArgs.getArg("Schema Description")
+            return "Property '$propertyName' must conform to '$schemaDescription'"
+        }
+    },
     SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
