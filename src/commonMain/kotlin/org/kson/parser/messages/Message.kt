@@ -430,11 +430,12 @@ enum class MessageType(
     },
     SCHEMA_ENUM_VALUE_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Allowed Values")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value is not one of the allowed enum values"
+            val allowedValues = parsedArgs.getArg("Allowed Values")
+            return "Value must be one of: $allowedValues"
         }
     },
     SCHEMA_FALSE_SCHEMA_ERROR(MessageSeverity.WARNING) {
@@ -668,7 +669,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredValue = parsedArgs.getArg("Required Value")
-            return "Value must be exactly equal to '$requiredValue'"
+            return "Value must be exactly equal to $requiredValue"
         }
     },
     SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
