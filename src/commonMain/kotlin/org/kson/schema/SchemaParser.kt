@@ -227,25 +227,15 @@ object SchemaParser {
         }
 
         schemaProperties["items"]?.let { itemsValue ->
-            val additionalItemsValidator = schemaProperties["additionalItems"]?.let { additionalItems ->
-                when (additionalItems) {
-                    is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value)
-                    else -> AdditionalItemsSchemaValidator(
-                        parseSchemaElement(
-                            additionalItems,
-                            messageSink,
-                            updatedBaseUri,
-                            idLookup
-                        )
-                    )
-                }
-            }
-
             when (itemsValue) {
                 is KsonList -> {
-                    val leadingItemsValidator = LeadingItemsTupleValidator(itemsValue.elements.mapNotNull {
+                    val tupleSchemas = itemsValue.elements.mapNotNull {
                         parseSchemaElement(it, messageSink, updatedBaseUri, idLookup)
-                    })
+                    }
+                    val leadingItemsValidator = LeadingItemsTupleValidator(tupleSchemas)
+                    val additionalItemsValidator = parseAdditionalItemsValidator(
+                        schemaProperties, tupleSchemas.size, messageSink, updatedBaseUri, idLookup
+                    )
                     validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                 }
 
@@ -253,6 +243,9 @@ object SchemaParser {
                     val itemsSchema = parseSchemaElement(itemsValue, messageSink, updatedBaseUri, idLookup)
                     if (itemsSchema != null) {
                         val leadingItemsValidator = LeadingItemsSchemaValidator(itemsSchema)
+                        val additionalItemsValidator = parseAdditionalItemsValidator(
+                            schemaProperties, 0, messageSink, updatedBaseUri, idLookup
+                        )
                         validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                     } else {
                         // no-op todo this shouldn't be necessary - bug in Intellij inspections?
@@ -475,6 +468,23 @@ object SchemaParser {
         }
 
         return JsonObjectSchema(title, description, comment, default, definitions, typeValidator, validators)
+    }
+
+    private fun parseAdditionalItemsValidator(
+        schemaProperties: Map<String, KsonValue>,
+        tupleLength: Int,
+        messageSink: MessageSink,
+        currentBaseUri: String,
+        idLookup: SchemaIdLookup
+    ): AdditionalItemsValidator? {
+        return schemaProperties["additionalItems"]?.let { additionalItems ->
+            when (additionalItems) {
+                is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value, tupleLength)
+                else -> AdditionalItemsSchemaValidator(
+                    parseSchemaElement(additionalItems, messageSink, currentBaseUri, idLookup)
+                )
+            }
+        }
     }
 }
 

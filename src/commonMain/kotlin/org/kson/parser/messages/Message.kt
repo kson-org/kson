@@ -332,11 +332,13 @@ enum class MessageType(
     },
     SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Allowed Count", "Actual Count")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Additional items are not allowed"
+            val allowedCount = parsedArgs.getArg("Allowed Count")
+            val actualCount = parsedArgs.getArg("Actual Count")
+            return "Expected at most $allowedCount items, but found $actualCount"
         }
     },
     SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.WARNING) {
