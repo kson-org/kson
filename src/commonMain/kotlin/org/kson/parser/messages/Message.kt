@@ -533,7 +533,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
-            return "Schema \"$schemaPropertyName\" array entries must be a strings"
+            return "Schema \"$schemaPropertyName\" array entries must be strings"
         }
     },
     SCHEMA_STRING_REQUIRED(MessageSeverity.WARNING) {
@@ -562,7 +562,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema \"type\" array entries must be a strings"
+            return "Schema \"type\" array entries must be strings"
         }
     },
     SCHEMA_TYPE_TYPE_ERROR(MessageSeverity.WARNING) {
