@@ -15,7 +15,7 @@ import org.kson.validation.Validator
 sealed interface JsonSchema: Validator {
   /**
    * A guaranteed non-null description for this schema that may be used in user-facing messages.  Should be defaulted
-   * to something reasonable (if not as helpful) when the schema itself provides no description
+   * to something reasonable (if not as helpful) when the schema provides neither a description nor a title
    */
   fun descriptionWithDefault(): String
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
@@ -42,7 +42,7 @@ class JsonObjectSchema(
 ) : JsonSchema {
 
   override fun descriptionWithDefault(): String {
-    return description ?: "JSON Object Schema"
+    return description ?: title ?: "JSON Object Schema"
   }
 
   /**

@@ -3,6 +3,7 @@ package org.kson.schema.validators
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
+import kotlin.test.assertContains
 
 class AnyOfValidatorTest : JsonSchemaTest {
     @Test
@@ -20,7 +21,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
                         .
                       thing:
                         type: number
-                
+
                   - properties:
                       description:
                         type: string
@@ -51,7 +52,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
                         .
                       think:
                         type: number
-                
+
                   - properties:
                       description:
                         type: string
@@ -65,5 +66,47 @@ class AnyOfValidatorTest : JsonSchemaTest {
                 // sub-schema errors are rolled up into this error
                 SCHEMA_SUB_SCHEMA_ERRORS)
         )
+    }
+
+    @Test
+    fun testSubSchemaErrorsIncludeLocationAndTitle() {
+        val errors = assertKsonSchemaErrors(
+            """
+                name: test
+                value: hello
+            """.trimIndent(),
+            """
+                anyOf:
+                  - title: NumberModel
+                    properties:
+                      name:
+                        type: string
+                        .
+                      value:
+                        type: number
+                        .
+                      .
+                    additionalProperties: false
+
+                  - title: BooleanModel
+                    properties:
+                      name:
+                        type: string
+                        .
+                      value:
+                        type: boolean
+                        .
+                      .
+                    additionalProperties: false
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ANY_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+
+        val subSchemaMessage = errors[1].message.toString()
+        assertContains(subSchemaMessage, "'NumberModel': ['Expected one of: number, but got: string' at 2.8]")
+        assertContains(subSchemaMessage, "'BooleanModel': ['Expected one of: boolean, but got: string' at 2.8]")
     }
 }
