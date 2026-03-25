@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {createTestFile, cleanUp, assertTextEqual} from './common';
+import {createTestFile, cleanUp, pollUntil} from './common';
 
 
 describe('Formatting Settings Test Suite', () => {
@@ -12,6 +12,26 @@ describe('Formatting Settings Test Suite', () => {
         // always fetch from the workspace to ensure we see the latest edits
         return vscode.workspace.openTextDocument(testFileUri!);
     };
+
+    /**
+     * Format the document and poll until the result matches the expected text.
+     *
+     * Configuration changes use the LSP pull model: the server receives a
+     * didChangeConfiguration notification and then makes an async round-trip
+     * to pull the new settings.  A format request issued immediately after
+     * a config change may arrive before that pull completes.  Polling
+     * accounts for this inherent race.
+     */
+    async function formatAndAwait(expectedText: string): Promise<void> {
+        await pollUntil(
+            async () => {
+                await vscode.commands.executeCommand('editor.action.formatDocument');
+                return (await document()).getText().replace(/\r\n/g, '\n');
+            },
+            text => text === expectedText,
+            { timeout: 5000, interval: 100, message: `Expected formatting:\n${expectedText}` }
+        );
+    }
 
     beforeEach(async () => {
         // Sample unformatted content used in all tests
@@ -33,7 +53,7 @@ describe('Formatting Settings Test Suite', () => {
         await config.update('format.insertSpaces', undefined, vscode.ConfigurationTarget.Workspace);
         await config.update('format.tabSize', undefined, vscode.ConfigurationTarget.Workspace);
         await config.update('format.formattingStyle', undefined, vscode.ConfigurationTarget.Workspace);
-        
+
         if (testFileUri) {
             await cleanUp(testFileUri);
             testFileUri = undefined;
@@ -53,9 +73,7 @@ describe('Formatting Settings Test Suite', () => {
             '        c: 2'
         ].join('\n');
 
-        await vscode.commands.executeCommand('editor.action.formatDocument');
-
-        assertTextEqual(await document(), expectedText);
+        await formatAndAwait(expectedText);
     }).timeout(10000);
 
     it('Should format with tabs when insertSpaces is false', async () => {
@@ -71,9 +89,7 @@ describe('Formatting Settings Test Suite', () => {
             '\tc: 2'
         ].join('\n');
 
-        await vscode.commands.executeCommand('editor.action.formatDocument');
-
-        assertTextEqual(await document(), expectedText);
+        await formatAndAwait(expectedText);
     }).timeout(10000);
 
     it('Should format delimited when formattingStyle is delimited', async () => {
@@ -92,9 +108,7 @@ describe('Formatting Settings Test Suite', () => {
             '}'
         ].join('\n');
 
-        await vscode.commands.executeCommand('editor.action.formatDocument');
-
-        assertTextEqual(await document(), expectedText);
+        await formatAndAwait(expectedText);
     }).timeout(10000);
 
     it('Should update formatting when settings change dynamically', async () => {
@@ -116,13 +130,11 @@ describe('Formatting Settings Test Suite', () => {
         await config.update('format.tabSize', 2, vscode.ConfigurationTarget.Workspace);
         await config.update('format.formattingStyle', 'plain', vscode.ConfigurationTarget.Workspace);
 
-        await vscode.commands.executeCommand('editor.action.formatDocument');
-        assertTextEqual(await document(), expectedSpacesText);
+        await formatAndAwait(expectedSpacesText);
 
         // Now change to tabs
         await config.update('format.insertSpaces', false, vscode.ConfigurationTarget.Workspace);
 
-        await vscode.commands.executeCommand('editor.action.formatDocument');
-        assertTextEqual(await document(), expectedTabsText);
+        await formatAndAwait(expectedTabsText);
     }).timeout(15000);
 });
