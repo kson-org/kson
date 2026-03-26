@@ -9,18 +9,13 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
 
+/** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
+data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
+
 class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchema?>?,
-                          private val patternPropertySchemas: Map<KsonString, JsonSchema?>?,
+                          private val compiledPatterns: List<CompiledPatternSchema>?,
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
-
-    // Pre-compile pattern regexes once during construction rather than on every validation.
-    // SchemaParser validates regex syntax before constructing this validator, so compilation
-    // is guaranteed to succeed here.
-    private val compiledPatterns: List<Triple<Regex, KsonString, JsonSchema?>>? =
-        patternPropertySchemas?.map { (pattern, schema) ->
-            Triple(Regex(pattern.value), pattern, schema)
-        }
 
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val objectProperties = node.propertyLookup
@@ -39,7 +34,7 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
             objectProperties.forEach { (propertyName, propertyValue) ->
                 var matchedAnyPattern = false
 
-                patterns.forEach { (regex, _, schema) ->
+                patterns.forEach { (regex, schema) ->
                     if (regex.containsMatchIn(propertyName)) {
                         matchedAnyPattern = true
                         schema?.validate(propertyValue, messageSink)

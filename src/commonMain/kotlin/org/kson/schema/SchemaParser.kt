@@ -210,8 +210,8 @@ object SchemaParser {
 
         schemaProperties["pattern"]?.let { pattern ->
             if (pattern is KsonString) {
-                runCatching { PatternValidator(pattern.value) }
-                    .onSuccess { validators.add(it) }
+                runCatching { Regex(pattern.value) }
+                    .onSuccess { validators.add(PatternValidator(it)) }
                     .onFailure { messageSink.error(pattern.location, SCHEMA_INVALID_REGEX.create("pattern", pattern.value)) }
             } else {
                 messageSink.error(pattern.location, SCHEMA_STRING_REQUIRED.create("pattern"))
@@ -300,12 +300,15 @@ object SchemaParser {
             }
         }
 
-        val patternPropertySchemas = schemaProperties["patternProperties"]?.let { patternProperties ->
+        val compiledPatterns = schemaProperties["patternProperties"]?.let { patternProperties ->
             if (patternProperties is KsonObject) {
-                val validEntries = mutableMapOf<KsonString, JsonSchema?>()
+                val validEntries = mutableListOf<CompiledPatternSchema>()
                 for ((_, prop) in patternProperties.propertyMap.entries) {
                     runCatching { Regex(prop.propName.value) }
-                        .onSuccess { validEntries[prop.propName] = parseSchemaElement(prop.propValue, messageSink, updatedBaseUri, idLookup) }
+                        .onSuccess { regex ->
+                            val schema = parseSchemaElement(prop.propValue, messageSink, updatedBaseUri, idLookup)
+                            validEntries.add(CompiledPatternSchema(regex, schema))
+                        }
                         .onFailure { messageSink.error(prop.propName.location, SCHEMA_INVALID_REGEX.create("patternProperties", prop.propName.value)) }
                 }
                 validEntries
@@ -323,8 +326,8 @@ object SchemaParser {
             }
         }
 
-        if (propertySchemas != null || patternPropertySchemas != null || additionalPropertiesValidator != null) {
-            validators.add(PropertiesValidator(propertySchemas, patternPropertySchemas, additionalPropertiesValidator))
+        if (propertySchemas != null || compiledPatterns != null || additionalPropertiesValidator != null) {
+            validators.add(PropertiesValidator(propertySchemas, compiledPatterns, additionalPropertiesValidator))
         }
 
         schemaProperties["required"]?.let { required ->
