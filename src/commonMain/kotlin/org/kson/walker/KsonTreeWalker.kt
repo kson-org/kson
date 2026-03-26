@@ -17,9 +17,9 @@ data class TreeProperty<N>(val name: String, val value: N)
  * location-based lookup, path building) from any specific tree representation.
  *
  * Generic algorithms that operate on any tree representation are provided as
- * extension functions in TreeNavigation.kt.
+ * extension functions.
  *
- * Note: [org.kson.value.EmbedBlock] nodes are treated as leaves by the walker.
+ * Note: [org.kson.value.EmbedBlock] nodes are treated as strings by the walker.
  * They are not objects or arrays from the walker's perspective, even though
  * [org.kson.value.EmbedBlock.asKsonObject] can convert them to an object
  * representation. This matches how embed blocks behave in JSON Pointer

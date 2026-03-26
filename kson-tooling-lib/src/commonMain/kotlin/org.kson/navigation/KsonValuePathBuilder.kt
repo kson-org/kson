@@ -2,12 +2,11 @@ package org.kson.navigation
 
 import org.kson.ToolingDocument
 import org.kson.ast.AstNode
-import org.kson.ast.QuotedStringNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
-import org.kson.parser.behavior.StringQuote
+import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.navigateToLocationWithPointer
@@ -117,16 +116,6 @@ class KsonValuePathBuilder(
     }
 
     /**
-     * Processes escape sequences in a STRING_CONTENT token to produce
-     * the logical property name.
-     */
-    private fun processedStringContent(token: Token): String =
-        QuotedStringNode(
-            sourceTokens = listOf(token),
-            stringQuote = StringQuote.DoubleQuote
-        ).processedStringContent
-
-    /**
      * Checks if the given position falls within the bounds of a token.
      */
     private fun isPositionInsideToken(
@@ -155,7 +144,11 @@ class KsonValuePathBuilder(
             val token = meaningfulTokens[i]
             when (token.tokenType) {
                 TokenType.UNQUOTED_STRING -> return token.lexeme.text
-                TokenType.STRING_CONTENT -> return processedStringContent(token)
+                TokenType.STRING_CONTENT -> return QuotedStringContentTransformer(
+                    token.lexeme.text,
+                    token.lexeme.location
+                ).processedContent
+
                 TokenType.STRING_CLOSE_QUOTE -> continue // skip quote, look for content
                 else -> return null
             }
@@ -221,7 +214,7 @@ class KsonValuePathBuilder(
                     includePropertyKeys -> {
                 // Extract the property name from the token, processing escapes for quoted keys
                 val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)
-                    processedStringContent(lastToken)
+                    QuotedStringContentTransformer(lastToken.lexeme.text, lastToken.lexeme.location).processedContent
                 else
                     lastToken.lexeme.text
                 pointer.tokens + propertyName

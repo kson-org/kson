@@ -37,12 +37,7 @@ fun <N> KsonTreeWalker<N>.navigateWithJsonPointer(
 }
 
 /**
- * Navigate a tree using a JsonPointerGlob (with wildcard and pattern support).
- *
- * JsonPointerGlob extends JSON Pointer with:
- * - Wildcard tokens: `*` matches any single key or array index
- * - Glob patterns: tokens containing `*` or `?` match using glob-style patterns
- * - Recursive descent: `**` matches zero or more levels
+ * Navigate a tree using a [JsonPointerGlob].
  *
  * Unlike [navigateWithJsonPointer], this returns ALL matching nodes, since wildcards
  * and patterns can match multiple keys/indices at each level.
@@ -113,13 +108,7 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
     }
 
     /**
-     * Navigate through a tree using parsed tokens (JSON Pointer/JsonPointerGlob style).
-     *
-     * Supports four token types:
-     * - [PointerParser.Tokens.Literal]: Exact match against property names or array indices
-     * - [PointerParser.Tokens.Wildcard]: Matches all keys/indices at one level
-     * - [PointerParser.Tokens.RecursiveDescent]: Matches zero or more levels (depth-first)
-     * - [PointerParser.Tokens.GlobPattern]: Pattern matching with * and ?
+     * Navigate through a tree using parsed tokens ([JsonPointer]/[JsonPointerGlob] style).
      */
     fun navigateByParsedTokens(
         roots: List<N>,
