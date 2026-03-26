@@ -1,5 +1,5 @@
-import {Analysis} from 'kson';
 import {TextDocument} from 'vscode-languageserver-textdocument';
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 import {KsonDocument} from './KsonDocument.js';
 
 /**
@@ -11,9 +11,10 @@ import {KsonDocument} from './KsonDocument.js';
  */
 export class KsonSchemaDocument extends KsonDocument {
     private metaSchemaDocument?: TextDocument;
+    private _metaSchemaToolingDocument: ToolingDocument | null = null;
 
-    constructor(textDocument: TextDocument, parseAnalysis: Analysis, metaSchemaDocument?: TextDocument) {
-        super(textDocument, parseAnalysis);
+    constructor(textDocument: TextDocument, toolingDocument: ToolingDocument, metaSchemaDocument?: TextDocument) {
+        super(textDocument, toolingDocument);
         this.metaSchemaDocument = metaSchemaDocument;
     }
 
@@ -22,6 +23,19 @@ export class KsonSchemaDocument extends KsonDocument {
      */
     getMetaSchemaDocument(): TextDocument | undefined {
         return this.metaSchemaDocument;
+    }
+
+    /**
+     * Returns a lazily-created {@link ToolingDocument} for the metaschema
+     * associated with this schema document. Cached for the lifetime of this
+     * document instance.
+     */
+    getMetaSchemaToolingDocument(): ToolingDocument | undefined {
+        if (!this.metaSchemaDocument) return undefined;
+        if (!this._metaSchemaToolingDocument) {
+            this._metaSchemaToolingDocument = KsonTooling.getInstance().parse(this.metaSchemaDocument.getText());
+        }
+        return this._metaSchemaToolingDocument;
     }
 }
 

@@ -56,7 +56,7 @@ class SchemaRefResolutionTest {
             .replace(cursorMarker, "")
 
         // Get the actual resolution result
-        val locations = KsonTooling.resolveRefAtLocation(schema, cursorCoordinates.line, cursorCoordinates.column)
+        val locations = KsonTooling.resolveRefAtLocation(KsonTooling.parse(schema), cursorCoordinates.line, cursorCoordinates.column)
 
         if (expectedRange == null) {
             // No expected range means we expect empty list

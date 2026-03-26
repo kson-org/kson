@@ -1,7 +1,7 @@
 import {describe, it} from 'mocha';
 import * as assert from 'assert';
-import {Kson} from 'kson';
 import {TextDocument} from 'vscode-languageserver-textdocument';
+import {KsonTooling} from 'kson-tooling';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {KsonSchemaDocument, isKsonSchemaDocument} from '../../../core/document/KsonSchemaDocument.js';
 
@@ -24,8 +24,8 @@ describe('KsonSchemaDocument', () => {
 
     function createSchemaDocument(metaSchema?: TextDocument): KsonSchemaDocument {
         const textDoc = TextDocument.create('file:///my-schema.kson', 'kson', 1, schemaContent);
-        const analysis = Kson.getInstance().analyze(schemaContent);
-        return new KsonSchemaDocument(textDoc, analysis, metaSchema);
+        const toolingDoc = KsonTooling.getInstance().parse(schemaContent);
+        return new KsonSchemaDocument(textDoc, toolingDoc, metaSchema);
     }
 
     it('should return the metaschema document', () => {
@@ -50,7 +50,7 @@ describe('KsonSchemaDocument', () => {
         assert.strictEqual(doc.languageId, 'kson');
         assert.strictEqual(doc.version, 1);
         assert.ok(doc.getText().includes('"$schema"'));
-        assert.ok(doc.getAnalysisResult());
+        assert.ok(doc.getToolingDocument());
         assert.ok(doc.getFullDocumentRange());
         assert.ok(doc.lineCount > 0);
     });
@@ -64,17 +64,17 @@ describe('KsonSchemaDocument', () => {
         it('should return false for plain KsonDocument', () => {
             const content = '{ "name": "test" }';
             const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-            const analysis = Kson.getInstance().analyze(content);
-            const doc = new KsonDocument(textDoc, analysis);
+            const toolingDoc = KsonTooling.getInstance().parse(content);
+            const doc = new KsonDocument(textDoc, toolingDoc);
             assert.strictEqual(isKsonSchemaDocument(doc), false);
         });
 
         it('should return false for KsonDocument with schema', () => {
             const content = '{ "name": "test" }';
             const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-            const analysis = Kson.getInstance().analyze(content);
+            const toolingDoc = KsonTooling.getInstance().parse(content);
             const schemaDoc = TextDocument.create('file:///schema.kson', 'kson', 1, '{ "type": "object" }');
-            const doc = new KsonDocument(textDoc, analysis, schemaDoc);
+            const doc = new KsonDocument(textDoc, toolingDoc, schemaDoc);
             assert.strictEqual(isKsonSchemaDocument(doc), false);
         });
     });
@@ -87,8 +87,8 @@ describe('KsonDocument.getSchemaId', () => {
     "type": "object"
 }`;
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const doc = new KsonDocument(textDoc, analysis);
+        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), 'http://json-schema.org/draft-07/schema#');
     });
@@ -96,8 +96,8 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined when no $schema field', () => {
         const content = '{ "type": "object" }';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const doc = new KsonDocument(textDoc, analysis);
+        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);
     });
@@ -105,8 +105,8 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined for non-object document', () => {
         const content = '"just a string"';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const doc = new KsonDocument(textDoc, analysis);
+        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);
     });
@@ -114,25 +114,10 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined when $schema is not a string', () => {
         const content = '{ "$schema": 42 }';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const analysis = Kson.getInstance().analyze(content);
-        const doc = new KsonDocument(textDoc, analysis);
+        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);
     });
 });
 
-describe('KsonDocument.extractSchemaId (static)', () => {
-    it('should extract $schema from analysis', () => {
-        const content = `{ "$schema": "http://json-schema.org/draft-07/schema#" }`;
-        const analysis = Kson.getInstance().analyze(content);
-
-        assert.strictEqual(KsonDocument.extractSchemaId(analysis), 'http://json-schema.org/draft-07/schema#');
-    });
-
-    it('should return undefined for analysis without $schema', () => {
-        const content = '{ "type": "object" }';
-        const analysis = Kson.getInstance().analyze(content);
-
-        assert.strictEqual(KsonDocument.extractSchemaId(analysis), undefined);
-    });
-});

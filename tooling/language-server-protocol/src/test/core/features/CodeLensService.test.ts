@@ -5,7 +5,7 @@ import assert from 'assert';
 import {FormattingStyle} from 'kson'
 import {createKsonDocument, TEST_URI} from '../../TestHelpers.js';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Kson} from 'kson';
+import {KsonTooling} from 'kson-tooling';
 import {KsonDocument} from '../../../core/document/KsonDocument.js';
 
 describe('CodeLensService', () => {
@@ -76,8 +76,8 @@ describe('CodeLensService', () => {
     it('should use the document URI from the provided document', () => {
         const customUri = 'file:///custom/path/doc.kson';
         const textDoc = TextDocument.create(customUri, 'kson', 1, 'key: value');
-        const analysis = Kson.getInstance().analyze('key: value');
-        const document = new KsonDocument(textDoc, analysis);
+        const toolingDoc = KsonTooling.getInstance().parse('key: value');
+        const document = new KsonDocument(textDoc, toolingDoc);
 
         const lenses = service.getCodeLenses(document);
 

@@ -1,14 +1,16 @@
 package org.kson.navigation
 
-import org.kson.KsonCore
+import org.kson.ToolingDocument
+import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
 import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.value.KsonObject
-import org.kson.value.KsonValue
-import org.kson.value.navigation.KsonValueNavigation
+import org.kson.walker.AstNodeWalker
+import org.kson.walker.NodeChildren
+import org.kson.walker.navigateToLocationWithPointer
 
 /**
  * Context information about a token at a specific location.
@@ -22,68 +24,54 @@ private data class TokenContext(
 )
 
 /**
- * Builds a path from the document root to a specific location in a KSON document.
+ * Builds a JSON Pointer path from the document root to a specific cursor
+ * location in a KSON document.
  *
- * This class analyzes a KSON document and position to construct a path
- * (sequence of property names) from the root to the element at the given location.
- * The path is used for schema navigation, IDE auto-completion, and hover information.
+ * Operates entirely on a pre-parsed [ToolingDocument]—no re-parsing is
+ * performed. Token-context analysis uses the document's [ToolingDocument.meaningfulTokens]
+ * (WHITESPACE and COMMENT filtered out), and tree navigation uses the document's
+ * raw AST via [AstNodeWalker] and its navigation extensions.
  *
- * The builder handles several scenarios:
- * - **Invalid documents**: Attempts recovery by inserting empty quotes at the position
- * - **Position after colon**: Adds the property name to target the value being entered
- * - **Position outside token**: Removes the last path element to target the parent
+ * Using the AST directly (rather than [org.kson.value.KsonValue]) means path
+ * building works even on broken documents — error nodes in the AST are treated
+ * as leaves that navigation passes through, while the surrounding tree structure
+ * remains intact.
  *
- * Example usage:
- * ```kotlin
- * val document = "name: John\nage: 30"
- * val location = Coordinates(0, 6)  // Position in "John"
- * val builder = KsonValuePathBuilder(document, location)
- * val path = builder.buildPathToPosition()  // Returns ["name"]
- * ```
+ * The builder handles several cursor-position scenarios:
+ * - **Position after colon**: adds the property name to target the value being entered
+ * - **Position on a property key**: includes the property name in the path (for definition lookups)
+ * - **Position outside token**: removes the last path element to target the parent (for completions)
  *
- * @param document The KSON document string to analyze
- * @param location The position (line and column, zero-based)
- *
- * @see buildJsonPointerToPosition Main method to build the path
- * @see KsonValueNavigation For navigation within parsed KSON values
+ * @param document The pre-parsed KSON document
+ * @param location The cursor position (zero-based line and column)
  */
-class KsonValuePathBuilder(private val document: String, private val location: Coordinates) {
+class KsonValuePathBuilder(
+    private val document: ToolingDocument,
+    private val location: Coordinates
+) {
 
     /**
-     * Builds a path from the document root to the target location.
+     * Builds a JSON Pointer from the document root to the target location.
      *
-     * This method analyzes the document structure and position to determine
-     * the JSON path (sequence of property names) from the root to the element at
-     * the given location. This path is used for schema navigation and IDE features.
-     *
-     * The method handles several edge cases:
-     * - Invalid documents (attempts recovery by inserting quotes)
-     * - Positioned after a colon (targets the value being entered)
-     * - Positioned outside a token (targets the parent element, unless includePropertyKeys is true)
-     *
-     * @param includePropertyKeys If true, keeps the path to the current property even when position is outside token.
-     *                            This is useful for "jump to definition" where we want to navigate to the property's
-     *                            schema definition, not its parent. Default is false for completion behavior.
-     * @return A list of property names representing the path from root to target,
-     *         or null if the path cannot be determined
+     * @param includePropertyKeys If true, keeps the path to the current property even when
+     *   the cursor is outside a token. This is useful for "jump to definition" where we
+     *   want the property's schema definition, not its parent. Default is true.
+     * @return A [JsonPointer] representing the path from root to target,
+     *         or null if the document is completely unparseable
      */
     fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): JsonPointer? {
-        val parsedDocument = KsonCore.parseToAst(document)
+        val rootNode = document.rootAstNode ?: return if (document.content.isBlank()) JsonPointer.ROOT else null
 
-        // Analyze token context at the target location
-        val tokenContext = analyzeTokenContext(parsedDocument.lexedTokens, location)
-
-        // Parse the document, or attempt recovery if it contains syntax errors
-        val documentValue = parsedDocument.ksonValue
-            ?: attemptDocumentRecovery(document, location)
-            ?: return null
+        // Analyze token context using meaningful (non-whitespace) tokens
+        val tokenContext = analyzeTokenContext(document.meaningfulTokens, location)
 
         // Determine the search position: use token start if available, otherwise location
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
-        // Navigate to the target node and build the path in a single traversal
-        val navResult = KsonValueNavigation.navigateToLocationWithPointer(documentValue, searchPosition)
-            ?: return JsonPointer.ROOT
+        // Navigate to the target node and build the path via the AST walker
+        val navResult = AstNodeWalker.navigateToLocationWithPointer(
+            rootNode, searchPosition
+        ) ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
@@ -91,9 +79,9 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             lastToken = tokenContext.lastToken,
             targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
-            includePropertyKeys = includePropertyKeys
-            )
-
+            includePropertyKeys = includePropertyKeys,
+            meaningfulTokens = document.meaningfulTokens
+        )
     }
 
     /**
@@ -101,10 +89,6 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      *
      * Determines which token (if any) is at or before the location,
      * and whether the location falls within that token's bounds.
-     *
-     * @param tokens The list of lexed tokens from the document
-     * @param location The position (line and column, zero-based)
-     * @return Token context information
      */
     private fun analyzeTokenContext(
         tokens: List<Token>,
@@ -117,13 +101,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
 
     /**
      * Finds the last token that starts at or before the location.
-     *
-     * This helps determine what syntactic element is positioned at or after.
      * The EOF token is excluded from consideration.
-     *
-     * @param tokens The list of lexed tokens from the document
-     * @param location The position (line and column, zero-based)
-     * @return The last token before the location, or null if no such token exists
      */
     private fun findLastTokenBeforeLocation(
         tokens: List<Token>,
@@ -133,18 +111,13 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             .dropLast(1)  // Exclude EOF token
             .lastOrNull { token ->
                 val tokenStart = token.lexeme.location.start
-                // Token starts before or at location
                 tokenStart.line < location.line ||
-                    (tokenStart.line == location.line && tokenStart.column <= location.column)
+                        (tokenStart.line == location.line && tokenStart.column <= location.column)
             }
     }
 
     /**
      * Checks if the given position falls within the bounds of a token.
-     *
-     * @param token The token to check, or null
-     * @param position The position to test
-     * @return true if the position is inside the token's location, false otherwise
      */
     private fun isPositionInsideToken(
         token: Token?,
@@ -156,6 +129,49 @@ class KsonValuePathBuilder(private val document: String, private val location: C
     }
 
     /**
+     * Finds the property name from the token stream that precedes a COLON token.
+     *
+     * Walks backwards from the colon to find the nearest UNQUOTED_STRING or
+     * STRING_CONTENT token, which contains the property key text.
+     *
+     * For STRING_CONTENT tokens (quoted keys), escape sequences are processed
+     * to produce the logical property name.
+     */
+    private fun findPropertyNameBeforeColon(colonToken: Token, meaningfulTokens: List<Token>): String? {
+        val colonIndex = meaningfulTokens.indexOf(colonToken)
+        if (colonIndex <= 0) return null
+        // Walk backwards to find the key token (skip STRING_CLOSE_QUOTE if present)
+        for (i in (colonIndex - 1) downTo 0) {
+            val token = meaningfulTokens[i]
+            when (token.tokenType) {
+                TokenType.UNQUOTED_STRING -> return token.lexeme.text
+                TokenType.STRING_CONTENT -> return QuotedStringContentTransformer(
+                    token.lexeme.text,
+                    token.lexeme.location
+                ).processedContent
+
+                TokenType.STRING_CLOSE_QUOTE -> continue // skip quote, look for content
+                else -> return null
+            }
+        }
+        return null
+    }
+
+    /**
+     * Finds the nearest COLON at or before [lastToken] in the meaningful token stream.
+     * Returns the COLON token if [lastToken] is itself a COLON, or if the token
+     * immediately preceding [lastToken] is a COLON (handles the case where the cursor
+     * lands on a COMMA or other delimiter right after an empty value position).
+     */
+    private fun findNearestPrecedingColon(lastToken: Token, meaningfulTokens: List<Token>): Token? {
+        if (lastToken.tokenType == TokenType.COLON) return lastToken
+        val idx = meaningfulTokens.indexOf(lastToken)
+        if (idx <= 0) return null
+        val prev = meaningfulTokens[idx - 1]
+        return if (prev.tokenType == TokenType.COLON) prev else null
+    }
+
+    /**
      * Adjusts the path based on token context.
      *
      * Handles special cases:
@@ -163,37 +179,45 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      * 2. Location on a property key: Add the property name to the path (for definition lookups)
      * 3. Location outside token bounds: Remove the last path element to target the parent
      *    (unless includePropertyKeys is true, in which case keep the path to the property)
-     *
-     * @param pointer The initial [JsonPointer] built from document navigation
-     * @param lastToken The last token before the location
-     * @param targetNode The KsonValue node found at the target location
-     * @param isLocationInsideToken Whether the location is inside the token bounds
-     * @param includePropertyKeys If true, don't drop the last element when location is outside token
-     * @return The adjusted path
      */
     private fun adjustPathForLocationContext(
         pointer: JsonPointer,
         lastToken: Token?,
-        targetNode: KsonValue,
+        targetNode: AstNode,
         isLocationInsideToken: Boolean,
-        includePropertyKeys: Boolean
+        includePropertyKeys: Boolean,
+        meaningfulTokens: List<Token>
     ): JsonPointer {
+        // Check if the nearest preceding colon indicates we're entering a value.
+        // Only apply when the colon falls INSIDE the targetNode's bounds — this
+        // means targetNode is the parent object that owns the colon. If the colon
+        // is outside targetNode, it means navigation already descended through the
+        // property into its value object, and the pointer already contains the
+        // property name. This structural check avoids false negatives from string
+        // comparison of property names (which breaks with repeated names at
+        // different levels, e.g. {"name": {"name": }}).
+        val colonToken = lastToken?.let { findNearestPrecedingColon(it, meaningfulTokens) }
+        val colonPropertyName = colonToken?.let { findPropertyNameBeforeColon(it, meaningfulTokens) }
+        val isAfterColonAtParent = colonPropertyName != null &&
+                AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
+                Location.containsCoordinates(AstNodeWalker.getLocation(targetNode), colonToken.lexeme.location.start)
         val tokens = when {
-            // Location is right after a colon - we're entering a value
-            lastToken?.tokenType == TokenType.COLON -> {
-                val propertyName = (targetNode as KsonObject).propertyLookup.keys.last()
-                pointer.tokens + propertyName
+            isAfterColonAtParent -> {
+                pointer.tokens + colonPropertyName
             }
             // Location is on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) and we're at the parent object
             // This happens when location is in the middle of a property name like "user<caret>name"
             isLocationInsideToken &&
-            (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
-             lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
-             lastToken?.tokenType == TokenType.STRING_CONTENT) &&
-            targetNode is KsonObject &&
-            includePropertyKeys -> {
-                // Extract the property name from the token
-                val propertyName = lastToken.lexeme.text
+                    (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
+                            lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
+                            lastToken?.tokenType == TokenType.STRING_CONTENT) &&
+                    AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
+                    includePropertyKeys -> {
+                // Extract the property name from the token, processing escapes for quoted keys
+                val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)
+                    QuotedStringContentTransformer(lastToken.lexeme.text, lastToken.lexeme.location).processedContent
+                else
+                    lastToken.lexeme.text
                 pointer.tokens + propertyName
             }
             // Location is outside the token - target the parent element (for completions)
@@ -205,47 +229,5 @@ class KsonValuePathBuilder(private val document: String, private val location: C
             else -> pointer.tokens
         }
         return JsonPointer.fromTokens(tokens)
-    }
-
-    /**
-     * Attempts to recover a parseable document from an invalid one.
-     *
-     * When a document contains syntax errors, this method tries to make it valid
-     * by inserting an empty list, `[]`, at the location. This is useful for
-     * providing IDE features even when the user is in the middle of typing.
-     *
-     * For example, if the location is at `{ "key": | }`, this would try parsing
-     * `{ "key": [] }` to enable completions for the value.
-     *
-     * @param document The invalid document string
-     * @param location The position where quotes should be inserted
-     * @return A KsonValue from the recovered document, or null if recovery fails
-     */
-    private fun attemptDocumentRecovery(
-        document: String,
-        location: Coordinates
-    ): KsonValue? {
-        val lines = document.lines().toMutableList()
-
-        // Validate that the target line exists
-        if (location.line >= lines.size) {
-            return null
-        }
-
-        val targetLine = lines[location.line]
-        val safeColumn = (location.column).coerceAtMost(targetLine.length)
-
-        // Insert empty list at the position
-        val recoveredLine = buildString {
-            append(targetLine.take(safeColumn))
-            append("[]")  // Empty string literal
-            append(targetLine.substring(safeColumn))
-        }
-
-        lines[location.line] = recoveredLine
-        val recoveredDocument = lines.joinToString("\n")
-
-        // Attempt to parse the recovered document
-        return KsonCore.parseToAst(recoveredDocument).ksonValue
     }
 }
