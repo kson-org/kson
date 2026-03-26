@@ -9,6 +9,7 @@ import org.kson.parser.TokenType
 import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
+import org.kson.walker.NodeChildren
 import org.kson.walker.navigateToLocationWithPointer
 
 /**
@@ -198,7 +199,7 @@ class KsonValuePathBuilder(
         val colonToken = lastToken?.let { findNearestPrecedingColon(it, meaningfulTokens) }
         val colonPropertyName = colonToken?.let { findPropertyNameBeforeColon(it, meaningfulTokens) }
         val isAfterColonAtParent = colonPropertyName != null &&
-                AstNodeWalker.isObject(targetNode) &&
+                AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                 Location.containsCoordinates(AstNodeWalker.getLocation(targetNode), colonToken.lexeme.location.start)
         val tokens = when {
             isAfterColonAtParent -> {
@@ -210,7 +211,7 @@ class KsonValuePathBuilder(
                     (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
                             lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
                             lastToken?.tokenType == TokenType.STRING_CONTENT) &&
-                    AstNodeWalker.isObject(targetNode) &&
+                    AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                     includePropertyKeys -> {
                 // Extract the property name from the token, processing escapes for quoted keys
                 val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)

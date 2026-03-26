@@ -8,24 +8,10 @@ import org.kson.value.*
  */
 object KsonValueWalker : KsonTreeWalker<KsonValue> {
 
-    override fun isObject(node: KsonValue): Boolean = node is KsonObject
-
-    override fun isArray(node: KsonValue): Boolean = node is KsonList
-
-    override fun getObjectProperties(node: KsonValue): List<TreeProperty<KsonValue>> {
-        return (node as? KsonObject)?.propertyMap?.map { (key, prop) -> TreeProperty(key, prop.propValue) }
-            ?: emptyList()
-    }
-
-    override fun getObjectProperty(node: KsonValue, key: String): KsonValue? =
-        (node as? KsonObject)?.propertyLookup?.get(key)
-
-    override fun getArrayElements(node: KsonValue): List<KsonValue> {
-        return (node as? KsonList)?.elements ?: emptyList()
-    }
-
-    override fun getStringValue(node: KsonValue): String? {
-        return (node as? KsonString)?.value
+    override fun getChildren(node: KsonValue): NodeChildren<KsonValue> = when (node) {
+        is KsonObject -> NodeChildren.Object(node.propertyMap.map { (key, prop) -> TreeProperty(key, prop.propValue) })
+        is KsonList -> NodeChildren.Array(node.elements)
+        else -> NodeChildren.Leaf
     }
 
     override fun getLocation(node: KsonValue): Location = node.location

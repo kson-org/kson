@@ -9,9 +9,8 @@ import org.kson.parser.Location
  * Unlike [KsonValueWalker] (which requires a fully valid [org.kson.value.KsonValue] tree),
  * this walker operates directly on the parser's AST, which includes
  * [AstNodeError] nodes for syntactically broken parts of the document.
- * Error nodes are treated as leaves — [isObject] and [isArray] return false,
- * so navigation algorithms stop descending at them while the surrounding
- * tree structure remains intact.
+ * Error nodes are treated as leaves, so navigation algorithms stop
+ * descending at them while the surrounding tree structure remains intact.
  *
  * This makes the walker suitable for IDE features (path building,
  * completions, hover) that need to work on partially-typed documents
@@ -19,30 +18,18 @@ import org.kson.parser.Location
  */
 object AstNodeWalker : KsonTreeWalker<AstNode> {
 
-    override fun isObject(node: AstNode): Boolean = node is ObjectNode
-
-    override fun isArray(node: AstNode): Boolean = node is ListNode
-
-    override fun getObjectProperties(node: AstNode): List<TreeProperty<AstNode>> {
-        if (node !is ObjectNode) return emptyList()
-        return node.properties.mapNotNull { prop ->
+    override fun getChildren(node: AstNode): NodeChildren<AstNode> = when (node) {
+        is ObjectNode -> NodeChildren.Object(node.properties.mapNotNull { prop ->
             val propImpl = prop as? ObjectPropertyNodeImpl ?: return@mapNotNull null
             val keyImpl = propImpl.key as? ObjectKeyNodeImpl ?: return@mapNotNull null
             val keyString = (keyImpl.key as? StringNodeImpl)?.processedStringContent ?: return@mapNotNull null
             TreeProperty(keyString, propImpl.value as AstNode)
-        }
-    }
-
-    override fun getArrayElements(node: AstNode): List<AstNode> {
-        if (node !is ListNode) return emptyList()
-        return node.elements.mapNotNull { elem ->
+        })
+        is ListNode -> NodeChildren.Array(node.elements.mapNotNull { elem ->
             val elemImpl = elem as? ListElementNodeImpl ?: return@mapNotNull null
             elemImpl.value as AstNode
-        }
-    }
-
-    override fun getStringValue(node: AstNode): String? {
-        return (node as? StringNodeImpl)?.processedStringContent
+        })
+        else -> NodeChildren.Leaf
     }
 
     override fun getLocation(node: AstNode): Location = node.location

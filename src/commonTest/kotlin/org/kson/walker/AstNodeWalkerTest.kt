@@ -25,122 +25,100 @@ class AstNodeWalkerTest {
         (KsonCore.parseToAst(source).ast as KsonRootImpl).rootNode
 
     @Test
-    fun testIsObject() {
+    fun testObjectNode() {
         val node = parseValidAst("name: Alice")
-        assertTrue(walker.isObject(node))
-        assertFalse(walker.isArray(node))
+        assertIs<NodeChildren.Object<AstNode>>(walker.getChildren(node))
     }
 
     @Test
-    fun testIsArray() {
+    fun testArrayNode() {
         val node = parseValidAst("- one\n- two")
-        assertTrue(walker.isArray(node))
-        assertFalse(walker.isObject(node))
+        assertIs<NodeChildren.Array<AstNode>>(walker.getChildren(node))
     }
 
     @Test
-    fun testIsString() {
+    fun testStringValueNode() {
         val obj = parseValidAst("key: hello")
-        val props = walker.getObjectProperties(obj)
-        assertIs<StringNodeImpl>(props[0].value)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertIs<StringNodeImpl>(children.properties[0].value)
     }
 
     @Test
-    fun testIsNumber() {
+    fun testNumberValueNode() {
         val obj = parseValidAst("key: 42")
-        val props = walker.getObjectProperties(obj)
-        assertIs<NumberNode>(props[0].value)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertIs<NumberNode>(children.properties[0].value)
     }
 
     @Test
-    fun testIsBoolean() {
+    fun testBooleanValueNode() {
         val obj = parseValidAst("key: true")
-        val props = walker.getObjectProperties(obj)
-        assertIs<BooleanNode>(props[0].value)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertIs<BooleanNode>(children.properties[0].value)
     }
 
     @Test
-    fun testIsNull() {
+    fun testNullValueNode() {
         val obj = parseValidAst("key: null")
-        val props = walker.getObjectProperties(obj)
-        assertIs<NullNode>(props[0].value)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertIs<NullNode>(children.properties[0].value)
     }
 
     @Test
     fun testGetObjectProperties() {
         val node = parseValidAst("name: Alice\nage: 30")
-        val props = walker.getObjectProperties(node)
-        assertEquals(2, props.size)
-        assertEquals("name", props[0].name)
-        assertEquals("age", props[1].name)
-        assertIs<StringNodeImpl>(props[0].value)
-        assertIs<NumberNode>(props[1].value)
+        val children = walker.getChildren(node)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertEquals(2, children.properties.size)
+        assertEquals("name", children.properties[0].name)
+        assertEquals("age", children.properties[1].name)
+        assertIs<StringNodeImpl>(children.properties[0].value)
+        assertIs<NumberNode>(children.properties[1].value)
     }
 
     @Test
-    fun testGetObjectPropertiesOnNonObject() {
+    fun testArrayNodeIsNotObject() {
         val node = parseValidAst("- one\n- two")
-        assertEquals(emptyList(), walker.getObjectProperties(node))
+        assertIsNot<NodeChildren.Object<AstNode>>(walker.getChildren(node))
     }
 
     @Test
     fun testGetArrayElements() {
         val node = parseValidAst("- one\n- two\n- three")
-        val elements = walker.getArrayElements(node)
+        val children = walker.getChildren(node)
+        assertIs<NodeChildren.Array<AstNode>>(children)
         assertEquals(
             listOf("one", "two", "three"),
-            elements.map { walker.getStringValue(it) }
+            children.elements.map { (it as StringNodeImpl).processedStringContent }
         )
     }
 
     @Test
-    fun testGetArrayElementsOnNonArray() {
+    fun testObjectNodeIsNotArray() {
         val node = parseValidAst("key: value")
-        assertEquals(emptyList(), walker.getArrayElements(node))
-    }
-
-    @Test
-    fun testGetStringValueUnquoted() {
-        val obj = parseValidAst("key: hello")
-        val value = walker.getObjectProperties(obj)[0].value
-        assertEquals("hello", walker.getStringValue(value))
-    }
-
-    @Test
-    fun testGetStringValueQuoted() {
-        val obj = parseValidAst("""key: "hello world"""")
-        val value = walker.getObjectProperties(obj)[0].value
-        assertEquals("hello world", walker.getStringValue(value))
-    }
-
-    @Test
-    fun testGetStringValueOnNonString() {
-        val obj = parseValidAst("key: 42")
-        val value = walker.getObjectProperties(obj)[0].value
-        assertNull(walker.getStringValue(value))
-    }
-
-    @Test
-    fun testGetStringValueWithEscapes() {
-        val obj = parseValidAst("""key: "hello\nworld"""")
-        val value = walker.getObjectProperties(obj)[0].value
-        assertEquals("hello\nworld", walker.getStringValue(value))
+        assertIsNot<NodeChildren.Array<AstNode>>(walker.getChildren(node))
     }
 
     @Test
     fun testQuotedPropertyKey() {
         val obj = parseValidAst(""""my key": value""")
-        val props = walker.getObjectProperties(obj)
-        assertEquals(1, props.size)
-        assertEquals("my key", props[0].name)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertEquals(1, children.properties.size)
+        assertEquals("my key", children.properties[0].name)
     }
 
     @Test
     fun testQuotedPropertyKeyWithEscapes() {
         val obj = parseValidAst(""""key\twith\ttabs": value""")
-        val props = walker.getObjectProperties(obj)
-        assertEquals(1, props.size)
-        assertEquals("key\twith\ttabs", props[0].name)
+        val children = walker.getChildren(obj)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertEquals(1, children.properties.size)
+        assertEquals("key\twith\ttabs", children.properties[0].name)
     }
 
     @Test
@@ -157,11 +135,11 @@ class AstNodeWalkerTest {
         // produces ObjectPropertyNodeError which the walker skips
         val node = parseAst("""{"key": , "other": 42}""")
         assertNotNull(node)
-        assertTrue(walker.isObject(node))
-        val props = walker.getObjectProperties(node)
-        assertEquals(1, props.size)
-        assertEquals("other", props[0].name)
-        assertIs<NumberNode>(props[0].value)
+        val children = walker.getChildren(node)
+        assertIs<NodeChildren.Object<AstNode>>(children)
+        assertEquals(1, children.properties.size)
+        assertEquals("other", children.properties[0].name)
+        assertIs<NumberNode>(children.properties[0].value)
     }
 
     @Test
@@ -169,13 +147,14 @@ class AstNodeWalkerTest {
         // Error inside a nested object — outer structure is intact
         val node = parseAst("""{"outer": {"inner": }}""")
         assertNotNull(node)
-        val outerProps = walker.getObjectProperties(node)
-        assertEquals(1, outerProps.size)
-        assertEquals("outer", outerProps[0].name)
-        // The inner object has an error property, so getObjectProperties returns empty
-        assertTrue(walker.isObject(outerProps[0].value))
-        val innerProps = walker.getObjectProperties(outerProps[0].value)
-        assertEquals(0, innerProps.size)
+        val outerChildren = walker.getChildren(node)
+        assertIs<NodeChildren.Object<AstNode>>(outerChildren)
+        assertEquals(1, outerChildren.properties.size)
+        assertEquals("outer", outerChildren.properties[0].name)
+        // The inner object has an error property, so getChildren returns empty properties
+        val innerChildren = walker.getChildren(outerChildren.properties[0].value)
+        assertIs<NodeChildren.Object<AstNode>>(innerChildren)
+        assertEquals(0, innerChildren.properties.size)
     }
 
     @Test
@@ -187,12 +166,7 @@ class AstNodeWalkerTest {
 
     @Test
     fun testErrorNodeIsLeaf() {
-        // Direct AstNodeError: not an object or array, no children
         val errorNode = AstNodeError(emptyList())
-        assertFalse(walker.isObject(errorNode))
-        assertFalse(walker.isArray(errorNode))
-        assertEquals(emptyList(), walker.getObjectProperties(errorNode))
-        assertEquals(emptyList(), walker.getArrayElements(errorNode))
-        assertNull(walker.getStringValue(errorNode))
+        assertIs<NodeChildren.Leaf>(walker.getChildren(errorNode))
     }
 }

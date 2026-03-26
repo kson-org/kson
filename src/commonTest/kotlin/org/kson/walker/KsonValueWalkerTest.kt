@@ -16,89 +16,68 @@ class KsonValueWalkerTest {
             ?: error("Parse failed")
 
     @Test
-    fun testIsObject() {
+    fun testObjectNode() {
         val value = parse("name: Alice")
-        assertTrue(walker.isObject(value))
-        assertFalse(walker.isArray(value))
+        assertIs<NodeChildren.Object<KsonValue>>(walker.getChildren(value))
     }
 
     @Test
-    fun testIsArray() {
+    fun testArrayNode() {
         val value = parse("- one\n- two")
-        assertTrue(walker.isArray(value))
-        assertFalse(walker.isObject(value))
+        assertIs<NodeChildren.Array<KsonValue>>(walker.getChildren(value))
     }
 
     @Test
     fun testPrimitivesAreLeaves() {
         val value = parse("str: hello\nnum: 42\nbool: true\nnullVal: null")
-        val props = walker.getObjectProperties(value)
-        for ((_, child) in props) {
-            assertFalse(walker.isObject(child))
-            assertFalse(walker.isArray(child))
-            assertEquals(emptyList(), walker.getObjectProperties(child))
-            assertEquals(emptyList(), walker.getArrayElements(child))
+        val children = walker.getChildren(value)
+        assertIs<NodeChildren.Object<KsonValue>>(children)
+        for ((_, child) in children.properties) {
+            assertIs<NodeChildren.Leaf>(walker.getChildren(child))
         }
     }
 
     @Test
     fun testGetObjectProperties() {
         val value = parse("name: Alice\nage: 30")
-        val props = walker.getObjectProperties(value)
-        assertEquals(2, props.size)
-        assertEquals("name", props[0].name)
-        assertEquals("age", props[1].name)
-        assertIs<KsonString>(props[0].value)
-        assertIs<KsonNumber>(props[1].value)
+        val children = walker.getChildren(value)
+        assertIs<NodeChildren.Object<KsonValue>>(children)
+        assertEquals(2, children.properties.size)
+        assertEquals("name", children.properties[0].name)
+        assertEquals("age", children.properties[1].name)
+        assertIs<KsonString>(children.properties[0].value)
+        assertIs<KsonNumber>(children.properties[1].value)
     }
 
     @Test
-    fun testGetObjectPropertiesOnNonObject() {
+    fun testArrayNodeIsNotObject() {
         val value = parse("- one\n- two")
-        assertEquals(emptyList(), walker.getObjectProperties(value))
+        assertIsNot<NodeChildren.Object<KsonValue>>(walker.getChildren(value))
     }
 
     @Test
     fun testGetArrayElements() {
         val value = parse("- one\n- two\n- three")
-        val elements = walker.getArrayElements(value)
+        val children = walker.getChildren(value)
+        assertIs<NodeChildren.Array<KsonValue>>(children)
         assertEquals(
             listOf("one", "two", "three"),
-            elements.map { walker.getStringValue(it) }
+            children.elements.map { (it as KsonString).value }
         )
     }
 
     @Test
-    fun testGetArrayElementsOnNonArray() {
+    fun testObjectNodeIsNotArray() {
         val value = parse("key: value")
-        assertEquals(emptyList(), walker.getArrayElements(value))
-    }
-
-    @Test
-    fun testGetStringValue() {
-        val obj = parse("key: hello") as KsonObject
-        val stringValue = obj.propertyLookup["key"]!!
-        assertEquals("hello", walker.getStringValue(stringValue))
-    }
-
-    @Test
-    fun testGetStringValueOnNonString() {
-        val obj = parse("key: 42") as KsonObject
-        val numValue = obj.propertyLookup["key"]!!
-        assertNull(walker.getStringValue(numValue))
+        assertIsNot<NodeChildren.Array<KsonValue>>(walker.getChildren(value))
     }
 
     @Test
     fun testEmbedBlockIsTreatedAsLeaf() {
         val obj = parse("content: %\n  hello\n%%") as KsonObject
         val embedValue = obj.propertyLookup["content"]!!
-        // EmbedBlock is not an object or array — it's a leaf from the walker's perspective
-        assertFalse(walker.isObject(embedValue))
-        assertFalse(walker.isArray(embedValue))
         assertIs<EmbedBlock>(embedValue)
-        // No children to enumerate
-        assertEquals(emptyList(), walker.getObjectProperties(embedValue))
-        assertEquals(emptyList(), walker.getArrayElements(embedValue))
+        assertIs<NodeChildren.Leaf>(walker.getChildren(embedValue))
     }
 
     @Test

@@ -228,7 +228,7 @@ class TreeNavigationTest {
         )
         assertNotNull(result)
         assertIs<KsonString>(result.value)
-        assertEquals("Alice", walker.getStringValue(result.value))
+        assertEquals("Alice", result.value.value)
         assertEquals(JsonPointer.fromTokens(listOf("person", "name")), result.pointerFromRoot)
     }
 

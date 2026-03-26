@@ -86,22 +86,26 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
             return null
         }
 
-        if (walker.isObject(root)) {
-            for (prop in walker.getObjectProperties(root)) {
-                val childResult = navigateToLocation(
-                    prop.value, targetLocation,
-                    JsonPointer.fromTokens(currentPointer.tokens + prop.name)
-                )
-                if (childResult != null) return childResult
+        when (val children = walker.getChildren(root)) {
+            is NodeChildren.Object -> {
+                for (prop in children.properties) {
+                    val childResult = navigateToLocation(
+                        prop.value, targetLocation,
+                        JsonPointer.fromTokens(currentPointer.tokens + prop.name)
+                    )
+                    if (childResult != null) return childResult
+                }
             }
-        } else if (walker.isArray(root)) {
-            for ((index, child) in walker.getArrayElements(root).withIndex()) {
-                val childResult = navigateToLocation(
-                    child, targetLocation,
-                    JsonPointer.fromTokens(currentPointer.tokens + index.toString())
-                )
-                if (childResult != null) return childResult
+            is NodeChildren.Array -> {
+                for ((index, child) in children.elements.withIndex()) {
+                    val childResult = navigateToLocation(
+                        child, targetLocation,
+                        JsonPointer.fromTokens(currentPointer.tokens + index.toString())
+                    )
+                    if (childResult != null) return childResult
+                }
             }
+            is NodeChildren.Leaf -> { /* no children to descend into */ }
         }
 
         return TreeNavigationResult(root, currentPointer)
@@ -165,51 +169,50 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
         return when (token) {
             is PointerParser.Tokens.Literal -> {
                 currentNodes.mapNotNull { node ->
-                    when {
-                        walker.isObject(node) ->
-                            walker.getObjectProperty(node, token.value)
+                    when (val children = walker.getChildren(node)) {
+                        is NodeChildren.Object ->
+                            children.properties.firstOrNull { it.name == token.value }?.value
 
-                        walker.isArray(node) -> {
+                        is NodeChildren.Array -> {
                             val index = token.value.toIntOrNull()
-                            val elements = walker.getArrayElements(node)
-                            if (index != null && index >= 0 && index < elements.size) {
-                                elements[index]
+                            if (index != null && index >= 0 && index < children.elements.size) {
+                                children.elements[index]
                             } else {
                                 null
                             }
                         }
 
-                        else -> null
+                        is NodeChildren.Leaf -> null
                     }
                 }
             }
 
             is PointerParser.Tokens.Wildcard -> {
                 currentNodes.flatMap { node ->
-                    when {
-                        walker.isObject(node) -> walker.getObjectProperties(node).map { it.value }
-                        walker.isArray(node) -> walker.getArrayElements(node)
-                        else -> emptyList()
+                    when (val children = walker.getChildren(node)) {
+                        is NodeChildren.Object -> children.properties.map { it.value }
+                        is NodeChildren.Array -> children.elements
+                        is NodeChildren.Leaf -> emptyList()
                     }
                 }
             }
 
             is PointerParser.Tokens.GlobPattern -> {
                 currentNodes.flatMap { node ->
-                    when {
-                        walker.isObject(node) -> {
-                            walker.getObjectProperties(node)
+                    when (val children = walker.getChildren(node)) {
+                        is NodeChildren.Object -> {
+                            children.properties
                                 .filter { GlobMatcher.matches(token.pattern, it.name) }
                                 .map { it.value }
                         }
 
-                        walker.isArray(node) -> {
-                            walker.getArrayElements(node).filterIndexed { index, _ ->
+                        is NodeChildren.Array -> {
+                            children.elements.filterIndexed { index, _ ->
                                 GlobMatcher.matches(token.pattern, index.toString())
                             }
                         }
 
-                        else -> emptyList()
+                        is NodeChildren.Leaf -> emptyList()
                     }
                 }
             }
@@ -228,18 +231,20 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
         val result = mutableListOf<N>()
         result.add(node)
 
-        when {
-            walker.isObject(node) -> {
-                for (prop in walker.getObjectProperties(node)) {
+        when (val children = walker.getChildren(node)) {
+            is NodeChildren.Object -> {
+                for (prop in children.properties) {
                     result.addAll(collectAllDescendants(prop.value))
                 }
             }
 
-            walker.isArray(node) -> {
-                for (element in walker.getArrayElements(node)) {
+            is NodeChildren.Array -> {
+                for (element in children.elements) {
                     result.addAll(collectAllDescendants(element))
                 }
             }
+
+            is NodeChildren.Leaf -> { /* nothing */ }
         }
 
         return result

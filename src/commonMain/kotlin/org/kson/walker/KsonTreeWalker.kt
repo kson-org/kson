@@ -11,6 +11,17 @@ import org.kson.parser.Location
 data class TreeProperty<N>(val name: String, val value: N)
 
 /**
+ * The children of a node in a KSON-like tree.
+ *
+ * @param N The node type of the tree
+ */
+sealed class NodeChildren<out N> {
+    class Object<N>(val properties: List<TreeProperty<N>>) : NodeChildren<N>()
+    class Array<N>(val elements: List<N>) : NodeChildren<N>()
+    data object Leaf : NodeChildren<Nothing>()
+}
+
+/**
  * Abstraction for walking JSON-like tree structures.
  *
  * This interface decouples tree-navigation algorithms (JSON Pointer traversal,
@@ -19,8 +30,8 @@ data class TreeProperty<N>(val name: String, val value: N)
  * Generic algorithms that operate on any tree representation are provided as
  * extension functions.
  *
- * Note: [org.kson.value.EmbedBlock] nodes are treated as strings by the walker.
- * They are not objects or arrays from the walker's perspective, even though
+ * Note: [org.kson.value.EmbedBlock] nodes are treated as [NodeChildren.Leaf] by the walker.
+ * They are not an object from the walker's perspective, even though
  * [org.kson.value.EmbedBlock.asKsonObject] can convert them to an object
  * representation. This matches how embed blocks behave in JSON Pointer
  * navigation — they are opaque values, not containers to descend into.
@@ -28,24 +39,9 @@ data class TreeProperty<N>(val name: String, val value: N)
  * @param N The node type of the tree
  */
 interface KsonTreeWalker<N> {
-    fun isObject(node: N): Boolean
-    fun isArray(node: N): Boolean
 
-    /** Returns properties for an object node. Empty if not an object. */
-    fun getObjectProperties(node: N): List<TreeProperty<N>>
-
-    /**
-     * Look up a single property by key. Implementations with O(1) map lookup
-     * should override this; the default falls back to a linear scan of [getObjectProperties].
-     */
-    fun getObjectProperty(node: N, key: String): N? =
-        getObjectProperties(node).firstOrNull { it.name == key }?.value
-
-    /** Returns child elements for an array node. Empty if not an array. */
-    fun getArrayElements(node: N): List<N>
-
-    /** Returns the string value of a string node, or null if not a string. */
-    fun getStringValue(node: N): String?
+    /** Returns the children of [node]: object properties, array elements, or [NodeChildren.Leaf]. */
+    fun getChildren(node: N): NodeChildren<N>
 
     /** Returns the source location (start/end coordinates) of a node. */
     fun getLocation(node: N): Location
