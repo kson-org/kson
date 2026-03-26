@@ -1286,4 +1286,115 @@ class SchemaCompletionLocationTest {
         assertTrue("phoneNumber" !in labels, "Should NOT include 'phoneNumber' (from SMS branch)")
         assertTrue("message" !in labels, "Should NOT include 'message' (from SMS branch)")
     }
+
+    @Test
+    fun testCompletionsInsideDashListWithRefToAnyOf() {
+        val schema = searchExpressionSchema()
+
+        // Cursor inside an and: dash-list array nested in query
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': test
+            query:
+              and:
+                - <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions inside dash-list array item")
+        val labels = completions.map { it.label }
+        assertTrue("field" in labels, "Should include 'field' from SearchTerm, got: $labels")
+        assertTrue("term" in labels, "Should include 'term' from SearchTerm, got: $labels")
+        assertTrue("and" in labels, "Should include 'and' from AndExpression, got: $labels")
+        assertTrue("\$schema" !in labels, "Should NOT include root-level '\$schema'")
+        assertTrue("query" !in labels, "Should NOT include root-level 'query'")
+    }
+
+    @Test
+    fun testNoCompletionsInsideDelimitedListWhenSchemaExpectsObject() {
+        val schema = searchExpressionSchema()
+
+        // Cursor inside a [] delimited list, but schema expects objects (SearchTerm
+        // or AndExpression). The structural mismatch means no branch is compatible.
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': test
+            query:
+              [
+                <caret>
+              ]
+        """.trimIndent())
+
+        assertNotNull(completions)
+        assertTrue(completions.isEmpty(), "Should have no completions when document structure doesn't match schema, got: ${completions.map { it.label }}")
+    }
+
+    @Test
+    fun testCompletionsInsideEmptyDelimitedObject() {
+        // Cursor inside an empty {} — the CURLY_BRACE_L guard should prevent
+        // the path builder from dropping the last path element.
+        val schema = """
+            type: object
+            properties:
+              config:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            config: {<caret>}
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions inside empty delimited object")
+        val labels = completions.map { it.label }
+        assertTrue("name" in labels, "Should include 'name' from config schema, got: $labels")
+        assertTrue("config" !in labels, "Should NOT include 'config' (parent property)")
+    }
+
+    private fun searchExpressionSchema() = $$"""
+        type: object
+        additionalProperties: false
+        properties:
+          '$schema':
+            type: string
+            .
+          query:
+            '$ref': '#/$defs/SearchExpression'
+            .
+          .
+        '$defs':
+          SearchExpression:
+            anyOf:
+              - '$ref': '#/$defs/SearchTerm'
+              - '$ref': '#/$defs/AndExpression'
+              =
+            .
+          SearchTerm:
+            type: object
+            additionalProperties: false
+            properties:
+              field:
+                type: string
+                .
+              term:
+                type: string
+                .
+              .
+            .
+          AndExpression:
+            type: object
+            additionalProperties: false
+            properties:
+              and:
+                type: array
+                items:
+                  '$ref': '#/$defs/SearchExpression'
+                  .
+                .
+              .
+            .
+    """
 }
