@@ -103,9 +103,12 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         documentValue: org.kson.value.KsonValue,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
-        // Get the object to validate against
-        // For completions, we validate the object where we're adding properties
-        val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer) ?: documentValue
+        // Get the value at the pointer location to validate against.
+        // If navigation returns null, the value doesn't exist yet (e.g. the user is about
+        // to type at an empty position). In that case there's nothing to filter against,
+        // so return all expanded schemas.
+        val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer)
+            ?: return candidateSchemas
 
         return candidateSchemas.filter { ref ->
             when (ref.resolutionType) {

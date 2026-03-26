@@ -221,8 +221,14 @@ class KsonValuePathBuilder(
                 pointer.tokens + propertyName
             }
             // Location is outside the token - target the parent element (for completions)
-            // But keep the path as-is for definition lookups
-            !isLocationInsideToken && !includePropertyKeys -> {
+            // But keep the path as-is for definition lookups.
+            // Exception: when lastToken is a container-opening delimiter, the cursor is
+            // inside an empty delimited container — the path already points to the container
+            // and dropping would overshoot to the grandparent.
+            !isLocationInsideToken && !includePropertyKeys
+                    && lastToken?.tokenType != TokenType.SQUARE_BRACKET_L
+                    && lastToken?.tokenType != TokenType.CURLY_BRACE_L
+                    && lastToken?.tokenType != TokenType.ANGLE_BRACKET_L -> {
                 pointer.tokens.dropLast(1)
             }
             // Normal case - return path as-is
