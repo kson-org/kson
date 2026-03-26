@@ -33,7 +33,10 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
 
     @Test
     fun testIllegalCharacterError() {
-        assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS, FATAL_PARSE_ERROR))
+        assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("{key: \\value}", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("[\\value]", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("- \\value", listOf(ILLEGAL_CHARACTERS))
     }
 
     @Test
@@ -70,13 +73,13 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
         assertParserRejectsSource("[,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
         assertParserRejectsSource("{,,}", listOf(EMPTY_COMMAS, EMPTY_COMMAS))
 
-        assertParserRejectsSource("[1,,3]", listOf(EMPTY_COMMAS, FATAL_PARSE_ERROR))
-        assertParserRejectsSource("{one: 1 ,, three: 3}", listOf(EMPTY_COMMAS, FATAL_PARSE_ERROR))
+        assertParserRejectsSource("[1,,3]", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("{one: 1 ,, three: 3}", listOf(EMPTY_COMMAS))
 
-        assertParserRejectsSource("[1,2,3,,,,,,]", listOf(EMPTY_COMMAS, FATAL_PARSE_ERROR))
-        assertParserRejectsSource("{one: 1, two: 2, three: 3,,,,,,}", listOf(EMPTY_COMMAS, FATAL_PARSE_ERROR))
+        assertParserRejectsSource("[1,2,3,,,,,,]", listOf(EMPTY_COMMAS))
+        assertParserRejectsSource("{one: 1, two: 2, three: 3,,,,,,}", listOf(EMPTY_COMMAS))
 
-        assertParserRejectsSource("[,,,, x ,, y ,,,,,,, z ,,,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, FATAL_PARSE_ERROR))
+        assertParserRejectsSource("[,,,, x ,, y ,,,,,,, z ,,,,]", listOf(EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS, EMPTY_COMMAS))
     }
 
     @Test
