@@ -1288,6 +1288,188 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testCompletionsAtValuePositionWithRefToAnyOf() {
+        val schema = searchExpressionSchema()
+
+        // Cursor directly at the value position for query (which $refs to SearchExpression anyOf)
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': test
+            query:
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions at value position with ref to anyOf")
+        val labels = completions.map { it.label }
+        assertTrue("field" in labels, "Should include 'field' from SearchTerm, got: $labels")
+        assertTrue("term" in labels, "Should include 'term' from SearchTerm, got: $labels")
+        assertTrue("and" in labels, "Should include 'and' from AndExpression, got: $labels")
+        assertTrue("\$schema" !in labels, "Should NOT include root-level '\$schema'")
+        assertTrue("query" !in labels, "Should NOT include root-level 'query'")
+    }
+
+    @Test
+    fun testCompletionsAtValuePositionWithRefToAnyOfWithDescription() {
+        // Schema where SearchExpression has description alongside anyOf (like PubMed schema)
+        val schema = $$"""
+            type: object
+            additionalProperties: false
+            properties:
+              '$schema':
+                type: string
+                .
+              query:
+                '$ref': '#/$defs/SearchExpression'
+                description: 'The root of the boolean search expression tree.'
+                .
+              .
+            '$defs':
+              SearchExpression:
+                description: 'A node in the boolean expression tree.'
+                anyOf:
+                  - '$ref': '#/$defs/SearchTerm'
+                  - '$ref': '#/$defs/AndExpression'
+                  - '$ref': '#/$defs/OrExpression'
+                  - '$ref': '#/$defs/NotExpression'
+                    .
+                .
+              SearchTerm:
+                type: object
+                additionalProperties: false
+                required:
+                  - field
+                  - term
+                properties:
+                  field:
+                    type: string
+                    .
+                  term:
+                    type: string
+                    .
+                  exactPhrase:
+                    type: boolean
+                    .
+                  .
+                .
+              AndExpression:
+                type: object
+                additionalProperties: false
+                properties:
+                  and:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/SearchExpression'
+                      .
+                    .
+                  .
+                .
+              OrExpression:
+                type: object
+                additionalProperties: false
+                properties:
+                  or:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/SearchExpression'
+                      .
+                    .
+                  .
+                .
+              NotExpression:
+                type: object
+                additionalProperties: false
+                properties:
+                  not:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/SearchExpression'
+                      .
+                    .
+                  .
+                .
+        """
+
+        // Cursor directly at the value position for query
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': test
+            query:
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions at value position with ref to anyOf (with description)")
+        val labels = completions.map { it.label }
+        assertTrue("field" in labels, "Should include 'field' from SearchTerm, got: $labels")
+        assertTrue("term" in labels, "Should include 'term' from SearchTerm, got: $labels")
+        assertTrue("and" in labels, "Should include 'and' from AndExpression, got: $labels")
+        assertTrue("or" in labels, "Should include 'or' from OrExpression, got: $labels")
+        assertTrue("not" in labels, "Should include 'not' from NotExpression, got: $labels")
+    }
+
+    @Test
+    fun testCompletionsAtValuePositionWithSchemaId() {
+        // Schema with $id set — ensures $ref resolution works when the schema
+        // has a non-URI $id like 'pubmed.schema.kson'
+        val schema = $$"""
+            '$schema': 'http://json-schema.org/draft-07/schema#'
+            '$id': 'pubmed.schema.kson'
+            type: object
+            additionalProperties: false
+            properties:
+              '$schema':
+                type: string
+                .
+              query:
+                '$ref': '#/$defs/SearchExpression'
+                description: 'The root of the boolean search expression tree.'
+                .
+              .
+            '$defs':
+              SearchExpression:
+                description: 'A node in the boolean expression tree.'
+                anyOf:
+                  - '$ref': '#/$defs/SearchTerm'
+                  - '$ref': '#/$defs/AndExpression'
+                    .
+                .
+              SearchTerm:
+                type: object
+                additionalProperties: false
+                properties:
+                  field:
+                    type: string
+                    .
+                  term:
+                    type: string
+                    .
+                  .
+                .
+              AndExpression:
+                type: object
+                additionalProperties: false
+                properties:
+                  and:
+                    type: array
+                    items:
+                      '$ref': '#/$defs/SearchExpression'
+                      .
+                    .
+                  .
+                .
+        """
+
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': 'pubmed.schema.kson'
+            query:
+              <caret>
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions with ${'$'}id set on schema")
+        val labels = completions.map { it.label }
+        assertTrue("field" in labels, "Should include 'field' from SearchTerm, got: $labels")
+        assertTrue("term" in labels, "Should include 'term' from SearchTerm, got: $labels")
+        assertTrue("and" in labels, "Should include 'and' from AndExpression, got: $labels")
+    }
+
+    @Test
     fun testCompletionsInsideDashListWithRefToAnyOf() {
         val schema = searchExpressionSchema()
 
@@ -1314,6 +1496,9 @@ class SchemaCompletionLocationTest {
 
         // Cursor inside a [] delimited list, but schema expects objects (SearchTerm
         // or AndExpression). The structural mismatch means no branch is compatible.
+        // This also exercises the SQUARE_BRACKET_L guard in the path builder: the
+        // path must point at /query (not drop to root), otherwise the filter would
+        // see root-level completions leak through.
         val completions = getCompletionsAtCaret(schema, $$"""
             '$schema': test
             query:
@@ -1324,6 +1509,27 @@ class SchemaCompletionLocationTest {
 
         assertNotNull(completions)
         assertTrue(completions.isEmpty(), "Should have no completions when document structure doesn't match schema, got: ${completions.map { it.label }}")
+    }
+
+    @Test
+    fun testNoCompletionsInsideEmptyDelimitedDashListWhenSchemaExpectsObject() {
+        val schema = searchExpressionSchema()
+
+        // Cursor inside an empty delimited dash-list `<>`, but schema expects
+        // objects (SearchTerm or AndExpression). Exercises the ANGLE_BRACKET_L
+        // guard in the path builder: without it, the pointer would overshoot
+        // to root and root-level properties would leak through as completions.
+        val completions = getCompletionsAtCaret(schema, $$"""
+            '$schema': test
+            query: <<caret>>
+        """.trimIndent())
+
+        assertNotNull(completions)
+        assertTrue(
+            completions.isEmpty(),
+            "Should have no completions: the path must target /query, and array-at-object " +
+                "filters out both anyOf branches. Got: ${completions.map { it.label }}"
+        )
     }
 
     @Test

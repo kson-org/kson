@@ -37,7 +37,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                 }
             } ?: ""
 
-            // Store the root schema at is baseUri
+            // Store the root schema at its baseUri
             idMap[rootBaseUri] = schemaRootValue
 
             // Walk the schema tree to collect all IDs with fully-qualified URIs
@@ -496,21 +496,38 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
          * This works analogously to how url updates in a web browsers: if you are "on" [baseUri] and "click" on
          *   and link with href="[uri]", you will be sent to the uri defined by the returned [RefUriParts]
          *
-         * NOTE: this attempts to implement the rules specified in [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986#section-5)
-         *   but is a little ad-hoc compared to what is there.  If/when bugs creep up with their root cause in this
-         *   method, let's more carefully port the behavior specified there
+         * NOTE: this implements reference transformation from
+         *   [RFC 3986 §5.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2) — including its
+         *   scheme/authority inheritance cases and the
+         *   [§5.2.3](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.3) merge-paths sub-operation.
+         *   It does not yet perform the
+         *   [§5.2.4](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4) remove-dot-segments sub-operation;
+         *   add that when a case needs it.
          */
         fun resolveUri(uri: String, baseUri: String): RefUriParts {
             val uriParts = parseUri(uri)
             val baseUriParts = parseUri(baseUri)
             val origin = uriParts.origin.ifBlank { baseUriParts.origin }
-            val path = if (uriParts.path.startsWith('/')) {
-                uriParts.path
-            } else if (uriParts.path.isNotBlank()) {
-                baseUriParts.path.substringBeforeLast("/") + "/" + uriParts.path.removePrefix("/")
-            }
-            else {
-                baseUriParts.path
+            val path = when {
+                // Absolute-path reference: use as-is.
+                uriParts.path.startsWith('/') -> uriParts.path
+                // Empty reference path: inherit the base path.
+                uriParts.path.isEmpty() -> baseUriParts.path
+                // Relative reference path: merge with base path per RFC 3986 §5.2.3.
+                // If the base has an authority and an empty path, the merged path
+                // starts with "/". Otherwise, replace the last segment of the base
+                // path with the reference path; if the base path has no "/", the
+                // entire base path is discarded.
+                baseUriParts.origin.isNotEmpty() && baseUriParts.path.isEmpty() ->
+                    "/" + uriParts.path
+                else -> {
+                    val lastSlash = baseUriParts.path.lastIndexOf('/')
+                    if (lastSlash < 0) {
+                        uriParts.path
+                    } else {
+                        baseUriParts.path.substring(0, lastSlash + 1) + uriParts.path
+                    }
+                }
             }
             return RefUriParts(origin, path, uriParts.fragment)
         }
