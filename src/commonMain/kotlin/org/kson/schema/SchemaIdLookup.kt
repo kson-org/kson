@@ -30,14 +30,17 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         if (schemaRootValue is KsonObject) {
             val rootBaseUri = schemaRootValue.propertyLookup["\$id"]?.let { idValue ->
                 if (idValue is KsonString) {
-                    idValue.value
+                    // Resolve the $id against the empty base URI so that the
+                    // idMap key is in canonical resolved form, consistent with
+                    // how all other code paths resolve $id values.
+                    resolveUri(idValue.value, "").toString()
                 } else {
                     // this $id is completely invalid
                     null
                 }
             } ?: ""
 
-            // Store the root schema at is baseUri
+            // Store the root schema at its baseUri
             idMap[rootBaseUri] = schemaRootValue
 
             // Walk the schema tree to collect all IDs with fully-qualified URIs

@@ -310,4 +310,22 @@ class SchemaRefResolutionTest {
             }
         """.trimIndent())
     }
+
+    @Test
+    fun testResolveRef_withNonUriSchemaId() {
+        // Schema with a non-URI $id (e.g. a filename) should still resolve refs
+        assertRefResolution($$"""
+            '$id': 'pubmed.schema.kson'
+            type: object
+            properties:
+              query:
+                '$ref': '#/$defs/Data<cursor>'
+                .
+              .
+            '$defs':
+              Data:
+                <target>type: string
+                .</target>
+        """.trimIndent())
+    }
 }
