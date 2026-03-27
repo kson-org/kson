@@ -139,8 +139,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -163,8 +162,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -348,8 +346,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -372,8 +369,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -557,8 +553,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -581,8 +576,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -720,8 +714,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -744,8 +737,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -883,8 +875,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -907,8 +898,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1092,8 +1082,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1116,8 +1105,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1324,8 +1312,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1348,8 +1335,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1519,8 +1505,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1546,8 +1531,7 @@ class SchemaDraft2020_12SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {

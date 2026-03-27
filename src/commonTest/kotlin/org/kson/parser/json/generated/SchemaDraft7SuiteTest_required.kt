@@ -31,10 +31,8 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -63,10 +61,8 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -88,16 +84,13 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -124,10 +117,8 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -154,10 +145,8 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -179,14 +168,12 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     }
                 }
             """,
@@ -205,17 +192,14 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
-                    "required": [
-                    ]
+                    "required": []
                 }
             """,
             true,
@@ -301,8 +285,7 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -354,8 +337,7 @@ class SchemaDraft7SuiteTest_required : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

@@ -23,6 +23,12 @@ tasks {
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
+
+        inputs.dir("src")
+        inputs.dir("tests")
+        inputs.files(copyNativeArtifacts)
+        outputs.file(layout.buildDirectory.file("stamp/test.stamp"))
+        doLast { layout.buildDirectory.file("stamp/test.stamp").get().asFile.apply { parentFile.mkdirs(); writeText("${System.currentTimeMillis()}") } }
     }
 
     val validateReadme by register<Exec>("validateReadme") {
@@ -34,14 +40,26 @@ tasks {
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
+
+        inputs.file("readme.md")
+        inputs.dir("src")
+        inputs.files(copyNativeArtifacts)
+        outputs.file(layout.buildDirectory.file("stamp/validateReadme.stamp"))
+        doLast { layout.buildDirectory.file("stamp/validateReadme.stamp").get().asFile.apply { parentFile.mkdirs(); writeText("${System.currentTimeMillis()}") } }
     }
 
     val typeCheck by register<Exec>("typeCheck") {
+        dependsOn(build)
+
         group = "verification"
         commandLine = "$uvwPath run pyright".split(" ")
         standardOutput = System.out
         errorOutput = System.err
         isIgnoreExitValue = false
+
+        inputs.dir("src")
+        outputs.file(layout.buildDirectory.file("stamp/typeCheck.stamp"))
+        doLast { layout.buildDirectory.file("stamp/typeCheck.stamp").get().asFile.apply { parentFile.mkdirs(); writeText("${System.currentTimeMillis()}") } }
     }
 
     register<Task>("check") {

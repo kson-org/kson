@@ -8,11 +8,15 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
 abstract class PixiExecTask : DefaultTask() {
+    @get:Inject
+    abstract val execOperations: ExecOperations
     @get:Input
     abstract val command: ListProperty<String>
 
@@ -63,7 +67,7 @@ abstract class PixiExecTask : DefaultTask() {
 
         logger.info("Executing: ${fullCommand.joinToString(" ")}")
 
-        return project.exec { spec: ExecSpec ->
+        return execOperations.exec { spec: ExecSpec ->
             if (workingDirectory.isPresent) {
                 spec.workingDir = workingDirectory.get().asFile
             }

@@ -661,8 +661,7 @@ class SchemaDraft2020_12SuiteTest_patternProperties : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

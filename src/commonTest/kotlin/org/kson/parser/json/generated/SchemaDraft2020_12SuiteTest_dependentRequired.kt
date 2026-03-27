@@ -24,8 +24,7 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -229,15 +228,13 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "dependentRequired": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -264,8 +261,7 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "dependentRequired": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -290,8 +286,7 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "dependentRequired": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -310,8 +305,7 @@ class SchemaDraft2020_12SuiteTest_dependentRequired : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
