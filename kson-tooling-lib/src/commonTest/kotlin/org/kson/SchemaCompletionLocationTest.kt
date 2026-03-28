@@ -6,6 +6,7 @@ import org.kson.tooling.KsonTooling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SchemaCompletionLocationTest {
@@ -1646,6 +1647,100 @@ class SchemaCompletionLocationTest {
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }
         assertTrue("params" in labels, "Should include 'params' from allOf if/then branch, got: $labels")
+    }
+
+    @Test
+    fun testOrchestraPatternCompletionsFilterToMatchingParameterModel() {
+        // Minimal reproduction of the orchestra.schema.kson pattern:
+        // - TaskModel has a base "parameters" with additionalProperties: true
+        // - allOf contains if/then blocks mapping integrationJob to specific parameter models
+        // - Parameter models have additionalProperties: false
+        // - Document is nested: pipeline > taskId > parameters
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "TaskModel": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "integrationJob": { "type": "string" },
+                            "parameters": {
+                                "additionalProperties": true,
+                                "type": "object"
+                            }
+                        },
+                        "allOf": [
+                            {
+                                "if": {
+                                    "properties": { "integrationJob": { "const": "RUN_QUERY" } },
+                                    "required": ["integrationJob"]
+                                },
+                                "then": {
+                                    "properties": {
+                                        "parameters": { "${'$'}ref": "#/${'$'}defs/RunQueryParams" }
+                                    }
+                                }
+                            },
+                            {
+                                "if": {
+                                    "properties": { "integrationJob": { "const": "SYNC_JOB" } },
+                                    "required": ["integrationJob"]
+                                },
+                                "then": {
+                                    "properties": {
+                                        "parameters": { "${'$'}ref": "#/${'$'}defs/SyncJobParams" }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "RunQueryParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "statement": { "type": "string", "description": "SQL to execute" }
+                        },
+                        "required": ["statement"]
+                    },
+                    "SyncJobParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "connector_id": { "type": "string", "description": "Connector to sync" }
+                        },
+                        "required": ["connector_id"]
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "pipeline": {
+                        "type": "object",
+                        "additionalProperties": { "${'$'}ref": "#/${'$'}defs/TaskModel" }
+                    }
+                }
+            }
+        """
+
+        // Document: user picked RUN_QUERY and is inside parameters
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "pipeline": {
+                    "myTask": {
+                        "integrationJob": "RUN_QUERY",
+                        "parameters": {
+                            <caret>
+                        }
+                    }
+                }
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+
+        // Should see "statement" from RunQueryParams, NOT "connector_id" from SyncJobParams
+        assertTrue("statement" in labels, "Should include 'statement' from RunQueryParams, got: $labels")
+        assertFalse("connector_id" in labels, "Should NOT include 'connector_id' from SyncJobParams, got: $labels")
     }
 
     private fun searchExpressionSchema() = $$"""

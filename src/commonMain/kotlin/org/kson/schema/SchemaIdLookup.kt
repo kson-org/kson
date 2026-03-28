@@ -1,5 +1,6 @@
 package org.kson.schema
 
+import org.kson.parser.MessageSink
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
@@ -191,6 +192,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      */
     fun navigateByDocumentPointer(
         documentPointer: JsonPointer,
+        documentValue: KsonValue? = null,
     ): List<ResolvedRef> {
         val startingBaseUri = ""
         val documentPathTokens = documentPointer.tokens
@@ -202,6 +204,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         // Track all current schema nodes we're exploring (can branch out due to combinators)
         var currentNodes = listOf(resolveRefIfPresent(schemaRootValue, startingBaseUri))
+        // Track the document value at the current navigation level for if/then evaluation
+        var currentDocumentValue = documentValue
 
         for (token in documentPathTokens) {
             val nextNodes = mutableListOf<ResolvedRef>()
@@ -229,7 +233,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                     navigateArrayItems(node, updatedBaseUri)
                 } else {
                     // Object navigation: go to "properties" wrapper, then the property
-                    navigateObjectProperty(node, token, updatedBaseUri)
+                    navigateObjectProperty(node, token, updatedBaseUri, currentDocumentValue)
                 }
 
                 // Resolve $ref for each navigated node
@@ -242,6 +246,11 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             currentNodes = nextNodes
             if (currentNodes.isEmpty()) {
                 break
+            }
+
+            // Advance document value in parallel with schema navigation
+            currentDocumentValue = currentDocumentValue?.let { docVal ->
+                KsonValueWalker.navigateWithJsonPointer(docVal, JsonPointer.fromTokens(listOf(token)))
             }
         }
 
@@ -368,17 +377,19 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     /**
      * Navigate through if/then/else conditional schemas.
      *
-     * Navigates into both the "then" and "else" sub-schemas (when present),
-     * resolving any $ref in each branch before delegating to the caller's
-     * navigation function.
+     * When [documentValue] is available, evaluates the "if" condition against it
+     * and only includes the matching branch (then or else).  When unavailable,
+     * includes both branches so that all possible schemas are discoverable.
      *
      * @param schemaNode The schema node containing if/then/else
      * @param currentBaseUri The current base URI for $ref resolution
+     * @param documentValue The document value at this schema level, used to evaluate the "if" condition
      * @param recursiveNavigate How to continue navigation within each branch
      */
     private fun navigateThroughConditionals(
         schemaNode: KsonObject,
         currentBaseUri: String,
+        documentValue: KsonValue? = null,
         recursiveNavigate: (schema: KsonObject, baseUri: String) -> List<ResolvedRef>
     ): List<ResolvedRef> {
         val results = mutableListOf<ResolvedRef>()
@@ -389,16 +400,32 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             if (resolved.resolvedValue is KsonObject) {
                 val nestedResults = recursiveNavigate(resolved.resolvedValue, resolved.resolvedValueBaseUri)
                 // Unlike navigateThroughCombinators, we always tag results with the
-                // conditional type.  Combinators need selective tagging because their
-                // branches are validated individually (anyOf/oneOf filtering).
-                // Conditional branches are not yet filtered by evaluating the "if"
-                // condition, so preserving inner resolution types has no benefit today.
+                // conditional type.  This tagging is what SchemaFilteringService uses
+                // to identify branches that need validation-based filtering.
                 results.addAll(nestedResults.map { ref ->
                     ref.copy(resolutionType = resolutionType)
                 })
             }
         }
 
+        // When we have a document value, evaluate the "if" condition to determine
+        // which branch to include.  This is critical when the "if" condition
+        // checks a sibling property that isn't visible from the target property.
+        val ifCondition = schemaNode.propertyLookup["if"]
+        if (documentValue != null && ifCondition != null) {
+            val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), currentBaseUri, this)
+            if (ifSchema != null) {
+                val conditionMatches = ifSchema.isValid(documentValue, MessageSink())
+                if (conditionMatches) {
+                    processConditionalBranch(schemaNode.propertyLookup["then"], SchemaResolutionType.IF_THEN)
+                } else {
+                    processConditionalBranch(schemaNode.propertyLookup["else"], SchemaResolutionType.IF_ELSE)
+                }
+                return results
+            }
+        }
+
+        // No document value or couldn't parse if condition — include both branches
         processConditionalBranch(schemaNode.propertyLookup["then"], SchemaResolutionType.IF_THEN)
         processConditionalBranch(schemaNode.propertyLookup["else"], SchemaResolutionType.IF_ELSE)
 
@@ -423,7 +450,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     private fun navigateObjectProperty(
         schemaNode: KsonObject,
         propertyName: String,
-        currentBaseUri: String
+        currentBaseUri: String,
+        documentValue: KsonValue? = null
     ): List<ResolvedRef> {
         val results = mutableListOf<ResolvedRef>()
 
@@ -454,7 +482,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             results.addAll(navigateThroughCombinators(
                 schemaNode = schemaNode,
                 currentBaseUri = currentBaseUri,
-                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri) },
+                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri, documentValue) },
                 shouldTagWithCombinator = { it in listOf(
                     SchemaResolutionType.DIRECT_PROPERTY,
                     SchemaResolutionType.PATTERN_PROPERTY,
@@ -468,7 +496,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             results.addAll(navigateThroughConditionals(
                 schemaNode = schemaNode,
                 currentBaseUri = currentBaseUri,
-                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri) }
+                documentValue = documentValue,
+                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri, documentValue) }
             ))
         }
 

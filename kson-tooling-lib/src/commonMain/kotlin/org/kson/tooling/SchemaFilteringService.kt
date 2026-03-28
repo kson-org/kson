@@ -22,8 +22,8 @@ import kotlin.js.JsExport
  * Service for filtering schemas based on validation against document content.
  *
  * This service handles the validation-based filtering logic for JSON Schema combinators
- * (oneOf/anyOf/allOf), ensuring that only compatible schemas are used for IDE features
- * like completions, hover info, and jump-to-definition.
+ * (oneOf/anyOf/allOf) and conditionals (if/then/else), ensuring that only compatible
+ * schemas are used for IDE features like completions, hover info, and jump-to-definition.
  *
  * The filtering uses a "soft" validation approach: a schema is included if the existing
  * properties don't contradict it, even if required properties are missing.
@@ -31,16 +31,16 @@ import kotlin.js.JsExport
 class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
 
     /**
-     * Get valid schemas for a document path, applying combinator expansion and filtering.
+     * Get valid schemas for a document path, applying expansion and filtering.
      *
      * This function:
-     * 1. Expands combinator schemas (oneOf/anyOf/allOf) into individual branches
-     * 2. Filters branches based on validation against the current document (for oneOf/anyOf)
+     * 1. Expands combinator schemas (oneOf/anyOf/allOf) and conditionals (if/then/else) into individual branches
+     * 2. Filters branches based on validation against the current document (for oneOf/anyOf/if-then-else)
      * 3. Returns all branches for allOf and direct properties (no filtering needed)
      *
      * @param candidateSchemas The schemas found at the document path
      * @param documentValue The pre-parsed document value, or null if the document
-     *   couldn't be parsed. When null, combinator filtering is skipped and all
+     *   couldn't be parsed. When null, filtering is skipped and all
      *   expanded schemas are returned.
      * @param documentPointer The [JsonPointer] to the location in the document
      * @return List of valid schemas after expansion and filtering
@@ -50,22 +50,16 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         documentValue: KsonValue?,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
-        // Check if we need to filter based on combinators
-        // This includes both schemas directly tagged as combinators AND schemas that contain combinator properties
-        // Note: Only oneOf/anyOf require validation-based filtering.
-        // allOf always includes all branches (no filtering needed).
-        val hasCombinatorsThatRequireValidation = candidateSchemas.any { ref ->
+        val hasBranchesThatRequireValidation = candidateSchemas.any { ref ->
             requiresValidationFiltering(ref)
         }
 
-        // Always expand combinators to get individual branches
+        // Always expand to get individual branches
         val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
 
-        // Filter if needed (for oneOf/anyOf that require validation)
-        return if (hasCombinatorsThatRequireValidation && documentValue != null) {
+        return if (hasBranchesThatRequireValidation && documentValue != null) {
             filterByValidation(expandedSchemas, documentValue, documentPointer)
         } else {
-            // No filtering needed (no combinators, or document unavailable)
             expandedSchemas
         }
     }
@@ -73,25 +67,27 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
     /**
      * Checks if a schema reference requires validation-based filtering.
      *
-     * Only oneOf/anyOf combinators require validation filtering. allOf combinators
-     * always include all branches.
+     * oneOf/anyOf combinators and if/then/else conditionals require validation filtering.
+     * allOf combinators always include all branches (no filtering needed).
      *
      * @param ref The schema reference to check
      * @return true if the schema requires validation filtering
      */
     private fun requiresValidationFiltering(ref: ResolvedRef): Boolean {
-        return ref.resolutionType == SchemaResolutionType.ANY_OF ||
-            ref.resolutionType == SchemaResolutionType.ONE_OF ||
-            (ref.resolvedValue as? KsonObject)?.let { obj ->
-                obj.propertyLookup.containsKey("oneOf") || obj.propertyLookup.containsKey("anyOf")
+        return ref.resolutionType in FILTERABLE_RESOLUTION_TYPES ||
+            (ref.resolvedValue as? org.kson.value.KsonObject)?.let { obj ->
+                obj.propertyLookup.containsKey("oneOf") ||
+                obj.propertyLookup.containsKey("anyOf") ||
+                obj.propertyLookup.containsKey("if")
             } ?: false
     }
 
     /**
      * Filters schemas based on validation against the current document.
      *
-     * For schemas resolved via combinators (anyOf/oneOf), this validates them against
-     * the parent object to ensure only compatible schemas contribute completions.
+     * For schemas resolved via combinators (anyOf/oneOf) or conditionals (if/then/else),
+     * this validates them against the document value to ensure only compatible schemas
+     * contribute completions.
      *
      * This uses a "soft" validation approach: a schema is included if the existing
      * properties don't contradict it, even if required properties are missing.
@@ -113,15 +109,24 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer)
             ?: return candidateSchemas
 
-        return candidateSchemas.filter { ref ->
+        val filtered = candidateSchemas.filter { ref ->
             when (ref.resolutionType) {
-                // For anyOf/oneOf, check if the current document state is compatible
+                // For anyOf/oneOf and if/then/else, check if the current document state is compatible
                 SchemaResolutionType.ANY_OF,
-                SchemaResolutionType.ONE_OF -> isSchemaValidForDocument(ref, targetValue)
+                SchemaResolutionType.ONE_OF,
+                SchemaResolutionType.IF_THEN,
+                SchemaResolutionType.IF_ELSE -> isSchemaValidForDocument(ref, targetValue)
                 // For all other types (direct property, allOf, etc.), include them
                 else -> true
             }
         }
+
+        // If filtering eliminated every filterable branch, the document value likely
+        // doesn't match the expected shape yet (e.g. a list where objects are expected).
+        // Fall back to unfiltered schemas so completions remain available.
+        val filterableBranchesBefore = candidateSchemas.count { isFilterableBranch(it) }
+        val filterableBranchesAfter = filtered.count { isFilterableBranch(it) }
+        return if (filterableBranchesBefore > 0 && filterableBranchesAfter == 0) candidateSchemas else filtered
     }
 
     /**
@@ -183,6 +188,9 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         }
     }
 
+    private fun isFilterableBranch(ref: ResolvedRef): Boolean =
+        ref.resolutionType in FILTERABLE_RESOLUTION_TYPES
+
     companion object {
         /**
          * Error types that should be ignored during validation-based filtering.
@@ -191,6 +199,18 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         private val IGNORABLE_ERROR_TYPES = setOf(
             MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING,
             MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES
+        )
+
+        /**
+         * Resolution types that require validation-based filtering.
+         * These are schema branches where multiple alternatives exist and
+         * only compatible ones should be shown.
+         */
+        private val FILTERABLE_RESOLUTION_TYPES = setOf(
+            SchemaResolutionType.ANY_OF,
+            SchemaResolutionType.ONE_OF,
+            SchemaResolutionType.IF_THEN,
+            SchemaResolutionType.IF_ELSE
         )
     }
 }

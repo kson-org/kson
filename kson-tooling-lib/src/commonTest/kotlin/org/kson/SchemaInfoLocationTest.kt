@@ -520,4 +520,62 @@ class SchemaInfoLocationTest {
         // Should have separator between the two
         assertTrue(hoverInfo.contains("---"), "Expected separator between branches. Got: $hoverInfo")
     }
+
+    @Test
+    fun testGetSchemaInfoAtLocation_ifThenShowsMatchingBranch() {
+        // Hover on a property reached via if/then should show the specific
+        // parameter model, not a generic "any object" schema.
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "DogParams": {
+                        "type": "object",
+                        "title": "Dog Parameters",
+                        "description": "Parameters for dogs",
+                        "additionalProperties": false,
+                        "properties": {
+                            "treats": { "type": "integer", "description": "Number of treats" }
+                        }
+                    },
+                    "CatParams": {
+                        "type": "object",
+                        "title": "Cat Parameters",
+                        "description": "Parameters for cats",
+                        "additionalProperties": false,
+                        "properties": {
+                            "naps": { "type": "integer", "description": "Number of naps" }
+                        }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
+                    },
+                    {
+                        "if": { "properties": { "kind": { "const": "cat" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
+                    }
+                ]
+            }
+        """
+
+        val hoverInfo = getInfoAtCaret(schema, """
+            {
+                "kind": "dog",
+                "<caret>params": {
+                    "treats": 5
+                }
+            }
+        """.trimIndent())
+
+        assertNotNull(hoverInfo, "Should show hover info for params")
+        assertTrue(hoverInfo.contains("Dog Parameters"), "Should show DogParams title, got: $hoverInfo")
+        assertTrue(hoverInfo.contains("Parameters for dogs"), "Should show DogParams description, got: $hoverInfo")
+        assertFalse(hoverInfo.contains("Cat Parameters"), "Should NOT show CatParams, got: $hoverInfo")
+    }
 }
