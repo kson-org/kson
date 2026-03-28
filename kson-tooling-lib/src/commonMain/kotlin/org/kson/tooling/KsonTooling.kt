@@ -49,9 +49,9 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.ksonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
-        val schemaInfos = context.validSchemas.mapNotNull { ref ->
+        val schemaInfos = validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
         }
 
@@ -79,9 +79,9 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
-        return context.validSchemas.map {
+        return validSchemas.map {
             Range(
                 it.resolvedValue.location.start.line,
                 it.resolvedValue.location.start.column,
@@ -159,9 +159,13 @@ object KsonTooling {
     ): List<CompletionItem> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, document.partialKsonValue)
 
-        return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document.ksonValue, documentPointer)
+
+        return SchemaInformation.getCompletions(parsedSchema, documentPointer, validSchemas, document.ksonValue)
     }
 
     /**
@@ -279,40 +283,20 @@ object KsonTooling {
     }
 
     /**
-     * Internal helper data class to hold the result of schema resolution and filtering.
+     * Navigate and filter schemas for a document path.
+     *
+     * Creates a [SchemaIdLookup], navigates to candidate schemas at the pointer,
+     * then filters them based on validation against the document value.
      */
-    private data class ResolvedSchemaContext(
-        val schemaIdLookup: SchemaIdLookup,
-        val validSchemas: List<ResolvedRef>,
-        val parsedDocument: KsonValue?
-    ){
-        companion object {
-            /**
-             * Common helper to navigate and filter schemas based on a document path.
-             *
-             * Encapsulates the repeated pattern of:
-             * 1. Creating a SchemaIdLookup from the pre-parsed schema
-             * 2. Navigating to candidate schemas
-             * 3. Filtering schemas based on validation against the pre-parsed document
-             *
-             * @param parsedSchema The pre-parsed schema value
-             * @param documentValue The pre-parsed document value (may be null for broken documents)
-             * @param documentPointer The [JsonPointer] to navigate to in the schema
-             */
-            fun resolveAndFilterSchemas(
-                parsedSchema: KsonValue,
-                documentValue: KsonValue?,
-                documentPointer: JsonPointer
-            ): ResolvedSchemaContext {
-                val schemaIdLookup = SchemaIdLookup(parsedSchema)
-                val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, documentValue)
-
-                val filteringService = SchemaFilteringService(schemaIdLookup)
-                val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
-
-                return ResolvedSchemaContext(schemaIdLookup, validSchemas, documentValue)
-            }
-        }
+    private fun resolveAndFilterSchemas(
+        parsedSchema: KsonValue,
+        documentValue: KsonValue?,
+        documentPointer: JsonPointer
+    ): List<ResolvedRef> {
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, documentValue)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        return filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
     }
 }
 

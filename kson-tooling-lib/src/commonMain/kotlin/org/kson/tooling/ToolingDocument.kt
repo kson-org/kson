@@ -4,15 +4,11 @@ package org.kson.tooling
 
 import org.kson.CoreCompileConfig
 import org.kson.KsonCore
-import org.kson.ast.AstNode
-import org.kson.ast.KsonRoot
-import org.kson.ast.KsonRootImpl
+import org.kson.ast.*
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.validation.SourceContext
-import org.kson.value.KsonObject
-import org.kson.value.KsonString
-import org.kson.value.KsonValue
+import org.kson.value.*
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -55,6 +51,19 @@ class ToolingDocument internal constructor(val content: String, internal val sou
      */
     internal val rootAstNode: AstNode? get() = (parseResult.ast as? KsonRootImpl)?.rootNode
 
+    /**
+     * Partial [KsonValue] that skips error nodes rather than returning null.
+     *
+     * Falls back to [ksonValue] when available (no errors), otherwise builds a
+     * partial tree from the AST by silently dropping properties/elements that
+     * contain parse errors. This allows IDE features like completion narrowing
+     * to see successfully-parsed sibling values even when the cursor position
+     * has an incomplete value (e.g. `key:` with no value yet).
+     */
+    internal val partialKsonValue: KsonValue? by lazy {
+        ksonValue ?: rootAstNode?.toPartialKsonValue()
+    }
+
     /** Full gap-free token list (includes WHITESPACE and COMMENT). */
     internal val tokens: List<Token> get() = parseResult.lexedTokens
 
@@ -84,5 +93,50 @@ class ToolingDocument internal constructor(val content: String, internal val sou
      */
     internal val meaningfulTokens: List<Token> by lazy {
         parseResult.lexedTokens.filter { it.tokenType !in Lexer.ignoredTokens }
+    }
+}
+
+/**
+ * Partial conversion from AST to [KsonValue], skipping error nodes.
+ *
+ * Unlike [toKsonValue], which throws on any [AstNodeError], this function
+ * silently skips properties/elements that contain errors.  This produces a
+ * partial [KsonValue] that preserves all successfully-parsed siblings—useful
+ * for IDE features like completion narrowing where sibling values need to be
+ * visible even when the cursor position has an incomplete value.
+ *
+ * Returns null only when the node itself is an error (not when children are).
+ */
+private fun AstNode.toPartialKsonValue(): KsonValue? {
+    if (this !is AstNodeImpl) return null
+
+    return when (this) {
+        is AstNodeError -> null
+        is KsonRootImpl -> rootNode.toPartialKsonValue()
+        is ObjectNode -> {
+            val validProperties = properties.mapNotNull { prop ->
+                val propImpl = prop as? ObjectPropertyNodeImpl ?: return@mapNotNull null
+                val propKey = propImpl.key as? ObjectKeyNodeImpl ?: return@mapNotNull null
+                val keyValue = propKey.key.toPartialKsonValue() as? KsonString ?: return@mapNotNull null
+                val propValue = propImpl.value.toPartialKsonValue() ?: return@mapNotNull null
+                keyValue.value to KsonObjectProperty(keyValue, propValue)
+            }
+            KsonObject(validProperties.toMap(), this)
+        }
+        is ListNode -> {
+            val validElements = elements.mapNotNull { elem ->
+                val listElementNode = elem as? ListElementNodeImpl ?: return@mapNotNull null
+                listElementNode.value.toPartialKsonValue()
+            }
+            KsonList(validElements, this)
+        }
+        is EmbedBlockNode -> EmbedBlock(this)
+        is StringNodeImpl -> KsonString(this)
+        is NumberNode -> KsonNumber(this)
+        is TrueNode -> KsonBoolean(this)
+        is FalseNode -> KsonBoolean(this)
+        is NullNode -> KsonNull(this)
+        is KsonValueNodeImpl -> this.toPartialKsonValue()
+        is ObjectKeyNodeImpl, is ObjectPropertyNodeImpl, is ListElementNodeImpl -> null
     }
 }
