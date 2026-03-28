@@ -234,6 +234,7 @@ internal fun InternalKsonValue.extractCompletions(
  *
  * Provides completions for:
  * - Object properties (if type is object)
+ * - Const value (if const is defined)
  * - Enum values (if enum is defined)
  * - Boolean values (if type is boolean)
  * - Null value (if type is null or includes null)
@@ -254,6 +255,19 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     }
 
     val completions = mutableListOf<CompletionItem>()
+
+    // If const exists, offer that single value
+    propertyLookup["const"]?.let { constValue ->
+        completions.add(
+            CompletionItem(
+                label = constValue.formatValueForDisplay(),
+                detail = "const value",
+                documentation = this.extractSchemaInfo(),
+                kind = CompletionKind.VALUE
+            )
+        )
+        return completions
+    }
 
     // If enum exists, offer those values
     (propertyLookup["enum"] as? InternalKsonList)?.let { enumList ->

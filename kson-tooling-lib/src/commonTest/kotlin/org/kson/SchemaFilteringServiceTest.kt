@@ -30,7 +30,7 @@ class SchemaFilteringServiceTest {
         val parsedDocument = KsonCore.parseToAst(document).ksonValue
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, parsedDocument)
         return filteringService.getValidSchemas(candidateSchemas, parsedDocument, documentPointer).map { it.resolvedValue }
     }
 
@@ -271,9 +271,8 @@ class SchemaFilteringServiceTest {
 
     @Test
     fun testGetValidSchemas_withIfThen_filtersIncompatibleConditionalBranches() {
-        // Schema with allOf containing if/then blocks — the orchestra pattern.
-        // The params property is only reachable via if/then (no anyOf fallback),
-        // so this test isolates the if/then filtering behavior.
+        // allOf with if/then blocks that select a $ref based on a sibling property.
+        // params is only reachable via if/then (no anyOf), isolating the filtering.
         val schema = """
             {
                 "${'$'}defs": {

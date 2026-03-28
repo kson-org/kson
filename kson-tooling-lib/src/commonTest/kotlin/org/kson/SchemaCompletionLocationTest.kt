@@ -31,6 +31,69 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testConstValueCompletions() {
+        val schema = """
+            {
+                type: object
+                properties: {
+                    status: {
+                        const: "active"
+                        description: "Always active"
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                status: "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions for const value")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("active"), labels, "Should offer only the const value")
+    }
+
+    @Test
+    fun testIfThenNarrowsConstValueForSiblingProperty() {
+        // if/then narrows a property to a const based on a sibling value
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" },
+                    "breed": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "kind": { "const": "dog" } },
+                            "required": ["kind"]
+                        },
+                        "then": {
+                            "properties": {
+                                "breed": { "const": "labrador" }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "kind": "dog",
+                "breed": "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertTrue("labrador" in labels, "Should include const from matching if/then, got: $labels")
+    }
+
+    @Test
     fun testEnumValueCompletions() {
         val schema = """
             {
@@ -1602,145 +1665,77 @@ class SchemaCompletionLocationTest {
 
     @Test
     fun testAllOfWithIfThenCompletionsIncludeConditionalProperties() {
-        // Test the orchestra.schema.kson pattern: allOf containing if/then blocks
+        // allOf if/then should surface properties from matching branches
         val schema = """
             {
-                "${'$'}defs": {
-                    "DogParams": {
-                        "type": "object",
-                        "properties": {
-                            "treats": { "type": "integer" }
-                        }
-                    }
-                },
                 "type": "object",
-                "properties": {
-                    "kind": { "type": "string" }
-                },
+                "properties": { "kind": { "type": "string" } },
                 "allOf": [
                     {
-                        "if": {
-                            "properties": {
-                                "kind": { "const": "dog" }
-                            }
-                        },
-                        "then": {
-                            "properties": {
-                                "params": {
-                                    "${'$'}ref": "#/${'$'}defs/DogParams"
-                                }
-                            }
-                        }
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "bark": { "type": "boolean" } } }
                     }
                 ]
             }
         """
 
-        // Completions at the root level should include "params" from the allOf if/then branch
         val completions = getCompletionsAtCaret(schema, """
-            {
-                "kind": "dog",
-                <caret>
-            }
+            { "kind": "dog", <caret> }
         """.trimIndent())
 
-        assertNotNull(completions, "Should return completions")
-        val labels = completions.map { it.label }
-        assertTrue("params" in labels, "Should include 'params' from allOf if/then branch, got: $labels")
+        assertNotNull(completions)
+        assertTrue("bark" in completions.map { it.label }, "Should include 'bark' from then branch")
     }
 
     @Test
-    fun testOrchestraPatternCompletionsFilterToMatchingParameterModel() {
-        // Minimal reproduction of the orchestra.schema.kson pattern:
-        // - TaskModel has a base "parameters" with additionalProperties: true
-        // - allOf contains if/then blocks mapping integrationJob to specific parameter models
-        // - Parameter models have additionalProperties: false
-        // - Document is nested: pipeline > taskId > parameters
+    fun testIfThenFiltersNestedPropertyCompletionsBySiblingValue() {
+        // A nested property's completions should be narrowed by if/then evaluation
+        // against a sibling at the parent level.  The base "config" allows any
+        // properties; the if/then narrows to a specific $ref based on "kind".
         val schema = """
             {
                 "${'$'}defs": {
-                    "TaskModel": {
+                    "Item": {
                         "type": "object",
-                        "additionalProperties": false,
                         "properties": {
-                            "integrationJob": { "type": "string" },
-                            "parameters": {
-                                "additionalProperties": true,
-                                "type": "object"
-                            }
+                            "kind": { "type": "string" },
+                            "config": { "additionalProperties": true, "type": "object" }
                         },
                         "allOf": [
                             {
-                                "if": {
-                                    "properties": { "integrationJob": { "const": "RUN_QUERY" } },
-                                    "required": ["integrationJob"]
-                                },
-                                "then": {
-                                    "properties": {
-                                        "parameters": { "${'$'}ref": "#/${'$'}defs/RunQueryParams" }
-                                    }
-                                }
+                                "if": { "properties": { "kind": { "const": "a" } }, "required": ["kind"] },
+                                "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } }
                             },
                             {
-                                "if": {
-                                    "properties": { "integrationJob": { "const": "SYNC_JOB" } },
-                                    "required": ["integrationJob"]
-                                },
-                                "then": {
-                                    "properties": {
-                                        "parameters": { "${'$'}ref": "#/${'$'}defs/SyncJobParams" }
-                                    }
-                                }
+                                "if": { "properties": { "kind": { "const": "b" } }, "required": ["kind"] },
+                                "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } }
                             }
                         ]
                     },
-                    "RunQueryParams": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "statement": { "type": "string", "description": "SQL to execute" }
-                        },
-                        "required": ["statement"]
+                    "ConfigA": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": { "alpha": { "type": "string" } }
                     },
-                    "SyncJobParams": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "connector_id": { "type": "string", "description": "Connector to sync" }
-                        },
-                        "required": ["connector_id"]
+                    "ConfigB": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": { "beta": { "type": "string" } }
                     }
                 },
                 "type": "object",
                 "properties": {
-                    "pipeline": {
-                        "type": "object",
-                        "additionalProperties": { "${'$'}ref": "#/${'$'}defs/TaskModel" }
-                    }
+                    "items": { "type": "object", "additionalProperties": { "${'$'}ref": "#/${'$'}defs/Item" } }
                 }
             }
         """
 
-        // Document: user picked RUN_QUERY and is inside parameters
         val completions = getCompletionsAtCaret(schema, """
-            {
-                "pipeline": {
-                    "myTask": {
-                        "integrationJob": "RUN_QUERY",
-                        "parameters": {
-                            <caret>
-                        }
-                    }
-                }
-            }
+            { "items": { "x": { "kind": "a", "config": { <caret> } } } }
         """.trimIndent())
 
-        assertNotNull(completions, "Should return completions")
+        assertNotNull(completions)
         val labels = completions.map { it.label }
-
-        // Should see "statement" from RunQueryParams, NOT "connector_id" from SyncJobParams
-        assertTrue("statement" in labels, "Should include 'statement' from RunQueryParams, got: $labels")
-        assertFalse("connector_id" in labels, "Should NOT include 'connector_id' from SyncJobParams, got: $labels")
+        assertTrue("alpha" in labels, "Should include 'alpha' from ConfigA, got: $labels")
+        assertFalse("beta" in labels, "Should NOT include 'beta' from ConfigB, got: $labels")
     }
 
     private fun searchExpressionSchema() = $$"""
