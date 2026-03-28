@@ -270,9 +270,65 @@ class SchemaFilteringServiceTest {
     }
 
     @Test
-    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutIncompatibleBranches() {
-        // Document is a list; both branches expect objects. No branch survives —
-        // only the parent (oneOf container) remains.
+    fun testGetValidSchemas_withIfThen_filtersIncompatibleConditionalBranches() {
+        // Schema with allOf containing if/then blocks — the orchestra pattern.
+        // The params property is only reachable via if/then (no anyOf fallback),
+        // so this test isolates the if/then filtering behavior.
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "DogParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "treats": { "type": "integer" }
+                        }
+                    },
+                    "CatParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "naps": { "type": "integer" }
+                        }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
+                    },
+                    {
+                        "if": { "properties": { "kind": { "const": "cat" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val document = """
+            {
+                "kind": "dog",
+                "params": {
+                    "treats": 5
+                }
+            }
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/params"))
+
+        assertEquals(1, validSchemas.size, "Only DogParams should survive filtering")
+
+        val schema0 = validSchemas.single() as org.kson.value.KsonObject
+        val propertyNames = (schema0.propertyLookup["properties"] as? org.kson.value.KsonObject)?.propertyLookup?.keys ?: emptySet()
+        assertTrue("treats" in propertyNames, "DogParams properties should be present, got: $propertyNames")
+    }
+
+    @Test
+    fun testGetValidSchemas_withTypeMismatchAtTarget_fallsBackToAllBranches() {
         val schema = """
             oneOf:
               - type: object
@@ -291,9 +347,6 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        assertEquals(
-            1, validSchemas.size,
-            "Only the parent schema should remain when target type doesn't match any branch"
-        )
+        assertEquals(3, validSchemas.size, "Parent + both oneOf branches should be returned when target type doesn't match any branch")
     }
 }

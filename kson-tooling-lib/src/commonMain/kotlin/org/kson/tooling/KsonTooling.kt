@@ -305,7 +305,7 @@ object KsonTooling {
                 documentPointer: JsonPointer
             ): ResolvedSchemaContext {
                 val schemaIdLookup = SchemaIdLookup(parsedSchema)
-                val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
+                val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, documentValue)
 
                 val filteringService = SchemaFilteringService(schemaIdLookup)
                 val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
