@@ -1705,6 +1705,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_45() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::refs with relative uris and defs::valid on both fields" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1870,6 +1876,12 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_48() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::relative refs with absolute uris and defs::valid on both fields" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

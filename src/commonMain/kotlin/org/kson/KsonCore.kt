@@ -69,7 +69,7 @@ object KsonCore {
             ast = builder.buildTree(messageSink)
 
         } catch (ex: FatalParseException) {
-            println("Fatal parsing error: ${ex.message}")
+            messageSink.error(tokens[0].lexeme.location, MessageType.FATAL_PARSE_ERROR.create(ex.message ?: "Unknown error"))
             return AstParseResult(KsonRootError(tokens), tokens, messageSink)
         }
 

@@ -307,6 +307,71 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefToMalformedDefinitionReportsError() {
+        // A $ref pointing to a definition that is not a valid schema (a number,
+        // where a schema object or boolean is required) must report an error.
+        val schema = """
+            {
+                "definitions": {
+                    "broken": 42
+                },
+                "${'$'}ref": "#/definitions/broken"
+            }
+        """
+        val ksonSource = """
+            key: value
+        """
+        assertKsonSchemaErrors(
+            ksonSource,
+            schema,
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testInvalidRegexInPatternReportsError() {
+        assertSchemaHasValidationErrors(
+            """{"pattern": "*"}""",
+            listOf(MessageType.SCHEMA_INVALID_REGEX)
+        )
+    }
+
+    @Test
+    fun testInvalidRegexInPatternPropertiesReportsError() {
+        assertSchemaHasValidationErrors(
+            """{"patternProperties": {"*": {"type": "string"}}}""",
+            listOf(MessageType.SCHEMA_INVALID_REGEX)
+        )
+    }
+
+    @Test
+    fun testMalformedNotSubSchemaDoesNotSilentlyAccept() {
+        // A "not" with a malformed sub-schema must not silently become permissive.
+        // Schema parse errors are already reported; the validator must not be created
+        // with a null schema that causes it to skip validation entirely.
+        assertSchemaHasValidationErrors(
+            """{"not": 42}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testMalformedIfSubSchemaDoesNotSilentlyAccept() {
+        assertSchemaHasValidationErrors(
+            """{"if": 42, "then": {"type": "string"}}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testMalformedPropertyNamesSubSchemaDoesNotSilentlyAccept() {
+        assertSchemaHasValidationErrors(
+            """{"propertyNames": 42}""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
     fun testRefOnlyWithNoOtherProperties() {
         // Test that $ref alone works without errors
         assertValidObjectSchema(

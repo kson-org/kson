@@ -9,14 +9,18 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
 
+/** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
+data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
+
 class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchema?>?,
-                          private val patternPropertySchemas: Map<KsonString, JsonSchema?>?,
+                          private val compiledPatterns: List<CompiledPatternSchema>?,
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
+
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val objectProperties = node.propertyLookup
         val seenKeys = mutableSetOf<String>()
-        
+
         // First, validate regular properties
         propertySchemas?.forEach { (key, schema) ->
             objectProperties[key.value]?.let { objectProperty ->
@@ -26,18 +30,17 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         }
 
         // Then validate pattern properties - need to check ALL patterns for each property
-        patternPropertySchemas?.let { patterns ->
+        compiledPatterns?.let { patterns ->
             objectProperties.forEach { (propertyName, propertyValue) ->
                 var matchedAnyPattern = false
-                
-                patterns.forEach { (pattern, schema) ->
-                    val patternMatcher = Regex(pattern.value)
-                    if (patternMatcher.containsMatchIn(propertyName)) {
+
+                patterns.forEach { (regex, schema) ->
+                    if (regex.containsMatchIn(propertyName)) {
                         matchedAnyPattern = true
                         schema?.validate(propertyValue, messageSink)
                     }
                 }
-                
+
                 if (matchedAnyPattern) {
                     seenKeys.add(propertyName)
                 }
@@ -64,11 +67,8 @@ data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : Addition
     }
 }
 
-data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema?) : AdditionalPropertiesValidator {
+data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
-        if (schema == null) {
-            return
-        }
         remainingProperties.forEach { (_, property) ->
             schema.validate(property.propValue, messageSink)
         }
