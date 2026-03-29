@@ -332,20 +332,36 @@ enum class MessageType(
     },
     SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Allowed Count", "Actual Count")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Additional items are not allowed"
+            val allowedCount = parsedArgs.getArg("Allowed Count")
+            val actualCount = parsedArgs.getArg("Actual Count")
+            return "Expected at most $allowedCount items, but found $actualCount"
         }
     },
     SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Property Name", "Schema Title")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Additional properties are not allowed"
+            val propertyName = parsedArgs.getArg("Property Name")
+            val schemaTitle = parsedArgs.getArg("Schema Title")
+            val suffix = if (schemaTitle.isNullOrEmpty()) "" else " in $schemaTitle"
+            return "Additional property '$propertyName' is not allowed$suffix"
+        }
+    },
+    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Property Name", "Schema Description")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val propertyName = parsedArgs.getArg("Property Name")
+            val schemaDescription = parsedArgs.getArg("Schema Description")
+            return "Property '$propertyName' must conform to '$schemaDescription'"
         }
     },
     SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
@@ -416,11 +432,12 @@ enum class MessageType(
     },
     SCHEMA_ENUM_VALUE_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return emptyList()
+            return listOf("Allowed Values")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value is not one of the allowed enum values"
+            val allowedValues = parsedArgs.getArg("Allowed Values")
+            return "Value must be one of: $allowedValues"
         }
     },
     SCHEMA_FALSE_SCHEMA_ERROR(MessageSeverity.WARNING) {
@@ -516,7 +533,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
-            return "Schema \"$schemaPropertyName\" array entries must be a strings"
+            return "Schema \"$schemaPropertyName\" array entries must be strings"
         }
     },
     SCHEMA_STRING_REQUIRED(MessageSeverity.WARNING) {
@@ -545,7 +562,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema \"type\" array entries must be a strings"
+            return "Schema \"type\" array entries must be strings"
         }
     },
     SCHEMA_TYPE_TYPE_ERROR(MessageSeverity.WARNING) {
@@ -589,13 +606,15 @@ enum class MessageType(
     },
     SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Expected Types", "Actual Type")
+            return listOf("Property Name", "Expected Types", "Actual Type")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val propertyName = parsedArgs.getArg("Property Name")
             val expectedTypes = parsedArgs.getArg("Expected Types")
             val actualType = parsedArgs.getArg("Actual Type")
-            return "Expected one of: $expectedTypes, but got: $actualType"
+            val prefix = if (propertyName.isNullOrEmpty()) "" else "Property '$propertyName': "
+            return "${prefix}Expected one of: $expectedTypes, but got: $actualType"
         }
     },
     SCHEMA_ARRAY_ITEMS_NOT_UNIQUE(MessageSeverity.WARNING) {
@@ -654,7 +673,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredValue = parsedArgs.getArg("Required Value")
-            return "Value must be exactly equal to '$requiredValue'"
+            return "Value must be exactly equal to $requiredValue"
         }
     },
     SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
@@ -715,7 +734,7 @@ enum class MessageType(
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredBy = parsedArgs.getArg("Required by")
             val missingProperty = parsedArgs.getArg("Missing property")
-            return "Property `$missingProperty' is not provided, but it is required by '$requiredBy'"
+            return "Property '$missingProperty' is not provided, but it is required by '$requiredBy'"
         }
     },
     SCHEMA_DEPENDENCIES_SCHEMA_ERROR(MessageSeverity.WARNING) {
@@ -726,7 +745,7 @@ enum class MessageType(
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredBy = parsedArgs.getArg("Required by")
             val schemaError = parsedArgs.getArg("Schema error")
-            return "Error from '$requiredBy' dependency schema: `$schemaError'"
+            return "Error from '$requiredBy' dependency schema: '$schemaError'"
         }
     },
     OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {

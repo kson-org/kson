@@ -42,7 +42,7 @@ internal fun reportNoSubSchemaMatchErrors(
                     matchAttemptSink.messageSink
                         .loggedMessages()
                         .joinToString(",") {
-                            "'${it.message}'"
+                            "'${it.message}' at ${it.location.start}"
                         } + "]"
         }
 

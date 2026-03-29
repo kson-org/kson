@@ -11,7 +11,8 @@ class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val enumValues = enum.elements
         if (!enumValues.contains(ksonValue)) {
-            messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create())
+            val allowedValues = enumValues.joinToString(", ") { it.toDisplayString() }
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowedValues))
         }
     }
 }
