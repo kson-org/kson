@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>KSON Editor — Iframe Demo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        * { margin: 0; box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background: #fafafa; }
+
+        .layout { display: flex; height: 100vh; }
+        .guide {
+            width: 380px; min-width: 380px;
+            padding: 24px; overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+            background: #fff;
+            display: flex; flex-direction: column;
+        }
+        .guide-content { flex: 1; }
+        .guide h1 { font-size: 1.2em; margin-bottom: 4px; }
+        .guide .subtitle { color: #666; font-size: 0.85em; margin-bottom: 20px; }
+        .guide h2 { font-size: 0.95em; margin: 20px 0 8px; color: #333; }
+        .guide p { font-size: 0.85em; color: #555; line-height: 1.5; margin-bottom: 8px; }
+        .guide pre {
+            background: #f5f5f5; border: 1px solid #e8e8e8; border-radius: 4px;
+            padding: 10px 12px; font-size: 0.8em; overflow-x: auto;
+            line-height: 1.5; margin-bottom: 8px;
+        }
+        .guide code {
+            background: #f0f0f0; padding: 1px 5px; border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .guide pre code { background: none; padding: 0; }
+
+        .try-btn {
+            display: inline-block; margin-bottom: 12px;
+            padding: 4px 12px; font-size: 0.78em;
+            background: #f0f7ff; border: 1px solid #bdd7f5; border-radius: 4px;
+            color: #2563eb; cursor: pointer; font-family: monospace;
+        }
+        .try-btn:hover { background: #dbeafe; }
+        .try-btn:active { background: #bfdbfe; }
+        .try-btn[disabled] { opacity: 0.4; cursor: default; }
+
+        #log {
+            margin-top: 16px; padding: 10px 12px;
+            background: #1e1e1e; color: #d4d4d4; border-radius: 4px;
+            font-family: monospace; font-size: 0.78em; line-height: 1.6;
+            min-height: 100px; max-height: 180px; overflow-y: auto;
+        }
+        #log .log-label { color: #888; }
+        #log .log-value { color: #9cdcfe; }
+        #log .log-event { color: #6a9955; }
+        #log .log-error { color: #f48771; }
+
+        #editor { flex: 1; min-width: 0; }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <div class="guide">
+            <div class="guide-content">
+                <h1>Iframe Demo</h1>
+                <p class="subtitle">
+                    Drop-in embed via a script tag — no npm or bundler required.
+                </p>
+
+                <h2>1. Include the script</h2>
+                <p>
+                    Copy <code>dist-iframe/</code> to your static assets, then
+                    add a single script tag:
+                </p>
+                <pre><code>&lt;script src="kson-editor.js"&gt;&lt;/script&gt;</code></pre>
+
+                <h2>2. Create an editor</h2>
+                <pre><code>const editor = await KsonEditor.create(
+    document.getElementById('editor'),
+    {
+        value: '{ name: "hello" }',
+        schema: {
+            fileExtension: 'kson',
+            schemaContent: mySchema,
+        },
+        onChange(value) {
+            console.log('changed:', value);
+        },
+    },
+);</code></pre>
+
+                <h2>3. Read and write content</h2>
+                <pre><code>editor.getValue();</code></pre>
+                <button class="try-btn" id="btn-get" disabled>Run getValue()</button>
+
+                <pre><code>editor.setValue('{\n  name: "updated"\n}');</code></pre>
+                <button class="try-btn" id="btn-set" disabled>Run setValue()</button>
+
+                <h2>4. Clean up</h2>
+                <pre><code>editor.dispose();</code></pre>
+                <button class="try-btn" id="btn-dispose" disabled>Run dispose()</button>
+
+                <h2>Options</h2>
+                <pre><code>{
+  value?: string,
+  uri?: string,
+  schema?: {
+    fileExtension: string,
+    schemaContent: string,
+  },
+  editorOptions?: Record&lt;string, unknown&gt;,
+  onChange?: (value: string) =&gt; void,
+  baseUrl?: string,
+}</code></pre>
+            </div>
+
+            <div id="log"><span class="log-label">// output appears here</span></div>
+        </div>
+
+        <div id="editor"></div>
+    </div>
+
+    <script src="../../dist-iframe/kson-editor.js"></script>
+    <script>
+        const logEl = document.getElementById('log');
+        let firstLog = true;
+        function log(label, value, cls = 'log-value') {
+            if (firstLog) { logEl.textContent = ''; firstLog = false; }
+            const line = document.createElement('div');
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'log-label';
+            labelSpan.textContent = label + ' ';
+            const valueSpan = document.createElement('span');
+            valueSpan.className = cls;
+            valueSpan.textContent = value;
+            line.append(labelSpan, valueSpan);
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        const schema = JSON.stringify({
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {
+                "name":    { "type": "string",  "description": "Project name" },
+                "version": { "type": "string",  "description": "Semantic version" },
+                "tags":    { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["name", "version"],
+            "additionalProperties": false
+        });
+
+        const btnGet = document.getElementById('btn-get');
+        const btnSet = document.getElementById('btn-set');
+        const btnDispose = document.getElementById('btn-dispose');
+
+        (async () => {
+            log('>', 'KsonEditor.create(container, options)', 'log-label');
+
+            const editor = await KsonEditor.create(
+                document.getElementById('editor'),
+                {
+                    value: '{\n  # Try adding an unknown key to see schema validation\n  name: "my-project"\n  version: "1.0.0"\n  tags: ["demo" "editor"]\n}',
+                    schema: { fileExtension: 'kson', schemaContent: schema },
+                    baseUrl: '../../dist-iframe',
+                    onChange(value) {
+                        log('onChange', value, 'log-event');
+                    },
+                },
+            );
+
+            log('=', 'editor ready', 'log-event');
+            window.editor = editor;
+            btnGet.disabled = false;
+            btnSet.disabled = false;
+            btnDispose.disabled = false;
+
+            btnGet.onclick = () => {
+                log('>', 'editor.getValue()');
+                log('=', editor.getValue());
+            };
+
+            btnSet.onclick = () => {
+                const newValue = '{\n  name: "updated"\n  version: "2.0.0"\n}';
+                log('>', `editor.setValue('...')`, 'log-label');
+                editor.setValue(newValue);
+                log('=', 'done', 'log-event');
+            };
+
+            btnDispose.onclick = () => {
+                log('>', 'editor.dispose()', 'log-label');
+                editor.dispose();
+                log('=', 'disposed', 'log-event');
+                btnGet.disabled = true;
+                btnSet.disabled = true;
+                btnDispose.disabled = true;
+            };
+        })();
+    </script>
+</body>
+
+</html>

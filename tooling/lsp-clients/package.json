@@ -12,12 +12,15 @@
   "scripts": {
     "buildMonaco": "npm run compile && npm run build -w monaco",
     "buildVSCode": "npm run compile && npm run packagePlugin -w vscode",
+    "buildMonacoIframe": "npm run compile && npm run build:iframe -w monaco",
     "buildPlugins": "npm run buildMonaco && npm run buildVSCode",
     "compile": "npm run compile -w shared && npm run compile -w vscode",
     "clean": "npm run clean --workspaces --if-present",
     "test": "npm run compile && npm run test --workspaces --if-present",
     "vscode": "npm run compile && npm run vscode -w vscode",
-    "monaco": "npm run compile && npm run dev -w monaco"
+    "monaco": "npm run compile && npm run dev -w monaco",
+    "demoLibrary": "npm run compile && npm run demo:library -w monaco",
+    "demoIframe": "npm run compile && npm run demo:iframe -w monaco"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
