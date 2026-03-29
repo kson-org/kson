@@ -9,6 +9,7 @@ import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.value.KsonValue
 import org.kson.value.navigation.KsonValueNavigation
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
@@ -24,27 +25,26 @@ object KsonTooling {
     /**
      * Get schema information for a position in a document.
      *
-     * This is a convenience method that finds the KsonValue at the given position
-     * and then retrieves schema information for it.
-     *
-     * Filters schemas based on validation - only returns info from schemas that
-     * are compatible with the existing document properties (for oneOf/anyOf combinators).
+     * Finds the KsonValue at the given position and retrieves schema information
+     * for it. Filters schemas based on validation — only returns info from schemas
+     * compatible with the existing document properties (for oneOf/anyOf combinators).
      * When multiple valid schemas exist, their information is combined with separators.
      *
-     * @param documentRoot The root of the document being edited (KSON string)
-     * @param schemaValue The schema for the document (KSON string)
+     * @param document The pre-parsed document being edited
+     * @param schema The pre-parsed schema for the document
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return Formatted text, or null if no schema info available
      */
     fun getSchemaInfoAtLocation(
-        documentRoot: String,
-        schemaValue: String,
+        document: ToolingDocument,
+        schema: ToolingDocument,
         line: Int,
         column: Int
     ): String? {
-        val documentPointer = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, documentPointer) ?: return null
+        val parsedSchema = schema.ksonValue ?: return null
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition() ?: return null
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Extract schema info from each valid schema
         val schemaInfos = context.validSchemas.mapNotNull { ref ->
@@ -57,26 +57,25 @@ object KsonTooling {
     /**
      * Get schema location for a position in a document.
      *
-     * This is a convenience method that finds the KsonValue at the given position
-     * and then returns its location in the schema document.
+     * Finds the KsonValue at the given position and returns its location in the
+     * schema document. Filters schemas based on validation — only returns locations
+     * for schemas compatible with the existing document properties.
      *
-     * Filters schemas based on validation - only returns locations for schemas that
-     * are compatible with the existing document properties (for oneOf/anyOf combinators).
-     *
-     * @param documentRoot The root of the document being edited (KSON string)
-     * @param schemaValue The schema for the document (KSON string)
+     * @param document The pre-parsed document being edited
+     * @param schema The pre-parsed schema for the document
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return List of Range objects with zero-based coordinates, or empty list if no schema info available
      */
     fun getSchemaLocationAtLocation(
-        documentRoot: String,
-        schemaValue: String,
+        document: ToolingDocument,
+        schema: ToolingDocument,
         line: Int,
         column: Int
     ): List<Range> {
-        val documentPointer = KsonValuePathBuilder( documentRoot, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, documentPointer) ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition() ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         return context.validSchemas.map {
             Range(
@@ -95,18 +94,18 @@ object KsonTooling {
      * and if so, resolves it to the target location within the same schema document.
      * Only internal references (starting with #) are supported.
      *
-     * @param schemaValue The schema document (KSON string)
+     * @param schema The pre-parsed schema document
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return List of Range objects pointing to the referenced schema location(s), or empty list if not a ref or not found
      */
     fun resolveRefAtLocation(
-        schemaValue: String,
+        schema: ToolingDocument,
         line: Int,
         column: Int
     ): List<Range> {
-        val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(schemaValue, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(schema.content, Coordinates(line, column), parsedSchema, schema.tokens).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
         if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
@@ -139,26 +138,138 @@ object KsonTooling {
     /**
      * Get completion suggestions for a position in a document.
      *
-     * This is a convenience method that finds the KsonValue at the given position
-     * and then retrieves completion suggestions based on the schema.
+     * Finds the KsonValue at the given position and retrieves completion
+     * suggestions based on the schema.
      *
-     * @param documentRoot The root of the document being edited (KSON string)
-     * @param schemaValue The schema for the document (KSON string)
+     * @param document The pre-parsed document being edited
+     * @param schema The pre-parsed schema for the document
      * @param line The zero-based line number
      * @param column The zero-based column number
-     * @return List of completion items, or null if no completions available
+     * @return List of completion items, or empty list if no completions available
      */
     fun getCompletionsAtLocation(
-        documentRoot: String,
-        schemaValue: String,
+        document: ToolingDocument,
+        schema: ToolingDocument,
         line: Int,
         column: Int
     ): List<CompletionItem> {
-        val documentPointer = KsonValuePathBuilder(documentRoot, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(schemaValue, documentRoot, documentPointer) ?: return emptyList()
+        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(document.content, Coordinates(line, column), document.ksonValue, document.tokens).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
+        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
         // Get completions from valid schemas, passing the document value to filter out already-filled properties
         return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
+    }
+
+    /**
+     * Parse KSON source into a [ToolingDocument] that can be reused across
+     * multiple tooling operations, avoiding redundant parsing.
+     *
+     * The document is parsed with error tolerance so that partial results
+     * are available even for documents with syntax errors.
+     *
+     * @param content The KSON source text
+     * @return A reusable [ToolingDocument]
+     */
+    fun parse(content: String): ToolingDocument = ToolingDocument(content)
+
+    /**
+     * Get document symbols from a pre-parsed [ToolingDocument].
+     *
+     * @param document The pre-parsed KSON document
+     * @return List of document symbols, or empty list if parsing failed
+     */
+    fun getDocumentSymbols(document: ToolingDocument): List<DocumentSymbol> {
+        return document.documentSymbols
+    }
+
+    /**
+     * Build semantic tokens from a pre-parsed [ToolingDocument].
+     *
+     * @param document The pre-parsed KSON document
+     * @return List of semantic tokens with absolute positions
+     */
+    fun getSemanticTokens(document: ToolingDocument): List<SemanticToken> {
+        return SemanticTokenBuilder.build(document.tokens, document.ast)
+    }
+
+    /**
+     * Get structural ranges (foldable regions) from a pre-parsed [ToolingDocument].
+     *
+     * Identifies multi-line objects, arrays, and embed blocks that can
+     * be collapsed in an editor. Single-line constructs are excluded.
+     *
+     * @param document The pre-parsed KSON document
+     * @return List of structural ranges, each spanning at least two lines
+     */
+    fun getStructuralRanges(document: ToolingDocument): List<StructuralRange> {
+        return FoldingRangeBuilder.build(document.tokens)
+    }
+
+    /**
+     * Get enclosing ranges for a cursor position in a pre-parsed [ToolingDocument].
+     *
+     * Returns a list of ranges from innermost to outermost that contain
+     * the cursor position. Used for smart expand/shrink selection.
+     * Includes the full-document range as the outermost entry.
+     *
+     * @param document The pre-parsed KSON document
+     * @param line Zero-based line number
+     * @param column Zero-based column number
+     * @return List of ranges from innermost to outermost, deduplicated,
+     *         with the full-document range as the last element
+     */
+    fun getEnclosingRanges(document: ToolingDocument, line: Int, column: Int): List<Range> {
+        val ksonValue = document.ksonValue
+        val ancestors = if (ksonValue != null) {
+            SelectionRangeBuilder.build(ksonValue, line, column).toMutableList()
+        } else {
+            mutableListOf()
+        }
+        // The lexer always produces at least an EOF token
+        val eof = document.tokens.last()
+        val documentRange = Range(0, 0, eof.lexeme.location.end.line, eof.lexeme.location.end.column)
+        if (ancestors.lastOrNull() != documentRange) {
+            ancestors.add(documentRange)
+        }
+        return ancestors
+    }
+
+    /**
+     * Validate a KSON document and return diagnostic messages.
+     *
+     * This method does its own strict parse (without error tolerance) to
+     * produce accurate error messages, so it accepts raw content rather
+     * than a [ToolingDocument].
+     *
+     * If [schemaContent] is provided, the document is validated against the schema.
+     * Schema validation includes both parse errors and schema violations.
+     * If no schema is provided (or it fails to parse), only parse errors are returned.
+     *
+     * @param content The KSON source text
+     * @param schemaContent Optional schema document as KSON source text
+     * @return List of diagnostic messages
+     */
+    fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
+        return DiagnosticBuilder.build(content, schemaContent)
+    }
+
+    /**
+     * Get sibling key ranges for a cursor position in a pre-parsed [ToolingDocument].
+     *
+     * If the cursor is on a property key, returns the selection ranges of all
+     * sibling keys within the same parent object. Returns an empty list if the
+     * cursor is not on a key.
+     *
+     * @param document The pre-parsed KSON document
+     * @param line Zero-based line number
+     * @param column Zero-based column number
+     * @return List of ranges for sibling key symbols
+     */
+    fun getSiblingKeys(document: ToolingDocument, line: Int, column: Int): List<Range> {
+        val symbols = document.documentSymbols
+        if (symbols.isEmpty()) return emptyList()
+        return SiblingKeyBuilder.build(symbols, line, column)
     }
 
     /**
@@ -171,34 +282,29 @@ object KsonTooling {
     ){
         companion object {
             /**
-             * Common helper to parse, navigate, and filter schemas based on a document path.
+             * Common helper to navigate and filter schemas based on a document path.
              *
-             * This method encapsulates the repeated pattern of:
-             * 1. Parsing the schema
-             * 2. Creating a SchemaIdLookup
-             * 3. Navigating to candidate schemas
-             * 4. Filtering schemas based on validation
+             * Encapsulates the repeated pattern of:
+             * 1. Creating a SchemaIdLookup from the pre-parsed schema
+             * 2. Navigating to candidate schemas
+             * 3. Filtering schemas based on validation against the pre-parsed document
              *
-             * @param schemaValue The schema document (KSON string)
-             * @param documentRoot The document being edited (KSON string)
+             * @param parsedSchema The pre-parsed schema value
+             * @param documentValue The pre-parsed document value (may be null for broken documents)
              * @param documentPointer The [JsonPointer] to navigate to in the schema
-             * @return ResolvedSchemaContext containing the parsed schema, lookup, filtered schemas, and parsed document, or null if parsing fails
              */
             fun resolveAndFilterSchemas(
-                schemaValue: String,
-                documentRoot: String,
+                parsedSchema: org.kson.value.KsonValue,
+                documentValue: org.kson.value.KsonValue?,
                 documentPointer: JsonPointer
-            ): ResolvedSchemaContext? {
-                val parsedSchema = KsonCore.parseToAst(schemaValue).ksonValue ?: return null
+            ): ResolvedSchemaContext {
                 val schemaIdLookup = SchemaIdLookup(parsedSchema)
                 val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
 
                 val filteringService = SchemaFilteringService(schemaIdLookup)
-                val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentRoot, documentPointer)
+                val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
 
-                val parsedDocument = KsonCore.parseToAst(documentRoot).ksonValue
-
-                return ResolvedSchemaContext( schemaIdLookup, validSchemas, parsedDocument)
+                return ResolvedSchemaContext(schemaIdLookup, validSchemas, documentValue)
             }
         }
     }
@@ -230,4 +336,87 @@ enum class CompletionKind {
  * @param endLine line where range ends
  * @param endColumn column where range ends
  */
-class Range(val startLine: Int, val startColumn: Int, val  endLine: Int, val endColumn: Int)
+data class Range(val startLine: Int, val startColumn: Int, val endLine: Int, val endColumn: Int)
+
+internal fun KsonValue.toRange(): Range = Range(
+    location.start.line, location.start.column,
+    location.end.line, location.end.column
+)
+
+/**
+ * Represents a document symbol for the IDE outline view.
+ */
+data class DocumentSymbol(
+    val name: String,
+    val kind: DocumentSymbolKind,
+    val range: Range,
+    val selectionRange: Range,
+    val detail: String?,
+    val children: List<DocumentSymbol>
+)
+
+/**
+ * Kind of a document symbol. Domain-level classification of KSON values.
+ */
+enum class DocumentSymbolKind {
+    OBJECT,
+    ARRAY,
+    STRING,
+    NUMBER,
+    BOOLEAN,
+    NULL,
+    KEY,
+    EMBED
+}
+
+/**
+ * Represents a semantic token with absolute position.
+ */
+data class SemanticToken(
+    val line: Int,
+    val column: Int,
+    val length: Int,
+    val tokenType: SemanticTokenKind
+)
+
+/**
+ * Kind of a semantic token. Domain-level classification of KSON tokens.
+ */
+enum class SemanticTokenKind {
+    STRING,
+    KEY,
+    NUMBER,
+    KEYWORD,
+    OPERATOR,
+    COMMENT,
+    EMBED_TAG,
+    EMBED_CONTENT,
+    EMBED_DELIM
+}
+
+/**
+ * A structural range representing a foldable region in a KSON document.
+ */
+data class StructuralRange(val startLine: Int, val endLine: Int, val kind: StructuralRangeKind)
+
+/**
+ * Kind of structural range.
+ */
+enum class StructuralRangeKind {
+    OBJECT,
+    ARRAY,
+    EMBED
+}
+
+/**
+ * A diagnostic message from document validation.
+ */
+data class DiagnosticMessage(val message: String, val severity: DiagnosticSeverity, val range: Range)
+
+/**
+ * Severity of a diagnostic message.
+ */
+enum class DiagnosticSeverity {
+    ERROR,
+    WARNING
+}

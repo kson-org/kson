@@ -35,13 +35,13 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * 3. Returns all branches for allOf and direct properties (no filtering needed)
      *
      * @param candidateSchemas The schemas found at the document path
-     * @param documentRoot The document being edited (KSON string)
+     * @param documentValue The pre-parsed document value, or null if the document has errors
      * @param documentPointer The [JsonPointer] to the location in the document
      * @return List of valid schemas after expansion and filtering
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
-        documentRoot: String,
+        documentValue: org.kson.value.KsonValue?,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Check if we need to filter based on combinators
@@ -56,17 +56,10 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
 
         // Filter if needed (for oneOf/anyOf that require validation)
-        return if (hasCombinatorsThatRequireValidation) {
-            // Parse the document for validation
-            val documentValue = KsonCore.parseToAst(documentRoot).ksonValue
-            if (documentValue != null) {
-                filterByValidation(expandedSchemas, documentValue, documentPointer)
-            } else {
-                // If document doesn't parse, fall back to unfiltered schemas
-                expandedSchemas
-            }
+        return if (hasCombinatorsThatRequireValidation && documentValue != null) {
+            filterByValidation(expandedSchemas, documentValue, documentPointer)
         } else {
-            // No filtering needed, use all expanded schemas
+            // No filtering needed, or document didn't parse — use all expanded schemas
             expandedSchemas
         }
     }

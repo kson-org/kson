@@ -79,7 +79,7 @@ describe('KsonTextDocumentService', () => {
             const result = await connection.requestSemanticTokens(TEST_URI);
 
             assert.ok(result, "Result should not be null");
-            assert.ok((result as any).data.length > 0, "Should have semantic token data");
+            assert.strictEqual((result as any).data.length, 25, "Should have 5 tokens at 5 ints each (key, operator, open quote, string content, close quote)");
         });
 
         it('should return empty data when document is not found', async () => {
@@ -93,8 +93,9 @@ describe('KsonTextDocumentService', () => {
             openDocument('name: "value" extra');
             const result = await connection.requestDiagnostics(TEST_URI) as FullDocumentDiagnosticReport;
 
-            assert.ok(result.items.length > 0, "Should have diagnostic items");
+            assert.strictEqual(result.items.length, 1, "Should have exactly 1 diagnostic for trailing token");
             assert.strictEqual(result.items[0].severity, DiagnosticSeverity.Error);
+            assert.strictEqual(result.items[0].source, 'kson');
         });
 
         it('should return empty items when document is not found', async () => {
@@ -177,6 +178,7 @@ describe('KsonTextDocumentService', () => {
             openDocument('{ name: "test", age: 30 }');
             const result = await connection.requestDocumentHighlight(TEST_URI, pos(0, 3));
             assert.ok(Array.isArray(result), "Should return an array");
+            assert.strictEqual(result.length, 2, "Should highlight both sibling keys (name and age)");
         });
     });
 
@@ -188,9 +190,130 @@ describe('KsonTextDocumentService', () => {
 
         it('should return symbols for a document', async () => {
             openDocument('{ name: "test", age: 30 }');
-            const result = await connection.requestDocumentSymbol(TEST_URI);
+            const result = await connection.requestDocumentSymbol(TEST_URI) as any[];
             assert.ok(result, "Should return symbols");
-            assert.ok((result as any[]).length > 0, "Should have at least one symbol");
+            assert.strictEqual(result.length, 1, "Should have one root object symbol");
+            assert.strictEqual(result[0].children.length, 2, "Root object should have name and age children");
         });
+    });
+
+    describe('Folding Ranges', () => {
+        it('should return empty array when document is not found', async () => {
+            const result = await connection.requestFoldingRanges('file:///nonexistent.kson');
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return folding ranges for multi-line object', async () => {
+            openDocument('{\n  name: "test"\n  age: 30\n}');
+            const result = await connection.requestFoldingRanges(TEST_URI) as any[];
+            assert.strictEqual(result.length, 1, "Should have one folding range for the object");
+            assert.strictEqual(result[0].startLine, 0);
+            assert.strictEqual(result[0].endLine, 3);
+        });
+    });
+
+    describe('Selection Ranges', () => {
+        it('should return empty array when document is not found', async () => {
+            const result = await connection.requestSelectionRanges('file:///nonexistent.kson', [pos(0, 0)]);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return selection ranges for a document', async () => {
+            openDocument('{ name: "test" }');
+            const result = await connection.requestSelectionRanges(TEST_URI, [pos(0, 3)]) as any[];
+            assert.strictEqual(result.length, 1, "Should have one selection range per position");
+            assert.ok(result[0].range, "Selection range should have a range");
+        });
+    });
+
+    describe('Error Handling', () => {
+        // Monkey-patch a service to throw, verify the handler catches and returns a safe default.
+        function breakService(serviceName: string) {
+            const svc = (service as any)[serviceName];
+            for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(svc))) {
+                if (typeof svc[key] === 'function' && key !== 'constructor') {
+                    svc[key] = () => { throw new Error('test error'); };
+                }
+            }
+        }
+
+        it('should return {data: []} when semanticTokensService throws', async () => {
+            openDocument('name: "value"');
+            breakService('semanticTokensService');
+            const result = await connection.requestSemanticTokens(TEST_URI);
+            assert.deepStrictEqual(result, {data: []});
+        });
+
+        it('should return [] when formattingService throws', async () => {
+            openDocument('name: "value"');
+            breakService('formattingService');
+            const result = await connection.requestFormatting(TEST_URI);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return empty diagnostic report when diagnosticService throws', async () => {
+            openDocument('name: "value"');
+            breakService('diagnosticService');
+            const result = await connection.requestDiagnostics(TEST_URI) as FullDocumentDiagnosticReport;
+            assert.strictEqual(result.kind, 'full');
+            assert.strictEqual(result.items.length, 0);
+        });
+
+        it('should return [] when codeLensService throws', async () => {
+            openDocument('name: "value"');
+            breakService('codeLensService');
+            const result = await connection.requestCodeLens(TEST_URI);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return [] when documentHighlightService throws', async () => {
+            openDocument('{ name: "test" }');
+            breakService('documentHighlightService');
+            const result = await connection.requestDocumentHighlight(TEST_URI, pos(0, 3));
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return [] when documentSymbolService throws', async () => {
+            openDocument('{ name: "test" }');
+            breakService('documentSymbolService');
+            const result = await connection.requestDocumentSymbol(TEST_URI);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return null when hoverService throws', async () => {
+            openDocument('name: "value"');
+            breakService('hoverService');
+            const result = await connection.requestHover(TEST_URI, pos(0, 0));
+            assert.strictEqual(result, null);
+        });
+
+        it('should return null when completionService throws', async () => {
+            openDocument('name: "value"');
+            breakService('completionService');
+            const result = await connection.requestCompletion(TEST_URI, pos(0, 0));
+            assert.strictEqual(result, null);
+        });
+
+        it('should return null when definitionService throws', async () => {
+            openDocument('name: "value"');
+            breakService('definitionService');
+            const result = await connection.requestDefinition(TEST_URI, pos(0, 0));
+            assert.strictEqual(result, null);
+        });
+
+        it('should return [] when foldingRangeService throws', async () => {
+            openDocument('{\n  name: "test"\n}');
+            breakService('foldingRangeService');
+            const result = await connection.requestFoldingRanges(TEST_URI);
+            assert.deepStrictEqual(result, []);
+        });
+
+        it('should return [] when selectionRangeService throws', async () => {
+            openDocument('{ name: "test" }');
+            breakService('selectionRangeService');
+            const result = await connection.requestSelectionRanges(TEST_URI, [pos(0, 3)]);
+            assert.deepStrictEqual(result, []);
+        });
+
     });
 });

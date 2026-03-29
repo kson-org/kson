@@ -2,6 +2,7 @@ package org.kson.navigation
 
 import org.kson.KsonCore
 import org.kson.parser.Coordinates
+import org.kson.parser.Lexer
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
@@ -41,13 +42,28 @@ private data class TokenContext(
  * val path = builder.buildPathToPosition()  // Returns ["name"]
  * ```
  *
- * @param document The KSON document string to analyze
+ * @param document The KSON document string, used for recovery when the document
+ *        cannot be parsed (inserts empty quotes at the cursor position)
  * @param location The position (line and column, zero-based)
+ * @param preParsedValue Optional pre-parsed [KsonValue] for AST navigation.
+ *        Falls back to recovery when null.
+ * @param tokens Pre-lexed tokens from a [org.kson.ToolingDocument]. WHITESPACE and
+ *        COMMENT tokens from gap-free lexing are filtered out automatically. When null,
+ *        falls back to a strict parse for token context (backward compatibility).
  *
  * @see buildJsonPointerToPosition Main method to build the path
  * @see KsonValueNavigation For navigation within parsed KSON values
  */
-class KsonValuePathBuilder(private val document: String, private val location: Coordinates) {
+class KsonValuePathBuilder(
+    private val document: String,
+    private val location: Coordinates,
+    private val preParsedValue: KsonValue? = null,
+    tokens: List<Token>? = null
+) {
+
+    private val filteredTokens: List<Token>? = tokens?.filter {
+        !Lexer.ignoredTokens.contains(it.tokenType)
+    }
 
     /**
      * Builds a path from the document root to the target location.
@@ -68,32 +84,39 @@ class KsonValuePathBuilder(private val document: String, private val location: C
      *         or null if the path cannot be determined
      */
     fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): JsonPointer? {
-        val parsedDocument = KsonCore.parseToAst(document)
+        // Resolve tokens and a fallback document value. When pre-lexed tokens
+        // are available we use them directly; otherwise fall back to a strict
+        // parse which also provides a fallback document value.
+        val resolvedTokens: List<Token>
+        val fallbackValue: KsonValue?
+        if (filteredTokens != null) {
+            resolvedTokens = filteredTokens
+            fallbackValue = null
+        } else {
+            val strictParse = KsonCore.parseToAst(document)
+            resolvedTokens = strictParse.lexedTokens
+            fallbackValue = strictParse.ksonValue
+        }
 
-        // Analyze token context at the target location
-        val tokenContext = analyzeTokenContext(parsedDocument.lexedTokens, location)
+        val tokenContext = analyzeTokenContext(resolvedTokens, location)
 
-        // Parse the document, or attempt recovery if it contains syntax errors
-        val documentValue = parsedDocument.ksonValue
+        val documentValue = preParsedValue
+            ?: fallbackValue
             ?: attemptDocumentRecovery(document, location)
             ?: return null
 
-        // Determine the search position: use token start if available, otherwise location
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
 
-        // Navigate to the target node and build the path in a single traversal
         val navResult = KsonValueNavigation.navigateToLocationWithPointer(documentValue, searchPosition)
             ?: return JsonPointer.ROOT
 
-        // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
             pointer = navResult.pointerFromRoot,
             lastToken = tokenContext.lastToken,
             targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys
-            )
-
+        )
     }
 
     /**
@@ -238,7 +261,7 @@ class KsonValuePathBuilder(private val document: String, private val location: C
         // Insert empty list at the position
         val recoveredLine = buildString {
             append(targetLine.take(safeColumn))
-            append("[]")  // Empty string literal
+            append("[]")  // Empty list literal
             append(targetLine.substring(safeColumn))
         }
 

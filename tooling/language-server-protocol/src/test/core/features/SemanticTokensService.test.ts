@@ -3,6 +3,7 @@ import assert from "assert"
 import {SemanticTokenTypes} from 'vscode-languageserver';
 import {KSON_LEGEND, SemanticTokensService} from '../../../core/features/SemanticTokensService';
 import {createKsonDocument} from '../../TestHelpers.js';
+import {KsonTooling} from 'kson-tooling';
 
 describe('KSON Semantic Tokens', () => {
     interface DecodedToken {
@@ -21,7 +22,7 @@ describe('KSON Semantic Tokens', () => {
 
     function assertSemanticTokens(text: string, expectedTokens: DecodedToken[]): void {
         const documentEntry = createKsonDocument(text);
-        const result = semanticTokensService.getSemanticTokens(documentEntry);
+        const result = semanticTokensService.getSemanticTokens(documentEntry.getToolingDocument());
 
         // Convert the encoded tokens to decoded format for comparison
         const tokens = decodeTokens(result.data);
@@ -31,7 +32,7 @@ describe('KSON Semantic Tokens', () => {
 
     function getTokens(text: string): DecodedToken[] {
         const documentEntry = createKsonDocument(text);
-        const result = semanticTokensService.getSemanticTokens(documentEntry);
+        const result = semanticTokensService.getSemanticTokens(documentEntry.getToolingDocument());
         return decodeTokens(result.data);
     }
 

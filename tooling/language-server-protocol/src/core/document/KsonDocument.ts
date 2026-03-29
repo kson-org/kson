@@ -1,7 +1,7 @@
 import {Analysis, KsonValue, KsonValueType} from 'kson';
 import {DocumentUri, TextDocuments, Range, Position} from "vscode-languageserver";
 import {TextDocument} from "vscode-languageserver-textdocument";
-import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
+import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
  * Kson Document Entry.
@@ -12,9 +12,11 @@ import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
 export class KsonDocument implements TextDocument {
     public readonly textDocument: TextDocument;
     private schemaDocument?: TextDocument;
+    // parseAnalysis uses strict parsing for value extraction (schema IDs, etc.)
+    // _toolingDocument uses error-tolerant parsing for editor features (symbols, tokens, etc.)
     private readonly parseAnalysis: Analysis;
-    private indexedDocumentSymbols?: IndexedDocumentSymbols;
-
+    private _toolingDocument: ToolingDocument | null = null;
+    private _schemaToolingDocument: ToolingDocument | null = null;
     constructor(textDocument: TextDocument, parseAnalysis:Analysis, schemaDocument?: TextDocument) {
         this.schemaDocument = schemaDocument;
         this.textDocument = textDocument;
@@ -50,6 +52,31 @@ export class KsonDocument implements TextDocument {
     }
 
     /**
+     * Returns a lazily-created {@link ToolingDocument} for use with tooling operations.
+     * Created on first access and cached for the lifetime of this document instance,
+     * so multiple tooling calls on the same version share one parse.
+     */
+    getToolingDocument(): ToolingDocument {
+        if (!this._toolingDocument) {
+            this._toolingDocument = KsonTooling.getInstance().parse(this.getText());
+        }
+        return this._toolingDocument;
+    }
+
+    /**
+     * Returns a lazily-created {@link ToolingDocument} for the schema associated
+     * with this document. Cached for the lifetime of this document instance.
+     */
+    getSchemaToolingDocument(): ToolingDocument | undefined {
+        const schema = this.getSchemaDocument();
+        if (!schema) return undefined;
+        if (!this._schemaToolingDocument) {
+            this._schemaToolingDocument = KsonTooling.getInstance().parse(schema.getText());
+        }
+        return this._schemaToolingDocument;
+    }
+
+    /**
      * Returns the parse result of this {@link KsonDocument}
      */
     getAnalysisResult(): Analysis {
@@ -73,20 +100,6 @@ export class KsonDocument implements TextDocument {
         };
     }
     
-    /**
-     * Get cached symbols with index, or undefined if not cached
-     */
-    getSymbolsWithIndex(): IndexedDocumentSymbols | undefined {
-        return this.indexedDocumentSymbols;
-    }
-    
-    /**
-     * Set cached symbols with index
-     */
-    setSymbolsWithIndex(symbolsWithIndex: IndexedDocumentSymbols): void {
-        this.indexedDocumentSymbols = symbolsWithIndex;
-    }
-
     /**
      * Get the schema document for this document, if one is configured.
      */

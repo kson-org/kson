@@ -23,7 +23,7 @@ class SchemaInfoLocationTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        return KsonTooling.getSchemaInfoAtLocation(document, schema, line, column)
+        return KsonTooling.getSchemaInfoAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
     }
 
     @Test

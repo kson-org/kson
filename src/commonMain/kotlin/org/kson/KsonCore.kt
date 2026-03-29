@@ -10,6 +10,7 @@ import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.tools.FormattingStyle
 import org.kson.tools.InternalEmbedRule
 import org.kson.validation.DuplicateKeyValidator
@@ -189,25 +190,39 @@ data class AstParseResult(
 
     /**
      * A [KsonValue] on the AST constructed here, or null if there were errors trying to parse
-     * (consult [messageSink] for information on any errors)
+     * (consult [messageSink] for information on any errors).
+     *
+     * When parsed with [CoreCompileConfig.ignoreErrors], the AST may contain
+     * [org.kson.ast.AstNodeError] nodes deeper in the tree even though [hasErrors]
+     * returns false (because error-walking is skipped). In that case [toKsonValue]
+     * fails and this property returns null.
      */
     val ksonValue: KsonValue? by lazy {
         if (hasErrors()) {
             null
         } else {
-            ast.toKsonValue()
+            try {
+                ast.toKsonValue()
+            } catch (_: ShouldNotHappenException) {
+                null
+            } catch (_: UnsupportedOperationException) {
+                null
+            }
         }
     }
 
     /**
      * Utility method that internally calls [AstNode.toSource] on this AST, or returns null if
-     * there wre errors trying to parse (consult [messageSink] for information on any errors)
+     * there were errors trying to parse (consult [messageSink] for information on any errors)
      */
     fun toSourceOrNull(indent: AstNode.Indent, compileTarget: CompileTarget): String? {
-        return if (hasErrors()) {
-            null
-        } else {
+        if (hasErrors()) return null
+        return try {
             ast.toSource(indent, compileTarget)
+        } catch (_: ShouldNotHappenException) {
+            null
+        } catch (_: UnsupportedOperationException) {
+            null
         }
     }
 

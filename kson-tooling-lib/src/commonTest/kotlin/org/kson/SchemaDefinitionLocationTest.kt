@@ -63,7 +63,7 @@ class SchemaDefinitionLocationTest {
         val schema = schemaWithCaret.replace(caretMarker, "")
 
         // Get the actual location result
-        val locations = KsonTooling.getSchemaLocationAtLocation(document, schema, docCoordinates.line, docCoordinates.column)
+        val locations = KsonTooling.getSchemaLocationAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), docCoordinates.line, docCoordinates.column)
 
         // Insert <caret> markers into the actual schema to visualize where the returned locations are
         val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
