@@ -10,7 +10,8 @@ import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
 import org.kson.schema.SchemaResolutionType
-import org.kson.value.navigation.KsonValueNavigation
+import org.kson.walker.KsonValueWalker
+import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -35,13 +36,15 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * 3. Returns all branches for allOf and direct properties (no filtering needed)
      *
      * @param candidateSchemas The schemas found at the document path
-     * @param documentRoot The document being edited (KSON string)
+     * @param documentValue The pre-parsed document value, or null if the document
+     *   couldn't be parsed. When null, combinator filtering is skipped and all
+     *   expanded schemas are returned.
      * @param documentPointer The [JsonPointer] to the location in the document
      * @return List of valid schemas after expansion and filtering
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
-        documentRoot: String,
+        documentValue: org.kson.value.KsonValue?,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Check if we need to filter based on combinators
@@ -56,17 +59,10 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
 
         // Filter if needed (for oneOf/anyOf that require validation)
-        return if (hasCombinatorsThatRequireValidation) {
-            // Parse the document for validation
-            val documentValue = KsonCore.parseToAst(documentRoot).ksonValue
-            if (documentValue != null) {
-                filterByValidation(expandedSchemas, documentValue, documentPointer)
-            } else {
-                // If document doesn't parse, fall back to unfiltered schemas
-                expandedSchemas
-            }
+        return if (hasCombinatorsThatRequireValidation && documentValue != null) {
+            filterByValidation(expandedSchemas, documentValue, documentPointer)
         } else {
-            // No filtering needed, use all expanded schemas
+            // No filtering needed (no combinators, or document unavailable)
             expandedSchemas
         }
     }
@@ -107,9 +103,12 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         documentValue: org.kson.value.KsonValue,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
-        // Get the object to validate against
-        // For completions, we validate the object where we're adding properties
-        val targetValue = KsonValueNavigation.navigateWithJsonPointer(documentValue, documentPointer) ?: documentValue
+        // Get the value at the pointer location to validate against.
+        // If navigation returns null, the value doesn't exist yet (e.g. the user is about
+        // to type at an empty position). In that case there's nothing to filter against,
+        // so return all expanded schemas.
+        val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer)
+            ?: return candidateSchemas
 
         return candidateSchemas.filter { ref ->
             when (ref.resolutionType) {

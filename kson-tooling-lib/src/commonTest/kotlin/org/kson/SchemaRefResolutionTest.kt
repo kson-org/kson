@@ -56,7 +56,7 @@ class SchemaRefResolutionTest {
             .replace(cursorMarker, "")
 
         // Get the actual resolution result
-        val locations = KsonTooling.resolveRefAtLocation(schema, cursorCoordinates.line, cursorCoordinates.column)
+        val locations = KsonTooling.resolveRefAtLocation(KsonTooling.parse(schema), cursorCoordinates.line, cursorCoordinates.column)
 
         if (expectedRange == null) {
             // No expected range means we expect empty list
@@ -308,6 +308,24 @@ class SchemaRefResolutionTest {
                 }</target>
               }
             }
+        """.trimIndent())
+    }
+
+    @Test
+    fun testResolveRef_withNonUriSchemaId() {
+        // Schema with a non-URI $id (e.g. a filename) should still resolve refs
+        assertRefResolution($$"""
+            '$id': 'pubmed.schema.kson'
+            type: object
+            properties:
+              query:
+                '$ref': '#/$defs/Data<cursor>'
+                .
+              .
+            '$defs':
+              Data:
+                <target>type: string
+                .</target>
         """.trimIndent())
     }
 }
