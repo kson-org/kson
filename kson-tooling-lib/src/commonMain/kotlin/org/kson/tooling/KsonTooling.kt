@@ -49,7 +49,7 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.ksonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
-        val validSchemas = resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveAndFilterSchemas(parsedSchema, document, documentPointer)
 
         val schemaInfos = validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
@@ -79,7 +79,7 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
-        val validSchemas = resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveAndFilterSchemas(parsedSchema, document, documentPointer)
 
         return validSchemas.map {
             Range(
@@ -159,11 +159,7 @@ object KsonTooling {
     ): List<CompletionItem> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, document.partialKsonValue)
-
-        val filteringService = SchemaFilteringService(schemaIdLookup)
-        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document.ksonValue, documentPointer)
+        val validSchemas = resolveAndFilterSchemas(parsedSchema, document, documentPointer)
 
         return SchemaInformation.getCompletions(parsedSchema, documentPointer, validSchemas, document.ksonValue)
     }
@@ -287,16 +283,21 @@ object KsonTooling {
      *
      * Creates a [SchemaIdLookup], navigates to candidate schemas at the pointer,
      * then filters them based on validation against the document value.
+     *
+     * Uses [ToolingDocument.partialKsonValue] for navigation so that if/then
+     * conditions can evaluate sibling properties even when the document has
+     * parse errors.  Uses [ToolingDocument.ksonValue] for validation filtering
+     * to avoid false matches from incomplete document state.
      */
     private fun resolveAndFilterSchemas(
         parsedSchema: KsonValue,
-        documentValue: KsonValue?,
+        document: ToolingDocument,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, documentValue)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, document.partialKsonValue)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        return filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
+        return filteringService.getValidSchemas(candidateSchemas, document.ksonValue, documentPointer)
     }
 }
 
