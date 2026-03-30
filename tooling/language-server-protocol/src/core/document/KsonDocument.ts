@@ -66,7 +66,7 @@ export class KsonDocument implements TextDocument {
         const schema = this.getSchemaDocument();
         if (!schema) return undefined;
         if (!this._schemaToolingDocument) {
-            this._schemaToolingDocument = KsonTooling.getInstance().parse(schema.getText());
+            this._schemaToolingDocument = KsonTooling.getInstance().parse(schema.getText(), schema.uri);
         }
         return this._schemaToolingDocument;
     }

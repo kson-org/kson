@@ -4,41 +4,47 @@ import kotlin.test.*
 
 class DiagnosticTest {
 
+    private fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
+        val document = KsonTooling.parse(content)
+        val schema = schemaContent?.let { KsonTooling.parse(it) }
+        return KsonTooling.validateDocument(document, schema)
+    }
+
     @Test
     fun testEmptyDocumentReportsError() {
-        val diagnostics = KsonTooling.validateDocument("")
+        val diagnostics = validateDocument("")
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
     fun testValidDocumentNoDiagnostics() {
-        val diagnostics = KsonTooling.validateDocument("key: \"value\"")
+        val diagnostics = validateDocument("key: \"value\"")
         assertEquals(0, diagnostics.size)
     }
 
     @Test
     fun testValidObjectNoDiagnostics() {
-        val diagnostics = KsonTooling.validateDocument("{ \"name\": \"test\", \"age\": 30 }")
+        val diagnostics = validateDocument("{ \"name\": \"test\", \"age\": 30 }")
         assertEquals(0, diagnostics.size)
     }
 
     @Test
     fun testValidArrayNoDiagnostics() {
-        val diagnostics = KsonTooling.validateDocument("[1, 2, 3]")
+        val diagnostics = validateDocument("[1, 2, 3]")
         assertEquals(0, diagnostics.size)
     }
 
     @Test
     fun testExtraTokensAfterValue() {
-        val diagnostics = KsonTooling.validateDocument("key: \"value\" extraValue")
+        val diagnostics = validateDocument("key: \"value\" extraValue")
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
     fun testUnclosedBrace() {
-        val diagnostics = KsonTooling.validateDocument("{ \"name\": \"test\"")
+        val diagnostics = validateDocument("{ \"name\": \"test\"")
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
@@ -49,7 +55,7 @@ class DiagnosticTest {
             - {list_item: false false}
                 - deceptive_indent_list_item
         """.trimIndent()
-        val diagnostics = KsonTooling.validateDocument(content)
+        val diagnostics = validateDocument(content)
         assertEquals(2, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
         assertEquals(DiagnosticSeverity.WARNING, diagnostics[1].severity)
@@ -57,7 +63,7 @@ class DiagnosticTest {
 
     @Test
     fun testDiagnosticsHaveRangeInformation() {
-        val diagnostics = KsonTooling.validateDocument("")
+        val diagnostics = validateDocument("")
         assertEquals(1, diagnostics.size)
         val range = diagnostics[0].range
         assertEquals(0, range.startLine)
@@ -68,7 +74,7 @@ class DiagnosticTest {
 
     @Test
     fun testDiagnosticsHaveMessageText() {
-        val diagnostics = KsonTooling.validateDocument("")
+        val diagnostics = validateDocument("")
         assertEquals(1, diagnostics.size)
         assertTrue(diagnostics[0].message.isNotEmpty(), "Diagnostic message should not be empty")
     }
@@ -83,7 +89,7 @@ class DiagnosticTest {
                 }
             }
         """.trimIndent()
-        val diagnostics = KsonTooling.validateDocument("{ age: \"not a number\" }", schema)
+        val diagnostics = validateDocument("{ age: \"not a number\" }", schema)
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
     }
@@ -99,7 +105,7 @@ class DiagnosticTest {
                 required: ["name"]
             }
         """.trimIndent()
-        val diagnostics = KsonTooling.validateDocument("{ age: 30 }", schema)
+        val diagnostics = validateDocument("{ age: 30 }", schema)
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
     }
@@ -115,14 +121,14 @@ class DiagnosticTest {
                 }
             }
         """.trimIndent()
-        val diagnostics = KsonTooling.validateDocument("{ name: \"Alice\", age: 30 }", schema)
+        val diagnostics = validateDocument("{ name: \"Alice\", age: 30 }", schema)
         assertEquals(0, diagnostics.size)
     }
 
     @Test
     fun testInvalidSchemaStillReturnsParseErrors() {
         val invalidSchema = "{ this is not valid : : : }}}"
-        val diagnostics = KsonTooling.validateDocument("key: \"value\" extra", invalidSchema)
+        val diagnostics = validateDocument("key: \"value\" extra", invalidSchema)
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
@@ -130,13 +136,13 @@ class DiagnosticTest {
     @Test
     fun testValidDocumentWithBrokenSchemaReturnsNoDiagnostics() {
         val invalidSchema = "{ broken schema {{{{"
-        val diagnostics = KsonTooling.validateDocument("key: \"value\"", invalidSchema)
+        val diagnostics = validateDocument("key: \"value\"", invalidSchema)
         assertEquals(0, diagnostics.size)
     }
 
     @Test
     fun testNoSchemaReturnsOnlyParseErrors() {
-        val diagnostics = KsonTooling.validateDocument("key: \"value\" extra")
+        val diagnostics = validateDocument("key: \"value\" extra")
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }

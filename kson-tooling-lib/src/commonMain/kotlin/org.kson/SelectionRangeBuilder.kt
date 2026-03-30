@@ -2,7 +2,14 @@ package org.kson
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.value.*
+import org.kson.value.EmbedBlock
+import org.kson.value.KsonBoolean
+import org.kson.value.KsonList
+import org.kson.value.KsonNull
+import org.kson.value.KsonNumber
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
+import org.kson.value.KsonValue
 
 /**
  * Builds a list of enclosing [Range]s for a given cursor position in KSON source.
@@ -72,6 +79,7 @@ internal object SelectionRangeBuilder {
             is KsonNumber,
             is KsonBoolean,
             is KsonNull -> {}
+
         }
 
         // Leaf node or cursor is on container delimiters (e.g. { or })

@@ -9,6 +9,7 @@ import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.validation.SourceContext
 import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
@@ -168,9 +169,11 @@ object KsonTooling {
      * are available even for documents with syntax errors.
      *
      * @param content The KSON source text
+     * @param filepath The filepath of the document, used to provide context to validators
      * @return A reusable [ToolingDocument]
      */
-    fun parse(content: String): ToolingDocument = ToolingDocument(content)
+    fun parse(content: String, filepath: String? = null): ToolingDocument =
+        ToolingDocument(content, SourceContext(filepath))
 
     /**
      * Get document symbols from a pre-parsed [ToolingDocument].
@@ -237,20 +240,21 @@ object KsonTooling {
     /**
      * Validate a KSON document and return diagnostic messages.
      *
-     * This method does its own strict parse (without error tolerance) to
-     * produce accurate error messages, so it accepts raw content rather
-     * than a [ToolingDocument].
+     * Internally performs a strict re-parse (without error tolerance) to
+     * produce accurate error messages. The [ToolingDocument]'s content and
+     * [SourceContext][org.kson.validation.SourceContext] are used for the
+     * strict parse, so validators receive the document's filepath.
      *
-     * If [schemaContent] is provided, the document is validated against the schema.
+     * If a [schema] is provided, the document is validated against it.
      * Schema validation includes both parse errors and schema violations.
      * If no schema is provided (or it fails to parse), only parse errors are returned.
      *
-     * @param content The KSON source text
-     * @param schemaContent Optional schema document as KSON source text
+     * @param document The pre-parsed document to validate
+     * @param schema Optional pre-parsed schema document
      * @return List of diagnostic messages
      */
-    fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
-        return DiagnosticBuilder.build(content, schemaContent)
+    fun validateDocument(document: ToolingDocument, schema: ToolingDocument? = null): List<DiagnosticMessage> {
+        return DiagnosticBuilder.build(document.content, schema?.content, document.sourceContext)
     }
 
     /**
