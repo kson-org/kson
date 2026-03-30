@@ -1,11 +1,12 @@
 package org.kson
 
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.KsonTooling
 import org.kson.tooling.SchemaFilteringService
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.*
 
 /**
@@ -27,10 +28,10 @@ class SchemaFilteringServiceTest {
         documentPointer: JsonPointer = JsonPointer("")
     ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val parsedDocument = KsonCore.parseToAst(document).ksonValue
+        val parsedDocument = KsonTooling.parse(document)
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, parsedDocument)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, parsedDocument.ksonValue)
         return filteringService.getValidSchemas(candidateSchemas, parsedDocument, documentPointer).map { it.resolvedValue }
     }
 
@@ -327,7 +328,7 @@ class SchemaFilteringServiceTest {
     }
 
     @Test
-    fun testGetValidSchemas_withTypeMismatchAtTarget_fallsBackToAllBranches() {
+    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches() {
         val schema = """
             oneOf:
               - type: object
@@ -346,6 +347,8 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        assertEquals(3, validSchemas.size, "Parent + both oneOf branches should be returned when target type doesn't match any branch")
+        // Only the parent oneOf container remains — both branches expect objects
+        // but the document is a list, so neither branch is compatible.
+        assertEquals(1, validSchemas.size, "Only the parent oneOf should remain when no branch matches the document type")
     }
 }

@@ -298,7 +298,7 @@ object KsonTooling {
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, document.partialKsonValue)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        return filteringService.getValidSchemas(candidateSchemas, document.ksonValue, documentPointer)
+        return filteringService.getValidSchemas(candidateSchemas, document, documentPointer)
     }
 }
 
