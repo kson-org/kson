@@ -547,4 +547,32 @@ class SchemaInfoLocationTest {
         assertTrue(hoverInfo.contains("Config A"), "Should show matching branch title, got: $hoverInfo")
         assertFalse(hoverInfo.contains("Config B"), "Should NOT show non-matching branch, got: $hoverInfo")
     }
+
+    @Test
+    fun testGetSchemaInfoAtLocation_ifThenShowsMatchingBranchInBrokenDocument() {
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "ConfigA": { "type": "object", "title": "Config A", "description": "Settings for A" },
+                    "ConfigB": { "type": "object", "title": "Config B", "description": "Settings for B" }
+                },
+                "type": "object",
+                "properties": { "kind": { "type": "string" } },
+                "allOf": [
+                    { "if": { "properties": { "kind": { "const": "a" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } } },
+                    { "if": { "properties": { "kind": { "const": "b" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } } }
+                ]
+            }
+        """
+
+        // The document has a parse error (missing value after "other":)
+        // so ksonValue is null, but partialKsonValue recovers "kind": "a"
+        // for if/then evaluation.
+        val hoverInfo = getInfoAtCaret(schema, """
+            { "kind": "a", "other": , "<caret>config": {} }
+        """.trimIndent())
+        assertNotNull(hoverInfo, "Hover should work in broken documents via partial AST")
+        assertTrue(hoverInfo.contains("Config A"), "Should show matching branch, got: $hoverInfo")
+        assertFalse(hoverInfo.contains("Config B"), "Should NOT show non-matching branch, got: $hoverInfo")
+    }
 }
