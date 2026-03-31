@@ -30,6 +30,7 @@ tasks {
         command=listOf("npm", "run", "test")
         dependsOn(npmInstall)
         dependsOn(playwrightInstall)
+        dependsOn("npm_run_buildMonacoIframe")
     }
 
     val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {
@@ -40,6 +41,48 @@ tasks {
     val buildMonaco = register<PixiExecTask>("npm_run_buildMonaco") {
         command=listOf("npm", "run", "buildMonaco")
         dependsOn(npmInstall)
+        doLast {
+            val distDir = file("monaco/dist")
+            val bundle = File(distDir, "kson-monaco.js")
+            if (bundle.exists()) {
+                println()
+                println("=".repeat(60))
+                println("@kson/monaco-editor built successfully!")
+                println("  Output: ${distDir.absolutePath}")
+                println()
+                println("Dev server:  ./gradlew tooling:lsp-clients:npm_run_monaco")
+                println("Full docs:   tooling/lsp-clients/monaco/readme.md")
+                println("=".repeat(60))
+            }
+        }
+    }
+
+    register<PixiExecTask>("npm_run_buildMonacoIframe") {
+        command=listOf("npm", "run", "buildMonacoIframe")
+        dependsOn(npmInstall)
+        doLast {
+            val iframeDir = file("monaco/dist-iframe")
+            val editorHtml = File(iframeDir, "kson-editor.html")
+            if (editorHtml.exists()) {
+                println()
+                println("=".repeat(60))
+                println("@kson/monaco-editor iframe built successfully!")
+                println("  Output: ${iframeDir.absolutePath}")
+                println()
+                println("Full docs:   tooling/lsp-clients/monaco/readme.md")
+                println("=".repeat(60))
+            }
+        }
+    }
+
+    register<PixiExecTask>("npm_run_demoLibrary") {
+        command=listOf("npm", "run", "demoLibrary")
+        dependsOn(npmInstall)
+    }
+
+    register<PixiExecTask>("npm_run_demoIframe") {
+        command=listOf("npm", "run", "demoIframe")
+        dependsOn("npm_run_buildMonacoIframe")
     }
 
     check {
@@ -58,6 +101,7 @@ tasks {
         delete("vscode/node_modules")
         delete("monaco/dist")
         delete("monaco/node_modules")
+        delete("monaco/dist-iframe")
         delete("shared/out")
     }
 }

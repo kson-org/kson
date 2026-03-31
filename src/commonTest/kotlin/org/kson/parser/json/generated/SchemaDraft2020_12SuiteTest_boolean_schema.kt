@@ -146,8 +146,7 @@ class SchemaDraft2020_12SuiteTest_boolean_schema : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 true
@@ -189,8 +188,7 @@ class SchemaDraft2020_12SuiteTest_boolean_schema : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 true
@@ -332,8 +330,7 @@ class SchemaDraft2020_12SuiteTest_boolean_schema : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 false
@@ -375,8 +372,7 @@ class SchemaDraft2020_12SuiteTest_boolean_schema : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 false

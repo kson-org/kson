@@ -5,6 +5,9 @@ import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonBooleanSchema
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 /**
@@ -34,6 +37,9 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
     @Test
     fun testIllegalCharacterError() {
         assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("{key: \\value}", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("[\\value]", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("- \\value", listOf(ILLEGAL_CHARACTERS))
     }
 
     @Test
@@ -108,5 +114,92 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
 
         val yamlResult = KsonCore.parseToYaml(source, CompileSettings().yamlSettings)
         assertNull(yamlResult.yaml)
+    }
+
+    @Test
+    fun testKsonValueReturnsNullForErrorTolerantParseWithDeepErrors() {
+        // With ignoreErrors=true, the parser produces an AST with error nodes
+        // deeper inside (not at the root). ksonValue should return null rather
+        // than throw when toKsonValue() encounters these error nodes.
+        val result = KsonCore.parseToAst(
+            """{"key": , "other": 42}""",
+            CoreCompileConfig(ignoreErrors = true)
+        )
+        // The root is valid (KsonRootImpl) and hasErrors() returns false because
+        // error-walking is skipped — this is the exact gap ksonValue must handle.
+        assertFalse(result.hasErrors(), "hasErrors() should be false with ignoreErrors=true")
+        assertNull(
+            result.ksonValue,
+            "ksonValue should return null when the AST contains deep error nodes"
+        )
+    }
+
+    @Test
+    fun testGapFreeAndStrictParsingProduceIdenticalLocations() {
+        // The KsonBuilder.done() walk-back ensures gap-free (error-tolerant)
+        // and strict parsing produce identical AST node locations, even when
+        // trailing whitespace would otherwise extend the gap-free range.
+        val source = """
+            {
+              "name": "Alice",
+              "address": {
+                "city": "Portland"
+              }
+            }
+        """.trimIndent()
+
+        val strict = KsonCore.parseToAst(source)
+        val gapFree = KsonCore.parseToAst(source, CoreCompileConfig(ignoreErrors = true))
+
+        val strictValue = assertNotNull(strict.ksonValue, "strict parse should produce a value")
+        val gapFreeValue = assertNotNull(gapFree.ksonValue, "gap-free parse should produce a value")
+
+        // Root object locations must match
+        assertEquals(
+            strictValue.location, gapFreeValue.location,
+            "Root object locations should be identical"
+        )
+
+        // Nested object locations must match (this is where trailing whitespace
+        // previously caused gap-free end positions to extend to the next line)
+        val strictAddress = (strictValue as org.kson.value.KsonObject).propertyMap["address"]!!.propValue
+        val gapFreeAddress = (gapFreeValue as org.kson.value.KsonObject).propertyMap["address"]!!.propValue
+        assertEquals(
+            strictAddress.location, gapFreeAddress.location,
+            "Nested 'address' object locations should be identical"
+        )
+    }
+
+    @Test
+    fun testGapFreeAndStrictLocationsMatchWithTrailingComments() {
+        // Trailing comments produce WHITESPACE + COMMENT lookahead tokens in gap-free mode.
+        // The walk-back in KsonBuilder.done() must skip past these (in addition to plain
+        // trailing WHITESPACE) so that gap-free end positions still match strict positions.
+        val source = """
+            {
+              "name": "Alice", # inline comment
+              "address": {
+                "city": "Portland" # another comment
+              } # closing comment
+            }
+        """.trimIndent()
+
+        val strict = KsonCore.parseToAst(source)
+        val gapFree = KsonCore.parseToAst(source, CoreCompileConfig(ignoreErrors = true))
+
+        val strictValue = assertNotNull(strict.ksonValue, "strict parse should produce a value")
+        val gapFreeValue = assertNotNull(gapFree.ksonValue, "gap-free parse should produce a value")
+
+        assertEquals(
+            strictValue.location, gapFreeValue.location,
+            "Root object locations should be identical with trailing comments"
+        )
+
+        val strictAddress = (strictValue as org.kson.value.KsonObject).propertyMap["address"]!!.propValue
+        val gapFreeAddress = (gapFreeValue as org.kson.value.KsonObject).propertyMap["address"]!!.propValue
+        assertEquals(
+            strictAddress.location, gapFreeAddress.location,
+            "Nested 'address' object locations should be identical with trailing comments"
+        )
     }
 }

@@ -55,6 +55,10 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         return tokens[tokenIndex].comments
     }
 
+    override fun getToken(index: Int): Token {
+        return tokens[index]
+    }
+
     override fun getTokenIndex(): Int {
         return currentToken
     }
@@ -249,11 +253,20 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     }
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
-                        val listElementValue: KsonValueNode = if (childMarkers.size == 1) {
-                            unsafeAstCreate(childMarkers.first()) { KsonValueNodeError(it) }
-                        } else {
-                            throw FatalParseException("list element markers should mark exactly one value")
+                        /**
+                         * We expect each list element to contain exactly one value.
+                         * Error-recovery markers (e.g. from illegal characters consumed
+                         * by delimitedValue) may appear as additional children alongside
+                         * the value — when that happens, find the single non-error child.
+                         */
+                        val nonErrorChildren = childMarkers.filter { it.element != ERROR }
+                        val valueChild = when {
+                            nonErrorChildren.size == 1 -> nonErrorChildren.first()
+                            childMarkers.size == 1 -> childMarkers.first()
+                            else -> throw FatalParseException("list element markers should mark exactly one value")
                         }
+                        val listElementValue: KsonValueNode =
+                            unsafeAstCreate(valueChild) { KsonValueNodeError(it) }
                         ListElementNodeImpl(
                             listElementValue,
                             comments,
@@ -277,18 +290,24 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
                         /**
-                         * We assume [Parser.plainObject] still parses [OBJECT_PROPERTY]s as a keyword/value
-                         * pair OR a keyword with a missing value error
+                         * We expect OBJECT_PROPERTY to contain a keyword/value pair OR a
+                         * keyword with a missing value error.  The keyword is always the
+                         * first child (it may itself be an error, e.g. for reserved word
+                         * keys).  Error-recovery markers (e.g. from illegal characters
+                         * consumed by delimitedValue) may appear as additional children
+                         * between keyword and value — skip them to find the value.
                          */
-                        if (childMarkers.size > 2) {
-                            throw FatalParseException("unless object property parsing has changed significantly")
-                        }
                         val keywordMark = childMarkers.getOrNull(0)
                             ?: throw ShouldNotHappenException("should have a keyword marker")
                         val keyNode: ObjectKeyNode = unsafeAstCreate(keywordMark) {
                             ObjectKeyNodeError(it)
                         }
-                        val valueMark = childMarkers.getOrNull(1)
+                        val remainingChildren = childMarkers.drop(1)
+                        val valueCandidates = remainingChildren.filter { it.element != ERROR }
+                        if (valueCandidates.size > 1) {
+                            throw FatalParseException("unless object property parsing has changed significantly")
+                        }
+                        val valueMark = valueCandidates.firstOrNull()
                         val ksonValueNode: KsonValueNode = if (valueMark == null) {
                             KsonValueNodeError(marker.getSourceTokens())
                         } else {
@@ -297,7 +316,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             }
                         }
                         if (keyNode is ObjectKeyNodeError || ksonValueNode is KsonValueNodeError) {
-                            ObjectPropertyNodeError(marker.getSourceTokens().dropLastWhile { it.tokenType == WHITESPACE })
+                            ObjectPropertyNodeError(marker.getSourceTokens())
                         } else {
                             ObjectPropertyNodeImpl(
                                 keyNode,
@@ -466,6 +485,11 @@ private interface MarkerBuilderContext {
     fun getComments(tokenIndex: Int): List<String>
 
     /**
+     * Get the [Token] at raw [index] — in gap-free mode this may be WHITESPACE or COMMENT
+     */
+    fun getToken(index: Int): Token
+
+    /**
      * [KsonMarker]s mark token start and end indexes.  This returns the token index of the [KsonBuilder]
      * being marked
      */
@@ -624,8 +648,19 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     }
 
     override fun done(elementType: ElementType) {
-        // the last token we advanced past is our last token
         lastTokenIndex = context.getTokenIndex() - 1
+        // For non-error nodes, walk back past ignored tokens (WHITESPACE and COMMENT) so
+        // gap-free markers match strict positions.  In gap-free mode, trailing comments
+        // produce WHITESPACE + COMMENT lookahead tokens after the meaningful closing token;
+        // we must skip past all of these to land on the actual closing token (e.g. "}").
+        //
+        // Error nodes are exempt: they must retain all their tokens (including trailing
+        // whitespace) so they can faithfully reconstruct the original source.
+        if (elementType != ERROR) {
+            while (lastTokenIndex > firstTokenIndex && Lexer.ignoredTokens.contains(context.getToken(lastTokenIndex).tokenType)) {
+                lastTokenIndex--
+            }
+        }
         if (lastTokenIndex < firstTokenIndex) {
             /**
              * Raise an alarm if we accidentally make an empty mark. We want all markers to mark either

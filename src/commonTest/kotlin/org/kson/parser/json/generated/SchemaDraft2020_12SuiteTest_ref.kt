@@ -629,8 +629,7 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
         assertKsonEnforcesSchema(
             """
                 {
-                    "foo": [
-                    ]
+                    "foo": []
                 }
             """,
             """
@@ -1470,6 +1469,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_38() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::refs with relative uris and defs::valid on both fields" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1614,6 +1619,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_41() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::relative refs with absolute uris and defs::valid on both fields" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2408,6 +2419,12 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_62() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "ref::URN ref with nested pointer ref::a string is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

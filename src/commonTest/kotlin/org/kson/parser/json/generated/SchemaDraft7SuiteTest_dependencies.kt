@@ -24,8 +24,7 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -216,14 +215,12 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "dependencies": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -249,8 +246,7 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "dependencies": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -274,8 +270,7 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "dependencies": {
-                        "bar": [
-                        ]
+                        "bar": []
                     }
                 }
             """,
@@ -294,8 +289,7 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -733,8 +727,7 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1046,14 +1039,12 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependencies": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -1082,14 +1073,12 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependencies": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -1119,14 +1108,12 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependencies": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }
@@ -1155,14 +1142,12 @@ class SchemaDraft7SuiteTest_dependencies : JsonSchemaTest {
             """
                 {
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
                     "dependencies": {
                         "foo": {
                             "properties": {
-                                "bar": {
-                                }
+                                "bar": {}
                             },
                             "additionalProperties": false
                         }

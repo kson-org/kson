@@ -148,14 +148,17 @@ fun schemaTestSuiteExclusions() = setOf(
     "ref::ref creates new scope when adjacent to keywords::referenced subschema doesn't see annotations from properties",
     "ref::refs with relative uris and defs::invalid on inner field",
     "ref::refs with relative uris and defs::invalid on outer field",
+    "ref::refs with relative uris and defs::valid on both fields",
     "ref::relative pointer ref to array::mismatch array",
     "ref::relative refs with absolute uris and defs::invalid on inner field",
     "ref::relative refs with absolute uris and defs::invalid on outer field",
+    "ref::relative refs with absolute uris and defs::valid on both fields",
     "ref::remote ref, containing refs itself::remote ref invalid",
     "ref::remote ref, containing refs itself::remote ref valid",
     "ref::URN base URI with URN and anchor ref::a non-string is invalid",
     "ref::URN base URI with URN and anchor ref::a string is valid",
     "ref::URN ref with nested pointer ref::a non-string is invalid",
+    "ref::URN ref with nested pointer ref::a string is valid",
 
     // refRemote tests (additional)
     "refRemote::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",

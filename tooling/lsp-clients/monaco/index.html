@@ -2,57 +2,91 @@
 <html lang="en">
 
 <head>
-    <title>KSON Editor</title>
+    <title>KSON Monaco Editor</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        #monaco-editor-root {
+        body { margin: 0; font-family: system-ui, sans-serif; }
+        .header { padding: 16px 24px; }
+        .header h1 { margin: 0; font-size: 1.4em; }
+        .header p { margin: 4px 0 0; color: #666; font-size: 0.9em; }
+        .editors {
             position: absolute;
-            top: 140px;
+            top: 120px;
             left: 0;
             right: 0;
             bottom: 0;
+            display: flex;
+            gap: 2px;
+            background: #e0e0e0;
         }
+        .editors > div { flex: 1; min-width: 0; }
     </style>
 </head>
 
 <body>
     <div class="header">
         <h1>KSON Monaco Editor</h1>
+        <p>Try adding an unknown key or removing "name" to see schema validation.</p>
     </div>
 
-    <div id="monaco-editor-root"></div>
+    <div class="editors">
+        <div id="editor-left"></div>
+        <div id="editor-right"></div>
+    </div>
 
     <script type="module">
         import { createKsonEditor } from './src/index.js';
 
-        let currentEditor = null;
+        // A JSON Schema that validates our sample config.
+        const sampleSchema = `{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "name":    { "type": "string", "description": "The name of the project" },
+    "version": { "type": "string", "description": "Semantic version string" },
+    "tags":    { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["name", "version"],
+  "additionalProperties": false
+}`;
 
-        async function startEditor() {
-            if (currentEditor) {
-                console.log('Editor already started');
-                return;
-            }
+        const leftDocument = `{
+  # My project config
+  name: "kson-monaco-editor"
+  unknown: "should trigger schema error"
+  tags: [
+    "editor"
+    "language-server"
+  ]
+}`;
 
-            const rootElement = document.getElementById('monaco-editor-root');
+        const rightDocument = `{
+  name: "another-project"
+  version: "1.0.0"
+  tags: ["demo"]
+}`;
 
-            const editor = await createKsonEditor({
-                editorAppConfig: {
-                    codeResources: {
-                        modified: {
-                            text: '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}',
-                            uri: '/test.kson'
-                        }
-                    }
-                }
-            });
+        // Create the first editor — this starts the language server.
+        const left = await createKsonEditor(document.getElementById('editor-left'), {
+            value: leftDocument,
+            uri: 'inmemory://kson/project.kson',
+            lspOptions: {
+                bundledSchemas: [
+                    { fileExtension: 'kson', schemaContent: sampleSchema }
+                ],
+                enableBundledSchemas: true,
+            },
+        });
 
-            await editor.start(rootElement);
-            currentEditor = editor;
-            console.log('KSON editor started successfully');
-        }
-        // Start the editor automatically
-        startEditor();
+        // Create the second editor, sharing the same language server.
+        const right = await createKsonEditor(document.getElementById('editor-right'), {
+            value: rightDocument,
+            uri: 'inmemory://kson/another.kson',
+            shared: left,
+        });
+
+        console.log('KSON editors started successfully');
     </script>
 </body>
 

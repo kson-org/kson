@@ -23,7 +23,7 @@ class SchemaCompletionLocationTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        return KsonTooling.getCompletionsAtLocation(document, schema, line, column)
+        return KsonTooling.getCompletionsAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
     }
 
     @Test

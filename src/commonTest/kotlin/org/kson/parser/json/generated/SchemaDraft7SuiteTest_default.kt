@@ -33,8 +33,7 @@ class SchemaDraft7SuiteTest_default : JsonSchemaTest {
                     "properties": {
                         "foo": {
                             "type": "integer",
-                            "default": [
-                            ]
+                            "default": []
                         }
                     }
                 }
@@ -54,16 +53,14 @@ class SchemaDraft7SuiteTest_default : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "properties": {
                         "foo": {
                             "type": "integer",
-                            "default": [
-                            ]
+                            "default": []
                         }
                     }
                 }
@@ -113,8 +110,7 @@ class SchemaDraft7SuiteTest_default : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -204,8 +200,7 @@ class SchemaDraft7SuiteTest_default : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

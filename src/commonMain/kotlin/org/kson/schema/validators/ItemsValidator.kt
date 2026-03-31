@@ -62,11 +62,8 @@ data class AdditionalItemsBooleanValidator(val allowed: Boolean, private val tup
         }
     }
 }
-data class AdditionalItemsSchemaValidator(val schema: JsonSchema?): AdditionalItemsValidator {
+data class AdditionalItemsSchemaValidator(val schema: JsonSchema): AdditionalItemsValidator {
     override fun validateArray(remainingItems: List<KsonValue>, actualCount: Int, location: Location, messageSink: MessageSink) {
-        if (schema == null) {
-            return
-        }
         remainingItems.forEach {
             schema.validate(it, messageSink)
         }

@@ -19,6 +19,10 @@ import {
     CompletionParams,
     DefinitionParams,
     DefinitionLink,
+    FoldingRange,
+    FoldingRangeParams,
+    SelectionRange,
+    SelectionRangeParams,
 } from 'vscode-languageserver';
 import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
@@ -30,10 +34,12 @@ import {DocumentSymbolService} from '../features/DocumentSymbolService.js';
 import {HoverService} from '../features/HoverService.js';
 import {CompletionService} from '../features/CompletionService.js';
 import {DefinitionService} from '../features/DefinitionService.js';
+import {FoldingRangeService} from '../features/FoldingRangeService.js';
+import {SelectionRangeService} from '../features/SelectionRangeService.js';
 import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
 import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
-import {IndexedDocumentSymbols} from "../features/IndexedDocumentSymbols";
+
 
 /**
  * This is the coordinator for all the service classes.
@@ -50,6 +56,8 @@ export class KsonTextDocumentService {
     private hoverService: HoverService;
     private completionService: CompletionService;
     private definitionService: DefinitionService;
+    private foldingRangeService: FoldingRangeService;
+    private selectionRangeService: SelectionRangeService;
     private commandExecutor!: CommandExecutorBase;
     private configuration: Required<KsonSettings>;
 
@@ -67,6 +75,8 @@ export class KsonTextDocumentService {
         this.hoverService = new HoverService();
         this.completionService = new CompletionService();
         this.definitionService = new DefinitionService();
+        this.foldingRangeService = new FoldingRangeService();
+        this.selectionRangeService = new SelectionRangeService();
 
         // Default configuration
         this.configuration = ksonSettingsWithDefaults();
@@ -121,6 +131,8 @@ export class KsonTextDocumentService {
         this.connection.onHover(this.onHover.bind(this));
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onDefinition(this.onDefinition.bind(this));
+        this.connection.onFoldingRanges(this.onFoldingRanges.bind(this));
+        this.connection.onSelectionRanges(this.onSelectionRanges.bind(this));
     }
 
 
@@ -131,7 +143,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return {data: []};
             }
-            const result = this.semanticTokensService.getSemanticTokens(document);
+            const result = this.semanticTokensService.getSemanticTokens(document.getToolingDocument());
             this.connection.console.info(`Semantic tokens result: ${result.data.length} tokens`);
             return result;
         } catch (error) {
@@ -200,7 +212,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.documentHighlightService.getDocumentHighlights(document, params.position);
+            return this.documentHighlightService.getDocumentHighlights(document.getToolingDocument(), params.position);
         } catch (error) {
             this.connection.console.error(`Error providing document highlights: ${error}`);
             return [];
@@ -214,8 +226,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getAnalysisResult().ksonValue)
-            document.setSymbolsWithIndex(new IndexedDocumentSymbols(documentSymbols))
+            const documentSymbols = this.documentSymbolService.getDocumentSymbols(document.getToolingDocument())
             this.connection.console.info(`Document symbols result: ${documentSymbols.length} symbols`);
             return documentSymbols
         } catch (error) {
@@ -263,6 +274,32 @@ export class KsonTextDocumentService {
         } catch (error) {
             this.connection.console.error(`Error providing definition: ${error}`);
             return null;
+        }
+    }
+
+    private async onFoldingRanges(params: FoldingRangeParams): Promise<FoldingRange[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            return this.foldingRangeService.getFoldingRanges(document.getToolingDocument());
+        } catch (error) {
+            this.connection.console.error(`Error providing folding ranges: ${error}`);
+            return [];
+        }
+    }
+
+    private async onSelectionRanges(params: SelectionRangeParams): Promise<SelectionRange[]> {
+        try {
+            const document = this.documentManager.get(params.textDocument.uri);
+            if (!document) {
+                return [];
+            }
+            return this.selectionRangeService.getSelectionRanges(document.getToolingDocument(), params.positions);
+        } catch (error) {
+            this.connection.console.error(`Error providing selection ranges: ${error}`);
+            return [];
         }
     }
 }

@@ -22,10 +22,11 @@ class SchemaFilteringServiceTest {
      */
     private fun getValidSchemasForDocument(schema: String, document: String): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
+        val parsedDocument = KsonCore.parseToAst(document).ksonValue
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
         val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(JsonPointer(""))
-        return filteringService.getValidSchemas(candidateSchemas, document, JsonPointer("")).map { it.resolvedValue }
+        return filteringService.getValidSchemas(candidateSchemas, parsedDocument, JsonPointer("")).map { it.resolvedValue }
     }
 
     @Test

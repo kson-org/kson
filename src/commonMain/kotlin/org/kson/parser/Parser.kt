@@ -161,10 +161,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
 
                 parseValueForKeyword(keywordMark)
-                if (builder.getTokenType() == COMMA) {
-                    processComma(builder)
+                val hasTrailingComma = builder.getTokenType() == COMMA
+                if (hasTrailingComma) {
+                    builder.advanceLexer()
                 }
                 propertyMark.done(OBJECT_PROPERTY)
+                if (hasTrailingComma) {
+                    consumeExtraCommas()
+                }
 
                 if (builder.getTokenType() == DOT) {
                     val dotMark = builder.mark()
@@ -259,6 +263,21 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             commaMark.error(EMPTY_COMMAS.create())
         } else {
             commaMark.drop()
+        }
+    }
+
+    /**
+     * Consumes any extra consecutive commas and reports an [EMPTY_COMMAS] error.
+     * Unlike [processComma], this assumes the first (valid delimiter) comma has
+     * already been consumed, so it only fires when there are genuinely redundant commas.
+     */
+    private fun consumeExtraCommas() {
+        if (builder.getTokenType() == COMMA) {
+            val commaMark = builder.mark()
+            while (builder.getTokenType() == COMMA) {
+                builder.advanceLexer()
+            }
+            commaMark.error(EMPTY_COMMAS.create())
         }
     }
 
@@ -445,9 +464,9 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
             }
             if (builder.getTokenType() == COMMA) {
-                processComma(builder)
-
+                builder.advanceLexer()
                 listElementMark.done(LIST_ELEMENT)
+                consumeExtraCommas()
                 continue
             } else {
                 listElementMark.done(LIST_ELEMENT)

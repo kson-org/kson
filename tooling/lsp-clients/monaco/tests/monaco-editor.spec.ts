@@ -1,16 +1,11 @@
 import {test, expect} from '@playwright/test';
-import {readFileSync} from 'fs';
-import {dirname, join} from 'path';
-import {fileURLToPath} from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 /**
  * Smoke test for the Monaco KSON Editor
  *
- * This test verifies the basic functionality:
- * 1. The editor loads automatically on page load
- * 2. The default KSON content is displayed
+ * Verifies basic functionality:
+ * 1. Both editors load automatically on page load
+ * 2. KSON content is displayed in each editor
  * 3. Syntax highlighting is applied
  * 4. Line numbers are visible
  *
@@ -18,40 +13,33 @@ const __dirname = dirname(__filename);
  * - Dev server running on http://localhost:5173 (npm run dev)
  */
 test.describe('Monaco KSON Editor - Smoke Test', () => {
-    test('should load editor with KSON example and syntax highlighting', async ({page}) => {
-        // Step 1: Navigate to the editor page
+    test('should load editors with KSON content and syntax highlighting', async ({page}) => {
         await page.goto('http://localhost:5173');
-        await expect(page).toHaveTitle('KSON Editor');
+        await expect(page).toHaveTitle('KSON Monaco Editor');
 
-        // Step 2: Wait for editor to auto-load
-        await page.waitForSelector('.monaco-editor', {state: 'visible', timeout: 10000});
+        // Wait for both editors to appear
+        const editors = page.locator('.monaco-editor');
+        await expect(editors.first()).toBeVisible({timeout: 10000});
+        await expect(editors).toHaveCount(2);
+
+        // Wait for line numbers to render
         await page.waitForSelector('.line-numbers', {state: 'visible'});
         await page.waitForTimeout(1000); // Allow time for content rendering
 
-        // Step 4: Extract and verify editor content
-        const actualEditorContent = await page.evaluate(() => {
-            // Monaco renders each line as a .view-line element
-            const lines = document.querySelectorAll('.view-line');
+        // Verify the left editor displays the expected content
+        const leftEditorContent = await page.evaluate(() => {
+            const container = document.getElementById('editor-left');
+            if (!container) return '';
+            const lines = container.querySelectorAll('.view-line');
             return Array.from(lines)
                 .map(line => line.textContent || '')
                 .join('\n');
         });
 
-        // The default content from index.html
-        const expectedContent = '{\n  # Welcome to KSON editor!\n  "hello": "world"\n}';
+        const normalizedLeft = leftEditorContent.replace(/\u00A0/g, ' ').trim();
+        expect(normalizedLeft).toContain('kson-monaco-editor');
 
-        // Normalize both strings by replacing NBSP (U+00A0) with regular spaces
-        const normalizedActualContent = actualEditorContent.replace(/\u00A0/g, ' ').trim();
-        const normalizedExpectedContent = expectedContent.replace(/\u00A0/g, ' ').trim();
-
-        // Verify the editor displays the expected content
-        expect(normalizedActualContent).toBeTruthy();
-        expect(normalizedActualContent).toBe(normalizedExpectedContent);
-
-        // Step 5: Verify syntax highlighting
-        // Monaco applies syntax highlighting through span elements with classes
-
-        // Monaco uses different classes for tokens. Each class is a number prepended with `mtk`
+        // Verify syntax highlighting (multiple token classes present)
         const tokenClasses = await page.evaluate(() => {
             const spans = document.querySelectorAll('.view-line span[class*="mtk"]');
             const classes = new Set<string>();
@@ -63,10 +51,9 @@ test.describe('Monaco KSON Editor - Smoke Test', () => {
             });
             return Array.from(classes);
         });
-        // Just verify that we can find more than 1 token class
         expect(tokenClasses.length).toBeGreaterThan(1);
 
-        // Step 6: Verify editor UI elements
+        // Verify line numbers are visible
         const lineNumberCount = await page.locator('.line-numbers').count();
         expect(lineNumberCount).toBeGreaterThan(0);
     });

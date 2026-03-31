@@ -1,22 +1,20 @@
 import {
     Diagnostic,
     DiagnosticSeverity,
-    Range,
     DocumentDiagnosticReport,
     RelatedFullDocumentDiagnosticReport
 } from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument';
 import {isKsonSchemaDocument} from '../document/KsonSchemaDocument';
-import {Message, Kson, SchemaResult} from 'kson';
+import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from 'kson-tooling';
 
 /**
  * Service responsible for providing diagnostic information for Kson documents.
+ * Delegates to Kotlin's KsonTooling for validation.
  */
 export class DiagnosticService {
-    private cachedSchemaContent: string | null = null;
-    private cachedSchemaResult: SchemaResult | null = null;
 
-    createDocumentDiagnosticReport(document: KsonDocument): DocumentDiagnosticReport {
+    createDocumentDiagnosticReport(document: KsonDocument | null | undefined): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];
         return {
             kind: 'full',
@@ -25,86 +23,29 @@ export class DiagnosticService {
     }
 
     private getDiagnostics(document: KsonDocument): Diagnostic[] {
-        // Schema validation already includes parse errors, so use it exclusively when
-        // available to avoid duplicate diagnostics.
-        const messages = this.getSchemaValidationMessages(document)
-            ?? document.getAnalysisResult().errors.asJsReadonlyArrayView();
-        return this.loggedMessagesToDiagnostics(messages);
-    }
-
-    private getSchemaValidationMessages(document: KsonDocument): readonly Message[] | null {
         const schema = isKsonSchemaDocument(document)
             ? document.getMetaSchemaDocument()
             : document.getSchemaDocument();
-        if (!schema) return null;
+        const schemaContent = schema?.getText();
 
-        const parsedSchema = this.parseSchemaWithCache(schema.getText());
-        if (!(parsedSchema instanceof SchemaResult.Success)) return null;
+        const messages = KsonTooling.getInstance()
+            .validateDocument(document.getText(), schemaContent ?? null)
+            .asJsReadonlyArrayView();
 
-        return parsedSchema.schemaValidator.validate(document.getText(), document.uri).asJsReadonlyArrayView();
+        return messages.map(msg => toDiagnostic(msg));
     }
+}
 
-    /**
-     * Convert multiple Kson {@link messages} to language server {@link Diagnostic}s.
-     * @param messages
-     * @private
-     */
-    private loggedMessagesToDiagnostics(messages: readonly Message[]): Diagnostic[] {
-        return messages.map(msg => this.loggedMessageToDiagnostic(msg));
-    }
-
-    /**
-     * Convert Kson {@link Message} type to a to language server {@link Diagnostic} type.
-     */
-    private loggedMessageToDiagnostic(loggedMessage: Message): Diagnostic {
-        let diagnosticSeverity: DiagnosticSeverity;
-        switch (loggedMessage.severity.name) {
-            case 'ERROR':
-                diagnosticSeverity = DiagnosticSeverity.Error;
-                break;
-            case 'WARNING':
-                diagnosticSeverity = DiagnosticSeverity.Warning;
-                break;
-            default:
-                // Default to error if unknown severity
-                diagnosticSeverity = DiagnosticSeverity.Error;
-                break;
-        }
-        
-        return {
-            range: this.locationToRange(loggedMessage),
-            severity: diagnosticSeverity,
-            source: 'kson',
-            message: loggedMessage.message.toString(),
-        };
-    }
-
-    /**
-     * Convert Kson Location to LSP Range.
-     */
-    private locationToRange(message: Message): Range {
-        return {
-            start: {
-                line: message.start.line,
-                character: message.start.column
-            },
-            end: {
-                line: message.end.line,
-                character: message.end.column
-            }
-        };
-    }
-
-    /**
-     * Parse schema content, returning cached result if content hasn't changed.
-     */
-    private parseSchemaWithCache(schemaContent: string): SchemaResult {
-        if (this.cachedSchemaResult && this.cachedSchemaContent === schemaContent) {
-            return this.cachedSchemaResult;
-        }
-        const result = Kson.getInstance().parseSchema(schemaContent);
-        this.cachedSchemaContent = schemaContent;
-        this.cachedSchemaResult = result;
-        return result;
-    }
-} 
+function toDiagnostic(msg: DiagnosticMessage): Diagnostic {
+    return {
+        range: {
+            start: {line: msg.range.startLine, character: msg.range.startColumn},
+            end: {line: msg.range.endLine, character: msg.range.endColumn}
+        },
+        severity: msg.severity === KtSeverity.ERROR
+            ? DiagnosticSeverity.Error
+            : DiagnosticSeverity.Warning,
+        source: 'kson',
+        message: msg.message
+    };
+}

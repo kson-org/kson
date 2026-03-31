@@ -80,9 +80,15 @@ interface KsonCoreTest {
             message
         )
 
+        val reParsedResult = KsonCore.parseToKson(ksonParseResult.kson!!, compileSettings.ksonSettings)
+        assertFalse(
+            reParsedResult.hasErrors(),
+            "Re-parsing our transpiled Kson should not produce errors, got:\n\n" +
+                    LoggedMessage.print(reParsedResult.messages)
+        )
         assertEquals(
             ksonParseResult.kson,
-            ksonParseResult.kson,
+            reParsedResult.kson,
             "Re-parsing our transpiled Kson must be idempotent"
         )
 

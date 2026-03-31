@@ -19,7 +19,7 @@ class KsonValuePathBuilderTest {
      */
     private fun assertPathAtCaret(
         documentWithCaret: String,
-        expectedPath: JsonPointer,
+        expectedPath: JsonPointer?,
         includePropertyKeys: Boolean = true
     ) {
         val caretMarker = "<caret>"
@@ -34,7 +34,7 @@ class KsonValuePathBuilderTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        val actualPath = KsonValuePathBuilder(document, Coordinates(line, column))
+        val actualPath = KsonValuePathBuilder(KsonTooling.parse(document), Coordinates(line, column))
             .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
         assertEquals(expectedPath, actualPath, "Path does not match expected value")
@@ -127,7 +127,7 @@ class KsonValuePathBuilderTest {
     fun testBuildJsonPointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
+            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
         )
     }
 
@@ -253,7 +253,7 @@ class KsonValuePathBuilderTest {
     fun testBuildJsonPointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
-            expectedPath = JsonPointer.fromTokens(emptyList()) // Empty document should return an empty list
+            expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
         )
     }
 
@@ -323,6 +323,52 @@ class KsonValuePathBuilderTest {
             }
             """.trimIndent(),
             expectedPath = JsonPointer.fromTokens(listOf("username")), // Keeps "username" for definition lookup
+            includePropertyKeys = true
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_classic_repeatedPropertyName_afterColon() {
+        // When a property name appears at multiple nesting levels, the path builder
+        // should still correctly add the inner property name after its colon.
+        // Regression test: previously the string comparison guard against duplicate
+        // pointer tokens would false-negative when the same name appeared at both levels.
+        assertPathAtCaret(
+            """
+            {
+              "name": {
+                "name": <caret>
+              }
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("name", "name"))
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_afterColon() {
+        // Property key with escape sequences — the path should use the processed
+        // (unescaped) key, matching what the AST walker produces.
+        assertPathAtCaret(
+            """
+            {
+              "key\twith\ttabs": <caret>
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs"))
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_onKey() {
+        // Cursor on a quoted key with escapes — definition lookup should use processed name
+        assertPathAtCaret(
+            """
+            {
+              "key<caret>\twith\ttabs": "value"
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs")),
             includePropertyKeys = true
         )
     }
