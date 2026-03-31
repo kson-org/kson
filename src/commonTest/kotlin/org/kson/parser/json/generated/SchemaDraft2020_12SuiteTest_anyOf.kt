@@ -510,8 +510,7 @@ class SchemaDraft2020_12SuiteTest_anyOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -539,8 +538,7 @@ class SchemaDraft2020_12SuiteTest_anyOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,

@@ -35,8 +35,11 @@ val generateConstants by tasks.registering {
     // Get version from kson-lib project
     val ksonLibVersion = project(":kson-lib").version.toString()
 
+    inputs.property("ksonLibVersion", ksonLibVersion)
+    inputs.property("cliName", cliName)
+    inputs.property("fileExtension", fileExtension)
+    inputs.property("cliDisplayName", cliDisplayName)
     outputs.files(versionFile, namingFile)
-    outputs.upToDateWhen { false } // Always regenerate to catch version/property changes
 
     doLast {
         outputDir.mkdirs()
@@ -82,10 +85,12 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
     group = "build"
     description = "Builds native executable using GraalVM from JDK toolchain"
 
-    dependsOn(tasks.jar)
-
     val outputDir = layout.buildDirectory.dir("native/nativeCompile").get().asFile
     val outputFile = file("$outputDir/$cliName")
+    outputs.file(outputFile)
+
+    inputs.files(tasks.jar.map { it.archiveFile })
+    inputs.files(configurations.runtimeClasspath)
 
     // Configure the command at configuration time using providers
     command.set(provider {

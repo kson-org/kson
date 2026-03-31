@@ -32,10 +32,8 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -65,10 +63,8 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -90,17 +86,14 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -128,10 +121,8 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -159,10 +150,8 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        },
-                        "bar": {
-                        }
+                        "foo": {},
+                        "bar": {}
                     },
                     "required": [
                         "foo"
@@ -184,15 +173,13 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     }
                 }
             """,
@@ -211,18 +198,15 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "properties": {
-                        "foo": {
-                        }
+                        "foo": {}
                     },
-                    "required": [
-                    ]
+                    "required": []
                 }
             """,
             true,
@@ -310,8 +294,7 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -365,8 +348,7 @@ class SchemaDraft2020_12SuiteTest_required : JsonSchemaTest {
         // Ensure JS implementations don't universally consider e.g. __proto__ to always be present in an object.
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {

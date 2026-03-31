@@ -614,8 +614,7 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
             """
                 {
                     "allOf": [
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -639,10 +638,8 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
             """
                 {
                     "allOf": [
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {}
                     ]
                 }
             """,
@@ -666,8 +663,7 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
             """
                 {
                     "allOf": [
-                        {
-                        },
+                        {},
                         {
                             "type": "number"
                         }
@@ -694,8 +690,7 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
             """
                 {
                     "allOf": [
-                        {
-                        },
+                        {},
                         {
                             "type": "number"
                         }
@@ -725,8 +720,7 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
@@ -753,8 +747,7 @@ class SchemaDraft7SuiteTest_allOf : JsonSchemaTest {
                         {
                             "type": "number"
                         },
-                        {
-                        }
+                        {}
                     ]
                 }
             """,
