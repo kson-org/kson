@@ -388,4 +388,103 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             "Nested embed block with incorrect tag should fail validation"
         )
     }
+
+    @Test
+    fun testEmbedBlockMaxLengthValidation() {
+        val schema = """
+        {
+          "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+          "type": "string",
+          "maxLength": 10
+        }
+        """
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              short
+            %%
+            """,
+            schema,
+            true,
+            "Embed block content within maxLength should validate"
+        )
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              this content exceeds the max length
+            %%
+            """,
+            schema,
+            false,
+            "Embed block content exceeding maxLength should fail"
+        )
+    }
+
+    @Test
+    fun testEmbedBlockMinLengthValidation() {
+        val schema = """
+        {
+          "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+          "type": "string",
+          "minLength": 20
+        }
+        """
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              SELECT * FROM users WHERE active = 1
+            %%
+            """,
+            schema,
+            true,
+            "Embed block content meeting minLength should validate"
+        )
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              short
+            %%
+            """,
+            schema,
+            false,
+            "Embed block content shorter than minLength should fail"
+        )
+    }
+
+    @Test
+    fun testEmbedBlockPatternValidation() {
+        val schema = """
+        {
+          "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+          "type": "string",
+          "pattern": "SELECT"
+        }
+        """
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              SELECT * FROM users
+            %%
+            """,
+            schema,
+            true,
+            "Embed block content matching pattern should validate"
+        )
+
+        assertKsonEnforcesSchema(
+            """
+            %sql
+              INSERT INTO users VALUES (1)
+            %%
+            """,
+            schema,
+            false,
+            "Embed block content not matching pattern should fail"
+        )
+    }
 }

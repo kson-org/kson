@@ -11,20 +11,7 @@ data object KsonDraft7MetaSchema {
         '$schema': 'http://json-schema.org/draft-07/schema#'
         '$id': 'http://json-schema.org/draft-07/schema#'
         title: 'Core schema meta-schema'
-        description: %markdown
-          KSON adaptation of the JSON Schema Draft-07 meta-schema.
-
-          This meta-schema extends the [original](http://json-schema.org/draft-07/schema#)
-          with KSON-native features:
-
-          - **`description`** and **`$comment`** accept embed blocks in addition to
-            plain strings, via the `stringOrEmbedBlock` definition.  This allows schema
-            authors to write rich, tagged, multi-line documentation using KSON's embed
-            block syntax.
-
-          For JSON Schema compatibility, transpile with `retainEmbedTags = false` to
-          collapse embed blocks back to plain strings.
-        %%
+        description: 'KSON adaptation of the JSON Schema Draft-07 meta-schema.'
         definitions:
           schemaArray:
             type: array
@@ -62,23 +49,6 @@ data object KsonDraft7MetaSchema {
             default:
               <>
             .
-          stringOrEmbedBlock:
-            anyOf:
-              - type: string
-              - type: object
-                properties:
-                  embedTag:
-                    type: string
-                    .
-                  embedContent:
-                    type: string
-                    .
-                  .
-                required:
-                  - embedContent
-                additionalProperties: false
-                .
-            .
           .
         type:
           - object
@@ -97,13 +67,13 @@ data object KsonDraft7MetaSchema {
             format: 'uri-reference'
             .
           '$comment':
-            '$ref': '#/definitions/stringOrEmbedBlock'
+            type: string
             .
           title:
             type: string
             .
           description:
-            '$ref': '#/definitions/stringOrEmbedBlock'
+            type: string
             .
           default: true
           readOnly:
