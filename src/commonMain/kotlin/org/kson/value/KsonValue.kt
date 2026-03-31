@@ -159,7 +159,7 @@ class KsonNumber(private val numberNode: NumberNode) : KsonValue(numberNode), Su
 
     override fun subCoordinatesLocation(subStartLine: Int, subStartColumn: Int, subEndLine: Int, subEndColumn: Int): Location {
         return numberNode.contentTransformer
-            .mapToOriginal(subStartLine, subStartColumn, subEndLine, subStartColumn)
+            .mapToOriginal(subStartLine, subStartColumn, subEndLine, subEndColumn)
     }
 
     override fun equals(other: Any?): Boolean {
