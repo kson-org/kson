@@ -38,11 +38,12 @@ object SchemaParser {
         schemaValue: KsonValue,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         return when (schemaValue) {
             is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup)
+            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup, propertyName = propertyName)
             else -> {
                 messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
                 null
@@ -54,7 +55,8 @@ object SchemaParser {
         schemaObject: KsonObject,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
 
@@ -127,7 +129,7 @@ object SchemaParser {
 
         val typeValidator = schemaProperties["type"]?.let { typeValue ->
             when (typeValue) {
-                is KsonString -> TypeValidator(typeValue.value)
+                is KsonString -> TypeValidator(typeValue.value, propertyName)
                 is KsonList -> {
                     val typeArrayEntries = ArrayList<String>()
                     for (element in typeValue.elements) {
@@ -137,7 +139,7 @@ object SchemaParser {
                             messageSink.error(element.location, SCHEMA_TYPE_ARRAY_ENTRY_ERROR.create())
                         }
                     }
-                    TypeValidator(typeArrayEntries)
+                    TypeValidator(typeArrayEntries, propertyName)
                 }
 
                 else -> {
@@ -227,19 +229,15 @@ object SchemaParser {
         }
 
         schemaProperties["items"]?.let { itemsValue ->
-            val additionalItemsValidator = schemaProperties["additionalItems"]?.let { additionalItems ->
-                when (additionalItems) {
-                    is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value)
-                    else -> parseSchemaElement(additionalItems, messageSink, updatedBaseUri, idLookup)
-                        ?.let { AdditionalItemsSchemaValidator(it) }
-                }
-            }
-
             when (itemsValue) {
                 is KsonList -> {
-                    val leadingItemsValidator = LeadingItemsTupleValidator(itemsValue.elements.mapNotNull {
+                    val tupleSchemas = itemsValue.elements.mapNotNull {
                         parseSchemaElement(it, messageSink, updatedBaseUri, idLookup)
-                    })
+                    }
+                    val leadingItemsValidator = LeadingItemsTupleValidator(tupleSchemas)
+                    val additionalItemsValidator = parseAdditionalItemsValidator(
+                        schemaProperties, tupleSchemas.size, messageSink, updatedBaseUri, idLookup
+                    )
                     validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                 }
 
@@ -247,6 +245,9 @@ object SchemaParser {
                     val itemsSchema = parseSchemaElement(itemsValue, messageSink, updatedBaseUri, idLookup)
                     if (itemsSchema != null) {
                         val leadingItemsValidator = LeadingItemsSchemaValidator(itemsSchema)
+                        val additionalItemsValidator = parseAdditionalItemsValidator(
+                            schemaProperties, 0, messageSink, updatedBaseUri, idLookup
+                        )
                         validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                     } else {
                         // no-op todo this shouldn't be necessary - bug in Intellij inspections?
@@ -292,7 +293,7 @@ object SchemaParser {
         val propertySchemas = schemaProperties["properties"]?.let { properties ->
             if (properties is KsonObject) {
                 properties.propertyMap.entries.associate { (_, value) ->
-                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup, value.propName.value)
                 }
             } else {
                 messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))
@@ -320,7 +321,7 @@ object SchemaParser {
 
         val additionalPropertiesValidator = schemaProperties["additionalProperties"]?.let { additionalProperties ->
             when (additionalProperties) {
-                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value)
+                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value, title)
                 else -> parseSchemaElement(additionalProperties, messageSink, updatedBaseUri, idLookup)
                     ?.let { AdditionalPropertiesSchemaValidator(it) }
             }
@@ -464,6 +465,26 @@ object SchemaParser {
         }
 
         return JsonObjectSchema(title, description, comment, default, definitions, typeValidator, validators)
+    }
+
+    private fun parseAdditionalItemsValidator(
+        schemaProperties: Map<String, KsonValue>,
+        tupleLength: Int,
+        messageSink: MessageSink,
+        currentBaseUri: String,
+        idLookup: SchemaIdLookup
+    ): AdditionalItemsValidator? {
+        return schemaProperties["additionalItems"]?.let { additionalItems ->
+            when (additionalItems) {
+                is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value, tupleLength)
+                else -> parseSchemaElement(
+                    additionalItems,
+                    messageSink,
+                    currentBaseUri,
+                    idLookup
+                )?.let { AdditionalItemsSchemaValidator(it) }
+            }
+        }
     }
 }
 

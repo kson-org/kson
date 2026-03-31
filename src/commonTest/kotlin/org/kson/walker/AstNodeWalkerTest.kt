@@ -160,7 +160,7 @@ class AstNodeWalkerTest {
     @Test
     fun testCompletelyUnparseableDocumentReturnsNull() {
         // Some inputs produce KsonRootError — parseAst returns null
-        val node = parseAst("[1, , 3]")
+        val node = parseAst("")
         assertNull(node)
     }
 

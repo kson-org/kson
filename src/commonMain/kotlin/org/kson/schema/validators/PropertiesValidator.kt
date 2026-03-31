@@ -57,11 +57,11 @@ sealed interface AdditionalPropertiesValidator {
     fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink)
 }
 
-data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : AdditionalPropertiesValidator {
+data class AdditionalPropertiesBooleanValidator(val allowed: Boolean, private val schemaTitle: String?) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
         if (!allowed && remainingProperties.isNotEmpty()) {
             remainingProperties.forEach { (_, property) ->
-                messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create())
+                messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(property.propName.value, schemaTitle ?: ""))
             }
         }
     }
@@ -70,7 +70,20 @@ data class AdditionalPropertiesBooleanValidator(val allowed: Boolean) : Addition
 data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : AdditionalPropertiesValidator {
     override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
         remainingProperties.forEach { (_, property) ->
-            schema.validate(property.propValue, messageSink)
+            val propertyMessageSink = MessageSink()
+            schema.validate(property.propValue, propertyMessageSink)
+            if (propertyMessageSink.hasMessages()) {
+                messageSink.error(
+                    property.propName.location,
+                    MessageType.SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH.create(
+                        property.propName.value,
+                        schema.descriptionWithDefault()
+                    )
+                )
+                propertyMessageSink.loggedMessages().forEach {
+                    messageSink.error(it.location, it.message)
+                }
+            }
         }
     }
 }
