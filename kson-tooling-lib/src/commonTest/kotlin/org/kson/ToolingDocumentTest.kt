@@ -47,6 +47,36 @@ class ToolingDocumentTest {
     }
 
     @Test
+    fun testSchemaIdExtraction() {
+        val doc = KsonTooling.parse("""{ "${'$'}schema": "http://json-schema.org/draft-07/schema#", "type": "object" }""")
+        assertEquals("http://json-schema.org/draft-07/schema#", doc.schemaId)
+    }
+
+    @Test
+    fun testSchemaIdNullWhenAbsent() {
+        val doc = KsonTooling.parse("""{ "type": "object" }""")
+        assertNull(doc.schemaId)
+    }
+
+    @Test
+    fun testSchemaIdNullForNonObject() {
+        val doc = KsonTooling.parse(""""just a string"""")
+        assertNull(doc.schemaId)
+    }
+
+    @Test
+    fun testSchemaIdExtractionFromKsonSyntax() {
+        val doc = KsonTooling.parse(""""${'$'}schema": "http://json-schema.org/draft-07/schema#"""")
+        assertEquals("http://json-schema.org/draft-07/schema#", doc.schemaId)
+    }
+
+    @Test
+    fun testSchemaIdNullWhenNotString() {
+        val doc = KsonTooling.parse("""{ "${'$'}schema": 42 }""")
+        assertNull(doc.schemaId)
+    }
+
+    @Test
     fun testEmptyDocumentHasNullKsonValue() {
         val doc = KsonTooling.parse("")
         assertNull(doc.ksonValue, "Empty document should have null ksonValue")

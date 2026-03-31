@@ -403,12 +403,15 @@ class SchemaInfoLocationTest {
             }
         """.trimIndent()
 
-        // Should return null for invalid document
+        // Error-tolerant parsing + AST-based navigation means we can still
+        // navigate broken documents. The cursor is inside the root object,
+        // so schema info for the object type is returned.
         val hoverInfo = getInfoAtCaret(schema, """
             {inva<caret>lid kson
         """.trimIndent())
 
-        assertNull(hoverInfo)
+        assertNotNull(hoverInfo)
+        assertTrue(hoverInfo.contains("object"))
     }
 
     @Test
