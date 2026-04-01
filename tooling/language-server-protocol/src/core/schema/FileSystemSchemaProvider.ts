@@ -6,7 +6,7 @@ import {SchemaProvider} from './SchemaProvider.js';
 import { Kson, Result} from 'kson'
 import * as fs from 'fs';
 import * as path from 'path';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 /**
  * Node.js-specific schema provider that reads from the file system.
