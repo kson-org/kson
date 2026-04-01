@@ -1,8 +1,8 @@
 pluginManagement {
     plugins {
-        kotlin("multiplatform") version "2.2.20"
-        kotlin("jvm") version "2.2.20"
-        kotlin("plugin.serialization") version "2.2.20"
+        kotlin("multiplatform") version "2.3.20"
+        kotlin("jvm") version "2.3.20"
+        kotlin("plugin.serialization") version "2.3.20"
     }
 
     repositories {
