@@ -1,4 +1,4 @@
-package org.kson
+package tooling
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
@@ -10,6 +10,7 @@ import org.kson.value.KsonNumber
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import kotlin.collections.iterator
 
 /**
  * Builds a list of enclosing [Range]s for a given cursor position in KSON source.

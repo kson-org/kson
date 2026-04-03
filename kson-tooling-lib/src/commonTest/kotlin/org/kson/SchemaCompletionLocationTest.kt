@@ -10,7 +10,7 @@ class SchemaCompletionLocationTest {
     /**
      * Helper to get completions at the <caret> position in the document
      */
-    private fun getCompletionsAtCaret(schema: String, documentWithCaret: String): List<CompletionItem>? {
+    private fun getCompletionsAtCaret(schema: String, documentWithCaret: String): List<tooling.CompletionItem>? {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
@@ -23,7 +23,7 @@ class SchemaCompletionLocationTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        return KsonTooling.getCompletionsAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
+        return tooling.KsonTooling.getCompletionsAtLocation(tooling.KsonTooling.parse(document), tooling.KsonTooling.parse(schema), line, column)
     }
 
     @Test
@@ -57,7 +57,7 @@ class SchemaCompletionLocationTest {
         assertTrue("pending" in labels, "Should include 'pending'")
 
         // All should be VALUE kind
-        assertTrue(completions.all { it.kind == CompletionKind.VALUE }, "All should be VALUE completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.VALUE }, "All should be VALUE completions")
     }
 
     @Test
@@ -359,7 +359,7 @@ class SchemaCompletionLocationTest {
         assertTrue("cancelled" in labels, "Should include 'cancelled'")
 
         // All should be VALUE kind
-        assertTrue(completions.all { it.kind == CompletionKind.VALUE }, "All should be VALUE completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.VALUE }, "All should be VALUE completions")
     }
 
     @Test
@@ -413,7 +413,7 @@ class SchemaCompletionLocationTest {
         assertTrue("cancelled" in labels, "Should include 'cancelled'")
 
         // All should be VALUE kind
-        assertTrue(completions.all { it.kind == CompletionKind.VALUE }, "All should be VALUE completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.VALUE }, "All should be VALUE completions")
     }
 
     @Test
@@ -554,7 +554,7 @@ class SchemaCompletionLocationTest {
         assertTrue("email" in labels, "Should include 'email' property")
 
         // All should be PROPERTY kind
-        assertTrue(completions.all { it.kind == CompletionKind.PROPERTY }, "All should be PROPERTY completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.PROPERTY }, "All should be PROPERTY completions")
     }
 
     @Test
@@ -701,7 +701,7 @@ class SchemaCompletionLocationTest {
         assertTrue("name" !in labels, "Should NOT include sibling property 'name'")
 
         // All should be PROPERTY kind
-        assertTrue(completions.all { it.kind == CompletionKind.PROPERTY }, "All should be PROPERTY completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.PROPERTY }, "All should be PROPERTY completions")
     }
 
     @Test
@@ -733,7 +733,7 @@ class SchemaCompletionLocationTest {
         assertTrue("email" in labels, "Should include 'email' property")
 
         // All should be PROPERTY kind
-        assertTrue(completions.all { it.kind == CompletionKind.PROPERTY }, "All should be PROPERTY completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.PROPERTY }, "All should be PROPERTY completions")
     }
 
     @Test
@@ -765,7 +765,7 @@ class SchemaCompletionLocationTest {
         assertTrue("pending" in labels, "Should include 'pending' enum value")
 
         // All should be VALUE kind
-        assertTrue(completions.all { it.kind == CompletionKind.VALUE }, "All should be VALUE completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.VALUE }, "All should be VALUE completions")
     }
 
     @Test
@@ -811,7 +811,7 @@ class SchemaCompletionLocationTest {
         assertTrue("priority" in labels, "Should include 'priority' property")
 
         // All should be PROPERTY kind
-        assertTrue(completions.all { it.kind == CompletionKind.PROPERTY }, "All should be PROPERTY completions")
+        assertTrue(completions.all { it.kind == tooling.CompletionKind.PROPERTY }, "All should be PROPERTY completions")
     }
     @Test
     fun testCompletionsWithExtraWhitespace() {

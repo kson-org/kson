@@ -1,7 +1,7 @@
-package org.kson.navigation
+package tooling.navigation
 
-import org.kson.CompletionItem
-import org.kson.CompletionKind
+import tooling.CompletionItem
+import tooling.CompletionKind
 import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef

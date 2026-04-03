@@ -4,7 +4,7 @@ import org.kson.parser.Coordinates
 import kotlin.test.*
 
 /**
- * Tests for [KsonTooling.resolveRefAtLocation] - jump to definition within schema documents
+ * Tests for [tooling.KsonTooling.resolveRefAtLocation] - jump to definition within schema documents
  */
 class SchemaRefResolutionTest {
 
@@ -56,7 +56,7 @@ class SchemaRefResolutionTest {
             .replace(cursorMarker, "")
 
         // Get the actual resolution result
-        val locations = KsonTooling.resolveRefAtLocation(KsonTooling.parse(schema), cursorCoordinates.line, cursorCoordinates.column)
+        val locations = tooling.KsonTooling.resolveRefAtLocation(tooling.KsonTooling.parse(schema), cursorCoordinates.line, cursorCoordinates.column)
 
         if (expectedRange == null) {
             // No expected range means we expect empty list

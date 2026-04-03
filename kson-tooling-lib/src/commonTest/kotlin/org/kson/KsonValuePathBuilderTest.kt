@@ -1,8 +1,9 @@
 package org.kson
 
-import org.kson.navigation.KsonValuePathBuilder
+import tooling.navigation.KsonValuePathBuilder
 import org.kson.parser.Coordinates
 import org.kson.value.navigation.json_pointer.JsonPointer
+import tooling.KsonTooling.parse
 import kotlin.test.*
 
 /**
@@ -34,7 +35,7 @@ class KsonValuePathBuilderTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        val actualPath = KsonValuePathBuilder(KsonTooling.parse(document), Coordinates(line, column))
+        val actualPath = KsonValuePathBuilder(parse(document), Coordinates(line, column))
             .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
         assertEquals(expectedPath, actualPath, "Path does not match expected value")

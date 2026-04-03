@@ -1,7 +1,9 @@
 @file:OptIn(ExperimentalJsExport::class)
 
-package org.kson
+package tooling
 
+import org.kson.CoreCompileConfig
+import org.kson.KsonCore
 import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
 import org.kson.ast.KsonRootImpl
@@ -17,7 +19,7 @@ import kotlin.js.JsExport
 /**
  * A pre-parsed KSON document that can be shared across multiple tooling operations.
  *
- * Parses with [CoreCompileConfig.ignoreErrors] = true so that partial results are
+ * Parses with [org.kson.CoreCompileConfig.ignoreErrors] = true so that partial results are
  * available even for documents with syntax errors. This gives better editor behavior:
  * features like folding, semantic tokens, and document symbols continue to work in
  * broken documents rather than returning empty results.
@@ -30,7 +32,9 @@ import kotlin.js.JsExport
  */
 @JsExport
 class ToolingDocument internal constructor(val content: String, internal val sourceContext: SourceContext = SourceContext()) {
-    private val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true, sourceContext = sourceContext))
+    private val parseResult = KsonCore.parseToAst(content,
+        CoreCompileConfig(ignoreErrors = true, sourceContext = sourceContext)
+    )
 
     /**
      * The parsed [KsonValue] from error-tolerant parsing, or null if the

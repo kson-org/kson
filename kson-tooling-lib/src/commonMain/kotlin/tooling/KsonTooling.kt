@@ -1,15 +1,18 @@
 @file:OptIn(ExperimentalJsExport::class)
 @file:JsExport
 
-package org.kson
+package tooling
 
-import org.kson.navigation.KsonValuePathBuilder
-import org.kson.navigation.SchemaInformation
-import org.kson.navigation.extractSchemaInfo
+import tooling.navigation.KsonValuePathBuilder
+import tooling.navigation.SchemaInformation
+import tooling.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
+import org.kson.schema.ResolvedRef
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.validation.SourceContext
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
@@ -114,12 +117,12 @@ object KsonTooling {
         // Navigate to the value at the cursor position
         val valueAtPosition = KsonValueWalker.navigateWithJsonPointer(parsedSchema, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
-        val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return emptyList()
+        val refString = (valueAtPosition as? KsonString)?.value ?: return emptyList()
 
         // Determine the base URI for the schema root
-        val baseUri = (parsedSchema as? org.kson.value.KsonObject)
+        val baseUri = (parsedSchema as? KsonObject)
             ?.propertyLookup[$$"$id"]
-            ?.let { it as? org.kson.value.KsonString }
+            ?.let { it as? KsonString }
             ?.value ?: ""
 
         // Resolve the reference and return its location
@@ -242,7 +245,7 @@ object KsonTooling {
      *
      * Internally performs a strict re-parse (without error tolerance) to
      * produce accurate error messages. The [ToolingDocument]'s content and
-     * [SourceContext][org.kson.validation.SourceContext] are used for the
+     * [SourceContext][SourceContext] are used for the
      * strict parse, so validators receive the document's filepath.
      *
      * If a [schema] is provided, the document is validated against it.
@@ -280,7 +283,7 @@ object KsonTooling {
      */
     private data class ResolvedSchemaContext(
         val schemaIdLookup: SchemaIdLookup,
-        val validSchemas: List<org.kson.schema.ResolvedRef>,
+        val validSchemas: List<ResolvedRef>,
         val parsedDocument: KsonValue?
     ){
         companion object {
@@ -297,8 +300,8 @@ object KsonTooling {
              * @param documentPointer The [JsonPointer] to navigate to in the schema
              */
             fun resolveAndFilterSchemas(
-                parsedSchema: org.kson.value.KsonValue,
-                documentValue: org.kson.value.KsonValue?,
+                parsedSchema: KsonValue,
+                documentValue: KsonValue?,
                 documentPointer: JsonPointer
             ): ResolvedSchemaContext {
                 val schemaIdLookup = SchemaIdLookup(parsedSchema)

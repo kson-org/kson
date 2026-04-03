@@ -3,7 +3,7 @@ package org.kson
 import kotlin.test.*
 
 /**
- * Tests for [KsonTooling] hover information functionality
+ * Tests for [tooling.KsonTooling] hover information functionality
  */
 class SchemaInfoLocationTest {
 
@@ -23,7 +23,7 @@ class SchemaInfoLocationTest {
         // Remove caret marker from document
         val document = documentWithCaret.replace(caretMarker, "")
 
-        return KsonTooling.getSchemaInfoAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
+        return tooling.KsonTooling.getSchemaInfoAtLocation(tooling.KsonTooling.parse(document), tooling.KsonTooling.parse(schema), line, column)
     }
 
     @Test

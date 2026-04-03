@@ -1,7 +1,7 @@
 @file:OptIn(ExperimentalJsExport::class)
 @file:JsExport
 
-package org.kson
+package tooling
 
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType

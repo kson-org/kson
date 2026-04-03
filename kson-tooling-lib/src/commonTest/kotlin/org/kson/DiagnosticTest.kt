@@ -4,17 +4,17 @@ import kotlin.test.*
 
 class DiagnosticTest {
 
-    private fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
-        val document = KsonTooling.parse(content)
-        val schema = schemaContent?.let { KsonTooling.parse(it) }
-        return KsonTooling.validateDocument(document, schema)
+    private fun validateDocument(content: String, schemaContent: String? = null): List<tooling.DiagnosticMessage> {
+        val document = tooling.KsonTooling.parse(content)
+        val schema = schemaContent?.let { tooling.KsonTooling.parse(it) }
+        return tooling.KsonTooling.validateDocument(document, schema)
     }
 
     @Test
     fun testEmptyDocumentReportsError() {
         val diagnostics = validateDocument("")
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
@@ -39,14 +39,14 @@ class DiagnosticTest {
     fun testExtraTokensAfterValue() {
         val diagnostics = validateDocument("key: \"value\" extraValue")
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
     fun testUnclosedBrace() {
         val diagnostics = validateDocument("{ \"name\": \"test\"")
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
@@ -57,8 +57,8 @@ class DiagnosticTest {
         """.trimIndent()
         val diagnostics = validateDocument(content)
         assertEquals(2, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[1].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.WARNING, diagnostics[1].severity)
     }
 
     @Test
@@ -91,7 +91,7 @@ class DiagnosticTest {
         """.trimIndent()
         val diagnostics = validateDocument("{ age: \"not a number\" }", schema)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.WARNING, diagnostics[0].severity)
     }
 
     @Test
@@ -107,7 +107,7 @@ class DiagnosticTest {
         """.trimIndent()
         val diagnostics = validateDocument("{ age: 30 }", schema)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.WARNING, diagnostics[0].severity)
     }
 
     @Test
@@ -130,7 +130,7 @@ class DiagnosticTest {
         val invalidSchema = "{ this is not valid : : : }}}"
         val diagnostics = validateDocument("key: \"value\" extra", invalidSchema)
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 
     @Test
@@ -144,6 +144,6 @@ class DiagnosticTest {
     fun testNoSchemaReturnsOnlyParseErrors() {
         val diagnostics = validateDocument("key: \"value\" extra")
         assertEquals(1, diagnostics.size)
-        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+        assertEquals(tooling.DiagnosticSeverity.ERROR, diagnostics[0].severity)
     }
 }

@@ -1,5 +1,7 @@
-package org.kson
+package tooling
 
+import org.kson.CoreCompileConfig
+import org.kson.KsonCore
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageSeverity
 import org.kson.validation.SourceContext
@@ -30,7 +32,9 @@ internal object DiagnosticBuilder {
         val jsonSchema = schemaResult.jsonSchema ?: return null
 
         // Schema validation already includes parse errors, so we use it exclusively
-        val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext))
+        val parseResult = KsonCore.parseToAst(content,
+            CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)
+        )
         return parseResult.messages.map { toDiagnosticMessage(it) }
     }
 
