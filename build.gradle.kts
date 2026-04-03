@@ -7,15 +7,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonVersion
 import java.util.*
 
-val sharedProps = Properties().apply {
-    project.file("jdk.properties").inputStream().use { load(it) }
-}
+val sharedProps =
+    Properties().apply {
+        project.file("jdk.properties").inputStream().use { load(it) }
+    }
 
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -49,7 +51,7 @@ tasks {
     withType<Task> {
         // make every task except itself depend on generateJsonTestSuiteTask and transpileCircleCIConfigTask to
         // ensure it's always up-to-date before any other build steps
-        if (name != generateJsonTestSuiteTask.name && name != transpileCircleCiConfigTask.name ) {
+        if (name != generateJsonTestSuiteTask.name && name != transpileCircleCiConfigTask.name) {
             dependsOn(generateJsonTestSuiteTask, transpileCircleCiConfigTask)
         }
     }
@@ -76,16 +78,20 @@ tasks {
         // ensure buildSrc/ regenerates its wrapper whenever we do
         doLast {
             project.file("buildSrc").let { buildSrcDir ->
-                GradleConnector.newConnector().apply {
-                    useInstallation(gradle.gradleHomeDir)
-                    forProjectDirectory(buildSrcDir)
-                }.connect().use { connection ->
-                    connection.newBuild()
-                        .forTasks("wrapper")
-                        .setStandardOutput(System.out)
-                        .setStandardError(System.err)
-                        .run()
-                }
+                GradleConnector
+                    .newConnector()
+                    .apply {
+                        useInstallation(gradle.gradleHomeDir)
+                        forProjectDirectory(buildSrcDir)
+                    }.connect()
+                    .use { connection ->
+                        connection
+                            .newBuild()
+                            .forTasks("wrapper")
+                            .setStandardOutput(System.out)
+                            .setStandardError(System.err)
+                            .run()
+                    }
             }
             println("Generated Gradle wrapper for both root and buildSrc")
         }
@@ -111,7 +117,32 @@ tasks {
     }
 }
 
+// TODO update the generators to emit ktlint-compliant code, then remove these exclusions
+val generatedFileFilter: PatternFilterable.() -> Unit = {
+    exclude { it.file.path.contains("/generated/") }
+}
+
+ktlint {
+    filter(generatedFileFilter)
+}
+
+subprojects {
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
+        configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            filter(generatedFileFilter)
+        }
+    }
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
+        configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            filter(generatedFileFilter)
+        }
+    }
+}
+
 group = "org.kson"
+
 /**
  * We use x.[incrementing number] version here since this in not intended for general consumption.
  *   This version number is both easy to increment and (hopefully) telegraphs well with the strange
@@ -175,7 +206,9 @@ mavenPublishing {
 
     pom {
         name.set("KSON Internals")
-        description.set("Internal implementation details of KSON. This package is not intended for direct use. Please use the 'org.kson:kson' package instead for the stable public API.")
+        description.set(
+            "Internal implementation details of KSON. This package is not intended for direct use. Please use the 'org.kson:kson' package instead for the stable public API.",
+        )
         url.set("https://kson.org")
 
         licenses {
