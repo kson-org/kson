@@ -11,59 +11,49 @@ import org.kson.jetbrains.highlighter.KsonSyntaxHighlighter
 import javax.swing.Icon
 
 class KsonColorSettingsPage : ColorSettingsPage {
-    override fun getIcon(): Icon {
-        return KsonIcons.FILE
-    }
+    override fun getIcon(): Icon = KsonIcons.FILE
 
-    override fun getHighlighter(): SyntaxHighlighter {
-        return KsonSyntaxHighlighter()
-    }
+    override fun getHighlighter(): SyntaxHighlighter = KsonSyntaxHighlighter()
 
-    override fun getDemoText(): String {
-        return """
-            key: value
-            string: "a string"
-            dashList:
-                - "list element"
-                - <
-                    - "element of delimited sub-list"
-                    - "another sub-list element"
-                  >
-                - "another list element"
-            list: [1, 2, 3, true, false]
-            invalid: ``
-            embed_block: %%kotlin
-                println("Hello y'all")
-            %%
-            # this is a comment
-            nested: {
-                null_keyword: null
-            }
+    override fun getDemoText(): String =
+        """
+        key: value
+        string: "a string"
+        dashList:
+            - "list element"
+            - <
+                - "element of delimited sub-list"
+                - "another sub-list element"
+              >
+            - "another list element"
+        list: [1, 2, 3, true, false]
+        invalid: ``
+        embed_block: %%kotlin
+            println("Hello y'all")
+        %%
+        # this is a comment
+        nested: {
+            null_keyword: null
+        }
         """.trimIndent()
-    }
 
-    override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey>? {
-        return null
-    }
+    override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey>? = null
 
-    override fun getAttributeDescriptors(): Array<AttributesDescriptor> {
-        return DESCRIPTORS
-    }
+    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
 
-    override fun getColorDescriptors(): Array<ColorDescriptor> {
-        return ColorDescriptor.EMPTY_ARRAY
-    }
+    override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
 
-    override fun getDisplayName(): String {
-        return KsonBundle.message("kson.name")
-    }
+    override fun getDisplayName(): String = KsonBundle.message("kson.name")
 
     companion object {
-        private val DESCRIPTORS = KsonSyntaxHighlighter.KsonColorTag.values().map {
-            AttributesDescriptor(
-                it.displayName,
-                KsonSyntaxHighlighter.getTextAttributesKey(it)
-            )
-        }.toTypedArray()
+        private val DESCRIPTORS =
+            KsonSyntaxHighlighter.KsonColorTag
+                .values()
+                .map {
+                    AttributesDescriptor(
+                        it.displayName,
+                        KsonSyntaxHighlighter.getTextAttributesKey(it),
+                    )
+                }.toTypedArray()
     }
 }

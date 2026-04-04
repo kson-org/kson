@@ -2,11 +2,11 @@ package org.kson.walker
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
-import org.kson.value.navigation.json_pointer.GlobMatcher
-import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.value.navigation.json_pointer.JsonPointerGlob
-import org.kson.value.navigation.json_pointer.PointerParser
+import org.kson.value.navigation.jsonpointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.jsonpointer.GlobMatcher
+import org.kson.value.navigation.jsonpointer.JsonPointer
+import org.kson.value.navigation.jsonpointer.JsonPointerGlob
+import org.kson.value.navigation.jsonpointer.PointerParser
 
 /**
  * Result of navigating to a location in a tree.
@@ -16,7 +16,7 @@ import org.kson.value.navigation.json_pointer.PointerParser
  */
 data class TreeNavigationResult<N>(
     val value: N,
-    val pointerFromRoot: JsonPointer
+    val pointerFromRoot: JsonPointer,
 )
 
 /**
@@ -30,7 +30,7 @@ data class TreeNavigationResult<N>(
  */
 fun <N> KsonTreeWalker<N>.navigateWithJsonPointer(
     root: N,
-    pointer: JsonPointer
+    pointer: JsonPointer,
 ): N? {
     // JSON Pointer always has only Literal tokens, so we expect exactly 0 or 1 result
     return TreeNavigator(this).navigateByParsedTokens(listOf(root), pointer.rawTokens).firstOrNull()
@@ -47,10 +47,8 @@ fun <N> KsonTreeWalker<N>.navigateWithJsonPointer(
 @OptIn(ExperimentalJsonPointerGlobLanguage::class)
 fun <N> KsonTreeWalker<N>.navigateWithJsonPointerGlob(
     root: N,
-    pointer: JsonPointerGlob
-): List<N> {
-    return TreeNavigator(this).navigateByParsedTokens(listOf(root), pointer.rawTokens)
-}
+    pointer: JsonPointerGlob,
+): List<N> = TreeNavigator(this).navigateByParsedTokens(listOf(root), pointer.rawTokens)
 
 /**
  * Find the most specific node at a location and build the JSON Pointer path to it.
@@ -64,10 +62,8 @@ fun <N> KsonTreeWalker<N>.navigateWithJsonPointerGlob(
  */
 fun <N> KsonTreeWalker<N>.navigateToLocationWithPointer(
     root: N,
-    targetLocation: Coordinates
-): TreeNavigationResult<N>? {
-    return TreeNavigator(this).navigateToLocation(root, targetLocation, JsonPointer.ROOT)
-}
+    targetLocation: Coordinates,
+): TreeNavigationResult<N>? = TreeNavigator(this).navigateToLocation(root, targetLocation, JsonPointer.ROOT)
 
 /**
  * Encapsulates tree navigation algorithms for a given [KsonTreeWalker].
@@ -75,12 +71,13 @@ fun <N> KsonTreeWalker<N>.navigateToLocationWithPointer(
  * Constructed per-call by the public extension functions above, so that the
  * walker is captured once and all internal methods can use it directly.
  */
-private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
-
+private class TreeNavigator<N>(
+    private val walker: KsonTreeWalker<N>,
+) {
     fun navigateToLocation(
         root: N,
         targetLocation: Coordinates,
-        currentPointer: JsonPointer
+        currentPointer: JsonPointer,
     ): TreeNavigationResult<N>? {
         if (!Location.containsCoordinates(walker.getLocation(root), targetLocation)) {
             return null
@@ -89,19 +86,23 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
         when (val children = walker.getChildren(root)) {
             is NodeChildren.Object -> {
                 for (prop in children.properties) {
-                    val childResult = navigateToLocation(
-                        prop.value, targetLocation,
-                        JsonPointer.fromTokens(currentPointer.tokens + prop.name)
-                    )
+                    val childResult =
+                        navigateToLocation(
+                            prop.value,
+                            targetLocation,
+                            JsonPointer.fromTokens(currentPointer.tokens + prop.name),
+                        )
                     if (childResult != null) return childResult
                 }
             }
             is NodeChildren.Array -> {
                 for ((index, child) in children.elements.withIndex()) {
-                    val childResult = navigateToLocation(
-                        child, targetLocation,
-                        JsonPointer.fromTokens(currentPointer.tokens + index.toString())
-                    )
+                    val childResult =
+                        navigateToLocation(
+                            child,
+                            targetLocation,
+                            JsonPointer.fromTokens(currentPointer.tokens + index.toString()),
+                        )
                     if (childResult != null) return childResult
                 }
             }
@@ -116,15 +117,13 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
      */
     fun navigateByParsedTokens(
         roots: List<N>,
-        tokens: List<PointerParser.Tokens>
-    ): List<N> {
-        return navigateRecursive(roots, tokens, tokenIndex = 0)
-    }
+        tokens: List<PointerParser.Tokens>,
+    ): List<N> = navigateRecursive(roots, tokens, tokenIndex = 0)
 
     private tailrec fun navigateRecursive(
         currentNodes: List<N>,
         tokens: List<PointerParser.Tokens>,
-        tokenIndex: Int
+        tokenIndex: Int,
     ): List<N> {
         if (tokenIndex >= tokens.size || currentNodes.isEmpty()) {
             return currentNodes
@@ -145,7 +144,7 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
     private fun handleRecursiveDescent(
         currentNodes: List<N>,
         tokens: List<PointerParser.Tokens>,
-        tokenIndex: Int
+        tokenIndex: Int,
     ): List<N> {
         val remainingTokens = tokens.subList(tokenIndex + 1, tokens.size)
         return currentNodes.flatMap { node ->
@@ -164,9 +163,9 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
 
     private fun processSingleToken(
         currentNodes: List<N>,
-        token: PointerParser.Tokens
-    ): List<N> {
-        return when (token) {
+        token: PointerParser.Tokens,
+    ): List<N> =
+        when (token) {
             is PointerParser.Tokens.Literal -> {
                 currentNodes.mapNotNull { node ->
                     when (val children = walker.getChildren(node)) {
@@ -221,7 +220,6 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
                 throw UnsupportedOperationException("RecursiveDescent should be handled by handleRecursiveDescent")
             }
         }
-    }
 
     /**
      * Collect all descendants of a node using depth-first search.

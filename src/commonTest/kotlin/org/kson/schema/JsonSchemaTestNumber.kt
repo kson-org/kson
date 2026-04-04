@@ -5,7 +5,6 @@ import kotlin.test.Test
 class JsonSchemaTestNumber : JsonSchemaTest {
     @Test
     fun testNumberSchemaWithMinExclusive() {
-
         assertKsonEnforcesSchema(
             """
                 10
@@ -13,6 +12,7 @@ class JsonSchemaTestNumber : JsonSchemaTest {
             """
                 {"type": "number", "exclusiveMinimum": 20}
             """,
-            false)
+            false,
+        )
     }
 }

@@ -8,20 +8,29 @@ import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.file.KsonFileType
 
 class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
-    private fun doTest(before: String, after: String, useTabs: Boolean = false, indentSize: Int = 2) {
+    private fun doTest(
+        before: String,
+        after: String,
+        useTabs: Boolean = false,
+        indentSize: Int = 2,
+    ) {
         val settings = CodeStyle.createTestSettings()
         val commonSettings = settings.getCommonSettings(KsonLanguage)
         commonSettings.indentOptions?.INDENT_SIZE = indentSize
         commonSettings.indentOptions?.USE_TAB_CHARACTER = useTabs
 
-        CodeStyle.doWithTemporarySettings(project, settings, Runnable {
-            WriteCommandAction.runWriteCommandAction(project) {
-                myFixture.configureByText(KsonFileType, before)
-                myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ENTER)
-            }
+        CodeStyle.doWithTemporarySettings(
+            project,
+            settings,
+            Runnable {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    myFixture.configureByText(KsonFileType, before)
+                    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ENTER)
+                }
 
-            myFixture.checkResult(after)
-        })
+                myFixture.checkResult(after)
+            },
+        )
     }
 
     fun testAutoInsertOfCloseBrace() {
@@ -33,7 +42,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: {
               <caret>
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -45,7 +54,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: {
               <caret>
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -56,7 +65,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: {
               <caret>
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -72,7 +81,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
               <caret>
               
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -85,7 +94,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: [
               <caret>
             ]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -97,7 +106,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: [
               <caret>
             ]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -108,7 +117,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: [
               <caret>
             ]
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -121,7 +130,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: <
               <caret>
             >
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -133,7 +142,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: <
               <caret>
             >
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -144,7 +153,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: <
               <caret>
             >
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -161,7 +170,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                 <caret>
               }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -176,7 +185,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                 <caret>
               ]
             ]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         doTest(
@@ -191,7 +200,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                 <caret>
               >
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -206,7 +215,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             }
             """.trimIndent(),
             useTabs = false,
-            indentSize = 4
+            indentSize = 4,
         )
     }
 
@@ -220,7 +229,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             ${'\t'}<caret>
             }
             """.trimIndent(),
-            useTabs = true
+            useTabs = true,
         )
     }
 
@@ -236,7 +245,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                 nested: {
                 }
                 <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -250,7 +259,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: {
                 
                 <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -264,7 +273,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             items:
               - first item
               <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -278,7 +287,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: <
               - first
               <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -298,7 +307,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                   <caret>
               ]
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -310,7 +319,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             """
             root: { key: value
               <caret>another: value }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -322,7 +331,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             """
             list: [one, two,
               <caret>three, four]
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -340,7 +349,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
                 {
                   sublist: <
                     <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -354,7 +363,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
             root: {
               first: value,
               <caret>
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -369,7 +378,7 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
               - {
                 <caret>
               }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -384,40 +393,40 @@ class KsonEnterHandlerDelegateTest : BasePlatformTestCase() {
               {
                 <caret>
               }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     fun testRespectsCloseDelimiters() {
         doTest(
             """
-              {{{}<caret>}}
+            {{{}<caret>}}
             """.trimIndent(),
             """
-              {{{}
-              <caret>}}
-            """.trimIndent()
+            {{{}
+            <caret>}}
+            """.trimIndent(),
         )
 
         doTest(
             """
-              [[[]<caret>]]
+            [[[]<caret>]]
             """.trimIndent(),
             """
-              [[[]
-              <caret>]]
-            """.trimIndent()
+            [[[]
+            <caret>]]
+            """.trimIndent(),
         )
 
         doTest(
             """
-              [[<caret>]
+            [[<caret>]
             """.trimIndent(),
             """
-              [[
-                  <caret>
-                ]
-            """.trimIndent()
+            [[
+                <caret>
+              ]
+            """.trimIndent(),
         )
     }
 }

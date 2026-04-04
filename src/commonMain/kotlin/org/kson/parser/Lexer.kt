@@ -1,24 +1,26 @@
 package org.kson.parser
 
-import org.kson.stdlibx.collections.ImmutableList
-import org.kson.stdlibx.collections.toImmutableList
-import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
+import org.kson.stdlibx.collections.ImmutableList
+import org.kson.stdlibx.collections.toImmutableList
+import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 private val KEYWORDS =
     mapOf(
         "null" to NULL,
         "true" to TRUE,
-        "false" to FALSE
+        "false" to FALSE,
     ).toImmutableMap()
 
 /**
  * [SourceScanner] provides a char-by-char scanning interface which produces [Lexeme]s
  */
-private class SourceScanner(private val source: String) {
+private class SourceScanner(
+    private val source: String,
+) {
     private var selectionStartOffset = 0
     private var selectionEndOffset = 0
 
@@ -27,13 +29,9 @@ private class SourceScanner(private val source: String) {
     private var selectionEndLine = 0
     private var selectionEndColumn = 0
 
-    fun eof(): Boolean {
-        return eofIn(0)
-    }
+    fun eof(): Boolean = eofIn(0)
 
-    private fun eofIn(numCharsToEof: Int): Boolean {
-        return selectionEndOffset + numCharsToEof >= source.length
-    }
+    private fun eofIn(numCharsToEof: Int): Boolean = selectionEndOffset + numCharsToEof >= source.length
 
     /**
      * Return the next character in this [SourceScanner]
@@ -80,10 +78,11 @@ private class SourceScanner(private val source: String) {
             throw ShouldNotHappenException("Scanner has been advanced past end of source---missing some needed calls to peek()?")
         }
 
-        val lexeme = Lexeme(
-            source.substring(selectionStartOffset, selectionEndOffset),
-            currentLocation()
-        )
+        val lexeme =
+            Lexeme(
+                source.substring(selectionStartOffset, selectionEndOffset),
+                currentLocation(),
+            )
         startNextSelection()
         return lexeme
     }
@@ -104,7 +103,7 @@ private class SourceScanner(private val source: String) {
             Coordinates(selectionFirstLine, selectionFirstColumn),
             Coordinates(selectionEndLine, selectionEndColumn),
             selectionStartOffset,
-            selectionEndOffset
+            selectionEndOffset,
         )
 }
 
@@ -112,7 +111,10 @@ private class SourceScanner(private val source: String) {
  * A [String]/[Location] pair representing the raw [text] of a [Token]
  * along with its [location] in the parsed source input
  */
-data class Lexeme(val text: String, val location: Location)
+data class Lexeme(
+    val text: String,
+    val location: Location,
+)
 
 /**
  * [Coordinates]s are used to describe the [Location.start] and [Location.end] of a chunk inside a
@@ -121,15 +123,16 @@ data class Lexeme(val text: String, val location: Location)
  * @param line The zero-based line number
  * @param column The zero-based column number
  */
-data class Coordinates(val line: Int, val column: Int) {
+data class Coordinates(
+    val line: Int,
+    val column: Int,
+) {
     /**
      *  Override the [toString] to easily print locations in error messages as base-1 indexed line/column numbers
      *  following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
      *  for this sort of output
      */
-    override fun toString(): String {
-        return "${line + 1}.${column + 1}"
-    }
+    override fun toString(): String = "${line + 1}.${column + 1}"
 }
 
 /**
@@ -140,12 +143,10 @@ data class Location(
      * [Coordinates] where this [Location] starts
      */
     val start: Coordinates,
-
     /**
      * [Coordinates] where this [Location] ends
      */
     val end: Coordinates,
-
     /**
      * The zero-based start offset of this location relative to the whole document
      */
@@ -153,7 +154,7 @@ data class Location(
     /**
      * The zero-based end offset of this location relative to the whole document
      */
-    val endOffset: Int
+    val endOffset: Int,
 ) {
     /**
      * Trim this [Location] to its first line.  Useful when it's more clear to highlight the beginning
@@ -168,9 +169,10 @@ data class Location(
             trimmedStart,
             trimmedEnd,
             startOffset,
-            startOffset + trimmedLength
+            startOffset + trimmedLength,
         )
     }
+
     companion object {
         /**
          * Creates a new [Location] instance using line and column positions directly.
@@ -192,21 +194,23 @@ data class Location(
             lastLine: Int,
             lastColumn: Int,
             startOffset: Int,
-            endOffset: Int
-        ): Location {
-            return Location(
+            endOffset: Int,
+        ): Location =
+            Location(
                 Coordinates(firstLine, firstColumn),
                 Coordinates(lastLine, lastColumn),
                 startOffset,
-                endOffset
+                endOffset,
             )
-        }
 
         /**
          * Merge two locations into a Location which spans from the beginning of [startLocation] to the end of
          * [endLocation].  [startLocation] must be positioned before [endLocation]
          */
-        fun merge(startLocation: Location, endLocation: Location): Location {
+        fun merge(
+            startLocation: Location,
+            endLocation: Location,
+        ): Location {
             if (startLocation.startOffset > endLocation.endOffset) {
                 throw ShouldNotHappenException("`startLocation` must be before `endLocation`")
             }
@@ -214,7 +218,7 @@ data class Location(
                 startLocation.start,
                 endLocation.end,
                 startLocation.startOffset,
-                endLocation.endOffset
+                endLocation.endOffset,
             )
         }
 
@@ -223,7 +227,7 @@ data class Location(
          */
         fun containsCoordinates(
             containerLocation: Location,
-            targetCoordinates: Coordinates
+            targetCoordinates: Coordinates,
         ): Boolean {
             val containerStart = containerLocation.start
             val containerEnd = containerLocation.end
@@ -260,7 +264,7 @@ data class Token(
      *  will be rendered as preceding line comments.  This is okay, and aligns well with all the good reasons that
      *  trailing comments are somewhat discouraged ([here is a good summary from Code Complete](https://stackoverflow.com/a/14385596))
      */
-    val comments: List<String> = emptyList()
+    val comments: List<String> = emptyList(),
 )
 
 /**
@@ -269,7 +273,9 @@ data class Token(
  *
  * @param ignoreSet [TokenType]s to leave out of the constructed [Token] list return by [toList]
  */
-private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
+private data class TokenizedSource(
+    private val ignoreSet: Set<TokenType>,
+) {
     private val tokens = mutableListOf<Token>()
 
     fun add(token: Token) {
@@ -280,9 +286,7 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
         tokens.add(token)
     }
 
-    fun toList(): ImmutableList<Token> {
-        return tokens.toImmutableList()
-    }
+    fun toList(): ImmutableList<Token> = tokens.toImmutableList()
 }
 
 /**
@@ -293,20 +297,23 @@ private data class TokenizedSource(private val ignoreSet: Set<TokenType>) {
  *                covered by the resulting [Token] list.  This is needed for instance to properly back a Jetbrains
  *                IDE-compliant lexer with this official lexer.  Default: false
  */
-class Lexer(source: String, gapFree: Boolean = false) {
-
+class Lexer(
+    source: String,
+    gapFree: Boolean = false,
+) {
     companion object {
         val ignoredTokens = setOf(WHITESPACE, COMMENT)
     }
 
     private val sourceScanner = SourceScanner(source)
-    private val tokens = TokenizedSource(
-        if (gapFree) {
-            emptySet()
-        } else {
-            ignoredTokens
-        }
-    )
+    private val tokens =
+        TokenizedSource(
+            if (gapFree) {
+                emptySet()
+            } else {
+                ignoredTokens
+            },
+        )
 
     /**
      * We collect scanned comments into this collection, then drain them on the appropriate
@@ -403,16 +410,12 @@ class Lexer(source: String, gapFree: Boolean = false) {
     /**
      * Returns true if the given [char] is whitespace
      */
-    private fun isWhitespace(char: Char?): Boolean {
-        return isInlineWhitespace(char) || char == '\n'
-    }
+    private fun isWhitespace(char: Char?): Boolean = isInlineWhitespace(char) || char == '\n'
 
     /**
      * Returns true if the given [char] is a non-newline whitespace
      */
-    private fun isInlineWhitespace(char: Char?): Boolean {
-        return char == ' ' || char == '\r' || char == '\t'
-    }
+    private fun isInlineWhitespace(char: Char?): Boolean = char == ' ' || char == '\r' || char == '\t'
 
     private fun unquotedString() {
         while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())) sourceScanner.advance()
@@ -474,7 +477,8 @@ class Lexer(source: String, gapFree: Boolean = false) {
             // extract our embed tag (note: may be empty, that's supported)
             val embedTagLexeme = sourceScanner.extractLexeme()
             addToken(
-                EMBED_TAG, embedTagLexeme
+                EMBED_TAG,
+                embedTagLexeme,
             )
 
             // consume the newline from after this embed tag
@@ -488,8 +492,8 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
         // read embedded content until the closing delimChar pair (or EOF in the case of an unclosed block)
         while (
-            !sourceScanner.eof()
-            && !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
+            !sourceScanner.eof() &&
+            !(sourceScanner.peek() == delimChar && sourceScanner.peekNext() == delimChar)
         ) {
             sourceScanner.advance()
         }
@@ -518,10 +522,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
          * in case the user is mistakenly just starting it with a digit.  We'll give a helpful error
          * in [NumberParser]
          */
-        while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())
-            || sourceScanner.peek() == '+'
-            || sourceScanner.peek() == '-'
-            || sourceScanner.peek() == '.') sourceScanner.advance()
+        while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek()) ||
+            sourceScanner.peek() == '+' ||
+            sourceScanner.peek() == '-' ||
+            sourceScanner.peek() == '.'
+        ) {
+            sourceScanner.advance()
+        }
         addLiteralToken(NUMBER)
     }
 
@@ -542,8 +549,10 @@ class Lexer(source: String, gapFree: Boolean = false) {
      *
      * @return the location of the added [Token]
      */
-    private fun addToken(type: TokenType, lexeme: Lexeme): Location {
-
+    private fun addToken(
+        type: TokenType,
+        lexeme: Lexeme,
+    ): Location {
         val commentMetadata = commentMetadataForCurrentToken(type)
 
         tokens.add(Token(type, lexeme, commentMetadata.comments))
@@ -559,13 +568,17 @@ class Lexer(source: String, gapFree: Boolean = false) {
      * in collecting those comments (for instance when collecting trailing comments) that should be added after
      * the [Token] currently being lexed
      */
-    private data class CommentMetadata(val comments: List<String>, val lookaheadTokens: List<Token>)
+    private data class CommentMetadata(
+        val comments: List<String>,
+        val lookaheadTokens: List<Token>,
+    )
+
     private fun commentMetadataForCurrentToken(currentTokenType: TokenType): CommentMetadata {
         // comments don't get associated with these types
-        if (currentTokenType == COMMENT
-            || currentTokenType == WHITESPACE
-            || currentTokenType == EMBED_PREAMBLE_NEWLINE
-            || currentTokenType == STRING_CONTENT
+        if (currentTokenType == COMMENT ||
+            currentTokenType == WHITESPACE ||
+            currentTokenType == EMBED_PREAMBLE_NEWLINE ||
+            currentTokenType == STRING_CONTENT
         ) {
             return CommentMetadata(emptyList(), emptyList())
         }
@@ -575,8 +588,9 @@ class Lexer(source: String, gapFree: Boolean = false) {
         currentCommentLines = ArrayList()
 
         // these tokens open comment free constructs, so they cannot have trailing comments
-        val acceptsTrailingComments = currentTokenType != STRING_OPEN_QUOTE
-                && currentTokenType != EMBED_OPEN_DELIM
+        val acceptsTrailingComments =
+            currentTokenType != STRING_OPEN_QUOTE &&
+                currentTokenType != EMBED_OPEN_DELIM
 
         // when appropriate, we lex ahead a bit looking for any trailing comments
         val trailingCommentTokens = ArrayList<Token>()
@@ -591,17 +605,18 @@ class Lexer(source: String, gapFree: Boolean = false) {
                     Token(
                         WHITESPACE,
                         whitespaceLexeme,
-                        emptyList()
-                    )
+                        emptyList(),
+                    ),
                 )
             }
-            val trailingComment = if (sourceScanner.peek() == '#') {
-                val commentToken = extractCommentToken()
-                trailingCommentTokens.add(commentToken)
-                commentToken.lexeme.text
-            } else {
-                ""
-            }
+            val trailingComment =
+                if (sourceScanner.peek() == '#') {
+                    val commentToken = extractCommentToken()
+                    trailingCommentTokens.add(commentToken)
+                    commentToken.lexeme.text
+                } else {
+                    ""
+                }
 
             if (trailingComment.isNotBlank()) {
                 commentsForToken.add(trailingComment)

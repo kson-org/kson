@@ -9,28 +9,29 @@ class AllOfValidatorTest : JsonSchemaTest {
     fun testAllOfValidationErrors() {
         assertKsonSchemaErrors(
             """
-                description: 99
-                think: false
+            description: 99
+            think: false
             """.trimIndent(),
             """
-                allOf:
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      thing:
-                        type: number
-                
-                  - required: [other_thing] 
-                    properties:
-                      description:
-                        type: string
+            allOf:
+              - properties:
+                  description:
+                    type: string
+                    .
+                  thing:
+                    type: number
+            
+              - required: [other_thing] 
+                properties:
+                  description:
+                    type: string
             """.trimIndent(),
             listOf(
                 // description is wrong type according to both schemas
                 SCHEMA_VALUE_TYPE_MISMATCH,
                 // missing 'other_thing' required by second schema
-                SCHEMA_REQUIRED_PROPERTY_MISSING)
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+            ),
         )
     }
 }

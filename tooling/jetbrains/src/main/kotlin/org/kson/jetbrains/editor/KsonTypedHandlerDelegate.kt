@@ -12,9 +12,9 @@ import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getIndentType
 import org.kson.jetbrains.util.getLineIndentLevel
 import org.kson.jetbrains.util.hasElementAtOffset
-import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.ParsedElementType.EMBED_BLOCK
 import org.kson.parser.TokenType.*
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
     override fun beforeCharTyped(
@@ -22,7 +22,7 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
         project: Project,
         editor: Editor,
         file: PsiFile,
-        fileType: FileType
+        fileType: FileType,
     ): Result {
         // this handler runs on typing events in all filetypes, so
         // be careful to return quickly if this event isn't for us
@@ -91,8 +91,11 @@ class KsonTypedHandlerDelegate : TypedHandlerDelegate() {
 /**
  * Look ahead for the closing delimiter, skipping whitespace
  */
-private fun findNextChar(caretOffset: Int, text: String): Char {
-    if (caretOffset == text.length){
+private fun findNextChar(
+    caretOffset: Int,
+    text: String,
+): Char {
+    if (caretOffset == text.length) {
         return '\n'
     }
     // Look ahead for the closing delimiter, skipping whitespace

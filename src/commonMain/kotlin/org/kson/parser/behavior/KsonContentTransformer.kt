@@ -19,7 +19,7 @@ import org.kson.parser.Location
  */
 abstract class KsonContentTransformer(
     protected val rawContent: String,
-    protected val rawLocation: Location
+    protected val rawLocation: Location,
 ) {
     /**
      * The processed content after all transformations
@@ -33,7 +33,10 @@ abstract class KsonContentTransformer(
      * @param processedEnd Character offset in processedContent (0-based, exclusive)
      * @return Location in the original KSON source document
      */
-    fun mapToOriginal(processedStart: Int, processedEnd: Int): Location {
+    fun mapToOriginal(
+        processedStart: Int,
+        processedEnd: Int,
+    ): Location {
         // Step 1: Map offsets through the transformation pipeline (reverse)
         val rawStart = mapProcessedOffsetToRawOffset(processedStart)
         val rawEnd = mapProcessedOffsetToRawOffset(processedEnd)
@@ -63,7 +66,12 @@ abstract class KsonContentTransformer(
      * @param endColumn Column number in processedContent (0-based)
      * @return Location in the original KSON source document
      */
-    fun mapToOriginal(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int): Location {
+    fun mapToOriginal(
+        startLine: Int,
+        startColumn: Int,
+        endLine: Int,
+        endColumn: Int,
+    ): Location {
         val processedStart = computeOffsetFromCoordinates(processedContent, startLine, startColumn)
         val processedEnd = computeOffsetFromCoordinates(processedContent, endLine, endColumn)
         return mapToOriginal(processedStart, processedEnd)
@@ -80,7 +88,10 @@ abstract class KsonContentTransformer(
     /**
      * Computes line/column coordinates for a given offset within a string.
      */
-    protected fun computeCoordinatesInString(text: String, offset: Int): Coordinates {
+    protected fun computeCoordinatesInString(
+        text: String,
+        offset: Int,
+    ): Coordinates {
         val upToOffset = text.take(offset)
         val line = upToOffset.count { it == '\n' }
         val lastNewline = upToOffset.lastIndexOf('\n')
@@ -91,7 +102,11 @@ abstract class KsonContentTransformer(
     /**
      * Computes a character offset from line/column coordinates within a string.
      */
-    protected fun computeOffsetFromCoordinates(text: String, line: Int, column: Int): Int {
+    protected fun computeOffsetFromCoordinates(
+        text: String,
+        line: Int,
+        column: Int,
+    ): Int {
         var currentLine = 0
         var offset = 0
 
@@ -108,25 +123,27 @@ abstract class KsonContentTransformer(
     /**
      * Adds coordinate offsets to a base coordinate
      */
-    protected fun addCoordinates(base: Coordinates, offset: Coordinates): Coordinates {
-        return if (offset.line == 0) {
+    protected fun addCoordinates(
+        base: Coordinates,
+        offset: Coordinates,
+    ): Coordinates =
+        if (offset.line == 0) {
             // No change to the line, so just add columns
             Coordinates(base.line, base.column + offset.column)
         } else {
             // Offset puts us on a later line, so offset.column is the absolute column on that line
             Coordinates(base.line + offset.line, offset.column)
         }
-    }
 }
 
 /**
  * A [KsonContentTransformer] for content that performs the "identity" transformation, i.e. no transformation
  */
-class IdentityContentTransformer(content: String, location: Location)
-    : KsonContentTransformer(content, location) {
+class IdentityContentTransformer(
+    content: String,
+    location: Location,
+) : KsonContentTransformer(content, location) {
     override val processedContent = content
 
-    override fun mapProcessedOffsetToRawOffset(processedOffset: Int): Int {
-        return processedOffset
-    }
+    override fun mapProcessedOffsetToRawOffset(processedOffset: Int): Int = processedOffset
 }

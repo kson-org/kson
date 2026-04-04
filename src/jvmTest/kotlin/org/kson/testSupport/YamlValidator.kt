@@ -8,4 +8,4 @@ actual fun validateYaml(yamlString: String) {
     } catch (e: Exception) {
         throw IllegalArgumentException("Invalid YAML: ${e.message}", e)
     }
-} 
+}

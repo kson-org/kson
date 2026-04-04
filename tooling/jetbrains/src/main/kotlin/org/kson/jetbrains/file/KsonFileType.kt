@@ -7,20 +7,11 @@ import org.kson.jetbrains.KsonLanguage
 import javax.swing.Icon
 
 object KsonFileType : LanguageFileType(KsonLanguage) {
+    override fun getName(): String = KsonLanguage.NAME
 
-    override fun getName(): String {
-        return KsonLanguage.NAME
-    }
+    override fun getDescription(): String = KsonBundle.message("kson.file.fileTypeDescription")
 
-    override fun getDescription(): String {
-        return KsonBundle.message("kson.file.fileTypeDescription")
-    }
+    override fun getDefaultExtension(): String = "kson"
 
-    override fun getDefaultExtension(): String {
-        return "kson"
-    }
-
-    override fun getIcon(): Icon {
-        return KsonIcons.FILE
-    }
+    override fun getIcon(): Icon = KsonIcons.FILE
 }

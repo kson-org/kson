@@ -13,9 +13,7 @@ import org.kson.jetbrains.parser.KsonLexer
 import org.kson.parser.TokenType
 
 class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
-    override fun getHighlightingLexer(): Lexer {
-        return KsonLexer()
-    }
+    override fun getHighlightingLexer(): Lexer = KsonLexer()
 
     override fun getTokenHighlights(elementType: IElementType): Array<TextAttributesKey> {
         if (elementType is KsonLexedElementType) {
@@ -54,7 +52,9 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         }
     }
 
-    enum class KsonColorTag(val displayName: String) {
+    enum class KsonColorTag(
+        val displayName: String,
+    ) {
         KSON_CURLY_BRACE(KsonBundle.message("kson.syntaxHighlighter.curly_brace")),
         KSON_SQUARE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.square_bracket")),
         KSON_ANGLE_BRACKET(KsonBundle.message("kson.syntaxHighlighter.angle_bracket")),
@@ -69,44 +69,45 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
         KSON_INVALID(KsonBundle.message("kson.syntaxHighlighter.invalid")),
         KSON_NUMBER(KsonBundle.message("kson.syntaxHighlighter.number")),
         KSON_CONTENT(KsonBundle.message("kson.syntaxHighlighter.content")),
-        KSON_OBJECT_KEY(KsonBundle.message("kson.syntaxHighlighter.key"));
+        KSON_OBJECT_KEY(KsonBundle.message("kson.syntaxHighlighter.key")),
     }
 
     companion object {
-        private val keyToColorMap = mapOf(
-            KSON_CURLY_BRACE to DefaultLanguageHighlighterColors.BRACES,
-            KSON_SQUARE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
-            KSON_ANGLE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
-            KSON_COLON to DefaultLanguageHighlighterColors.SEMICOLON,
-            KSON_END_DOT to DefaultLanguageHighlighterColors.LINE_COMMENT,
-            KSON_COMMA to DefaultLanguageHighlighterColors.PARENTHESES,
-            KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
-            KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
-            KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
-            KSON_UNQUOTED_STRING to DefaultLanguageHighlighterColors.STRING,
-            KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,
-            KSON_INVALID to HighlighterColors.BAD_CHARACTER,
-            KSON_NUMBER to DefaultLanguageHighlighterColors.NUMBER,
-            KSON_CONTENT to DefaultLanguageHighlighterColors.STRING,
-            KSON_OBJECT_KEY to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
-        )
-
-        private val textAttributesMap = keyToColorMap.entries.associate {
-            it.key to TextAttributesKey.createTextAttributesKey(
-                it.key.name,
-                it.value
+        private val keyToColorMap =
+            mapOf(
+                KSON_CURLY_BRACE to DefaultLanguageHighlighterColors.BRACES,
+                KSON_SQUARE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
+                KSON_ANGLE_BRACKET to DefaultLanguageHighlighterColors.BRACES,
+                KSON_COLON to DefaultLanguageHighlighterColors.SEMICOLON,
+                KSON_END_DOT to DefaultLanguageHighlighterColors.LINE_COMMENT,
+                KSON_COMMA to DefaultLanguageHighlighterColors.PARENTHESES,
+                KSON_COMMENT to DefaultLanguageHighlighterColors.BLOCK_COMMENT,
+                KSON_DELIMITER to DefaultLanguageHighlighterColors.SEMICOLON,
+                KSON_EMBED_TAG to DefaultLanguageHighlighterColors.METADATA,
+                KSON_UNQUOTED_STRING to DefaultLanguageHighlighterColors.STRING,
+                KSON_KEYWORD to DefaultLanguageHighlighterColors.KEYWORD,
+                KSON_INVALID to HighlighterColors.BAD_CHARACTER,
+                KSON_NUMBER to DefaultLanguageHighlighterColors.NUMBER,
+                KSON_CONTENT to DefaultLanguageHighlighterColors.STRING,
+                KSON_OBJECT_KEY to DefaultLanguageHighlighterColors.INSTANCE_FIELD,
             )
-        }
+
+        private val textAttributesMap =
+            keyToColorMap.entries.associate {
+                it.key to
+                    TextAttributesKey.createTextAttributesKey(
+                        it.key.name,
+                        it.value,
+                    )
+            }
         private val packedTextAttributesMap = textAttributesMap.entries.associate { it.key to arrayOf(it.value) }
 
-        fun getTextAttributesKey(colorTag: KsonColorTag): TextAttributesKey {
-            return textAttributesMap[colorTag]
+        fun getTextAttributesKey(colorTag: KsonColorTag): TextAttributesKey =
+            textAttributesMap[colorTag]
                 ?: throw RuntimeException("This color tag should have an entry in textAttributesMap: $colorTag")
-        }
 
-        private fun getPackedTextAttributes(colorTag: KsonColorTag): Array<TextAttributesKey> {
-            return packedTextAttributesMap[colorTag]
+        private fun getPackedTextAttributes(colorTag: KsonColorTag): Array<TextAttributesKey> =
+            packedTextAttributesMap[colorTag]
                 ?: throw RuntimeException("This color tag should have an entry in packedTextAttributesMap: $colorTag")
-        }
     }
 }

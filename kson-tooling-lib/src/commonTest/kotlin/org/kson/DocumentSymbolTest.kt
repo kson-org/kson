@@ -3,16 +3,18 @@ package org.kson
 import kotlin.test.*
 
 class DocumentSymbolTest {
-
     @Test
     fun testSimpleObject() {
-        val doc = KsonTooling.parse("""
-            {
-                "name": "John",
-                "age": 30,
-                "active": true
-            }
-        """.trimIndent())
+        val doc =
+            KsonTooling.parse(
+                """
+                {
+                    "name": "John",
+                    "age": 30,
+                    "active": true
+                }
+                """.trimIndent(),
+            )
         val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
@@ -46,16 +48,19 @@ class DocumentSymbolTest {
 
     @Test
     fun testNestedObjects() {
-        val doc = KsonTooling.parse("""
-            {
-                "user": {
-                    "name": "Jane",
-                    "settings": {
-                        "theme": "dark"
+        val doc =
+            KsonTooling.parse(
+                """
+                {
+                    "user": {
+                        "name": "Jane",
+                        "settings": {
+                            "theme": "dark"
+                        }
                     }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
         val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
@@ -83,16 +88,19 @@ class DocumentSymbolTest {
 
     @Test
     fun testArrays() {
-        val doc = KsonTooling.parse("""
-            {
-                "items": [
-                    "apple",
-                    42,
-                    null,
-                    { "nested": true }
-                ]
-            }
-        """.trimIndent())
+        val doc =
+            KsonTooling.parse(
+                """
+                {
+                    "items": [
+                        "apple",
+                        42,
+                        null,
+                        { "nested": true }
+                    ]
+                }
+                """.trimIndent(),
+            )
         val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
@@ -121,12 +129,15 @@ class DocumentSymbolTest {
 
     @Test
     fun testEmptyObjectsAndArrays() {
-        val doc = KsonTooling.parse("""
-            {
-                "emptyObject": {},
-                "emptyArray": []
-            }
-        """.trimIndent())
+        val doc =
+            KsonTooling.parse(
+                """
+                {
+                    "emptyObject": {},
+                    "emptyArray": []
+                }
+                """.trimIndent(),
+            )
         val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
@@ -196,13 +207,16 @@ class DocumentSymbolTest {
 
     @Test
     fun testEmbedBlock() {
-        val doc = KsonTooling.parse("""
-            {
-                "code": ${"$"}bash
-                    echo hello
-                ${"$$"}
-            }
-        """.trimIndent())
+        val doc =
+            KsonTooling.parse(
+                """
+                {
+                    "code": ${"$"}bash
+                        echo hello
+                    ${"$$"}
+                }
+                """.trimIndent(),
+            )
         val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]

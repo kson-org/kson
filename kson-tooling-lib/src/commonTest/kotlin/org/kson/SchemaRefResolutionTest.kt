@@ -7,7 +7,6 @@ import kotlin.test.*
  * Tests for [KsonTooling.resolveRefAtLocation] - jump to definition within schema documents
  */
 class SchemaRefResolutionTest {
-
     /**
      * Helper to test $ref resolution.
      *
@@ -23,7 +22,10 @@ class SchemaRefResolutionTest {
         val targetEndMarker = "</target>"
         val cursorMarker = "<cursor>"
 
-        fun createCoordinates(document: String, index: Int): Coordinates {
+        fun createCoordinates(
+            document: String,
+            index: Int,
+        ): Coordinates {
             val beforeIndex = document.take(index)
             val line = beforeIndex.count { it == '\n' }
             val column = index - (beforeIndex.lastIndexOf('\n') + 1)
@@ -42,26 +44,30 @@ class SchemaRefResolutionTest {
         val targetStartIdx = schemaWithMarkers.indexOf(targetStartMarker)
         val targetEndIdx = schemaWithMarkers.indexOf(targetEndMarker)
 
-        val expectedRange = if (targetStartIdx != -1 && targetEndIdx != -1) {
-            val startCoords = createCoordinates(schemaWithMarkers, targetStartIdx)
-            val endCoords = createCoordinates(schemaWithMarkers, targetEndIdx)
-            startCoords to endCoords
-        } else {
-            null
-        }
+        val expectedRange =
+            if (targetStartIdx != -1 && targetEndIdx != -1) {
+                val startCoords = createCoordinates(schemaWithMarkers, targetStartIdx)
+                val endCoords = createCoordinates(schemaWithMarkers, targetEndIdx)
+                startCoords to endCoords
+            } else {
+                null
+            }
 
-        val schema = schemaWithMarkers
-            .replace(targetStartMarker, "")
-            .replace(targetEndMarker, "")
-            .replace(cursorMarker, "")
+        val schema =
+            schemaWithMarkers
+                .replace(targetStartMarker, "")
+                .replace(targetEndMarker, "")
+                .replace(cursorMarker, "")
 
         // Get the actual resolution result
         val locations = KsonTooling.resolveRefAtLocation(KsonTooling.parse(schema), cursorCoordinates.line, cursorCoordinates.column)
 
         if (expectedRange == null) {
             // No expected range means we expect empty list
-            assertTrue(locations.isEmpty(),
-                "Expected empty list when \$ref should not resolve")
+            assertTrue(
+                locations.isEmpty(),
+                "Expected empty list when \$ref should not resolve",
+            )
         } else {
             // We expect locations to match the expected range
             assertEquals(1, locations.size, "Expected exactly one location")
@@ -76,7 +82,8 @@ class SchemaRefResolutionTest {
 
     @Test
     fun testResolveRef_simpleDefinition() {
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -95,12 +102,14 @@ class SchemaRefResolutionTest {
                 }</target>
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_jsonPointer() {
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -117,12 +126,14 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_nestedDefinitions() {
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -155,12 +166,14 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_refToRef() {
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -177,13 +190,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_invalidRef() {
         // Ref points to non-existent definition
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -197,13 +212,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_externalRef() {
         // External refs (not starting with #) should not resolve
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -212,13 +229,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_cursorNotOnRef() {
         // Cursor on a property that is not a $ref
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -227,13 +246,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_cursorOnRefKey() {
         // Cursor on the "$ref" key itself, not the value
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -247,13 +268,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_definitions() {
         // Test with "definitions" (older JSON Schema draft) instead of "$defs"
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "type": "object",
               "properties": {
@@ -272,13 +295,15 @@ class SchemaRefResolutionTest {
                 }</target>
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_rootRef() {
         // Ref to root schema
-        assertRefResolution("""
+        assertRefResolution(
+            """
             <target>{
               "type": "object",
               "properties": {
@@ -287,13 +312,15 @@ class SchemaRefResolutionTest {
                 }
               }
             }</target>
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun testResolveRef_withSchemaId() {
         // Schema with $id should still resolve internal refs correctly
-        assertRefResolution("""
+        assertRefResolution(
+            """
             {
               "${'$'}id": "https://example.com/my-schema",
               "type": "object",
@@ -308,6 +335,7 @@ class SchemaRefResolutionTest {
                 }</target>
               }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 }

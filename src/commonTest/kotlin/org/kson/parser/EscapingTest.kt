@@ -8,17 +8,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EscapingTest {
-
     /**
      * Assert the given [jsonStringContent] is escaped to [expectedEscapedString] by [renderForJsonString]
      */
-    private fun assertJsonStringEscaping(jsonStringContent: String, expectedEscapedString: String) {
+    private fun assertJsonStringEscaping(
+        jsonStringContent: String,
+        expectedEscapedString: String,
+    ) {
         try {
             validateJson("\"$expectedEscapedString\"")
         } catch (e: Exception) {
             throw IllegalArgumentException(
                 "ERROR: The expected JSON in this test is invalid. Please fix the test's expectations.\n" +
-                        "JSON parsing error:\n${e.message}", e
+                    "JSON parsing error:\n${e.message}",
+                e,
             )
         }
 
@@ -35,13 +38,13 @@ class EscapingTest {
         assertJsonStringEscaping("\u0000", "\\u0000")
         assertJsonStringEscaping("\u0001", "\\u0001")
         assertJsonStringEscaping("\u001F", "\\u001F")
-        
+
         // Special escape sequences for common control characters
-        assertJsonStringEscaping("\b", "\\b")     // U+0008
+        assertJsonStringEscaping("\b", "\\b") // U+0008
         assertJsonStringEscaping("\u000C", "\\f") // U+000C
-        assertJsonStringEscaping("\n", "\\n")     // U+000A
-        assertJsonStringEscaping("\r", "\\r")     // U+000D
-        assertJsonStringEscaping("\t", "\\t")     // U+0009
+        assertJsonStringEscaping("\n", "\\n") // U+000A
+        assertJsonStringEscaping("\r", "\\r") // U+000D
+        assertJsonStringEscaping("\t", "\\t") // U+0009
     }
 
     @Test
@@ -55,10 +58,10 @@ class EscapingTest {
         // Regular ASCII characters
         assertJsonStringEscaping("Hello World", "Hello World")
         assertJsonStringEscaping("123", "123")
-        
+
         // Empty string
         assertJsonStringEscaping("", "")
-        
+
         // Unicode characters from Basic Multilingual Plane (BMP)
         // that aren't control characters should not be escaped
         assertJsonStringEscaping("Hello λ World", "Hello λ World")
@@ -70,11 +73,11 @@ class EscapingTest {
         // Control characters must be escaped with \u00XX
         assertJsonStringEscaping("\u0001", "\\u0001")
         assertJsonStringEscaping("\u001F", "\\u001F")
-        
+
         // Special whitespace that must be escaped
         assertJsonStringEscaping("\u2028", "\\u2028") // Line separator
         assertJsonStringEscaping("\u2029", "\\u2029") // Paragraph separator
-        
+
         // Characters outside BMP must be escaped as surrogate pairs
         assertJsonStringEscaping("𝄞", "\\uD834\\uDD1E") // Musical G-clef (U+1D11E)
     }
@@ -84,7 +87,7 @@ class EscapingTest {
         // Mix of required escapes
         assertJsonStringEscaping("Hello\nWorld\t!", "Hello\\nWorld\\t!")
         assertJsonStringEscaping("\"Quote\" and \\Backslash\\", "\\\"Quote\\\" and \\\\Backslash\\\\")
-        
+
         // Mix of required escapes with Unicode
         assertJsonStringEscaping("\"Hello\n世界\t!", "\\\"Hello\\n世界\\t!")
     }
@@ -94,7 +97,7 @@ class EscapingTest {
         // Multiple sequential special characters
         assertJsonStringEscaping("\n\r\t", "\\n\\r\\t")
         assertJsonStringEscaping("\"\"", "\\\"\\\"")
-        
+
         // Multiple backslashes (each backslash must escape the next one if present)
         assertJsonStringEscaping("\\\"", "\\\\\\\"") // Input: \", Output: \"
         assertJsonStringEscaping("\\\\", "\\\\\\\\") // Input: \\, Output: \\
@@ -165,7 +168,7 @@ class EscapingTest {
         // Invalid escape sequences should be preserved
         assertEquals("\\x", unescapeStringContent("\\x"))
         assertEquals("\\", unescapeStringContent("\\"))
-        
+
         // Invalid unicode (not enough digits)
         assertEquals("\\u12", unescapeStringContent("\\u12"))
         assertEquals("\\u", unescapeStringContent("\\u"))
@@ -195,24 +198,25 @@ class EscapingTest {
 
     @Test
     fun testRoundTripEscaping() {
-        val testStrings = listOf(
-            "Hello World",
-            "Quote: \"test\"",
-            "Backslash: \\",
-            "Newline:\nTab:\t",
-            "Unicode: €",
-            "Emoji: 😀",
-            "Path: /home/user",
-            "Control: \b\u000C",
-            "\u0000\u001F", // control characters
-            "\u2028\u2029", // line/paragraph separators
-            "Mixed\\\"content\nwith\ttabs"
-        )
-        
+        val testStrings =
+            listOf(
+                "Hello World",
+                "Quote: \"test\"",
+                "Backslash: \\",
+                "Newline:\nTab:\t",
+                "Unicode: €",
+                "Emoji: 😀",
+                "Path: /home/user",
+                "Control: \b\u000C",
+                "\u0000\u001F", // control characters
+                "\u2028\u2029", // line/paragraph separators
+                "Mixed\\\"content\nwith\ttabs",
+            )
+
         for (original in testStrings) {
             val escaped = renderForJsonString(original)
             val unescaped = unescapeStringContent(escaped)
             assertEquals(original, unescaped, "Failed to round-trip: $original")
         }
     }
-} 
+}

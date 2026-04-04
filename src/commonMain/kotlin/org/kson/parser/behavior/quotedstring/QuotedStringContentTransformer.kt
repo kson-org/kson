@@ -12,7 +12,7 @@ import org.kson.parser.behavior.KsonContentTransformer
  */
 class QuotedStringContentTransformer(
     rawContent: String,
-    rawLocation: Location
+    rawLocation: Location,
 ) : KsonContentTransformer(rawContent, rawLocation) {
     // The processed content after all transformations
     override val processedContent: String
@@ -66,7 +66,7 @@ class QuotedStringContentTransformer(
 private data class EscapeInfo(
     val rawPosition: Int,
     val rawLength: Int,
-    val processedLength: Int
+    val processedLength: Int,
 )
 
 /**
@@ -76,9 +76,7 @@ private data class EscapeInfo(
  * unescaping into its [QuotedStringContentTransformer.processedContent] property, maintaining a [Location] source map
  * between the unescaped string and original escaped source
  */
-internal fun unescapeStringContent(content: String): String {
-    return unescapeAndTrackEscapes(content).first
-}
+internal fun unescapeStringContent(content: String): String = unescapeAndTrackEscapes(content).first
 
 /**
  * Unescapes the content and tracks all escape sequences for source mapping.
@@ -167,18 +165,19 @@ private fun handleUnicodeEscape(input: String): Pair<CharArray, Int> {
     }
 
     val hexStr = input.substring(2, 6)
-    val codePoint = hexStr.toIntOrNull(16) ?: run {
-        // Invalid hex sequence, return backslash
-        return Pair(charArrayOf('\\'), 1)
-    }
+    val codePoint =
+        hexStr.toIntOrNull(16) ?: run {
+            // Invalid hex sequence, return backslash
+            return Pair(charArrayOf('\\'), 1)
+        }
 
     // Check for high surrogate
     if (codePoint.toChar().isHighSurrogate()) {
         // Look for low surrogate
         if (input.length >= 12 &&
             input[6] == '\\' &&
-            input[7] == 'u') {
-
+            input[7] == 'u'
+        ) {
             val lowHexStr = input.substring(8, 12)
             val lowCodePoint = lowHexStr.toIntOrNull(16)
 

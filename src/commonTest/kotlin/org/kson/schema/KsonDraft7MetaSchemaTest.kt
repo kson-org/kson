@@ -3,7 +3,6 @@ package org.kson.schema
 import kotlin.test.Test
 
 class KsonDraft7MetaSchemaTest : JsonSchemaTest {
-
     private val draft7MetaSchemaRef = $$"""
         {
             "$ref": "http://json-schema.org/draft-07/schema#"
@@ -21,7 +20,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            "Plain string description should still validate against the meta-schema"
+            "Plain string description should still validate against the meta-schema",
         )
     }
 
@@ -38,7 +37,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            "Embed block description with tag should validate against the meta-schema"
+            "Embed block description with tag should validate against the meta-schema",
         )
     }
 
@@ -53,7 +52,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            "Embed block description without tag should validate against the meta-schema"
+            "Embed block description without tag should validate against the meta-schema",
         )
     }
 
@@ -68,7 +67,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            $$"Plain string $comment should still validate against the meta-schema"
+            $$"Plain string $comment should still validate against the meta-schema",
         )
     }
 
@@ -85,7 +84,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            $$"Embed block $comment should validate against the meta-schema"
+            $$"Embed block $comment should validate against the meta-schema",
         )
     }
 
@@ -103,7 +102,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             false,
-            "An arbitrary object for description should be rejected by the meta-schema"
+            "An arbitrary object for description should be rejected by the meta-schema",
         )
     }
 
@@ -122,7 +121,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             false,
-            "Embed-block-shaped object with extra properties should be rejected"
+            "Embed-block-shaped object with extra properties should be rejected",
         )
     }
 
@@ -140,7 +139,7 @@ class KsonDraft7MetaSchemaTest : JsonSchemaTest {
             """,
             draft7MetaSchemaRef,
             true,
-            "A JSON object with the embed block shape should also validate"
+            "A JSON object with the embed block shape should also validate",
         )
     }
 }

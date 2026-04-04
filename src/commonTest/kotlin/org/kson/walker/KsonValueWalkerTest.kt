@@ -8,7 +8,6 @@ import kotlin.test.*
  * Tests that [KsonValueWalker] correctly delegates to the [KsonValue] sealed hierarchy.
  */
 class KsonValueWalkerTest {
-
     private val walker = KsonValueWalker
 
     private fun parse(source: String): KsonValue =
@@ -62,7 +61,7 @@ class KsonValueWalkerTest {
         assertIs<NodeChildren.Array<KsonValue>>(children)
         assertEquals(
             listOf("one", "two", "three"),
-            children.elements.map { (it as KsonString).value }
+            children.elements.map { (it as KsonString).value },
         )
     }
 

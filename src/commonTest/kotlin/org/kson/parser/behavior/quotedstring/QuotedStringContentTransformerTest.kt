@@ -6,21 +6,22 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class QuotedStringContentTransformerTest {
-
     @Test
     fun testSimpleSingleLineNoEscapes() {
         val rawQuotedContent = "hello world"
-        val baseLocation = Location(
-            Coordinates(10, 5),
-            Coordinates(10, 16),
-            100,
-            111
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 5),
+                Coordinates(10, 16),
+                100,
+                111,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         // Verify no transformation occurred
         assertEquals("hello world", transformer.processedContent)
@@ -39,17 +40,19 @@ class QuotedStringContentTransformerTest {
     fun testSingleLineWithSimpleEscape() {
         val rawQuotedContent = """hello\nworld"""
         val processed = "hello\nworld"
-        val baseLocation = Location(
-            Coordinates(5, 0),
-            Coordinates(5, rawQuotedContent.length),
-            50,
-            50 + rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 0),
+                Coordinates(5, rawQuotedContent.length),
+                50,
+                50 + rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -67,17 +70,19 @@ class QuotedStringContentTransformerTest {
     fun testMultipleEscapesOnSameLine() {
         val rawQuotedContent = """tab\there\tand\tthere"""
         val processed = "tab\there\tand\tthere"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -94,17 +99,19 @@ class QuotedStringContentTransformerTest {
     fun testEscapedQuotes() {
         val rawQuotedContent = """say \"hello\""""
         val processed = """say "hello""""
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -121,17 +128,19 @@ class QuotedStringContentTransformerTest {
     fun testEscapedBackslash() {
         val rawQuotedContent = """path\\to\\file"""
         val processed = """path\to\file"""
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -148,17 +157,19 @@ class QuotedStringContentTransformerTest {
     fun testUnicodeEscape() {
         val rawQuotedContent = """A\u0041B"""
         val processed = "AAB"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -174,18 +185,20 @@ class QuotedStringContentTransformerTest {
     fun testSurrogatePair() {
         // \uD83D\uDE00 is the surrogate pair for the grinning face emoji 😀
         val rawQuotedContent = """\uD83D\uDE00"""
-        val processed = "\uD83D\uDE00"  // The actual emoji
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val processed = "\uD83D\uDE00" // The actual emoji
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -201,17 +214,19 @@ class QuotedStringContentTransformerTest {
     fun testMultiLineWithRawWhitespace() {
         val rawQuotedContent = "line 1\nline 2\nline 3"
         val processed = "line 1\nline 2\nline 3"
-        val baseLocation = Location(
-            Coordinates(10, 0),
-            Coordinates(12, 6),
-            100,
-            120
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 0),
+                Coordinates(12, 6),
+                100,
+                120,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         // No transformation for raw whitespace
         assertEquals(processed, transformer.processedContent)
@@ -228,17 +243,19 @@ class QuotedStringContentTransformerTest {
     fun testMultiLineWithEscapedWhitespace() {
         val rawQuotedContent = """line 1\nline 2"""
         val processed = "line 1\nline 2"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -256,17 +273,19 @@ class QuotedStringContentTransformerTest {
     fun testMixedRawAndEscapedNewlines() {
         val rawQuotedContent = "line 1\nline 2\\nline 3"
         val processed = "line 1\nline 2\nline 3"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(1, 13),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(1, 13),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -283,17 +302,19 @@ class QuotedStringContentTransformerTest {
     fun testOffsetBasedAPI() {
         val rawQuotedContent = """hello\tworld"""
         val processed = "hello\tworld"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -310,27 +331,30 @@ class QuotedStringContentTransformerTest {
     fun testLineColumnBasedAPI() {
         val rawQuotedContent = "line 1\nline 2"
         val processed = "line 1\nline 2"
-        val baseLocation = Location(
-            Coordinates(10, 0),
-            Coordinates(11, 6),
-            100,
-            113
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 0),
+                Coordinates(11, 6),
+                100,
+                113,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
         // Map line 1, columns 0-4 in processed ("line")
-        val result = transformer.mapToOriginal(
-            startLine = 1,
-            startColumn = 0,
-            endLine = 1,
-            endColumn = 4
-        )
+        val result =
+            transformer.mapToOriginal(
+                startLine = 1,
+                startColumn = 0,
+                endLine = 1,
+                endColumn = 4,
+            )
 
         // Should map to line 11, columns 0-4 in original
         assertEquals(Coordinates(11, 0), result.start)
@@ -341,17 +365,19 @@ class QuotedStringContentTransformerTest {
     fun testEmptyContent() {
         val rawQuotedContent = ""
         val processed = ""
-        val baseLocation = Location(
-            Coordinates(5, 10),
-            Coordinates(5, 10),
-            100,
-            100
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 10),
+                Coordinates(5, 10),
+                100,
+                100,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -368,17 +394,19 @@ class QuotedStringContentTransformerTest {
     fun testEscapeAtStartOfContent() {
         val rawQuotedContent = """\nhello"""
         val processed = "\nhello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -394,17 +422,19 @@ class QuotedStringContentTransformerTest {
     fun testAllCommonEscapes() {
         val rawQuotedContent = """\\\/\b\f\n\r\t\"""" + """\'"""
         val processed = "\\/\b\u000C\n\r\t\"'"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -419,17 +449,19 @@ class QuotedStringContentTransformerTest {
     fun testZeroLengthRange() {
         val rawQuotedContent = """hello\nworld"""
         val processed = "hello\nworld"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -447,17 +479,19 @@ class QuotedStringContentTransformerTest {
     fun testComplexMixedContent() {
         val rawQuotedContent = """Hello\n\tWorld!\nThis is a "test" with 'quotes' and unicode: \u0041"""
         val processed = "Hello\n\tWorld!\nThis is a \"test\" with 'quotes' and unicode: A"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawQuotedContent.length),
-            0,
-            rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawQuotedContent.length),
+                0,
+                rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -476,17 +510,19 @@ class QuotedStringContentTransformerTest {
     fun testMultilineSelectionInComplexMixedContent() {
         val rawQuotedContent = "Hello\n\tWorld!\nThis is a \"test\" with 'quotes' and unicode: \\u0041"
         val processed = "Hello\n\tWorld!\nThis is a \"test\" with 'quotes' and unicode: A"
-        val baseLocation = Location(
-            Coordinates(4, 0),
-            Coordinates(4, rawQuotedContent.length),
-            5,
-            5 + rawQuotedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(4, 0),
+                Coordinates(4, rawQuotedContent.length),
+                5,
+                5 + rawQuotedContent.length,
+            )
 
-        val transformer = QuotedStringContentTransformer(
-            rawContent = rawQuotedContent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            QuotedStringContentTransformer(
+                rawContent = rawQuotedContent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 

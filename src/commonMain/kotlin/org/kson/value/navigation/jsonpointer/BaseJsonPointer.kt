@@ -1,6 +1,6 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
-import org.kson.value.navigation.json_pointer.PointerParser.*
+import org.kson.value.navigation.jsonpointer.PointerParser.*
 
 /**
  * Abstract base class for JSON Pointer implementations.
@@ -9,7 +9,9 @@ import org.kson.value.navigation.json_pointer.PointerParser.*
  *
  * @property pointerString The pointer string representation
  */
-abstract class BaseJsonPointer(parser: PointerParser) {
+abstract class BaseJsonPointer(
+    parser: PointerParser,
+) {
     /**
      * The pointer string representation
      */
@@ -42,13 +44,14 @@ abstract class BaseJsonPointer(parser: PointerParser) {
             }
             is ParseResult.Error -> {
                 // Determine the pointer type name for error message
-                val pointerTypeName = when (parser) {
-                    is JsonPointerParser -> "JSON Pointer"
-                    is JsonPointerGlobParser -> "JsonPointerGlob"
-                    else -> "pointer"
-                }
+                val pointerTypeName =
+                    when (parser) {
+                        is JsonPointerParser -> "JSON Pointer"
+                        is JsonPointerGlobParser -> "JsonPointerGlob"
+                        else -> "pointer"
+                    }
                 throw IllegalArgumentException(
-                    "Invalid $pointerTypeName '$pointerString': ${result.message}"
+                    "Invalid $pointerTypeName '$pointerString': ${result.message}",
                 )
             }
         }
@@ -63,7 +66,5 @@ abstract class BaseJsonPointer(parser: PointerParser) {
         return pointerString == other.pointerString
     }
 
-    override fun hashCode(): Int {
-        return pointerString.hashCode()
-    }
+    override fun hashCode(): Int = pointerString.hashCode()
 }

@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 import org.kson.parser.messages.MessageType.*
 
@@ -50,8 +50,9 @@ import org.kson.parser.messages.MessageType.*
  *
  * @param pointerString The JsonPointerGlob string to parse
  */
-class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString) {
-
+class JsonPointerGlobParser(
+    pointerString: String,
+) : PointerParser(pointerString) {
     /**
      * Represents a parsed character with its semantic meaning.
      * Separates parsing from classification by capturing whether each character
@@ -59,11 +60,20 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
      */
     private sealed class ParsedChar {
         /** A literal character (either plain or from an escape sequence) */
-        data class Literal(val char: Char, val escaped: Boolean = false) : ParsedChar()
+        data class Literal(
+            val char: Char,
+            val escaped: Boolean = false,
+        ) : ParsedChar()
+
         /** An unescaped `*` wildcard */
-        data object Wildcard : ParsedChar() { const val CHAR = '*' }
+        data object Wildcard : ParsedChar() {
+            const val CHAR = '*'
+        }
+
         /** An unescaped `?` single-character wildcard */
-        data object SingleCharWildcard : ParsedChar() { const val CHAR = '?' }
+        data object SingleCharWildcard : ParsedChar() {
+            const val CHAR = '?'
+        }
     }
 
     override fun referenceToken(): Boolean {
@@ -123,12 +133,13 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
         return when (char) {
             ParsedChar.Wildcard.CHAR -> ParsedChar.Wildcard
             ParsedChar.SingleCharWildcard.CHAR -> ParsedChar.SingleCharWildcard
-            else -> if (PointerEscapeHandler.isUnescaped(char)) {
-                ParsedChar.Literal(char)
-            } else {
-                error = JSON_POINTER_INVALID_CHARACTER.create(char.toString())
-                null
-            }
+            else ->
+                if (PointerEscapeHandler.isUnescaped(char)) {
+                    ParsedChar.Literal(char)
+                } else {
+                    error = JSON_POINTER_INVALID_CHARACTER.create(char.toString())
+                    null
+                }
         }
     }
 
@@ -149,25 +160,25 @@ class JsonPointerGlobParser(pointerString: String) : PointerParser(pointerString
     /**
      * Build the literal string value from parsed characters.
      */
-    private fun buildLiteralString(chars: List<ParsedChar>): String =
-        chars.joinToString("") { (it as ParsedChar.Literal).char.toString() }
+    private fun buildLiteralString(chars: List<ParsedChar>): String = chars.joinToString("") { (it as ParsedChar.Literal).char.toString() }
 
     /**
      * Build the pattern string for GlobMatcher, preserving escape sequences
      * so the matcher can distinguish literal characters from wildcards.
      */
-    private fun buildPatternString(chars: List<ParsedChar>): String = buildString {
-        for (char in chars) {
-            when (char) {
-                is ParsedChar.Literal -> {
-                    if (char.escaped) {
-                        append('\\')
+    private fun buildPatternString(chars: List<ParsedChar>): String =
+        buildString {
+            for (char in chars) {
+                when (char) {
+                    is ParsedChar.Literal -> {
+                        if (char.escaped) {
+                            append('\\')
+                        }
+                        append(char.char)
                     }
-                    append(char.char)
+                    is ParsedChar.Wildcard -> append(ParsedChar.Wildcard.CHAR)
+                    is ParsedChar.SingleCharWildcard -> append(ParsedChar.SingleCharWildcard.CHAR)
                 }
-                is ParsedChar.Wildcard -> append(ParsedChar.Wildcard.CHAR)
-                is ParsedChar.SingleCharWildcard -> append(ParsedChar.SingleCharWildcard.CHAR)
             }
         }
-    }
 }

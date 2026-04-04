@@ -3403,7 +3403,7 @@ impl Kson {
     ///
     /// @param kson The Kson source to convert
     /// @param options Options for the JSON transpilation
-    /// @return A Result containing either the Json output or error messages
+    /// @return A Result containing either the JSON output or error messages
     pub fn to_json(
         kson: &str,
         options: transpile_options::Json,
@@ -3434,7 +3434,7 @@ impl Kson {
     ///
     /// @param kson The Kson source to convert
     /// @param options Options for the YAML transpilation
-    /// @return A Result containing either the Yaml output or error messages
+    /// @return A Result containing either the YAML output or error messages
     pub fn to_yaml(
         kson: &str,
         options: transpile_options::Yaml,
@@ -3493,7 +3493,7 @@ impl Kson {
 
     /// Parses a Kson schema definition and returns a validator for that schema.
     ///
-    /// @param schemaKson The Kson source defining a Json Schema
+    /// @param schemaKson The Kson source defining a JSON Schema
     /// @return A SchemaValidator that can validate Kson documents against the schema
     pub fn parse_schema(
         schema_kson: &str,

@@ -14,11 +14,12 @@ import org.kson.FormattingStyle
 import org.kson.IndentType
 import org.kson.Kson
 import org.kson.tooling.cli.generated.CLI_DISPLAY_NAME
-import org.kson.tooling.cli.generated.FILE_EXTENSION
 import org.kson.tooling.cli.generated.CLI_NAME
+import org.kson.tooling.cli.generated.FILE_EXTENSION
 
 class KsonFormatCommand : BaseKsonCommand(name = "format") {
-    override fun help(context: Context) = """
+    override fun help(context: Context) =
+        """
         |Format $CLI_DISPLAY_NAME documents with customizable indentation and style.
         |
         |Examples:
@@ -33,7 +34,7 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
         |${"\u0085"}
         |${"\u0085"}Validate against schema before formatting:
         |${"\u0085"}  $CLI_NAME format -i input.$FILE_EXTENSION -s schema.$FILE_EXTENSION -o output.$FILE_EXTENSION
-    """.trimMargin()
+        """.trimMargin()
 
     private val indentType: IndentType by mutuallyExclusiveOptions(
         option("--indent-spaces", help = "Number of spaces for indentation")
@@ -41,7 +42,7 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
             .convert { IndentType.Spaces(it) },
         option("--indent-tabs", help = "Use tabs for indentation")
             .flag()
-            .convert { if (it) IndentType.Tabs else null }
+            .convert { if (it) IndentType.Tabs else null },
     ).single().default(IndentType.Spaces(2))
 
     private val style by option("--style", help = "Formatting style")
@@ -49,14 +50,15 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
         .default("plain")
 
     override fun run() {
-        super.run()  // Check for help display
+        super.run() // Check for help display
 
-        val ksonContent = try {
-            readInput()
-        } catch (e: Exception) {
-            echo("Error reading input: ${e.message}", err = true)
-            throw ProgramResult(1)
-        }
+        val ksonContent =
+            try {
+                readInput()
+            } catch (e: Exception) {
+                echo("Error reading input: ${e.message}", err = true)
+                throw ProgramResult(1)
+            }
 
         if (ksonContent.isBlank()) {
             echo("Error: Input is empty. Provide a $CLI_DISPLAY_NAME document to format.", err = true)
@@ -68,19 +70,21 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
 
         val indentType = this.indentType
 
-        val formattingStyle = when (style) {
-            "plain" -> FormattingStyle.PLAIN
-            "delimited" -> FormattingStyle.DELIMITED
-            "compact" -> FormattingStyle.COMPACT
-            "classic" -> FormattingStyle.CLASSIC
-            else -> FormattingStyle.PLAIN
-        }
+        val formattingStyle =
+            when (style) {
+                "plain" -> FormattingStyle.PLAIN
+                "delimited" -> FormattingStyle.DELIMITED
+                "compact" -> FormattingStyle.COMPACT
+                "classic" -> FormattingStyle.CLASSIC
+                else -> FormattingStyle.PLAIN
+            }
 
-        val formatOptions = FormatOptions(
-            indentType = indentType,
-            formattingStyle = formattingStyle
-        )
-        
+        val formatOptions =
+            FormatOptions(
+                indentType = indentType,
+                formattingStyle = formattingStyle,
+            )
+
         val formatted = Kson.format(ksonContent, formatOptions)
 
         writeOutput(formatted)

@@ -11,8 +11,10 @@ import org.kson.parser.TokenType
  * reliable key-vs-value distinction regardless of surrounding token context.
  */
 internal object SemanticTokenBuilder {
-
-    fun build(tokens: List<Token>, ast: KsonRoot): List<SemanticToken> {
+    fun build(
+        tokens: List<Token>,
+        ast: KsonRoot,
+    ): List<SemanticToken> {
         val keyTokens = mutableSetOf<Token>()
         collectKeyTokens(ast, keyTokens)
 
@@ -24,14 +26,17 @@ internal object SemanticTokenBuilder {
                     line = token.lexeme.location.start.line,
                     column = token.lexeme.location.start.column,
                     length = token.lexeme.text.length,
-                    tokenType = kind
-                )
+                    tokenType = kind,
+                ),
             )
         }
         return result
     }
 
-    private fun collectKeyTokens(node: AstNode, keyTokens: MutableSet<Token>) {
+    private fun collectKeyTokens(
+        node: AstNode,
+        keyTokens: MutableSet<Token>,
+    ) {
         when (node) {
             is KsonRootImpl -> collectKeyTokens(node.rootNode, keyTokens)
             is ObjectNode -> {
@@ -63,13 +68,17 @@ internal object SemanticTokenBuilder {
         }
     }
 
-    private fun classifyToken(token: Token, keyTokens: Set<Token>): SemanticTokenKind? {
-        return when (token.tokenType) {
+    private fun classifyToken(
+        token: Token,
+        keyTokens: Set<Token>,
+    ): SemanticTokenKind? =
+        when (token.tokenType) {
             // Strings and identifiers: key vs value
             TokenType.UNQUOTED_STRING,
             TokenType.STRING_CONTENT,
             TokenType.STRING_OPEN_QUOTE,
-            TokenType.STRING_CLOSE_QUOTE -> {
+            TokenType.STRING_CLOSE_QUOTE,
+            -> {
                 if (token in keyTokens) SemanticTokenKind.KEY else SemanticTokenKind.STRING
             }
 
@@ -79,7 +88,8 @@ internal object SemanticTokenBuilder {
             // Keywords (booleans + null)
             TokenType.TRUE,
             TokenType.FALSE,
-            TokenType.NULL -> SemanticTokenKind.KEYWORD
+            TokenType.NULL,
+            -> SemanticTokenKind.KEYWORD
 
             // Operators and punctuation
             TokenType.COLON,
@@ -92,7 +102,8 @@ internal object SemanticTokenBuilder {
             TokenType.SQUARE_BRACKET_R,
             TokenType.ANGLE_BRACKET_L,
             TokenType.ANGLE_BRACKET_R,
-            TokenType.END_DASH -> SemanticTokenKind.OPERATOR
+            TokenType.END_DASH,
+            -> SemanticTokenKind.OPERATOR
 
             // Comments
             TokenType.COMMENT -> SemanticTokenKind.COMMENT
@@ -102,12 +113,13 @@ internal object SemanticTokenBuilder {
             TokenType.EMBED_CONTENT -> SemanticTokenKind.EMBED_CONTENT
             TokenType.EMBED_PREAMBLE_NEWLINE,
             TokenType.EMBED_OPEN_DELIM,
-            TokenType.EMBED_CLOSE_DELIM -> SemanticTokenKind.EMBED_DELIM
+            TokenType.EMBED_CLOSE_DELIM,
+            -> SemanticTokenKind.EMBED_DELIM
 
             // Skip tokens without semantic meaning
             TokenType.WHITESPACE,
             TokenType.ILLEGAL_CHAR,
-            TokenType.EOF -> null
+            TokenType.EOF,
+            -> null
         }
-    }
 }

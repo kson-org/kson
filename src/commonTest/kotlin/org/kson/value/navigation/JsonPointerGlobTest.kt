@@ -2,15 +2,14 @@
 
 package org.kson.value.navigation
 
-import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
-import org.kson.value.navigation.json_pointer.JsonPointerGlob
+import org.kson.value.navigation.jsonpointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.jsonpointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class JsonPointerGlobTest {
-
     @Test
     fun `root pointer has empty token list`() {
         val pointer = JsonPointerGlob("")
@@ -117,34 +116,38 @@ class JsonPointerGlobTest {
 
     @Test
     fun `invalid pointer without leading slash throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointerGlob("foo/bar")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointerGlob("foo/bar")
+            }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
         assertTrue(exception.message!!.contains("foo/bar"))
     }
 
     @Test
     fun `invalid escape sequence throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointerGlob("/foo~2bar")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointerGlob("/foo~2bar")
+            }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
     }
 
     @Test
     fun `incomplete RFC escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointerGlob("/foo~")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointerGlob("/foo~")
+            }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
     }
 
     @Test
     fun `incomplete backslash escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointerGlob("/foo\\")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointerGlob("/foo\\")
+            }
         assertTrue(exception.message!!.contains("Invalid JsonPointerGlob"))
     }
 
@@ -174,11 +177,12 @@ class JsonPointerGlobTest {
 
     @Test
     fun `pointers can be used in collections`() {
-        val set = setOf(
-            JsonPointerGlob("/users/*"),
-            JsonPointerGlob("/data/*"),
-            JsonPointerGlob("/users/*")  // Duplicate
-        )
+        val set =
+            setOf(
+                JsonPointerGlob("/users/*"),
+                JsonPointerGlob("/data/*"),
+                JsonPointerGlob("/users/*"), // Duplicate
+            )
         assertEquals(2, set.size)
     }
 

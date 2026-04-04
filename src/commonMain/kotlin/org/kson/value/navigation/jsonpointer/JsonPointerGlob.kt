@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 /**
  * Represents a validated JsonPointerGlob - an extension of JSON Pointer with glob-style pattern matching.
@@ -26,33 +26,34 @@ package org.kson.value.navigation.json_pointer
  * @throws IllegalArgumentException if the pointer string is invalid
  */
 @ExperimentalJsonPointerGlobLanguage
-class JsonPointerGlob(pointerString: String) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
-
+class JsonPointerGlob(
+    pointerString: String,
+) : BaseJsonPointer(JsonPointerGlobParser(pointerString)) {
     override val tokens: List<String>
-        get() = rawTokens.map {
-            when (it) {
-                is PointerParser.Tokens.Literal -> escapeGlobSpecialChars(it.value)
-                is PointerParser.Tokens.Wildcard -> "*"
-                is PointerParser.Tokens.RecursiveDescent -> "**"
-                is PointerParser.Tokens.GlobPattern -> it.pattern
+        get() =
+            rawTokens.map {
+                when (it) {
+                    is PointerParser.Tokens.Literal -> escapeGlobSpecialChars(it.value)
+                    is PointerParser.Tokens.Wildcard -> "*"
+                    is PointerParser.Tokens.RecursiveDescent -> "**"
+                    is PointerParser.Tokens.GlobPattern -> it.pattern
+                }
             }
-        }
 
     /**
      * Escapes glob special characters in a literal value.
      * Characters *, ?, and \ are escaped with a backslash.
      */
-    private fun escapeGlobSpecialChars(value: String): String {
-        return value
+    private fun escapeGlobSpecialChars(value: String): String =
+        value
             .replace("\\", "\\\\")
             .replace("*", "\\*")
             .replace("?", "\\?")
-    }
 }
 
 @RequiresOptIn(
-  level = RequiresOptIn.Level.WARNING,
-  message = "The JsonPointerGlob language specification is experimental and may change in future versions."
+    level = RequiresOptIn.Level.WARNING,
+    message = "The JsonPointerGlob language specification is experimental and may change in future versions.",
 )
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)

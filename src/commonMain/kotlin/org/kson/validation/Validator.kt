@@ -7,6 +7,6 @@ interface Validator {
     fun validate(
         ksonValue: KsonValue,
         messageSink: MessageSink,
-        sourceContext: SourceContext = SourceContext()
+        sourceContext: SourceContext = SourceContext(),
     )
 }

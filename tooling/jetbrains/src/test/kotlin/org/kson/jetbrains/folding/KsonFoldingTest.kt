@@ -38,4 +38,4 @@ class KsonFoldingTest : BasePlatformTestCase() {
         val testName = getTestName(true)
         myFixture.testFolding("$testDataPath/$testName.kson")
     }
-} 
+}

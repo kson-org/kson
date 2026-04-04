@@ -13,11 +13,15 @@ import org.kson.jetbrains.parser.elem
 import org.kson.jetbrains.util.getIndentType
 import org.kson.jetbrains.util.getLineIndentLevel
 import org.kson.jetbrains.util.hasElementAtOffset
-import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.TokenType.*
+import org.kson.parser.behavior.embedblock.EmbedDelim
 
 class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
-    override fun beforeCharDeleted(charDeleted: Char, file: PsiFile, editor: Editor) {
+    override fun beforeCharDeleted(
+        charDeleted: Char,
+        file: PsiFile,
+        editor: Editor,
+    ) {
         // this handler runs on all backspace events in all filetypes, so
         // be careful to return quickly if this event isn't for us
         if (!file.viewProvider.baseLanguage.isKindOf(KsonLanguage)) {
@@ -80,8 +84,8 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
                     val embedDelim = EmbedDelim.fromString(charDeleted.toString())
                     val toBeDeletedIfFound = "${newIndent}${embedDelim.closeDelimiter}"
                     val toBeDeletedIfFoundWithComma = "$toBeDeletedIfFound,"
-                    if (nextLineText == toBeDeletedIfFound
-                        || nextLineText == toBeDeletedIfFoundWithComma
+                    if (nextLineText == toBeDeletedIfFound ||
+                        nextLineText == toBeDeletedIfFoundWithComma
                     ) {
                         CommandProcessor.getInstance().executeCommand(project, {
                             ApplicationManager.getApplication().runWriteAction {
@@ -95,9 +99,11 @@ class KsonBackspaceHandlerDelegate : BackspaceHandlerDelegate() {
         }
     }
 
-    override fun charDeleted(c: Char, file: PsiFile, editor: Editor): Boolean {
-        return false
-    }
+    override fun charDeleted(
+        c: Char,
+        file: PsiFile,
+        editor: Editor,
+    ): Boolean = false
 }
 
 /**

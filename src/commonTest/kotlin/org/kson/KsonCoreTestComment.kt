@@ -10,53 +10,56 @@ import kotlin.test.Test
 class KsonCoreTestComment : KsonCoreTest {
     @Test
     fun testSourceWithComment() {
-        assertParsesTo("""
+        assertParsesTo(
+            """
             # this is a comment
             "string"
         """,
             """
             # this is a comment
             string
-        """.trimIndent(),
+            """.trimIndent(),
             """
             # this is a comment
             string
-        """.trimIndent(),
+            """.trimIndent(),
             """
             "string"
-        """.trimIndent()
+            """.trimIndent(),
         )
     }
 
     @Test
     fun testSanityCheckCommentFreeCompiles() {
-        assertParsesTo("""
+        assertParsesTo(
+            """
             # a comment
             key: {
               # nested comment
               value: 42
             }
             # document end comment
-        """.trimIndent(),
+            """.trimIndent(),
             """
             key:
               value: 42
-        """.trimIndent(),
+            """.trimIndent(),
             """
             key:
               value: 42
-        """.trimIndent(),
+            """.trimIndent(),
             """
             {
               "key": {
                 "value": 42
               }
             }
-        """.trimIndent(),
-            compileSettings = CompileSettings(
-                Kson(preserveComments = false),
-                Yaml(preserveComments = false),
-            )
+            """.trimIndent(),
+            compileSettings =
+                CompileSettings(
+                    Kson(preserveComments = false),
+                    Yaml(preserveComments = false),
+                ),
         )
     }
 
@@ -64,39 +67,39 @@ class KsonCoreTestComment : KsonCoreTest {
     fun testCommentPreservationOnDashLists() {
         assertParsesTo(
             """
-                # comment one
-                - one
-                # comment two
-                - two
-                # comment three.1
-                # comment three.2
-                - three
+            # comment one
+            - one
+            # comment two
+            - two
+            # comment three.1
+            # comment three.2
+            - three
             """.trimIndent(),
             """
-                # comment one
-                - one
-                # comment two
-                - two
-                # comment three.1
-                # comment three.2
-                - three
+            # comment one
+            - one
+            # comment two
+            - two
+            # comment three.1
+            # comment three.2
+            - three
             """.trimIndent(),
             """
-                # comment one
-                - one
-                # comment two
-                - two
-                # comment three.1
-                # comment three.2
-                - three
+            # comment one
+            - one
+            # comment two
+            - two
+            # comment three.1
+            # comment three.2
+            - three
             """.trimIndent(),
             """
-                [
-                  "one",
-                  "two",
-                  "three"
-                ]
-            """.trimIndent()
+            [
+              "one",
+              "two",
+              "three"
+            ]
+            """.trimIndent(),
         )
     }
 
@@ -113,45 +116,44 @@ class KsonCoreTestComment : KsonCoreTest {
               ]
             """,
             """
-              # first comment
-              # second comment
-              # third comment
-              - one
-              - two
+            # first comment
+            # second comment
+            # third comment
+            - one
+            - two
             """.trimIndent(),
             """
-              # first comment
-              # second comment
-              # third comment
-              - one
-              - two
+            # first comment
+            # second comment
+            # third comment
+            - one
+            - two
             """.trimIndent(),
             """
-              [
-                "one",
-                "two"
-              ]
-            """.trimIndent()
+            [
+              "one",
+              "two"
+            ]
+            """.trimIndent(),
         )
     }
 
     @Test
     fun testCommentPreservationOnConstants() {
-
         assertParsesTo(
             """
                 # comment on a number
                 4.5
             """,
             """
-                # comment on a number
-                4.5
+            # comment on a number
+            4.5
             """.trimIndent(),
             """
-                # comment on a number
-                4.5
+            # comment on a number
+            4.5
             """.trimIndent(),
-            "4.5"
+            "4.5",
         )
 
         assertParsesTo(
@@ -160,14 +162,14 @@ class KsonCoreTestComment : KsonCoreTest {
                 false
             """,
             """
-                # comment on a boolean
-                false
+            # comment on a boolean
+            false
             """.trimIndent(),
             """
-                # comment on a boolean
-                false
+            # comment on a boolean
+            false
             """.trimIndent(),
-            "false"
+            "false",
         )
 
         assertParsesTo(
@@ -176,14 +178,14 @@ class KsonCoreTestComment : KsonCoreTest {
                 id
             """,
             """
-                # comment on an identifier
-                id
+            # comment on an identifier
+            id
             """.trimIndent(),
             """
-                # comment on an identifier
-                id
+            # comment on an identifier
+            id
             """.trimIndent(),
-            "\"id\""
+            "\"id\"",
         )
 
         assertParsesTo(
@@ -192,33 +194,32 @@ class KsonCoreTestComment : KsonCoreTest {
                 "a string"
             """,
             """
-                # comment on a string
-                'a string'
+            # comment on a string
+            'a string'
             """.trimIndent(),
             """
-                # comment on a string
-                "a string"
+            # comment on a string
+            "a string"
             """.trimIndent(),
-            "\"a string\""
+            "\"a string\"",
         )
     }
 
     @Test
     fun testTrailingCommentPreservationOnConstants() {
-
         assertParsesTo(
             """
                 4.5 # trailing comment
             """,
             """
-                # trailing comment
-                4.5
+            # trailing comment
+            4.5
             """.trimIndent(),
             """
-                # trailing comment
-                4.5
+            # trailing comment
+            4.5
             """.trimIndent(),
-            "4.5"
+            "4.5",
         )
 
         assertParsesTo(
@@ -226,14 +227,14 @@ class KsonCoreTestComment : KsonCoreTest {
                 false # trailing comment
             """,
             """
-                # trailing comment
-                false
+            # trailing comment
+            false
             """.trimIndent(),
             """
-                # trailing comment
-                false
+            # trailing comment
+            false
             """.trimIndent(),
-            "false"
+            "false",
         )
 
         assertParsesTo(
@@ -241,14 +242,14 @@ class KsonCoreTestComment : KsonCoreTest {
                 id # trailing comment
             """,
             """
-                # trailing comment
-                id
+            # trailing comment
+            id
             """.trimIndent(),
             """
-                # trailing comment
-                id
+            # trailing comment
+            id
             """.trimIndent(),
-            "\"id\""
+            "\"id\"",
         )
 
         assertParsesTo(
@@ -256,14 +257,14 @@ class KsonCoreTestComment : KsonCoreTest {
                 "a string" # trailing comment
             """,
             """
-                # trailing comment
-                'a string'
+            # trailing comment
+            'a string'
             """.trimIndent(),
             """
-                # trailing comment
-                "a string"
+            # trailing comment
+            "a string"
             """.trimIndent(),
-            "\"a string\""
+            "\"a string\"",
         )
     }
 
@@ -281,25 +282,25 @@ class KsonCoreTestComment : KsonCoreTest {
                 key2: val2
             """,
             """
-               # a comment
-               # an odd but legal comment on this val
-               key: val
-               # another comment
-               key2: val2
+            # a comment
+            # an odd but legal comment on this val
+            key: val
+            # another comment
+            key2: val2
             """.trimIndent(),
             """
-               # a comment
-               # an odd but legal comment on this val
-               key: val
-               # another comment
-               key2: val2
+            # a comment
+            # an odd but legal comment on this val
+            key: val
+            # another comment
+            key2: val2
             """.trimIndent(),
             """
-               {
-                 "key": "val",
-                 "key2": "val2"
-               }
-            """.trimIndent()
+            {
+              "key": "val",
+              "key2": "val2"
+            }
+            """.trimIndent(),
         )
     }
 
@@ -317,23 +318,23 @@ class KsonCoreTestComment : KsonCoreTest {
                 }
             """,
             """
-                # this comment should be preserved on this property
-                key1: val1
-                # as should this one
-                key2: val2
+            # this comment should be preserved on this property
+            key1: val1
+            # as should this one
+            key2: val2
             """.trimIndent(),
             """
-                # this comment should be preserved on this property
-                key1: val1
-                # as should this one
-                key2: val2
+            # this comment should be preserved on this property
+            key1: val1
+            # as should this one
+            key2: val2
             """.trimIndent(),
             """
-                {
-                  "key1": "val1",
-                  "key2": "val2"
-                }
-            """.trimIndent()
+            {
+              "key1": "val1",
+              "key2": "val2"
+            }
+            """.trimIndent(),
         )
     }
 
@@ -349,25 +350,25 @@ class KsonCoreTestComment : KsonCoreTest {
                 second_element ]
             """,
             """
-                # comment on list
-                # comment on first_element
-                - first_element
-                # comment on second_element
-                - second_element
+            # comment on list
+            # comment on first_element
+            - first_element
+            # comment on second_element
+            - second_element
             """.trimIndent(),
             """
-                # comment on list
-                # comment on first_element
-                - first_element
-                # comment on second_element
-                - second_element
+            # comment on list
+            # comment on first_element
+            - first_element
+            # comment on second_element
+            - second_element
             """.trimIndent(),
             """
-                [
-                  "first_element",
-                  "second_element"
-                ]
-            """.trimIndent()
+            [
+              "first_element",
+              "second_element"
+            ]
+            """.trimIndent(),
         )
 
         assertParsesTo(
@@ -378,25 +379,25 @@ class KsonCoreTestComment : KsonCoreTest {
                 - second_element
             """,
             """
-                # comment on first_element
-                - first_element
-                # comment on second_element
-                - second_element
+            # comment on first_element
+            - first_element
+            # comment on second_element
+            - second_element
             """.trimIndent(),
             """
-                # comment on first_element
-                - first_element
-                # comment on second_element
-                - second_element
+            # comment on first_element
+            - first_element
+            # comment on second_element
+            - second_element
             """.trimIndent(),
             """
-                [
-                  "first_element",
-                  "second_element"
-                ]
+            [
+              "first_element",
+              "second_element"
+            ]
             """.trimIndent(),
             "should always anchor dash-delimited list comments to the elements " +
-                    "since there's no syntactic way to identify a comment on the whole list"
+                "since there's no syntactic way to identify a comment on the whole list",
         )
 
         assertParsesTo(
@@ -416,29 +417,29 @@ class KsonCoreTestComment : KsonCoreTest {
                 ]
             """,
             """
-              # a list of lists
+            # a list of lists
+            - 
+              # trailing comment on constant element
+              - 1.2
+              # a nested list element
+              - 2.2
+              - 3.2
+              =
+            - 
+              # a nested dash-delimited list
               - 
-                # trailing comment on constant element
-                - 1.2
-                # a nested list element
-                - 2.2
-                - 3.2
+                - 10.2
+                =
+              # a further nested braced list
+              # trailing comment on nested list
+              - 
+                - 4.2
+                # a further nested braced list element
+                - 5.2
                 =
               - 
-                # a nested dash-delimited list
-                - 
-                  - 10.2
-                  =
-                # a further nested braced list
-                # trailing comment on nested list
-                - 
-                  - 4.2
-                  # a further nested braced list element
-                  - 5.2
-                  =
-                - 
-                  - 9.2
-                  - 8.2
+                - 9.2
+                - 8.2
             """.trimIndent(),
             """
             # a list of lists
@@ -463,28 +464,28 @@ class KsonCoreTestComment : KsonCoreTest {
                 - 8.2
             """.trimIndent(),
             """
+            [
+              [
+                1.2,
+                2.2,
+                3.2
+              ],
+              [
                 [
-                  [
-                    1.2,
-                    2.2,
-                    3.2
-                  ],
-                  [
-                    [
-                      10.2
-                    ],
-                    [
-                      4.2,
-                      5.2
-                    ],
-                    [
-                      9.2,
-                      8.2
-                    ]
-                  ]
+                  10.2
+                ],
+                [
+                  4.2,
+                  5.2
+                ],
+                [
+                  9.2,
+                  8.2
                 ]
+              ]
+            ]
             """.trimIndent(),
-            "should preserve comments in nested lists"
+            "should preserve comments in nested lists",
         )
     }
 
@@ -498,19 +499,19 @@ class KsonCoreTestComment : KsonCoreTest {
                 %%
             """,
             """
-               # a comment on an embed block
-               %
-               embedded stuff
-               %%
+            # a comment on an embed block
+            %
+            embedded stuff
+            %%
             """.trimIndent(),
             """
-               # a comment on an embed block
-               |
-                 embedded stuff
+            # a comment on an embed block
+            |
+              embedded stuff
             """.trimIndent(),
             """
-              "embedded stuff"
-            """.trimIndent()
+            "embedded stuff"
+            """.trimIndent(),
         )
     }
 
@@ -524,27 +525,27 @@ class KsonCoreTestComment : KsonCoreTest {
                 ] # trailing list brace
             """,
             """
-                # leading
-                # trailing list brace
-                # trailing "one"
-                - one
-                # trailing "two"
-                - two
+            # leading
+            # trailing list brace
+            # trailing "one"
+            - one
+            # trailing "two"
+            - two
             """.trimIndent(),
             """
-                # leading
-                # trailing list brace
-                # trailing "one"
-                - one
-                # trailing "two"
-                - two
+            # leading
+            # trailing list brace
+            # trailing "one"
+            - one
+            # trailing "two"
+            - two
             """.trimIndent(),
             """
-                [
-                  "one",
-                  "two"
-                ]
-            """.trimIndent()
+            [
+              "one",
+              "two"
+            ]
+            """.trimIndent(),
         )
     }
 
@@ -558,20 +559,20 @@ class KsonCoreTestComment : KsonCoreTest {
                 }
             """,
             """
-                # leading
-                # trailing
-                keyword: value
+            # leading
+            # trailing
+            keyword: value
             """.trimIndent(),
             """
-                # leading
-                # trailing
-                keyword: value
+            # leading
+            # trailing
+            keyword: value
             """.trimIndent(),
             """
-                {
-                  "keyword": "value"
-                }
-            """.trimIndent()
+            {
+              "keyword": "value"
+            }
+            """.trimIndent(),
         )
 
         assertParsesTo(
@@ -582,20 +583,20 @@ class KsonCoreTestComment : KsonCoreTest {
                 }
             """,
             """
-                # leading
-                # trailing
-                keyword: value
+            # leading
+            # trailing
+            keyword: value
             """.trimIndent(),
             """
-                # leading
-                # trailing
-                keyword: value
+            # leading
+            # trailing
+            keyword: value
             """.trimIndent(),
             """
-                {
-                  "keyword": "value"
-                }
-            """.trimIndent()
+            {
+              "keyword": "value"
+            }
+            """.trimIndent(),
         )
     }
 
@@ -613,22 +614,22 @@ class KsonCoreTestComment : KsonCoreTest {
                 # of the file
             """,
             """
-                null
-                
-                # these are some trailing
-                # comments that would like 
-                # to be preserved at the end
-                # of the file
+            null
+            
+            # these are some trailing
+            # comments that would like 
+            # to be preserved at the end
+            # of the file
             """.trimIndent(),
             """
-                null
-                
-                # these are some trailing
-                # comments that would like 
-                # to be preserved at the end
-                # of the file
+            null
+            
+            # these are some trailing
+            # comments that would like 
+            # to be preserved at the end
+            # of the file
             """.trimIndent(),
-            "null"
+            "null",
         )
     }
-} 
+}

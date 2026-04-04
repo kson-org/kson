@@ -14,7 +14,7 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
 
     private fun doTrimTest(
         input: String,
-        expectedRanges: List<TextRange>
+        expectedRanges: List<TextRange>,
     ) {
         val embedBlock = generator.createEmbedBlock(EmbedDelim.Percent, input)
         val embedContent = embedBlock.embedContent!!
@@ -24,7 +24,7 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             assertEquals("Range at index $index does not match", expected, actual)
         }
     }
-    
+
     fun testTrimIndentBasicIndentation() {
         doTrimTest(
             """
@@ -33,10 +33,10 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |    line3
             """.trimMargin(),
             listOf(
-                TextRange(4, 10),   // "line1\n"
-                TextRange(14, 20),  // "line2\n"
-                TextRange(24, 29)   // "line3"
-            )
+                TextRange(4, 10), // "line1\n"
+                TextRange(14, 20), // "line2\n"
+                TextRange(24, 29), // "line3"
+            ),
         )
     }
 
@@ -49,11 +49,11 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |    5
             """.trimMargin(),
             listOf(
-                TextRange(4, 6),    // "1\n"
-                TextRange(10, 11),  // "\n"
-                TextRange(15, 16),  // "\n"
-                TextRange(20, 21)   // "5"
-            )
+                TextRange(4, 6), // "1\n"
+                TextRange(10, 11), // "\n"
+                TextRange(15, 16), // "\n"
+                TextRange(20, 21), // "5"
+            ),
         )
     }
 
@@ -66,11 +66,11 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |  
             """.trimMargin(),
             listOf(
-                TextRange(2, 5),    // "  \n"
-                TextRange(7, 10),  // "  \n"
-                TextRange(12, 15),  // "  \n"
-                TextRange(17, 17)   // ""
-            )
+                TextRange(2, 5), // "  \n"
+                TextRange(7, 10), // "  \n"
+                TextRange(12, 15), // "  \n"
+                TextRange(17, 17), // ""
+            ),
         )
     }
 
@@ -81,9 +81,9 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |      
             """.trimMargin(),
             listOf(
-                TextRange(4, 6),    // "1\n"
-                TextRange(10, 12)   // "  "
-            )
+                TextRange(4, 6), // "1\n"
+                TextRange(10, 12), // "  "
+            ),
         )
     }
 
@@ -94,7 +94,7 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             """.trimMargin(),
             listOf(
                 TextRange(0, 0),
-            )
+            ),
         )
     }
 
@@ -106,10 +106,10 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |    line3
             """.trimMargin(),
             listOf(
-                TextRange(4, 10),   // "line1\n"
-                TextRange(14, 22),  // "  line2\n"
-                TextRange(26, 31)   // "line3"
-            )
+                TextRange(4, 10), // "line1\n"
+                TextRange(14, 22), // "  line2\n"
+                TextRange(26, 31), // "line3"
+            ),
         )
     }
 
@@ -121,17 +121,17 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
             |    line2
             """.trimMargin(),
             listOf(
-                TextRange(4, 5),    // "\n"
-                TextRange(9, 15),   // "line1\n"
-                TextRange(19, 24)   // "line2"
-            )
+                TextRange(4, 5), // "\n"
+                TextRange(9, 15), // "line1\n"
+                TextRange(19, 24), // "line2"
+            ),
         )
     }
 
     fun testTrimIndentWithSingleLine() {
         doTrimTest(
             "    single line",
-            listOf(TextRange(4, 15))
+            listOf(TextRange(4, 15)),
         )
     }
 }

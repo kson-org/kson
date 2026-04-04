@@ -5,22 +5,28 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import org.kson.parser.behavior.embedblock.EmbedDelim
 
-open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageInjectionHost {
+open class KsonEmbedContent(
+    node: ASTNode,
+) : KsonPsiElement(node),
+    PsiLanguageInjectionHost {
     val embedBlock: KsonEmbedBlock?
         get() = node.treeParent?.psi as? KsonEmbedBlock
     val indentHandler = KsonTrimIndentHandler()
+
     override fun isValidHost(): Boolean {
         // First check if parent is a valid KsonEmbedBlock
         if (this.embedBlock !is KsonEmbedBlock) return false
 
         // Check for any error elements in the PSI tree
         var hasErrors = false
-        this.embedBlock?.accept(object : PsiRecursiveElementWalkingVisitor() {
-            override fun visitErrorElement(element: PsiErrorElement) {
-                hasErrors = true
-                stopWalking()
-            }
-        })
+        this.embedBlock?.accept(
+            object : PsiRecursiveElementWalkingVisitor() {
+                override fun visitErrorElement(element: PsiErrorElement) {
+                    hasErrors = true
+                    stopWalking()
+                }
+            },
+        )
         return !hasErrors
     }
 
@@ -40,12 +46,11 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
         return newEmbedContent
     }
 
-    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost?> {
-        return EmbedContentLiteralTextEscaper(this)
-    }
+    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost?> = EmbedContentLiteralTextEscaper(this)
 
-    private class EmbedContentLiteralTextEscaper(host: KsonEmbedContent) :
-        LiteralTextEscaper<PsiLanguageInjectionHost>(host) {
+    private class EmbedContentLiteralTextEscaper(
+        host: KsonEmbedContent,
+    ) : LiteralTextEscaper<PsiLanguageInjectionHost>(host) {
         private val embedDelim = host.embedBlock?.embedDelim ?: EmbedDelim.Percent
 
         /**
@@ -56,7 +61,10 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
          * @param outChars StringBuilder to receive the decoded text
          * @return true if decoding was successful, false otherwise
          */
-        override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
+        override fun decode(
+            rangeInsideHost: TextRange,
+            outChars: StringBuilder,
+        ): Boolean {
             val hostText = rangeInsideHost.substring(myHost.text)
 
             // Unescape the embed content
@@ -74,7 +82,10 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
          * @param rangeInsideHost The range of text to decode
          * @return The offset in the host text, or -1 if the offset is invalid
          */
-        override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
+        override fun getOffsetInHost(
+            offsetInDecoded: Int,
+            rangeInsideHost: TextRange,
+        ): Int {
             val hostText = rangeInsideHost.substring(myHost.text)
             if (hostText.isEmpty() || offsetInDecoded < 0) return -1
 
@@ -85,8 +96,10 @@ open class KsonEmbedContent(node: ASTNode) : KsonPsiElement(node), PsiLanguageIn
             val hostOffset = rangeInsideHost.startOffset + offsetInDecoded
 
             // Find all escaped delimiter positions before our target position and adjust offset
-            val escapedIndices = embedDelim.findEscapedDelimiterIndices(hostText)
-                .filter { it < hostOffset }
+            val escapedIndices =
+                embedDelim
+                    .findEscapedDelimiterIndices(hostText)
+                    .filter { it < hostOffset }
             val adjustedOffset = hostOffset + escapedIndices.size
 
             // Ensure the result is within the valid range

@@ -24,7 +24,9 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  *           | "e" sign digits
  * sign -> "" | "+" | "-"
  */
-class NumberParser(private val numberCandidate: String) {
+class NumberParser(
+    private val numberCandidate: String,
+) {
     private val scanner: Scanner = Scanner(numberCandidate)
     private var error: Message? = null
     private var hasDecimalPoint = false
@@ -43,7 +45,9 @@ class NumberParser(private val numberCandidate: String) {
             }
         }
 
-        class Integer(rawString: String) : ParsedNumber() {
+        class Integer(
+            rawString: String,
+        ) : ParsedNumber() {
             override val asString = trimLeadingZeros(rawString)
             val value = convertToLong(rawString.trimStart('0').ifEmpty { "0" })
 
@@ -53,14 +57,16 @@ class NumberParser(private val numberCandidate: String) {
                     val trimmed = input.substring(1).trimStart('0')
                     return "-" + (trimmed.ifEmpty { "0" })
                 }
-                
+
                 // For positive numbers, just trim leading zeros
                 val trimmed = input.trimStart('0')
                 return if (trimmed.isEmpty()) "0" else trimmed
             }
         }
 
-        class Decimal(rawString: String) : ParsedNumber() {
+        class Decimal(
+            rawString: String,
+        ) : ParsedNumber() {
             override val asString = trimLeadingZeros(rawString)
             val value: Double by lazy {
                 asString.toDouble()
@@ -78,13 +84,14 @@ class NumberParser(private val numberCandidate: String) {
                 val mainPart = parts[0]
                 val exponentPart = if (parts.size > 1) "e${parts[1]}" else ""
 
-                val mainTrimmedPart = if (mainPart.contains('.')) {
-                    val (intPart, fracPart) = mainPart.split('.')
-                    val trimmedIntPart = intPart.trimStart('0').ifEmpty { "0" }
-                    if (fracPart.isEmpty()) trimmedIntPart else "$trimmedIntPart.$fracPart"
-                } else {
-                    mainPart.trimStart('0').ifEmpty { "0" }
-                }
+                val mainTrimmedPart =
+                    if (mainPart.contains('.')) {
+                        val (intPart, fracPart) = mainPart.split('.')
+                        val trimmedIntPart = intPart.trimStart('0').ifEmpty { "0" }
+                        if (fracPart.isEmpty()) trimmedIntPart else "$trimmedIntPart.$fracPart"
+                    } else {
+                        mainPart.trimStart('0').ifEmpty { "0" }
+                    }
 
                 return buildString {
                     if (isNegative) append("-")
@@ -104,21 +111,24 @@ class NumberParser(private val numberCandidate: String) {
          * If we fail to parse to a number, [number] will be `null` and this [error] property will contain the
          * error [Message] describing why the number parsing failed
          */
-        val error: Message?
+        val error: Message?,
     )
 
     fun parse(): NumberParseResult {
         return if (number()) {
-            val result = if (!hasDecimalPoint && !hasExponent) {
-                try {
-                    ParsedNumber.Integer(numberCandidate)
-                } catch (e: IntegerOverflowException) {
-                    return NumberParseResult(null,
-                        MessageType.INTEGER_OVERFLOW.create(numberCandidate))
+            val result =
+                if (!hasDecimalPoint && !hasExponent) {
+                    try {
+                        ParsedNumber.Integer(numberCandidate)
+                    } catch (e: IntegerOverflowException) {
+                        return NumberParseResult(
+                            null,
+                            MessageType.INTEGER_OVERFLOW.create(numberCandidate),
+                        )
+                    }
+                } else {
+                    ParsedNumber.Decimal(numberCandidate)
                 }
-            } else {
-                ParsedNumber.Decimal(numberCandidate)
-            }
             NumberParseResult(result, null)
         } else {
             if (error == null) {
@@ -134,7 +144,9 @@ class NumberParser(private val numberCandidate: String) {
     /**
      * A [Char] by [Char] [source] [Scanner]
      */
-    private class Scanner(private val source: String) {
+    private class Scanner(
+        private val source: String,
+    ) {
         private var currentSourceIndex = 0
 
         /**
@@ -152,9 +164,7 @@ class NumberParser(private val numberCandidate: String) {
             currentSourceIndex++
         }
 
-        fun eof(): Boolean {
-            return currentSourceIndex >= source.length
-        }
+        fun eof(): Boolean = currentSourceIndex >= source.length
     }
 
     /**
@@ -213,22 +223,21 @@ class NumberParser(private val numberCandidate: String) {
     /**
      * digit -> "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
      */
-    private fun digit(): Boolean {
-        return zeroToNine.contains(scanner.peek())
-    }
+    private fun digit(): Boolean = zeroToNine.contains(scanner.peek())
 
-    private val zeroToNine = setOf(
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9'
-    )
+    private val zeroToNine =
+        setOf(
+            '0',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+        )
 
     /**
      * fraction -> ""
@@ -303,4 +312,6 @@ private fun convertToLong(numberString: String): Long {
 /**
  * TODO We should be able to fall back to a BigInteger in these cases and not error anymore
  */
-private class IntegerOverflowException(message: String) : NumberFormatException(message)
+private class IntegerOverflowException(
+    message: String,
+) : NumberFormatException(message)

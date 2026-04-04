@@ -11,31 +11,31 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonQuoteMatcherTest.testAutoInsert]
      */
     fun testDeleteEmptyQuotePairs() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairQuote(), true) {
             doIdeActionTest(
                 "\"<caret>\"",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>"
+                "<caret>",
             )
 
             doIdeActionTest(
                 "\'<caret>\'",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>"
+                "<caret>",
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_QUOTE(), false) {
+        withConfigSetting(ConfigProperty.AutoInsertPairQuote(), false) {
             doIdeActionTest(
                 "\"<caret>\"",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>\""
+                "<caret>\"",
             )
 
             doIdeActionTest(
                 "\'<caret>\'",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>\'"
+                "<caret>\'",
             )
         }
     }
@@ -45,19 +45,19 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonTypedHandlerDelegateTest.testAngleBracketAutoInsert]
      */
     fun testDeleteEmptyAngleBracketPairs() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>"
+                "<caret>",
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), false) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>>"
+                "<caret>>",
             )
         }
     }
@@ -66,13 +66,13 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-delete closing angle brackets in non-Kson files
      */
     fun testNonKsonAngleBracketAutoDelete() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doIdeActionTest(
                 "<<caret>>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
                 "<caret>>",
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
         }
     }
@@ -85,20 +85,21 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {
             val openDelim = delimiter.openDelimiter
             val closeDelim = delimiter.closeDelimiter
-            val altDelim = if (delimiter == EmbedDelim.Percent) {
-                EmbedDelim.Dollar
-            } else {
-                EmbedDelim.Percent
-            }
+            val altDelim =
+                if (delimiter == EmbedDelim.Percent) {
+                    EmbedDelim.Dollar
+                } else {
+                    EmbedDelim.Percent
+                }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+            withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
                 doIdeActionTest(
                     """
                     $openDelim<caret>
                     $closeDelim
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "<caret>"
+                    "<caret>",
                 )
 
                 // should delete even if a comma follows the closing delimiter
@@ -108,7 +109,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     $closeDelim,
                     """.trimIndent(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "<caret>,"
+                    "<caret>,",
                 )
 
                 // should only delete when closing embed delimiter has correct indent
@@ -118,7 +119,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     |  $closeDelim
                     """.trimMargin(),
                     IdeActions.ACTION_EDITOR_BACKSPACE,
-                    "my_embed: <caret>"
+                    "my_embed: <caret>",
                 )
 
                 // should not delete if closing embed delimiter does not have the correct indent (i.e. does not look auto-inserted)
@@ -130,7 +131,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     """
                     my_embed: <caret>
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 // should not delete if anything other than a newline follows the opening delimiter
@@ -144,17 +145,17 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     """
                     <caret>tag
                     $closeDelim
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 // should not delete if anything other than a newline follows the opening delimiter
                 doIdeActionTest(
                     // note the extra space here after the <caret>
                     "$openDelim<caret> \n" +
-                            closeDelim,
+                        closeDelim,
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     "<caret> \n" +
-                            closeDelim
+                        closeDelim,
                 )
 
                 // should not delete if anything other than a newline, a comma or EOF follows the closing delimiter
@@ -168,17 +169,17 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     """
                     <caret>
                     $closeDelim stuff
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 // should not delete if anything other than a newline or EOF follows the closing delimiter
                 doIdeActionTest(
                     "$openDelim<caret>\n" +
-                            // note the trailing space here
-                            "$closeDelim ",
+                        // note the trailing space here
+                        "$closeDelim ",
                     IdeActions.ACTION_EDITOR_BACKSPACE,
                     "<caret>\n" +
-                            "$closeDelim "
+                        "$closeDelim ",
                 )
 
                 // should not delete inside strings
@@ -191,7 +192,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     """
                     "<caret>
                     $closeDelim"
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 // should not delete inside embeds
@@ -208,11 +209,11 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                       <caret>
                       $closeDelim
                     ${altDelim.closeDelimiter}"
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
+            withConfigSetting(ConfigProperty.AutoInsertPairBracked(), false) {
                 doIdeActionTest(
                     """
                     $openDelim<caret>
@@ -222,7 +223,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                     """
                     <caret>
                     $closeDelim
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
         }
@@ -232,7 +233,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-delete closing embed delimiters in non-Kson files
      */
     fun testNonKsonEmbedDelimAutoDelete() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doIdeActionTest(
                 """
                 %<caret>
@@ -244,7 +245,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 %%
                 """.trimIndent(),
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
 
             doIdeActionTest(
@@ -258,7 +259,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 $$
                 """.trimIndent(),
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
         }
     }
@@ -267,24 +268,23 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Ensure the lookbehinds in [KsonBackspaceHandlerDelegate] don't trip at the boundary
      */
     fun testBackspaceAtTheBoundary() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doIdeActionTest(
                 "x<caret>",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>"
-
+                "<caret>",
             )
 
             doIdeActionTest(
                 "x<caret>y",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "<caret>y"
+                "<caret>y",
             )
 
             doIdeActionTest(
                 "xy<caret>z",
                 IdeActions.ACTION_EDITOR_BACKSPACE,
-                "x<caret>z"
+                "x<caret>z",
             )
         }
     }
@@ -293,12 +293,12 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
      * Integration test that verifies both auto-insertion and deletion behavior work together correctly
      */
     fun testAutoInsertAndDeleteIntegration() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doTypingAndBackspaceTest(
                 "<caret>",
                 "<",
                 "<<caret>>",
-                "<caret>"
+                "<caret>",
             )
 
             doTypingAndBackspaceTest(
@@ -308,7 +308,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 %<caret>
                 %%
                 """.trimIndent(),
-                "<caret>"
+                "<caret>",
             )
 
             doTypingAndBackspaceTest(
@@ -318,7 +318,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 key: $<caret>
                   $$
                 """.trimIndent(),
-                "key: <caret>"
+                "key: <caret>",
             )
 
             doTypingAndBackspaceTest(
@@ -328,7 +328,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
                 key: %<caret>
                   %%
                 """.trimIndent(),
-                "key: <caret>"
+                "key: <caret>",
             )
         }
     }
@@ -337,7 +337,7 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
         initialText: String,
         charsToType: String,
         expectedAfterTyping: String,
-        expectedAfterBackspace: String
+        expectedAfterBackspace: String,
     ) {
         // First verify the auto-insertion
         doTypingTest(initialText, charsToType, expectedAfterTyping)
@@ -346,14 +346,14 @@ class KsonBackspaceHandlerDelegateTest : KsonEditorActionTest() {
         doIdeActionTest(
             expectedAfterTyping,
             IdeActions.ACTION_EDITOR_BACKSPACE,
-            expectedAfterBackspace
+            expectedAfterBackspace,
         )
     }
 
     private fun doTypingTest(
         initialText: String,
         charsToType: String,
-        expectedText: String
+        expectedText: String,
     ) {
         myFixture.configureByText(KsonFileType, initialText)
         for (char in charsToType) {

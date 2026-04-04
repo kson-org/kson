@@ -30,7 +30,10 @@ class DuplicateKeyValidator {
      * @param ast The root of the AST to validate
      * @param messageSink The sink to report validation errors to
      */
-    fun validate(ast: KsonRoot, messageSink: MessageSink) {
+    fun validate(
+        ast: KsonRoot,
+        messageSink: MessageSink,
+    ) {
         if (ast is KsonRootImpl) {
             validateNode(ast.rootNode, messageSink)
         }
@@ -41,7 +44,10 @@ class DuplicateKeyValidator {
      * Only processes ObjectNode and ListNode types, as other node types
      * cannot contain duplicate keys.
      */
-    private fun validateNode(node: KsonValueNode, messageSink: MessageSink) {
+    private fun validateNode(
+        node: KsonValueNode,
+        messageSink: MessageSink,
+    ) {
         when (node) {
             is ObjectNode -> validateObject(node, messageSink)
             is ListNode -> validateList(node, messageSink)
@@ -57,23 +63,27 @@ class DuplicateKeyValidator {
      * After checking for duplicates, recursively validates any nested structures
      * within the object's property values.
      */
-    private fun validateObject(objNode: ObjectNode, messageSink: MessageSink) {
+    private fun validateObject(
+        objNode: ObjectNode,
+        messageSink: MessageSink,
+    ) {
         val seenKeys = mutableMapOf<String, ObjectPropertyNode>()
 
         objNode.properties.filterIsInstance<ObjectPropertyNodeImpl>().forEach {
             // Get the property key as string
-            val keyString = if (it.key is ObjectKeyNodeImpl && it.key.key is StringNodeImpl) {
-                it.key.key.processedStringContent
-            } else {
-                ""
-            }
+            val keyString =
+                if (it.key is ObjectKeyNodeImpl && it.key.key is StringNodeImpl) {
+                    it.key.key.processedStringContent
+                } else {
+                    ""
+                }
 
             // Check if the property has been seen before, if not the new unique property is added to seenKeys
             val existingProperty = seenKeys[keyString]
             if (existingProperty != null) {
                 messageSink.error(
                     it.key.location,
-                    MessageType.OBJECT_DUPLICATE_KEY.create(keyString)
+                    MessageType.OBJECT_DUPLICATE_KEY.create(keyString),
                 )
             } else {
                 seenKeys[keyString] = it
@@ -91,7 +101,10 @@ class DuplicateKeyValidator {
      * objects that need to be validated. This method recursively validates
      * each element in the list.
      */
-    private fun validateList(listNode: ListNode, messageSink: MessageSink) {
+    private fun validateList(
+        listNode: ListNode,
+        messageSink: MessageSink,
+    ) {
         for (element in listNode.elements) {
             if (element is ListElementNodeImpl) {
                 validateNode(element.value, messageSink)

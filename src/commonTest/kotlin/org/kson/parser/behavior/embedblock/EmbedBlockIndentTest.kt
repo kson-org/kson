@@ -6,21 +6,23 @@ import kotlin.test.assertEquals
 class EmbedBlockIndentTest {
     @Test
     fun `test trimMinimumIndent with mixed indentation`() {
-        val input = """
+        val input =
+            """
             |   first line
             |       second line
             |     third line
             |   fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         val embedBlockIndent = EmbedBlockIndent(input)
 
-        val expected = """
+        val expected =
+            """
             |first line
             |    second line
             |  third line
             |fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         assertEquals(3, embedBlockIndent.computeMinimumIndent())
         assertEquals(expected, embedBlockIndent.trimMinimumIndent())
@@ -29,21 +31,23 @@ class EmbedBlockIndentTest {
     @Test
     fun `test trimMinimumIndent with empty lines`() {
         // Note how the empty line contains one space.
-        val input = """
+        val input =
+            """
             |   first line
             |  
             |   third line
             |   fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         val embedBlockIndent = EmbedBlockIndent(input)
 
-        val expected = """
+        val expected =
+            """
             | first line
             |
             | third line
             | fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         assertEquals(2, embedBlockIndent.computeMinimumIndent())
         assertEquals(expected, embedBlockIndent.trimMinimumIndent())
@@ -51,17 +55,19 @@ class EmbedBlockIndentTest {
 
     @Test
     fun `test trimMinimumIndent with no indentation`() {
-        val input = """
+        val input =
+            """
             |first line
             |second line
             |third line
-        """.trimMargin()
+            """.trimMargin()
 
-        val expected = """
+        val expected =
+            """
             |first line
             |second line
             |third line
-        """.trimMargin()
+            """.trimMargin()
 
         val embedBlockIndent = EmbedBlockIndent(input)
         assertEquals(0, embedBlockIndent.computeMinimumIndent())
@@ -70,12 +76,13 @@ class EmbedBlockIndentTest {
 
     @Test
     fun `test computeMinimumIndent with empty lines`() {
-        val input = """
+        val input =
+            """
             |   first line
             |   
             |   third line
             |   fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         val embedBlockIndent = EmbedBlockIndent(input)
         val result = embedBlockIndent.computeMinimumIndent()
@@ -85,25 +92,26 @@ class EmbedBlockIndentTest {
 
     @Test
     fun `test trimMinimumIndent with tabs and spaces`() {
-        val input = """
+        val input =
+            """
             |   first line
             |\tsecond line
             |\t   third line
             |   fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         val embedBlockIndent = EmbedBlockIndent(input)
 
-        val expected = """
+        val expected =
+            """
             |   first line
             |\tsecond line
             |\t   third line
             |   fourth line
-        """.trimMargin()
+            """.trimMargin()
 
         assertEquals(0, embedBlockIndent.computeMinimumIndent())
         assertEquals(expected, embedBlockIndent.trimMinimumIndent())
-
     }
 
     @Test
@@ -113,7 +121,6 @@ class EmbedBlockIndentTest {
 
         assertEquals(4, embedBlockIndent.computeMinimumIndent())
         assertEquals("single line", embedBlockIndent.trimMinimumIndent())
-
     }
 
     @Test
@@ -127,15 +134,16 @@ class EmbedBlockIndentTest {
 
     @Test
     fun `test trimMinimumIndent determined by trailing end-delim`() {
-        val input = """
+        val input =
+            """
             %
                 this should stay indented
                 
             %%
-        """.trimIndent()
+            """.trimIndent()
         val embedBlockIndent = EmbedBlockIndent(input)
 
         assertEquals(0, embedBlockIndent.computeMinimumIndent())
         assertEquals(input, embedBlockIndent.trimMinimumIndent())
     }
-} 
+}

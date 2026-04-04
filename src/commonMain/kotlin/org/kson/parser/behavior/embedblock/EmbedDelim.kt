@@ -17,9 +17,12 @@ import org.kson.parser.TokenType.EMBED_CLOSE_DELIM
  *   inside of embeds.  So: when evaluating escaped `%%`s, we allow arbitrary `\`s before the second
  *   %, and consume one of them.  Then, %\\% gives %\% in the output, %\\\% gives %\\% in the output, etc
  */
-sealed class EmbedDelim(val char: Char) {
+sealed class EmbedDelim(
+    val char: Char,
+) {
     /** The full open delimiter string (either "%" or "$") */
     val openDelimiter: Char = char
+
     /** The full close delimiter string (either "%%" or "$$") */
     val closeDelimiter: String = "$char$char"
 
@@ -58,31 +61,27 @@ sealed class EmbedDelim(val char: Char) {
      * including escaped delimiters. A delimiter is considered escaped if it has
      * one or mores backslashes between its two characters (e.g. %\%, %\\\%, $\$, etc.)
      */
-    fun countDelimiterOccurrences(content: String): Int {
-        return needsEscapesPattern.findAll(content).count()
-    }
+    fun countDelimiterOccurrences(content: String): Int = needsEscapesPattern.findAll(content).count()
 
     /**
      * Returns a list of indices where delimiters are escaped in the content.
      * For each escaped delimiter like %\%, returns the index of the first character.
      */
-    fun findEscapedDelimiterIndices(content: String): List<Int> {
-        return needsEscapesPattern.findAll(content)
+    fun findEscapedDelimiterIndices(content: String): List<Int> =
+        needsEscapesPattern
+            .findAll(content)
             .map { it.range.first }
             .toList()
-    }
-
 
     /**
      * Perform any needed escapes on this embed content
      */
-    fun escapeEmbedContent(content: String): String {
-        return content.replace(needsEscapesPattern) { matchResult ->
+    fun escapeEmbedContent(content: String): String =
+        content.replace(needsEscapesPattern) { matchResult ->
             // For each match, insert an extra backslash between the delimiter chars
             val match = matchResult.value
             match[0] + "\\" + match.substring(1, match.length)
         }
-    }
 
     /**
      * Process escapes in embed content delimiter by this [EmbedDelim]. See the doc on [EmbedDelim] more for details on
@@ -108,27 +107,24 @@ sealed class EmbedDelim(val char: Char) {
      * @param content The raw embed content
      * @return Sequence of character offsets (0-based) where escape backslashes appear, in ascending order
      */
-    fun findEscapePositions(content: String): Sequence<Int> {
-        return hasEscapesPattern.findAll(content)
+    fun findEscapePositions(content: String): Sequence<Int> =
+        hasEscapesPattern
+            .findAll(content)
             .map { matchResult ->
                 // The pattern matches: delimChar + backslash(es) + delimChar
                 // The first backslash (right after the first delimChar) is the escape backslash
                 // that gets removed during unescaping
                 matchResult.range.first + 1
             }
-    }
 
-    override fun toString(): String {
-        return char.toString()
-    }
+    override fun toString(): String = char.toString()
 
     companion object {
-        fun fromString(delimString: String): EmbedDelim {
-            return when (delimString) {
+        fun fromString(delimString: String): EmbedDelim =
+            when (delimString) {
                 "%" -> Percent
                 "$" -> Dollar
                 else -> throw UnsupportedOperationException("Unknown embed delimiter string: $delimString")
             }
-        }
     }
 }

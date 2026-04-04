@@ -7,14 +7,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class IndentValidatorTest {
-
     @Test
     fun testValidObjectIndentation() {
-        val source = """
+        val source =
+            """
             key1: value1
             key2: value2
             key3: value3
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for aligned properties")
@@ -22,11 +22,12 @@ class IndentValidatorTest {
 
     @Test
     fun testMisalignedObjectProperties() {
-        val source = """
+        val source =
+            """
             key1: value1
               key2: value2
             key3: value3
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size, "Should have one error for misaligned property")
@@ -37,11 +38,12 @@ class IndentValidatorTest {
 
     @Test
     fun testMultipleMisalignedObjectProperties() {
-        val source = """
+        val source =
+            """
             key1: value1
               key2: value2
                 key3: value3
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(2, result.messages.size, "Should have two errors for misaligned properties")
@@ -49,11 +51,12 @@ class IndentValidatorTest {
 
     @Test
     fun testValidDashListIndentation() {
-        val source = """
+        val source =
+            """
             - item1
             - item2
             - item3
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for aligned list items")
@@ -61,11 +64,12 @@ class IndentValidatorTest {
 
     @Test
     fun testMisalignedDashListItems() {
-        val source = """
+        val source =
+            """
             - item1
               - item2
             - item3
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size, "Should have one error for misaligned list item")
@@ -76,7 +80,8 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedObjectsWithValidIndentation() {
-        val source = """
+        val source =
+            """
             outer1:
               inner1: value1
               inner2: value2
@@ -84,7 +89,7 @@ class IndentValidatorTest {
             outer2:
               inner3: value3
               inner4: value4
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for properly nested objects")
@@ -92,13 +97,14 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedObjectsWithMisalignedFirstInnerProperties() {
-        val source = """
+        val source =
+            """
             outer1:
               inner1: value1
                 inner2: value2
               .
             outer2: value2
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size, "Should have one error for the misaligned first inner property")
@@ -109,14 +115,15 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedListWithMisalignedFirstInnerProperties() {
-        val source = """
+        val source =
+            """
             -
               - inner1
                 - inner2
               =
             - outer1
             - outer2
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size, "Should have one error for misaligned first inner list")
@@ -127,7 +134,8 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedListsWithValidIndentation() {
-        val source = """
+        val source =
+            """
             - 
               - inner1
               - inner2
@@ -135,7 +143,7 @@ class IndentValidatorTest {
             - 
               - inner3
               - inner4
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for properly nested lists")
@@ -143,7 +151,8 @@ class IndentValidatorTest {
 
     @Test
     fun testMixedObjectAndListNesting() {
-        val source = """
+        val source =
+            """
             key1:
               - item1
               - item2
@@ -151,17 +160,18 @@ class IndentValidatorTest {
               nested:
                 - item3
                 - item4
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for properly mixed nesting")
 
-        val badSource = """
+        val badSource =
+            """
             - key:
                 - x
                  # deceptive indentation: sibling of `key:`
                  key_sibling: y
-        """.trimIndent()
+            """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
         assertEquals(1, badResult.messages.size)
@@ -170,37 +180,46 @@ class IndentValidatorTest {
 
     @Test
     fun testValidateSameLineConstructs() {
-        val message = "Should have no errors for one-line constructs," +
+        val message =
+            "Should have no errors for one-line constructs," +
                 "provided leading items are aligned"
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     key1: value1 key2: value2
                     key3: value3 key4: value4
-                """.trimIndent()
-            )
-                .messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     - - 1
                       - 2
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
-        val misalignedSource = """
+        val misalignedSource =
+            """
               key1: value1 key2: value2
             key3: value3 key4: value4
-        """.trimIndent()
+            """.trimIndent()
 
         val misalignedResult = KsonCore.parseToAst(misalignedSource)
         assertEquals(
-            1, misalignedResult.messages.size, "Should have an error the mis-aligned " +
-                    "one-line constructs"
+            1,
+            misalignedResult.messages.size,
+            "Should have an error the mis-aligned " +
+                "one-line constructs",
         )
 
         val error = misalignedResult.messages.first()
@@ -209,28 +228,33 @@ class IndentValidatorTest {
 
     @Test
     fun testValidateLeadingAlignment1() {
-        val source = """
+        val source =
+            """
             key1: - 1 - 2
                   - 3
                   - 4
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(
-            result.messages.isEmpty(), "Should have no errors provided leading alignment is correct " +
-                    "for all entries"
+            result.messages.isEmpty(),
+            "Should have no errors provided leading alignment is correct " +
+                "for all entries",
         )
 
-        val misalignedSource = """
+        val misalignedSource =
+            """
             key1: - 1 - 2
                   - 3
                     - 4
-        """.trimIndent()
+            """.trimIndent()
 
         val misalignedResult = KsonCore.parseToAst(misalignedSource)
         assertEquals(
-            1, misalignedResult.messages.size, "Should have an error the mis-aligned " +
-                    "end of this list"
+            1,
+            misalignedResult.messages.size,
+            "Should have an error the mis-aligned " +
+                "end of this list",
         )
 
         val error = misalignedResult.messages.first()
@@ -239,33 +263,38 @@ class IndentValidatorTest {
 
     @Test
     fun testValidateLeadingAlignment2() {
-        val source = """
+        val source =
+            """
             key1: - 1 - 2
                   - 3
                   - 4 key2: w key3: x
             key4: y
             key5: z
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(
-            result.messages.isEmpty(), "Should have no errors provided leading alignment is correct " +
-                    "for all entries"
+            result.messages.isEmpty(),
+            "Should have no errors provided leading alignment is correct " +
+                "for all entries",
         )
 
-        val misalignedSource = """
-           - 1 - 2
-           - 3
-           - key2: w key3: x
-                key4: y
-                    key5: z
-                key6: a
-        """.trimIndent()
+        val misalignedSource =
+            """
+            - 1 - 2
+            - 3
+            - key2: w key3: x
+                 key4: y
+                     key5: z
+                 key6: a
+            """.trimIndent()
 
         val misalignedResult = KsonCore.parseToAst(misalignedSource)
         assertEquals(
-            3, misalignedResult.messages.size, "Should have an error the mis-aligned " +
-                    "end of this object"
+            3,
+            misalignedResult.messages.size,
+            "Should have an error the mis-aligned " +
+                "end of this object",
         )
 
         val errors = misalignedResult.messages
@@ -276,10 +305,11 @@ class IndentValidatorTest {
 
     @Test
     fun testEmptyObjectAndList() {
-        val source = """
+        val source =
+            """
             empty_object: {}
             empty_list: []
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for empty structures")
@@ -287,9 +317,10 @@ class IndentValidatorTest {
 
     @Test
     fun testSinglePropertyObject() {
-        val source = """
+        val source =
+            """
             single: value
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertTrue(result.messages.isEmpty(), "Should have no errors for single property object")
@@ -298,13 +329,14 @@ class IndentValidatorTest {
     @Test
     fun testDelimitedObjectsAlsoChecked() {
         // Delimited objects should also be checked for alignment
-        val source = """
+        val source =
+            """
             {
               key1: value1
                 key2: value2
               key3: value3
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size, "Should have one error for misaligned property in delimited object")
@@ -315,11 +347,12 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedInSingleElementObject() {
-        val source = """
+        val source =
+            """
             person:
               favorite_books: 10
                     test: ex
-        """.trimIndent()
+            """.trimIndent()
 
         val result = KsonCore.parseToAst(source)
         assertEquals(1, result.messages.size)
@@ -330,9 +363,10 @@ class IndentValidatorTest {
 
     @Test
     fun testNestedDashedList() {
-        val badSource = """
-                - -
-                  - 1
+        val badSource =
+            """
+            - -
+              - 1
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
@@ -351,72 +385,92 @@ class IndentValidatorTest {
         val message = "Should have no errors for things misaligned by their opening delimiter"
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     {one:1
                      two:2}
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     {one:1
                      two:2}
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     <- 1
                      - 2>
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     - # object hanging off dash
                      {key1: x
                       # this should not be considered mis-aligned
                       key2: y}
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     - # list hanging off dash
                      [x
                       # this should not be considered mis-aligned
                       y]
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
 
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     - # list hanging off dash
                      < - x
                        # this should not be considered mis-aligned
                        - y>
-                """.trimIndent()
-            ).messages.isEmpty(), message
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            message,
         )
     }
 
     @Test
     fun testObjectNestedInBracketList() {
         assertTrue(
-            KsonCore.parseToAst(
-                "[key: 1]"
-            ).messages.isEmpty()
+            KsonCore
+                .parseToAst(
+                    "[key: 1]",
+                ).messages
+                .isEmpty(),
         )
     }
 
@@ -428,24 +482,27 @@ class IndentValidatorTest {
          * case, we were incorrectly marking `should_not_error:` as a deceptive indent
          */
         assertTrue(
-            KsonCore.parseToAst(
-                """
+            KsonCore
+                .parseToAst(
+                    """
                     x:y non_leading:{
                     } should_not_error: 0
-                """.trimIndent()
-            ).messages.isEmpty(),
-            "should never consider a non-leading item on a line to mis-aligned"
+                    """.trimIndent(),
+                ).messages
+                .isEmpty(),
+            "should never consider a non-leading item on a line to mis-aligned",
         )
     }
 
     @Test
     fun testDeceptivelyAlignedSubObject() {
-        val badSource = """
-                key:
-                   nested1: 80
-                   nested2: 80000 nested3: 10000
-                   nested4: 12000 nested5:
-                   doubleNested: 14000
+        val badSource =
+            """
+            key:
+               nested1: 80
+               nested2: 80000 nested3: 10000
+               nested4: 12000 nested5:
+               doubleNested: 14000
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
@@ -454,12 +511,13 @@ class IndentValidatorTest {
         val error = badResult.messages.first()
         assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, error.message.type)
 
-        val goodSource = """
-                key:
-                   nested1: 80
-                   nested2: 80000 nested3: 10000
-                   nested4: 12000 nested5:
-                                    doubleNested: 14000
+        val goodSource =
+            """
+            key:
+               nested1: 80
+               nested2: 80000 nested3: 10000
+               nested4: 12000 nested5:
+                                doubleNested: 14000
             """.trimIndent()
         val goodResult = KsonCore.parseToAst(goodSource)
         assertEquals(0, goodResult.messages.size)
@@ -467,12 +525,13 @@ class IndentValidatorTest {
 
     @Test
     fun testDeceptivelyAlignedSubList() {
-        val badSource = """
-                ports:
-                   - 80
-                   - 8000 - 10000
-                   - 12000 -
-                   - 14000
+        val badSource =
+            """
+            ports:
+               - 80
+               - 8000 - 10000
+               - 12000 -
+               - 14000
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
@@ -481,12 +540,13 @@ class IndentValidatorTest {
         val error = badResult.messages.first()
         assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, error.message.type)
 
-        val goodSource = """
-                ports:
-                   - 80
-                   - 8000 - 10000
-                   - 12000 -
-                             - 14000
+        val goodSource =
+            """
+            ports:
+               - 80
+               - 8000 - 10000
+               - 12000 -
+                         - 14000
             """.trimIndent()
         val goodResult = KsonCore.parseToAst(goodSource)
         assertEquals(0, goodResult.messages.size)
@@ -494,19 +554,20 @@ class IndentValidatorTest {
 
     @Test
     fun testMixedSubListsAndObjects() {
-        val badSource = """
-                deceptive_list:
-                  - 1
-                  - key:
-                  # deceptive indent: nested under `key:`
-                  - 9
-                # deceptive indent: must be aligned `key:`
-                # deceptive indent: nested under list with `key:`
-                deceptive_object:
-                    key: x
-                    list: - 
-                    # deceptive indent: nested under `list: - ` list
-                    key: x
+        val badSource =
+            """
+            deceptive_list:
+              - 1
+              - key:
+              # deceptive indent: nested under `key:`
+              - 9
+            # deceptive indent: must be aligned `key:`
+            # deceptive indent: nested under list with `key:`
+            deceptive_object:
+                key: x
+                list: - 
+                # deceptive indent: nested under `list: - ` list
+                key: x
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
@@ -518,15 +579,16 @@ class IndentValidatorTest {
         assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[2].message.type)
         assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[3].message.type)
 
-        val goodSource = """
-                honest_list:
-                  - 1
-                  - key:
-                      - 9
-                    honest_object:
-                      key: x
-                      list: - 
-                             key: x
+        val goodSource =
+            """
+            honest_list:
+              - 1
+              - key:
+                  - 9
+                honest_object:
+                  key: x
+                  list: - 
+                         key: x
             """.trimIndent()
         val goodResult = KsonCore.parseToAst(goodSource)
         assertEquals(0, goodResult.messages.size)
@@ -534,11 +596,12 @@ class IndentValidatorTest {
 
     @Test
     fun testSimpleListValueNesting() {
-        val badSource = """
-                    -
-                bad_nest
-                    -
-                   also_bad
+        val badSource =
+            """
+                -
+            bad_nest
+                -
+               also_bad
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)

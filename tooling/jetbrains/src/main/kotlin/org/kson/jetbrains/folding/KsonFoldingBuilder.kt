@@ -34,19 +34,20 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
     /**
      * Set of PSI element types that can be folded.
      */
-    private val foldableElements = setOf(
-        elem(ParsedElementType.DASH_LIST),
-        elem(ParsedElementType.DASH_DELIMITED_LIST),
-        elem(ParsedElementType.BRACKET_LIST),
-        elem(ParsedElementType.EMBED_BLOCK),
-        elem(ParsedElementType.OBJECT_PROPERTY)
-    )
+    private val foldableElements =
+        setOf(
+            elem(ParsedElementType.DASH_LIST),
+            elem(ParsedElementType.DASH_DELIMITED_LIST),
+            elem(ParsedElementType.BRACKET_LIST),
+            elem(ParsedElementType.EMBED_BLOCK),
+            elem(ParsedElementType.OBJECT_PROPERTY),
+        )
 
     override fun buildLanguageFoldRegions(
         descriptors: MutableList<FoldingDescriptor>,
         root: PsiElement,
         document: Document,
-        quick: Boolean
+        quick: Boolean,
     ) {
         if (root.language !== root.containingFile.viewProvider.baseLanguage) {
             return
@@ -65,7 +66,7 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
     private fun recursivelyProcessElements(
         element: PsiElement,
         descriptors: MutableList<FoldingDescriptor>,
-        document: Document
+        document: Document,
     ) {
         // Check if this element should be folded
         if (isFoldable(document, element)) {
@@ -93,20 +94,23 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
      * @param element The PSI element to potentially fold
      * @param descriptors List to store the folding descriptors
      */
-    private fun addDescriptor(element: PsiElement, descriptors: MutableList<FoldingDescriptor>) {
-        val range = when (element.elementType) {
-            elem(ParsedElementType.DASH_LIST), elem(ParsedElementType.BRACKET_LIST), elem(ParsedElementType.DASH_DELIMITED_LIST) -> {
-                if (element.prevSibling != null && element.prevSibling.text.contains("\n")) {
-                    TextRange(element.prevSibling.textRange.startOffset, element.textRange.endOffset)
-                } else {
-                    element.textRange
+    private fun addDescriptor(
+        element: PsiElement,
+        descriptors: MutableList<FoldingDescriptor>,
+    ) {
+        val range =
+            when (element.elementType) {
+                elem(ParsedElementType.DASH_LIST), elem(ParsedElementType.BRACKET_LIST), elem(ParsedElementType.DASH_DELIMITED_LIST) -> {
+                    if (element.prevSibling != null && element.prevSibling.text.contains("\n")) {
+                        TextRange(element.prevSibling.textRange.startOffset, element.textRange.endOffset)
+                    } else {
+                        element.textRange
+                    }
                 }
+                else -> element.textRange
             }
-            else -> element.textRange
-        }
 
         descriptors.add(FoldingDescriptor(element.node, range))
-
     }
 
     /**
@@ -119,7 +123,10 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
      * @param element The PSI element to check
      * @return true if the element's type is in [foldableElements]
      */
-    private fun isFoldable(document: Document, element: PsiElement): Boolean {
+    private fun isFoldable(
+        document: Document,
+        element: PsiElement,
+    ): Boolean {
         // Check if the element is in [foldableElements]
         if (element.node.elementType !in foldableElements) {
             return false
@@ -153,7 +160,10 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
      * @param range The TextRange of the element being folded
      * @return The placeholder text to display
      */
-    override fun getLanguagePlaceholderText(node: ASTNode, range: TextRange): String {
+    override fun getLanguagePlaceholderText(
+        node: ASTNode,
+        range: TextRange,
+    ): String {
         return when (node.elementType) {
             elem(ParsedElementType.DASH_LIST), elem(ParsedElementType.DASH_DELIMITED_LIST) -> {
                 val numItems = node.psi.children.count()
@@ -168,14 +178,14 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
             elem(ParsedElementType.OBJECT_PROPERTY) -> {
                 val keyWord = (node.psi.firstChild?.text) ?: return ""
                 val numKeys = countChildKeys(node.psi)
-                "${keyWord}: { $numKeys ${pluralize(numKeys, "key")} }"
+                "$keyWord: { $numKeys ${pluralize(numKeys, "key")} }"
             }
 
             elem(ParsedElementType.EMBED_BLOCK) -> {
                 val embedBlock = node.psi as KsonEmbedBlock
                 val embedDelim = embedBlock.embedDelim
                 val embedBlockTag = embedBlock.embedBlockTag
-                "${embedDelim.openDelimiter}${embedBlockTag}...${embedDelim.closeDelimiter}"
+                "${embedDelim.openDelimiter}$embedBlockTag...${embedDelim.closeDelimiter}"
             }
 
             else -> {
@@ -191,9 +201,10 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
      * @param word The singular form of the word
      * @return The word with "s" appended if count != 1
      */
-    private fun pluralize(count: Int, word: String): String {
-        return if (count == 1) word else "${word}s"
-    }
+    private fun pluralize(
+        count: Int,
+        word: String,
+    ): String = if (count == 1) word else "${word}s"
 
     /**
      * Counts the number of child keys within an object represented by the given PSI element.
@@ -206,8 +217,5 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
         return childObject.children.count { it.elementType == elem(ParsedElementType.OBJECT_PROPERTY) }
     }
 
-    override fun isRegionCollapsedByDefault(node: ASTNode): Boolean {
-        return false
-    }
-
+    override fun isRegionCollapsedByDefault(node: ASTNode): Boolean = false
 }

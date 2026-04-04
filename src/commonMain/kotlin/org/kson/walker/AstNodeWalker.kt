@@ -17,20 +17,26 @@ import org.kson.parser.Location
  * where [org.kson.value.KsonValue] conversion would fail.
  */
 object AstNodeWalker : KsonTreeWalker<AstNode> {
-
-    override fun getChildren(node: AstNode): NodeChildren<AstNode> = when (node) {
-        is ObjectNode -> NodeChildren.Object(node.properties.mapNotNull { prop ->
-            val propImpl = prop as? ObjectPropertyNodeImpl ?: return@mapNotNull null
-            val keyImpl = propImpl.key as? ObjectKeyNodeImpl ?: return@mapNotNull null
-            val keyString = (keyImpl.key as? StringNodeImpl)?.processedStringContent ?: return@mapNotNull null
-            TreeProperty(keyString, propImpl.value as AstNode)
-        })
-        is ListNode -> NodeChildren.Array(node.elements.mapNotNull { elem ->
-            val elemImpl = elem as? ListElementNodeImpl ?: return@mapNotNull null
-            elemImpl.value as AstNode
-        })
-        else -> NodeChildren.Leaf
-    }
+    override fun getChildren(node: AstNode): NodeChildren<AstNode> =
+        when (node) {
+            is ObjectNode ->
+                NodeChildren.Object(
+                    node.properties.mapNotNull { prop ->
+                        val propImpl = prop as? ObjectPropertyNodeImpl ?: return@mapNotNull null
+                        val keyImpl = propImpl.key as? ObjectKeyNodeImpl ?: return@mapNotNull null
+                        val keyString = (keyImpl.key as? StringNodeImpl)?.processedStringContent ?: return@mapNotNull null
+                        TreeProperty(keyString, propImpl.value as AstNode)
+                    },
+                )
+            is ListNode ->
+                NodeChildren.Array(
+                    node.elements.mapNotNull { elem ->
+                        val elemImpl = elem as? ListElementNodeImpl ?: return@mapNotNull null
+                        elemImpl.value as AstNode
+                    },
+                )
+            else -> NodeChildren.Leaf
+        }
 
     override fun getLocation(node: AstNode): Location = node.location
 }

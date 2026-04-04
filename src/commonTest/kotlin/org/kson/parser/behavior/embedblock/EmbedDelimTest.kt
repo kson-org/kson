@@ -9,31 +9,43 @@ class EmbedDelimTest {
      */
     @Test
     fun testEscapeEmbedContentAtBoundary() {
-        assertEquals("""
-                %\%\n
+        assertEquals(
+            """
+            %\%\n
             """.trimIndent(),
-            EmbedDelim.Percent.escapeEmbedContent("""
+            EmbedDelim.Percent.escapeEmbedContent(
+                """
                 %%\n
-            """.trimIndent()))
+                """.trimIndent(),
+            ),
+        )
     }
 
     @Test
     fun testEscapeSubsequentEmbedDelims() {
-        assertEquals("""
-                %\%%\%
+        assertEquals(
+            """
+            %\%%\%
             """.trimIndent(),
-            EmbedDelim.Percent.escapeEmbedContent("""
+            EmbedDelim.Percent.escapeEmbedContent(
+                """
                 %%%%
-            """.trimIndent()),
-            "should detect the first and second embed-ends without double-counting")
+                """.trimIndent(),
+            ),
+            "should detect the first and second embed-ends without double-counting",
+        )
 
-        assertEquals("""
-                %\\%\%\\%
+        assertEquals(
+            """
+            %\\%\%\\%
             """.trimIndent(),
-            EmbedDelim.Percent.escapeEmbedContent("""
+            EmbedDelim.Percent.escapeEmbedContent(
+                """
                 %\%\%\%
-            """.trimIndent()),
-            "should detect the first and second embed-ends without double-counting")
+                """.trimIndent(),
+            ),
+            "should detect the first and second embed-ends without double-counting",
+        )
     }
 
     @Test
@@ -45,21 +57,27 @@ class EmbedDelimTest {
          */
         assertEquals(
             """
-                \%\\\\%\%\\%\\n
+            \%\\\\%\%\\%\\n
             """.trimIndent(),
-            EmbedDelim.Percent.escapeEmbedContent("""
+            EmbedDelim.Percent.escapeEmbedContent(
+                """
                 \%\\\%\%\%\\n
-            """.trimIndent()))
+                """.trimIndent(),
+            ),
+        )
     }
 
     @Test
     fun testUnescapeDelimWithTrailingSlash() {
         assertEquals(
             """
-                %%\n
+            %%\n
             """.trimIndent(),
-            EmbedDelim.Percent.unescapeEmbedContent("""
+            EmbedDelim.Percent.unescapeEmbedContent(
+                """
                 %\%\n
-            """.trimIndent()))
+                """.trimIndent(),
+            ),
+        )
     }
 }

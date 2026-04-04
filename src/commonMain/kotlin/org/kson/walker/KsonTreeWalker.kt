@@ -8,7 +8,10 @@ import org.kson.parser.Location
  * @param name The property key
  * @param value The property value node
  */
-data class TreeProperty<N>(val name: String, val value: N)
+data class TreeProperty<N>(
+    val name: String,
+    val value: N,
+)
 
 /**
  * The children of a node in a KSON-like tree.
@@ -16,8 +19,14 @@ data class TreeProperty<N>(val name: String, val value: N)
  * @param N The node type of the tree
  */
 sealed class NodeChildren<out N> {
-    class Object<N>(val properties: List<TreeProperty<N>>) : NodeChildren<N>()
-    class Array<N>(val elements: List<N>) : NodeChildren<N>()
+    class Object<N>(
+        val properties: List<TreeProperty<N>>,
+    ) : NodeChildren<N>()
+
+    class Array<N>(
+        val elements: List<N>,
+    ) : NodeChildren<N>()
+
     data object Leaf : NodeChildren<Nothing>()
 }
 
@@ -39,7 +48,6 @@ sealed class NodeChildren<out N> {
  * @param N The node type of the tree
  */
 interface KsonTreeWalker<N> {
-
     /** Returns the children of [node]: object properties, array elements, or [NodeChildren.Leaf]. */
     fun getChildren(node: N): NodeChildren<N>
 

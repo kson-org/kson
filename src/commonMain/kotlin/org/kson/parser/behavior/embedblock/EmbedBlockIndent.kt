@@ -1,6 +1,5 @@
 package org.kson.parser.behavior.embedblock
 
-
 /**
  * This class represents the behavior for handling embedded block content
  * by parsing and trimming its minimum indentation.
@@ -8,7 +7,9 @@ package org.kson.parser.behavior.embedblock
  * @property rawEmbedContent The raw embedded block content as a string
  *                        to be analyzed or transformed.
  */
-class EmbedBlockIndent(embedContent: String) {
+class EmbedBlockIndent(
+    embedContent: String,
+) {
     private val rawEmbedContent: String = embedContent
 
     /**
@@ -61,7 +62,5 @@ class EmbedBlockIndent(embedContent: String) {
     /**
      * Returns true if the given [char] is a non-newline whitespace
      */
-    private fun isInlineWhitespace(char: Char?): Boolean {
-        return char == ' ' || char == '\r' || char == '\t'
-    }
+    private fun isInlineWhitespace(char: Char?): Boolean = char == ' ' || char == '\r' || char == '\t'
 }

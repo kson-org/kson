@@ -16,7 +16,7 @@ class KsonCompletionContributor : CompletionContributor() {
         extend(
             CompletionType.BASIC,
             psiElement().withElementType(elem(TokenType.EMBED_TAG)),
-            EmbedBlockLanguageListCompletionProvider()
+            EmbedBlockLanguageListCompletionProvider(),
         )
     }
 

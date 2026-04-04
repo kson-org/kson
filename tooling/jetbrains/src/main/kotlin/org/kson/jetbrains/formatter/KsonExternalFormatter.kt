@@ -12,9 +12,7 @@ import org.kson.tools.KsonFormatterConfig
 import org.kson.tools.format
 
 class KsonExternalFormatter : AbstractDocumentFormattingService() {
-    override fun canFormat(file: PsiFile): Boolean {
-        return file is KsonPsiFile
-    }
+    override fun canFormat(file: PsiFile): Boolean = file is KsonPsiFile
 
     override fun getFeatures(): Set<Feature> = emptySet()
 
@@ -23,15 +21,17 @@ class KsonExternalFormatter : AbstractDocumentFormattingService() {
         formattingRanges: MutableList<TextRange>,
         formattingContext: FormattingContext,
         canChangeWhiteSpaceOnly: Boolean,
-        quickFormat: Boolean
+        quickFormat: Boolean,
     ) {
-        val indentOptions = formattingContext.codeStyleSettings
-            .getIndentOptions(formattingContext.containingFile.fileType)
-        val indentType = if (indentOptions.USE_TAB_CHARACTER) {
-            IndentType.Tab()
-        } else {
-            IndentType.Space(indentOptions.INDENT_SIZE)
-        }
+        val indentOptions =
+            formattingContext.codeStyleSettings
+                .getIndentOptions(formattingContext.containingFile.fileType)
+        val indentType =
+            if (indentOptions.USE_TAB_CHARACTER) {
+                IndentType.Tab()
+            } else {
+                IndentType.Space(indentOptions.INDENT_SIZE)
+            }
 
         val formatted = format(document.text, KsonFormatterConfig(indentType))
         document.setText(formatted)

@@ -5,7 +5,6 @@ import kotlin.test.Test
 class JsonSchemaTestType : JsonSchemaTest {
     @Test
     fun testEnforceConstraintsForMultipleTypes() {
-
         assertKsonEnforcesSchema(
             """
                 "this string is longer than 10 characters"
@@ -13,7 +12,8 @@ class JsonSchemaTestType : JsonSchemaTest {
             """
                 {"type": ["string", "number"], "exclusiveMinimum": 20, "maxLength": 10 }
             """,
-            false)
+            false,
+        )
 
         assertKsonEnforcesSchema(
             """
@@ -22,6 +22,7 @@ class JsonSchemaTestType : JsonSchemaTest {
             """
                 {"type": ["string", "number"], "exclusiveMinimum": 20, "maxLength": 10 }
             """,
-            false)
+            false,
+        )
     }
 }

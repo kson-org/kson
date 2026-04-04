@@ -6,11 +6,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SchemaCompletionLocationTest {
-
     /**
      * Helper to get completions at the <caret> position in the document
      */
-    private fun getCompletionsAtCaret(schema: String, documentWithCaret: String): List<CompletionItem>? {
+    private fun getCompletionsAtCaret(
+        schema: String,
+        documentWithCaret: String,
+    ): List<CompletionItem>? {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
@@ -41,11 +43,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                status: "<caret>active"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    status: "<caret>active"
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for enum value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -74,11 +80,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                enabled: <caret>true
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    enabled: <caret>true
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for boolean value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -106,11 +116,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                optional: <caret>null
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    optional: <caret>null
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for null value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -134,11 +148,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                setting: <caret>true
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    setting: <caret>true
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for union type")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -169,11 +187,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                level: "<caret>info"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    level: "<caret>info"
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -186,15 +208,16 @@ class SchemaCompletionLocationTest {
         val firstWithDoc = withDocs.first()
         assertTrue(
             firstWithDoc.documentation!!.contains("Log Level") ||
-                    firstWithDoc.documentation.contains("logging verbosity"),
-            "Documentation should include schema info"
+                firstWithDoc.documentation.contains("logging verbosity"),
+            "Documentation should include schema info",
         )
     }
 
     @Test
     fun testCompletionsWithDetail() {
         // language="kson"
-        val schema = """
+        val schema =
+            """
             {
                 type: object
                 properties: {
@@ -204,13 +227,17 @@ class SchemaCompletionLocationTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                priority: "<caret>low"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    priority: "<caret>low"
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -218,7 +245,7 @@ class SchemaCompletionLocationTest {
         // All completions should have a detail field
         assertTrue(
             completions.all { it.detail != null },
-            "All completions should have detail text"
+            "All completions should have detail text",
         )
     }
 
@@ -236,16 +263,20 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                name: "<caret>John"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    name: "<caret>John"
+                }
+                """.trimIndent(),
+            )
 
         // Should return empty list or null (no specific completions for plain strings)
         assertTrue(
             completions == null || completions.isEmpty(),
-            "Should not have completions for plain string type"
+            "Should not have completions for plain string type",
         )
     }
 
@@ -268,13 +299,17 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                user: {
-                    role: "<caret>admin"
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    user: {
+                        role: "<caret>admin"
+                    }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for nested enum")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -302,11 +337,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                tags: ["red", "<caret>blue"]
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    tags: ["red", "<caret>blue"]
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for array item enum")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -342,10 +381,14 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            todos:
-              - status: <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                todos:
+                  - status: <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for enum property in array item")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -396,10 +439,14 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            todos:
-              - status: <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                todos:
+                  - status: <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for enum property in ${'$'}ref definition")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -430,11 +477,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                version: <caret>1
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    version: <caret>1
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for numeric enum")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -458,11 +509,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                value: "<caret>auto"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    value: "<caret>auto"
+                }
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for mixed-type enum")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -480,19 +535,23 @@ class SchemaCompletionLocationTest {
     @Test
     fun testNoSchemaReturnsEmptyList() {
         // Try to get completions with empty schema
-        val completions = getCompletionsAtCaret("", """
-            {
-                name: "test<caret>"
-            }
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                "",
+                """
+                {
+                    name: "test<caret>"
+                }
+                """.trimIndent(),
+            )
 
         // Should return null when schema is invalid
         assertEquals(completions, emptyList(), "Should return empty list when schema is empty/invalid")
     }
 
     @Test
-    fun testLocationOnEmptyValue(){
-       val schema = """
+    fun testLocationOnEmptyValue() {
+        val schema = """
             {
                 type: object
                 properties: {
@@ -504,9 +563,13 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            key: <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                key: <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for enum value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -536,13 +599,17 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                user: <caret>{
-                    name: "John"
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    user: <caret>{
+                        name: "John"
+                    }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for object value")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -573,13 +640,17 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                config: <caret>{
-                    debug: true
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    config: <caret>{
+                        debug: true
+                    }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions even without explicit type")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -607,13 +678,17 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                value: <caret>{
-                    x: 10
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    value: <caret>{
+                        x: 10
+                    }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for union with object")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -649,15 +724,19 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            {
-                app: {
-                    settings: <caret>{
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                {
+                    app: {
+                        settings: <caret>{
 
+                        }
                     }
                 }
-            }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for nested object")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -686,10 +765,14 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            name: "test"
-            depends_on: <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                name: "test"
+                depends_on: <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions after colon for object property")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -718,10 +801,14 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
             name: "John"
 <caret>
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions on newline in object")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -751,9 +838,13 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            status:<caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                status:<caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions after colon for enum property")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -772,7 +863,8 @@ class SchemaCompletionLocationTest {
     fun testCompletionsAfterColonForListProperties() {
         // Test completions for additional properties in an array item
         // language="kson"
-        val schema = """
+        val schema =
+            """
             type: object
             properties:
               items:
@@ -794,13 +886,17 @@ class SchemaCompletionLocationTest {
                     .
                   priority:
                     type: number
-        """.trimIndent()
+            """.trimIndent()
 
-        val completions = getCompletionsAtCaret(schema, """
-            items:
-              - status: active
-                <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                items:
+                  - status: active
+                    <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for additional properties")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -813,6 +909,7 @@ class SchemaCompletionLocationTest {
         // All should be PROPERTY kind
         assertTrue(completions.all { it.kind == CompletionKind.PROPERTY }, "All should be PROPERTY completions")
     }
+
     @Test
     fun testCompletionsWithExtraWhitespace() {
         val schema = """
@@ -828,11 +925,15 @@ class SchemaCompletionLocationTest {
             }
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            status:   <caret>
-              value: key
-            another_status: key
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                status:   <caret>
+                  value: key
+                another_status: key
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions for enum property")
         assertTrue(completions.isNotEmpty(), "Should have completion items")
@@ -902,11 +1003,15 @@ class SchemaCompletionLocationTest {
         """
 
         // When type is "email", should only get email-specific properties
-        val emailCompletions = getCompletionsAtCaret(schema, """
-            notification:
-              type: email
-              <caret>
-        """.trimIndent())
+        val emailCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                notification:
+                  type: email
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(emailCompletions, "Should return completions for email notification")
         val emailLabels = emailCompletions.map { it.label }
@@ -916,11 +1021,15 @@ class SchemaCompletionLocationTest {
         assertTrue("deviceId" !in emailLabels, "Should NOT include 'deviceId' (push-specific)")
 
         // When type is "sms", should only get SMS-specific properties
-        val smsCompletions = getCompletionsAtCaret(schema, """
-            notification:
-              type: sms
-              <caret>
-        """.trimIndent())
+        val smsCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                notification:
+                  type: sms
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(smsCompletions, "Should return completions for SMS notification")
         val smsLabels = smsCompletions.map { it.label }
@@ -930,11 +1039,15 @@ class SchemaCompletionLocationTest {
         assertTrue("deviceId" !in smsLabels, "Should NOT include 'deviceId' (push-specific)")
 
         // When type is "push", should only get push-specific properties
-        val pushCompletions = getCompletionsAtCaret(schema, """
-            notification:
-              type: push
-              <caret>
-        """.trimIndent())
+        val pushCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                notification:
+                  type: push
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(pushCompletions, "Should return completions for push notification")
         val pushLabels = pushCompletions.map { it.label }
@@ -978,10 +1091,14 @@ class SchemaCompletionLocationTest {
         """
 
         // Both branches are valid initially (anyOf means at least one must match)
-        val completions = getCompletionsAtCaret(schema, """
-            config:
-              <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                config:
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }
@@ -1034,9 +1151,13 @@ class SchemaCompletionLocationTest {
         """
 
         // When no properties are filled, should include properties from both branches
-        val emptyCompletions = getCompletionsAtCaret(schema, """
-            <caret>
-        """.trimIndent())
+        val emptyCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(emptyCompletions, "Should return completions for empty document")
         val emptyLabels = emptyCompletions.map { it.label }
@@ -1048,10 +1169,14 @@ class SchemaCompletionLocationTest {
         assertTrue("cluster" in emptyLabels, "Should include 'cluster' from Production")
 
         // When debugMode is used (Development property), should only get Development properties
-        val devCompletions = getCompletionsAtCaret(schema, """
-            debugMode: true
-            <caret>
-        """.trimIndent())
+        val devCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                debugMode: true
+                <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(devCompletions, "Should return completions for Development branch")
         val devLabels = devCompletions.map { it.label }
@@ -1062,10 +1187,14 @@ class SchemaCompletionLocationTest {
         assertTrue("cluster" !in devLabels, "Should NOT include 'cluster' (from Production)")
 
         // When apiKey is used (Production property), should only get Production properties
-        val prodCompletions = getCompletionsAtCaret(schema, """
-            apiKey: "secret123"
-            <caret>
-        """.trimIndent())
+        val prodCompletions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                apiKey: "secret123"
+                <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(prodCompletions, "Should return completions for Production branch")
         val prodLabels = prodCompletions.map { it.label }
@@ -1108,10 +1237,14 @@ class SchemaCompletionLocationTest {
               .
         """
 
-        val completions = getCompletionsAtCaret(schema, """
-            entity:
-              <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                entity:
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }
@@ -1150,12 +1283,16 @@ class SchemaCompletionLocationTest {
         """
 
         // User object already has 'name' and 'email' filled in
-        val completions = getCompletionsAtCaret(schema, """
-            user:
-              name: "John"
-              email: "john@example.com"
-              <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                user:
+                  name: "John"
+                  email: "john@example.com"
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }
@@ -1200,12 +1337,16 @@ class SchemaCompletionLocationTest {
         """
 
         // Array item already has 'title' and 'status' filled in
-        val completions = getCompletionsAtCaret(schema, """
-            todos:
-              - title: "Fix bug"
-                status: done
-                <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                todos:
+                  - title: "Fix bug"
+                    status: done
+                    <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }
@@ -1261,12 +1402,16 @@ class SchemaCompletionLocationTest {
         """
 
         // Email notification with 'type' and 'recipient' already filled
-        val completions = getCompletionsAtCaret(schema, """
-            notification:
-              type: email
-              recipient: "user@example.com"
-              <caret>
-        """.trimIndent())
+        val completions =
+            getCompletionsAtCaret(
+                schema,
+                """
+                notification:
+                  type: email
+                  recipient: "user@example.com"
+                  <caret>
+                """.trimIndent(),
+            )
 
         assertNotNull(completions, "Should return completions")
         val labels = completions.map { it.label }

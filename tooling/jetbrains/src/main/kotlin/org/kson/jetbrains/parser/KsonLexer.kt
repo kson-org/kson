@@ -3,11 +3,11 @@ package org.kson.jetbrains.parser
 import com.intellij.lexer.LexerBase
 import com.intellij.lexer.LexerPosition
 import com.intellij.psi.tree.IElementType
-import org.kson.stdlibx.collections.ImmutableList
-import org.kson.stdlibx.collections.toImmutableList
 import org.kson.parser.Lexer
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.stdlibx.collections.ImmutableList
+import org.kson.stdlibx.collections.toImmutableList
 
 /**
  * [KsonLexer] implements the [com.intellij.lexer.Lexer] interface by delegating to the main
@@ -15,26 +15,33 @@ import org.kson.parser.TokenType
  */
 class KsonLexer : LexerBase() {
     private var ksonTokens: ImmutableList<Token> = emptyList<Token>().toImmutableList()
+
     // we'll use this index as this lexer's "state" since this lexer is a precomputed array of tokens
     private var ksonTokensIndex = 0
     private var buffer: CharSequence = ""
     private var bufferEnd: Int = 0
-    private var startOffset: Int = 0  // Add field to track the original startOffset
+    private var startOffset: Int = 0 // Add field to track the original startOffset
 
-    override fun start(buffer: CharSequence, startOffset: Int, endOffset: Int, initialState: Int) {
+    override fun start(
+        buffer: CharSequence,
+        startOffset: Int,
+        endOffset: Int,
+        initialState: Int,
+    ) {
         this.buffer = buffer
-        this.startOffset = startOffset  // Store the original startOffset
+        this.startOffset = startOffset // Store the original startOffset
         bufferEnd = endOffset
-        ksonTokens = Lexer(buffer.substring(startOffset, endOffset),
-            // note that we demand a gap-free lex here to properly comply with Jetbrains' Lexer interface demands.
-            // see the green "Info" block on this page for details: https://plugins.jetbrains.com/docs/intellij/implementing-lexer.html
-            true).tokenize()
+        ksonTokens =
+            Lexer(
+                buffer.substring(startOffset, endOffset),
+                // note that we demand a gap-free lex here to properly comply with Jetbrains' Lexer interface demands.
+                // see the green "Info" block on this page for details: https://plugins.jetbrains.com/docs/intellij/implementing-lexer.html
+                true,
+            ).tokenize()
         ksonTokensIndex = initialState
     }
 
-    override fun getState(): Int {
-        return ksonTokensIndex
-    }
+    override fun getState(): Int = ksonTokensIndex
 
     override fun getTokenType(): IElementType? {
         if (ksonTokensIndex >= ksonTokens.size) {
@@ -51,13 +58,9 @@ class KsonLexer : LexerBase() {
         return elem(lexedElementType)
     }
 
-    override fun getTokenStart(): Int {
-        return startOffset + ksonTokens[ksonTokensIndex].lexeme.location.startOffset
-    }
+    override fun getTokenStart(): Int = startOffset + ksonTokens[ksonTokensIndex].lexeme.location.startOffset
 
-    override fun getTokenEnd(): Int {
-        return startOffset + ksonTokens[ksonTokensIndex].lexeme.location.endOffset
-    }
+    override fun getTokenEnd(): Int = startOffset + ksonTokens[ksonTokensIndex].lexeme.location.endOffset
 
     override fun advance() {
         ksonTokensIndex++
@@ -67,11 +70,7 @@ class KsonLexer : LexerBase() {
         ksonTokensIndex = position.state
     }
 
-    override fun getBufferSequence(): CharSequence {
-        return buffer
-    }
+    override fun getBufferSequence(): CharSequence = buffer
 
-    override fun getBufferEnd(): Int {
-        return bufferEnd
-    }
+    override fun getBufferEnd(): Int = bufferEnd
 }

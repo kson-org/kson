@@ -1,23 +1,29 @@
 package org.kson.schema.validators
 
-import org.kson.value.KsonObject
-import org.kson.value.KsonString
-import org.kson.value.KsonObjectProperty
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
+import org.kson.value.KsonObject
+import org.kson.value.KsonObjectProperty
+import org.kson.value.KsonString
 
 /** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
-data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
+data class CompiledPatternSchema(
+    val regex: Regex,
+    val schema: JsonSchema?,
+)
 
-class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchema?>?,
-                          private val compiledPatterns: List<CompiledPatternSchema>?,
-                          private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
-    : JsonObjectValidator() {
-
-    override fun validateObject(node: KsonObject, messageSink: MessageSink) {
+class PropertiesValidator(
+    private val propertySchemas: Map<KsonString, JsonSchema?>?,
+    private val compiledPatterns: List<CompiledPatternSchema>?,
+    private val additionalPropertiesValidator: AdditionalPropertiesValidator?,
+) : JsonObjectValidator() {
+    override fun validateObject(
+        node: KsonObject,
+        messageSink: MessageSink,
+    ) {
         val objectProperties = node.propertyLookup
         val seenKeys = mutableSetOf<String>()
 
@@ -54,21 +60,44 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
 }
 
 sealed interface AdditionalPropertiesValidator {
-    fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink)
+    fun validateProperties(
+        remainingProperties: Map<String, KsonObjectProperty>,
+        location: Location,
+        messageSink: MessageSink,
+    )
 }
 
-data class AdditionalPropertiesBooleanValidator(val allowed: Boolean, private val schemaTitle: String?) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
+data class AdditionalPropertiesBooleanValidator(
+    val allowed: Boolean,
+    private val schemaTitle: String?,
+) : AdditionalPropertiesValidator {
+    override fun validateProperties(
+        remainingProperties: Map<String, KsonObjectProperty>,
+        location: Location,
+        messageSink: MessageSink,
+    ) {
         if (!allowed && remainingProperties.isNotEmpty()) {
             remainingProperties.forEach { (_, property) ->
-                messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(property.propName.value, schemaTitle ?: ""))
+                messageSink.error(
+                    property.propName.location,
+                    MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(
+                        property.propName.value,
+                        schemaTitle ?: "",
+                    ),
+                )
             }
         }
     }
 }
 
-data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
+data class AdditionalPropertiesSchemaValidator(
+    val schema: JsonSchema,
+) : AdditionalPropertiesValidator {
+    override fun validateProperties(
+        remainingProperties: Map<String, KsonObjectProperty>,
+        location: Location,
+        messageSink: MessageSink,
+    ) {
         remainingProperties.forEach { (_, property) ->
             val propertyMessageSink = MessageSink()
             schema.validate(property.propValue, propertyMessageSink)
@@ -77,8 +106,8 @@ data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : Additio
                     property.propName.location,
                     MessageType.SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH.create(
                         property.propName.value,
-                        schema.descriptionWithDefault()
-                    )
+                        schema.descriptionWithDefault(),
+                    ),
                 )
                 propertyMessageSink.loggedMessages().forEach {
                     messageSink.error(it.location, it.message)

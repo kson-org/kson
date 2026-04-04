@@ -9,10 +9,9 @@ import com.github.ajalt.clikt.parameters.types.outputStream
 import org.kson.Kson
 import org.kson.Message
 import org.kson.SchemaResult
-import java.io.File
 
 abstract class BaseKsonCommand(
-    name: String? = null
+    name: String? = null,
 ) : CliktCommand(name = name) {
     private val inputFile by option("-i", "--input", help = "Input file (default: stdin)")
         .file(mustExist = true, canBeDir = false, mustBeReadable = true)

@@ -6,11 +6,12 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import org.kson.Kson
 import org.kson.tooling.cli.generated.CLI_DISPLAY_NAME
-import org.kson.tooling.cli.generated.FILE_EXTENSION
 import org.kson.tooling.cli.generated.CLI_NAME
+import org.kson.tooling.cli.generated.FILE_EXTENSION
 
 class ValidateCommand : BaseKsonCommand() {
-    override fun help(context: Context) = """
+    override fun help(context: Context) =
+        """
         |Validate $CLI_DISPLAY_NAME documents for syntax errors, warnings and tokens.
         |
         |Performs static analysis to detect issues without executing or converting the document.
@@ -32,20 +33,21 @@ class ValidateCommand : BaseKsonCommand() {
         |Exit codes:
         |${"\u0085"}  0 - No errors found
         |${"\u0085"}  1 - Errors detected (warnings don't affect exit code)
-    """.trimMargin()
+        """.trimMargin()
 
     private val showTokens by option("--show-tokens", help = "Display lexical tokens (for debugging)")
         .flag()
 
     override fun run() {
-        super.run()  // Check for help display
+        super.run() // Check for help display
 
-        val ksonContent = try {
-            readInput()
-        } catch (e: Exception) {
-            echo("Error reading input: ${e.message}", err = true)
-            throw ProgramResult(1)
-        }
+        val ksonContent =
+            try {
+                readInput()
+            } catch (e: Exception) {
+                echo("Error reading input: ${e.message}", err = true)
+                throw ProgramResult(1)
+            }
 
         if (ksonContent.isBlank()) {
             echo("Error: Input is empty. Provide a $CLI_DISPLAY_NAME document to validate.", err = true)
@@ -68,7 +70,8 @@ class ValidateCommand : BaseKsonCommand() {
         if (showTokens) {
             outputString += "\n\nTokens:\n"
             analysis.tokens.forEach { token ->
-                outputString += "  ${token.tokenType}: '${token.text}' at ${token.start.line}:${token.start.column}-${token.end.line}:${token.end.column}\n"
+                outputString +=
+                    "  ${token.tokenType}: '${token.text}' at ${token.start.line}:${token.start.column}-${token.end.line}:${token.end.column}\n"
             }
         }
 

@@ -7,7 +7,9 @@ package org.kson.parser.behavior.embedblock
  *
  * The embed block syntax may be considered a "view" on objects of this shape.
  */
-enum class EmbedObjectKeys(val key: String) {
+enum class EmbedObjectKeys(
+    val key: String,
+) {
     EMBED_TAG("embedTag"),
-    EMBED_CONTENT("embedContent");
+    EMBED_CONTENT("embedContent"),
 }

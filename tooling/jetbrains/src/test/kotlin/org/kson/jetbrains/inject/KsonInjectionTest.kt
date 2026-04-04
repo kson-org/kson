@@ -34,12 +34,16 @@ class KsonInjectionTest : BasePlatformTestCase() {
         /**
          * Type the given text in the editor
          */
-        data class TypeText(val text: String) : ActionInEditor()
+        data class TypeText(
+            val text: String,
+        ) : ActionInEditor()
 
         /**
          * Perform a standard editor action (like select all, delete, etc)
          */
-        data class EditorAction(val actionId: String) : ActionInEditor()
+        data class EditorAction(
+            val actionId: String,
+        ) : ActionInEditor()
     }
 
     /**
@@ -71,40 +75,46 @@ class KsonInjectionTest : BasePlatformTestCase() {
     ) {
         myFixture.configureByText(KsonFileType, text.trimIndent())
 
-        CodeStyle.doWithTemporarySettings(project, settings, Runnable {
-            WriteCommandAction.runWriteCommandAction(project) {
-                for (action in actions) {
-                    when (action) {
-                        is ActionInEditor.TypeText -> myFixture.type(action.text)
-                        is ActionInEditor.EditorAction -> myFixture.performEditorAction(action.actionId)
+        CodeStyle.doWithTemporarySettings(
+            project,
+            settings,
+            Runnable {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    for (action in actions) {
+                        when (action) {
+                            is ActionInEditor.TypeText -> myFixture.type(action.text)
+                            is ActionInEditor.EditorAction -> myFixture.performEditorAction(action.actionId)
+                        }
                     }
                 }
-
-            }
-        }
+            },
         )
 
         assertEquals(
             "should match with the actions executed in the fragment editor",
             expectedTextInMainAfterActions,
-            InjectionTestFixture(myFixture).topLevelFile.text
+            InjectionTestFixture(myFixture).topLevelFile.text,
         )
     }
-
 
     /**
      * Assert that manual language injection is available when no injection is present.
      */
-    private fun hasLanguageInjectionAvailable(@Language("kson") text: String, injectionAvailable: Boolean) {
+    private fun hasLanguageInjectionAvailable(
+        @Language("kson") text: String,
+        injectionAvailable: Boolean,
+    ) {
         myFixture.configureByText(KsonFileType, text.trimIndent())
 
         val intentions = myFixture.availableIntentions
-        val injectIntention = intentions.find {
-            it.text.contains("Inject language", ignoreCase = true) || it.familyName.contains(
-                "Inject language",
-                ignoreCase = true
-            )
-        }
+        val injectIntention =
+            intentions.find {
+                it.text.contains("Inject language", ignoreCase = true) ||
+                    it.familyName.contains(
+                        "Inject language",
+                        ignoreCase = true,
+                    )
+            }
         if (injectionAvailable) {
             assertNotNull("should have 'Inject language' intention available", injectIntention)
         } else {
@@ -120,7 +130,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
      */
     private fun hasCorrectAutoCompletion(
         @Language("kson") before: String,
-        @Language("kson") after: String
+        @Language("kson") after: String,
     ) {
         myFixture.configureByText(KsonFileType, before.trimIndent())
         myFixture.complete(CompletionType.BASIC)
@@ -137,7 +147,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
     private fun hasLanguageListCompletionAvailable(
         @Language("kson") text: String,
         inputTag: String,
-        expectedLanguageId: String
+        expectedLanguageId: String,
     ) {
         myFixture.configureByText(KsonFileType, text.trimIndent())
 
@@ -150,7 +160,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
         val completionTexts = lookupElements!!.map { it.lookupString }
         assertTrue(
             "should contain '$expectedLanguageId', but not found in completion list: $completionTexts",
-            completionTexts.contains(expectedLanguageId)
+            completionTexts.contains(expectedLanguageId),
         )
     }
 
@@ -160,7 +170,7 @@ class KsonInjectionTest : BasePlatformTestCase() {
             """
         |    should be injected xml content
         |    with a newline
-        """.trimMargin()
+            """.trimMargin()
         val fileContent =
             """
             |$${language.id}
@@ -168,12 +178,11 @@ class KsonInjectionTest : BasePlatformTestCase() {
             """.trimMargin()
         hasInjectionPresent(
             fileContent,
-            InjectionAssertionData(injectedContent, language.id)
+            InjectionAssertionData(injectedContent, language.id),
         )
     }
 
     fun testLanguageInjectionActionAvailable() {
-
         hasLanguageInjectionAvailable(
             """
             key: %custom
@@ -181,7 +190,8 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 "key": "should have injection within `EMBED_CONTENT`"
             }
             %%
-        """, true
+        """,
+            true,
         )
 
         hasLanguageInjectionAvailable(
@@ -191,7 +201,8 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 "key": "should not have injection outside `EMBED_CONTENT`"
             }
             %%
-        """, false
+        """,
+            false,
         )
 
         hasLanguageInjectionAvailable(
@@ -201,7 +212,8 @@ class KsonInjectionTest : BasePlatformTestCase() {
                "key": "should not have injection outside of `EMBED_CONTENT`"
             }
             %%
-        """, false
+        """,
+            false,
         )
 
         hasLanguageInjectionAvailable(
@@ -211,7 +223,8 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 "key": "should not have injection for already injected language"
             }
             %%
-        """, false
+        """,
+            false,
         )
     }
 
@@ -222,14 +235,14 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 |  <div><caret></div>
                 |  %%
                 |
-                """.trimMargin()
-
+            """.trimMargin()
 
         hasCorrectTextEditors(
             text = fileContent,
-            actions = listOf(
-                ActionInEditor.EditorAction(IdeActions.ACTION_EDITOR_ENTER),
-            ),
+            actions =
+                listOf(
+                    ActionInEditor.EditorAction(IdeActions.ACTION_EDITOR_ENTER),
+                ),
             expectedTextInMainAfterActions =
                 """
                     |key: %
@@ -237,45 +250,50 @@ class KsonInjectionTest : BasePlatformTestCase() {
                     |  
                     |  </div>
                     |  %%
-                    """.trimMargin(),
+                """.trimMargin(),
         )
     }
 
     fun testAutoCompleteXmlFirstLine() {
         hasCorrectAutoCompletion(
-            before = """
+            before =
+                """
                 |key: %xml
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
-            after = """
+            after =
+                """
                 |key: %xml
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
-                """.trimMargin()
+                """.trimMargin(),
         )
     }
 
     fun testAutoCompleteXmlLastLine() {
         hasCorrectAutoCompletion(
-            before = """
+            before =
+                """
                 |key: %xml
                 |  
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
-            after = """
+            after =
+                """
                 |key: %xml
                 |  
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
-                """.trimMargin()
+                """.trimMargin(),
         )
     }
 
     fun testAutoCompleteXmlMultipleBlocks() {
         hasCorrectAutoCompletion(
-            before = """
+            before =
+                """
                 |block1: %html
                 |   empty block
                 |%%
@@ -286,7 +304,8 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 |  <analyze-<caret>
                 |  %%
                 """.trimMargin(),
-            after = """
+            after =
+                """
                 |block1: %html
                 |   empty block
                 |%%
@@ -296,15 +315,16 @@ class KsonInjectionTest : BasePlatformTestCase() {
                 |  
                 |  <analyze-string xmlns="http://www.w3.org/1999/XSL/Transform"
                 |  %%
-                """.trimMargin()
+                """.trimMargin(),
         )
     }
 
     fun testLanguageListCompletion() {
-        val fileContent = """
+        val fileContent =
+            """
             key: %<caret>
             %%
-        """.trimIndent()
+            """.trimIndent()
 
         hasLanguageListCompletionAvailable(fileContent, "j", "json")
         hasLanguageListCompletionAvailable(fileContent, "h", "html")

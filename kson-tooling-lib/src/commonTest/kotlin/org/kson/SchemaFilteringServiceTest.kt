@@ -1,8 +1,8 @@
 package org.kson
 
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import kotlin.test.*
 
 /**
@@ -12,7 +12,6 @@ import kotlin.test.*
  * without going through the full public API.
  */
 class SchemaFilteringServiceTest {
-
     /**
      * Helper function to set up schema filtering and return valid schemas for a given document.
      *
@@ -20,7 +19,10 @@ class SchemaFilteringServiceTest {
      * @param document The document to validate against the schema
      * @return List of valid schemas after filtering
      */
-    private fun getValidSchemasForDocument(schema: String, document: String): List<KsonValue> {
+    private fun getValidSchemasForDocument(
+        schema: String,
+        document: String,
+    ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         val parsedDocument = KsonCore.parseToAst(document).ksonValue
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
@@ -32,7 +34,8 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_withOneOfCombinator_filtersIncompatibleSchemas() {
         // Schema with oneOf combinator
-        val schema = """
+        val schema =
+            """
             oneOf:
               - type: object
                 properties:
@@ -46,12 +49,13 @@ class SchemaFilteringServiceTest {
                     const: sms
                   phoneNumber:
                     type: string
-        """.trimIndent()
+            """.trimIndent()
 
         // Document with type: email (should only match first branch)
-        val document = """
+        val document =
+            """
             type: email
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
@@ -67,7 +71,8 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_withAnyOfCombinator_filtersIncompatibleSchemas() {
         // Schema with anyOf combinator
-        val schema = """
+        val schema =
+            """
             anyOf:
               - type: object
                 properties:
@@ -81,13 +86,14 @@ class SchemaFilteringServiceTest {
                     type: string
                   role:
                     type: string
-        """.trimIndent()
+            """.trimIndent()
 
         // Document with 'age' property (should only match first branch)
-        val document = """
+        val document =
+            """
             name: John
             age: 30
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
@@ -101,7 +107,8 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_withAllOfCombinator_includesAllBranches() {
         // Schema with allOf combinator - all branches should always be included
-        val schema = """
+        val schema =
+            """
             allOf:
               - type: object
                 properties:
@@ -111,11 +118,12 @@ class SchemaFilteringServiceTest {
                 properties:
                   age:
                     type: number
-        """.trimIndent()
+            """.trimIndent()
 
-        val document = """
+        val document =
+            """
             name: John
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
@@ -126,11 +134,12 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_withInvalidDocument_fallsBackToUnfilteredSchemas() {
         // Schema with oneOf
-        val schema = """
+        val schema =
+            """
             oneOf:
               - type: string
               - type: number
-        """.trimIndent()
+            """.trimIndent()
 
         // Invalid document (not parseable)
         val invalidDocument = "{ invalid json"
@@ -144,18 +153,20 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_withNoCombinators_returnsAllSchemas() {
         // Simple schema without combinators
-        val schema = """
+        val schema =
+            """
             type: object
             properties:
               name:
                 type: string
               age:
                 type: number
-        """.trimIndent()
+            """.trimIndent()
 
-        val document = """
+        val document =
+            """
             name: John
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
@@ -166,7 +177,8 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_ignoresRequiredPropertyErrors() {
         // Schema with required properties
-        val schema = """
+        val schema =
+            """
             oneOf:
               - type: object
                 required: [name, email]
@@ -182,13 +194,14 @@ class SchemaFilteringServiceTest {
                     type: string
                   phone:
                     type: string
-        """.trimIndent()
+            """.trimIndent()
 
         // Document with only 'name' (missing required 'email' or 'phone')
         // Both branches should still be valid because missing required props are ignored
-        val document = """
+        val document =
+            """
             name: John
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
@@ -199,7 +212,8 @@ class SchemaFilteringServiceTest {
     @Test
     fun testGetValidSchemas_filtersBasedOnTypeViolations() {
         // Schema with different type requirements
-        val schema = """
+        val schema =
+            """
             oneOf:
               - type: object
                 properties:
@@ -209,12 +223,13 @@ class SchemaFilteringServiceTest {
                 properties:
                   value:
                     type: number
-        """.trimIndent()
+            """.trimIndent()
 
         // Document with string value (should only match first branch)
-        val document = """
+        val document =
+            """
             value: hello
-        """.trimIndent()
+            """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 

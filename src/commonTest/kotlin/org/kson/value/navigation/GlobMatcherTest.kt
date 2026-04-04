@@ -1,12 +1,11 @@
 package org.kson.value.navigation
 
-import org.kson.value.navigation.json_pointer.GlobMatcher
+import org.kson.value.navigation.jsonpointer.GlobMatcher
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GlobMatcherTest {
-
     // Basic wildcard tests
     @Test
     fun `asterisk matches zero characters`() {

@@ -3,7 +3,6 @@ package org.kson
 import kotlin.test.*
 
 class DiagnosticTest {
-
     @Test
     fun testEmptyDocumentReportsError() {
         val diagnostics = KsonTooling.validateDocument("")
@@ -45,10 +44,11 @@ class DiagnosticTest {
 
     @Test
     fun testErrorsAndWarnings() {
-        val content = """
+        val content =
+            """
             - {list_item: false false}
                 - deceptive_indent_list_item
-        """.trimIndent()
+            """.trimIndent()
         val diagnostics = KsonTooling.validateDocument(content)
         assertEquals(2, diagnostics.size)
         assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
@@ -75,14 +75,15 @@ class DiagnosticTest {
 
     @Test
     fun testSchemaTypeMismatch() {
-        val schema = """
+        val schema =
+            """
             {
                 type: object
                 properties: {
                     age: { type: number }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
         val diagnostics = KsonTooling.validateDocument("{ age: \"not a number\" }", schema)
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
@@ -90,7 +91,8 @@ class DiagnosticTest {
 
     @Test
     fun testSchemaMissingRequiredProperty() {
-        val schema = """
+        val schema =
+            """
             {
                 type: object
                 properties: {
@@ -98,7 +100,7 @@ class DiagnosticTest {
                 }
                 required: ["name"]
             }
-        """.trimIndent()
+            """.trimIndent()
         val diagnostics = KsonTooling.validateDocument("{ age: 30 }", schema)
         assertEquals(1, diagnostics.size)
         assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
@@ -106,7 +108,8 @@ class DiagnosticTest {
 
     @Test
     fun testValidDocumentMatchingSchema() {
-        val schema = """
+        val schema =
+            """
             {
                 type: object
                 properties: {
@@ -114,7 +117,7 @@ class DiagnosticTest {
                     age: { type: number }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
         val diagnostics = KsonTooling.validateDocument("{ name: \"Alice\", age: 30 }", schema)
         assertEquals(0, diagnostics.size)
     }

@@ -14,9 +14,8 @@ import org.kson.parser.behavior.KsonContentTransformer
 class EmbedContentTransformer(
     rawContent: String,
     embedDelim: EmbedDelim,
-    rawLocation: Location
+    rawLocation: Location,
 ) : KsonContentTransformer(rawContent, rawLocation) {
-
     override val processedContent: String
 
     /**
@@ -38,12 +37,13 @@ class EmbedContentTransformer(
         minIndent = indentTrimmer.computeMinimumIndent()
         val indentTrimmed = indentTrimmer.trimMinimumIndent()
 
-        processedContent = if (isCloseDelimOnOwnLine(rawContent)) {
-            val lastNewline = indentTrimmed.lastIndexOf('\n')
-            if (lastNewline >= 0) indentTrimmed.substring(0, lastNewline) else indentTrimmed
-        } else {
-            indentTrimmed
-        }
+        processedContent =
+            if (isCloseDelimOnOwnLine(rawContent)) {
+                val lastNewline = indentTrimmed.lastIndexOf('\n')
+                if (lastNewline >= 0) indentTrimmed.substring(0, lastNewline) else indentTrimmed
+            } else {
+                indentTrimmed
+            }
     }
 
     /**

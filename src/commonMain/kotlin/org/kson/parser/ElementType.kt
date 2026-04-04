@@ -18,85 +18,112 @@ interface ElementType
 enum class TokenType : ElementType {
     // {
     CURLY_BRACE_L,
+
     // }
     CURLY_BRACE_R,
+
     // [
     SQUARE_BRACKET_L,
+
     // ]
     SQUARE_BRACKET_R,
+
     // <
     ANGLE_BRACKET_L,
+
     // >
     ANGLE_BRACKET_R,
+
     // :
     COLON,
+
     // .
     DOT,
+
     // =
     END_DASH,
+
     // ,
     COMMA,
+
     // lines starting with `#`
     COMMENT,
+
     /**
      * Opening delimiter for an embed block, either `%` or `$`, see [EmbedDelim.Percent] and [EmbedDelim.Dollar]
      */
     EMBED_OPEN_DELIM,
+
     /**
      * Closing delimiter for an embed block, either `%%` or `$$`, matches the [EMBED_OPEN_DELIM] for the block it closes
      */
     EMBED_CLOSE_DELIM,
+
     /**
      * The line of text starting at an embed block's [EMBED_OPEN_DELIM], "tagging" that embedded content
      */
     EMBED_TAG,
+
     /**
      * The newline that ends the "preamble" of an embed block (i.e. the [EMBED_OPEN_DELIM] and possibly an [EMBED_TAG])
      * [EMBED_CONTENT] begins on the line immediately after the [EMBED_PREAMBLE_NEWLINE]
      */
     EMBED_PREAMBLE_NEWLINE,
+
     /**
      * The content of an [EMBED_OPEN_DELIM]/[EMBED_CLOSE_DELIM] delimited embed block
      */
     EMBED_CONTENT,
+
     // false
     FALSE,
+
     /**
      * An unquoted alpha-numeric-with-underscores string (must not start with a number)
      */
     UNQUOTED_STRING,
+
     /**
      * A char completely outside the Kson grammar. Used to give helpful errors to the user.
      */
     ILLEGAL_CHAR,
+
     /**
      * The `-` denoting a dashed list element
      */
     LIST_DASH,
+
     // null
     NULL,
+
     /**
      * A number, to be parsed by [NumberParser]
      */
     NUMBER,
+
     // " or ' opening a string
     STRING_OPEN_QUOTE,
+
     // " or ' closing a string
     STRING_CLOSE_QUOTE,
+
     /**
      * A [STRING_OPEN_QUOTE]/[STRING_CLOSE_QUOTE] delimited chunk of text, i.e. "This is a string"
      */
     STRING_CONTENT,
+
     // true
     TRUE,
+
     /**
      * Any whitespace such as spaces, newlines and tabs
      */
     WHITESPACE,
+
     /**
      * A special token to denote the end of a "file" or token stream
      */
-    EOF
+    EOF,
 }
 
 /**
@@ -114,5 +141,5 @@ enum class ParsedElementType : ElementType {
     OBJECT,
     OBJECT_PROPERTY,
     QUOTED_STRING,
-    ROOT
+    ROOT,
 }

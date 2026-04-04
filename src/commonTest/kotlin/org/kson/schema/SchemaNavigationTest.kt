@@ -1,26 +1,27 @@
 package org.kson.schema
 
 import org.kson.KsonCore
-import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.value.KsonValue as InternalKsonValue
-import org.kson.value.KsonObject as InternalKsonObject
-import org.kson.value.KsonString as InternalKsonString
-import org.kson.value.KsonBoolean as InternalKsonBoolean
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+import org.kson.value.KsonBoolean as InternalKsonBoolean
+import org.kson.value.KsonObject as InternalKsonObject
+import org.kson.value.KsonString as InternalKsonString
+import org.kson.value.KsonValue as InternalKsonValue
 
 class SchemaNavigationTest {
-
     /**
      * Helper to navigate schema and get all result values
      */
-    private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
-        return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaIdLookup(it).navigateByDocumentPointer(JsonPointer.fromTokens(path))
+    private fun navigateSchema(
+        schema: String,
+        path: List<String>,
+    ): List<InternalKsonValue> =
+        KsonCore.parseToAst(schema).ksonValue?.let {
+            SchemaIdLookup(it)
+                .navigateByDocumentPointer(JsonPointer.fromTokens(path))
                 .map { it.resolvedValue }
         } ?: emptyList()
-    }
 
     @Test
     fun testNavigateEmptyPath() {
@@ -112,7 +113,7 @@ class SchemaNavigationTest {
         assertEquals(1, itemResults.size)
         assertEquals(
             "object",
-            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value,
         )
 
         // Navigate deeper: users[0].name
@@ -120,7 +121,7 @@ class SchemaNavigationTest {
         assertEquals(1, nameResults.size)
         assertEquals(
             "string",
-            ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((nameResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value,
         )
     }
 
@@ -179,11 +180,11 @@ class SchemaNavigationTest {
         val unknownPropSchema = unknownProp.single() as InternalKsonObject
         assertEquals(
             "number",
-            (unknownPropSchema.propertyLookup["type"] as? InternalKsonString)?.value
+            (unknownPropSchema.propertyLookup["type"] as? InternalKsonString)?.value,
         )
         assertEquals(
             "Any other property is a number",
-            (unknownPropSchema.propertyLookup["description"] as? InternalKsonString)?.value
+            (unknownPropSchema.propertyLookup["description"] as? InternalKsonString)?.value,
         )
     }
 
@@ -322,7 +323,7 @@ class SchemaNavigationTest {
         // (This tests the URI tracking functionality)
         assertEquals(
             "string",
-            ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value,
         )
     }
 
@@ -387,7 +388,7 @@ class SchemaNavigationTest {
         assertEquals(1, validResults.size)
         assertEquals(
             "number",
-            ((validResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((validResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value,
         )
     }
 
@@ -568,8 +569,10 @@ class SchemaNavigationTest {
 
         val contextSchema = results.single() as InternalKsonObject
         assertEquals("Context", (contextSchema.propertyLookup["title"] as? InternalKsonString)?.value)
-        assertEquals("Defines arbitrary key-value pairs for Jinja interpolation",
-                     (contextSchema.propertyLookup["description"] as? InternalKsonString)?.value)
+        assertEquals(
+            "Defines arbitrary key-value pairs for Jinja interpolation",
+            (contextSchema.propertyLookup["description"] as? InternalKsonString)?.value,
+        )
     }
 
     @Test
@@ -608,7 +611,7 @@ class SchemaNavigationTest {
         assertEquals(1, itemResults.size, "Should navigate through root \$ref into array items")
         assertEquals(
             "string",
-            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+            ((itemResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value,
         )
     }
 

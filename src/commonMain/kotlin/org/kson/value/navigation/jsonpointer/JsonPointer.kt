@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 /**
  * Represents a validated JSON Pointer according to RFC 6901.
@@ -18,15 +18,17 @@ package org.kson.value.navigation.json_pointer
  * @property pointerString The JSON Pointer string (must be valid according to RFC 6901)
  * @throws IllegalArgumentException if the pointer string is invalid
  */
-class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(pointerString)) {
-
+class JsonPointer(
+    pointerString: String,
+) : BaseJsonPointer(JsonPointerParser(pointerString)) {
     override val tokens: List<String>
-        get() = rawTokens.map {
-            when (it) {
-                is PointerParser.Tokens.Literal -> it.value
-                else -> throw UnsupportedOperationException("JsonPointer only supports 'literal' tokens")
+        get() =
+            rawTokens.map {
+                when (it) {
+                    is PointerParser.Tokens.Literal -> it.value
+                    else -> throw UnsupportedOperationException("JsonPointer only supports 'literal' tokens")
+                }
             }
-        }
 
     companion object {
         /**
@@ -61,9 +63,10 @@ class JsonPointer(pointerString: String) : BaseJsonPointer(JsonPointerParser(poi
             // IMPORTANT: Must escape '~' first, then '/' (order matters!)
             // 1. Replace '~' with '~0'
             // 2. Replace '/' with '~1'
-            val pointerString = tokens.joinToString(separator = "/", prefix = "/") { token ->
-                token.replace("~", "~0").replace("/", "~1")
-            }
+            val pointerString =
+                tokens.joinToString(separator = "/", prefix = "/") { token ->
+                    token.replace("~", "~0").replace("/", "~1")
+                }
             return JsonPointer(pointerString)
         }
     }

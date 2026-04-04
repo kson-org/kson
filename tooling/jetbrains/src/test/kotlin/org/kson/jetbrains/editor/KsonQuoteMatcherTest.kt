@@ -9,13 +9,13 @@ class KsonQuoteMatcherTest : KsonEditorActionTest() {
         doCharTest(
             "<caret>",
             '"',
-            "\"<caret>\""
+            "\"<caret>\"",
         )
 
         doCharTest(
             "<caret>",
             '\'',
-            "'<caret>'"
+            "'<caret>'",
         )
     }
 
@@ -23,13 +23,13 @@ class KsonQuoteMatcherTest : KsonEditorActionTest() {
         doCharTest(
             "\"<caret>",
             '"',
-            "\"\"<caret>"
+            "\"\"<caret>",
         )
 
         doCharTest(
             "key: \"unclosed<caret>",
             '"',
-            "key: \"unclosed\"<caret>"
+            "key: \"unclosed\"<caret>",
         )
     }
 }

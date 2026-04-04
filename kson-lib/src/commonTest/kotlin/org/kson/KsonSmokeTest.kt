@@ -1,6 +1,10 @@
 package org.kson
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for the public [Kson] interface.  Note we explicitly call this out as a [KsonSmokeTest]: since the underlying
@@ -8,27 +12,30 @@ import kotlin.test.*
  * confident in this code
  */
 class KsonSmokeTest {
-    
     @Test
     fun testFormat_withDefaultOptions() {
         val input = """{"name": "test", "value": 123}"""
         val formatted = Kson.format(input)
-        assertEquals("""
-              name: test
-              value: 123
+        assertEquals(
+            """
+            name: test
+            value: 123
             """.trimIndent(),
-            formatted)
+            formatted,
+        )
     }
-    
+
     @Test
     fun testFormat_withSpacesOption() {
         val input = """{"name": "test", "value": 123}"""
         val formatted = Kson.format(input, FormatOptions(IndentType.Spaces(6)))
-        assertEquals("""
-                  name: test
-                  value: 123
+        assertEquals(
+            """
+            name: test
+            value: 123
             """.trimIndent(),
-            formatted)
+            formatted,
+        )
     }
 
     @Test
@@ -45,11 +52,11 @@ class KsonSmokeTest {
                 - 3
               >
             }
-        """.trimIndent(),
-            formatted
+            """.trimIndent(),
+            formatted,
         )
     }
-    
+
     @Test
     fun testFormat_withTabsOption() {
         val input = """{"name": "test", "value": 123}"""
@@ -57,7 +64,7 @@ class KsonSmokeTest {
         assertIs<String>(result)
         assertTrue(result.isNotEmpty())
     }
-    
+
     @Test
     fun testToJson_success() {
         val input = """{"name": "test", "value": 123}"""
@@ -65,7 +72,7 @@ class KsonSmokeTest {
         assertIs<Result.Success>(result)
         assertTrue(result.output.isNotEmpty())
     }
-    
+
     @Test
     fun testToJson_failure() {
         val input = """{"invalid": }"""
@@ -79,7 +86,7 @@ class KsonSmokeTest {
         assertTrue(error.start.line == 0)
         assertTrue(error.start.column > 0)
     }
-    
+
     @Test
     fun testToYaml_success() {
         val input = """{"name": "test", "value": 123}"""
@@ -87,7 +94,7 @@ class KsonSmokeTest {
         assertIs<Result.Success>(result)
         assertTrue(result.output.isNotEmpty())
     }
-    
+
     @Test
     fun testToYaml_failure() {
         val input = """{"invalid": }"""
@@ -95,7 +102,7 @@ class KsonSmokeTest {
         assertIs<Result.Failure>(result)
         assertTrue(result.errors.isNotEmpty())
     }
-    
+
     @Test
     fun testAnalyze() {
         val input = """{"name": "test", "value": 123}"""
@@ -132,7 +139,8 @@ class KsonSmokeTest {
         val input = """name: test, complexString: "this has legal \n and illegal \x escapes and \u3456 unicode""""
         val tokens = Kson.analyze(input).tokens
         assertEquals(
-            listOf(TokenType.UNQUOTED_STRING,
+            listOf(
+                TokenType.UNQUOTED_STRING,
                 TokenType.COLON,
                 TokenType.UNQUOTED_STRING,
                 TokenType.COMMA,
@@ -141,20 +149,24 @@ class KsonSmokeTest {
                 TokenType.STRING_OPEN_QUOTE,
                 TokenType.STRING_CONTENT,
                 TokenType.STRING_CLOSE_QUOTE,
-                TokenType.EOF),
-            tokens.map { it.tokenType })
+                TokenType.EOF,
+            ),
+            tokens.map { it.tokenType },
+        )
     }
 
     @Test
     fun testAnalyze_value() {
-        val input = """
+        val input =
+            """
             key: value
             list:
               - 1
               - 2.1
               - 3E5
             embed:%tag
-            %%""".trimIndent()
+            %%
+            """.trimIndent()
         val value = Kson.analyze(input).ksonValue
         assertNotNull(value)
         assertTrue(value is KsonValue.KsonObject)
@@ -220,7 +232,7 @@ class KsonSmokeTest {
         assertEquals(6, embedValue.end.line)
         assertEquals(2, embedValue.end.column)
     }
-    
+
     @Test
     fun testParseSchema_success() {
         val schemaKson = """{
@@ -234,7 +246,7 @@ class KsonSmokeTest {
         assertIs<SchemaResult.Success>(result)
         assertIs<SchemaValidator>(result.schemaValidator)
     }
-    
+
     @Test
     fun testParseSchema_failure() {
         val invalidSchema = """{"type": }"""
@@ -242,7 +254,7 @@ class KsonSmokeTest {
         assertIs<SchemaResult.Failure>(result)
         assertTrue(result.errors.isNotEmpty())
     }
-    
+
     @Test
     fun testSchemaValidator_validInput() {
         val schemaKson = """{
@@ -254,13 +266,13 @@ class KsonSmokeTest {
         }"""
         val schemaResult = Kson.parseSchema(schemaKson)
         assertIs<SchemaResult.Success>(schemaResult)
-        
+
         val validator = schemaResult.schemaValidator
         val validKson = """{"name": "John", "age": 30}"""
         val errors = validator.validate(validKson)
         assertTrue(errors.isEmpty())
     }
-    
+
     @Test
     fun testSchemaValidator_invalidInput() {
         val schemaKson = """{
@@ -273,13 +285,13 @@ class KsonSmokeTest {
         }"""
         val schemaResult = Kson.parseSchema(schemaKson)
         assertIs<SchemaResult.Success>(schemaResult)
-        
+
         val validator = schemaResult.schemaValidator
         val invalidKson = """{"name": "John"}"""
         val errors = validator.validate(invalidKson)
         assertTrue(errors.isNotEmpty())
     }
-    
+
     @Test
     fun testSchemaValidator_validateWithParseErrors() {
         val schemaKson = """{"type": "object"}"""
@@ -294,11 +306,12 @@ class KsonSmokeTest {
 
     @Test
     fun testPropertyKeys_basicAccess() {
-        val input = """
+        val input =
+            """
             name: John
             age: 30
             city: 'New York'
-        """.trimIndent()
+            """.trimIndent()
         val analysis = Kson.analyze(input)
         val value = analysis.ksonValue
         assertNotNull(value)
@@ -322,10 +335,11 @@ class KsonSmokeTest {
 
     @Test
     fun testPropertyKeys_withPositionInformation() {
-        val input = """
+        val input =
+            """
             name: John
             age: 30
-        """.trimIndent()
+            """.trimIndent()
         val analysis = Kson.analyze(input)
         val value = analysis.ksonValue
         assertNotNull(value)
@@ -392,18 +406,20 @@ class KsonSmokeTest {
 
     @Test
     fun testFormat_withEmbedBlockRules() {
-        val input = """
+        val input =
+            """
             scripts:
               build: "make all"
-        """.trimIndent()
+            """.trimIndent()
 
         val rule = (EmbedRule.fromPathPattern("/scripts/build", tag = "bash") as EmbedRuleResult.Success).embedRule
-        val formatted = Kson.format(
-            input,
-            FormatOptions(
-                embedBlockRules = listOf(rule)
+        val formatted =
+            Kson.format(
+                input,
+                FormatOptions(
+                    embedBlockRules = listOf(rule),
+                ),
             )
-        )
         assertEquals(
             """
             scripts:
@@ -411,7 +427,7 @@ class KsonSmokeTest {
                 make all
                 %%
             """.trimIndent(),
-            formatted
+            formatted,
         )
     }
 

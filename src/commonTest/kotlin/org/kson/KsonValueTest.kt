@@ -9,10 +9,11 @@ import kotlin.test.assertTrue
 class KsonValueTest {
     @Test
     fun testksonValueBasicUsage() {
-        val source = """
-          host: "0.0.0.0"
-          port: 8080
-        """.trimIndent()
+        val source =
+            """
+            host: "0.0.0.0"
+            port: 8080
+            """.trimIndent()
 
         val parseResult = KsonCore.parseToAst(source)
 
@@ -29,7 +30,8 @@ class KsonValueTest {
      */
     @Test
     fun testksonValueComprehensive() {
-        val source = """
+        val source =
+            """
             {
               stringVal: "hello world"
               numberVal: 42.5
@@ -60,7 +62,7 @@ class KsonValueTest {
                 ]
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val parseResult = KsonCore.parseToAst(source)
         assertTrue(!parseResult.hasErrors(), "Parse should succeed without errors")
@@ -97,7 +99,8 @@ class KsonValueTest {
             """
             This is an embed block
             with multiple lines
-        """.trimIndent(), embedProp.embedContent.value
+            """.trimIndent(),
+            embedProp.embedContent.value,
         )
 
         // Verify nested object
@@ -140,14 +143,15 @@ class KsonValueTest {
         assertTrue(nestedListElements.all { it is KsonString })
         assertEquals(
             listOf("nested", "list", "elements"),
-            nestedListElements.map { (it as KsonString).value }
+            nestedListElements.map { (it as KsonString).value },
         )
     }
 
     @Test
     fun testksonValueStringProcessing() {
         // Test various escape sequences to ensure KsonString returns properly unescaped content
-        val source = """
+        val source =
+            """
             {
               basicEscapes: "Hello\nWorld\tTabbed\"Quote\""
               unicodeEscapes: "\u0041\u20AC\u2028\u2029"
@@ -158,7 +162,7 @@ class KsonValueTest {
               mixedContent: "Line 1\nLine 2\t\"quoted\"\u0041"
               regexPattern: "\\d+\\.\\d+"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val parseResult = KsonCore.parseToAst(source)
 
@@ -189,4 +193,4 @@ class KsonValueTest {
         // Test regex pattern - important for schema validation
         assertEquals("\\d+\\.\\d+", (properties["regexPattern"] as KsonString).value)
     }
-} 
+}

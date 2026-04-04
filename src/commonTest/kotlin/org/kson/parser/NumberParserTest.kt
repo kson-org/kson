@@ -8,12 +8,17 @@ import kotlin.test.assertNotNull
 import kotlin.test.fail
 
 class NumberParserTest {
-
-    private fun assertParsesTo(numberSource: String, expectedNumber: Int) {
+    private fun assertParsesTo(
+        numberSource: String,
+        expectedNumber: Int,
+    ) {
         assertParsesTo(numberSource, expectedNumber.toLong())
     }
 
-    private fun assertParsesTo(numberSource: String, expectedNumber: Long) {
+    private fun assertParsesTo(
+        numberSource: String,
+        expectedNumber: Long,
+    ) {
         val parsedNumber = NumberParser(numberSource).parse().number
         if (parsedNumber !is NumberParser.ParsedNumber.Integer) {
             fail("$numberSource should have parsed to an integer, but instead parsed to $parsedNumber")
@@ -21,7 +26,10 @@ class NumberParserTest {
         assertEquals(expectedNumber, parsedNumber.value)
     }
 
-    private fun assertParsesTo(numberSource: String, expectedNumber: Double) {
+    private fun assertParsesTo(
+        numberSource: String,
+        expectedNumber: Double,
+    ) {
         val parsedNumber = NumberParser(numberSource).parse().number
         if (parsedNumber !is NumberParser.ParsedNumber.Decimal) {
             fail("$numberSource should have parsed to a decimal, but instead parsed to $parsedNumber")
@@ -29,7 +37,10 @@ class NumberParserTest {
         assertEquals(expectedNumber, parsedNumber.value)
     }
 
-    private fun assertParsedNumberString(numberSource: String, expectedString: String) {
+    private fun assertParsedNumberString(
+        numberSource: String,
+        expectedString: String,
+    ) {
         val parsedNumber = NumberParser(numberSource).parse().number
         assertNotNull(parsedNumber, "Failed to parse $numberSource")
         assertEquals(expectedString, parsedNumber.asString, "Normalized string of $numberSource should be $expectedString")
@@ -45,7 +56,7 @@ class NumberParserTest {
      */
     private fun assertParserRejectsSource(
         source: String,
-        expectedParseMessageType: MessageType
+        expectedParseMessageType: MessageType,
     ): Message {
         val numberParseResult = NumberParser(source).parse()
 
@@ -54,13 +65,13 @@ class NumberParserTest {
         assertEquals(
             expectedParseMessageType,
             error.type,
-            "Should have the expected parse errors."
+            "Should have the expected parse errors.",
         )
 
         assertEquals(
             null,
             numberParseResult.number,
-            "Should produce a null a number if given string fails to parse"
+            "Should produce a null a number if given string fails to parse",
         )
 
         return error
@@ -125,12 +136,12 @@ class NumberParserTest {
         assertParsesTo("0", 0)
         assertParsesTo("42", 42)
         assertParsesTo("123456789", 123456789)
-        
+
         // Leading zeros
         assertParsesTo("00", 0)
         assertParsesTo("0042", 42)
         assertParsesTo("000123456789", 123456789)
-        
+
         // Negative integers
         assertParsesTo("-0", 0)
         assertParsesTo("-42", -42)
@@ -148,7 +159,7 @@ class NumberParserTest {
         assertParsesTo("0009223372036854775807", Long.MAX_VALUE)
         assertParsesTo("-0009223372036854775808", Long.MIN_VALUE)
     }
-    
+
     @Test
     fun testIntegerOverflow() {
         /**
@@ -164,44 +175,44 @@ class NumberParserTest {
         // huuuuuuuuuuuuuuuuuuuuuuuge number
         assertParserRejectsSource("10000000000000000000000000000000", MessageType.INTEGER_OVERFLOW)
     }
-    
+
     @Test
     fun testEdgeCaseDecimals() {
         // Very small decimals
         assertParsesTo("0.0000000001", 0.0000000001)
         assertParsesTo("1e-10", 1e-10)
-        
+
         // Very large decimals
         assertParsesTo("1e20", 1e20)
-        
+
         // Negative exponents
         assertParsesTo("1e-5", 0.00001)
-        
+
         // Zero with different representations
         assertParsesTo("0.0", 0.0)
         assertParsesTo("0e0", 0.0)
         assertParsesTo("-0.0", -0.0)
     }
-    
+
     @Test
     fun testExponentEdgeCases() {
         // Exponent with sign but no digits
         assertParserRejectsSource("1e+", MessageType.DANGLING_EXP_INDICATOR)
         assertParserRejectsSource("1e-", MessageType.DANGLING_EXP_INDICATOR)
-        
+
         // Invalid exponent characters
         assertParserRejectsSource("1ex", MessageType.INVALID_DIGITS)
-        
+
         // Multiple exponents
         assertParserRejectsSource("1e2e3", MessageType.INVALID_DIGITS)
     }
-    
+
     @Test
     fun testMultipleDecimalPoints() {
         // Multiple decimal points
         assertParserRejectsSource("1.2.3", MessageType.INVALID_DIGITS)
     }
-    
+
     @Test
     fun testMalformedNumbers() {
         assertParserRejectsSource("", MessageType.INVALID_DIGITS)

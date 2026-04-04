@@ -1,24 +1,23 @@
 package org.kson.schema
 
+import org.kson.KsonCore
 import org.kson.parser.messages.MessageType
 import kotlin.test.*
-import org.kson.KsonCore
 
 class SchemaParserTest : JsonSchemaTest {
-
     /**
      * Assertion helper for testing that [source] is partially parsed by the schema parser
      * (produces non-null jsonSchema) but has validation errors listed in [expectedMessageTypes]
      */
     private fun assertSchemaHasValidationErrors(
         source: String,
-        expectedMessageTypes: List<MessageType>
+        expectedMessageTypes: List<MessageType>,
     ) {
         val result = KsonCore.parseSchema(source)
         assertEquals(
             expectedMessageTypes,
             result.messages.map { it.message.type },
-            "Should have the expected validation errors."
+            "Should have the expected validation errors.",
         )
         assertTrue(result.messages.isNotEmpty(), "Should have error messages for validation errors")
     }
@@ -67,45 +66,48 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testParseSchemaWithEmbedBlockDescription() {
-        val schema = assertValidObjectSchema(
-            """
-            description: %markdown
-              A **rich** description of this schema.
-              %%
-            type: object
-            """.trimIndent()
-        )
+        val schema =
+            assertValidObjectSchema(
+                """
+                description: %markdown
+                  A **rich** description of this schema.
+                  %%
+                type: object
+                """.trimIndent(),
+            )
         assertEquals("A **rich** description of this schema.", schema.description)
     }
 
     @Test
     fun testParseSchemaWithMultilineEmbedBlockDescription() {
-        val schema = assertValidObjectSchema(
-            """
+        val schema =
+            assertValidObjectSchema(
+                """
             |description: %markdown
             |  A **person** object representing a user in the system.
             |  
             |  Must include at least a `name` and `email`.
             |  %%
             |type: object
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assertEquals(
             "A **person** object representing a user in the system.\n\nMust include at least a `name` and `email`.",
-            schema.description
+            schema.description,
         )
     }
 
     @Test
     fun testParseSchemaWithTaglessEmbedBlockDescription() {
-        val schema = assertValidObjectSchema(
-            """
-            description: %
-              A plain embed block description.
-              %%
-            type: object
-            """.trimIndent()
-        )
+        val schema =
+            assertValidObjectSchema(
+                """
+                description: %
+                  A plain embed block description.
+                  %%
+                type: object
+                """.trimIndent(),
+            )
         assertEquals("A plain embed block description.", schema.description)
     }
 
@@ -113,7 +115,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testParseSchemaWithInvalidDescriptionType() {
         assertSchemaHasValidationErrors(
             """{"description": 123}""",
-            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
+            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED),
         )
     }
 
@@ -125,14 +127,15 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testParseSchemaWithEmbedBlockComment() {
-        val schema = assertValidObjectSchema(
-            """
+        val schema =
+            assertValidObjectSchema(
+                """
             |'${'$'}comment': %markdown
             |  A **rich** comment on this schema.
             |  %%
             |type: object
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         assertEquals("A **rich** comment on this schema.", schema.comment)
     }
 
@@ -140,7 +143,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testParseSchemaWithInvalidCommentType() {
         assertSchemaHasValidationErrors(
             """{"${'$'}comment": 123}""",
-            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED)
+            listOf(MessageType.SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED),
         )
     }
 
@@ -158,13 +161,14 @@ class SchemaParserTest : JsonSchemaTest {
     fun testParseSchemaWithInvalidTypeArrayEntry() {
         assertSchemaHasValidationErrors(
             """{"type": ["string", 123]}""",
-            listOf(MessageType.SCHEMA_TYPE_ARRAY_ENTRY_ERROR)
+            listOf(MessageType.SCHEMA_TYPE_ARRAY_ENTRY_ERROR),
         )
     }
 
     @Test
     fun testParseSchemaWithNumericValidators() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "minimum": 0,
                 "maximum": 100,
@@ -172,43 +176,49 @@ class SchemaParserTest : JsonSchemaTest {
                 "exclusiveMinimum": -1,
                 "exclusiveMaximum": 101
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseSchemaWithInvalidMinimum() {
         assertSchemaHasValidationErrors(
             """{"minimum": "not a number"}""",
-            listOf(MessageType.SCHEMA_NUMBER_REQUIRED)
+            listOf(MessageType.SCHEMA_NUMBER_REQUIRED),
         )
     }
 
     @Test
     fun testParseSchemaWithStringValidators() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "minLength": 1,
                 "maxLength": 10,
                 "pattern": "^[a-z]+$"
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseSchemaWithArrayValidators() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "minItems": 1,
                 "maxItems": 5,
                 "uniqueItems": true,
                 "items": {"type": "string"}
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseSchemaWithObjectValidators() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "minProperties": 1,
                 "maxProperties": 10,
@@ -218,58 +228,65 @@ class SchemaParserTest : JsonSchemaTest {
                     "age": {"type": "number"}
                 }
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseSchemaWithInvalidRequiredArray() {
         assertSchemaHasValidationErrors(
             """{"required": [123, "name"]}""",
-            listOf(MessageType.SCHEMA_STRING_ARRAY_ENTRY_ERROR)
+            listOf(MessageType.SCHEMA_STRING_ARRAY_ENTRY_ERROR),
         )
     }
 
     @Test
     fun testParseSchemaWithIfThenElse() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "if": {"type": "string"},
                 "then": {"minLength": 1},
                 "else": {"type": "number"}
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseSchemaWithDependencies() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "dependencies": {
                     "name": ["age"],
                     "address": {"type": "object"}
                 }
             }
-        """)
+        """,
+        )
     }
 
     @Test
     fun testParseInvalidSchemaType() {
         assertSchemaHasValidationErrors(
             "123",
-            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN),
         )
     }
 
     @Test
     fun testParseSchemaWithIntegerLengths() {
-        assertValidObjectSchema("""
+        assertValidObjectSchema(
+            """
             {
                 "minLength": 1.0,
                 "maxLength": 10.0,
                 "minItems": 2.0,
                 "maxItems": 5.0
             }
-        """)
+        """,
+        )
     }
 
     @Test
@@ -281,7 +298,7 @@ class SchemaParserTest : JsonSchemaTest {
                 "maxLength": "not a number"
             }
             """,
-            listOf(MessageType.SCHEMA_INTEGER_REQUIRED)
+            listOf(MessageType.SCHEMA_INTEGER_REQUIRED),
         )
     }
 
@@ -302,7 +319,7 @@ class SchemaParserTest : JsonSchemaTest {
                     }
                 }
             }
-        """
+        """,
         )
     }
 
@@ -324,7 +341,7 @@ class SchemaParserTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             ksonSource,
             schema,
-            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN),
         )
     }
 
@@ -332,7 +349,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testInvalidRegexInPatternReportsError() {
         assertSchemaHasValidationErrors(
             """{"pattern": "*"}""",
-            listOf(MessageType.SCHEMA_INVALID_REGEX)
+            listOf(MessageType.SCHEMA_INVALID_REGEX),
         )
     }
 
@@ -340,7 +357,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testInvalidRegexInPatternPropertiesReportsError() {
         assertSchemaHasValidationErrors(
             """{"patternProperties": {"*": {"type": "string"}}}""",
-            listOf(MessageType.SCHEMA_INVALID_REGEX)
+            listOf(MessageType.SCHEMA_INVALID_REGEX),
         )
     }
 
@@ -351,7 +368,7 @@ class SchemaParserTest : JsonSchemaTest {
         // with a null schema that causes it to skip validation entirely.
         assertSchemaHasValidationErrors(
             """{"not": 42}""",
-            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN),
         )
     }
 
@@ -359,7 +376,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testMalformedIfSubSchemaDoesNotSilentlyAccept() {
         assertSchemaHasValidationErrors(
             """{"if": 42, "then": {"type": "string"}}""",
-            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN),
         )
     }
 
@@ -367,7 +384,7 @@ class SchemaParserTest : JsonSchemaTest {
     fun testMalformedPropertyNamesSubSchemaDoesNotSilentlyAccept() {
         assertSchemaHasValidationErrors(
             """{"propertyNames": 42}""",
-            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN),
         )
     }
 
@@ -386,7 +403,7 @@ class SchemaParserTest : JsonSchemaTest {
                     }
                 }
             }
-        """
+        """,
         )
     }
 }
