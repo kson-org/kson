@@ -7,8 +7,7 @@ class KsonCommenterTest : KsonEditorActionTest() {
     fun testInsertLineComment() {
         doLineCommentTest(
             "key: value<caret>",
-            "#key: value<caret>"
+            "#key: value<caret>",
         )
     }
-
 }

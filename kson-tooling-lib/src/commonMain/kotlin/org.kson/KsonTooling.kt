@@ -7,9 +7,9 @@ import org.kson.navigation.KsonValuePathBuilder
 import org.kson.navigation.SchemaInformation
 import org.kson.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.value.KsonValue
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
@@ -22,7 +22,6 @@ import kotlin.js.JsExport
  * for building IDE integrations.
  */
 object KsonTooling {
-
     /**
      * Get schema information for a position in a document.
      *
@@ -41,15 +40,16 @@ object KsonTooling {
         document: ToolingDocument,
         schema: ToolingDocument,
         line: Int,
-        column: Int
+        column: Int,
     ): String? {
         val parsedSchema = schema.ksonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
-        val schemaInfos = context.validSchemas.mapNotNull { ref ->
-            ref.resolvedValue.extractSchemaInfo()
-        }
+        val schemaInfos =
+            context.validSchemas.mapNotNull { ref ->
+                ref.resolvedValue.extractSchemaInfo()
+            }
 
         return schemaInfos.distinct().joinToString("\n\n---\n\n")
     }
@@ -71,7 +71,7 @@ object KsonTooling {
         document: ToolingDocument,
         schema: ToolingDocument,
         line: Int,
-        column: Int
+        column: Int,
     ): List<Range> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
@@ -82,7 +82,7 @@ object KsonTooling {
                 it.resolvedValue.location.start.line,
                 it.resolvedValue.location.start.column,
                 it.resolvedValue.location.end.line,
-                it.resolvedValue.location.end.column
+                it.resolvedValue.location.end.column,
             )
         }
     }
@@ -102,13 +102,15 @@ object KsonTooling {
     fun resolveRefAtLocation(
         schema: ToolingDocument,
         line: Int,
-        column: Int
+        column: Int,
     ): List<Range> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
-        if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
+        if (documentPointer.tokens.lastOrNull() != $$"$ref") {
+            return emptyList()
+        }
 
         // Navigate to the value at the cursor position
         val valueAtPosition = KsonValueWalker.navigateWithJsonPointer(parsedSchema, documentPointer) ?: return emptyList()
@@ -116,10 +118,11 @@ object KsonTooling {
         val refString = (valueAtPosition as? org.kson.value.KsonString)?.value ?: return emptyList()
 
         // Determine the base URI for the schema root
-        val baseUri = (parsedSchema as? org.kson.value.KsonObject)
-            ?.propertyLookup[$$"$id"]
-            ?.let { it as? org.kson.value.KsonString }
-            ?.value ?: ""
+        val baseUri =
+            (parsedSchema as? org.kson.value.KsonObject)
+                ?.propertyLookup[$$"$id"]
+                ?.let { it as? org.kson.value.KsonString }
+                ?.value ?: ""
 
         // Resolve the reference and return its location
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
@@ -130,8 +133,8 @@ object KsonTooling {
                 resolvedRef.resolvedValue.location.start.line,
                 resolvedRef.resolvedValue.location.start.column,
                 resolvedRef.resolvedValue.location.end.line,
-                resolvedRef.resolvedValue.location.end.column
-            )
+                resolvedRef.resolvedValue.location.end.column,
+            ),
         )
     }
 
@@ -151,13 +154,20 @@ object KsonTooling {
         document: ToolingDocument,
         schema: ToolingDocument,
         line: Int,
-        column: Int
+        column: Int,
     ): List<CompletionItem> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
+        val documentPointer =
+            KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false)
+                ?: return emptyList()
         val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
 
-        return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
+        return SchemaInformation.getCompletions(
+            context.schemaIdLookup.schemaRootValue,
+            documentPointer,
+            context.validSchemas,
+            context.parsedDocument,
+        )
     }
 
     /**
@@ -178,9 +188,7 @@ object KsonTooling {
      * @param document The pre-parsed KSON document
      * @return List of document symbols, or empty list if parsing failed
      */
-    fun getDocumentSymbols(document: ToolingDocument): List<DocumentSymbol> {
-        return document.documentSymbols
-    }
+    fun getDocumentSymbols(document: ToolingDocument): List<DocumentSymbol> = document.documentSymbols
 
     /**
      * Build semantic tokens from a pre-parsed [ToolingDocument].
@@ -188,9 +196,7 @@ object KsonTooling {
      * @param document The pre-parsed KSON document
      * @return List of semantic tokens with absolute positions
      */
-    fun getSemanticTokens(document: ToolingDocument): List<SemanticToken> {
-        return SemanticTokenBuilder.build(document.tokens, document.ast)
-    }
+    fun getSemanticTokens(document: ToolingDocument): List<SemanticToken> = SemanticTokenBuilder.build(document.tokens, document.ast)
 
     /**
      * Get structural ranges (foldable regions) from a pre-parsed [ToolingDocument].
@@ -201,9 +207,7 @@ object KsonTooling {
      * @param document The pre-parsed KSON document
      * @return List of structural ranges, each spanning at least two lines
      */
-    fun getStructuralRanges(document: ToolingDocument): List<StructuralRange> {
-        return FoldingRangeBuilder.build(document.tokens)
-    }
+    fun getStructuralRanges(document: ToolingDocument): List<StructuralRange> = FoldingRangeBuilder.build(document.tokens)
 
     /**
      * Get enclosing ranges for a cursor position in a pre-parsed [ToolingDocument].
@@ -218,13 +222,18 @@ object KsonTooling {
      * @return List of ranges from innermost to outermost, deduplicated,
      *         with the full-document range as the last element
      */
-    fun getEnclosingRanges(document: ToolingDocument, line: Int, column: Int): List<Range> {
+    fun getEnclosingRanges(
+        document: ToolingDocument,
+        line: Int,
+        column: Int,
+    ): List<Range> {
         val ksonValue = document.ksonValue
-        val ancestors = if (ksonValue != null) {
-            SelectionRangeBuilder.build(ksonValue, line, column).toMutableList()
-        } else {
-            mutableListOf()
-        }
+        val ancestors =
+            if (ksonValue != null) {
+                SelectionRangeBuilder.build(ksonValue, line, column).toMutableList()
+            } else {
+                mutableListOf()
+            }
         // The lexer always produces at least an EOF token
         val eof = document.tokens.last()
         val documentRange = Range(0, 0, eof.lexeme.location.end.line, eof.lexeme.location.end.column)
@@ -249,9 +258,10 @@ object KsonTooling {
      * @param schemaContent Optional schema document as KSON source text
      * @return List of diagnostic messages
      */
-    fun validateDocument(content: String, schemaContent: String? = null): List<DiagnosticMessage> {
-        return DiagnosticBuilder.build(content, schemaContent)
-    }
+    fun validateDocument(
+        content: String,
+        schemaContent: String? = null,
+    ): List<DiagnosticMessage> = DiagnosticBuilder.build(content, schemaContent)
 
     /**
      * Get sibling key ranges for a cursor position in a pre-parsed [ToolingDocument].
@@ -265,7 +275,11 @@ object KsonTooling {
      * @param column Zero-based column number
      * @return List of ranges for sibling key symbols
      */
-    fun getSiblingKeys(document: ToolingDocument, line: Int, column: Int): List<Range> {
+    fun getSiblingKeys(
+        document: ToolingDocument,
+        line: Int,
+        column: Int,
+    ): List<Range> {
         val symbols = document.documentSymbols
         if (symbols.isEmpty()) return emptyList()
         return SiblingKeyBuilder.build(symbols, line, column)
@@ -277,8 +291,8 @@ object KsonTooling {
     private data class ResolvedSchemaContext(
         val schemaIdLookup: SchemaIdLookup,
         val validSchemas: List<org.kson.schema.ResolvedRef>,
-        val parsedDocument: KsonValue?
-    ){
+        val parsedDocument: KsonValue?,
+    ) {
         companion object {
             /**
              * Common helper to navigate and filter schemas based on a document path.
@@ -295,7 +309,7 @@ object KsonTooling {
             fun resolveAndFilterSchemas(
                 parsedSchema: org.kson.value.KsonValue,
                 documentValue: org.kson.value.KsonValue?,
-                documentPointer: JsonPointer
+                documentPointer: JsonPointer,
             ): ResolvedSchemaContext {
                 val schemaIdLookup = SchemaIdLookup(parsedSchema)
                 val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
@@ -313,18 +327,18 @@ object KsonTooling {
  * Represents a completion item to be shown in the IDE.
  */
 class CompletionItem(
-    val label: String,              // The text to insert
-    val detail: String?,            // Short description (e.g., "string")
-    val documentation: String?,     // Full markdown documentation
-    val kind: CompletionKind        // Type of completion
+    val label: String, // The text to insert
+    val detail: String?, // Short description (e.g., "string")
+    val documentation: String?, // Full markdown documentation
+    val kind: CompletionKind, // Type of completion
 )
 
 /**
  * The type of completion item.
  */
 enum class CompletionKind {
-    PROPERTY,    // Object property name
-    VALUE        // Enum value or suggested value
+    PROPERTY, // Object property name
+    VALUE, // Enum value or suggested value
 }
 
 /**
@@ -335,12 +349,20 @@ enum class CompletionKind {
  * @param endLine line where range ends
  * @param endColumn column where range ends
  */
-data class Range(val startLine: Int, val startColumn: Int, val endLine: Int, val endColumn: Int)
-
-internal fun KsonValue.toRange(): Range = Range(
-    location.start.line, location.start.column,
-    location.end.line, location.end.column
+data class Range(
+    val startLine: Int,
+    val startColumn: Int,
+    val endLine: Int,
+    val endColumn: Int,
 )
+
+internal fun KsonValue.toRange(): Range =
+    Range(
+        location.start.line,
+        location.start.column,
+        location.end.line,
+        location.end.column,
+    )
 
 /**
  * Represents a document symbol for the IDE outline view.
@@ -351,7 +373,7 @@ data class DocumentSymbol(
     val range: Range,
     val selectionRange: Range,
     val detail: String?,
-    val children: List<DocumentSymbol>
+    val children: List<DocumentSymbol>,
 )
 
 /**
@@ -365,7 +387,7 @@ enum class DocumentSymbolKind {
     BOOLEAN,
     NULL,
     KEY,
-    EMBED
+    EMBED,
 }
 
 /**
@@ -375,7 +397,7 @@ data class SemanticToken(
     val line: Int,
     val column: Int,
     val length: Int,
-    val tokenType: SemanticTokenKind
+    val tokenType: SemanticTokenKind,
 )
 
 /**
@@ -390,13 +412,17 @@ enum class SemanticTokenKind {
     COMMENT,
     EMBED_TAG,
     EMBED_CONTENT,
-    EMBED_DELIM
+    EMBED_DELIM,
 }
 
 /**
  * A structural range representing a foldable region in a KSON document.
  */
-data class StructuralRange(val startLine: Int, val endLine: Int, val kind: StructuralRangeKind)
+data class StructuralRange(
+    val startLine: Int,
+    val endLine: Int,
+    val kind: StructuralRangeKind,
+)
 
 /**
  * Kind of structural range.
@@ -404,18 +430,22 @@ data class StructuralRange(val startLine: Int, val endLine: Int, val kind: Struc
 enum class StructuralRangeKind {
     OBJECT,
     ARRAY,
-    EMBED
+    EMBED,
 }
 
 /**
  * A diagnostic message from document validation.
  */
-data class DiagnosticMessage(val message: String, val severity: DiagnosticSeverity, val range: Range)
+data class DiagnosticMessage(
+    val message: String,
+    val severity: DiagnosticSeverity,
+    val range: Range,
+)
 
 /**
  * Severity of a diagnostic message.
  */
 enum class DiagnosticSeverity {
     ERROR,
-    WARNING
+    WARNING,
 }

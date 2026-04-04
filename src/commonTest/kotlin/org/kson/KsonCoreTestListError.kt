@@ -14,11 +14,14 @@ class KsonCoreTestListError : KsonCoreTestError {
     fun testDanglingListDash() {
         assertParserRejectsSource("-", listOf(DANGLING_LIST_DASH))
         assertParserRejectsSource("- ", listOf(DANGLING_LIST_DASH))
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             - 2
             - 4
             - 
-        """.trimIndent(), listOf(DANGLING_LIST_DASH))
+            """.trimIndent(),
+            listOf(DANGLING_LIST_DASH),
+        )
     }
 
     @Test
@@ -54,25 +57,34 @@ class KsonCoreTestListError : KsonCoreTestError {
         assertParserRejectsSource("[[[[[[]]]]]]", listOf(MAX_NESTING_LEVEL_EXCEEDED), 5)
 
         // test 157 nested lists with a nesting limit of 156
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 156)
+            """.trimIndent(),
+            listOf(MAX_NESTING_LEVEL_EXCEEDED),
+            156,
+        )
 
         // same test as above, but with dashed sub-lists sprinkled in
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ - [
             [[[[[[[[[ - 1 - 2 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[[[[[[[[[[[[ - 3 - [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
             [[[[[[[
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 156)
+            """.trimIndent(),
+            listOf(MAX_NESTING_LEVEL_EXCEEDED),
+            156,
+        )
     }
 
     @Test
     fun testIgnoredEndDotError() {
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             <
               - "sub-list elem 1"
               - "sub-list elem 2" =
@@ -80,7 +92,7 @@ class KsonCoreTestListError : KsonCoreTestError {
               - "sub-list elem 4"
             >
             """.trimIndent(),
-            listOf(IGNORED_DASH_LIST_END_DASH, IGNORED_DASH_LIST_END_DASH)
+            listOf(IGNORED_DASH_LIST_END_DASH, IGNORED_DASH_LIST_END_DASH),
         )
     }
 }

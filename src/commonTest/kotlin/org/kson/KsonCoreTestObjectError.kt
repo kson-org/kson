@@ -6,7 +6,8 @@ import kotlin.test.Test
 class KsonCoreTestObjectError : KsonCoreTestError {
     @Test
     fun testObjectSourceWithInvalidInternals() {
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             {
                 key: value
                 [1,2,3]
@@ -15,7 +16,9 @@ class KsonCoreTestObjectError : KsonCoreTestError {
                 key4: value4
                 key5: value5
                 test:
-        """.trimIndent(), listOf(OBJECT_NO_CLOSE, OBJECT_BAD_INTERNALS, OBJECT_BAD_INTERNALS, OBJECT_KEY_NO_VALUE))
+            """.trimIndent(),
+            listOf(OBJECT_NO_CLOSE, OBJECT_BAD_INTERNALS, OBJECT_BAD_INTERNALS, OBJECT_KEY_NO_VALUE),
+        )
     }
 
     @Test
@@ -39,14 +42,19 @@ class KsonCoreTestObjectError : KsonCoreTestError {
 
     @Test
     fun testIllegalObjectNesting() {
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             {'1':{'2':{'3':{'4':{'5':{'6':{'7':{'8':0}}}}}}}}
-        """.trimIndent(), listOf(MAX_NESTING_LEVEL_EXCEEDED), 8)
+            """.trimIndent(),
+            listOf(MAX_NESTING_LEVEL_EXCEEDED),
+            8,
+        )
     }
 
     @Test
     fun testIgnoredEndDotError() {
-        assertParserRejectsSource("""
+        assertParserRejectsSource(
+            """
             {
               key1: "val 1"
               key2: "val 2" .
@@ -54,7 +62,7 @@ class KsonCoreTestObjectError : KsonCoreTestError {
               key4: "val 4"
             }
             """.trimIndent(),
-            listOf(IGNORED_OBJECT_END_DOT, IGNORED_OBJECT_END_DOT)
+            listOf(IGNORED_OBJECT_END_DOT, IGNORED_OBJECT_END_DOT),
         )
     }
 
@@ -62,22 +70,22 @@ class KsonCoreTestObjectError : KsonCoreTestError {
     fun testHelpfulErrorForReservedWordKeys() {
         assertParserRejectsSource(
             """
-               key: value
-               null: "can't use null as a key"
-               true: "can't use true as a key"
-               false: "can't use false as a key"
+            key: value
+            null: "can't use null as a key"
+            true: "can't use true as a key"
+            false: "can't use false as a key"
             """.trimIndent(),
-            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD)
+            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD),
         )
 
         assertParserRejectsSource(
             """
-               key   : value
-               null   : "can't use null as a key" 
-               true   : "can't use true as a key" 
-               false  : "can't use false as a key" 
+            key   : value
+            null   : "can't use null as a key" 
+            true   : "can't use true as a key" 
+            false  : "can't use false as a key" 
             """.trimIndent(),
-            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD)
+            listOf(OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD, OBJECT_KEYWORD_RESERVED_WORD),
         )
     }
 }

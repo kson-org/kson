@@ -13,7 +13,6 @@ import kotlin.test.*
  * covers the error-node scenarios that only apply to the AST layer.
  */
 class AstNodeWalkerTest {
-
     private val walker = AstNodeWalker
 
     /** Parse with ignoreErrors to get an AST that may contain error nodes. */
@@ -21,8 +20,7 @@ class AstNodeWalkerTest {
         (KsonCore.parseToAst(source, CoreCompileConfig(ignoreErrors = true)).ast as? KsonRootImpl)?.rootNode
 
     /** Parse strictly — asserts no error nodes. */
-    private fun parseValidAst(source: String): AstNode =
-        (KsonCore.parseToAst(source).ast as KsonRootImpl).rootNode
+    private fun parseValidAst(source: String): AstNode = (KsonCore.parseToAst(source).ast as KsonRootImpl).rootNode
 
     @Test
     fun testObjectNode() {
@@ -93,7 +91,7 @@ class AstNodeWalkerTest {
         assertIs<NodeChildren.Array<AstNode>>(children)
         assertEquals(
             listOf("one", "two", "three"),
-            children.elements.map { (it as StringNodeImpl).processedStringContent }
+            children.elements.map { (it as StringNodeImpl).processedStringContent },
         )
     }
 

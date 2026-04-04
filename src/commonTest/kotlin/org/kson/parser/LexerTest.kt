@@ -18,7 +18,7 @@ class LexerTest {
         source: String,
         expectedTokenTypes: List<TokenType>,
         message: String? = null,
-        testGapFreeLexing: Boolean = false
+        testGapFreeLexing: Boolean = false,
     ): List<Token> {
         val actualTokens = Lexer(source, testGapFreeLexing).tokenize()
 
@@ -29,7 +29,7 @@ class LexerTest {
         assertEquals(
             expectedTokenTypes,
             actualTokenTypes,
-            message
+            message,
         )
 
         return eofStrippedActualTokens
@@ -48,7 +48,7 @@ class LexerTest {
     private fun assertTokenizesTo(
         source: String,
         expectedTokenLocationPairs: List<Pair<TokenType, Location>>,
-        testGapFreeLexing: Boolean = false
+        testGapFreeLexing: Boolean = false,
     ) {
         val tokens = assertTokenizesTo(source, expectedTokenLocationPairs.map { it.first }, null, testGapFreeLexing)
         expectedTokenLocationPairs.forEachIndexed { index, tokenLocationPair ->
@@ -56,7 +56,7 @@ class LexerTest {
             assertEquals(
                 location,
                 tokens[index].lexeme.location,
-                "Incorrect location for token of type $tokenType at index $index of the lexed tokens\n"
+                "Incorrect location for token of type $tokenType at index $index of the lexed tokens\n",
             )
         }
     }
@@ -65,9 +65,7 @@ class LexerTest {
      * Runs some assertions validating the [EOF] in the given [Token] list, and returns the same [Token] list
      * with the [EOF] clipped off to streamline further assertions on the [Token]s
      */
-    private fun verifyAndClipEof(
-        tokens: List<Token>
-    ): List<Token> {
+    private fun verifyAndClipEof(tokens: List<Token>): List<Token> {
         // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
         val eofToken = tokens.last()
         if (eofToken.tokenType != EOF) {
@@ -84,17 +82,17 @@ class LexerTest {
     fun testEmptySource() {
         assertTokenizesTo(
             "",
-            emptyList<TokenType>()
+            emptyList<TokenType>(),
         )
 
         assertTokenizesTo(
             " ",
-            emptyList<TokenType>()
+            emptyList<TokenType>(),
         )
 
         assertTokenizesTo(
             "\t\n",
-            emptyList<TokenType>()
+            emptyList<TokenType>(),
         )
     }
 
@@ -105,7 +103,7 @@ class LexerTest {
     fun testNoWhitespaceSource() {
         assertTokenizesTo(
             "1",
-            listOf(NUMBER)
+            listOf(NUMBER),
         )
     }
 
@@ -115,7 +113,7 @@ class LexerTest {
             """
                 "This is a string"
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
+            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
         )
     }
 
@@ -164,8 +162,8 @@ class LexerTest {
                 NUMBER,
                 NUMBER,
                 NUMBER,
-                NUMBER
-            )
+                NUMBER,
+            ),
         )
 
         // test malformed numbers also lex correctly (it's the parser's responsibility to report that they are malformed)
@@ -178,7 +176,7 @@ class LexerTest {
                 9geee8.0e-f2
                 9geee8.0ef-2
             """,
-            listOf(NUMBER, NUMBER, NUMBER, NUMBER, NUMBER, NUMBER)
+            listOf(NUMBER, NUMBER, NUMBER, NUMBER, NUMBER, NUMBER),
         )
     }
 
@@ -188,14 +186,14 @@ class LexerTest {
             """
                 true
             """,
-            listOf(TRUE)
+            listOf(TRUE),
         )
 
         assertTokenizesTo(
             """
                 false
             """,
-            listOf(FALSE)
+            listOf(FALSE),
         )
     }
 
@@ -205,7 +203,7 @@ class LexerTest {
             """
                 null
             """,
-            listOf(NULL)
+            listOf(NULL),
         )
     }
 
@@ -215,7 +213,7 @@ class LexerTest {
             """
                 []
             """,
-            listOf(SQUARE_BRACKET_L, SQUARE_BRACKET_R)
+            listOf(SQUARE_BRACKET_L, SQUARE_BRACKET_R),
         )
     }
 
@@ -225,14 +223,14 @@ class LexerTest {
             """
                 ["a string"]
             """,
-            listOf(SQUARE_BRACKET_L, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, SQUARE_BRACKET_R)
+            listOf(SQUARE_BRACKET_L, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, SQUARE_BRACKET_R),
         )
 
         assertTokenizesTo(
             """
                 [42, 43, 44]
             """,
-            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R)
+            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R),
         )
     }
 
@@ -241,14 +239,14 @@ class LexerTest {
         // ensure we test the boundary when `-` is the first char in the source (not whitespace, for instance)
         assertTokenizesTo(
             "- null",
-            listOf(LIST_DASH, NULL)
+            listOf(LIST_DASH, NULL),
         )
 
         assertTokenizesTo(
             """
                 - "a string"
             """,
-            listOf(LIST_DASH, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
+            listOf(LIST_DASH, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
         )
 
         assertTokenizesTo(
@@ -257,7 +255,7 @@ class LexerTest {
                 - 43
                 - 44
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER)
+            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER),
         )
 
         // odd but kind of needs to be legal to keep the dash list element semantics straightforward...
@@ -266,7 +264,7 @@ class LexerTest {
             """
                 - 42 - 43 - 44
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER)
+            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER, LIST_DASH, NUMBER),
         )
     }
 
@@ -278,7 +276,7 @@ class LexerTest {
                 - [2, 4]
                 - 44
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R, LIST_DASH, NUMBER)
+            listOf(LIST_DASH, NUMBER, LIST_DASH, SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R, LIST_DASH, NUMBER),
         )
 
         // this must lex in spite of the fact it will parse with errors on the illegal list nesting
@@ -303,8 +301,8 @@ class LexerTest {
                 STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
                 LIST_DASH,
-                NUMBER
-            )
+                NUMBER,
+            ),
         )
     }
 
@@ -314,7 +312,7 @@ class LexerTest {
             """
                 {}
             """,
-            listOf(CURLY_BRACE_L, CURLY_BRACE_R)
+            listOf(CURLY_BRACE_L, CURLY_BRACE_R),
         )
     }
 
@@ -343,8 +341,8 @@ class LexerTest {
                 STRING_OPEN_QUOTE,
                 STRING_CONTENT,
                 STRING_CLOSE_QUOTE,
-                CURLY_BRACE_R
-            )
+                CURLY_BRACE_R,
+            ),
         )
 
         assertTokenizesTo(
@@ -366,8 +364,8 @@ class LexerTest {
                 COLON,
                 STRING_OPEN_QUOTE,
                 STRING_CONTENT,
-                STRING_CLOSE_QUOTE
-            )
+                STRING_CLOSE_QUOTE,
+            ),
         )
     }
 
@@ -395,8 +393,8 @@ class LexerTest {
                 COLON,
                 STRING_OPEN_QUOTE,
                 STRING_CONTENT,
-                STRING_CLOSE_QUOTE
-            )
+                STRING_CLOSE_QUOTE,
+            ),
         )
     }
 
@@ -408,7 +406,7 @@ class LexerTest {
                     this is a raw embed
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
 
         assertTokenizesTo(
@@ -417,7 +415,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
 
         assertTokenizesTo(
@@ -426,7 +424,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
 
         assertTokenizesTo(
@@ -435,7 +433,7 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
         assertTokenizesTo(
             """
@@ -443,33 +441,35 @@ class LexerTest {
                     select * from something
                 %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
     }
 
     @Test
     fun testEmbedBlockTrialingWhitespace() {
-        val trailingNewlineTokens = assertTokenizesTo(
-            """
+        val trailingNewlineTokens =
+            assertTokenizesTo(
+                """
                 %
                 this should have a newline at the end
                 %%
-            """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
+                """.trimIndent(),
+                listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            )
 
         assertEquals("this should have a newline at the end\n", trailingNewlineTokens[2].lexeme.text)
 
-        val trailingSpacesTokens = assertTokenizesTo(
-            """
+        val trailingSpacesTokens =
+            assertTokenizesTo(
+                """
                 %
                 this lovely embed
                     should have four trailing 
                     spaces and a newline at the end    
                 %%
-            """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
+                """.trimIndent(),
+                listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            )
 
         assertEquals(
             """
@@ -478,21 +478,22 @@ class LexerTest {
                 spaces and a newline at the end    
 
             """.trimIndent(),
-            trailingSpacesTokens[2].lexeme.text
+            trailingSpacesTokens[2].lexeme.text,
         )
 
-        val zeroTrailingWhitespaceTokens = assertTokenizesTo(
-            """
+        val zeroTrailingWhitespaceTokens =
+            assertTokenizesTo(
+                """
                 %
                     this on the other hand,
                     should have spaces but no newline at the end    %%
-            """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
+                """.trimIndent(),
+                listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            )
 
         assertEquals(
             "    this on the other hand,\n    should have spaces but no newline at the end    ",
-            zeroTrailingWhitespaceTokens[2].lexeme.text
+            zeroTrailingWhitespaceTokens[2].lexeme.text,
         )
     }
 
@@ -506,7 +507,7 @@ class LexerTest {
                 %%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
-            "should allow trailing whitespace after the opening '%'"
+            "should allow trailing whitespace after the opening '%'",
         )
 
         assertTokenizesTo(
@@ -517,7 +518,7 @@ class LexerTest {
                 %%
             """,
             listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
-            "should allow trailing whitespace after the opening '%embedTag'"
+            "should allow trailing whitespace after the opening '%embedTag'",
         )
     }
 
@@ -527,7 +528,7 @@ class LexerTest {
             """
             test: %
             """,
-            listOf(UNQUOTED_STRING, COLON, EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(UNQUOTED_STRING, COLON, EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT),
         )
     }
 
@@ -539,7 +540,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
 
         assertTokenizesTo(
@@ -548,7 +549,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
 
         assertTokenizesTo(
@@ -557,7 +558,7 @@ class LexerTest {
             some sweet content
             %%
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
         )
     }
 
@@ -568,7 +569,7 @@ class LexerTest {
             %
             This embed block lacks its closing delimiter
             """,
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT)
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT),
         )
     }
 
@@ -579,7 +580,7 @@ class LexerTest {
             "this string has no end quote
             """,
             listOf(STRING_OPEN_QUOTE, STRING_CONTENT),
-            "should simply tokenize unterminated strings.  Errors are handled in parsing."
+            "should simply tokenize unterminated strings.  Errors are handled in parsing.",
         )
     }
 
@@ -590,18 +591,19 @@ class LexerTest {
             'this string has no end quote
             """,
             listOf(STRING_OPEN_QUOTE, STRING_CONTENT),
-            "should simply tokenize unterminated strings.  Errors are handled in parsing."
+            "should simply tokenize unterminated strings.  Errors are handled in parsing.",
         )
     }
 
     @Test
     fun testUnquotedStringLexemeContent() {
-        val tokens = assertTokenizesTo(
-            """   
+        val tokens =
+            assertTokenizesTo(
+                """   
                 a_key: "a_value"
             """,
-            listOf(UNQUOTED_STRING, COLON, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
-        )
+                listOf(UNQUOTED_STRING, COLON, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
+            )
 
         assertEquals("a_key", tokens[0].lexeme.text)
         assertEquals("\"", tokens[2].lexeme.text)
@@ -640,31 +642,33 @@ class LexerTest {
                 Pair(EMBED_PREAMBLE_NEWLINE, Location.create(3, 12, 4, 0, 51, 52)),
                 Pair(EMBED_CONTENT, Location.create(4, 0, 7, 6, 52, 127)),
                 Pair(EMBED_CLOSE_DELIM, Location.create(7, 6, 7, 8, 127, 129)),
-                Pair(CURLY_BRACE_R, Location.create(8, 0, 8, 1, 130, 131))
-            )
+                Pair(CURLY_BRACE_R, Location.create(8, 0, 8, 1, 130, 131)),
+            ),
         )
     }
 
     @Test
     fun testStringEscapes() {
-        val tokens = assertTokenizesTo(
-            """
+        val tokens =
+            assertTokenizesTo(
+                """
                 "string with 'unescaped' and \"embedded\" quotes"
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
-        )
+                listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
+            )
 
         assertEquals("string with 'unescaped' and \\\"embedded\\\" quotes", tokens[1].lexeme.text)
     }
 
     @Test
     fun testAltStringEscapes() {
-        val tokens = assertTokenizesTo(
-            """
+        val tokens =
+            assertTokenizesTo(
+                """
                 'string with "unescaped" and \'embedded\' quotes'
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
-        )
+                listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
+            )
 
         // sanity check the tokens are lexing to what we expect
         assertEquals("string with \"unescaped\" and \\'embedded\\' quotes", tokens[1].lexeme.text)
@@ -675,7 +679,7 @@ class LexerTest {
         assertTokenizesTo(
             """'string with \' whitespace after an escape'""",
             listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
 
         assertTokenizesTo(
@@ -683,7 +687,7 @@ class LexerTest {
                 'string with \' whitespace after an escape'
             """,
             listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
 
         assertTokenizesTo(
@@ -691,7 +695,7 @@ class LexerTest {
                 'string with all whitespace after escape: \'     '
             """,
             listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
     }
 
@@ -702,32 +706,34 @@ class LexerTest {
                 'string with   whitespace after an illegal escape char'
             """,
             listOf(WHITESPACE, STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
     }
 
     @Test
     fun testEmbeddedBlockDelimiterEscapes() {
-        val singleEscapeTokens = assertTokenizesTo(
-            """   
+        val singleEscapeTokens =
+            assertTokenizesTo(
+                """   
                 %
                 these double %\% percents are embedded but escaped%%
-            """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
+                """.trimIndent(),
+                listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            )
 
         assertEquals("these double %\\% percents are embedded but escaped", singleEscapeTokens[2].lexeme.text)
     }
 
     @Test
     fun testEmbeddedBlockAltDelimiterEscapes() {
-        val singleEscapeTokens = assertTokenizesTo(
-            """   
+        val singleEscapeTokens =
+            assertTokenizesTo(
+                """   
                 $
                 these double $\$ dollars are embedded but escaped$$
-            """.trimIndent(),
-            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM)
-        )
+                """.trimIndent(),
+                listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            )
 
         assertEquals("these double $\\$ dollars are embedded but escaped", singleEscapeTokens[2].lexeme.text)
     }
@@ -741,7 +747,7 @@ class LexerTest {
             """,
             listOf(WHITESPACE, COMMENT, WHITESPACE, UNQUOTED_STRING, COLON, WHITESPACE, UNQUOTED_STRING, WHITESPACE),
             "Should include WHITESPACE tokens when lexing gap-free",
-            true
+            true,
         )
 
         assertTokenizesTo(
@@ -757,16 +763,17 @@ class LexerTest {
                 Pair(STRING_OPEN_QUOTE, Location.create(0, 10, 0, 11, 10, 11)),
                 Pair(STRING_CONTENT, Location.create(0, 11, 0, 17, 11, 17)),
                 Pair(STRING_CLOSE_QUOTE, Location.create(0, 17, 0, 18, 17, 18)),
-                Pair(WHITESPACE, Location.create(0, 18, 1, 0, 18, 19))
+                Pair(WHITESPACE, Location.create(0, 18, 1, 0, 18, 19)),
             ),
-            true
+            true,
         )
     }
 
     @Test
     fun testCommentPreservation() {
-        val tokenList = assertTokenizesTo(
-            """
+        val tokenList =
+            assertTokenizesTo(
+                """
                # a comment
                # another comment
                - 1
@@ -774,14 +781,14 @@ class LexerTest {
                # yet another comment
                - 2
             """,
-            listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER)
-        )
+                listOf(LIST_DASH, NUMBER, LIST_DASH, NUMBER),
+            )
 
         val firstListDashToken = tokenList[0]
         assertEquals(
             2,
             firstListDashToken.comments.size,
-            "should have both the comments on this list entry saved with this token"
+            "should have both the comments on this list entry saved with this token",
         )
         assertEquals("# a comment", firstListDashToken.comments[0])
         assertEquals("# another comment", firstListDashToken.comments[1])
@@ -793,12 +800,13 @@ class LexerTest {
 
     @Test
     fun testTrailingCommentPreservationOnConstants() {
-        val tokenList = assertTokenizesTo(
-            """
+        val tokenList =
+            assertTokenizesTo(
+                """
                 "stuff" # comment about stuff
             """,
-            listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE)
-        )
+                listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE),
+            )
 
         val endQuoteToken = tokenList[2]
         assertEquals("# comment about stuff", endQuoteToken.comments[0])
@@ -806,13 +814,14 @@ class LexerTest {
 
     @Test
     fun testTrailingCommentOnLists() {
-        val tokenList = assertTokenizesTo(
-            """
+        val tokenList =
+            assertTokenizesTo(
+                """
                 [1, # trailing list comma
                 2] # trailing list brace
             """,
-            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R)
-        )
+                listOf(SQUARE_BRACKET_L, NUMBER, COMMA, NUMBER, SQUARE_BRACKET_R),
+            )
 
         val commaToken = tokenList[2]
         assertEquals("# trailing list comma", commaToken.comments[0])
@@ -826,13 +835,13 @@ class LexerTest {
         assertTokenizesTo(
             "'# not a comment' # yes a coment",
             listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, WHITESPACE, COMMENT),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
 
         assertTokenizesTo(
             "'also # not a comment'# yes a comment",
             listOf(STRING_OPEN_QUOTE, STRING_CONTENT, STRING_CLOSE_QUOTE, COMMENT),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
     }
 
@@ -841,139 +850,175 @@ class LexerTest {
         assertTokenizesTo(
             "%%# should not be a comment",
             listOf(EMBED_OPEN_DELIM, EMBED_TAG),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
 
         assertTokenizesTo(
             "%%also # should not be a comment",
             listOf(EMBED_OPEN_DELIM, EMBED_TAG),
-            testGapFreeLexing = true
+            testGapFreeLexing = true,
         )
     }
 
     @Test
     fun testlocationContainsPosition_targetStartsAtContainerStart() {
-        val container = Location.create(
-            firstLine = 2, firstColumn = 5,
-            lastLine = 10, lastColumn = 15,
-            startOffset = 20, endOffset = 100
-        )
-        val target = Coordinates(
-            line = 2, column = 5,
-        )
+        val container =
+            Location.create(
+                firstLine = 2,
+                firstColumn = 5,
+                lastLine = 10,
+                lastColumn = 15,
+                startOffset = 20,
+                endOffset = 100,
+            )
+        val target =
+            Coordinates(
+                line = 2,
+                column = 5,
+            )
 
         assertEquals(
             true,
             Location.containsCoordinates(container, target),
-            "Target starting exactly at container start should return true"
+            "Target starting exactly at container start should return true",
         )
     }
 
     @Test
     fun testLocationContainsLocation_targetStartsAtContainerEnd() {
-        val container = Location.create(
-            firstLine = 2, firstColumn = 5,
-            lastLine = 10, lastColumn = 15,
-            startOffset = 20, endOffset = 100
-        )
-        val target = Coordinates(
-            line = 10, column = 15,
-        )
+        val container =
+            Location.create(
+                firstLine = 2,
+                firstColumn = 5,
+                lastLine = 10,
+                lastColumn = 15,
+                startOffset = 20,
+                endOffset = 100,
+            )
+        val target =
+            Coordinates(
+                line = 10,
+                column = 15,
+            )
 
         assertEquals(
             true,
             Location.containsCoordinates(container, target),
-            "Target starting exactly at container end should return true"
+            "Target starting exactly at container end should return true",
         )
     }
 
     @Test
     fun testLocationContainsLocation_targetStartsBeforeContainerLine() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 0,
-            lastLine = 10, lastColumn = 20,
-            startOffset = 50, endOffset = 100
-        )
-        val target = Coordinates(3,10)
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 0,
+                lastLine = 10,
+                lastColumn = 20,
+                startOffset = 50,
+                endOffset = 100,
+            )
+        val target = Coordinates(3, 10)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, target),
-            "Target starting before container line should return false"
+            "Target starting before container line should return false",
         )
     }
 
     @Test
     fun testLocationContainsLocation_targetStartsAfterContainerLine() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 0,
-            lastLine = 10, lastColumn = 20,
-            startOffset = 50, endOffset = 100
-        )
-        val target = Coordinates(15,5)
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 0,
+                lastLine = 10,
+                lastColumn = 20,
+                startOffset = 50,
+                endOffset = 100,
+            )
+        val target = Coordinates(15, 5)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, target),
-            "Target starting after container line should return false"
+            "Target starting after container line should return false",
         )
     }
 
     @Test
     fun testLocationContainsLocation_sameLineTargetBeforeColumn() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 10,
-            lastLine = 5, lastColumn = 20,
-            startOffset = 50, endOffset = 60
-        )
-        val target = Coordinates(5,5)
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 10,
+                lastLine = 5,
+                lastColumn = 20,
+                startOffset = 50,
+                endOffset = 60,
+            )
+        val target = Coordinates(5, 5)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, target),
-            "Target on same start line but before start column should return false"
+            "Target on same start line but before start column should return false",
         )
     }
 
     @Test
     fun testLocationContainsLocation_sameLineTargetAfterColumn() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 10,
-            lastLine = 5, lastColumn = 20,
-            startOffset = 50, endOffset = 60
-        )
-        val target = Coordinates(5,25)
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 10,
+                lastLine = 5,
+                lastColumn = 20,
+                startOffset = 50,
+                endOffset = 60,
+            )
+        val target = Coordinates(5, 25)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, target),
-            "Target on same end line but after end column should return false"
+            "Target on same end line but after end column should return false",
         )
     }
 
     @Test
     fun testLocationContainsLocation_targetOnSameLineWithinBounds() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 10,
-            lastLine = 5, lastColumn = 20,
-            startOffset = 50, endOffset = 60
-        )
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 10,
+                lastLine = 5,
+                lastColumn = 20,
+                startOffset = 50,
+                endOffset = 60,
+            )
         val target = Coordinates(5, 15)
 
         assertEquals(
             true,
             Location.containsCoordinates(container, target),
-            "Target on same line and within column bounds should return true"
+            "Target on same line and within column bounds should return true",
         )
     }
 
     @Test
     fun testLocationContainsLocation_multiLineContainer() {
-        val container = Location.create(
-            firstLine = 2, firstColumn = 5,
-            lastLine = 8, lastColumn = 10,
-            startOffset = 20, endOffset = 80
-        )
+        val container =
+            Location.create(
+                firstLine = 2,
+                firstColumn = 5,
+                lastLine = 8,
+                lastColumn = 10,
+                startOffset = 20,
+                endOffset = 80,
+            )
 
         // Target on middle line (any column should be valid)
         val targetMiddle = Coordinates(5, 0)
@@ -981,79 +1026,87 @@ class LexerTest {
         assertEquals(
             true,
             Location.containsCoordinates(container, targetMiddle),
-            "Target on middle line should return true regardless of column"
+            "Target on middle line should return true regardless of column",
         )
     }
 
     @Test
     fun testLocationContainsLocation_edgeCaseFirstLineBoundary() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 10,
-            lastLine = 10, lastColumn = 5,
-            startOffset = 50, endOffset = 100
-        )
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 10,
+                lastLine = 10,
+                lastColumn = 5,
+                startOffset = 50,
+                endOffset = 100,
+            )
 
         // Target on first line, before column
-        val targetBefore = Coordinates(5,9)
+        val targetBefore = Coordinates(5, 9)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, targetBefore),
-            "Target on first line but before start column should return false"
+            "Target on first line but before start column should return false",
         )
 
         // Target on first line, at column
-        val targetAt = Coordinates(5,10)
+        val targetAt = Coordinates(5, 10)
 
         assertEquals(
             true,
             Location.containsCoordinates(container, targetAt),
-            "Target on first line at start column should return true"
+            "Target on first line at start column should return true",
         )
 
         // Target on first line, after column
-        val targetAfter = Coordinates(5,11)
+        val targetAfter = Coordinates(5, 11)
 
         assertEquals(
             true,
             Location.containsCoordinates(container, targetAfter),
-            "Target on first line after start column should return true"
+            "Target on first line after start column should return true",
         )
     }
 
     @Test
     fun testLocationContainsLocation_edgeCaseLastLineBoundary() {
-        val container = Location.create(
-            firstLine = 5, firstColumn = 10,
-            lastLine = 10, lastColumn = 15,
-            startOffset = 50, endOffset = 100
-        )
+        val container =
+            Location.create(
+                firstLine = 5,
+                firstColumn = 10,
+                lastLine = 10,
+                lastColumn = 15,
+                startOffset = 50,
+                endOffset = 100,
+            )
 
         // Target on last line, before end column
-        val targetBefore = Coordinates(10,10)
+        val targetBefore = Coordinates(10, 10)
 
         assertEquals(
             true,
             Location.containsCoordinates(container, targetBefore),
-            "Target on last line before end column should return true"
+            "Target on last line before end column should return true",
         )
 
         // Target on last line, at end column
-        val targetAt = Coordinates(10,15)
+        val targetAt = Coordinates(10, 15)
 
         assertEquals(
             true,
             Location.containsCoordinates(container, targetAt),
-            "Target on last line at end column should return true"
+            "Target on last line at end column should return true",
         )
 
         // Target on last line, after end column
-        val targetAfter = Coordinates(10,16)
+        val targetAfter = Coordinates(10, 16)
 
         assertEquals(
             false,
             Location.containsCoordinates(container, targetAfter),
-            "Target on last line after end column should return false"
+            "Target on last line after end column should return false",
         )
     }
 }

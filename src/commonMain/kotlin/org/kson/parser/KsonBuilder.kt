@@ -3,13 +3,13 @@ package org.kson.parser
 import org.kson.ast.*
 import org.kson.parser.ParsedElementType.*
 import org.kson.parser.TokenType.*
-import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.StringQuote
+import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.behavior.embedblock.EmbedObjectKeys
 import org.kson.parser.messages.CoreParseMessage
 import org.kson.parser.messages.Message
-import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.stdlibx.exceptions.FatalParseException
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * An [AstBuilder] implementation used to produce a [KsonRoot] rooted AST tree based on the given [Token]s
@@ -17,51 +17,53 @@ import org.kson.stdlibx.exceptions.FatalParseException
  * @param tokens the [Token] stream to build into an AST
  * @param ignoreErrors skip some of the work of collecting error if the caller tells us they are going to ignore them anyway
  */
-class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boolean = false) :
-    AstBuilder,
+class KsonBuilder(
+    private val tokens: List<Token>,
+    private val ignoreErrors: Boolean = false,
+) : AstBuilder,
     MarkerBuilderContext {
-
     /**
      * Initialize [currentToken] to the first non-[Lexer.ignoredTokens] token
      */
-    private var currentToken = run {
-        var firstRealTokenIdx = 0
-        while (firstRealTokenIdx < tokens.size && Lexer.ignoredTokens.contains(tokens[firstRealTokenIdx].tokenType)) {
-            firstRealTokenIdx++
+    private var currentToken =
+        run {
+            var firstRealTokenIdx = 0
+            while (firstRealTokenIdx < tokens.size && Lexer.ignoredTokens.contains(tokens[firstRealTokenIdx].tokenType)) {
+                firstRealTokenIdx++
+            }
+            firstRealTokenIdx
         }
-        firstRealTokenIdx
-    }
-    private var rootMarker = KsonMarker(this, object : MarkerCreator {
-        override fun forgetMe(me: KsonMarker): KsonMarker {
-            throw ShouldNotHappenException("The root marker has no creator that needs to forget it")
-        }
+    private var rootMarker =
+        KsonMarker(
+            this,
+            object : MarkerCreator {
+                override fun forgetMe(me: KsonMarker): KsonMarker =
+                    throw ShouldNotHappenException("The root marker has no creator that needs to forget it")
 
-        override fun dropMe(me: KsonMarker) {
-            throw ShouldNotHappenException("The root marker has no creator that needs to drop it")
-        }
-    })
+                override fun dropMe(me: KsonMarker): Unit =
+                    throw ShouldNotHappenException("The root marker has no creator that needs to drop it")
+            },
+        )
 
-    override fun getSourceTokens(firstTokenIndex: Int, lastTokenIndex: Int): List<Token> {
-        return tokens.subList(firstTokenIndex, lastTokenIndex + 1)
-    }
+    override fun getSourceTokens(
+        firstTokenIndex: Int,
+        lastTokenIndex: Int,
+    ): List<Token> = tokens.subList(firstTokenIndex, lastTokenIndex + 1)
 
-    override fun getLocation(firstTokenIndex: Int, lastTokenIndex: Int): Location {
-        return Location.merge(
+    override fun getLocation(
+        firstTokenIndex: Int,
+        lastTokenIndex: Int,
+    ): Location =
+        Location.merge(
             tokens[firstTokenIndex].lexeme.location,
-            tokens[lastTokenIndex].lexeme.location)
-    }
+            tokens[lastTokenIndex].lexeme.location,
+        )
 
-    override fun getComments(tokenIndex: Int): List<String> {
-        return tokens[tokenIndex].comments
-    }
+    override fun getComments(tokenIndex: Int): List<String> = tokens[tokenIndex].comments
 
-    override fun getToken(index: Int): Token {
-        return tokens[index]
-    }
+    override fun getToken(index: Int): Token = tokens[index]
 
-    override fun getTokenIndex(): Int {
-        return currentToken
-    }
+    override fun getTokenIndex(): Int = currentToken
 
     override fun setTokenIndex(index: Int) {
         currentToken = index
@@ -75,9 +77,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         return null
     }
 
-    override fun getTokenText(): String {
-        return tokens[currentToken].lexeme.text
-    }
+    override fun getTokenText(): String = tokens[currentToken].lexeme.text
 
     override fun advanceLexer() {
         currentToken++
@@ -94,13 +94,9 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         return null
     }
 
-    override fun eof(): Boolean {
-        return currentToken >= tokens.size || tokens[currentToken].tokenType == EOF
-    }
+    override fun eof(): Boolean = currentToken >= tokens.size || tokens[currentToken].tokenType == EOF
 
-    override fun mark(): AstMarker {
-        return rootMarker.addMark()
-    }
+    override fun mark(): AstMarker = rootMarker.addMark()
 
     /**
      * Attempt to construct an [AstNode] tree from the [KsonMarker]s made in this builder
@@ -119,14 +115,18 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
     /**
      * Walk the tree of [KsonMarker]s rooted at [marker] collecting the info from any messages (errors and warnings) into [messageSink]
      */
-    private fun walkForMessages(marker: KsonMarker, messageSink: MessageSink) {
+    private fun walkForMessages(
+        marker: KsonMarker,
+        messageSink: MessageSink,
+    ) {
         val errorMessage = marker.markedError
         if (errorMessage != null) {
             messageSink.error(
                 Location.merge(
                     tokens[marker.firstTokenIndex].lexeme.location,
-                    tokens[marker.lastTokenIndex].lexeme.location
-                ), errorMessage
+                    tokens[marker.lastTokenIndex].lexeme.location,
+                ),
+                errorMessage,
             )
         }
 
@@ -166,7 +166,8 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     EMBED_CONTENT,
                     OBJECT_KEY,
                     ILLEGAL_CHAR,
-                    WHITESPACE -> {
+                    WHITESPACE,
+                    -> {
                         throw ShouldNotHappenException("These tokens do not generate their own AST nodes")
                     }
                     FALSE -> {
@@ -199,31 +200,35 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * [Parser.embedBlock] ensures we always find an [EMBED_OPEN_DELIM],
                          * here, which we use to understand which [EmbedDelim] is in use here
                          */
-                        val embedDelimChar = childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getRawText()
-                            ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
+                        val embedDelimChar =
+                            childMarkers.find { it.element == EMBED_OPEN_DELIM }?.getRawText()
+                                ?: throw ShouldNotHappenException("The parser should have ensured we could find an open delim here")
 
-                        val embedTagNode = childMarkers.find { it.element == EMBED_TAG }?.let{
-                            QuotedStringNode(
-                                it.getSourceTokens(),
-                                // TODO this needs to be formalized as a "quoted" string, even if the quotes are novel
-                                //   then this should pass the quote type, not null
-                                null
-                            )
-                        }
+                        val embedTagNode =
+                            childMarkers.find { it.element == EMBED_TAG }?.let {
+                                QuotedStringNode(
+                                    it.getSourceTokens(),
+                                    // TODO this needs to be formalized as a "quoted" string, even if the quotes are novel
+                                    //   then this should pass the quote type, not null
+                                    null,
+                                )
+                            }
 
                         val embedDelim = EmbedDelim.fromString(embedDelimChar)
 
-                        val embedContentNode = childMarkers.find { it.element == EMBED_CONTENT }?.let{
-                            EmbedBlockContentNode(
-                                it.getSourceTokens(),
-                                embedDelim
-                            )
-                        } ?: throw ShouldNotHappenException("Embed block should always have embed content")
+                        val embedContentNode =
+                            childMarkers.find { it.element == EMBED_CONTENT }?.let {
+                                EmbedBlockContentNode(
+                                    it.getSourceTokens(),
+                                    embedDelim,
+                                )
+                            } ?: throw ShouldNotHappenException("Embed block should always have embed content")
 
                         EmbedBlockNode(
                             embedTagNode,
                             embedContentNode,
-                            marker.getSourceTokens())
+                            marker.getSourceTokens(),
+                        )
                     }
                     OBJECT_KEY -> {
                         /**
@@ -231,28 +236,31 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * an [UNQUOTED_STRING] mark or a [QUOTED_STRING] mark
                          */
                         val stringContentMark = childMarkers.first()
-                        val objectKey = when (stringContentMark.element) {
-                            UNQUOTED_STRING -> UnquotedStringNode(stringContentMark.getSourceTokens())
-                            QUOTED_STRING -> quoteStringToStringNode(stringContentMark)
-                            else -> {
-                                throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                        val objectKey =
+                            when (stringContentMark.element) {
+                                UNQUOTED_STRING -> UnquotedStringNode(stringContentMark.getSourceTokens())
+                                QUOTED_STRING -> quoteStringToStringNode(stringContentMark)
+                                else -> {
+                                    throw ShouldNotHappenException("unless our assumptions about keyword parsing have been invalidated")
+                                }
                             }
-                        }
                         return ObjectKeyNodeImpl(objectKey)
                     }
                     DASH_LIST, DASH_DELIMITED_LIST, BRACKET_LIST -> {
-                        val listElementNodes = childMarkers.map { listElementMarker ->
-                            unsafeAstCreate<ListElementNode>(listElementMarker) {
-                                ListElementNodeError(it)
+                        val listElementNodes =
+                            childMarkers.map { listElementMarker ->
+                                unsafeAstCreate<ListElementNode>(listElementMarker) {
+                                    ListElementNodeError(it)
+                                }
                             }
-                        }
                         ListNode(
                             listElementNodes,
-                            marker.getSourceTokens()
+                            marker.getSourceTokens(),
                         )
                     }
                     LIST_ELEMENT -> {
                         val comments = marker.getComments()
+
                         /**
                          * We expect each list element to contain exactly one value.
                          * Error-recovery markers (e.g. from illegal characters consumed
@@ -260,24 +268,27 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * the value — when that happens, find the single non-error child.
                          */
                         val nonErrorChildren = childMarkers.filter { it.element != ERROR }
-                        val valueChild = when {
-                            nonErrorChildren.size == 1 -> nonErrorChildren.first()
-                            childMarkers.size == 1 -> childMarkers.first()
-                            else -> throw FatalParseException("list element markers should mark exactly one value")
-                        }
+                        val valueChild =
+                            when {
+                                nonErrorChildren.size == 1 -> nonErrorChildren.first()
+                                childMarkers.size == 1 -> childMarkers.first()
+                                else -> throw FatalParseException("list element markers should mark exactly one value")
+                            }
                         val listElementValue: KsonValueNode =
                             unsafeAstCreate(valueChild) { KsonValueNodeError(it) }
                         ListElementNodeImpl(
                             listElementValue,
                             comments,
-                            marker.getSourceTokens())
+                            marker.getSourceTokens(),
+                        )
                     }
                     OBJECT -> {
-                        val propertyNodes = childMarkers.map { property ->
-                            unsafeAstCreate<ObjectPropertyNode>(property) {
-                                ObjectPropertyNodeError(it)
+                        val propertyNodes =
+                            childMarkers.map { property ->
+                                unsafeAstCreate<ObjectPropertyNode>(property) {
+                                    ObjectPropertyNodeError(it)
+                                }
                             }
-                        }
 
                         val embedBlockNode = decodeEmbedBlock(propertyNodes, marker)
 
@@ -289,6 +300,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     }
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
+
                         /**
                          * We expect OBJECT_PROPERTY to contain a keyword/value pair OR a
                          * keyword with a missing value error.  The keyword is always the
@@ -297,24 +309,27 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                          * consumed by delimitedValue) may appear as additional children
                          * between keyword and value — skip them to find the value.
                          */
-                        val keywordMark = childMarkers.getOrNull(0)
-                            ?: throw ShouldNotHappenException("should have a keyword marker")
-                        val keyNode: ObjectKeyNode = unsafeAstCreate(keywordMark) {
-                            ObjectKeyNodeError(it)
-                        }
+                        val keywordMark =
+                            childMarkers.getOrNull(0)
+                                ?: throw ShouldNotHappenException("should have a keyword marker")
+                        val keyNode: ObjectKeyNode =
+                            unsafeAstCreate(keywordMark) {
+                                ObjectKeyNodeError(it)
+                            }
                         val remainingChildren = childMarkers.drop(1)
                         val valueCandidates = remainingChildren.filter { it.element != ERROR }
                         if (valueCandidates.size > 1) {
                             throw FatalParseException("unless object property parsing has changed significantly")
                         }
                         val valueMark = valueCandidates.firstOrNull()
-                        val ksonValueNode: KsonValueNode = if (valueMark == null) {
-                            KsonValueNodeError(marker.getSourceTokens())
-                        } else {
-                            unsafeAstCreate(valueMark) {
-                                KsonValueNodeError(it)
+                        val ksonValueNode: KsonValueNode =
+                            if (valueMark == null) {
+                                KsonValueNodeError(marker.getSourceTokens())
+                            } else {
+                                unsafeAstCreate(valueMark) {
+                                    KsonValueNodeError(it)
+                                }
                             }
-                        }
                         if (keyNode is ObjectKeyNodeError || ksonValueNode is KsonValueNodeError) {
                             ObjectPropertyNodeError(marker.getSourceTokens())
                         } else {
@@ -322,7 +337,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                                 keyNode,
                                 ksonValueNode,
                                 comments,
-                                marker.getSourceTokens()
+                                marker.getSourceTokens(),
                             )
                         }
                     }
@@ -342,21 +357,25 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             throw ShouldNotHappenException("Token list must end in EOF")
                         }
 
-                        val rootNode = unsafeAstCreate<KsonValueNode>(childMarkers[0]) {
-                            KsonValueNodeError(it)
-                        }
-
-                        val erroneousTrailingContent = childMarkers.drop(1).map {
-                            unsafeAstCreate<KsonValueNode>(it) {
+                        val rootNode =
+                            unsafeAstCreate<KsonValueNode>(childMarkers[0]) {
                                 KsonValueNodeError(it)
                             }
-                        }
 
-                        KsonRootImpl(rootNode,
+                        val erroneousTrailingContent =
+                            childMarkers.drop(1).map {
+                                unsafeAstCreate<KsonValueNode>(it) {
+                                    KsonValueNodeError(it)
+                                }
+                            }
+
+                        KsonRootImpl(
+                            rootNode,
                             erroneousTrailingContent,
                             comments,
                             eofToken.comments,
-                            marker.getSourceTokens())
+                            marker.getSourceTokens(),
+                        )
                     }
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
@@ -368,7 +387,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
             else -> {
                 throw ShouldNotHappenException(
                     "Unexpected ${ElementType::class.simpleName}.  " +
-                            "Should always be one of ${TokenType::class.simpleName} or ${ParsedElementType::class.simpleName}"
+                        "Should always be one of ${TokenType::class.simpleName} or ${ParsedElementType::class.simpleName}",
                 )
             }
         }
@@ -382,9 +401,11 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      */
     private fun decodeEmbedBlock(
         propertyNodes: List<ObjectPropertyNode>,
-        marker: KsonMarker
+        marker: KsonMarker,
     ): EmbedBlockNode? {
-        if (propertyNodes.size > 2) { return null }
+        if (propertyNodes.size > 2) {
+            return null
+        }
 
         val embedTagNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_TAG)
 
@@ -394,14 +415,15 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
             return null
         }
 
-        val embedContentNode = findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_CONTENT)
-            ?: return null
+        val embedContentNode =
+            findEmbedStringValue(propertyNodes, EmbedObjectKeys.EMBED_CONTENT)
+                ?: return null
 
         return EmbedBlockNode(
-                embedTagNode,
-                embedContentNode,
-                marker.getSourceTokens()
-            )
+            embedTagNode,
+            embedContentNode,
+            marker.getSourceTokens(),
+        )
     }
 
     /**
@@ -410,13 +432,14 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      */
     private fun findEmbedStringValue(
         propertyNodes: List<ObjectPropertyNode>,
-        embedKey: EmbedObjectKeys
-    ): StringNodeImpl? {
-        return propertyNodes.filterIsInstance<ObjectPropertyNodeImpl>().find { prop ->
-            val keyString = (prop.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
-            keyString?.rawStringContent == embedKey.key && prop.value is StringNodeImpl
-        }?.value as? StringNodeImpl
-    }
+        embedKey: EmbedObjectKeys,
+    ): StringNodeImpl? =
+        propertyNodes
+            .filterIsInstance<ObjectPropertyNodeImpl>()
+            .find { prop ->
+                val keyString = (prop.key as? ObjectKeyNodeImpl)?.key as? StringNodeImpl
+                keyString?.rawStringContent == embedKey.key && prop.value is StringNodeImpl
+            }?.value as? StringNodeImpl
 
     /**
      *  Note that we do not use [unsafeAstCreate] for this transformation because both places in this [KsonBuilder]
@@ -429,11 +452,13 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
         val quotedString = marker.getRawText()
         val stringDelim = quotedString.first()
 
-        val stringContentTokens = marker.getSourceTokens()
-            // drop the open quote token
-            .drop(1)
-            // and take everything up to the close quote (or the end, whichever comes first)
-            .takeWhile { it.tokenType != STRING_CLOSE_QUOTE }
+        val stringContentTokens =
+            marker
+                .getSourceTokens()
+                // drop the open quote token
+                .drop(1)
+                // and take everything up to the close quote (or the end, whichever comes first)
+                .takeWhile { it.tokenType != STRING_CLOSE_QUOTE }
 
         return QuotedStringNode(stringContentTokens, StringQuote.fromChar(stringDelim))
     }
@@ -448,8 +473,11 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
      * @param errorNodeGenerator a lambda to wrap an [ERROR] [marker]'s content in the appropriately typed
      *   [AstNodeError] to be used in place of the node we can't create
      */
-    private fun <A : AstNode> unsafeAstCreate(marker: KsonMarker, errorNodeGenerator: (errorContent: List<Token>) -> A): A {
-        if (marker.element == ERROR ) {
+    private fun <A : AstNode> unsafeAstCreate(
+        marker: KsonMarker,
+        errorNodeGenerator: (errorContent: List<Token>) -> A,
+    ): A {
+        if (marker.element == ERROR) {
             return errorNodeGenerator(marker.getSourceTokens())
         }
         val nodeToCast = toAst(marker)
@@ -471,13 +499,19 @@ private interface MarkerBuilderContext {
     /**
      * Get the underlying source [Token]s for the range [firstTokenIndex] to [lastTokenIndex], inclusive
      */
-    fun getSourceTokens(firstTokenIndex: Int, lastTokenIndex: Int): List<Token>
+    fun getSourceTokens(
+        firstTokenIndex: Int,
+        lastTokenIndex: Int,
+    ): List<Token>
 
     /**
      * Get the location of the underlying text for the range of tokens from [firstTokenIndex] to [lastTokenIndex],
      * inclusive
      */
-    fun getLocation(firstTokenIndex: Int, lastTokenIndex: Int): Location
+    fun getLocation(
+        firstTokenIndex: Int,
+        lastTokenIndex: Int,
+    ): Location
 
     /**
      * Get any comments associated with the token at [tokenIndex]
@@ -522,7 +556,10 @@ private interface MarkerCreator {
  * [KsonMarker] is the [AstMarker] implementation designed to collaborate with [KsonBuilder]
  * (through [MarkerBuilderContext])
  */
-private class KsonMarker(private val context: MarkerBuilderContext, private val creator: MarkerCreator) : AstMarker,
+private class KsonMarker(
+    private val context: MarkerBuilderContext,
+    private val creator: MarkerCreator,
+) : AstMarker,
     MarkerCreator {
     val firstTokenIndex = context.getTokenIndex()
     var lastTokenIndex = firstTokenIndex
@@ -530,23 +567,17 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
     var element: ElementType = INCOMPLETE
     val childMarkers = ArrayList<KsonMarker>()
 
-    fun isDone(): Boolean {
-        return element != INCOMPLETE
-    }
+    fun isDone(): Boolean = element != INCOMPLETE
 
-    fun getRawText(): String {
-        return context.getSourceTokens(this.firstTokenIndex, this.lastTokenIndex).joinToString("") { it.lexeme.text }
-    }
+    fun getRawText(): String = context.getSourceTokens(this.firstTokenIndex, this.lastTokenIndex).joinToString("") { it.lexeme.text }
 
-    fun getSourceTokens(): List<Token> {
-        return context.getSourceTokens(this.firstTokenIndex, this.lastTokenIndex)
-    }
+    fun getSourceTokens(): List<Token> = context.getSourceTokens(this.firstTokenIndex, this.lastTokenIndex)
 
     /**
      * Returns true if this [KsonMarker] denotes an entity that it makes sense to comment/document
      */
-    private fun commentable(): Boolean {
-        return when (element) {
+    private fun commentable(): Boolean =
+        when (element) {
             /**
              * These are the [ElementType]s that correspond to the [Documented] [AstNode] types,
              * and hence are the target for comments we find on tokens marked by this [TokenType]
@@ -554,7 +585,6 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
             ROOT, OBJECT_PROPERTY, LIST_ELEMENT -> true
             else -> false
         }
-    }
 
     /**
      * Comments found in the tokens marked by a [KsonMarker] are either
@@ -613,8 +643,8 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         if (lastChild != me) {
             throw ShouldNotHappenException(
                 "Bug: This should be an impossible `forgetMe` call since " +
-                        "the order of resolving markers should ensure that calls to `forgetMe` are always " +
-                        "on the last added marker"
+                    "the order of resolving markers should ensure that calls to `forgetMe` are always " +
+                    "on the last added marker",
             )
         }
         return lastChild
@@ -637,15 +667,14 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
      * This means there is always only ONE unresolved mark for whom _this_ mark is the [MarkerCreator]:
      * the last entry in [childMarkers] (hence [forgetMe] being implemented as a simple [removeLast])
      */
-    fun addMark(): KsonMarker {
-        return if (childMarkers.isNotEmpty() && !childMarkers.last().isDone()) {
+    fun addMark(): KsonMarker =
+        if (childMarkers.isNotEmpty() && !childMarkers.last().isDone()) {
             childMarkers.last().addMark()
         } else {
             val newMarker = KsonMarker(context, this)
             childMarkers.add(newMarker)
             newMarker
         }
-    }
 
     override fun done(elementType: ElementType) {
         lastTokenIndex = context.getTokenIndex() - 1
@@ -680,9 +709,7 @@ private class KsonMarker(private val context: MarkerBuilderContext, private val 
         creator.forgetMe(this)
     }
 
-    override fun toString(): String {
-        return element.toString()
-    }
+    override fun toString(): String = element.toString()
 
     override fun error(message: Message) {
         markedError = CoreParseMessage(message)

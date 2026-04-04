@@ -9,8 +9,9 @@ package org.kson.parser.behavior
  *   Kson supports single-quoted  strings, in which case the escaping rules are identical but with
  *   respect to single-quote `'` rather than double-quote `"`
  */
-sealed class StringQuote(private val quoteChar: Char) {
-
+sealed class StringQuote(
+    private val quoteChar: Char,
+) {
     private val delimiterString = quoteChar.toString()
     private val escapedDelimiterString = "\\" + quoteChar
 
@@ -23,9 +24,7 @@ sealed class StringQuote(private val quoteChar: Char) {
     /**
      * Counts the number of occurrences of this [quoteChar] in the given [rawContent]
      */
-    fun countDelimiterOccurrences(rawContent: String): Int {
-        return rawContent.count { it == quoteChar }
-    }
+    fun countDelimiterOccurrences(rawContent: String): Int = rawContent.count { it == quoteChar }
 
     /**
      * Perform any needed [quoteChar] escapes on this string [rawContent]
@@ -33,9 +32,7 @@ sealed class StringQuote(private val quoteChar: Char) {
      * @param rawContent a "raw" string that has NO escaped delimiters (other escapes are ignored)
      * @return a copy of [rawContent] with all [quoteChar]s escaped
      */
-    fun escapeQuotes(rawContent: String): String {
-        return rawContent.replace(delimiterString, escapedDelimiterString)
-    }
+    fun escapeQuotes(rawContent: String): String = rawContent.replace(delimiterString, escapedDelimiterString)
 
     /**
      * Process [quoteChar] escapes in string content delimited by this [StringQuote]
@@ -48,17 +45,14 @@ sealed class StringQuote(private val quoteChar: Char) {
         return escapedContent.replace(escapedDelimiterString, delimiterString)
     }
 
-    override fun toString(): String {
-        return delimiterString
-    }
+    override fun toString(): String = delimiterString
 
     companion object {
-        fun fromChar(delimString: Char): StringQuote {
-            return when (delimString) {
+        fun fromChar(delimString: Char): StringQuote =
+            when (delimString) {
                 '\'' -> SingleQuote
                 '"' -> DoubleQuote
                 else -> throw UnsupportedOperationException("Unknown string delimiter: $delimString")
             }
-        }
     }
-} 
+}

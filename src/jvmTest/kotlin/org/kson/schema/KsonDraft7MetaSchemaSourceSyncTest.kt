@@ -8,7 +8,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class KsonDraft7MetaSchemaSourceSyncTest {
-
     @Test
     fun testSourceMatchesVSCodeSchemaFile() {
         val schemaFile = File("tooling/lsp-clients/vscode/schemas/metaschema.draft7.kson")
@@ -27,7 +26,7 @@ class KsonDraft7MetaSchemaSourceSyncTest {
              * Note: enforcing this with a test is a fairly hacky way to keep these in sync, but since this schema will
              * not change much, this is an easy and clear way to ensure this invariant is maintained
              */
-            "KsonDraft7MetaSchema.SOURCE must stay in sync with ${schemaFile.path}"
+            "KsonDraft7MetaSchema.SOURCE must stay in sync with ${schemaFile.path}",
         )
     }
 }

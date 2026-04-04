@@ -17,42 +17,30 @@ import org.kson.parser.ParsedElementType
 import org.kson.parser.TokenType
 
 class KsonParserDefinition : ParserDefinition {
-    override fun createLexer(project: Project?): Lexer {
-        return KsonLexer()
-    }
+    override fun createLexer(project: Project?): Lexer = KsonLexer()
 
-    override fun createParser(project: Project?): PsiParser {
-        return KsonParser()
-    }
+    override fun createParser(project: Project?): PsiParser = KsonParser()
 
-    override fun getFileNodeType(): IFileElementType {
-        return IFileElementType(KsonLanguage)
-    }
+    override fun getFileNodeType(): IFileElementType = IFileElementType(KsonLanguage)
 
-    override fun getCommentTokens(): TokenSet {
-        return commentTokenSet
-    }
+    override fun getCommentTokens(): TokenSet = commentTokenSet
 
-    override fun getWhitespaceTokens(): TokenSet {
-        return whitespaceTokenSet
-    }
+    override fun getWhitespaceTokens(): TokenSet = whitespaceTokenSet
 
-    override fun getStringLiteralElements(): TokenSet {
-        return stringTokenSet
-    }
+    override fun getStringLiteralElements(): TokenSet = stringTokenSet
 
-    override fun createElement(node: ASTNode): PsiElement {
-        return when (node.elementType) {
-            elem(ParsedElementType.EMBED_BLOCK) -> org.kson.jetbrains.psi.KsonEmbedBlock(node)
-            elem(TokenType.EMBED_CONTENT) -> org.kson.jetbrains.psi.KsonEmbedContent(node)
+    override fun createElement(node: ASTNode): PsiElement =
+        when (node.elementType) {
+            elem(ParsedElementType.EMBED_BLOCK) ->
+                org.kson.jetbrains.psi
+                    .KsonEmbedBlock(node)
+            elem(TokenType.EMBED_CONTENT) ->
+                org.kson.jetbrains.psi
+                    .KsonEmbedContent(node)
             else -> KsonPsiElement(node)
         }
-    }
 
-    override fun createFile(viewProvider: FileViewProvider): PsiFile {
-        return KsonPsiFile(viewProvider)
-    }
-
+    override fun createFile(viewProvider: FileViewProvider): PsiFile = KsonPsiFile(viewProvider)
 }
 
 private val commentTokenSet = TokenSet.create(elem(TokenType.COMMENT))

@@ -5,7 +5,7 @@ package org.kson.parser.messages
  */
 enum class MessageSeverity {
     ERROR,
-    WARNING
+    WARNING,
 }
 
 /**
@@ -24,6 +24,7 @@ interface Message {
      * (being able to de-dupe in a Set for instance is important)
      */
     override operator fun equals(other: Any?): Boolean
+
     override fun hashCode(): Int
 
     override fun toString(): String
@@ -34,8 +35,7 @@ interface Message {
          * [org.kson.parser.AstMarker.error], otherwise the message is annotated in
          * [org.kson.jetbrains.parser.KsonValidationAnnotator.apply].
          */
-        fun isFatalParseError(message: Message): Boolean =
-            message is CoreParseMessage && message.type.severity == MessageSeverity.ERROR
+        fun isFatalParseError(message: Message): Boolean = message is CoreParseMessage && message.type.severity == MessageSeverity.ERROR
     }
 }
 
@@ -46,8 +46,9 @@ interface Message {
  * This is only instantiated when messages pass through the parser,
  * indicating they were created before or during the parsing phase.
  */
-class CoreParseMessage(private val delegate: Message) : Message by delegate
-
+class CoreParseMessage(
+    private val delegate: Message,
+) : Message by delegate
 
 /**
  * Enum for all our user-facing messages.
@@ -60,21 +61,15 @@ enum class MessageType(
     /**
      * The severity of this message type
      */
-    val severity: MessageSeverity = MessageSeverity.ERROR
+    val severity: MessageSeverity = MessageSeverity.ERROR,
 ) {
     BLANK_SOURCE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unable to parse a blank file.  A Kson document must describe a value."
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unable to parse a blank file.  A Kson document must describe a value."
     },
     EMBED_BLOCK_NO_CLOSE {
-        override fun expectedArgs(): List<String> {
-            return listOf("Embed delimiter")
-        }
+        override fun expectedArgs(): List<String> = listOf("Embed delimiter")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val embedDelimiter = parsedArgs.getArg("Embed delimiter")
@@ -82,90 +77,53 @@ enum class MessageType(
         }
     },
     EOF_NOT_REACHED {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected trailing content. The previous content parsed as a complete Kson document."
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Unexpected trailing content. The previous content parsed as a complete Kson document."
     },
     ONLY_UNEXPECTED_CONTENT {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unexpected content. No content can be parsed as a Kson document."
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unexpected content. No content can be parsed as a Kson document."
     },
     LIST_NO_CLOSE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unclosed list"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unclosed list"
     },
     LIST_NO_OPEN {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This must close a list, but this is not a list"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "This must close a list, but this is not a list"
     },
     LIST_INVALID_ELEM {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unable to parse this list element as a legal Kson value"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unable to parse this list element as a legal Kson value"
     },
     OBJECT_BAD_INTERNALS {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Object properties must be `key: value` pairs"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Object properties must be `key: value` pairs"
     },
     OBJECT_NO_CLOSE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unclosed object"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unclosed object"
     },
     OBJECT_NO_OPEN {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This must close an object, but this is not an object"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "This must close an object, but this is not an object"
     },
     OBJECT_KEY_NO_VALUE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This object key must be followed by a value"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "This object key must be followed by a value"
     },
     OBJECT_KEYWORD_RESERVED_WORD {
-        override fun expectedArgs(): List<String> {
-            return listOf("Reserved Word")
-        }
+        override fun expectedArgs(): List<String> = listOf("Reserved Word")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val reservedWord = parsedArgs.getArg("Reserved Word")
@@ -173,38 +131,26 @@ enum class MessageType(
         }
     },
     IGNORED_OBJECT_END_DOT {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This end-dot is ignored because this object is `{}`-delimited. " +
-                    "End-dots only effect non-delimited objects"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "This end-dot is ignored because this object is `{}`-delimited. " +
+                "End-dots only effect non-delimited objects"
     },
     IGNORED_DASH_LIST_END_DASH {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "This end-dash is ignored because this list is `<>`-delimited. " +
-                    "End-dashes only effect non-delimited dashed lists"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "This end-dash is ignored because this list is `<>`-delimited. " +
+                "End-dashes only effect non-delimited dashed lists"
     },
     STRING_NO_CLOSE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Unclosed string"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Unclosed string"
     },
     STRING_CONTROL_CHARACTER {
-        override fun expectedArgs(): List<String> {
-            return listOf("Control Character")
-        }
+        override fun expectedArgs(): List<String> = listOf("Control Character")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badControlCharArg = parsedArgs.getArg("Control Character")
@@ -214,13 +160,11 @@ enum class MessageType(
             val badControlChar = badControlCharArg[0]
 
             return "Non-whitespace control characters must not be embedded directly in strings. " +
-                    "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
+                "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
         }
     },
     STRING_BAD_UNICODE_ESCAPE {
-        override fun expectedArgs(): List<String> {
-            return listOf("Unicode `\\uXXXX` Escape")
-        }
+        override fun expectedArgs(): List<String> = listOf("Unicode `\\uXXXX` Escape")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badUnicodeEscape = parsedArgs.getArg("Unicode `\\uXXXX` Escape")
@@ -228,9 +172,7 @@ enum class MessageType(
         }
     },
     STRING_BAD_ESCAPE {
-        override fun expectedArgs(): List<String> {
-            return listOf("\\-prefixed String Escape")
-        }
+        override fun expectedArgs(): List<String> = listOf("\\-prefixed String Escape")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badStringEscape = parsedArgs.getArg("\\-prefixed String Escape")
@@ -238,9 +180,7 @@ enum class MessageType(
         }
     },
     INVALID_DIGITS {
-        override fun expectedArgs(): List<String> {
-            return listOf("Unexpected Character")
-        }
+        override fun expectedArgs(): List<String> = listOf("Unexpected Character")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val unexpectedCharacter = parsedArgs.getArg("Unexpected Character")
@@ -248,9 +188,7 @@ enum class MessageType(
         }
     },
     DANGLING_EXP_INDICATOR {
-        override fun expectedArgs(): List<String> {
-            return listOf("Exponent character: E or e")
-        }
+        override fun expectedArgs(): List<String> = listOf("Exponent character: E or e")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val exponentCharacter = parsedArgs.getArg("Exponent character: E or e")
@@ -263,67 +201,46 @@ enum class MessageType(
      * helpful error such as [OBJECT_NO_OPEN] or [DANGLING_LIST_DASH]
      */
     ILLEGAL_CHARACTERS {
-        override fun expectedArgs(): List<String> {
-            return listOf("The Illegal Characters")
-        }
+        override fun expectedArgs(): List<String> = listOf("The Illegal Characters")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val illegalCharacter = parsedArgs.getArg("The Illegal Characters")
             return "Kson does not allow \"$illegalCharacter\" here"
         }
-
     },
     ILLEGAL_MINUS_SIGN {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "A dash `-` must be followed by a space (to make a list element), or a number (to make a negative number)"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "A dash `-` must be followed by a space (to make a list element), or a number (to make a negative number)"
     },
     DANGLING_DECIMAL {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "A decimal must be followed by digits"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "A decimal must be followed by digits"
     },
     DANGLING_LIST_DASH(MessageSeverity.ERROR) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "A list dash `- ` must be followed by a value"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "A list dash `- ` must be followed by a value"
     },
     EMPTY_COMMAS {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Redundant comma found. A comma must delimit a value, one comma per value"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Redundant comma found. A comma must delimit a value, one comma per value"
     },
     MAX_NESTING_LEVEL_EXCEEDED {
-        override fun expectedArgs(): List<String> {
-            return listOf("Max Nesting Level")
-        }
+        override fun expectedArgs(): List<String> = listOf("Max Nesting Level")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxNestingLevel = parsedArgs.getArg("Max Nesting Level")
             return "The nesting of objects and/or lists in this Kson " +
-                    "exceeds the configured maximum supported nesting level of $maxNestingLevel"
+                "exceeds the configured maximum supported nesting level of $maxNestingLevel"
         }
     },
     INTEGER_OVERFLOW {
-        override fun expectedArgs(): List<String> {
-            return listOf("Overflow Number")
-        }
+        override fun expectedArgs(): List<String> = listOf("Overflow Number")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val overflowNumber = parsedArgs.getArg("Overflow Number")
@@ -331,9 +248,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Allowed Count", "Actual Count")
-        }
+        override fun expectedArgs(): List<String> = listOf("Allowed Count", "Actual Count")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val allowedCount = parsedArgs.getArg("Allowed Count")
@@ -342,9 +257,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Property Name", "Schema Title")
-        }
+        override fun expectedArgs(): List<String> = listOf("Property Name", "Schema Title")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val propertyName = parsedArgs.getArg("Property Name")
@@ -354,9 +267,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Property Name", "Schema Description")
-        }
+        override fun expectedArgs(): List<String> = listOf("Property Name", "Schema Description")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val propertyName = parsedArgs.getArg("Property Name")
@@ -365,18 +276,12 @@ enum class MessageType(
         }
     },
     SCHEMA_ANY_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match at least one sub-schema"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Value must match at least one sub-schema"
     },
     SCHEMA_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Sub-schema error summary")
-        }
+        override fun expectedArgs(): List<String> = listOf("Sub-schema error summary")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val subSchemaErrors = parsedArgs.getArg("Sub-schema error summary")
@@ -384,9 +289,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -394,9 +297,7 @@ enum class MessageType(
         }
     },
     SCHEMA_BOOLEAN_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -404,36 +305,22 @@ enum class MessageType(
         }
     },
     SCHEMA_CONTAINS_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Array must contain at least one item that matches the contains schema"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Array must contain at least one item that matches the contains schema"
     },
     SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Property names in a \"dependencies\" list must be strings"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Property names in a \"dependencies\" list must be strings"
     },
     SCHEMA_EMPTY_SCHEMA(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema must not be empty"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Schema must not be empty"
     },
     SCHEMA_ENUM_VALUE_NOT_ALLOWED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Allowed Values")
-        }
+        override fun expectedArgs(): List<String> = listOf("Allowed Values")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val allowedValues = parsedArgs.getArg("Allowed Values")
@@ -441,18 +328,12 @@ enum class MessageType(
         }
     },
     SCHEMA_FALSE_SCHEMA_ERROR(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema always fails"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Schema always fails"
     },
     SCHEMA_INTEGER_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -460,18 +341,12 @@ enum class MessageType(
         }
     },
     SCHEMA_NOT_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must not match the specified schema"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Value must not match the specified schema"
     },
     SCHEMA_NUMBER_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -479,18 +354,12 @@ enum class MessageType(
         }
     },
     SCHEMA_OBJECT_OR_BOOLEAN(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema must be an object or boolean"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Schema must be an object or boolean"
     },
     SCHEMA_OBJECT_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -498,18 +367,12 @@ enum class MessageType(
         }
     },
     SCHEMA_ONE_OF_VALIDATION_FAILED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Value must match exactly one of the specified schemas"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Value must match exactly one of the specified schemas"
     },
     SCHEMA_ONE_OF_MULTIPLE_MATCHES(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Matched schemas")
-        }
+        override fun expectedArgs(): List<String> = listOf("Matched schemas")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val matchedSchemas = parsedArgs.getArg("Matched schemas")
@@ -517,9 +380,7 @@ enum class MessageType(
         }
     },
     SCHEMA_REQUIRED_PROPERTY_MISSING(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Missing Properties")
-        }
+        override fun expectedArgs(): List<String> = listOf("Missing Properties")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val missingProperties = parsedArgs.getArg("Missing Properties")
@@ -527,9 +388,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_ARRAY_ENTRY_ERROR(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -537,9 +396,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -547,9 +404,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_OR_EMBED_BLOCK_REQUIRED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -557,27 +412,17 @@ enum class MessageType(
         }
     },
     SCHEMA_TYPE_ARRAY_ENTRY_ERROR(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema \"type\" array entries must be strings"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Schema \"type\" array entries must be strings"
     },
     SCHEMA_TYPE_TYPE_ERROR(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Schema \"type\" must be a string or array of strings"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Schema \"type\" must be a string or array of strings"
     },
     SCHEMA_VALUE_MUST_BE_MULTIPLE_OF(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Multiple Of Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Multiple Of Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val multipleOfValue = parsedArgs.getArg("Multiple Of Value")
@@ -585,9 +430,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_LENGTH_TOO_SHORT(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Minimum Length")
-        }
+        override fun expectedArgs(): List<String> = listOf("Minimum Length")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minLength = parsedArgs.getArg("Minimum Length")
@@ -595,9 +438,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_LENGTH_TOO_LONG(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Maximum Length")
-        }
+        override fun expectedArgs(): List<String> = listOf("Maximum Length")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxLength = parsedArgs.getArg("Maximum Length")
@@ -605,9 +446,7 @@ enum class MessageType(
         }
     },
     SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Property Name", "Expected Types", "Actual Type")
-        }
+        override fun expectedArgs(): List<String> = listOf("Property Name", "Expected Types", "Actual Type")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val propertyName = parsedArgs.getArg("Property Name")
@@ -618,18 +457,12 @@ enum class MessageType(
         }
     },
     SCHEMA_ARRAY_ITEMS_NOT_UNIQUE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Items in this array must be unique"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String = "Items in this array must be unique"
     },
     SCHEMA_VALUE_TOO_LARGE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Maximum Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Maximum Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maximum = parsedArgs.getArg("Maximum Value")
@@ -637,9 +470,7 @@ enum class MessageType(
         }
     },
     SCHEMA_VALUE_TOO_LARGE_EXCLUSIVE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Exclusive Maximum Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Exclusive Maximum Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val exclusiveMaximum = parsedArgs.getArg("Exclusive Maximum Value")
@@ -647,9 +478,7 @@ enum class MessageType(
         }
     },
     SCHEMA_VALUE_TOO_SMALL(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Minimum Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Minimum Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minimum = parsedArgs.getArg("Minimum Value")
@@ -657,9 +486,7 @@ enum class MessageType(
         }
     },
     SCHEMA_VALUE_TOO_SMALL_EXCLUSIVE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Exclusive Minimum Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Exclusive Minimum Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val exclusiveMinimum = parsedArgs.getArg("Exclusive Minimum Value")
@@ -667,9 +494,7 @@ enum class MessageType(
         }
     },
     SCHEMA_VALUE_NOT_EQUAL_TO_CONST(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Required Value")
-        }
+        override fun expectedArgs(): List<String> = listOf("Required Value")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredValue = parsedArgs.getArg("Required Value")
@@ -677,9 +502,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Maximum Items")
-        }
+        override fun expectedArgs(): List<String> = listOf("Maximum Items")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxItems = parsedArgs.getArg("Maximum Items")
@@ -687,9 +510,7 @@ enum class MessageType(
         }
     },
     SCHEMA_ARRAY_TOO_SHORT(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Minimum Items")
-        }
+        override fun expectedArgs(): List<String> = listOf("Minimum Items")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minItems = parsedArgs.getArg("Minimum Items")
@@ -697,9 +518,7 @@ enum class MessageType(
         }
     },
     SCHEMA_OBJECT_TOO_MANY_PROPERTIES(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Maximum Properties")
-        }
+        override fun expectedArgs(): List<String> = listOf("Maximum Properties")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxProperties = parsedArgs.getArg("Maximum Properties")
@@ -707,9 +526,7 @@ enum class MessageType(
         }
     },
     SCHEMA_OBJECT_TOO_FEW_PROPERTIES(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Minimum Properties")
-        }
+        override fun expectedArgs(): List<String> = listOf("Minimum Properties")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minProperties = parsedArgs.getArg("Minimum Properties")
@@ -717,9 +534,7 @@ enum class MessageType(
         }
     },
     SCHEMA_STRING_PATTERN_MISMATCH(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Pattern")
-        }
+        override fun expectedArgs(): List<String> = listOf("Pattern")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val pattern = parsedArgs.getArg("Pattern")
@@ -727,9 +542,7 @@ enum class MessageType(
         }
     },
     SCHEMA_MISSING_REQUIRED_DEPENDENCIES(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Required by", "Missing property")
-        }
+        override fun expectedArgs(): List<String> = listOf("Required by", "Missing property")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredBy = parsedArgs.getArg("Required by")
@@ -738,9 +551,7 @@ enum class MessageType(
         }
     },
     SCHEMA_DEPENDENCIES_SCHEMA_ERROR(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Required by", "Schema error")
-        }
+        override fun expectedArgs(): List<String> = listOf("Required by", "Schema error")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val requiredBy = parsedArgs.getArg("Required by")
@@ -749,47 +560,33 @@ enum class MessageType(
         }
     },
     OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This property should be aligned with the other leading properties in this object." +
-                    "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Deceptive indentation. This property should be aligned with the other leading properties in this object." +
+                "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
     },
     DASH_LIST_ITEMS_MISALIGNED(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This element should be aligned with the other leading elements in this list." +
-                    "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Deceptive indentation. This element should be aligned with the other leading elements in this list." +
+                "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
     },
     OBJECT_PROPERTY_NESTING_ISSUE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This value should be nested deeper than the object that contains it."
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Deceptive indentation. This value should be nested deeper than the object that contains it."
     },
     DASH_LIST_ITEMS_NESTING_ISSUE(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This value should nested deeper than the list that contains it."
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Deceptive indentation. This value should nested deeper than the list that contains it."
     },
     OBJECT_DUPLICATE_KEY(MessageSeverity.WARNING) {
-        override fun expectedArgs(): List<String> {
-            return listOf("Key name")
-        }
+        override fun expectedArgs(): List<String> = listOf("Key name")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val keyName = parsedArgs.getArg("Key name")
@@ -797,9 +594,7 @@ enum class MessageType(
         }
     },
     JSON_POINTER_BAD_START {
-        override fun expectedArgs(): List<String> {
-            return listOf("Bad Start Character")
-        }
+        override fun expectedArgs(): List<String> = listOf("Bad Start Character")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badStartChar = parsedArgs.getArg("Bad Start Character")
@@ -807,9 +602,7 @@ enum class MessageType(
         }
     },
     JSON_POINTER_INVALID_CHARACTER {
-        override fun expectedArgs(): List<String> {
-            return listOf("Invalid Character")
-        }
+        override fun expectedArgs(): List<String> = listOf("Invalid Character")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val invalidChar = parsedArgs.getArg("Invalid Character")
@@ -817,29 +610,22 @@ enum class MessageType(
         }
     },
     JSON_POINTER_INVALID_ESCAPE {
-        override fun expectedArgs(): List<String> {
-            return listOf("Invalid Escape Character")
-        }
+        override fun expectedArgs(): List<String> = listOf("Invalid Escape Character")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val invalidEscapeChar = parsedArgs.getArg("Invalid Escape Character")
             return "Invalid escape sequence: '~$invalidEscapeChar'. " +
-                    "Valid escape sequences are '~0' for '~' and '~1' for '/'"
+                "Valid escape sequences are '~0' for '~' and '~1' for '/'"
         }
     },
     JSON_POINTER_INCOMPLETE_ESCAPE {
-        override fun expectedArgs(): List<String> {
-            return emptyList()
-        }
+        override fun expectedArgs(): List<String> = emptyList()
 
-        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
-        }
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String =
+            "Incomplete escape sequence '~' at end of token. Must be '~0' or '~1'. "
     },
     SCHEMA_INVALID_REGEX {
-        override fun expectedArgs(): List<String> {
-            return listOf("Schema Property Name", "Pattern")
-        }
+        override fun expectedArgs(): List<String> = listOf("Schema Property Name", "Pattern")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val schemaPropertyName = parsedArgs.getArg("Schema Property Name")
@@ -848,9 +634,7 @@ enum class MessageType(
         }
     },
     FATAL_PARSE_ERROR {
-        override fun expectedArgs(): List<String> {
-            return listOf("Error Detail")
-        }
+        override fun expectedArgs(): List<String> = listOf("Error Detail")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val errorDetail = parsedArgs.getArg("Error Detail")
@@ -858,15 +642,13 @@ enum class MessageType(
         }
     },
     SCHEMA_REF_RESOLUTION_FAILED {
-        override fun expectedArgs(): List<String> {
-            return listOf("Reference")
-        }
+        override fun expectedArgs(): List<String> = listOf("Reference")
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val reference = parsedArgs.getArg("Reference")
             return "Failed to resolve schema reference: $reference"
         }
-    };
+    }, ;
 
     /**
      * Create a [Message] instance from this [MessageType].  The [args] expected here are defined in this
@@ -877,7 +659,7 @@ enum class MessageType(
         for ((index, value) in args.withIndex()) {
             if (value == null) {
                 throw IllegalArgumentException(
-                    "Illegal `null` arg at position $index of the given `args`.  Message arguments must not be `null`."
+                    "Illegal `null` arg at position $index of the given `args`.  Message arguments must not be `null`.",
                 )
             }
             givenArgs.add(value)
@@ -888,7 +670,7 @@ enum class MessageType(
             throw RuntimeException(
                 "`${this::class.simpleName}.${this::create.name}` requires $numExpectedArgs arg(s) for: ${
                     renderArgList(expectedArgs, "`")
-                }, but got ${givenArgs.size}: " + renderArgList(givenArgs)
+                }, but got ${givenArgs.size}: " + renderArgList(givenArgs),
             )
         }
 
@@ -898,11 +680,11 @@ enum class MessageType(
     /**
      * Data class for messages ensures that
      */
-    data class MessageImpl(override val type: MessageType,
-                           private val renderedMessage: String) : Message {
-        override fun toString(): String {
-            return renderedMessage
-        }
+    data class MessageImpl(
+        override val type: MessageType,
+        private val renderedMessage: String,
+    ) : Message {
+        override fun toString(): String = renderedMessage
     }
 
     /**
@@ -921,7 +703,10 @@ enum class MessageType(
     /**
      * Lookup wrapper for [MessageType.create] arguments to protect against typo'ed lookups
      */
-    protected class ParsedErrorArgs(private val messageType: MessageType, args: List<String>) {
+    protected class ParsedErrorArgs(
+        private val messageType: MessageType,
+        args: List<String>,
+    ) {
         // zip the given args up with corresponding argName for lookups
         private val parsedArgs: Map<String, String> = messageType.expectedArgs().zip(args).toMap()
 
@@ -934,17 +719,19 @@ enum class MessageType(
             } else {
                 // someone's asking for an invalid or typo'ed arg name
                 throw IllegalArgumentException(
-                    "Invalid arg name \"" + argName + "\" given for " + messageType::class.simpleName
-                            + ".  \"" + argName + "\" is not defined in " + messageType::expectedArgs.name
-                            + ": " + renderArgList(messageType.expectedArgs())
+                    "Invalid arg name \"" + argName + "\" given for " + messageType::class.simpleName +
+                        ".  \"" + argName + "\" is not defined in " + messageType::expectedArgs.name +
+                        ": " + renderArgList(messageType.expectedArgs()),
                 )
             }
         }
     }
-
 }
 
-private fun renderArgList(args: List<String>, quote: String = "\"") = if (args.isEmpty()) {
+private fun renderArgList(
+    args: List<String>,
+    quote: String = "\"",
+) = if (args.isEmpty()) {
     "[]"
 } else {
     args.joinToString("$quote, $quote", "[ $quote", "$quote ]")

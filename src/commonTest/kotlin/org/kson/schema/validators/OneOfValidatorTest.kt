@@ -9,30 +9,30 @@ class OneOfValidatorTest : JsonSchemaTest {
     fun testOneOfCommonValidationErrors() {
         assertKsonSchemaErrors(
             """
-                description: 99
-                thing: false
+            description: 99
+            thing: false
             """.trimIndent(),
             """
-                oneOf:
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      thing:
-                        type: number
+            oneOf:
+              - properties:
+                  description:
+                    type: string
+                    .
+                  thing:
+                    type: number
 
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      .
-                    required:
-                      - required_prop
+              - properties:
+                  description:
+                    type: string
+                    .
+                  .
+                required:
+                  - required_prop
             """.trimIndent(),
             listOf(
                 // since `description` is wrong for ALL the sub-schemas, we get a precise error for it
-                SCHEMA_VALUE_TYPE_MISMATCH
-            )
+                SCHEMA_VALUE_TYPE_MISMATCH,
+            ),
         )
     }
 
@@ -40,31 +40,31 @@ class OneOfValidatorTest : JsonSchemaTest {
     fun testOneOfDiverseValidationErrors() {
         assertKsonSchemaErrors(
             """
-                description: "describer"
-                think: false
+            description: "describer"
+            think: false
             """.trimIndent(),
             """
-                oneOf:
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      think:
-                        type: number
+            oneOf:
+              - properties:
+                  description:
+                    type: string
+                    .
+                  think:
+                    type: number
 
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      .
-                    required:
-                      - required_prop
+              - properties:
+                  description:
+                    type: string
+                    .
+                  .
+                required:
+                  - required_prop
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
                 // sub-schema errors are rolled up into this error
-                SCHEMA_SUB_SCHEMA_ERRORS
-            )
+                SCHEMA_SUB_SCHEMA_ERRORS,
+            ),
         )
     }
 
@@ -72,21 +72,21 @@ class OneOfValidatorTest : JsonSchemaTest {
     fun testOneOfMultipleMatches() {
         assertKsonSchemaErrors(
             """
-                description: "hello"
+            description: "hello"
             """.trimIndent(),
             """
-                oneOf:
-                  - properties:
-                      description:
-                        type: string
+            oneOf:
+              - properties:
+                  description:
+                    type: string
 
-                  - properties:
-                      description:
-                        type: string
+              - properties:
+                  description:
+                    type: string
             """.trimIndent(),
             listOf(
-                SCHEMA_ONE_OF_MULTIPLE_MATCHES
-            )
+                SCHEMA_ONE_OF_MULTIPLE_MATCHES,
+            ),
         )
     }
 }

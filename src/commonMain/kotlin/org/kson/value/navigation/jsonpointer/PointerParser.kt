@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType
@@ -17,7 +17,9 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
  *
  * @param pointerString The pointer string to parse
  */
-abstract class PointerParser(internal val pointerString: String) {
+abstract class PointerParser(
+    internal val pointerString: String,
+) {
     internal val scanner = PointerScanner(pointerString)
     internal var error: Message? = null
     internal val tokens = mutableListOf<Tokens>()
@@ -35,7 +37,9 @@ abstract class PointerParser(internal val pointerString: String) {
          * A literal token with exact value to match.
          * @property value The exact string value to match
          */
-        data class Literal(val value: String) : Tokens()
+        data class Literal(
+            val value: String,
+        ) : Tokens()
 
         /**
          * A wildcard token that matches any single key or array index.
@@ -54,7 +58,9 @@ abstract class PointerParser(internal val pointerString: String) {
          * A glob pattern token for matching keys.
          * @property pattern The glob pattern (may contain * and ?)
          */
-        data class GlobPattern(val pattern: String) : Tokens()
+        data class GlobPattern(
+            val pattern: String,
+        ) : Tokens()
     }
 
     /**
@@ -65,13 +71,17 @@ abstract class PointerParser(internal val pointerString: String) {
          * Successfully parsed pointer
          * @property tokens List of parsed tokens
          */
-        data class Success(val tokens: List<Tokens>) : ParseResult()
+        data class Success(
+            val tokens: List<Tokens>,
+        ) : ParseResult()
 
         /**
          * Failed to parse pointer
          * @property message Description of the parsing error
          */
-        data class Error(val message: Message) : ParseResult()
+        data class Error(
+            val message: Message,
+        ) : ParseResult()
     }
 
     /**
@@ -83,7 +93,7 @@ abstract class PointerParser(internal val pointerString: String) {
         if (!jsonPointer()) {
             return ParseResult.Error(
                 error
-                    ?: throw RuntimeException("must always set `error` for a failed parse")
+                    ?: throw RuntimeException("must always set `error` for a failed parse"),
             )
         }
 
@@ -96,7 +106,7 @@ abstract class PointerParser(internal val pointerString: String) {
             }
 
             throw ShouldNotHappenException(
-                "All unicode characters after the initial slash should be consumed by the parser"
+                "All unicode characters after the initial slash should be consumed by the parser",
             )
         }
 

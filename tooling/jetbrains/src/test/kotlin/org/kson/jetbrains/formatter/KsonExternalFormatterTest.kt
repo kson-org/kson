@@ -11,9 +11,9 @@ import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import junit.framework.TestCase
-import org.kson.tools.format
 import org.kson.jetbrains.KsonLanguage
 import org.kson.jetbrains.file.KsonFileType
+import org.kson.tools.format
 
 /**
  * Note that since [KsonExternalFormatter] delegates to [format], the testing here
@@ -22,7 +22,7 @@ import org.kson.jetbrains.file.KsonFileType
  */
 class KsonExternalFormatterTest : BasePlatformTestCase() {
     private lateinit var settings: CodeStyleSettings
-    
+
     override fun setUp() {
         super.setUp()
         settings = CodeStyle.createTestSettings()
@@ -43,121 +43,126 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
      */
     fun testFormatAndUndo() {
         val beforeFormat = "{ key: 'value' nested: { inner: stuff } }"
-        val afterFormat = """
+        val afterFormat =
+            """
             key: value
             nested:
               inner: stuff
-        """.trimIndent()
+            """.trimIndent()
 
         val settings = CodeStyle.createTestSettings()
-        CodeStyle.doWithTemporarySettings(project, settings, Runnable {
-            myFixture.configureByText(KsonFileType, "<caret>\n$beforeFormat")
+        CodeStyle.doWithTemporarySettings(
+            project,
+            settings,
+            Runnable {
+                myFixture.configureByText(KsonFileType, "<caret>\n$beforeFormat")
 
-            // type some stuff
-            myFixture.type("#")
-            myFixture.type("1")
-            myFixture.type("2")
+                // type some stuff
+                myFixture.type("#")
+                myFixture.type("1")
+                myFixture.type("2")
 
-            // perform and verify the format action
-            myFixture.performEditorAction(IdeActions.ACTION_EDITOR_REFORMAT)
-            assertEquals("#12\n$afterFormat", myFixture.editor.document.text)
+                // perform and verify the format action
+                myFixture.performEditorAction(IdeActions.ACTION_EDITOR_REFORMAT)
+                assertEquals("#12\n$afterFormat", myFixture.editor.document.text)
 
-            // undo the format
-            myFixture.performEditorAction(IdeActions.ACTION_UNDO)
+                // undo the format
+                myFixture.performEditorAction(IdeActions.ACTION_UNDO)
 
-            // expect to be at exactly the previous state of unformatted + typed chars
-            assertEquals("#12\n$beforeFormat", myFixture.editor.document.text)
-        })
+                // expect to be at exactly the previous state of unformatted + typed chars
+                assertEquals("#12\n$beforeFormat", myFixture.editor.document.text)
+            },
+        )
     }
 
     fun testObjectIndentation() {
         doFullFormatTest(
             """
-                {
-                                key: value
-                           }
+            {
+                            key: value
+                       }
             """.trimIndent(),
             """
-               key: value
-            """.trimIndent()
+            key: value
+            """.trimIndent(),
         )
     }
 
     fun testListIndentation() {
         doFullFormatTest(
             """
-                [
-                                1, 2, 3
-                           ]
+            [
+                            1, 2, 3
+                       ]
             """.trimIndent(),
             """
-                - 1
-                - 2
-                - 3
-            """.trimIndent()
+            - 1
+            - 2
+            - 3
+            """.trimIndent(),
         )
 
         doFullFormatTest(
             """
-                list: [
-                                1,
-                    2,
-                                        3
-                           ]
+            list: [
+                            1,
+                2,
+                                    3
+                       ]
             """.trimIndent(),
             """
-                list:
-                  - 1
-                  - 2
-                  - 3
-            """.trimIndent()
+            list:
+              - 1
+              - 2
+              - 3
+            """.trimIndent(),
         )
     }
 
     fun testDashIndentation() {
         doFullFormatTest(
             """
-                list:
-                        - 1
-                - 2
-                    - 3
+            list:
+                    - 1
+            - 2
+                - 3
             """.trimIndent(),
             """
-              list:
-                - 1
-                - 2
-                - 3
-            """.trimIndent()
+            list:
+              - 1
+              - 2
+              - 3
+            """.trimIndent(),
         )
     }
 
     fun testCustomIndentSize() {
         settings.getCommonSettings(KsonLanguage).indentOptions?.INDENT_SIZE = 4
-        
+
         doFullFormatTest(
             """
-                {
-                            key: value
-                       }
+            {
+                        key: value
+                   }
             """.trimIndent(),
             """
-               key: value
-            """.trimIndent()
+            key: value
+            """.trimIndent(),
         )
 
         doFullFormatTest(
             """
-                list:
-                        - first
-                    - second
-                            - third
+            list:
+                    - first
+                - second
+                        - third
             """.trimIndent(),
             """
-                list:
-                    - first
-                    - second
-                    - third
-            """.trimIndent()
+            list:
+                - first
+                - second
+                - third
+            """.trimIndent(),
         )
     }
 
@@ -171,28 +176,28 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
 
         doFullFormatTest(
             """
-                {
-                        key: value
-                   }
+            {
+                    key: value
+               }
             """.trimIndent(),
             """
-              ${'\t'}key: value
-            """.trimIndent()
+            ${'\t'}key: value
+            """.trimIndent(),
         )
 
         doFullFormatTest(
             """
-                list:
-                        - first
-                    - second
-                            - third
+            list:
+                    - first
+                - second
+                        - third
             """.trimIndent(),
             """
-                ${'\t'}list:
-                ${'\t'}${'\t'}- first
-                ${'\t'}${'\t'}- second
-                ${'\t'}${'\t'}- third
-            """.trimIndent()
+            ${'\t'}list:
+            ${'\t'}${'\t'}- first
+            ${'\t'}${'\t'}- second
+            ${'\t'}${'\t'}- third
+            """.trimIndent(),
         )
     }
 
@@ -200,16 +205,23 @@ class KsonExternalFormatterTest : BasePlatformTestCase() {
      * This method does full reformat of the given [textBefore] and asserts that it matches
      * [expectedTextAfter].
      */
-    private fun doFullFormatTest(textBefore: String, expectedTextAfter: String) {
+    private fun doFullFormatTest(
+        textBefore: String,
+        expectedTextAfter: String,
+    ) {
         val file: PsiFile = myFixture.configureByText("A.kson", textBefore)
 
         CommandProcessor.getInstance().executeCommand(project, {
             ApplicationManager.getApplication().runWriteAction {
-                CodeStyle.doWithTemporarySettings(project, settings, Runnable {
-                    val rangeToUse = file.textRange
-                    val styleManager = CodeStyleManager.getInstance(project)
-                    styleManager.reformatText(file, rangeToUse.startOffset, rangeToUse.endOffset)
-                })
+                CodeStyle.doWithTemporarySettings(
+                    project,
+                    settings,
+                    Runnable {
+                        val rangeToUse = file.textRange
+                        val styleManager = CodeStyleManager.getInstance(project)
+                        styleManager.reformatText(file, rangeToUse.startOffset, rangeToUse.endOffset)
+                    },
+                )
             }
         }, "", "")
 

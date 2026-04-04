@@ -3,20 +3,21 @@ package org.kson.tooling.cli
 import com.github.ajalt.clikt.core.*
 import com.github.ajalt.clikt.parameters.options.versionOption
 import org.kson.tooling.cli.commands.JsonCommand
-import org.kson.tooling.cli.commands.YamlCommand
-import org.kson.tooling.cli.commands.ValidateCommand
 import org.kson.tooling.cli.commands.KsonFormatCommand
+import org.kson.tooling.cli.commands.ValidateCommand
+import org.kson.tooling.cli.commands.YamlCommand
 import org.kson.tooling.cli.generated.CLI_DISPLAY_NAME
-import org.kson.tooling.cli.generated.FILE_EXTENSION
 import org.kson.tooling.cli.generated.CLI_NAME
+import org.kson.tooling.cli.generated.FILE_EXTENSION
 import org.kson.tooling.cli.generated.KSON_VERSION
-
 
 class KsonCli : CliktCommand(name = CLI_NAME) {
     init {
         versionOption(KSON_VERSION, names = setOf("--version", "-V"))
     }
-    override fun help(context: Context) = """
+
+    override fun help(context: Context) =
+        """
         |$CLI_DISPLAY_NAME CLI - A tool for working with $CLI_DISPLAY_NAME files.
         |
         |$CLI_DISPLAY_NAME is a human-friendly data serialization format that supports JSON and YAML conversion.
@@ -42,7 +43,7 @@ class KsonCli : CliktCommand(name = CLI_NAME) {
         |${"\u0085"}  cat data.$FILE_EXTENSION | $CLI_NAME json
         |
         |For more help on a specific command, use: $CLI_NAME <command> --help
-    """.trimMargin()
+        """.trimMargin()
 
     init {
         context {
@@ -60,6 +61,5 @@ fun main(args: Array<String>) {
             ValidateCommand(),
             JsonCommand(),
             YamlCommand(),
-        )
-        .main(args)
+        ).main(args)
 }

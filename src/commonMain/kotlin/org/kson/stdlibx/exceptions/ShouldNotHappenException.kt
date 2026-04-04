@@ -5,4 +5,6 @@ package org.kson.stdlibx.exceptions
  *
  * @param whyNot the reason why we believe that this code path should never be hit
  */
-class ShouldNotHappenException(whyNot: String) : RuntimeException("This should not happen:\n$whyNot")
+class ShouldNotHappenException(
+    whyNot: String,
+) : RuntimeException("This should not happen:\n$whyNot")

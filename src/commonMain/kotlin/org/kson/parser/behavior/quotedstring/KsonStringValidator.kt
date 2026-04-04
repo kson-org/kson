@@ -34,13 +34,19 @@ import org.kson.stdlibx.exceptions.FatalParseException
  * - Illegal control characters (0x00-0x1F except whitespace: `\n`, `\r`, `\t`)
  */
 class KsonStringValidator {
-    fun validate(ast: KsonRoot, messageSink: MessageSink) {
+    fun validate(
+        ast: KsonRoot,
+        messageSink: MessageSink,
+    ) {
         if (ast is KsonRootImpl) {
             validateNode(ast.rootNode, messageSink)
         }
     }
 
-    private fun validateNode(node: KsonValueNode, messageSink: MessageSink) {
+    private fun validateNode(
+        node: KsonValueNode,
+        messageSink: MessageSink,
+    ) {
         when (node) {
             is ObjectNode -> {
                 node.properties.forEach { property ->
@@ -76,13 +82,17 @@ class KsonStringValidator {
             // No validation needed for other node types
             is UnquotedStringNode,
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
-            is KsonValueNodeError -> {
+            is KsonValueNodeError,
+            -> {
                 // No string validation needed
             }
         }
     }
 
-    private fun validateQuotedString(node: QuotedStringNode, messageSink: MessageSink) {
+    private fun validateQuotedString(
+        node: QuotedStringNode,
+        messageSink: MessageSink,
+    ) {
         val rawContent = node.rawStringContent
         validateRawStringContent(rawContent, node.location, messageSink)
     }
@@ -94,7 +104,11 @@ class KsonStringValidator {
      * @param baseLocation The location of the STRING_CONTENT token in the source
      * @param messageSink The sink for reporting validation errors
      */
-    private fun validateRawStringContent(rawContent: String, baseLocation: Location, messageSink: MessageSink) {
+    private fun validateRawStringContent(
+        rawContent: String,
+        baseLocation: Location,
+        messageSink: MessageSink,
+    ) {
         val scanner = StringContentScanner(rawContent, baseLocation)
 
         while (!scanner.eof()) {
@@ -133,22 +147,30 @@ class KsonStringValidator {
 
                     val escapeText = escapeBuilder.toString()
                     if (!isValidUnicodeEscape(escapeText)) {
-                        val errorLocation = Location.create(
-                            escapeStartLocation.start.line, escapeStartLocation.start.column,
-                            escapeStartLocation.start.line, escapeStartLocation.start.column + escapeText.length,
-                            escapeStartLocation.startOffset, escapeStartLocation.startOffset + escapeText.length
-                        )
+                        val errorLocation =
+                            Location.create(
+                                escapeStartLocation.start.line,
+                                escapeStartLocation.start.column,
+                                escapeStartLocation.start.line,
+                                escapeStartLocation.start.column + escapeText.length,
+                                escapeStartLocation.startOffset,
+                                escapeStartLocation.startOffset + escapeText.length,
+                            )
                         messageSink.error(errorLocation, MessageType.STRING_BAD_UNICODE_ESCAPE.create(escapeText))
                     }
                 } else {
                     // Regular escape - check if it's valid
                     if (!isValidStringEscape(nextChar)) {
                         val escapeText = "\\$nextChar"
-                        val errorLocation = Location.create(
-                            escapeStartLocation.start.line, escapeStartLocation.start.column,
-                            escapeStartLocation.start.line, escapeStartLocation.start.column + 2,
-                            escapeStartLocation.startOffset, escapeStartLocation.startOffset + 2
-                        )
+                        val errorLocation =
+                            Location.create(
+                                escapeStartLocation.start.line,
+                                escapeStartLocation.start.column,
+                                escapeStartLocation.start.line,
+                                escapeStartLocation.start.column + 2,
+                                escapeStartLocation.startOffset,
+                                escapeStartLocation.startOffset + 2,
+                            )
                         messageSink.error(errorLocation, MessageType.STRING_BAD_ESCAPE.create(escapeText))
                     }
                     scanner.advance() // consume the escaped character
@@ -160,13 +182,9 @@ class KsonStringValidator {
         }
     }
 
-    private fun isWhitespace(char: Char?): Boolean {
-        return char == ' ' || char == '\n' || char == '\r' || char == '\t'
-    }
+    private fun isWhitespace(char: Char?): Boolean = char == ' ' || char == '\n' || char == '\r' || char == '\t'
 
-    private fun isValidStringEscape(escapedChar: Char): Boolean {
-        return escapedChar in validStringEscapes
-    }
+    private fun isValidStringEscape(escapedChar: Char): Boolean = escapedChar in validStringEscapes
 
     private fun isValidUnicodeEscape(unicodeEscapeText: String): Boolean {
         if (!unicodeEscapeText.startsWith("\\u")) {
@@ -197,18 +215,19 @@ class KsonStringValidator {
      */
     private class StringContentScanner(
         private val source: String,
-        baseLocation: Location
+        baseLocation: Location,
     ) {
         private var currentIndex = 0
         private var currentLine = baseLocation.start.line
         private var currentColumn = baseLocation.start.column
         private var currentOffset = baseLocation.startOffset
 
-        fun peek(): Char = if (!eof()) {
-            source[currentIndex]
-        } else {
-            throw RuntimeException("`eof()` should be checked before calling this")
-        }
+        fun peek(): Char =
+            if (!eof()) {
+                source[currentIndex]
+            } else {
+                throw RuntimeException("`eof()` should be checked before calling this")
+            }
 
         fun advance() {
             if (!eof()) {
@@ -225,11 +244,15 @@ class KsonStringValidator {
 
         fun eof(): Boolean = currentIndex >= source.length
 
-        fun currentLocation(length: Int = 1): Location = Location.create(
-            currentLine, currentColumn,
-            currentLine, currentColumn + length,
-            currentOffset, currentOffset + length
-        )
+        fun currentLocation(length: Int = 1): Location =
+            Location.create(
+                currentLine,
+                currentColumn,
+                currentLine,
+                currentColumn + length,
+                currentOffset,
+                currentOffset + length,
+            )
     }
 }
 
@@ -238,7 +261,28 @@ class KsonStringValidator {
  * but is validated separately against [validHexChars]
  */
 private val validStringEscapes = setOf('\'', '"', '\\', '/', 'b', 'f', 'n', 'r', 't')
-private val validHexChars = setOf(
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'
-)
+private val validHexChars =
+    setOf(
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+    )

@@ -6,22 +6,23 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EmbedContentTransformerTest {
-
     @Test
     fun testSimpleSingleLineNoEscapesNoIndent() {
         val rawEmbedContent = "hello"
-        val baseLocation = Location(
-            Coordinates(10, 5),
-            Coordinates(10, 10),
-            100,
-            105
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 5),
+                Coordinates(10, 10),
+                100,
+                105,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         // Verify no transformation occurred
         assertEquals("hello", transformer.processedContent)
@@ -40,18 +41,20 @@ class EmbedContentTransformerTest {
     fun testSingleLineWithEscape() {
         val rawEmbedContent = """{ "key": "val%\%ue" }"""
         val processed = """{ "key": "val%%ue" }"""
-        val baseLocation = Location(
-            Coordinates(5, 0),
-            Coordinates(5, rawEmbedContent.length),
-            50,
-            50 + rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 0),
+                Coordinates(5, rawEmbedContent.length),
+                50,
+                50 + rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -67,26 +70,32 @@ class EmbedContentTransformerTest {
 
     @Test
     fun testMultiLineWithUniformIndent() {
-        val rawEmbedContent = """|    {
+        val rawEmbedContent =
+            """|    {
                                  |      "key": "value"
-                                 |    }""".trimMargin()
+                                 |    }
+            """.trimMargin()
         // Processed (indent trimmed):
-        val processed = """|{
+        val processed =
+            """|{
                            |  "key": "value"
-                           |}""".trimMargin()
+                           |}
+            """.trimMargin()
 
-        val baseLocation = Location(
-            Coordinates(10, 0),
-            Coordinates(12, 5),
-            100,
-            100 + rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 0),
+                Coordinates(12, 5),
+                100,
+                100 + rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -103,18 +112,20 @@ class EmbedContentTransformerTest {
         val rawEmbedContent = "    line 1\n    line %\\% 2\n    line 3"
         val processed = "line 1\nline %% 2\nline 3"
 
-        val baseLocation = Location(
-            Coordinates(5, 0),
-            Coordinates(7, 10),
-            50,
-            50 + rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 0),
+                Coordinates(7, 10),
+                50,
+                50 + rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -132,18 +143,20 @@ class EmbedContentTransformerTest {
     fun testOffsetBasedAPI() {
         val rawEmbedContent = "  hello"
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, 7),
-            0,
-            7
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, 7),
+                0,
+                7,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -161,28 +174,31 @@ class EmbedContentTransformerTest {
     fun testLineColumnBasedAPI() {
         val rawEmbedContent = "  line 1\n  line 2"
         val processed = "line 1\nline 2"
-        val baseLocation = Location(
-            Coordinates(10, 0),
-            Coordinates(11, 8),
-            100,
-            118
-        )
+        val baseLocation =
+            Location(
+                Coordinates(10, 0),
+                Coordinates(11, 8),
+                100,
+                118,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
         // Map line 1, columns 0-4 in processed ("line")
-        val result = transformer.mapToOriginal(
-            startLine = 1,
-            startColumn = 0,
-            endLine = 1,
-            endColumn = 4
-        )
+        val result =
+            transformer.mapToOriginal(
+                startLine = 1,
+                startColumn = 0,
+                endLine = 1,
+                endColumn = 4,
+            )
 
         // Should map to line 11, columns 2-6 in original
         assertEquals(Coordinates(11, 2), result.start)
@@ -193,18 +209,20 @@ class EmbedContentTransformerTest {
     fun testEmptyContent() {
         val rawEmbedContent = ""
         val processed = ""
-        val baseLocation = Location(
-            Coordinates(5, 10),
-            Coordinates(5, 10),
-            100,
-            100
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 10),
+                Coordinates(5, 10),
+                100,
+                100,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -221,18 +239,20 @@ class EmbedContentTransformerTest {
     fun testMultipleEscapesOnSameLine() {
         val rawEmbedContent = """a%\%b%\%c"""
         val processed = "a%%b%%c"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawEmbedContent.length),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawEmbedContent.length),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -250,18 +270,20 @@ class EmbedContentTransformerTest {
     fun testEscapeAtStartOfContent() {
         val rawEmbedContent = """%\%hello"""
         val processed = "%%hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawEmbedContent.length),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawEmbedContent.length),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -277,18 +299,20 @@ class EmbedContentTransformerTest {
     fun testCombinedEscapesAndIndent() {
         val rawEmbedContent = """    a%\%b"""
         val processed = "a%%b"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawEmbedContent.length),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawEmbedContent.length),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -305,18 +329,20 @@ class EmbedContentTransformerTest {
         val rawEmbedContent = "  line1\n    line2\n  line3"
         val processed = "line1\n  line2\nline3"
 
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(2, 8),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(2, 8),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -331,18 +357,20 @@ class EmbedContentTransformerTest {
     fun testZeroLengthRange() {
         val rawEmbedContent = "  hello"
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, 7),
-            0,
-            7
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, 7),
+                0,
+                7,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -360,18 +388,20 @@ class EmbedContentTransformerTest {
     fun testDoubleEscapedDelimiter() {
         val rawEmbedContent = "%\\\\\\%"
         val processed = "%\\\\%"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawEmbedContent.length),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawEmbedContent.length),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -387,18 +417,20 @@ class EmbedContentTransformerTest {
         // Raw content ends with \n followed by whitespace only (close delim on own line)
         val rawEmbedContent = "    hello\n    "
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(1, 4),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(1, 4),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -408,18 +440,20 @@ class EmbedContentTransformerTest {
         // Raw content does not end with \n — close delim is inline
         val rawEmbedContent = "    hello"
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(0, rawEmbedContent.length),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(0, rawEmbedContent.length),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -429,18 +463,20 @@ class EmbedContentTransformerTest {
         // Raw content has newlines, but non-whitespace after the last \n — close delim is inline
         val rawEmbedContent = "  hello\n  world"
         val processed = "hello\nworld"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(1, 7),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(1, 7),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -451,18 +487,20 @@ class EmbedContentTransformerTest {
         // Content should preserve the inner \n
         val rawEmbedContent = "    hello\n    \n    "
         val processed = "hello\n"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(2, 4),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(2, 4),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -473,18 +511,20 @@ class EmbedContentTransformerTest {
         // produces just the spaces as content
         val rawEmbedContent = "      \n  "
         val processed = "    "
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(1, 2),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(1, 2),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -494,18 +534,20 @@ class EmbedContentTransformerTest {
         // Close delim on own line with mixed whitespace (tabs, CR)
         val rawEmbedContent = "  hello\n  \t\r"
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(1, 3),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(1, 3),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
     }
@@ -515,18 +557,20 @@ class EmbedContentTransformerTest {
         // Verify source mapping still works when trailing newline is stripped
         val rawEmbedContent = "    hello\n    "
         val processed = "hello"
-        val baseLocation = Location(
-            Coordinates(5, 0),
-            Coordinates(6, 4),
-            50,
-            50 + rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(5, 0),
+                Coordinates(6, 4),
+                50,
+                50 + rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 
@@ -545,18 +589,20 @@ class EmbedContentTransformerTest {
         // Multi-line content with trailing newline stripped — verify mapping across line boundary
         val rawEmbedContent = "  line1\n  line2\n  "
         val processed = "line1\nline2"
-        val baseLocation = Location(
-            Coordinates(0, 0),
-            Coordinates(2, 2),
-            0,
-            rawEmbedContent.length
-        )
+        val baseLocation =
+            Location(
+                Coordinates(0, 0),
+                Coordinates(2, 2),
+                0,
+                rawEmbedContent.length,
+            )
 
-        val transformer = EmbedContentTransformer(
-            rawContent = rawEmbedContent,
-            embedDelim = EmbedDelim.Percent,
-            rawLocation = baseLocation
-        )
+        val transformer =
+            EmbedContentTransformer(
+                rawContent = rawEmbedContent,
+                embedDelim = EmbedDelim.Percent,
+                rawLocation = baseLocation,
+            )
 
         assertEquals(processed, transformer.processedContent)
 

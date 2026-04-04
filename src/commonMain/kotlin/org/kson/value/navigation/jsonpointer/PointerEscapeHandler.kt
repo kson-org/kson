@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType.*
@@ -12,8 +12,8 @@ internal object PointerEscapeHandler {
     private const val PATH_SEPARATOR = '/'
     private const val RFC_ESCAPE_CHAR = '~'
     private const val BACKSLASH_ESCAPE = '\\'
-    private const val TILDE_ESCAPE = '0'  // ~0 represents '~'
-    private const val SLASH_ESCAPE = '1'  // ~1 represents '/'
+    private const val TILDE_ESCAPE = '0' // ~0 represents '~'
+    private const val SLASH_ESCAPE = '1' // ~1 represents '/'
     private const val WILDCARD_CHAR = '*'
     private const val SINGLE_CHAR_WILDCARD = '?'
 
@@ -53,11 +53,11 @@ internal object PointerEscapeHandler {
         return when (val nextChar = scanner.peek()) {
             TILDE_ESCAPE -> {
                 scanner.advance()
-                EscapeResult.Success(RFC_ESCAPE_CHAR)  // ~0 represents '~'
+                EscapeResult.Success(RFC_ESCAPE_CHAR) // ~0 represents '~'
             }
             SLASH_ESCAPE -> {
                 scanner.advance()
-                EscapeResult.Success(PATH_SEPARATOR)  // ~1 represents '/'
+                EscapeResult.Success(PATH_SEPARATOR) // ~1 represents '/'
             }
             else -> {
                 EscapeResult.Failure(JSON_POINTER_INVALID_ESCAPE.create(nextChar.toString()))
@@ -89,7 +89,7 @@ internal object PointerEscapeHandler {
         return when (val nextChar = scanner.peek()) {
             WILDCARD_CHAR, SINGLE_CHAR_WILDCARD, BACKSLASH_ESCAPE -> {
                 scanner.advance()
-                EscapeResult.Success(nextChar)  // \*, \?, \\ represent literal *, ?, \
+                EscapeResult.Success(nextChar) // \*, \?, \\ represent literal *, ?, \
             }
             else -> {
                 EscapeResult.Failure(JSON_POINTER_INVALID_ESCAPE.create(nextChar.toString()))
@@ -105,12 +105,16 @@ internal object PointerEscapeHandler {
          * Successfully processed escape sequence
          * @property char The unescaped character
          */
-        data class Success(val char: Char) : EscapeResult()
+        data class Success(
+            val char: Char,
+        ) : EscapeResult()
 
         /**
          * Failed to process escape sequence
          * @property error The error message, or null if this wasn't an escape sequence
          */
-        data class Failure(val error: Message?) : EscapeResult()
+        data class Failure(
+            val error: Message?,
+        ) : EscapeResult()
     }
 }

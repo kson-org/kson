@@ -6,16 +6,24 @@ import org.kson.validation.Validator
 import org.kson.value.*
 
 // schema todo capture file/location info from schema to link back to schema def?
-interface JsonSchemaValidator: Validator {
+interface JsonSchemaValidator : Validator {
     /**
      * Validates that the given [ksonValue] satisfies this [JsonNumberValidator].  Logs any validation errors to the
      * given [messageSink]
      */
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    )
 }
 
 abstract class JsonNumberValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
+    final override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
         if (ksonValue !is KsonNumber) {
             return
         }
@@ -23,11 +31,18 @@ abstract class JsonNumberValidator : JsonSchemaValidator {
         validateNumber(ksonValue, messageSink)
     }
 
-    abstract fun validateNumber(node: KsonNumber, messageSink: MessageSink)
+    abstract fun validateNumber(
+        node: KsonNumber,
+        messageSink: MessageSink,
+    )
 }
 
 abstract class JsonArrayValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
+    final override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
         if (ksonValue !is KsonList) {
             return
         }
@@ -35,27 +50,42 @@ abstract class JsonArrayValidator : JsonSchemaValidator {
         validateArray(ksonValue, messageSink)
     }
 
-    abstract fun validateArray(node: KsonList, messageSink: MessageSink)
+    abstract fun validateArray(
+        node: KsonList,
+        messageSink: MessageSink,
+    )
 }
 
 abstract class JsonObjectValidator : JsonSchemaValidator {
-    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
-        val ksonObject = if (ksonValue is KsonObject)
-            ksonValue
-        else if (ksonValue is EmbedBlock) {
-            ksonValue.asKsonObject()
-        } else {
-            return
-        }
+    final override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
+        val ksonObject =
+            if (ksonValue is KsonObject) {
+                ksonValue
+            } else if (ksonValue is EmbedBlock) {
+                ksonValue.asKsonObject()
+            } else {
+                return
+            }
 
         validateObject(ksonObject, messageSink)
     }
 
-    abstract fun validateObject(node: KsonObject, messageSink: MessageSink)
+    abstract fun validateObject(
+        node: KsonObject,
+        messageSink: MessageSink,
+    )
 }
 
 abstract class JsonStringValidator : JsonSchemaValidator {
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
         if (ksonValue !is KsonString) {
             return
         }
@@ -63,7 +93,10 @@ abstract class JsonStringValidator : JsonSchemaValidator {
         validateString(ksonValue, messageSink)
     }
 
-    abstract fun validateString(node: KsonString, messageSink: MessageSink)
+    abstract fun validateString(
+        node: KsonString,
+        messageSink: MessageSink,
+    )
 
     /**
      * Count Unicode code points in a string, not UTF-16 code units.
@@ -74,13 +107,14 @@ abstract class JsonStringValidator : JsonSchemaValidator {
         var index = 0
         while (index < str.length) {
             val char = str[index]
-            index += if (char.isHighSurrogate() && index + 1 < str.length && str[index + 1].isLowSurrogate()) {
-                // This is a surrogate pair, count as one code point
-                2
-            } else {
-                // Regular character, count as one code point
-                1
-            }
+            index +=
+                if (char.isHighSurrogate() && index + 1 < str.length && str[index + 1].isLowSurrogate()) {
+                    // This is a surrogate pair, count as one code point
+                    2
+                } else {
+                    // Regular character, count as one code point
+                    1
+                }
             count++
         }
         return count

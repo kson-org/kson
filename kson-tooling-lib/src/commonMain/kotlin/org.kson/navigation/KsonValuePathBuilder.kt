@@ -7,7 +7,7 @@ import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
 import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
-import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
 import org.kson.walker.navigateToLocationWithPointer
@@ -20,7 +20,7 @@ import org.kson.walker.navigateToLocationWithPointer
  */
 private data class TokenContext(
     val lastToken: Token?,
-    val isInsideToken: Boolean
+    val isInsideToken: Boolean,
 )
 
 /**
@@ -47,9 +47,8 @@ private data class TokenContext(
  */
 class KsonValuePathBuilder(
     private val document: ToolingDocument,
-    private val location: Coordinates
+    private val location: Coordinates,
 ) {
-
     /**
      * Builds a JSON Pointer from the document root to the target location.
      *
@@ -66,12 +65,18 @@ class KsonValuePathBuilder(
         val tokenContext = analyzeTokenContext(document.meaningfulTokens, location)
 
         // Determine the search position: use token start if available, otherwise location
-        val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
+        val searchPosition =
+            tokenContext.lastToken
+                ?.lexeme
+                ?.location
+                ?.start ?: location
 
         // Navigate to the target node and build the path via the AST walker
-        val navResult = AstNodeWalker.navigateToLocationWithPointer(
-            rootNode, searchPosition
-        ) ?: return JsonPointer.ROOT
+        val navResult =
+            AstNodeWalker.navigateToLocationWithPointer(
+                rootNode,
+                searchPosition,
+            ) ?: return JsonPointer.ROOT
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
@@ -80,7 +85,7 @@ class KsonValuePathBuilder(
             targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys,
-            meaningfulTokens = document.meaningfulTokens
+            meaningfulTokens = document.meaningfulTokens,
         )
     }
 
@@ -92,7 +97,7 @@ class KsonValuePathBuilder(
      */
     private fun analyzeTokenContext(
         tokens: List<Token>,
-        location: Coordinates
+        location: Coordinates,
     ): TokenContext {
         val lastToken = findLastTokenBeforeLocation(tokens, location)
         val isInsideToken = isPositionInsideToken(lastToken, location)
@@ -105,28 +110,26 @@ class KsonValuePathBuilder(
      */
     private fun findLastTokenBeforeLocation(
         tokens: List<Token>,
-        location: Coordinates
-    ): Token? {
-        return tokens
-            .dropLast(1)  // Exclude EOF token
+        location: Coordinates,
+    ): Token? =
+        tokens
+            .dropLast(1) // Exclude EOF token
             .lastOrNull { token ->
                 val tokenStart = token.lexeme.location.start
                 tokenStart.line < location.line ||
-                        (tokenStart.line == location.line && tokenStart.column <= location.column)
+                    (tokenStart.line == location.line && tokenStart.column <= location.column)
             }
-    }
 
     /**
      * Checks if the given position falls within the bounds of a token.
      */
     private fun isPositionInsideToken(
         token: Token?,
-        position: Coordinates
-    ): Boolean {
-        return token?.lexeme?.location?.let {
+        position: Coordinates,
+    ): Boolean =
+        token?.lexeme?.location?.let {
             Location.containsCoordinates(it, position)
         } ?: false
-    }
 
     /**
      * Finds the property name from the token stream that precedes a COLON token.
@@ -137,7 +140,10 @@ class KsonValuePathBuilder(
      * For STRING_CONTENT tokens (quoted keys), escape sequences are processed
      * to produce the logical property name.
      */
-    private fun findPropertyNameBeforeColon(colonToken: Token, meaningfulTokens: List<Token>): String? {
+    private fun findPropertyNameBeforeColon(
+        colonToken: Token,
+        meaningfulTokens: List<Token>,
+    ): String? {
         val colonIndex = meaningfulTokens.indexOf(colonToken)
         if (colonIndex <= 0) return null
         // Walk backwards to find the key token (skip STRING_CLOSE_QUOTE if present)
@@ -147,7 +153,7 @@ class KsonValuePathBuilder(
                 TokenType.UNQUOTED_STRING -> return token.lexeme.text
                 TokenType.STRING_CONTENT -> return QuotedStringContentTransformer(
                     token.lexeme.text,
-                    token.lexeme.location
+                    token.lexeme.location,
                 ).processedContent
 
                 TokenType.STRING_CLOSE_QUOTE -> continue // skip quote, look for content
@@ -163,7 +169,10 @@ class KsonValuePathBuilder(
      * immediately preceding [lastToken] is a COLON (handles the case where the cursor
      * lands on a COMMA or other delimiter right after an empty value position).
      */
-    private fun findNearestPrecedingColon(lastToken: Token, meaningfulTokens: List<Token>): Token? {
+    private fun findNearestPrecedingColon(
+        lastToken: Token,
+        meaningfulTokens: List<Token>,
+    ): Token? {
         if (lastToken.tokenType == TokenType.COLON) return lastToken
         val idx = meaningfulTokens.indexOf(lastToken)
         if (idx <= 0) return null
@@ -186,7 +195,7 @@ class KsonValuePathBuilder(
         targetNode: AstNode,
         isLocationInsideToken: Boolean,
         includePropertyKeys: Boolean,
-        meaningfulTokens: List<Token>
+        meaningfulTokens: List<Token>,
     ): JsonPointer {
         // Check if the nearest preceding colon indicates we're entering a value.
         // Only apply when the colon falls INSIDE the targetNode's bounds — this
@@ -198,36 +207,42 @@ class KsonValuePathBuilder(
         // different levels, e.g. {"name": {"name": }}).
         val colonToken = lastToken?.let { findNearestPrecedingColon(it, meaningfulTokens) }
         val colonPropertyName = colonToken?.let { findPropertyNameBeforeColon(it, meaningfulTokens) }
-        val isAfterColonAtParent = colonPropertyName != null &&
+        val isAfterColonAtParent =
+            colonPropertyName != null &&
                 AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                 Location.containsCoordinates(AstNodeWalker.getLocation(targetNode), colonToken.lexeme.location.start)
-        val tokens = when {
-            isAfterColonAtParent -> {
-                pointer.tokens + colonPropertyName
-            }
-            // Location is on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) and we're at the parent object
-            // This happens when location is in the middle of a property name like "user<caret>name"
-            isLocationInsideToken &&
-                    (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
+        val tokens =
+            when {
+                isAfterColonAtParent -> {
+                    pointer.tokens + colonPropertyName
+                }
+                // Location is on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) and we're at the parent object
+                // This happens when location is in the middle of a property name like "user<caret>name"
+                isLocationInsideToken &&
+                    (
+                        lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
                             lastToken?.tokenType == TokenType.STRING_OPEN_QUOTE ||
-                            lastToken?.tokenType == TokenType.STRING_CONTENT) &&
+                            lastToken?.tokenType == TokenType.STRING_CONTENT
+                    ) &&
                     AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                     includePropertyKeys -> {
-                // Extract the property name from the token, processing escapes for quoted keys
-                val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)
-                    QuotedStringContentTransformer(lastToken.lexeme.text, lastToken.lexeme.location).processedContent
-                else
-                    lastToken.lexeme.text
-                pointer.tokens + propertyName
+                    // Extract the property name from the token, processing escapes for quoted keys
+                    val propertyName =
+                        if (lastToken.tokenType == TokenType.STRING_CONTENT) {
+                            QuotedStringContentTransformer(lastToken.lexeme.text, lastToken.lexeme.location).processedContent
+                        } else {
+                            lastToken.lexeme.text
+                        }
+                    pointer.tokens + propertyName
+                }
+                // Location is outside the token - target the parent element (for completions)
+                // But keep the path as-is for definition lookups
+                !isLocationInsideToken && !includePropertyKeys -> {
+                    pointer.tokens.dropLast(1)
+                }
+                // Normal case - return path as-is
+                else -> pointer.tokens
             }
-            // Location is outside the token - target the parent element (for completions)
-            // But keep the path as-is for definition lookups
-            !isLocationInsideToken && !includePropertyKeys -> {
-                pointer.tokens.dropLast(1)
-            }
-            // Normal case - return path as-is
-            else -> pointer.tokens
-        }
         return JsonPointer.fromTokens(tokens)
     }
 }

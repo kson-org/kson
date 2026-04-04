@@ -1,8 +1,7 @@
 import nl.ochagavia.krossover.gradle.ReturnTypeMapping
-import org.kson.BinaryArtifactPaths
 import org.gradle.internal.os.OperatingSystem
+import org.kson.BinaryArtifactPaths
 import org.kson.GraalVmHelper
-
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
@@ -68,10 +67,19 @@ krossover {
     rust {
         jniSysModule = "kson_sys"
         outputDir = Path("${rootProject.projectDir}/lib-rust/kson/src/generated")
-        returnTypeMappings = listOf(
-            ReturnTypeMapping("org.kson.Result", "std::result::Result<result::Success, result::Failure>", "crate::kson_result_into_rust_result"),
-            ReturnTypeMapping("org.kson.SchemaResult", "std::result::Result<schema_result::Success, schema_result::Failure>", "crate::kson_schema_result_into_rust_result")
-        )
+        returnTypeMappings =
+            listOf(
+                ReturnTypeMapping(
+                    "org.kson.Result",
+                    "std::result::Result<result::Success, result::Failure>",
+                    "crate::kson_result_into_rust_result",
+                ),
+                ReturnTypeMapping(
+                    "org.kson.SchemaResult",
+                    "std::result::Result<schema_result::Success, schema_result::Failure>",
+                    "crate::kson_schema_result_into_rust_result",
+                ),
+            )
     }
 }
 
@@ -159,7 +167,6 @@ tasks.register("buildUniversalJsPackage") {
         // Ensure directory exists
         jsPackageDir.mkdirs()
 
-
         // Copy TypeScript definitions (from browser, they should be the same)
         copy {
             from(jsPackageDir.resolve("browser"))
@@ -168,39 +175,40 @@ tasks.register("buildUniversalJsPackage") {
         }
 
         // Write universal package.json
-        val packageJson = """
-        {
-          "name": "@kson_org/kson",
-          "version": $version,
-          "description": "KSON - Extended JSON format with comments and more",
-          "author": {
-            "name": "KSON Team",
-            "email": "kson@kson.org"
-          },
-          "repository": {
-            "type": "git",
-            "url": "https://github.com/kson-org/kson"
-          },
-          "license": "Apache-2.0",
-          "keywords": ["json", "kson", "yaml", "configuration"],
-          "exports": {
-            ".": {
+        val packageJson =
+            """
+            {
+              "name": "@kson_org/kson",
+              "version": $version,
+              "description": "KSON - Extended JSON format with comments and more",
+              "author": {
+                "name": "KSON Team",
+                "email": "kson@kson.org"
+              },
+              "repository": {
+                "type": "git",
+                "url": "https://github.com/kson-org/kson"
+              },
+              "license": "Apache-2.0",
+              "keywords": ["json", "kson", "yaml", "configuration"],
+              "exports": {
+                ".": {
+                  "browser": "./browser/kson-kson-lib.mjs",
+                  "node": "./node/kson-kson-lib.mjs",
+                  "types": "./kson-kson-lib.d.ts"
+                }
+              },
+              "main": "./node/kson-kson-lib.mjs",
               "browser": "./browser/kson-kson-lib.mjs",
-              "node": "./node/kson-kson-lib.mjs",
-              "types": "./kson-kson-lib.d.ts"
+              "types": "./kson-kson-lib.d.ts",
+              "files": [
+                "browser/",
+                "node/",
+                "*.d.ts",
+                "README.md"
+              ]
             }
-          },
-          "main": "./node/kson-kson-lib.mjs",
-          "browser": "./browser/kson-kson-lib.mjs",
-          "types": "./kson-kson-lib.d.ts",
-          "files": [
-            "browser/",
-            "node/",
-            "*.d.ts",
-            "README.md"
-          ]
-        }
-        """.trimIndent()
+            """.trimIndent()
 
         jsPackageDir.resolve("package.json").writeText(packageJson)
 
@@ -284,55 +292,67 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     outputs.file(nativeImageOutputDir.resolve(BinaryArtifactPaths.binaryFileName()))
 
     // Configure the command at configuration time using providers
-    command.set(provider {
-        val graalHome = GraalVmHelper.getGraalVMHome()
+    command.set(
+        provider {
+            val graalHome = GraalVmHelper.getGraalVMHome()
 
-        val nativeImageExe = file("${graalHome}/bin/native-image${GraalVmHelper.getNativeImageExtension()}")
-        if (!nativeImageExe.exists()) {
-            throw GradleException("native-image not found at $nativeImageExe. Ensure GraalVM JDK is properly installed.")
-        }
-
-        // Ensure build dir exists
-        val buildDir = nativeImageOutputDir.toPath()
-        buildDir.createDirectories()
-        val buildArtifactPath = buildDir.resolve(BinaryArtifactPaths.binaryFileNameWithoutExtension()).toAbsolutePath().pathString
-
-        // Gather JAR files with the classes we use
-        val ksonLibJar = ksonLibJarTask.get().archiveFile.get().asFile
-
-        // Get all runtime classpath dependencies (includes all transitive dependencies)
-        val runtimeClasspathJars = configurations.getByName("jvmRuntimeClasspath")
-            .resolvedConfiguration
-            .resolvedArtifacts
-            .map { it.file }
-
-        // Ensure ksonLib is at the front of the classpath, followed by all dependencies
-        val jars = listOf(ksonLibJar) + runtimeClasspathJars
-        jars.forEach {
-            if (!it.exists()) {
-                throw GradleException("Missing JAR file. It should have been present at $it")
+            val nativeImageExe = file("$graalHome/bin/native-image${GraalVmHelper.getNativeImageExtension()}")
+            if (!nativeImageExe.exists()) {
+                throw GradleException("native-image not found at $nativeImageExe. Ensure GraalVM JDK is properly installed.")
             }
-        }
 
-        val cpSeparator = if (System.getProperty("os.name").lowercase().contains("win")) {
-            ";"
-        } else {
-            ":"
-        }
-        val classPath = jars.joinToString(cpSeparator)
+            // Ensure build dir exists
+            val buildDir = nativeImageOutputDir.toPath()
+            buildDir.createDirectories()
+            val buildArtifactPath = buildDir.resolve(BinaryArtifactPaths.binaryFileNameWithoutExtension()).toAbsolutePath().pathString
 
-        buildList {
-            add(nativeImageExe.absolutePath)
-            add("--shared")
-            add("-cp"); add(classPath)
-            add("-H:+UnlockExperimentalVMOptions") // Necessary to use JNIConfigurationFiles option below
-            add("-H:JNIConfigurationFiles=$jniConfig")
-            // Pin the macOS deployment target so the dylib doesn't inherit the host's
-            // macOS version, which would make wheels unnecessarily require the latest OS.
-            if (OperatingSystem.current().isMacOsX) {
-                add("-H:NativeLinkerOption=-mmacosx-version-min=11.0")
+            // Gather JAR files with the classes we use
+            val ksonLibJar =
+                ksonLibJarTask
+                    .get()
+                    .archiveFile
+                    .get()
+                    .asFile
+
+            // Get all runtime classpath dependencies (includes all transitive dependencies)
+            val runtimeClasspathJars =
+                configurations
+                    .getByName("jvmRuntimeClasspath")
+                    .resolvedConfiguration
+                    .resolvedArtifacts
+                    .map { it.file }
+
+            // Ensure ksonLib is at the front of the classpath, followed by all dependencies
+            val jars = listOf(ksonLibJar) + runtimeClasspathJars
+            jars.forEach {
+                if (!it.exists()) {
+                    throw GradleException("Missing JAR file. It should have been present at $it")
+                }
             }
-            add("-o"); add(buildArtifactPath)
-        }
-    })
+
+            val cpSeparator =
+                if (System.getProperty("os.name").lowercase().contains("win")) {
+                    ";"
+                } else {
+                    ":"
+                }
+            val classPath = jars.joinToString(cpSeparator)
+
+            buildList {
+                add(nativeImageExe.absolutePath)
+                add("--shared")
+                add("-cp")
+                add(classPath)
+                add("-H:+UnlockExperimentalVMOptions") // Necessary to use JNIConfigurationFiles option below
+                add("-H:JNIConfigurationFiles=$jniConfig")
+                // Pin the macOS deployment target so the dylib doesn't inherit the host's
+                // macOS version, which would make wheels unnecessarily require the latest OS.
+                if (OperatingSystem.current().isMacOsX) {
+                    add("-H:NativeLinkerOption=-mmacosx-version-min=11.0")
+                }
+                add("-o")
+                add(buildArtifactPath)
+            }
+        },
+    )
 }

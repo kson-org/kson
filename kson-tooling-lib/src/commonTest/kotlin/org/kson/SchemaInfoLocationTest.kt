@@ -6,11 +6,13 @@ import kotlin.test.*
  * Tests for [KsonTooling] hover information functionality
  */
 class SchemaInfoLocationTest {
-
     /**
      * Helper to get completions at the <caret> position in the document
      */
-    private fun getInfoAtCaret(schema: String, documentWithCaret: String): String? {
+    private fun getInfoAtCaret(
+        schema: String,
+        documentWithCaret: String,
+    ): String? {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
@@ -28,7 +30,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_simpleStringProperty() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -42,12 +45,16 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            name: <caret>John
-            age: 30
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                name: <caret>John
+                age: 30
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("The person's name"))
@@ -56,7 +63,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_numberProperty() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -71,12 +79,16 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            name: John
-            age: <caret>30
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                name: John
+                age: <caret>30
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("The person's age"))
@@ -87,7 +99,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_withTitle() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -98,11 +111,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            username: <caret>johndoe
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                username: <caret>johndoe
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("**Username**"))
@@ -111,7 +128,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_withEnum() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -121,11 +139,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            status: <caret>active
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                status: <caret>active
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Allowed values:*"))
@@ -136,7 +158,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_withPattern() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -146,11 +169,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            email: '<caret>user@example.com'
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                email: '<caret>user@example.com'
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo, "Expected hover info but got null")
         assertTrue(hoverInfo.contains("*Pattern:*"))
@@ -158,7 +185,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_nestedObject() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -177,13 +205,17 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            person:
-              name: <caret>Alice
-              age: 25
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                person:
+                  name: <caret>Alice
+                  age: 25
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Person's name"))
@@ -192,7 +224,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_arrayItems() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -207,14 +240,18 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            tags:
-              - <caret>kotlin
-              - multiplatform
-              - json
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                tags:
+                  - <caret>kotlin
+                  - multiplatform
+                  - json
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("A tag value"))
@@ -225,7 +262,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_withDefault() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -236,11 +274,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            timeout: <caret>5000
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                timeout: <caret>5000
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Request timeout in milliseconds"))
@@ -249,7 +291,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_stringLengthConstraints() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -260,11 +303,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            password: <caret>secret123
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                password: <caret>secret123
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Min length:* 8"))
@@ -273,7 +320,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_arrayConstraints() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -287,13 +335,17 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            items:
-              - <caret>first
-              - second
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                items:
+                  - <caret>first
+                  - second
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Type:* `string`"))
@@ -301,16 +353,21 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_noSchemaForProperty() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {}
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            undefinedProp: <caret>value
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                undefinedProp: <caret>value
+                """.trimIndent(),
+            )
 
         // Should return empty string when no schema matches
         assertEquals("", hoverInfo)
@@ -318,7 +375,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_additionalProperties() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "additionalProperties": {
@@ -326,11 +384,15 @@ class SchemaInfoLocationTest {
                 "description": "Any additional string field"
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            customField: <caret>customValue
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                customField: <caret>customValue
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Any additional string field"))
@@ -339,7 +401,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_unionType() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -349,11 +412,15 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            value: <caret>123
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                value: <caret>123
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Can be either string or number"))
@@ -362,7 +429,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_deeplyNestedArray() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -378,17 +446,21 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            matrix:
-              -
-                - <caret>1
-                - 2
-              -
-                - 3
-                - 4
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                matrix:
+                  -
+                    - <caret>1
+                    - 2
+                  -
+                    - 3
+                    - 4
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("Matrix cell value"))
@@ -397,18 +469,23 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_invalidDocument() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // Error-tolerant parsing + AST-based navigation means we can still
         // navigate broken documents. The cursor is inside the root object,
         // so schema info for the object type is returned.
-        val hoverInfo = getInfoAtCaret(schema, """
-            {inva<caret>lid kson
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                {inva<caret>lid kson
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("object"))
@@ -416,7 +493,8 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_patternProperties() {
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "patternProperties": {
@@ -426,12 +504,16 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val hoverInfo = getInfoAtCaret(schema, """
-            field_1: <caret>value1
-            field_2: value2
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                field_1: <caret>value1
+                field_2: value2
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("A field matching the pattern"))
@@ -441,7 +523,8 @@ class SchemaInfoLocationTest {
     @Test
     fun testGetSchemaInfoAtLocation_refDefinition() {
         // Simplified test for $ref resolution
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -464,13 +547,17 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // This should resolve the $ref to #/$defs/Item and show the name field schema
-        val hoverInfo = getInfoAtCaret(schema, """
-            items:
-              - name: <caret>foo
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                items:
+                  - name: <caret>foo
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo, "Expected hover info for name field. Got null")
         assertTrue(hoverInfo.contains("Item name from ref"), "Expected description from resolved ref. Got: $hoverInfo")
@@ -480,7 +567,8 @@ class SchemaInfoLocationTest {
     @Test
     fun testGetSchemaInfoAtLocation_anyOf_combinedInfo() {
         // When multiple anyOf branches are valid, their info should be combined
-        val schema = """
+        val schema =
+            """
             {
               "type": "object",
               "properties": {
@@ -501,12 +589,16 @@ class SchemaInfoLocationTest {
                 }
               }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // Both anyOf branches accept strings, so both should be valid
-        val hoverInfo = getInfoAtCaret(schema, """
-            value: <caret>TEST
-        """.trimIndent())
+        val hoverInfo =
+            getInfoAtCaret(
+                schema,
+                """
+                value: <caret>TEST
+                """.trimIndent(),
+            )
 
         assertNotNull(hoverInfo, "Expected hover info for value field")
 

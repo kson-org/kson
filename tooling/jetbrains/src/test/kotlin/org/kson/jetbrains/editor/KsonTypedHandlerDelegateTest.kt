@@ -9,30 +9,30 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * This is the inverse operation to what is tested in [KsonBackspaceHandlerDelegateTest.testDeleteEmptyAngleBracketPairs]
      */
     fun testAngleBracketAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doCharTest(
                 "<caret>",
                 '<',
-                "<<caret>>"
+                "<<caret>>",
             )
 
             // should not auto-insert in comment block
             doCharTest(
                 "#    <caret>",
                 '<',
-                "#    <<caret>"
+                "#    <<caret>",
             )
 
             // should auto-insert below comment block
             doCharTest(
                 """
-                    # This is a commented line
-                    <caret>
+                # This is a commented line
+                <caret>
                 """.trimIndent(),
                 '<',
                 """
-                    # This is a commented line
-                    <<caret>>
+                # This is a commented line
+                <<caret>>
                 """.trimIndent(),
             )
 
@@ -40,36 +40,36 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
             doCharTest(
                 "#<caret>",
                 '<',
-                "#<<caret>"
+                "#<<caret>",
             )
 
             // should not auto-insert in a string
             doCharTest(
                 "\"<caret>\"",
                 '<',
-                "\"<<caret>\""
+                "\"<<caret>\"",
             )
 
             // should not auto-insert in a string
             doCharTest(
                 "\"  <caret>\"",
                 '<',
-                "\"  <<caret>\""
+                "\"  <<caret>\"",
             )
 
             // should not auto-insert if new character closes brackets
             doCharTest(
                 "<caret> >",
                 '<',
-                "<<caret> >"
+                "<<caret> >",
             )
         }
 
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), false) {
             doCharTest(
                 "<caret>",
                 '<',
-                "<<caret>"
+                "<<caret>",
             )
         }
     }
@@ -78,13 +78,13 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-insert closing angle brackets in non-Kson files `>`
      */
     fun testNonKsonAngleBracketAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doCharTest(
                 "<caret>",
                 '<',
                 "<<caret>",
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
         }
     }
@@ -97,13 +97,14 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
         for (delimiter in listOf(EmbedDelim.Percent, EmbedDelim.Dollar)) {
             val openDelim = delimiter.openDelimiter
             val closeDelimiter = delimiter.closeDelimiter
-            val altDelim = if (delimiter == EmbedDelim.Percent) {
-                EmbedDelim.Dollar
-            } else {
-                EmbedDelim.Percent
-            }
+            val altDelim =
+                if (delimiter == EmbedDelim.Percent) {
+                    EmbedDelim.Dollar
+                } else {
+                    EmbedDelim.Percent
+                }
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+            withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
                 doCharTest(
                     "<caret>",
                     openDelim,
@@ -127,7 +128,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 doCharTest(
                     "<caret>stuff",
                     openDelim,
-                    "$openDelim<caret>stuff"
+                    "$openDelim<caret>stuff",
                 )
 
                 // should not auto-insert if closing an embed block
@@ -179,7 +180,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                     ${altDelim.openDelimiter}
                         $openDelim<caret>
                     ${altDelim.closeDelimiter}
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
 
                 // should not auto-insert in commented line
@@ -190,52 +191,52 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                     openDelim,
                     """
                     #$openDelim<caret>
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
 
             doCharTest(
                 """
                     |key1: <caret>
-                    """.trimMargin(),
+                """.trimMargin(),
                 openDelim,
                 """
                     |key1: $openDelim<caret>
                     |  $closeDelimiter
-                    """.trimMargin()
+                """.trimMargin(),
             )
 
             doCharTest(
                 """
                     |key1:
                     |  key2: <caret>
-                    """.trimMargin(),
+                """.trimMargin(),
                 openDelim,
                 """
                     |key1:
                     |  key2: $openDelim<caret>
                     |    $closeDelimiter
-                    """.trimMargin()
+                """.trimMargin(),
             )
 
             doCharTest(
                 """
                     |key1: <caret>
                     |key2: value2
-                    """.trimMargin(),
+                """.trimMargin(),
                 openDelim,
                 """
                     |key1: $openDelim<caret>
                     |  $closeDelimiter
                     |key2: value2
-                    """.trimMargin()
+                """.trimMargin(),
             )
 
-            withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), false) {
+            withConfigSetting(ConfigProperty.AutoInsertPairBracked(), false) {
                 doCharTest(
                     "<caret>",
                     openDelim,
-                    "$openDelim<caret>"
+                    "$openDelim<caret>",
                 )
             }
         }
@@ -245,13 +246,13 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
      * Sanity check that we do NOT auto-insert closing embed delimiters in non-Kson files
      */
     fun testNonKsonEmbedDelimiterAutoInsert() {
-        withConfigSetting(ConfigProperty.AUTOINSERT_PAIR_BRACKET(), true) {
+        withConfigSetting(ConfigProperty.AutoInsertPairBracked(), true) {
             doCharTest(
                 "%<caret>",
                 EmbedDelim.Percent.char,
                 "%%<caret>",
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
 
             doCharTest(
@@ -259,7 +260,7 @@ class KsonTypedHandlerDelegateTest : KsonEditorActionTest() {
                 EmbedDelim.Dollar.char,
                 "$$<caret>",
                 // NOTE: this is NOT a Kson file
-                PlainTextFileType.INSTANCE
+                PlainTextFileType.INSTANCE,
             )
         }
     }

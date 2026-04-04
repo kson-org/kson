@@ -2,16 +2,16 @@ package org.kson.tools
 
 import org.kson.*
 import org.kson.KsonCore.parseToAst
-import org.kson.parser.Lexer
-import org.kson.parser.Token
-import org.kson.parser.TokenType
 import org.kson.ast.AstNode
 import org.kson.ast.EmbedBlockResolution
 import org.kson.ast.resolveEmbedBlocks
+import org.kson.parser.Lexer
+import org.kson.parser.Token
+import org.kson.parser.TokenType
 import org.kson.parser.TokenType.*
 import org.kson.parser.behavior.embedblock.EmbedBlockIndent
-import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
-import org.kson.value.navigation.json_pointer.JsonPointerGlob
+import org.kson.value.navigation.jsonpointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.jsonpointer.JsonPointerGlob
 
 /**
  * Format the given Kson source according to [formatterConfig]
@@ -19,21 +19,25 @@ import org.kson.value.navigation.json_pointer.JsonPointerGlob
  * @param ksonSource the Kson to format
  * @param formatterConfig the [KsonFormatterConfig] to apply when formatting
  */
-fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormatterConfig()): String {
+fun format(
+    ksonSource: String,
+    formatterConfig: KsonFormatterConfig = KsonFormatterConfig(),
+): String {
     if (ksonSource.isBlank()) return ""
 
     val astParseResult = parseToAst(ksonSource, CoreCompileConfig(ignoreErrors = true))
 
     // Pre-process: find all nodes that should be formatted as embed blocks
-    val embedBlockResolution = if (formatterConfig.embedBlockRules.isNotEmpty() && !astParseResult.hasErrors()) {
-        resolveEmbedBlocks(astParseResult.ast, formatterConfig.embedBlockRules)
-    } else {
-        EmbedBlockResolution.EMPTY
-    }
+    val embedBlockResolution =
+        if (formatterConfig.embedBlockRules.isNotEmpty() && !astParseResult.hasErrors()) {
+            resolveEmbedBlocks(astParseResult.ast, formatterConfig.embedBlockRules)
+        } else {
+            EmbedBlockResolution.EMPTY
+        }
 
     return KsonParseResult(
         astParseResult,
-        CompileTarget.Kson(preserveComments = true, formatterConfig, embedBlockResolution)
+        CompileTarget.Kson(preserveComments = true, formatterConfig, embedBlockResolution),
     ).kson ?: ksonSource
 }
 
@@ -51,16 +55,18 @@ enum class FormattingStyle {
  * @param tag Optional embed tag to include in the output
  * @param minLength Minimum string length — strings shorter than this won't be converted to embed blocks. Defaults to 0 (no restriction).
  */
-data class InternalEmbedRule @OptIn(ExperimentalJsonPointerGlobLanguage::class) constructor(
-    val pathPattern: JsonPointerGlob,
-    val tag: String? = null,
-    val minLength: Int = 0
-)
+data class InternalEmbedRule
+    @OptIn(ExperimentalJsonPointerGlobLanguage::class)
+    constructor(
+        val pathPattern: JsonPointerGlob,
+        val tag: String? = null,
+        val minLength: Int = 0,
+    )
 
 data class KsonFormatterConfig(
     val indentType: IndentType = IndentType.Space(2),
     val formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
-    val embedBlockRules: List<InternalEmbedRule> = emptyList()
+    val embedBlockRules: List<InternalEmbedRule> = emptyList(),
 )
 
 /**
@@ -78,7 +84,7 @@ data class KsonFormatterConfig(
  * @param indentType The [IndentType] to use for indentation
  */
 class IndentFormatter(
-    private val indentType: IndentType
+    private val indentType: IndentType,
 ) {
     /**
      * Indent the given source.  Uses the [indentType] this class was initialized with
@@ -92,9 +98,12 @@ class IndentFormatter(
      */
     @Deprecated(
         "This formatter is no long a good general purpose formatter. " +
-                "See the TODO in this class's doc for details"
+            "See the TODO in this class's doc for details",
     )
-    private fun indent(source: String, snippetNestingLevel: Int? = null): String {
+    private fun indent(
+        source: String,
+        snippetNestingLevel: Int? = null,
+    ): String {
         if (source.isBlank() && snippetNestingLevel == null) return ""
         val tokens = Lexer(source, gapFree = true).tokenize()
         val tokenLines = splitTokenLines(tokens)
@@ -136,17 +145,19 @@ class IndentFormatter(
                      * carefully preserved
                      */
                     EMBED_CONTENT -> {
-                        val embedContentIndent = if (line.subList(0, tokenIndex + 1).any {
-                                it.tokenType == COLON
-                            }) {
-                            /**
-                             * if our embed preamble is on the same line as an object key, we'll indent the embed
-                             * content on the next line
-                             */
-                            nesting.size + 1
-                        } else {
-                            nesting.size
-                        }
+                        val embedContentIndent =
+                            if (line.subList(0, tokenIndex + 1).any {
+                                    it.tokenType == COLON
+                                }
+                            ) {
+                                /**
+                                 * if our embed preamble is on the same line as an object key, we'll indent the embed
+                                 * content on the next line
+                                 */
+                                nesting.size + 1
+                            } else {
+                                nesting.size
+                            }
 
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
@@ -192,9 +203,10 @@ class IndentFormatter(
                          * on a line may trigger an immediate un-nest
                          */
                         if (line.subList(0, tokenIndex + 1).all {
-                                CLOSING_DELIMITERS.contains(it.tokenType)
-                                        || it.tokenType == WHITESPACE
-                            }) {
+                                CLOSING_DELIMITERS.contains(it.tokenType) ||
+                                    it.tokenType == WHITESPACE
+                            }
+                        ) {
                             if (nesting.lastOrNull() == COLON) {
                                 /**
                                  * If we spot a [COLON] nest as we're closing things, that must be closed too:
@@ -241,14 +253,20 @@ class IndentFormatter(
         return result.toString()
     }
 
-    fun getCurrentLineIndentLevel(prevLine: String, currentLine: String = ""): Int {
+    fun getCurrentLineIndentLevel(
+        prevLine: String,
+        currentLine: String = "",
+    ): Int {
         if (prevLine.isEmpty()) return 0
 
         val sourceLines = prevLine.split('\n')
-        val lastLineIndentLevel = if (sourceLines.isNotEmpty()) {
-            val lastLine = sourceLines.last()
-            countIndentLevels(lastLine)
-        } else 0
+        val lastLineIndentLevel =
+            if (sourceLines.isNotEmpty()) {
+                val lastLine = sourceLines.last()
+                countIndentLevels(lastLine)
+            } else {
+                0
+            }
 
         val indentedResult = indent(prevLine + "\n" + currentLine, lastLineIndentLevel)
         val resultLines = indentedResult.split('\n')
@@ -271,21 +289,26 @@ class IndentFormatter(
     /**
      * Prefixes the given [content] with an indent computed from [nestingLevel]
      */
-    private fun prefixWithIndent(content: String, nestingLevel: Int, keepTrailingIndent: Boolean = false): String {
+    private fun prefixWithIndent(
+        content: String,
+        nestingLevel: Int,
+        keepTrailingIndent: Boolean = false,
+    ): String {
         val indent = indentType.indentString.repeat(nestingLevel)
         val lines = content.split('\n')
 
-        return lines.mapIndexed { index, line ->
-            /**
-             * If [content] ends in a newline, the next line does not belong to it,
-             * so don't indent it unless our caller demands it
-             */
-            if (!keepTrailingIndent && index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
-                line
-            } else {
-                indent + line
-            }
-        }.joinToString("\n")
+        return lines
+            .mapIndexed { index, line ->
+                /**
+                 * If [content] ends in a newline, the next line does not belong to it,
+                 * so don't indent it unless our caller demands it
+                 */
+                if (!keepTrailingIndent && index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
+                    line
+                } else {
+                    indent + line
+                }
+            }.joinToString("\n")
     }
 
     /**
@@ -325,8 +348,8 @@ class IndentFormatter(
                 val nextToken = tokens.getOrNull(index + 1)
                 if (nextToken?.tokenType == COMMENT) {
                     var commentToken: Token = nextToken
-                    while (commentToken.tokenType == COMMENT
-                        || (commentToken.tokenType == WHITESPACE && commentToken.lexeme.text.contains('\n'))
+                    while (commentToken.tokenType == COMMENT ||
+                        (commentToken.tokenType == WHITESPACE && commentToken.lexeme.text.contains('\n'))
                     ) {
                         index++
                         if (commentToken.tokenType == WHITESPACE) {
@@ -356,7 +379,9 @@ class IndentFormatter(
 sealed class IndentType {
     abstract val indentString: String
 
-    class Space(size: Int) : IndentType() {
+    class Space(
+        size: Int,
+    ) : IndentType() {
         override val indentString = " ".repeat(size)
     }
 
@@ -365,20 +390,23 @@ sealed class IndentType {
     }
 }
 
-private val OPENING_DELIMITERS = setOf(
-    CURLY_BRACE_L,
-    SQUARE_BRACKET_L,
-    ANGLE_BRACKET_L
-)
+private val OPENING_DELIMITERS =
+    setOf(
+        CURLY_BRACE_L,
+        SQUARE_BRACKET_L,
+        ANGLE_BRACKET_L,
+    )
 
-private val CLOSING_DELIMITERS = setOf(
-    CURLY_BRACE_R,
-    SQUARE_BRACKET_R,
-    ANGLE_BRACKET_R
-)
+private val CLOSING_DELIMITERS =
+    setOf(
+        CURLY_BRACE_R,
+        SQUARE_BRACKET_R,
+        ANGLE_BRACKET_R,
+    )
 
-private val CLOSE_TO_OPEN_MAP = mapOf(
-    CURLY_BRACE_R to CURLY_BRACE_L,
-    SQUARE_BRACKET_R to SQUARE_BRACKET_L,
-    ANGLE_BRACKET_R to ANGLE_BRACKET_L
-)
+private val CLOSE_TO_OPEN_MAP =
+    mapOf(
+        CURLY_BRACE_R to CURLY_BRACE_L,
+        SQUARE_BRACKET_R to SQUARE_BRACKET_L,
+        ANGLE_BRACKET_R to ANGLE_BRACKET_L,
+    )

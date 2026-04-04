@@ -1,10 +1,10 @@
 package org.kson.schema.validators
 
-import org.kson.value.KsonValue
 import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.schema.*
 import org.kson.validation.SourceContext
+import org.kson.value.KsonValue
 
 /**
  * Validator for JSON Schema `$ref` references
@@ -14,20 +14,26 @@ import org.kson.validation.SourceContext
  */
 class RefValidator(
     private val resolvedRef: ResolvedRef,
-    private val idLookup: SchemaIdLookup
+    private val idLookup: SchemaIdLookup,
 ) : JsonSchemaValidator {
     private val refParseResult: Pair<JsonSchema?, List<LoggedMessage>> by lazy {
         val parseMessageSink = MessageSink()
         // TODO these parsed $ref schemas should be cached for efficiency
-        val schema = SchemaParser.parseSchemaElement(
-            resolvedRef.resolvedValue,
-            parseMessageSink,
-            resolvedRef.resolvedValueBaseUri,
-            idLookup)
+        val schema =
+            SchemaParser.parseSchemaElement(
+                resolvedRef.resolvedValue,
+                parseMessageSink,
+                resolvedRef.resolvedValueBaseUri,
+                idLookup,
+            )
         schema to parseMessageSink.loggedMessages()
     }
 
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
         val (schema, parseErrors) = refParseResult
 
         if (schema == null) {

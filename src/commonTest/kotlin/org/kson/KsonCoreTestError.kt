@@ -28,38 +28,39 @@ interface KsonCoreTestError {
     fun assertParserRejectsSource(
         source: String,
         expectedParseMessageTypes: List<MessageType>,
-        maxNestingLevel: Int? = null
+        maxNestingLevel: Int? = null,
     ): List<LoggedMessage> {
-        val parseResult = if (maxNestingLevel != null) {
-            KsonCore.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
-        } else {
-            KsonCore.parseToAst(source)
-        }
+        val parseResult =
+            if (maxNestingLevel != null) {
+                KsonCore.parseToAst(source, CoreCompileConfig(maxNestingLevel = maxNestingLevel))
+            } else {
+                KsonCore.parseToAst(source)
+            }
 
         assertEquals(
             expectedParseMessageTypes,
             parseResult.messages.map { it.message.type },
-            "Should have the expected parse errors."
+            "Should have the expected parse errors.",
         )
 
-        if(expectedParseMessageTypes.map { it.severity }.contains(ERROR)){
+        if (expectedParseMessageTypes.map { it.severity }.contains(ERROR)) {
             assertTrue(
                 parseResult.hasErrors(),
-                "Should set the hasErrors flag appropriate when there are errors"
+                "Should set the hasErrors flag appropriate when there are errors",
             )
         }
 
-        if(expectedParseMessageTypes.map { it.severity }.contains(WARNING)){
+        if (expectedParseMessageTypes.map { it.severity }.contains(WARNING)) {
             assertTrue(
                 parseResult.messages.map { it.message.type.severity }.contains(WARNING),
-                "Should set the hasWarnings flag appropriate when there are warnings"
+                "Should set the hasWarnings flag appropriate when there are warnings",
             )
         }
 
-        if(expectedParseMessageTypes.isNotEmpty()){
-            assertTrue (
+        if (expectedParseMessageTypes.isNotEmpty()) {
+            assertTrue(
                 parseResult.messages.isNotEmpty(),
-                "Should set the hasMessages flag appropriate when there are either errors or warnings"
+                "Should set the hasMessages flag appropriate when there are either errors or warnings",
             )
         }
 
@@ -86,7 +87,7 @@ interface KsonCoreTestError {
         assertEquals(
             expectedParseMessageLocation,
             loggedMessages.map { it.location },
-            "Should have the expected locations for the messages."
+            "Should have the expected locations for the messages.",
         )
         return loggedMessages
     }

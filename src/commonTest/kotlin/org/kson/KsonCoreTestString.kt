@@ -11,7 +11,7 @@ class KsonCoreTestString : KsonCoreTest {
             """,
             "'This is a string'",
             "\"This is a string\"",
-            "\"This is a string\""
+            "\"This is a string\"",
         )
     }
 
@@ -24,18 +24,18 @@ class KsonCoreTestString : KsonCoreTest {
     fun testQuotedSimpleString() {
         assertParsesTo(
             """
-                "simpleKey": "simpleValue"
+            "simpleKey": "simpleValue"
             """.trimIndent(),
             """
-                simpleKey: simpleValue
+            simpleKey: simpleValue
             """.trimIndent(),
             """
-                simpleKey: simpleValue
+            simpleKey: simpleValue
             """.trimIndent(),
             """
-                {
-                  "simpleKey": "simpleValue"
-                }
+            {
+              "simpleKey": "simpleValue"
+            }
             """.trimIndent(),
         )
     }
@@ -57,7 +57,7 @@ class KsonCoreTestString : KsonCoreTest {
             """.trimMargin(),
             """
             |"This is a string with raw, unescaped whitespace \t\n\ttabbed-indented second line"
-            """.trimMargin()
+            """.trimMargin(),
         )
     }
 
@@ -65,16 +65,18 @@ class KsonCoreTestString : KsonCoreTest {
     fun testStringEscapes() {
         assertParsesTo(
             """
-                "this'll need \"escaping\""
+            "this'll need \"escaping\""
             """.trimIndent(),
             """
-                'this\'ll need "escaping"'
+            'this\'ll need "escaping"'
             """.trimIndent(),
             """
-                "this'll need \"escaping\""
-            """.trimIndent(),"""
-                "this'll need \"escaping\""
-            """.trimIndent())
+            "this'll need \"escaping\""
+            """.trimIndent(),
+            """
+            "this'll need \"escaping\""
+            """.trimIndent(),
+        )
     }
 
     @Test
@@ -82,33 +84,33 @@ class KsonCoreTestString : KsonCoreTest {
         // Test backslash before delimiter
         assertParsesTo(
             """
-                "string with \\ and \""
+            "string with \\ and \""
             """.trimIndent(),
             """
-                'string with \\ and "'
+            'string with \\ and "'
             """.trimIndent(),
             """
-                "string with \\ and \""
+            "string with \\ and \""
             """.trimIndent(),
             """
-                "string with \\ and \""
-            """.trimIndent()
+            "string with \\ and \""
+            """.trimIndent(),
         )
 
         // Test multiple backslashes before delimiter
         assertParsesTo(
             """
-                "string with \\\""
+            "string with \\\""
             """.trimIndent(),
             """
-                'string with \\"'
+            'string with \\"'
             """.trimIndent(),
             """
-                "string with \\\""
+            "string with \\\""
             """.trimIndent(),
             """
-                "string with \\\""
-            """.trimIndent()
+            "string with \\\""
+            """.trimIndent(),
         )
     }
 
@@ -117,17 +119,17 @@ class KsonCoreTestString : KsonCoreTest {
         // Test mix of single and double quotes
         assertParsesTo(
             """
-                "string 'with' \"quotes\""
+            "string 'with' \"quotes\""
             """.trimIndent(),
             """
-                'string \'with\' "quotes"'
+            'string \'with\' "quotes"'
             """.trimIndent(),
             """
-                "string 'with' \"quotes\""
+            "string 'with' \"quotes\""
             """.trimIndent(),
             """
-                "string 'with' \"quotes\""
-            """.trimIndent()
+            "string 'with' \"quotes\""
+            """.trimIndent(),
         )
     }
 
@@ -136,33 +138,33 @@ class KsonCoreTestString : KsonCoreTest {
         // Test string with only delimiters
         assertParsesTo(
             """
-                "\"\""
+            "\"\""
             """.trimIndent(),
             """
-                '""'
+            '""'
             """.trimIndent(),
             """
-                "\"\""
+            "\"\""
             """.trimIndent(),
             """
-                "\"\""
-            """.trimIndent()
+            "\"\""
+            """.trimIndent(),
         )
 
         // Test string with alternating backslashes and delimiters
         assertParsesTo(
             """
-                "\\\"\\\""
+            "\\\"\\\""
             """.trimIndent(),
             """
-                '\\"\\"'
+            '\\"\\"'
             """.trimIndent(),
             """
-                "\\\"\\\""
+            "\\\"\\\""
             """.trimIndent(),
             """
-                "\\\"\\\""
-            """.trimIndent()
+            "\\\"\\\""
+            """.trimIndent(),
         )
     }
 
@@ -171,33 +173,33 @@ class KsonCoreTestString : KsonCoreTest {
         // Test sequences of backslashes not followed by delimiters
         assertParsesTo(
             """
-                "\\\\n"
+            "\\\\n"
             """.trimIndent(),
             """
-                '\\\\n'
+            '\\\\n'
             """.trimIndent(),
             """
-                "\\\\n"
+            "\\\\n"
             """.trimIndent(),
             """
-                "\\\\n"
-            """.trimIndent()
+            "\\\\n"
+            """.trimIndent(),
         )
 
         // Test backslash at end of string
         assertParsesTo(
             """
-                "\\"
+            "\\"
             """.trimIndent(),
             """
-                '\\'
+            '\\'
             """.trimIndent(),
             """
-                "\\"
+            "\\"
             """.trimIndent(),
             """
-                "\\"
-            """.trimIndent()
+            "\\"
+            """.trimIndent(),
         )
     }
 
@@ -205,17 +207,17 @@ class KsonCoreTestString : KsonCoreTest {
     fun testUnquotedNonAlphaNumericString() {
         assertParsesTo(
             """
-                水滴石穿
+            水滴石穿
             """.trimIndent(),
             """
-                水滴石穿
+            水滴石穿
             """.trimIndent(),
             """
-                水滴石穿
+            水滴石穿
             """.trimIndent(),
             """
-               "水滴石穿"
-            """.trimIndent()
+            "水滴石穿"
+            """.trimIndent(),
         )
     }
 
@@ -224,62 +226,62 @@ class KsonCoreTestString : KsonCoreTest {
         // Test that strings with reserved keyword content are properly quoted
         assertParsesTo(
             """
-                Y
+            Y
             """.trimIndent(),
             """
-                Y
+            Y
             """.trimIndent(),
             """
-                "Y"
+            "Y"
             """.trimIndent(),
             """
-                "Y"
-            """.trimIndent()
+            "Y"
+            """.trimIndent(),
         )
 
         assertParsesTo(
             """
-                False
+            False
             """.trimIndent(),
             """
-                False
+            False
             """.trimIndent(),
             """
-                "False"
+            "False"
             """.trimIndent(),
             """
-                "False"
-            """.trimIndent()
+            "False"
+            """.trimIndent(),
         )
 
         assertParsesTo(
             """
-                Null
+            Null
             """.trimIndent(),
             """
-                Null
+            Null
             """.trimIndent(),
             """
-                "Null"
+            "Null"
             """.trimIndent(),
             """
-                "Null"
-            """.trimIndent()
+            "Null"
+            """.trimIndent(),
         )
 
         assertParsesTo(
             """
-                No
+            No
             """.trimIndent(),
             """
-                No
+            No
             """.trimIndent(),
             """
-                "No"
+            "No"
             """.trimIndent(),
             """
-                "No"
-            """.trimIndent()
+            "No"
+            """.trimIndent(),
         )
     }
 
@@ -287,17 +289,17 @@ class KsonCoreTestString : KsonCoreTest {
     fun testValidEscapeSequences() {
         assertParsesTo(
             """ 
-                "\" ' \\ \/ \b \f \n \r \t\""
-             """.trimIndent(),
+            "\" ' \\ \/ \b \f \n \r \t\""
+            """.trimIndent(),
             """
-                '" \' \\ \/ \b \f \n \r \t"'
-             """.trimIndent(),
+            '" \' \\ \/ \b \f \n \r \t"'
+            """.trimIndent(),
             """
-                "\" ' \\ / \b \f \n \r \t\""
-                """.trimIndent(),
+            "\" ' \\ / \b \f \n \r \t\""
+            """.trimIndent(),
             """
-                "\" ' \\ \/ \b \f \n \r \t\""
-            """.trimIndent()
+            "\" ' \\ \/ \b \f \n \r \t\""
+            """.trimIndent(),
         )
     }
 
@@ -311,17 +313,17 @@ class KsonCoreTestString : KsonCoreTest {
          */
         assertParsesTo(
             """ 
-                "\/ / \\/"
-             """.trimIndent(),
+            "\/ / \\/"
+            """.trimIndent(),
             """
-                '\/ / \\/'
-             """.trimIndent(),
+            '\/ / \\/'
+            """.trimIndent(),
             """
-                "/ / \\/"
-                """.trimIndent(),
+            "/ / \\/"
+            """.trimIndent(),
             """
-                "\/ / \\/"
-            """.trimIndent()
+            "\/ / \\/"
+            """.trimIndent(),
         )
     }
 
@@ -331,7 +333,7 @@ class KsonCoreTestString : KsonCoreTest {
             "\"\\u0041\\uFFFF\\u1234\"",
             "'\\u0041\\uFFFF\\u1234'",
             "\"\\u0041\\uFFFF\\u1234\"",
-            "\"\\u0041\\uFFFF\\u1234\""
+            "\"\\u0041\\uFFFF\\u1234\"",
         )
     }
 
@@ -341,7 +343,7 @@ class KsonCoreTestString : KsonCoreTest {
             "\"hello\tworld\"",
             "'hello\tworld'",
             "\"hello\tworld\"",
-            "\"hello\\tworld\""
+            "\"hello\\tworld\"",
         )
     }
 
@@ -351,7 +353,7 @@ class KsonCoreTestString : KsonCoreTest {
             "\"line1\\nline2\\ttabbed\"",
             "'line1\\nline2\\ttabbed'",
             "\"line1\\nline2\\ttabbed\"",
-            "\"line1\\nline2\\ttabbed\""
+            "\"line1\\nline2\\ttabbed\"",
         )
     }
 
@@ -361,7 +363,7 @@ class KsonCoreTestString : KsonCoreTest {
             "\"\\u0041\\n\"",
             "'\\u0041\\n'",
             "\"\\u0041\\n\"",
-            "\"\\u0041\\n\""
+            "\"\\u0041\\n\"",
         )
     }
 
@@ -371,7 +373,7 @@ class KsonCoreTestString : KsonCoreTest {
             "\"\\u0041\\u0042\\u0043\"",
             "'\\u0041\\u0042\\u0043'",
             "\"\\u0041\\u0042\\u0043\"",
-            "\"\\u0041\\u0042\\u0043\""
+            "\"\\u0041\\u0042\\u0043\"",
         )
     }
 }

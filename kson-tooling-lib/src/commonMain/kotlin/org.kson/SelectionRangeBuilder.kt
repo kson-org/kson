@@ -11,8 +11,11 @@ import org.kson.value.*
  * from innermost to outermost. Used for smart expand/shrink selection.
  */
 internal object SelectionRangeBuilder {
-
-    fun build(ksonValue: KsonValue, line: Int, column: Int): List<Range> {
+    fun build(
+        ksonValue: KsonValue,
+        line: Int,
+        column: Int,
+    ): List<Range> {
         val ancestors = mutableListOf<Range>()
         collectAncestors(ksonValue, Coordinates(line, column), ancestors)
         return deduplicate(ancestors)
@@ -22,7 +25,11 @@ internal object SelectionRangeBuilder {
      * Recursively collect all AST node ranges that contain the given position,
      * from innermost to outermost.
      */
-    private fun collectAncestors(value: KsonValue, cursor: Coordinates, ancestors: MutableList<Range>): Boolean {
+    private fun collectAncestors(
+        value: KsonValue,
+        cursor: Coordinates,
+        ancestors: MutableList<Range>,
+    ): Boolean {
         if (!Location.containsCoordinates(value.location, cursor)) {
             return false
         }
@@ -35,10 +42,13 @@ internal object SelectionRangeBuilder {
                     val keyLoc = prop.propName.location
                     val valueLoc = prop.propValue.location
 
-                    val propertyRange = Range(
-                        keyLoc.start.line, keyLoc.start.column,
-                        valueLoc.end.line, valueLoc.end.column
-                    )
+                    val propertyRange =
+                        Range(
+                            keyLoc.start.line,
+                            keyLoc.start.column,
+                            valueLoc.end.line,
+                            valueLoc.end.column,
+                        )
 
                     if (containsPosition(propertyRange, cursor)) {
                         val descendedIntoValue = collectAncestors(prop.propValue, cursor, ancestors)
@@ -71,7 +81,8 @@ internal object SelectionRangeBuilder {
             is KsonString,
             is KsonNumber,
             is KsonBoolean,
-            is KsonNull -> {}
+            is KsonNull,
+            -> {}
         }
 
         // Leaf node or cursor is on container delimiters (e.g. { or })
@@ -90,11 +101,13 @@ internal object SelectionRangeBuilder {
         return result
     }
 
-    private fun containsPosition(range: Range, cursor: Coordinates): Boolean {
+    private fun containsPosition(
+        range: Range,
+        cursor: Coordinates,
+    ): Boolean {
         if (cursor.line < range.startLine || cursor.line > range.endLine) return false
         if (cursor.line == range.startLine && cursor.column < range.startColumn) return false
         if (cursor.line == range.endLine && cursor.column > range.endColumn) return false
         return true
     }
-
 }

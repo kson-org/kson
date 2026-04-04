@@ -7,4 +7,6 @@ package org.kson.stdlibx.exceptions
  *
  * @param message the reason why we believe that it is unexpected to hit this code path
  */
-class FatalParseException(message: String) : RuntimeException(message)
+class FatalParseException(
+    message: String,
+) : RuntimeException(message)

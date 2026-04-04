@@ -4,6 +4,7 @@ import org.kson.CompileTarget.*
 import org.kson.CompileTarget.Kson
 import org.kson.ast.*
 import org.kson.parser.*
+import org.kson.parser.behavior.quotedstring.KsonStringValidator
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
 import org.kson.schema.JsonBooleanSchema
@@ -13,10 +14,9 @@ import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.tools.FormattingStyle
 import org.kson.tools.InternalEmbedRule
+import org.kson.tools.KsonFormatterConfig
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
-import org.kson.parser.behavior.quotedstring.KsonStringValidator
-import org.kson.tools.KsonFormatterConfig
 import org.kson.validation.SourceContext
 import org.kson.validation.Validator
 import org.kson.value.KsonValue
@@ -36,19 +36,25 @@ object KsonCore {
      * @param coreCompileConfig the [CoreCompileConfig] for this parse
      * @return An [AstParseResult]
      */
-    fun parseToAst(source: String, coreCompileConfig: CoreCompileConfig = CoreCompileConfig()): AstParseResult {
+    fun parseToAst(
+        source: String,
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig(),
+    ): AstParseResult {
         val messageSink = MessageSink()
-        val tokens = Lexer(
-            source,
-            // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
-            gapFree = coreCompileConfig.ignoreErrors
-        ).tokenize()
+        val tokens =
+            Lexer(
+                source,
+                // we tokenize gapFree when we are errorTolerant so that error nodes can reconstruct their whitespace
+                gapFree = coreCompileConfig.ignoreErrors,
+            ).tokenize()
 
         var initialTokenIndex = 0
         // if our tokens are gapFree we may have an "empty" file with some comments or whitespace in it
         while (initialTokenIndex < tokens.size &&
-            (tokens[initialTokenIndex].tokenType == TokenType.WHITESPACE ||
-                    tokens[initialTokenIndex].tokenType == TokenType.COMMENT)
+            (
+                tokens[initialTokenIndex].tokenType == TokenType.WHITESPACE ||
+                    tokens[initialTokenIndex].tokenType == TokenType.COMMENT
+            )
         ) {
             initialTokenIndex++
         }
@@ -68,7 +74,6 @@ object KsonCore {
              * [AstParseResult] immediately.
              */
             ast = builder.buildTree(messageSink)
-
         } catch (ex: FatalParseException) {
             messageSink.error(tokens[0].lexeme.location, MessageType.FATAL_PARSE_ERROR.create(ex.message ?: "Unknown error"))
             return AstParseResult(KsonRootError(tokens), tokens, messageSink)
@@ -102,7 +107,7 @@ object KsonCore {
         if (firstToken.tokenType == TokenType.EOF) {
             return SchemaParseResult(
                 null,
-                listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create()))
+                listOf(LoggedMessage(firstToken.lexeme.location, SCHEMA_EMPTY_SCHEMA.create())),
             )
         }
         val ksonValue = astParseResult.ksonValue
@@ -122,9 +127,10 @@ object KsonCore {
      * @param compileConfig a [CompileTarget.Yaml] object with this compilation's config
      * @return A [YamlParseResult]
      */
-    fun parseToYaml(source: String, compileConfig: Yaml = Yaml()): YamlParseResult {
-        return YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-    }
+    fun parseToYaml(
+        source: String,
+        compileConfig: Yaml = Yaml(),
+    ): YamlParseResult = YamlParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
 
     /**
      * Parse the given Kson [source] and compile it to Json
@@ -133,9 +139,10 @@ object KsonCore {
      * @param compileConfig a [Json] object with this compilation's config
      * @return A [JsonParseResult]
      */
-    fun parseToJson(source: String, compileConfig: Json = Json()): JsonParseResult {
-        return JsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-    }
+    fun parseToJson(
+        source: String,
+        compileConfig: Json = Json(),
+    ): JsonParseResult = JsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
 
     /**
      * Parse the given Kson [source] and re-compile it out to Kson.  Useful for testing and transformations
@@ -146,9 +153,10 @@ object KsonCore {
      * @param compileConfig a [CompileTarget.Kson] object with this compilation's config
      * @return A [KsonParseResult]
      */
-    fun parseToKson(source: String, compileConfig: Kson = Kson()): KsonParseResult {
-        return KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
-    }
+    fun parseToKson(
+        source: String,
+        compileConfig: Kson = Kson(),
+    ): KsonParseResult = KsonParseResult(parseToAst(source, compileConfig.coreConfig), compileConfig)
 }
 
 /**
@@ -184,7 +192,7 @@ interface ParseResult {
 data class AstParseResult(
     override val ast: KsonRoot,
     override val lexedTokens: List<Token>,
-    private val messageSink: MessageSink
+    private val messageSink: MessageSink,
 ) : ParseResult {
     override val messages = messageSink.loggedMessages()
 
@@ -215,7 +223,10 @@ data class AstParseResult(
      * Utility method that internally calls [AstNode.toSource] on this AST, or returns null if
      * there were errors trying to parse (consult [messageSink] for information on any errors)
      */
-    fun toSourceOrNull(indent: AstNode.Indent, compileTarget: CompileTarget): String? {
+    fun toSourceOrNull(
+        indent: AstNode.Indent,
+        compileTarget: CompileTarget,
+    ): String? {
         if (hasErrors()) return null
         return try {
             ast.toSource(indent, compileTarget)
@@ -226,34 +237,32 @@ data class AstParseResult(
         }
     }
 
-    override fun hasErrors(): Boolean {
-        return ast is AstNodeError || messageSink.hasErrors()
-    }
+    override fun hasErrors(): Boolean = ast is AstNodeError || messageSink.hasErrors()
 }
 
 data class SchemaParseResult(
     val jsonSchema: JsonSchema?,
-    val messages: List<LoggedMessage>
+    val messages: List<LoggedMessage>,
 )
-
 
 class KsonParseResult(
     private val astParseResult: AstParseResult,
-    compileConfig: Kson
+    compileConfig: Kson,
 ) : ParseResult by astParseResult {
     /**
      * The Kson compiled from some Kson source, or null if there were errors trying to parse
      * (consult [astParseResult] for information on any errors)
      */
-    val kson: String? = astParseResult.toSourceOrNull(
+    val kson: String? =
+        astParseResult.toSourceOrNull(
             AstNode.Indent(compileConfig.formatConfig.indentType),
-            compileConfig
+            compileConfig,
         )
 }
 
 class YamlParseResult(
     private val astParseResult: AstParseResult,
-    compileConfig: Yaml
+    compileConfig: Yaml,
 ) : ParseResult by astParseResult {
     /**
      * The Yaml compiled from some Kson source, or null if there were errors trying to parse
@@ -264,7 +273,7 @@ class YamlParseResult(
 
 class JsonParseResult(
     private val astParseResult: AstParseResult,
-    compileConfig: Json
+    compileConfig: Json,
 ) : ParseResult by astParseResult {
     /**
      * The Json compiled from some Kson source, or null if there were errors trying to parse
@@ -273,11 +282,12 @@ class JsonParseResult(
     val json: String? = astParseResult.toSourceOrNull(AstNode.Indent(), compileConfig)
 }
 
-
 /**
  * Type to denote a supported Kson compilation target and hold the compilation's configuration
  */
-sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
+sealed class CompileTarget(
+    val coreConfig: CoreCompileConfig,
+) {
     /**
      * Whether this compilation should preserve comments from the input [Kson] source in the compiled output
      */
@@ -294,13 +304,12 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
         override val preserveComments: Boolean = true,
         val formatConfig: KsonFormatterConfig = KsonFormatterConfig(),
         val embedBlockResolution: EmbedBlockResolution = EmbedBlockResolution.EMPTY,
-        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig(),
     ) : CompileTarget(coreCompileConfig) {
         /**
          * Gets the embed rule for a StringNode, if one matches.
          */
-        fun getEmbedRule(node: StringNode): InternalEmbedRule? =
-            embedBlockResolution.stringNodes[node]
+        fun getEmbedRule(node: StringNode): InternalEmbedRule? = embedBlockResolution.stringNodes[node]
     }
 
     /**
@@ -312,9 +321,8 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
     class Yaml(
         override val preserveComments: Boolean = true,
         val retainEmbedTags: Boolean = true,
-        coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+        coreCompileConfig: CoreCompileConfig = CoreCompileConfig(),
     ) : CompileTarget(coreCompileConfig)
-
 }
 
 /**
@@ -325,13 +333,13 @@ sealed class CompileTarget(val coreConfig: CoreCompileConfig) {
  */
 class Json(
     val retainEmbedTags: Boolean = true,
-    coreCompileConfig: CoreCompileConfig = CoreCompileConfig()
+    coreCompileConfig: CoreCompileConfig = CoreCompileConfig(),
 ) : Kson(
-    formatConfig = KsonFormatterConfig(formattingStyle = FormattingStyle.CLASSIC),
-    coreCompileConfig = coreCompileConfig,
-    // Json does not support comments
-    preserveComments = false
-)
+        formatConfig = KsonFormatterConfig(formattingStyle = FormattingStyle.CLASSIC),
+        coreCompileConfig = coreCompileConfig,
+        // Json does not support comments
+        preserveComments = false,
+    )
 
 /**
  * Configuration applicable to all compile targets
@@ -350,16 +358,14 @@ data class CoreCompileConfig(
      * The deep object/list nesting to allow in the parsed document.  See [DEFAULT_MAX_NESTING_LEVEL] for more details.
      */
     val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL,
-
     /**
      * List of validators that are run on a complete KsonValue
      */
     val validators: List<Validator> = listOf(schemaJson),
-
     /**
      * Context information for the source
      */
-    val sourceContext: SourceContext = SourceContext()
+    val sourceContext: SourceContext = SourceContext(),
 )
 
 /**

@@ -5,11 +5,11 @@ package org.kson
 
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
 import org.kson.schema.SchemaResolutionType
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
@@ -25,8 +25,9 @@ import kotlin.js.JsExport
  * The filtering uses a "soft" validation approach: a schema is included if the existing
  * properties don't contradict it, even if required properties are missing.
  */
-class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
-
+class SchemaFilteringService(
+    private val schemaIdLookup: SchemaIdLookup,
+) {
     /**
      * Get valid schemas for a document path, applying combinator expansion and filtering.
      *
@@ -45,15 +46,16 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
         documentValue: org.kson.value.KsonValue?,
-        documentPointer: JsonPointer
+        documentPointer: JsonPointer,
     ): List<ResolvedRef> {
         // Check if we need to filter based on combinators
         // This includes both schemas directly tagged as combinators AND schemas that contain combinator properties
         // Note: Only oneOf/anyOf require validation-based filtering.
         // allOf always includes all branches (no filtering needed).
-        val hasCombinatorsThatRequireValidation = candidateSchemas.any { ref ->
-            requiresValidationFiltering(ref)
-        }
+        val hasCombinatorsThatRequireValidation =
+            candidateSchemas.any { ref ->
+                requiresValidationFiltering(ref)
+            }
 
         // Always expand combinators to get individual branches
         val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
@@ -76,13 +78,12 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * @param ref The schema reference to check
      * @return true if the schema requires validation filtering
      */
-    private fun requiresValidationFiltering(ref: ResolvedRef): Boolean {
-        return ref.resolutionType == SchemaResolutionType.ANY_OF ||
+    private fun requiresValidationFiltering(ref: ResolvedRef): Boolean =
+        ref.resolutionType == SchemaResolutionType.ANY_OF ||
             ref.resolutionType == SchemaResolutionType.ONE_OF ||
             (ref.resolvedValue as? org.kson.value.KsonObject)?.let { obj ->
                 obj.propertyLookup.containsKey("oneOf") || obj.propertyLookup.containsKey("anyOf")
             } ?: false
-    }
 
     /**
      * Filters schemas based on validation against the current document.
@@ -101,7 +102,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
     private fun filterByValidation(
         candidateSchemas: List<ResolvedRef>,
         documentValue: org.kson.value.KsonValue,
-        documentPointer: JsonPointer
+        documentPointer: JsonPointer,
     ): List<ResolvedRef> {
         // Get the object to validate against
         // For completions, we validate the object where we're adding properties
@@ -111,7 +112,8 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
             when (ref.resolutionType) {
                 // For anyOf/oneOf, check if the current document state is compatible
                 SchemaResolutionType.ANY_OF,
-                SchemaResolutionType.ONE_OF -> isSchemaValidForDocument(ref, targetValue)
+                SchemaResolutionType.ONE_OF,
+                -> isSchemaValidForDocument(ref, targetValue)
                 // For all other types (direct property, allOf, etc.), include them
                 else -> true
             }
@@ -131,15 +133,16 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      */
     private fun isSchemaValidForDocument(
         ref: ResolvedRef,
-        targetValue: org.kson.value.KsonValue
+        targetValue: org.kson.value.KsonValue,
     ): Boolean {
         val messageSink = MessageSink()
-        val schema = SchemaParser.parseSchemaElement(
-            ref.resolvedValue,
-            messageSink,
-            ref.resolvedValueBaseUri,
-            schemaIdLookup
-        )
+        val schema =
+            SchemaParser.parseSchemaElement(
+                ref.resolvedValue,
+                messageSink,
+                ref.resolvedValueBaseUri,
+                schemaIdLookup,
+            )
 
         if (schema == null) {
             // If we can't parse the schema, include it (fail open)
@@ -171,20 +174,20 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * @param errors All validation errors
      * @return Only the errors that indicate real incompatibility
      */
-    private fun filterInsignificantErrors(errors: List<org.kson.parser.LoggedMessage>): List<org.kson.parser.LoggedMessage> {
-        return errors.filter { loggedMessage ->
+    private fun filterInsignificantErrors(errors: List<org.kson.parser.LoggedMessage>): List<org.kson.parser.LoggedMessage> =
+        errors.filter { loggedMessage ->
             loggedMessage.message.type !in IGNORABLE_ERROR_TYPES
         }
-    }
 
     companion object {
         /**
          * Error types that should be ignored during validation-based filtering.
          * These errors don't indicate incompatibility with existing properties.
          */
-        private val IGNORABLE_ERROR_TYPES = setOf(
-            MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING,
-            MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES
-        )
+        private val IGNORABLE_ERROR_TYPES =
+            setOf(
+                MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING,
+                MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES,
+            )
     }
 }

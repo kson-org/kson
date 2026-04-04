@@ -10,14 +10,14 @@ class KsonCoreTestNumberError : KsonCoreTestError {
             """
                 420E
             """,
-            listOf(DANGLING_EXP_INDICATOR)
+            listOf(DANGLING_EXP_INDICATOR),
         )
 
         assertParserRejectsSource(
             """
                 420E-
             """,
-            listOf(DANGLING_EXP_INDICATOR)
+            listOf(DANGLING_EXP_INDICATOR),
         )
     }
 }

@@ -28,7 +28,9 @@ import kotlin.js.JsExport
  * Created via [KsonTooling.parse].
  */
 @JsExport
-class ToolingDocument internal constructor(val content: String) {
+class ToolingDocument internal constructor(
+    val content: String,
+) {
     private val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true))
 
     /**

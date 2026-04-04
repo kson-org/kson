@@ -1,30 +1,38 @@
 package org.kson.schema
-import org.kson.value.KsonNumber
-import org.kson.value.KsonString
-import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.TypeValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.Validator
+import org.kson.value.KsonNumber
+import org.kson.value.KsonString
+import org.kson.value.KsonValue
 
 /**
  * Base [JsonSchema] type that [KsonValue]s may be validated against
  */
-sealed interface JsonSchema: Validator {
-  /**
-   * A guaranteed non-null description for this schema that may be used in user-facing messages.  Should be defaulted
-   * to something reasonable (if not as helpful) when the schema provides neither a description nor a title
-   */
-  fun descriptionWithDefault(): String
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
+sealed interface JsonSchema : Validator {
+    /**
+     * A guaranteed non-null description for this schema that may be used in user-facing messages.  Should be defaulted
+     * to something reasonable (if not as helpful) when the schema provides neither a description nor a title
+     */
+    fun descriptionWithDefault(): String
 
-  fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
-    val numErrors = messageSink.loggedMessages().size
-    validate(ksonValue, messageSink)
-    return messageSink.loggedMessages().size == numErrors
-  }
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    )
+
+    fun isValid(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+    ): Boolean {
+        val numErrors = messageSink.loggedMessages().size
+        validate(ksonValue, messageSink)
+        return messageSink.loggedMessages().size == numErrors
+    }
 }
 
 /**
@@ -36,45 +44,53 @@ class JsonObjectSchema(
     val comment: String?,
     val default: KsonValue?,
     val definitions: Map<KsonString, JsonSchema?>?,
-
     private val typeValidator: TypeValidator?,
-    private val schemaValidators: List<JsonSchemaValidator>
+    private val schemaValidators: List<JsonSchemaValidator>,
 ) : JsonSchema {
+    override fun descriptionWithDefault(): String = description ?: title ?: "JSON Object Schema"
 
-  override fun descriptionWithDefault(): String {
-    return description ?: title ?: "JSON Object Schema"
-  }
+    /**
+     * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]
+     */
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
+        if (typeValidator != null) {
+            if (!typeValidator.validate(ksonValue, messageSink)) {
+                // we're not the right type for this document, validation cannot continue
+                return
+            }
+        }
 
-  /**
-   * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]
-   */
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
-    if (typeValidator != null) {
-      if (!typeValidator.validate(ksonValue, messageSink)) {
-        // we're not the right type for this document, validation cannot continue
-        return
-      }
+        // no `type` violations, run all other validators configured for this schema
+        schemaValidators.forEach { validator ->
+            validator.validate(ksonValue, messageSink)
+        }
     }
-
-    // no `type` violations, run all other validators configured for this schema
-    schemaValidators.forEach { validator ->
-      validator.validate(ksonValue, messageSink)
-    }
-  }
 }
 
 /**
  * The most basic valid JsonSchema: `true` accepts all Json, `false` accepts none.
  */
-class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
-  override fun descriptionWithDefault() = if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
-  override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
-    if (valid) {
-      return
-    } else {
-      messageSink.error(ksonValue.location, MessageType.SCHEMA_FALSE_SCHEMA_ERROR.create())
+class JsonBooleanSchema(
+    val valid: Boolean,
+) : JsonSchema {
+    override fun descriptionWithDefault() =
+        if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
+
+    override fun validate(
+        ksonValue: KsonValue,
+        messageSink: MessageSink,
+        sourceContext: SourceContext,
+    ) {
+        if (valid) {
+            return
+        } else {
+            messageSink.error(ksonValue.location, MessageType.SCHEMA_FALSE_SCHEMA_ERROR.create())
+        }
     }
-  }
 }
 
 /**
@@ -89,19 +105,18 @@ class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
  * @return The integer value of the `KsonNumber` if it represents an integer or a decimal that
  *         can be safely interpreted as an integer, otherwise, returns `null`
  */
-fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
-  return when (ksonNumber.value) {
-    is NumberParser.ParsedNumber.Integer -> ksonNumber.value.value
-    is NumberParser.ParsedNumber.Decimal -> {
-      if (ksonNumber.value.asString.matches(allZerosDecimalRegex)) {
-        // 1.0-type numbers are considered integers by JsonSchema, and it's safe to `toInt` it
-        ksonNumber.value.value.toLong()
-      } else {
-        null
-      }
+fun asSchemaInteger(ksonNumber: KsonNumber): Long? =
+    when (ksonNumber.value) {
+        is NumberParser.ParsedNumber.Integer -> ksonNumber.value.value
+        is NumberParser.ParsedNumber.Decimal -> {
+            if (ksonNumber.value.asString.matches(allZerosDecimalRegex)) {
+                // 1.0-type numbers are considered integers by JsonSchema, and it's safe to `toInt` it
+                ksonNumber.value.value.toLong()
+            } else {
+                null
+            }
+        }
     }
-  }
-}
 
 // cached regex for testing if all the digits after the decimal are zero in a decimal string
 private val allZerosDecimalRegex = Regex(".*\\.0*")

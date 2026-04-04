@@ -3,7 +3,6 @@ package org.kson
 import kotlin.test.*
 
 class ToolingDocumentTest {
-
     @Test
     fun testParseCreatesReusableDocument() {
         val doc = KsonTooling.parse("name: John")
@@ -12,12 +11,13 @@ class ToolingDocumentTest {
 
     @Test
     fun testMultipleBuilderCallsOnSameDocument() {
-        val content = """
+        val content =
+            """
             {
               name: "Alice"
               age: 30
             }
-        """.trimIndent()
+            """.trimIndent()
         val doc = KsonTooling.parse(content)
 
         // All five non-diagnostic builders produce correct results from the same document

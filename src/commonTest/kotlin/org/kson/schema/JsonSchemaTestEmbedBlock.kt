@@ -34,7 +34,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             true,
-            "EmbedBlock with matching tag should validate"
+            "EmbedBlock with matching tag should validate",
         )
 
         assertKsonEnforcesSchema(
@@ -45,7 +45,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             false,
-            "EmbedBlock with non-matching tag should fail validation"
+            "EmbedBlock with non-matching tag should fail validation",
         )
 
         assertKsonEnforcesSchema(
@@ -56,7 +56,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             false,
-            "EmbedBlock without tag should fail validation when tag is required"
+            "EmbedBlock without tag should fail validation when tag is required",
         )
     }
 
@@ -86,7 +86,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             %%
             """,
             schema,
-            true
+            true,
         )
 
         assertKsonEnforcesSchema(
@@ -96,7 +96,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             %%
             """,
             schema,
-            true
+            true,
         )
     }
 
@@ -139,7 +139,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             true,
-            "Array of embed blocks with valid tags should validate"
+            "Array of embed blocks with valid tags should validate",
         )
 
         assertKsonEnforcesSchema(
@@ -152,7 +152,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             false,
-            "Array with embed block having invalid tag should fail validation"
+            "Array with embed block having invalid tag should fail validation",
         )
     }
 
@@ -188,10 +188,11 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
                 Location(
                     Coordinates(0, 1),
                     Coordinates(0, 7),
-                    1, 7
-                )
+                    1,
+                    7,
+                ),
             ),
-            "Tag mismatch error should be reported at the embed block location"
+            "Tag mismatch error should be reported at the embed block location",
         )
 
         // Test error location when tag is missing
@@ -206,11 +207,12 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             listOf(
                 Location(
                     Coordinates(0, 0),
-                    Coordinates(0, 5),  // Length 5 due to trimToFirstLine
-                    0, 5
-                )
+                    Coordinates(0, 5), // Length 5 due to trimToFirstLine
+                    0,
+                    5,
+                ),
             ),
-            "Missing tag error should be reported at the embed block location"
+            "Missing tag error should be reported at the embed block location",
         )
     }
 
@@ -255,10 +257,11 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
                 Location(
                     Coordinates(1, 10),
                     Coordinates(1, 15),
-                    12, 17
-                )
+                    12,
+                    17,
+                ),
             ),
-            "Enum mismatch in nested embed block should report correct location"
+            "Enum mismatch in nested embed block should report correct location",
         )
 
         // Test error location for content length violation
@@ -276,10 +279,11 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
                 Location(
                     Coordinates(2, 0),
                     Coordinates(3, 2),
-                    19, 32
-                )
+                    19,
+                    32,
+                ),
             ),
-            "Content length violation should report at embed block location"
+            "Content length violation should report at embed block location",
         )
     }
 
@@ -323,10 +327,11 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
                 Location(
                     Coordinates(4, 3),
                     Coordinates(4, 9),
-                    42, 48
-                )
+                    42,
+                    48,
+                ),
             ),
-            "Pattern violation in array element should report correct location"
+            "Pattern violation in array element should report correct location",
         )
     }
 
@@ -371,7 +376,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             true,
-            "Nested embed block with correct tag should validate"
+            "Nested embed block with correct tag should validate",
         )
 
         assertKsonEnforcesSchema(
@@ -385,7 +390,7 @@ class JsonSchemaTestEmbedBlock : JsonSchemaTest {
             """,
             schema,
             false,
-            "Nested embed block with incorrect tag should fail validation"
+            "Nested embed block with incorrect tag should fail validation",
         )
     }
 }

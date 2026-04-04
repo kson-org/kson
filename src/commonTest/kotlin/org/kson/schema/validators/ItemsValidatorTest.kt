@@ -1,20 +1,21 @@
 package org.kson.schema.validators
 
-import org.kson.schema.JsonSchemaTest
 import org.kson.parser.messages.MessageType.SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED
+import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ItemsValidatorTest : JsonSchemaTest {
     @Test
     fun testAdditionalItemsErrorIncludesCounts() {
-        val errors = assertKsonSchemaErrors(
-            """
+        val errors =
+            assertKsonSchemaErrors(
+                """
                 {
                     "tuple": [1, 2, 3, 4, 5]
                 }
             """,
-            """
+                """
                 {
                     "properties": {
                         "tuple": {
@@ -28,8 +29,8 @@ class ItemsValidatorTest : JsonSchemaTest {
                     }
                 }
             """,
-            listOf(SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED)
-        )
+                listOf(SCHEMA_ADDITIONAL_ITEMS_NOT_ALLOWED),
+            )
 
         assertEquals("Expected at most 3 items, but found 5", errors[0].message.toString())
     }
@@ -56,7 +57,7 @@ class ItemsValidatorTest : JsonSchemaTest {
                     }
                 }
             """,
-            true
+            true,
         )
     }
 }

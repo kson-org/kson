@@ -9,31 +9,34 @@ class KsonCoreTestObject : KsonCoreTest {
             "{    }",
             "{}",
             "{}",
-            "{}"
+            "{}",
         )
     }
 
     @Test
     fun testObjectSource() {
-        val expectKsonRootObjectAst = """
-              key: val
-              'string key': 66.3
-              hello: "y'all"
+        val expectKsonRootObjectAst =
+            """
+            key: val
+            'string key': 66.3
+            hello: "y'all"
             """.trimIndent()
 
-        val expectedYamlRootObject = """
+        val expectedYamlRootObject =
+            """
             key: val
             "string key": 66.3
             hello: "y'all"
-        """.trimIndent()
+            """.trimIndent()
 
-        val expectedJsonRootObject = """
+        val expectedJsonRootObject =
+            """
             {
               "key": "val",
               "string key": 66.3,
               "hello": "y'all"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         assertParsesTo(
             """
@@ -46,7 +49,7 @@ class KsonCoreTestObject : KsonCoreTest {
             expectKsonRootObjectAst,
             expectedYamlRootObject,
             expectedJsonRootObject,
-            "should parse as a root object when optional root parens are provided"
+            "should parse as a root object when optional root parens are provided",
         )
 
         assertParsesTo(
@@ -57,7 +60,7 @@ class KsonCoreTestObject : KsonCoreTest {
             """,
             expectKsonRootObjectAst,
             expectedYamlRootObject,
-            expectedJsonRootObject
+            expectedJsonRootObject,
         )
     }
 
@@ -68,68 +71,68 @@ class KsonCoreTestObject : KsonCoreTest {
     fun testObjectCommaPrecedence() {
         assertParsesTo(
             """
-                [
-                  ObjA1: 1,
-                  ObjA2: [
-                    nested1:v,
-                    nested2:v,
-                    nested3:v,
-                  ],
-                  ObjA3: 3,
-                  
-                  "A string",
-                  
-                  ObjB4: 4,
-                ]
+            [
+              ObjA1: 1,
+              ObjA2: [
+                nested1:v,
+                nested2:v,
+                nested3:v,
+              ],
+              ObjA3: 3,
+              
+              "A string",
+              
+              ObjB4: 4,
+            ]
             """.trimIndent(),
             """
-                - ObjA1: 1
-                - ObjA2:
-                    - nested1: v
-                    - nested2: v
-                    - nested3: v
-                    =
-                - ObjA3: 3
-                - 'A string'
-                - ObjB4: 4
+            - ObjA1: 1
+            - ObjA2:
+                - nested1: v
+                - nested2: v
+                - nested3: v
+                =
+            - ObjA3: 3
+            - 'A string'
+            - ObjB4: 4
             """.trimIndent(),
             """
-                - ObjA1: 1
-                - ObjA2:
-                    - nested1: v
-                    - nested2: v
-                    - nested3: v
-                - ObjA3: 3
-                - "A string"
-                - ObjB4: 4
+            - ObjA1: 1
+            - ObjA2:
+                - nested1: v
+                - nested2: v
+                - nested3: v
+            - ObjA3: 3
+            - "A string"
+            - ObjB4: 4
             """.trimIndent(),
             """
-                [
+            [
+              {
+                "ObjA1": 1
+              },
+              {
+                "ObjA2": [
                   {
-                    "ObjA1": 1
+                    "nested1": "v"
                   },
                   {
-                    "ObjA2": [
-                      {
-                        "nested1": "v"
-                      },
-                      {
-                        "nested2": "v"
-                      },
-                      {
-                        "nested3": "v"
-                      }
-                    ]
+                    "nested2": "v"
                   },
                   {
-                    "ObjA3": 3
-                  },
-                  "A string",
-                  {
-                    "ObjB4": 4
+                    "nested3": "v"
                   }
                 ]
-            """.trimIndent()
+              },
+              {
+                "ObjA3": 3
+              },
+              "A string",
+              {
+                "ObjB4": 4
+              }
+            ]
+            """.trimIndent(),
         )
     }
 
@@ -137,57 +140,57 @@ class KsonCoreTestObject : KsonCoreTest {
     fun testObjectSourceMixedWithStringContainingRawNewlines() {
         assertParsesTo(
             """
-                first: "value"
-                second: "this is a string with a
-                raw newline in it and at its end
-                "
+            first: "value"
+            second: "this is a string with a
+            raw newline in it and at its end
+            "
             """.trimIndent(),
             """
-                first: value
-                second: 'this is a string with a
-                raw newline in it and at its end
-                '
+            first: value
+            second: 'this is a string with a
+            raw newline in it and at its end
+            '
             """.trimIndent(),
             """
-                first: value
-                second: "this is a string with a
-                raw newline in it and at its end
-                "
+            first: value
+            second: "this is a string with a
+            raw newline in it and at its end
+            "
             """.trimIndent(),
             """
-                {
-                  "first": "value",
-                  "second": "this is a string with a\nraw newline in it and at its end\n"
-                }
-            """.trimIndent()
+            {
+              "first": "value",
+              "second": "this is a string with a\nraw newline in it and at its end\n"
+            }
+            """.trimIndent(),
         )
     }
 
     @Test
-    fun testProhibitedKey(){
+    fun testProhibitedKey() {
         assertParsesTo(
             """
-                "false": 'false' 
-                "true": 'true'
-                "null": "null" 
+            "false": 'false' 
+            "true": 'true'
+            "null": "null" 
             """.trimIndent(),
             """
-                'false': 'false'
-                'true': 'true'
-                'null': 'null'
+            'false': 'false'
+            'true': 'true'
+            'null': 'null'
             """.trimIndent(),
             """
-                "false": "false"
-                "true": "true"
-                "null": "null"
+            "false": "false"
+            "true": "true"
+            "null": "null"
             """.trimIndent(),
             """
-                {
-                  "false": "false",
-                  "true": "true",
-                  "null": "null"
-                }
-            """.trimIndent()
+            {
+              "false": "false",
+              "true": "true",
+              "null": "null"
+            }
+            """.trimIndent(),
         )
     }
 
@@ -198,28 +201,29 @@ class KsonCoreTestObject : KsonCoreTest {
                 {a:b}#comment
             """,
             """
-                #comment
-                a: b
+            #comment
+            a: b
             """.trimIndent(),
             """
-                #comment
-                a: b
+            #comment
+            a: b
             """.trimIndent(),
             """
-                {
-                  "a": "b"
-                }
+            {
+              "a": "b"
+            }
             """.trimIndent(),
-            "should parse as a root object when optional root parens are provided"
+            "should parse as a root object when optional root parens are provided",
         )
     }
 
     @Test
     fun testObjectSourceOptionalComma() {
-        val expectKsonForRootObjectAst = """
-              key: val
-              'string key': 66.3
-              hello: "y'all"
+        val expectKsonForRootObjectAst =
+            """
+            key: val
+            'string key': 66.3
+            hello: "y'all"
             """.trimIndent()
 
         assertParsesTo(
@@ -232,18 +236,18 @@ class KsonCoreTestObject : KsonCoreTest {
             """,
             expectKsonForRootObjectAst,
             """
-               key: val
-               "string key": 66.3
-               hello: "y'all"
+            key: val
+            "string key": 66.3
+            hello: "y'all"
             """.trimIndent(),
             """
-               {
-                 "key": "val",
-                 "string key": 66.3,
-                 "hello": "y'all"
-               }
+            {
+              "key": "val",
+              "string key": 66.3,
+              "hello": "y'all"
+            }
             """.trimIndent(),
-            "should parse object ignoring optional commas, even trailing"
+            "should parse object ignoring optional commas, even trailing",
         )
     }
 
@@ -251,35 +255,35 @@ class KsonCoreTestObject : KsonCoreTest {
     fun testNestedNonDelimitedObjects() {
         assertParsesTo(
             """
-                key:
-                  nested_key: 10
-                  another_nest_key: 3
-                  .
-                unnested_key: 44
+            key:
+              nested_key: 10
+              another_nest_key: 3
+              .
+            unnested_key: 44
             """.trimIndent(),
             """
-                key:
-                  nested_key: 10
-                  another_nest_key: 3
-                  .
-                unnested_key: 44
+            key:
+              nested_key: 10
+              another_nest_key: 3
+              .
+            unnested_key: 44
             """.trimIndent(),
             """
-                key:
-                  nested_key: 10
-                  another_nest_key: 3
-                
-                unnested_key: 44
+            key:
+              nested_key: 10
+              another_nest_key: 3
+            
+            unnested_key: 44
             """.trimIndent(),
             """
-                {
-                  "key": {
-                    "nested_key": 10,
-                    "another_nest_key": 3
-                  },
-                  "unnested_key": 44
-                }
-            """.trimIndent()
+            {
+              "key": {
+                "nested_key": 10,
+                "another_nest_key": 3
+              },
+              "unnested_key": 44
+            }
+            """.trimIndent(),
         )
     }
-} 
+}

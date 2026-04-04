@@ -11,7 +11,7 @@ import org.kson.parser.behavior.StringQuote
  */
 fun renderForJsonString(content: String): String {
     val sb = StringBuilder(content.length + 2)
-    
+
     var i = 0
     while (i < content.length) {
         val char = content[i]
@@ -36,7 +36,7 @@ fun renderForJsonString(content: String): String {
         }
         i++
     }
-    
+
     return sb.toString()
 }
 
@@ -73,7 +73,10 @@ fun escapeRawWhitespace(ksonEscapedString: String): String {
  * @param sb The StringBuilder to append to
  * @param codePoint The Unicode code point to escape
  */
-private fun appendUnicodeEscape(sb: StringBuilder, codePoint: Int) {
+private fun appendUnicodeEscape(
+    sb: StringBuilder,
+    codePoint: Int,
+) {
     sb.append("\\u")
     sb.append(codePoint.toString(16).uppercase().padStart(4, '0'))
 }
@@ -89,7 +92,10 @@ private fun appendUnicodeEscape(sb: StringBuilder, codePoint: Int) {
  * @param sb The StringBuilder to append to
  * @param codePoint The Unicode code point to convert to a surrogate pair
  */
-private fun appendSurrogatePair(sb: StringBuilder, codePoint: Int) {
+private fun appendSurrogatePair(
+    sb: StringBuilder,
+    codePoint: Int,
+) {
     val high = (0xD800 or ((codePoint - 0x10000) shr 10))
     val low = (0xDC00 or ((codePoint - 0x10000) and 0x3FF))
     appendUnicodeEscape(sb, high)

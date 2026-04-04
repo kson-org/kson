@@ -12,34 +12,36 @@ class KsonElementGeneratorTest : BasePlatformTestCase() {
     }
 
     fun testEmbedBlockGeneration() {
-        val content = """
+        val content =
+            """
             |  content with a newline current indent of 2
             |   
-        """.trimMargin()
+            """.trimMargin()
         val generatedBlock = generator.createEmbedBlock(EmbedDelim.Percent, content, tag = "custom")
 
-        val expectedBlock = """
+        val expectedBlock =
+            """
             |%custom
             |  content with a newline current indent of 2
             |   %%
-        """.trimMargin()
+            """.trimMargin()
         assertEquals(generatedBlock.text, expectedBlock)
     }
 
     fun testEmbedBlockGenerationWithIndent() {
-        val content = """
+        val content =
+            """
             |  content with a newline and added indent of 2
             |  
-        """.trimMargin()
+            """.trimMargin()
         val generatedBlock = generator.createEmbedBlock(EmbedDelim.Percent, content, tag = "custom", indentText = "  ")
 
-        val expectedBlock = """
+        val expectedBlock =
+            """
             |%custom
             |    content with a newline and added indent of 2
             |    %%
-        """.trimMargin()
+            """.trimMargin()
         assertEquals(generatedBlock.text, expectedBlock)
     }
-
-
 }

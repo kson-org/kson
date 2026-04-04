@@ -7,7 +7,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SchemaInfoDisplayTest {
-
     /**
      * Helper to extract hover info from a schema source
      */
@@ -18,13 +17,16 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithTitleAndDescription() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 title: "User Name"
                 description: "The full name of the user"
                 type: "string"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("**User Name**"))
@@ -34,12 +36,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithDescriptionOnly() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 description: "A simple description"
                 type: "number"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("A simple description"))
@@ -48,12 +53,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithTitleOnly() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 title: "Important Field"
                 type: "boolean"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("**Important Field**"))
@@ -62,12 +70,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithDefaultValue() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "string"
                 default: "defaultValue"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Default:* `defaultValue`"))
@@ -75,12 +86,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithDefaultNumber() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "integer"
                 default: 42
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Default:* `42`"))
@@ -88,12 +102,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithDefaultBoolean() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "boolean"
                 default: true
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Default:* `true`"))
@@ -101,12 +118,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithEnumValues() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "string"
                 enum: ["option1", "option2", "option3"]
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Allowed values:*"))
@@ -117,12 +137,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithPattern() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "string"
                 pattern: "^[A-Z][a-z]+$"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Pattern:* `^[A-Z][a-z]+\$`"))
@@ -130,13 +153,16 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithNumericConstraints() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "integer"
                 minimum: 0
                 maximum: 100
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Minimum:* 0"))
@@ -145,13 +171,16 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithStringLengthConstraints() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "string"
                 minLength: 3
                 maxLength: 50
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Min length:* 3"))
@@ -160,13 +189,16 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithArrayItemConstraints() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "array"
                 minItems: 1
                 maxItems: 10
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Min items:* 1"))
@@ -175,12 +207,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithUnionType() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: ["string", "number", "null"]
                 description: "Can be string, number, or null"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Type:* `string | number | null`"))
@@ -189,7 +224,9 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithAllFeatures() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 title: "Age"
                 description: "The user's age in years"
@@ -198,7 +235,8 @@ class SchemaInfoDisplayTest {
                 minimum: 0
                 maximum: 150
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("**Age**"))
@@ -211,11 +249,14 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithMinimalSchema() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "string"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Type:* `string`"))
@@ -237,11 +278,14 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverFromSchemaWithOnlyTypeNoOtherInfo() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "object"
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Type:* `object`"))
@@ -250,14 +294,15 @@ class SchemaInfoDisplayTest {
     @Test
     fun testGetSchemaHoverInfoEndToEnd() {
         // Test the full integration: document + schema
-        val document = """
+        val document =
+            """
             {
                 user: {
                     name: "John"
                     age: 30
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val schema = """
             {
@@ -292,14 +337,15 @@ class SchemaInfoDisplayTest {
     @Test
     fun testGetSchemaHoverInfoForNestedArrayElement() {
         // language="kson"
-        val document = """
+        val document =
+            """
             {
                 users: [
                     { name: "Alice" }
                     { name: "Bob" }
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val schema = """
             {
@@ -331,12 +377,15 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithComplexDefaultValue() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "array"
                 default: ["item1", "item2", "item3"]
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Default:*"))
@@ -345,13 +394,16 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithFloatingPointConstraints() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "number"
                 minimum: 0.5
                 maximum: 99.9
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Minimum:* 0.5"))
@@ -360,11 +412,14 @@ class SchemaInfoDisplayTest {
 
     @Test
     fun testExtractHoverWithMixedEnumTypes() {
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 enum: ["string", 42, true, null]
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("*Allowed values:*"))
@@ -377,7 +432,9 @@ class SchemaInfoDisplayTest {
     @Test
     fun testExtractHoverDoesNotIncludePropertiesOrItems() {
         // Hover info should focus on the schema itself, not list all sub-properties
-        val hoverInfo = getHoverInfo("""
+        val hoverInfo =
+            getHoverInfo(
+                """
             {
                 type: "object"
                 description: "A user object"
@@ -386,7 +443,8 @@ class SchemaInfoDisplayTest {
                     age: { type: "integer" }
                 }
             }
-        """)
+        """,
+            )
 
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("A user object"))

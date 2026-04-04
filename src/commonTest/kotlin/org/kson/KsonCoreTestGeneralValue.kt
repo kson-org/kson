@@ -3,7 +3,6 @@ package org.kson
 import org.kson.KsonCoreTest.*
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
 
 /**
  * Tests for general/mixed Kson values that don't fit neatly into the other [KsonCoreTest] tests
@@ -17,44 +16,55 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
      * data structures into one Kson representation (which is of course incorrect on some of the input)
      */
     @Test
-    fun testParseAmbiguityRegression(){
+    fun testParseAmbiguityRegression() {
         val compileSettings = CompileSettings().ksonSettings
 
         // Note that "test_key" is a sibling of "outer_key"
-        val parseTwoOuterKeys = KsonCore.parseToKson("""
-            "outer_key": {
-                "inner_key": [
-                  1,
-                  2,
-                  3
-                ]
-              }
-            "test_key": "value"
-            """.trimIndent(), compileSettings)
+        val parseTwoOuterKeys =
+            KsonCore.parseToKson(
+                """
+                "outer_key": {
+                    "inner_key": [
+                      1,
+                      2,
+                      3
+                    ]
+                  }
+                "test_key": "value"
+                """.trimIndent(),
+                compileSettings,
+            )
 
         val doubleParseTwoOuterKeys = KsonCore.parseToKson(parseTwoOuterKeys.kson!!, compileSettings)
 
         // Note that "test_key" is a sibling of "inner_key"
-        val parseTwoInnerKeys = KsonCore.parseToKson(
-            """
-            "outer_key": {
-                "inner_key": [
-                  1,
-                  2,
-                  3
-                ],
-                "test_key": "value"
-              }
-            """.trimIndent(), compileSettings)
+        val parseTwoInnerKeys =
+            KsonCore.parseToKson(
+                """
+                "outer_key": {
+                    "inner_key": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "test_key": "value"
+                  }
+                """.trimIndent(),
+                compileSettings,
+            )
 
         // under no circumstances should these parse results be the same
-        assertNotEquals(doubleParseTwoOuterKeys, parseTwoInnerKeys,
-            "should never format two different data structures into identical Kson")
+        assertNotEquals(
+            doubleParseTwoOuterKeys,
+            parseTwoInnerKeys,
+            "should never format two different data structures into identical Kson",
+        )
     }
 
     @Test
     fun testNestedListAndObjectFormatting() {
-        assertParsesTo("""
+        assertParsesTo(
+            """
             {
               nested_obj: {
                 key: value
@@ -66,20 +76,20 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
             }
         """,
             """
-           nested_obj:
-             key: value
-             .
-           nested_list:
-             - 1.1
-             - 2.1
-        """.trimIndent(),
+            nested_obj:
+              key: value
+              .
+            nested_list:
+              - 1.1
+              - 2.1
+            """.trimIndent(),
             """
-           nested_obj:
-             key: value
-           nested_list:
-             - 1.1
-             - 2.1
-        """.trimIndent(),
+            nested_obj:
+              key: value
+            nested_list:
+              - 1.1
+              - 2.1
+            """.trimIndent(),
             """
             {
               "nested_obj": {
@@ -90,7 +100,7 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
                 2.1
               ]
             }
-        """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -99,7 +109,7 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
      * no way around the ambiguity involved in trying to unnest multiple mixed objects and lists
      */
     @Test
-    fun testParsingMultiLevelMixedObjectsAndLists(){
+    fun testParsingMultiLevelMixedObjectsAndLists() {
         assertParsesTo(
             // the object containing `inner_key` should be unambiguously terminated
             """

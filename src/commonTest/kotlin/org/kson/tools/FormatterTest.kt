@@ -1,6 +1,6 @@
 package org.kson.tools
 
-import org.kson.value.navigation.json_pointer.JsonPointerGlob
+import org.kson.value.navigation.jsonpointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,17 +11,17 @@ class FormatterTest {
         indentType: IndentType = IndentType.Space(2),
         formattingStyle: FormattingStyle = FormattingStyle.PLAIN,
         roundTrip: Boolean = true,
-        embedBlockRules: List<InternalEmbedRule> = emptyList()
+        embedBlockRules: List<InternalEmbedRule> = emptyList(),
     ) {
         val config = KsonFormatterConfig(indentType, formattingStyle, embedBlockRules)
         val formattedKson = format(source, config)
         assertEquals(
             expected,
-            formattedKson
+            formattedKson,
         )
 
-        // Roundtrip: each format should preserve the semantics of a kson document
         /**
+         * Roundtrip: each format should preserve the semantics of a kson document
          * TODO There are two test cases that currently can't roundtrip. After we handled these corner cases we should
          * roundtrip for every test.
          **/
@@ -35,14 +35,18 @@ class FormatterTest {
         assertEquals(
             expected,
             format(roundtripKson, config),
-            "Formatting with same style should be idempotent"
+            "Formatting with same style should be idempotent",
         )
     }
 
-    private fun embedRule(pathPattern: String, tag: String? = null, minLength: Int = 0) = InternalEmbedRule(
+    private fun embedRule(
+        pathPattern: String,
+        tag: String? = null,
+        minLength: Int = 0,
+    ) = InternalEmbedRule(
         pathPattern = JsonPointerGlob(pathPattern),
         tag = tag,
-        minLength = minLength
+        minLength = minLength,
     )
 
     @Test
@@ -63,7 +67,7 @@ class FormatterTest {
             """.trimIndent(),
             """
             key: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -77,18 +81,18 @@ class FormatterTest {
             """.trimIndent(),
             """
             key: value
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
             """
-                    {
-                 key: value
-                           }
+               {
+            key: value
+                      }
             """.trimIndent(),
             """
             key: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -105,7 +109,7 @@ class FormatterTest {
             """
             outer:
               inner: value
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         // Test with tabs
@@ -121,7 +125,7 @@ class FormatterTest {
             outer:
             ${"\t"}inner: value
             """.trimIndent(),
-            IndentType.Tab()
+            IndentType.Tab(),
         )
     }
 
@@ -141,7 +145,7 @@ class FormatterTest {
             nested:
                 inner: value2
             """.trimIndent(),
-            IndentType.Space(4)
+            IndentType.Space(4),
         )
     }
 
@@ -163,7 +167,7 @@ class FormatterTest {
                   child2Property: 2
                   .
                 child1Property: 1
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -178,7 +182,7 @@ class FormatterTest {
             - 
               - 
                 - 3
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -199,7 +203,7 @@ class FormatterTest {
               - 2
               =
             - 1
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -207,15 +211,15 @@ class FormatterTest {
     fun testDashList() {
         assertFormatting(
             """
-                      - one
-              -   two
-                     -    three
+                    - one
+            -   two
+                   -    three
             """.trimIndent(),
             """
             - one
             - two
             - three
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -231,7 +235,7 @@ class FormatterTest {
             """
             key:
               - a: b
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -254,7 +258,7 @@ class FormatterTest {
                 FROM table
                   WHERE x = 1
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -266,15 +270,15 @@ class FormatterTest {
     fun testEmbedBlockWithEscapes() {
         assertFormatting(
             """
-                %
-                This embed block %\% has escapes that should be respected when formatting %\\\%
-                %%
+            %
+            This embed block %\% has escapes that should be respected when formatting %\\\%
+            %%
             """.trimIndent(),
             """
-                $
-                This embed block %% has escapes that should be respected when formatting %\\%
-                $$
-            """.trimIndent()
+            $
+            This embed block %% has escapes that should be respected when formatting %\\%
+            $$
+            """.trimIndent(),
         )
     }
 
@@ -282,21 +286,21 @@ class FormatterTest {
     fun testEmbedBlockWithTrailingSlashEscapes() {
         assertFormatting(
             """
-                %
-                This embed block has more escaped percents than dollars
-                %\% %\% %\% $$\x
-                so will format to a $-embed block.
-                And it should not get tripped up by trailing slashes when escaping $\$\x
-                %%
+            %
+            This embed block has more escaped percents than dollars
+            %\% %\% %\% $$\x
+            so will format to a $-embed block.
+            And it should not get tripped up by trailing slashes when escaping $\$\x
+            %%
             """.trimIndent(),
             """
-                $
-                This embed block has more escaped percents than dollars
-                %% %% %% $\$\x
-                so will format to a $-embed block.
-                And it should not get tripped up by trailing slashes when escaping $\\$\x
-                $$
-            """.trimIndent()
+            $
+            This embed block has more escaped percents than dollars
+            %% %% %% $\$\x
+            so will format to a $-embed block.
+            And it should not get tripped up by trailing slashes when escaping $\\$\x
+            $$
+            """.trimIndent(),
         )
     }
 
@@ -319,7 +323,7 @@ class FormatterTest {
                 FROM table
                   WHERE x = 1
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -339,7 +343,7 @@ class FormatterTest {
                 FROM table
                   WHERE x = 1
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -356,7 +360,7 @@ class FormatterTest {
                 FROM table
                   WHERE x = 1
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -376,7 +380,7 @@ class FormatterTest {
                 FROM table
                   WHERE x = 1
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -395,7 +399,7 @@ class FormatterTest {
             # Property comment
             # Trailing comment with lots of space
             key: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -415,7 +419,7 @@ class FormatterTest {
             key: value
             # a property
             key2: value
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -429,22 +433,22 @@ class FormatterTest {
               # a value
               - 1
               - 2
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
             """
-        key:
-                    - 1 
-      # a value
-                  - 2
+              key:
+                          - 1 
+            # a value
+                        - 2
             """.trimIndent(),
             """
             key:
               - 1
               # a value
               - 2
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -469,7 +473,7 @@ class FormatterTest {
             # a property
             # a property
             key2: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -489,7 +493,7 @@ class FormatterTest {
               # comment
               # comment
               y: 12
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -523,9 +527,8 @@ class FormatterTest {
               # a property
               # a property
               nested2: value
-            """.trimIndent()
+            """.trimIndent(),
         )
-
     }
 
     @Test
@@ -566,7 +569,7 @@ class FormatterTest {
                   SELECT *
                       FROM table
                   %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -588,7 +591,7 @@ class FormatterTest {
               raw2
               raw3
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -610,7 +613,7 @@ class FormatterTest {
               not_indented
                     more_indented
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -648,7 +651,7 @@ class FormatterTest {
                 with some
                   indentation
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -669,7 +672,7 @@ class FormatterTest {
               - first
               - second
               - third
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -700,7 +703,7 @@ class FormatterTest {
             - 
               - inner3
               - inner4
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -732,7 +735,7 @@ class FormatterTest {
                       =
                     =
                   - y
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -740,24 +743,24 @@ class FormatterTest {
     fun testMixedBracketTypes() {
         assertFormatting(
             """
-              mixed: <
-              - [1,2]
-              - {x:y}
-              - <
-              - nested
-              >
-              >
+            mixed: <
+            - [1,2]
+            - {x:y}
+            - <
+            - nested
+            >
+            >
             """.trimIndent(),
             """
-              mixed:
-                - 
-                  - 1
-                  - 2
-                  =
-                - x: y
-                - 
-                  - nested
-            """.trimIndent()
+            mixed:
+              - 
+                - 1
+                - 2
+                =
+              - x: y
+              - 
+                - nested
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -796,7 +799,7 @@ class FormatterTest {
               - x: y
               - 
                 - nested
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -817,7 +820,7 @@ class FormatterTest {
                 - 3
               .
             outer_key2: value
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertFormatting(
@@ -836,7 +839,7 @@ class FormatterTest {
               - inner_key: x
               =
             - outer_list_elem
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -853,7 +856,7 @@ class FormatterTest {
             - key: value
             - nested:
                 inner: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -864,7 +867,7 @@ class FormatterTest {
             """
             key: {
             """.trimIndent(),
-            roundTrip = false
+            roundTrip = false,
         )
     }
 
@@ -903,7 +906,7 @@ class FormatterTest {
                 - value3_1
                 - value3_2
             """.trimIndent(),
-            IndentType.Space(4)
+            IndentType.Space(4),
         )
     }
 
@@ -922,7 +925,7 @@ class FormatterTest {
             key:
             ${"\t"}subkey: value
             """.trimIndent(),
-            IndentType.Tab()
+            IndentType.Tab(),
         )
 
         assertFormatting(
@@ -938,7 +941,7 @@ class FormatterTest {
             ${"\t"}inner:
             ${"\t"}${"\t"}very_inner: value
             """.trimIndent(),
-            IndentType.Tab()
+            IndentType.Tab(),
         )
     }
 
@@ -961,7 +964,7 @@ class FormatterTest {
             ${"\t"}    WHERE x = 1
             ${"\t"}%%
             """.trimIndent(),
-            IndentType.Tab()
+            IndentType.Tab(),
         )
     }
 
@@ -990,7 +993,7 @@ class FormatterTest {
             ${"\t"}${"\t"}- 1
             ${"\t"}${"\t"}- 2
             """.trimIndent(),
-            IndentType.Tab()
+            IndentType.Tab(),
         )
     }
 
@@ -1013,7 +1016,7 @@ class FormatterTest {
             key1:
               key2:
                 key3: value
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -1040,7 +1043,7 @@ class FormatterTest {
                 - 2
               inner2:
                 deepKey: 'deep value'
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -1061,7 +1064,7 @@ class FormatterTest {
               SELECT *
                 FROM table
               %%
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -1070,62 +1073,75 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("{"),
-            "should indent one level after opening brace"
+            1,
+            formatter.getCurrentLineIndentLevel("{"),
+            "should indent one level after opening brace",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("  {"),
-            "should indent one level after opening brace with existing indent"
-        )
-
-        assertEquals(
-            1, formatter.getCurrentLineIndentLevel("key:"),
-            "should indent one level after colon"
-        )
-        assertEquals(
-            2, formatter.getCurrentLineIndentLevel("  key:"),
-            "should indent one level after colon with existing indent"
+            2,
+            formatter.getCurrentLineIndentLevel("  {"),
+            "should indent one level after opening brace with existing indent",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("<"),
-            "should indent one level after opening angle bracket"
+            1,
+            formatter.getCurrentLineIndentLevel("key:"),
+            "should indent one level after colon",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("  <"),
-            "should indent one level after opening angle bracket with existing indent"
-        )
-
-        assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  - item"),
-            "should maintain indent after dash in list"
+            2,
+            formatter.getCurrentLineIndentLevel("  key:"),
+            "should indent one level after colon with existing indent",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  }"),
-            "should match closing brace indent"
+            1,
+            formatter.getCurrentLineIndentLevel("<"),
+            "should indent one level after opening angle bracket",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    }"),
-            "should match closing brace indent with higher existing indent"
-        )
-
-        assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  >"),
-            "should match closing angle bracket indent"
-        )
-        assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    >"),
-            "should match closing angle bracket indent with higher existing indent"
+            2,
+            formatter.getCurrentLineIndentLevel("  <"),
+            "should indent one level after opening angle bracket with existing indent",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  some text"),
-            "should maintain indent for normal lines"
+            1,
+            formatter.getCurrentLineIndentLevel("  - item"),
+            "should maintain indent after dash in list",
+        )
+
+        assertEquals(
+            1,
+            formatter.getCurrentLineIndentLevel("  }"),
+            "should match closing brace indent",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    other text"),
-            "should maintain indent for normal lines with higher existing indent"
+            2,
+            formatter.getCurrentLineIndentLevel("    }"),
+            "should match closing brace indent with higher existing indent",
+        )
+
+        assertEquals(
+            1,
+            formatter.getCurrentLineIndentLevel("  >"),
+            "should match closing angle bracket indent",
+        )
+        assertEquals(
+            2,
+            formatter.getCurrentLineIndentLevel("    >"),
+            "should match closing angle bracket indent with higher existing indent",
+        )
+
+        assertEquals(
+            1,
+            formatter.getCurrentLineIndentLevel("  some text"),
+            "should maintain indent for normal lines",
+        )
+        assertEquals(
+            2,
+            formatter.getCurrentLineIndentLevel("    other text"),
+            "should maintain indent for normal lines with higher existing indent",
         )
     }
 
@@ -1134,12 +1150,14 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  "),
-            "should maintain previous indent for empty lines"
+            1,
+            formatter.getCurrentLineIndentLevel("  "),
+            "should maintain previous indent for empty lines",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    "),
-            "should maintain previous indent for empty lines with higher existing indent"
+            2,
+            formatter.getCurrentLineIndentLevel("    "),
+            "should maintain previous indent for empty lines with higher existing indent",
         )
     }
 
@@ -1148,30 +1166,36 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Tab())
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("{"),
-            "should indent one level after opening brace with tab indentation"
+            1,
+            formatter.getCurrentLineIndentLevel("{"),
+            "should indent one level after opening brace with tab indentation",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("\t{"),
-            "should indent one level after opening brace with existing tab indent"
-        )
-
-        assertEquals(
-            1, formatter.getCurrentLineIndentLevel("key:"),
-            "should indent one level after colon with tab indentation"
-        )
-        assertEquals(
-            2, formatter.getCurrentLineIndentLevel("\tkey:"),
-            "should indent one level after colon with existing tab indent"
+            2,
+            formatter.getCurrentLineIndentLevel("\t{"),
+            "should indent one level after opening brace with existing tab indent",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("\tsome text"),
-            "should maintain indent for normal lines with tab indentation"
+            1,
+            formatter.getCurrentLineIndentLevel("key:"),
+            "should indent one level after colon with tab indentation",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("\t\tother text"),
-            "should maintain indent for normal lines with higher existing tab indent"
+            2,
+            formatter.getCurrentLineIndentLevel("\tkey:"),
+            "should indent one level after colon with existing tab indent",
+        )
+
+        assertEquals(
+            1,
+            formatter.getCurrentLineIndentLevel("\tsome text"),
+            "should maintain indent for normal lines with tab indentation",
+        )
+        assertEquals(
+            2,
+            formatter.getCurrentLineIndentLevel("\t\tother text"),
+            "should maintain indent for normal lines with higher existing tab indent",
         )
     }
 
@@ -1180,26 +1204,31 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            0, formatter.getCurrentLineIndentLevel("%%sql"),
-            "should not change indent for embed block start"
+            0,
+            formatter.getCurrentLineIndentLevel("%%sql"),
+            "should not change indent for embed block start",
         )
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  %%sql"),
-            "should not change indent for embed block start with existing indent"
-        )
-
-        assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  SELECT *"),
-            "should maintain indent inside embed block"
+            1,
+            formatter.getCurrentLineIndentLevel("  %%sql"),
+            "should not change indent for embed block start with existing indent",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  %%"),
-            "should decrease indent after embed block end"
+            1,
+            formatter.getCurrentLineIndentLevel("  SELECT *"),
+            "should maintain indent inside embed block",
+        )
+
+        assertEquals(
+            1,
+            formatter.getCurrentLineIndentLevel("  %%"),
+            "should decrease indent after embed block end",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    %%"),
-            "should decrease indent after embed block end with higher existing indent"
+            2,
+            formatter.getCurrentLineIndentLevel("    %%"),
+            "should decrease indent after embed block end with higher existing indent",
         )
     }
 
@@ -1208,33 +1237,40 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("{"),
-            "should properly indent for nested structures"
+            1,
+            formatter.getCurrentLineIndentLevel("{"),
+            "should properly indent for nested structures",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("  nested: {"),
-            "should properly indent for nested object properties"
+            2,
+            formatter.getCurrentLineIndentLevel("  nested: {"),
+            "should properly indent for nested object properties",
         )
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("    items: <"),
-            "should properly indent for nested angle brackets"
+            3,
+            formatter.getCurrentLineIndentLevel("    items: <"),
+            "should properly indent for nested angle brackets",
         )
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("    - {"),
-            "should properly indent for nested list items"
+            3,
+            formatter.getCurrentLineIndentLevel("    - {"),
+            "should properly indent for nested list items",
         )
 
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("      }"),
-            "should properly indent after closing nested delimiters"
+            3,
+            formatter.getCurrentLineIndentLevel("      }"),
+            "should properly indent after closing nested delimiters",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    >"),
-            "should properly indent after closing angle brackets"
+            2,
+            formatter.getCurrentLineIndentLevel("    >"),
+            "should properly indent after closing angle brackets",
         )
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  }"),
-            "should properly indent after closing outer brace"
+            1,
+            formatter.getCurrentLineIndentLevel("  }"),
+            "should properly indent after closing outer brace",
         )
     }
 
@@ -1243,25 +1279,30 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("{ {"),
-            "should increase indent by more than 1 for multiple opening delimiters on one line"
+            2,
+            formatter.getCurrentLineIndentLevel("{ {"),
+            "should increase indent by more than 1 for multiple opening delimiters on one line",
         )
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("{ { {"),
-            "should increase indent by multiple levels for three opening delimiters"
+            3,
+            formatter.getCurrentLineIndentLevel("{ { {"),
+            "should increase indent by multiple levels for three opening delimiters",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("key: {nested: {"),
-            "should increase indent by more than 1 for nested properties"
+            2,
+            formatter.getCurrentLineIndentLevel("key: {nested: {"),
+            "should increase indent by more than 1 for nested properties",
         )
 
         assertEquals(
-            1, formatter.getCurrentLineIndentLevel("  } }"),
-            "should have no effect on the next line for multiple closing delimiters as they unindent their own line"
+            1,
+            formatter.getCurrentLineIndentLevel("  } }"),
+            "should have no effect on the next line for multiple closing delimiters as they unindent their own line",
         )
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    } } }"),
-            "should maintain existing indent levels for multiple closing delimiters"
+            2,
+            formatter.getCurrentLineIndentLevel("    } } }"),
+            "should maintain existing indent levels for multiple closing delimiters",
         )
     }
 
@@ -1270,12 +1311,14 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            0, formatter.getCurrentLineIndentLevel("key:val }}}"),
-            "should trigger an unindent on the next line, not their own line, for non-leading close delimiters"
+            0,
+            formatter.getCurrentLineIndentLevel("key:val }}}"),
+            "should trigger an unindent on the next line, not their own line, for non-leading close delimiters",
         )
         assertEquals(
-            4, formatter.getCurrentLineIndentLevel("              key:val }}}"),
-            "should maintain existing indent for trailing delimiters with leading spaces"
+            4,
+            formatter.getCurrentLineIndentLevel("              key:val }}}"),
+            "should maintain existing indent for trailing delimiters with leading spaces",
         )
     }
 
@@ -1284,21 +1327,25 @@ class FormatterTest {
         val formatter = IndentFormatter(IndentType.Space(2))
 
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    }}"),
-            "should handle multiple nested structures closing at once"
+            2,
+            formatter.getCurrentLineIndentLevel("    }}"),
+            "should handle multiple nested structures closing at once",
         )
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("      }}}"),
-            "should handle three nested structures closing at once"
+            3,
+            formatter.getCurrentLineIndentLevel("      }}}"),
+            "should handle three nested structures closing at once",
         )
 
         assertEquals(
-            2, formatter.getCurrentLineIndentLevel("    }>"),
-            "should work with mixed bracket types"
+            2,
+            formatter.getCurrentLineIndentLevel("    }>"),
+            "should work with mixed bracket types",
         )
         assertEquals(
-            3, formatter.getCurrentLineIndentLevel("      ]}>"),
-            "should work with multiple mixed bracket types"
+            3,
+            formatter.getCurrentLineIndentLevel("      ]}>"),
+            "should work with multiple mixed bracket types",
         )
     }
 
@@ -1306,18 +1353,18 @@ class FormatterTest {
     fun testNestedPlainObjects() {
         assertFormatting(
             """
-                key:
-                nested_key: 10
-                another_nest_key: 3 .
-                unnested_key: 44
+            key:
+            nested_key: 10
+            another_nest_key: 3 .
+            unnested_key: 44
             """.trimIndent(),
             """
-              key:
-                nested_key: 10
-                another_nest_key: 3
-                .
-              unnested_key: 44
-            """.trimIndent()
+            key:
+              nested_key: 10
+              another_nest_key: 3
+              .
+            unnested_key: 44
+            """.trimIndent(),
         )
     }
 
@@ -1325,18 +1372,18 @@ class FormatterTest {
     fun testNestedDashLists() {
         assertFormatting(
             """
-                - 
-                - "sub-list elem 1"
-                - "sub-list elem 2" =
-                - "outer list elem 1"
+            - 
+            - "sub-list elem 1"
+            - "sub-list elem 2" =
+            - "outer list elem 1"
             """.trimIndent(),
             """
-              - 
-                - 'sub-list elem 1'
-                - 'sub-list elem 2'
-                =
-              - 'outer list elem 1'
-            """.trimIndent()
+            - 
+              - 'sub-list elem 1'
+              - 'sub-list elem 2'
+              =
+            - 'outer list elem 1'
+            """.trimIndent(),
         )
     }
 
@@ -1344,12 +1391,12 @@ class FormatterTest {
     fun testPlainObjectsInPlainLists() {
         assertFormatting(
             """
-                - key11: 11
-                key12: 12
-                - key21: 22
-                key22: 22
-                - key31: 31
-                key32: 32
+            - key11: 11
+            key12: 12
+            - key21: 22
+            key22: 22
+            - key31: 31
+            key32: 32
             """.trimIndent(),
             """
             - key11: 11
@@ -1360,7 +1407,7 @@ class FormatterTest {
             
             - key31: 31
               key32: 32
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -1372,10 +1419,10 @@ class FormatterTest {
               key12:
             """.trimIndent(),
             """
-                - key11: 11
-                  key12:
+            - key11: 11
+              key12:
             """.trimIndent(),
-            roundTrip = false
+            roundTrip = false,
         )
 
         assertFormatting(
@@ -1386,10 +1433,10 @@ class FormatterTest {
               }
             """.trimIndent(),
             """
-                - key11: 11
-                  key12:
+            - key11: 11
+              key12:
             """.trimIndent(),
-            roundTrip = false
+            roundTrip = false,
         )
     }
 
@@ -1401,14 +1448,14 @@ class FormatterTest {
             -
 
             # trailing comment
-        """.trimIndent(),
+            """.trimIndent(),
             """
             # error: list with no value
             -
 
             # trailing comment
-        """.trimIndent(),
-            roundTrip = false
+            """.trimIndent(),
+            roundTrip = false,
         )
     }
 
@@ -1420,57 +1467,57 @@ class FormatterTest {
     fun testFormattingSucceedsWithInvalidTrailingContent() {
         assertFormatting(
             """
-                {outer:{inner: value}}
-                "Illegal trailing content"
+            {outer:{inner: value}}
+            "Illegal trailing content"
             """.trimIndent(),
             """
-                outer:
-                  inner: value
-                  .
-                .
+            outer:
+              inner: value
+              .
+            .
 
-                "Illegal trailing content"
-            """.trimIndent()
+            "Illegal trailing content"
+            """.trimIndent(),
         )
 
         assertFormatting(
             """
-                key: value trailingContent
-                list: [1,2,3] extraTrailingContent
+            key: value trailingContent
+            list: [1,2,3] extraTrailingContent
             """.trimIndent(),
             """
-                key: value
-                .
-                
-                trailingContent
-          
-                
-                list:
-                  - 1
-                  - 2
-                  - 3
-                  =
-                .
-                
-                extraTrailingContent
-            """.trimIndent()
+            key: value
+            .
+            
+            trailingContent
+            
+            
+            list:
+              - 1
+              - 2
+              - 3
+              =
+            .
+            
+            extraTrailingContent
+            """.trimIndent(),
         )
 
         assertFormatting(
             """
-                key: value extraValue list:[1,2,3]
+            key: value extraValue list:[1,2,3]
             """.trimIndent(),
             """
-                key: value
-                .
-                
-                extraValue 
-          
-                list:
-                  - 1
-                  - 2
-                  - 3
-            """.trimIndent()
+            key: value
+            .
+            
+            extraValue 
+            
+            list:
+              - 1
+              - 2
+              - 3
+            """.trimIndent(),
         )
     }
 
@@ -1478,32 +1525,32 @@ class FormatterTest {
     fun testDelimitedFormattingStyleObjects() {
         assertFormatting(
             """
-                key: value
+            key: value
             """.trimIndent(),
             """
-                {
-                  key: value
-                }
+            {
+              key: value
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
 
         assertFormatting(
             """
-                key: 
-                  nested: value
-                  .
-                unnested: value
+            key: 
+              nested: value
+              .
+            unnested: value
             """.trimIndent(),
             """
-                {
-                  key: {
-                    nested: value
-                  }
-                  unnested: value
-                }
+            {
+              key: {
+                nested: value
+              }
+              unnested: value
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
     }
 
@@ -1511,61 +1558,61 @@ class FormatterTest {
     fun testDelimitedFormattingStyleLists() {
         assertFormatting(
             """
-                list: [1,2,3]
+            list: [1,2,3]
             """.trimIndent(),
             """
-                {
-                  list: <
-                    - 1
-                    - 2
-                    - 3
-                  >
-                }
+            {
+              list: <
+                - 1
+                - 2
+                - 3
+              >
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
 
         assertFormatting(
             """
-                [1,2,3]
+            [1,2,3]
             """.trimIndent(),
             """
-               <
-                 - 1
-                 - 2
-                 - 3
-               >
+            <
+              - 1
+              - 2
+              - 3
+            >
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
 
         assertFormatting(
             """
-                list: 
-                  - 1
-                  - 2
-                  - key: value
-                  - 
-                     - "new list"
-                     =
-                  - test
+            list: 
+              - 1
+              - 2
+              - key: value
+              - 
+                 - "new list"
+                 =
+              - test
             """.trimIndent(),
             """
-                {
-                  list: <
-                    - 1
-                    - 2
-                    - {
-                        key: value
-                      }
-                    - <
-                        - 'new list'
-                      >
-                    - test
+            {
+              list: <
+                - 1
+                - 2
+                - {
+                    key: value
+                  }
+                - <
+                    - 'new list'
                   >
-                }
+                - test
+              >
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
     }
 
@@ -1573,32 +1620,32 @@ class FormatterTest {
     fun testDelimitedFormattingStyleEmbed() {
         assertFormatting(
             """
-                $
-                content
-                $$
+            $
+            content
+            $$
             """.trimIndent(),
             """
-                %
-                content
-                %%
-                """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            %
+            content
+            %%
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED,
         )
 
         assertFormatting(
             """
-                embedBlock: $
-                content
-                $$
+            embedBlock: $
+            content
+            $$
             """.trimIndent(),
             """
-                {
-                  embedBlock: %
-                    content
-                    %%
-                }
+            {
+              embedBlock: %
+                content
+                %%
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
     }
 
@@ -1606,52 +1653,52 @@ class FormatterTest {
     fun testCompactFormattingStyleSimpleObject() {
         assertFormatting(
             """
-                "type": "object"
-                "properties": {
-                x: w
-                }
+            "type": "object"
+            "properties": {
+            x: w
+            }
             """.trimIndent(),
             """
-                type:object properties:x:w
+            type:object properties:x:w
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                {
-                  key: value
-                  key: value
-                }
+            {
+              key: value
+              key: value
+            }
             """.trimIndent(),
             """
-                key:value key:value
-                """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            key:value key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                {
-                  key: "quoted value"
-                  key: value
-                }
+            {
+              key: "quoted value"
+              key: value
+            }
             """.trimIndent(),
             """
-                key:'quoted value'key:value
-                """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            key:'quoted value'key:value
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                key: 1
-                another: key
+            key: 1
+            another: key
             """.trimIndent(),
             """
-                key:1 another:key
-                """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            key:1 another:key
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1659,16 +1706,16 @@ class FormatterTest {
     fun testCompactFormattingStyleList() {
         assertFormatting(
             """
-                list: <
-                 - 1
-                 - 2
-                 - 3
-                 >
+            list: <
+             - 1
+             - 2
+             - 3
+             >
             """.trimIndent(),
             """
-                list:[1 2 3]
+            list:[1 2 3]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1676,74 +1723,74 @@ class FormatterTest {
     fun testCompactFormattingStyleNestedStructures() {
         assertFormatting(
             """
-                list:
-                 - 1
-                 - 2
-                 -
-                   - 3
-                   - 4
-                   =
-                 key: value
+            list:
+             - 1
+             - 2
+             -
+               - 3
+               - 4
+               =
+             key: value
 
             """.trimIndent(),
             """
-                list:[1 2 [3 4]]key:value
+            list:[1 2 [3 4]]key:value
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                list:
-                 - 1
-                 - 2
-                 -
-                   - 3
-                   - 4
-                   =
-                 key:
-                   nestedkey: value
-                   .
-                 anotherkey: value
+            list:
+             - 1
+             - 2
+             -
+               - 3
+               - 4
+               =
+             key:
+               nestedkey: value
+               .
+             anotherkey: value
 
             """.trimIndent(),
             """
-                list:[1 2 [3 4]]key:nestedkey:value.anotherkey:value
+            list:[1 2 [3 4]]key:nestedkey:value.anotherkey:value
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                - key: value
-                - key: value
+            - key: value
+            - key: value
             """.trimIndent(),
             """
-                [{key:value}key:value]
+            [{key:value}key:value]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                - key: true
-                - key: value
+            - key: true
+            - key: value
             """.trimIndent(),
             """
-                [{key:true}key:value]
+            [{key:true}key:value]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                - key: 3
-                - key: value
+            - key: 3
+            - key: value
             """.trimIndent(),
             """
-                [{key:3}key:value]
+            [{key:3}key:value]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
@@ -1753,34 +1800,34 @@ class FormatterTest {
                 - key: value
             """.trimIndent(),
             """
-                nested:[[key:value]key:value]
+            nested:[[key:value]key:value]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                - key11:
-                   key12: value1
-                - key21: value2
+            - key11:
+               key12: value1
+            - key21: value2
             """.trimIndent(),
             """
-                [{key11:key12:value1}key21:value2]
+            [{key11:key12:value1}key21:value2]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                - key11:
-                   key12: 
-                    key13: value1
-                - key21: value2
+            - key11:
+               key12: 
+                key13: value1
+            - key21: value2
             """.trimIndent(),
             """
-                [{key11:key12:key13:value1}key21:value2]
+            [{key11:key12:key13:value1}key21:value2]
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1788,41 +1835,41 @@ class FormatterTest {
     fun testCompactFormattingStyleWithComments() {
         assertFormatting(
             """
-                # comment
-                key: value
-                key: value
+            # comment
+            key: value
+            key: value
             """.trimIndent(),
             """
-                # comment
-                key:value key:value
+            # comment
+            key:value key:value
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                key: value
-                # comment
-                key: value
+            key: value
+            # comment
+            key: value
             """.trimIndent(),
             """
-                key:value
-                # comment
-                key:value
+            key:value
+            # comment
+            key:value
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
 
         assertFormatting(
             """
-                list: [1,2,3]
-                # comment
+            list: [1,2,3]
+            # comment
             """.trimIndent(),
             """
-                list:[1 2 3]
-                # comment
+            list:[1 2 3]
+            # comment
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1830,17 +1877,17 @@ class FormatterTest {
     fun testCompactFormattingStyleEmbedBlock() {
         assertFormatting(
             """
-                embed: ${'$'}tag
-                  content
-                  $$
-                key: value  
+            embed: ${'$'}tag
+              content
+              $$
+            key: value  
             """.trimIndent(),
             """
-                embed:%tag
-                content
-                %%key:value
+            embed:%tag
+            content
+            %%key:value
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1848,14 +1895,14 @@ class FormatterTest {
     fun testCompactFormattingStyleReservedKeywords() {
         assertFormatting(
             """
-                key: true
-                key: false
-                key: null
+            key: true
+            key: false
+            key: null
             """.trimIndent(),
             """
-                key:true key:false key:null
+            key:true key:false key:null
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1863,25 +1910,25 @@ class FormatterTest {
     fun testPlainFormattingEmptyObject() {
         assertFormatting(
             """
-                key:
-                {}
+            key:
+            {}
             """.trimIndent(),
             """
-                key: {}
+            key: {}
             """.trimIndent(),
-            formattingStyle = FormattingStyle.PLAIN
+            formattingStyle = FormattingStyle.PLAIN,
         )
 
         assertFormatting(
             """
-                  - {}
-                  - items: {}
+            - {}
+            - items: {}
             """.trimIndent(),
             """
-                  - {}
-                  - items: {}
+            - {}
+            - items: {}
             """.trimIndent(),
-            formattingStyle = FormattingStyle.PLAIN
+            formattingStyle = FormattingStyle.PLAIN,
         )
     }
 
@@ -1889,15 +1936,15 @@ class FormatterTest {
     fun testDelimitedFormattingEmptyObject() {
         assertFormatting(
             """
-                key:
-                {}
+            key:
+            {}
             """.trimIndent(),
             """
-                {
-                  key: {}
-                }
+            {
+              key: {}
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
     }
 
@@ -1905,12 +1952,12 @@ class FormatterTest {
     fun testCompactFormattingEmptyObject() {
         assertFormatting(
             """
-                key: {}
+            key: {}
             """.trimIndent(),
             """
-                key:{}
+            key:{}
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1918,13 +1965,13 @@ class FormatterTest {
     fun testPlainFormattingEmptyList() {
         assertFormatting(
             """
-                key:
-                <>
+            key:
+            <>
             """.trimIndent(),
             """
-                key: <>
+            key: <>
             """.trimIndent(),
-            formattingStyle = FormattingStyle.PLAIN
+            formattingStyle = FormattingStyle.PLAIN,
         )
     }
 
@@ -1932,15 +1979,15 @@ class FormatterTest {
     fun testDelimitedFormattingEmptyList() {
         assertFormatting(
             """
-                key:
-                <>
+            key:
+            <>
             """.trimIndent(),
             """
-                {
-                  key: <>
-                }
+            {
+              key: <>
+            }
             """.trimIndent(),
-            formattingStyle = FormattingStyle.DELIMITED
+            formattingStyle = FormattingStyle.DELIMITED,
         )
     }
 
@@ -1948,12 +1995,12 @@ class FormatterTest {
     fun testCompactFormattingEmptyList() {
         assertFormatting(
             """
-                key: <>
+            key: <>
             """.trimIndent(),
             """
-                key:<>
+            key:<>
             """.trimIndent(),
-            formattingStyle = FormattingStyle.COMPACT
+            formattingStyle = FormattingStyle.COMPACT,
         )
     }
 
@@ -1961,12 +2008,12 @@ class FormatterTest {
     fun testFormatEmptyNestedList() {
         assertFormatting(
             """
-                -
-                  <>
+            -
+              <>
             """.trimIndent(),
             """
-                - <>
-            """.trimIndent()
+            - <>
+            """.trimIndent(),
         )
     }
 
@@ -1974,23 +2021,22 @@ class FormatterTest {
     fun testEmptyDocumentWithComment() {
         assertFormatting(
             """
-                # just a comment
+            # just a comment
             """.trimIndent(),
             """
-                # just a comment
-            """.trimIndent()
+            # just a comment
+            """.trimIndent(),
         )
-
 
         assertFormatting(
             """
-                # comment
-                
+            # comment
+            
             """.trimIndent(),
             """
-                # comment
-                
-            """.trimIndent()
+            # comment
+            
+            """.trimIndent(),
         )
     }
 
@@ -1998,24 +2044,24 @@ class FormatterTest {
     fun testTrailingContentWithEndDot() {
         assertFormatting(
             """
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
+            outer:
+              nest1:
+                nest2: 4
                 .
-                outer2: 8 # unexpected trailing content
+              .
+            .
+            outer2: 8 # unexpected trailing content
             """.trimIndent(),
             """
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
+            outer:
+              nest1:
+                nest2: 4
                 .
-                
-                outer2: 8 # unexpected trailing content
-            """.trimIndent()
+              .
+            .
+            
+            outer2: 8 # unexpected trailing content
+            """.trimIndent(),
         )
     }
 
@@ -2023,84 +2069,84 @@ class FormatterTest {
     fun testMultipleTrailingContent() {
         assertFormatting(
             """
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
+            outer:
+              nest1:
+                nest2: 4
                 .
-                outer2: 8 # unexpected trailing content
+              .
+            .
+            outer2: 8 # unexpected trailing content
+            .
+            outer:
+              nest1:
+                nest2: 4
                 .
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
-                .
-                # unexpected trailing content
-                outer2: 8
+              .
+            .
+            # unexpected trailing content
+            outer2: 8
             """.trimIndent(),
             """
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
+            outer:
+              nest1:
+                nest2: 4
                 .
-                
-                outer2: 8 # unexpected trailing content
+              .
+            .
+            
+            outer2: 8 # unexpected trailing content
+            .
+            
+            
+            outer:
+              nest1:
+                nest2: 4
                 .
-                
-                
-                outer:
-                  nest1:
-                    nest2: 4
-                    .
-                  .
-                .
-                
-                # unexpected trailing content
-                outer2: 8
-            """.trimIndent()
+              .
+            .
+            
+            # unexpected trailing content
+            outer2: 8
+            """.trimIndent(),
         )
 
         assertFormatting(
             """
-                - 
-                  - 
-                    - list
-                    =
-                  =
+            - 
+              - 
+                - list
                 =
-                key: value
-                - 
-                  - 
-                    - list
-                    =
-                  =
+              =
+            =
+            key: value
+            - 
+              - 
+                - list
                 =
-                key: value
+              =
+            =
+            key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
-                    =
-                  =
+            - 
+              - 
+                - list
                 =
-                
-                key: value
-                
-                
-                - 
-                  - 
-                    - list
-                    =
-                  =
+              =
+            =
+            
+            key: value
+            
+            
+            - 
+              - 
+                - list
                 =
-                
-                key: value
-            """.trimIndent()
+              =
+            =
+            
+            key: value
+            """.trimIndent(),
         )
     }
 
@@ -2108,24 +2154,24 @@ class FormatterTest {
     fun testTrailingContentWithEndDash() {
         assertFormatting(
             """
-                -
-                  -
-                    - list
-                    =
-                  =
+            -
+              -
+                - list
                 =
-                key: value
+              =
+            =
+            key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
-                    =
-                  =
+            - 
+              - 
+                - list
                 =
+              =
+            =
 
-                key: value
-            """.trimIndent()
+            key: value
+            """.trimIndent(),
         )
     }
 
@@ -2294,7 +2340,7 @@ class FormatterTest {
             """
             name: value
             """.trimIndent(),
-            embedBlockRules = emptyList()
+            embedBlockRules = emptyList(),
         )
     }
 
@@ -2314,7 +2360,7 @@ class FormatterTest {
             """.trimIndent(),
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
             formattingStyle = FormattingStyle.CLASSIC,
-            roundTrip = false
+            roundTrip = false,
         )
     }
 

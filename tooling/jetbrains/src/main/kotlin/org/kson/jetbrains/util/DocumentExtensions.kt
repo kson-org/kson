@@ -12,14 +12,18 @@ import org.kson.tools.IndentType
  * @param indentType The type of indentation to consider (e.g., spaces or tabs)
  * @return The number of indentation levels for the specified line
  */
-fun Document.getLineIndentLevel(lineNumber: Int, indentType: IndentType): Int {
-    val prevLine = if (lineNumber > 0) {
-        val lineStart = this.getLineStartOffset(lineNumber - 1)
-        val lineEnd = this.getLineEndOffset(lineNumber - 1)
-        this.getText(TextRange(lineStart, lineEnd))
-    } else {
-        ""
-    }
+fun Document.getLineIndentLevel(
+    lineNumber: Int,
+    indentType: IndentType,
+): Int {
+    val prevLine =
+        if (lineNumber > 0) {
+            val lineStart = this.getLineStartOffset(lineNumber - 1)
+            val lineEnd = this.getLineEndOffset(lineNumber - 1)
+            this.getText(TextRange(lineStart, lineEnd))
+        } else {
+            ""
+        }
 
     val lineStart = this.getLineStartOffset(lineNumber)
     val lineEnd = this.getLineEndOffset(lineNumber)

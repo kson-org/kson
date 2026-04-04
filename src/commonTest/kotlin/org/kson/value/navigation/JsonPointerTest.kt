@@ -1,13 +1,12 @@
 package org.kson.value.navigation
 
-import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class JsonPointerTest {
-
     @Test
     fun `root pointer has empty token list`() {
         val pointer = JsonPointer("")
@@ -78,26 +77,29 @@ class JsonPointerTest {
 
     @Test
     fun `invalid pointer without leading slash throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointer("foo/bar")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointer("foo/bar")
+            }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
         assertTrue(exception.message!!.contains("foo/bar"))
     }
 
     @Test
     fun `invalid escape sequence throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointer("/foo~2bar")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointer("/foo~2bar")
+            }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
     }
 
     @Test
     fun `incomplete escape at end throws exception`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            JsonPointer("/foo~")
-        }
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                JsonPointer("/foo~")
+            }
         assertTrue(exception.message!!.contains("Invalid JSON Pointer"))
     }
 
@@ -127,11 +129,12 @@ class JsonPointerTest {
 
     @Test
     fun `pointers can be used in collections`() {
-        val set = setOf(
-            JsonPointer("/foo"),
-            JsonPointer("/bar"),
-            JsonPointer("/foo")  // Duplicate
-        )
+        val set =
+            setOf(
+                JsonPointer("/foo"),
+                JsonPointer("/bar"),
+                JsonPointer("/foo"), // Duplicate
+            )
         assertEquals(2, set.size)
     }
 

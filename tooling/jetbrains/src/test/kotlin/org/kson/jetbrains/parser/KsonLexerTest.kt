@@ -4,7 +4,6 @@ import com.intellij.testFramework.LightPlatformTestCase
 import org.kson.parser.TokenType
 
 class KsonLexerTest : LightPlatformTestCase() {
-
     fun testLexerWithNonZeroStartOffset() {
         val fullBuffer = """prefix content {key:value}"""
         val lexer = KsonLexer()

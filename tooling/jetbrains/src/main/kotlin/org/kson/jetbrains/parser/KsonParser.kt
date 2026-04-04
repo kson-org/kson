@@ -12,7 +12,10 @@ import org.kson.parser.messages.Message
  * [PsiParser] for Kson, implemented by delegating to the official Kson [Parser]
  */
 class KsonParser : PsiParser {
-    override fun parse(root: IElementType, builder: PsiBuilder): ASTNode {
+    override fun parse(
+        root: IElementType,
+        builder: PsiBuilder,
+    ): ASTNode {
         val rootMarker = builder.mark()
         val delegatingBuilder = DelegatingBuilder(builder)
         val ksonParser = Parser(delegatingBuilder)
@@ -25,18 +28,17 @@ class KsonParser : PsiParser {
 /**
  * Implements a PSI-compatible [AstBuilder] for [Parser] by delegating to the given [psiBuilder].
  */
-private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
-    override fun getTokenType(): TokenType? {
-        return if (psiBuilder.tokenType == null) {
+private class DelegatingBuilder(
+    val psiBuilder: PsiBuilder,
+) : AstBuilder {
+    override fun getTokenType(): TokenType? =
+        if (psiBuilder.tokenType == null) {
             null
         } else {
             (psiBuilder.tokenType as KsonLexedElementType).tokenType
         }
-    }
 
-    override fun getTokenText(): String {
-        return psiBuilder.tokenText ?: ""
-    }
+    override fun getTokenText(): String = psiBuilder.tokenText ?: ""
 
     override fun advanceLexer() {
         psiBuilder.advanceLexer()
@@ -51,13 +53,12 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
         }
     }
 
-    override fun eof(): Boolean {
-        return psiBuilder.eof()
-    }
+    override fun eof(): Boolean = psiBuilder.eof()
 
-    override fun mark(): AstMarker {
-        return object : AstMarker {
+    override fun mark(): AstMarker =
+        object : AstMarker {
             val psiMark = psiBuilder.mark()
+
             override fun done(elementType: ElementType) {
                 psiMark.done(elem(elementType))
             }
@@ -77,12 +78,11 @@ private class DelegatingBuilder(val psiBuilder: PsiBuilder) : AstBuilder {
                  * Since we're in the parser, wrap the message as CoreParseMessage and check if it's fatal.
                  */
                 val wrappedMessage = CoreParseMessage(message)
-                if(Message.isFatalParseError(wrappedMessage)){
+                if (Message.isFatalParseError(wrappedMessage)) {
                     psiMark.error(message.toString())
-                }else{
+                } else {
                     psiMark.drop()
                 }
             }
         }
-    }
 }

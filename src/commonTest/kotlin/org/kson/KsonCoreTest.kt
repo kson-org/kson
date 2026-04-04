@@ -23,7 +23,7 @@ interface KsonCoreTest {
     data class CompileSettings(
         val ksonSettings: Kson = Kson(),
         val yamlSettings: Yaml = Yaml(),
-        val jsonSettings: Json = Json()
+        val jsonSettings: Json = Json(),
     )
 
     /**
@@ -45,17 +45,19 @@ interface KsonCoreTest {
         expectedYaml: String,
         expectedJson: String,
         message: String? = null,
-        compileSettings: CompileSettings = CompileSettings(
-            jsonSettings = Json(retainEmbedTags = false),
-            yamlSettings = Yaml(retainEmbedTags = false)
-        ),
+        compileSettings: CompileSettings =
+            CompileSettings(
+                jsonSettings = Json(retainEmbedTags = false),
+                yamlSettings = Yaml(retainEmbedTags = false),
+            ),
     ) {
         try {
             validateYaml(expectedYaml)
         } catch (e: Exception) {
             throw IllegalArgumentException(
                 "ERROR: The expected YAML in this test is invalid. Please fix the test's expectations.\n" +
-                "YAML parsing error:\n${e.message}", e
+                    "YAML parsing error:\n${e.message}",
+                e,
             )
         }
         try {
@@ -63,7 +65,8 @@ interface KsonCoreTest {
         } catch (e: Exception) {
             throw IllegalArgumentException(
                 "ERROR: The expected JSON in this test is invalid. Please fix the test's expectations.\n" +
-                        "JSON parsing error:\n${e.message}", e
+                    "JSON parsing error:\n${e.message}",
+                e,
             )
         }
 
@@ -71,25 +74,25 @@ interface KsonCoreTest {
 
         assertFalse(
             ksonParseResult.hasErrors(),
-            "Should not have parsing errors, got:\n\n" + LoggedMessage.print(ksonParseResult.messages)
+            "Should not have parsing errors, got:\n\n" + LoggedMessage.print(ksonParseResult.messages),
         )
 
         assertEquals(
             expectedKsonFromAst,
             ksonParseResult.kson,
-            message
+            message,
         )
 
         val reParsedResult = KsonCore.parseToKson(ksonParseResult.kson!!, compileSettings.ksonSettings)
         assertFalse(
             reParsedResult.hasErrors(),
             "Re-parsing our transpiled Kson should not produce errors, got:\n\n" +
-                    LoggedMessage.print(reParsedResult.messages)
+                LoggedMessage.print(reParsedResult.messages),
         )
         assertEquals(
             ksonParseResult.kson,
             reParsedResult.kson,
-            "Re-parsing our transpiled Kson must be idempotent"
+            "Re-parsing our transpiled Kson must be idempotent",
         )
 
         // now validate the Yaml produced for this source
@@ -97,7 +100,7 @@ interface KsonCoreTest {
         assertEquals(
             expectedYaml,
             yamlResult.yaml,
-            message
+            message,
         )
 
         // now validate the Json produced for this source
@@ -105,8 +108,7 @@ interface KsonCoreTest {
         assertEquals(
             expectedJson,
             jsonResult.json,
-            message
+            message,
         )
-
     }
 }

@@ -27,7 +27,6 @@ import org.kson.parser.messages.MessageType.BLANK_SOURCE
  *   arg to [ParsingTestCase]
  */
 class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition()) {
-
     /**
      * Sanity check parse of a file containing many Kson constructs
      */
@@ -86,15 +85,9 @@ class KsonParserTest : ParsingTestCase("parser", "kson", KsonParserDefinition())
     /**
      * @return path to test data file directory relative to root of this module
      */
-    override fun getTestDataPath(): String {
-        return "src/test/resources/testData"
-    }
+    override fun getTestDataPath(): String = "src/test/resources/testData"
 
-    override fun skipSpaces(): Boolean {
-        return true
-    }
+    override fun skipSpaces(): Boolean = true
 
-    override fun includeRanges(): Boolean {
-        return true
-    }
+    override fun includeRanges(): Boolean = true
 }

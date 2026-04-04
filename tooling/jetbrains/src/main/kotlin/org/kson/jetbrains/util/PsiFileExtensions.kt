@@ -12,11 +12,15 @@ import org.kson.tools.IndentType
  * Returns true if the given [offset] within this [PsiFile] lands inside a [PsiElement] of one of the types
  * given in [elements]
  */
-fun PsiFile.hasElementAtOffset(offset: Int, elements: Set<IElementType>): Boolean {
+fun PsiFile.hasElementAtOffset(
+    offset: Int,
+    elements: Set<IElementType>,
+): Boolean {
     val elemAtFirstDelimChar = this.findElementAt(offset) ?: return false
-    val parentFound = elemAtFirstDelimChar.findParentInFile(true) {
-        elements.contains(it.elementType)
-    }
+    val parentFound =
+        elemAtFirstDelimChar.findParentInFile(true) {
+            elements.contains(it.elementType)
+        }
     return parentFound != null
 }
 

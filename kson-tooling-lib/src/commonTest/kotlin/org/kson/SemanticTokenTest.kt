@@ -3,7 +3,6 @@ package org.kson
 import kotlin.test.*
 
 class SemanticTokenTest {
-
     @Test
     fun testKeyVsStringDistinction() {
         val tokens = KsonTooling.getSemanticTokens(KsonTooling.parse("key: string"))

@@ -18,8 +18,12 @@ import org.kson.jetbrains.util.getLineIndentLevel
 
 class KsonEnterHandlerDelegate : EnterHandlerDelegate {
     override fun preprocessEnter(
-        file: PsiFile, editor: Editor, caretOffset: Ref<Int>, caretAdvance: Ref<Int>, dataContext: DataContext,
-        originalHandler: EditorActionHandler?
+        file: PsiFile,
+        editor: Editor,
+        caretOffset: Ref<Int>,
+        caretAdvance: Ref<Int>,
+        dataContext: DataContext,
+        originalHandler: EditorActionHandler?,
     ): Result {
         val offset = caretOffset.get().toInt()
         if (editor !is EditorWindow) {
@@ -30,13 +34,10 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return preprocessEnter(hostPosition)
     }
 
-    private fun preprocessEnter(
-        hostPosition: HostPosition,
-    ): Result {
+    private fun preprocessEnter(hostPosition: HostPosition): Result {
         val (file, editor, offset) = hostPosition
         return preprocessEnter(file, editor, offset)
     }
-
 
     @Suppress("SameReturnValue") // Only need to return `Continue` right now.
     private fun preprocessEnter(
@@ -107,7 +108,11 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return Result.Continue
     }
 
-    override fun postProcessEnter(file: PsiFile, editor: Editor, dataContext: DataContext): Result {
+    override fun postProcessEnter(
+        file: PsiFile,
+        editor: Editor,
+        dataContext: DataContext,
+    ): Result {
         if (editor !is EditorWindow) {
             return postProcessEnter(file, editor)
         }
@@ -127,7 +132,10 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         return Result.Continue
     }
 
-    private fun indentCaretLine(editor: Editor, file: PsiFile) {
+    private fun indentCaretLine(
+        editor: Editor,
+        file: PsiFile,
+    ) {
         val document = editor.document
         val caretModel = editor.caretModel
         val caretOffset = caretModel.offset
@@ -151,7 +159,11 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
         document.insertString(lineStart, newIndent)
     }
 
-    private data class HostPosition(val file: PsiFile, val editor: Editor, val offset: Int)
+    private data class HostPosition(
+        val file: PsiFile,
+        val editor: Editor,
+        val offset: Int,
+    )
 
     private fun getHostPosition(dataContext: DataContext): HostPosition? {
         val editor = CommonDataKeys.HOST_EDITOR.getData(dataContext) as? EditorEx ?: return null

@@ -13,21 +13,22 @@ internal class EmbedBlockLanguageListCompletionProvider : CompletionProvider<Com
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         for (language in LanguageUtil.getInjectableLanguages()) {
-            val lookupElement = LookupElementBuilder.create(StringUtil.toLowerCase(language.id))
-                .withIcon(createLanguageIcon(language))
-                .withTypeText(language.displayName, true)
+            val lookupElement =
+                LookupElementBuilder
+                    .create(StringUtil.toLowerCase(language.id))
+                    .withIcon(createLanguageIcon(language))
+                    .withTypeText(language.displayName, true)
             result.addElement(lookupElement)
         }
     }
 
     companion object {
-        fun createLanguageIcon(language: Language): Icon {
-            return DeferredIconImpl(null, language, true) { curLanguage: Language ->
+        fun createLanguageIcon(language: Language): Icon =
+            DeferredIconImpl(null, language, true) { curLanguage: Language ->
                 curLanguage.associatedFileType?.icon
             }
-        }
     }
 }

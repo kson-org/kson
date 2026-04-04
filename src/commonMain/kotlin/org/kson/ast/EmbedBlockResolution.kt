@@ -2,7 +2,7 @@ package org.kson.ast
 
 import org.kson.tools.InternalEmbedRule
 import org.kson.value.KsonString
-import org.kson.value.navigation.json_pointer.ExperimentalJsonPointerGlobLanguage
+import org.kson.value.navigation.jsonpointer.ExperimentalJsonPointerGlobLanguage
 import org.kson.value.toKsonValue
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointerGlob
@@ -13,7 +13,7 @@ import org.kson.walker.navigateWithJsonPointerGlob
  * EmbedBlockNode instances don't need tracking - they're already embed blocks.
  */
 data class EmbedBlockResolution(
-    val stringNodes: Map<StringNode, InternalEmbedRule>
+    val stringNodes: Map<StringNode, InternalEmbedRule>,
 ) {
     companion object {
         val EMPTY = EmbedBlockResolution(emptyMap())
@@ -36,7 +36,7 @@ data class EmbedBlockResolution(
 @OptIn(ExperimentalJsonPointerGlobLanguage::class)
 fun resolveEmbedBlocks(
     root: KsonRoot,
-    rules: List<InternalEmbedRule>
+    rules: List<InternalEmbedRule>,
 ): EmbedBlockResolution {
     if (rules.isEmpty()) return EmbedBlockResolution.EMPTY
     val rootValue = root.toKsonValue()

@@ -6,7 +6,6 @@ import org.kson.jetbrains.file.KsonFileType
 import org.kson.jetbrains.psi.KsonPsiFile
 
 class KsonPsiFileTest : BasePlatformTestCase() {
-
     fun testKsonFileWithoutErrors() {
         val psiFile = myFixture.configureByText(KsonFileType, "key: val")
         val ksonFile = assertInstanceOf(psiFile, KsonPsiFile::class.java)
@@ -18,30 +17,34 @@ class KsonPsiFileTest : BasePlatformTestCase() {
         val ksonFileWithError = assertInstanceOf(psiFileWithError, KsonPsiFile::class.java)
         assertTrue(
             "should have errors --- since unclosed list error is created during parsing",
-            PsiErrorElementUtil.hasErrors(project, ksonFileWithError.virtualFile)
+            PsiErrorElementUtil.hasErrors(project, ksonFileWithError.virtualFile),
         )
     }
 
     fun testKsonFileWithPostProcessingIndentError() {
-        val psiFile = myFixture.configureByText(KsonFileType, """
-            key: value
-              bad_indent: value
-        """.trimIndent())
+        val psiFile =
+            myFixture.configureByText(
+                KsonFileType,
+                """
+                key: value
+                  bad_indent: value
+                """.trimIndent(),
+            )
         val ksonFileWithError = assertInstanceOf(psiFile, KsonPsiFile::class.java)
         assertFalse(
             "should not have errors --- they are provided by an annotator",
-            PsiErrorElementUtil.hasErrors(project, ksonFileWithError.virtualFile)
+            PsiErrorElementUtil.hasErrors(project, ksonFileWithError.virtualFile),
         )
 
         // But the annotator should highlight the bad indentation as an error
         val highlights = myFixture.doHighlighting()
         assertTrue(
             "Annotator should detect bad indentation error",
-            highlights.isNotEmpty()
+            highlights.isNotEmpty(),
         )
         assertTrue(
             "Error message should mention indentation",
-            highlights.any { it.description?.contains("indent", ignoreCase = true) == true }
+            highlights.any { it.description?.contains("indent", ignoreCase = true) == true },
         )
     }
 }

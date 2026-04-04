@@ -13,10 +13,10 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     fun testUnclosedEmbedWithEscape() {
         assertParserRejectsSource(
             """
-                %%
-                %\%
+            %%
+            %\%
             """.trimIndent(),
-            listOf(EMBED_BLOCK_NO_CLOSE)
+            listOf(EMBED_BLOCK_NO_CLOSE),
         )
     }
 
@@ -34,10 +34,10 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     fun testEmbedTagBadEscape() {
         assertParserRejectsSource(
             """
-                %my\xtag
-                content%%
+            %my\xtag
+            content%%
             """.trimIndent(),
-            listOf(STRING_BAD_ESCAPE)
+            listOf(STRING_BAD_ESCAPE),
         )
     }
 
@@ -45,10 +45,10 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     fun testEmbedTagBadUnicodeEscape() {
         assertParserRejectsSource(
             """
-                %\u12
-                content%%
+            %\u12
+            content%%
             """.trimIndent(),
-            listOf(STRING_BAD_UNICODE_ESCAPE)
+            listOf(STRING_BAD_UNICODE_ESCAPE),
         )
     }
 
@@ -57,7 +57,7 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
         // Control character (0x01) in embed tag
         assertParserRejectsSource(
             "%my\u0001tag\ncontent%%",
-            listOf(STRING_CONTROL_CHARACTER)
+            listOf(STRING_CONTROL_CHARACTER),
         )
     }
 
@@ -67,14 +67,14 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
             """
                 %
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE)
+            listOf(EMBED_BLOCK_NO_CLOSE),
         )
 
         assertParserRejectsSource(
             """
                 $
             """,
-            listOf(EMBED_BLOCK_NO_CLOSE)
+            listOf(EMBED_BLOCK_NO_CLOSE),
         )
     }
 }

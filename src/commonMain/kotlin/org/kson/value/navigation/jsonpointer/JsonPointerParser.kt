@@ -1,4 +1,4 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 import org.kson.parser.messages.MessageType.*
 
@@ -27,8 +27,9 @@ import org.kson.parser.messages.MessageType.*
  *
  * @param pointerString The JSON Pointer string to parse
  */
-class JsonPointerParser(pointerString: String) : PointerParser(pointerString) {
-
+class JsonPointerParser(
+    pointerString: String,
+) : PointerParser(pointerString) {
     /**
      * reference-token = *( unescaped / escaped )
      *

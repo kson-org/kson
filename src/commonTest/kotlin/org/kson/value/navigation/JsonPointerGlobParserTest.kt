@@ -1,16 +1,15 @@
 package org.kson.value.navigation
 
-import org.kson.value.navigation.json_pointer.GlobMatcher
-import org.kson.value.navigation.json_pointer.PointerParser
-import org.kson.value.navigation.json_pointer.PointerParser.Tokens
-import org.kson.value.navigation.json_pointer.JsonPointerGlobParser
+import org.kson.value.navigation.jsonpointer.GlobMatcher
+import org.kson.value.navigation.jsonpointer.JsonPointerGlobParser
+import org.kson.value.navigation.jsonpointer.PointerParser
+import org.kson.value.navigation.jsonpointer.PointerParser.Tokens
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class JsonPointerGlobParserTest {
-
     // Basic literal token tests
     @Test
     fun `root pointer has empty token list`() {
@@ -435,7 +434,7 @@ class JsonPointerGlobParserTest {
         assertTrue(GlobMatcher.matches(pattern, "a*banythingc?da"))
 
         // Should NOT match
-        assertFalse(GlobMatcher.matches(pattern, "aXbc?dY"))  // first * should be literal
-        assertFalse(GlobMatcher.matches(pattern, "a*bcXdY"))  // ? should be literal
+        assertFalse(GlobMatcher.matches(pattern, "aXbc?dY")) // first * should be literal
+        assertFalse(GlobMatcher.matches(pattern, "a*bcXdY")) // ? should be literal
     }
 }

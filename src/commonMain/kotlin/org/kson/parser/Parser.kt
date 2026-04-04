@@ -48,8 +48,10 @@ import org.kson.stdlibx.exceptions.FatalParseException
  *   TODO make maxNestingLevel part of a more holistic approach to configuring the parser
  *     if/when we have more dials we want to expose to the user
  */
-class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL) {
-
+class Parser(
+    private val builder: AstBuilder,
+    private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL,
+) {
     /**
      * root -> ksonValue <end-of-file>
      */
@@ -92,98 +94,100 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     /**
      * plainObject -> (keyword ksonValue)+ "."?
      */
-    private fun plainObject(): Boolean = nestingTracker.nest {
-        val objectMark = builder.mark()
-        var foundProperties = false
+    private fun plainObject(): Boolean =
+        nestingTracker.nest {
+            val objectMark = builder.mark()
+            var foundProperties = false
 
-        while (true) {
-            val propertyMark = builder.mark()
-            val keywordMark = builder.mark()
-            if (keyword()) {
-                foundProperties = true
-                parseValueForKeyword(keywordMark)
-                propertyMark.done(OBJECT_PROPERTY)
+            while (true) {
+                val propertyMark = builder.mark()
+                val keywordMark = builder.mark()
+                if (keyword()) {
+                    foundProperties = true
+                    parseValueForKeyword(keywordMark)
+                    propertyMark.done(OBJECT_PROPERTY)
+                } else {
+                    keywordMark.drop()
+                    propertyMark.rollbackTo()
+                    break
+                }
+            }
+
+            // Check for an end-dot `.`
+            if (builder.getTokenType() == DOT) {
+                builder.advanceLexer()
+            }
+
+            if (foundProperties) {
+                objectMark.done(OBJECT)
+                return@nest true
             } else {
-                keywordMark.drop()
-                propertyMark.rollbackTo()
-                break
+                // plain objects must have at least one property
+                objectMark.rollbackTo()
+                return@nest false
             }
         }
-
-        // Check for an end-dot `.`
-        if (builder.getTokenType() == DOT) {
-            builder.advanceLexer()
-        }
-
-        if (foundProperties) {
-            objectMark.done(OBJECT)
-            return@nest true
-        } else {
-            // plain objects must have at least one property
-            objectMark.rollbackTo()
-            return@nest false
-        }
-    }
 
     /**
      * objectInternals -> "," ( keyword ksonValue ","? )+
      *                  | ( ","? keyword ksonValue )*
      *                  | ( keyword ksonValue ","? )*
      */
-    private fun objectInternals(): Boolean = nestingTracker.nest {
-        var foundProperties = false
+    private fun objectInternals(): Boolean =
+        nestingTracker.nest {
+            var foundProperties = false
 
-        // parse the optional leading comma
-        if (builder.getTokenType() == COMMA) {
-            val leadingCommaMark = builder.mark()
-            processComma(builder)
+            // parse the optional leading comma
+            if (builder.getTokenType() == COMMA) {
+                val leadingCommaMark = builder.mark()
+                processComma(builder)
 
-            // prohibit the empty-ISH objects internals containing just commas
-            if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
-                leadingCommaMark.error(EMPTY_COMMAS.create())
-                return@nest true
-            } else {
-                leadingCommaMark.drop()
+                // prohibit the empty-ISH objects internals containing just commas
+                if (builder.getTokenType() == CURLY_BRACE_R || builder.eof()) {
+                    leadingCommaMark.error(EMPTY_COMMAS.create())
+                    return@nest true
+                } else {
+                    leadingCommaMark.drop()
+                }
             }
-        }
 
-        while (true) {
-            val propertyMark = builder.mark()
-            val keywordMark = builder.mark()
-            if (keyword()) {
-                foundProperties = true
+            while (true) {
+                val propertyMark = builder.mark()
+                val keywordMark = builder.mark()
+                if (keyword()) {
+                    foundProperties = true
 
-                if (builder.getTokenType() == CURLY_BRACE_R) {
-                    // object got closed before giving this keyword a value
-                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                    if (builder.getTokenType() == CURLY_BRACE_R) {
+                        // object got closed before giving this keyword a value
+                        keywordMark.error(OBJECT_KEY_NO_VALUE.create())
+                        propertyMark.done(OBJECT_PROPERTY)
+                        break
+                    }
+
+                    parseValueForKeyword(keywordMark)
+                    val hasTrailingComma = builder.getTokenType() == COMMA
+                    if (hasTrailingComma) {
+                        builder.advanceLexer()
+                    }
                     propertyMark.done(OBJECT_PROPERTY)
+                    if (hasTrailingComma) {
+                        consumeExtraCommas()
+                    }
+
+                    if (builder.getTokenType() == DOT) {
+                        val dotMark = builder.mark()
+                        builder.advanceLexer()
+                        dotMark.error(IGNORED_OBJECT_END_DOT.create())
+                    }
+                } else {
+                    keywordMark.drop()
+                    propertyMark.rollbackTo()
                     break
                 }
-
-                parseValueForKeyword(keywordMark)
-                val hasTrailingComma = builder.getTokenType() == COMMA
-                if (hasTrailingComma) {
-                    builder.advanceLexer()
-                }
-                propertyMark.done(OBJECT_PROPERTY)
-                if (hasTrailingComma) {
-                    consumeExtraCommas()
-                }
-
-                if (builder.getTokenType() == DOT) {
-                    val dotMark = builder.mark()
-                    builder.advanceLexer()
-                    dotMark.error(IGNORED_OBJECT_END_DOT.create())
-                }
-            } else {
-                keywordMark.drop()
-                propertyMark.rollbackTo()
-                break
             }
-        }
 
-        return@nest foundProperties
-    }
+            return@nest foundProperties
+        }
 
     /**
      * Helper method to centralize parsing and errors reporting to object values.
@@ -210,45 +214,46 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *
      * Note: we combine these two grammar rules here to minimize code duplication, disambiguating by [isDelimited]
      */
-    private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() != LIST_DASH) {
-            return@nest false
-        }
-
-        val listMark = builder.mark()
-
-        // parse the dash delimited list elements
-        do {
-            val listElementMark = builder.mark()
-            // advance past the LIST_DASH
-            builder.advanceLexer()
-
-            if (ksonValue()) {
-                // this LIST_DASH is not dangling
-                listElementMark.done(LIST_ELEMENT)
-            } else {
-                listElementMark.error(DANGLING_LIST_DASH.create())
+    private fun dashList(isDelimited: Boolean = false): Boolean =
+        nestingTracker.nest {
+            if (builder.getTokenType() != LIST_DASH) {
+                return@nest false
             }
 
-            if (builder.getTokenType() == END_DASH) {
-                val endDashMark = builder.mark()
+            val listMark = builder.mark()
+
+            // parse the dash delimited list elements
+            do {
+                val listElementMark = builder.mark()
+                // advance past the LIST_DASH
                 builder.advanceLexer()
-                if (!isDelimited) {
-                    endDashMark.drop()
-                    break
-                } else {
-                    endDashMark.error(IGNORED_DASH_LIST_END_DASH.create())
-                }
-            }
-        } while (builder.getTokenType() == LIST_DASH)
 
-        if (!isDelimited) {
-            listMark.done(DASH_LIST)
-        } else {
-            listMark.drop()
+                if (ksonValue()) {
+                    // this LIST_DASH is not dangling
+                    listElementMark.done(LIST_ELEMENT)
+                } else {
+                    listElementMark.error(DANGLING_LIST_DASH.create())
+                }
+
+                if (builder.getTokenType() == END_DASH) {
+                    val endDashMark = builder.mark()
+                    builder.advanceLexer()
+                    if (!isDelimited) {
+                        endDashMark.drop()
+                        break
+                    } else {
+                        endDashMark.error(IGNORED_DASH_LIST_END_DASH.create())
+                    }
+                }
+            } while (builder.getTokenType() == LIST_DASH)
+
+            if (!isDelimited) {
+                listMark.done(DASH_LIST)
+            } else {
+                listMark.drop()
+            }
+            return@nest true
         }
-        return@nest true
-    }
 
     private fun processComma(builder: AstBuilder) {
         val commaMark = builder.mark()
@@ -322,11 +327,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // of making sense of everything else
         }
 
-        return (delimitedObject()
-                || delimitedDashList()
-                || bracketList()
-                || literal()
-                || embedBlock())
+        return (
+            delimitedObject() ||
+                delimitedDashList() ||
+                bracketList() ||
+                literal() ||
+                embedBlock()
+        )
     }
 
     /**
@@ -416,73 +423,74 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *              | "[" ( ","? ksonValue )* "]"
      *              | "[" ( ksonValue ","? )* "]"
      */
-    private fun bracketList(): Boolean = nestingTracker.nest {
-        if (builder.getTokenType() != SQUARE_BRACKET_L) {
-            // no open square bracket, so not a bracketList
-            return@nest false
-        }
-        val listMark = builder.mark()
-        // advance past the SQUARE_BRACKET_L
-        builder.advanceLexer()
+    private fun bracketList(): Boolean =
+        nestingTracker.nest {
+            if (builder.getTokenType() != SQUARE_BRACKET_L) {
+                // no open square bracket, so not a bracketList
+                return@nest false
+            }
+            val listMark = builder.mark()
+            // advance past the SQUARE_BRACKET_L
+            builder.advanceLexer()
 
-        // parse the optional leading comma
-        if (builder.getTokenType() == COMMA) {
-            val leadingCommaMark = builder.mark()
-            processComma(builder)
+            // parse the optional leading comma
+            if (builder.getTokenType() == COMMA) {
+                val leadingCommaMark = builder.mark()
+                processComma(builder)
 
-            // prohibit the empty-ISH list "[,]"
+                // prohibit the empty-ISH list "[,]"
+                if (builder.getTokenType() == SQUARE_BRACKET_R) {
+                    // advance past the SQUARE_BRACKET_R
+                    builder.advanceLexer()
+                    leadingCommaMark.error(EMPTY_COMMAS.create())
+                    listMark.done(BRACKET_LIST)
+                    return@nest true
+                } else {
+                    leadingCommaMark.drop()
+                }
+            }
+
+            while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
+                val listElementMark = builder.mark()
+
+                if (!ksonValue()) {
+                    val invalidElementMark = builder.mark()
+
+                    var containsInvalidElement = false
+                    while (builder.getTokenType() != SQUARE_BRACKET_R &&
+                        builder.getTokenType() != COMMA &&
+                        !builder.eof()
+                    ) {
+                        builder.advanceLexer()
+                        containsInvalidElement = true
+                    }
+
+                    if (containsInvalidElement) {
+                        invalidElementMark.error(LIST_INVALID_ELEM.create())
+                    } else {
+                        invalidElementMark.drop()
+                    }
+                }
+                if (builder.getTokenType() == COMMA) {
+                    builder.advanceLexer()
+                    listElementMark.done(LIST_ELEMENT)
+                    consumeExtraCommas()
+                    continue
+                } else {
+                    listElementMark.done(LIST_ELEMENT)
+                }
+            }
+
             if (builder.getTokenType() == SQUARE_BRACKET_R) {
                 // advance past the SQUARE_BRACKET_R
                 builder.advanceLexer()
-                leadingCommaMark.error(EMPTY_COMMAS.create())
+                // just closed a well-formed list
                 listMark.done(BRACKET_LIST)
-                return@nest true
             } else {
-                leadingCommaMark.drop()
+                listMark.error(LIST_NO_CLOSE.create())
             }
+            return@nest true
         }
-
-        while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
-            val listElementMark = builder.mark()
-
-            if (!ksonValue()) {
-                val invalidElementMark = builder.mark()
-
-                var containsInvalidElement = false
-                while (builder.getTokenType() != SQUARE_BRACKET_R &&
-                    builder.getTokenType() != COMMA &&
-                    !builder.eof()
-                ) {
-                    builder.advanceLexer()
-                    containsInvalidElement = true
-                }
-
-                if (containsInvalidElement) {
-                    invalidElementMark.error(LIST_INVALID_ELEM.create())
-                } else {
-                    invalidElementMark.drop()
-                }
-            }
-            if (builder.getTokenType() == COMMA) {
-                builder.advanceLexer()
-                listElementMark.done(LIST_ELEMENT)
-                consumeExtraCommas()
-                continue
-            } else {
-                listElementMark.done(LIST_ELEMENT)
-            }
-        }
-
-        if (builder.getTokenType() == SQUARE_BRACKET_R) {
-            // advance past the SQUARE_BRACKET_R
-            builder.advanceLexer()
-            // just closed a well-formed list
-            listMark.done(BRACKET_LIST)
-        } else {
-            listMark.error(LIST_NO_CLOSE.create())
-        }
-        return@nest true
-    }
 
     /**
      * literal -> string | NUMBER | "true" | "false" | "null"
@@ -515,10 +523,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         val terminalElementMark = builder.mark()
-        if (elementType != null && setOf(
+        if (elementType != null &&
+            setOf(
                 TRUE,
                 FALSE,
-                NULL
+                NULL,
             ).any { it == elementType }
         ) {
             // consume our literal
@@ -538,10 +547,13 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         val keywordMark = builder.mark()
 
         // helpful errors for keywords that clash with reserved words
-        if ((builder.getTokenType() == NULL
-                    || builder.getTokenType() == TRUE
-                    || builder.getTokenType() == FALSE
-                ) && builder.lookAhead(1) == COLON) {
+        if ((
+                builder.getTokenType() == NULL ||
+                    builder.getTokenType() == TRUE ||
+                    builder.getTokenType() == FALSE
+            ) &&
+            builder.lookAhead(1) == COLON
+        ) {
             val reservedWord = builder.getTokenText()
             builder.advanceLexer()
             keywordMark.error(OBJECT_KEYWORD_RESERVED_WORD.create(reservedWord))
@@ -610,7 +622,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     private fun embedBlock(): Boolean {
         if (builder.getTokenType() == EMBED_OPEN_DELIM) {
             val embedBlockMark = builder.mark()
-            
+
             val embedBlockStartDelimMark = builder.mark()
             val embedStartDelimiter = builder.getTokenText()
             builder.advanceLexer()
@@ -686,23 +698,24 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
     }
 
-    private var nestingTracker = object {
-        private var nestingLevel = 0
+    private var nestingTracker =
+        object {
+            private var nestingLevel = 0
 
-        /**
-         * "Aspect"-style function to wrap the list and object functions in [Parser] which may recursively nest
-         * so we can clearly/consistently track nesting and detect excessive nesting
-         */
-        fun nest(nestingParserFunction: () -> Boolean): Boolean {
-            nestingLevel++
-            if (nestingLevel > maxNestingLevel) {
-                throw ExcessiveNestingException()
+            /**
+             * "Aspect"-style function to wrap the list and object functions in [Parser] which may recursively nest
+             * so we can clearly/consistently track nesting and detect excessive nesting
+             */
+            fun nest(nestingParserFunction: () -> Boolean): Boolean {
+                nestingLevel++
+                if (nestingLevel > maxNestingLevel) {
+                    throw ExcessiveNestingException()
+                }
+                val parseResult = nestingParserFunction()
+                nestingLevel--
+                return parseResult
             }
-            val parseResult = nestingParserFunction()
-            nestingLevel--
-            return parseResult
         }
-    }
 }
 
 /**

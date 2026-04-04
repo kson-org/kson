@@ -1,10 +1,12 @@
-package org.kson.value.navigation.json_pointer
+package org.kson.value.navigation.jsonpointer
 
 /**
  * Scanner for character-by-character processing of pointer strings.
  * Used by both [JsonPointerParser] and [JsonPointerGlobParser].
  */
-class PointerScanner(private val source: String) {
+class PointerScanner(
+    private val source: String,
+) {
     var currentIndex = 0
         private set
 
@@ -12,9 +14,7 @@ class PointerScanner(private val source: String) {
      * Get the current character without advancing
      * @return Current character or null if at end
      */
-    fun peek(): Char? {
-        return if (eof()) null else source[currentIndex]
-    }
+    fun peek(): Char? = if (eof()) null else source[currentIndex]
 
     /**
      * Advance to the next character
@@ -30,7 +30,5 @@ class PointerScanner(private val source: String) {
      *
      * @return true if no more characters to read, false otherwise
      */
-    fun eof(): Boolean {
-        return currentIndex >= source.length
-    }
+    fun eof(): Boolean = currentIndex >= source.length
 }

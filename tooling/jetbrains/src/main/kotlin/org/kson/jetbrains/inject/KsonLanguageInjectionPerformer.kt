@@ -1,8 +1,8 @@
 package org.kson.jetbrains.inject
 
+import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.lang.injection.general.Injection
 import com.intellij.lang.injection.general.LanguageInjectionPerformer
-import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.psi.PsiElement
 import org.kson.jetbrains.psi.KsonEmbedContent
 
@@ -11,11 +11,13 @@ import org.kson.jetbrains.psi.KsonEmbedContent
  * Handles the actual injection mechanics using the existing robust infrastructure.
  */
 class KsonLanguageInjectionPerformer : LanguageInjectionPerformer {
-    override fun isPrimary(): Boolean {
-        return true
-    }
+    override fun isPrimary(): Boolean = true
 
-    override fun performInjection(registrar: MultiHostRegistrar, injection: Injection, context: PsiElement): Boolean {
+    override fun performInjection(
+        registrar: MultiHostRegistrar,
+        injection: Injection,
+        context: PsiElement,
+    ): Boolean {
         if (context !is KsonEmbedContent || !context.isValidHost) {
             return false
         }
@@ -33,10 +35,10 @@ class KsonLanguageInjectionPerformer : LanguageInjectionPerformer {
                 injection.prefix,
                 injection.suffix,
                 context,
-                range
+                range,
             )
         }
-        
+
         registrar.doneInjecting()
         return true
     }

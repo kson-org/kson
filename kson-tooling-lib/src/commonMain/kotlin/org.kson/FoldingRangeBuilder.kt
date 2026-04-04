@@ -11,7 +11,6 @@ import org.kson.parser.TokenType
  * ranges that span multiple lines (single-line constructs don't fold).
  */
 internal object FoldingRangeBuilder {
-
     fun build(tokens: List<Token>): List<StructuralRange> {
         val ranges = mutableListOf<StructuralRange>()
 
@@ -56,7 +55,10 @@ internal object FoldingRangeBuilder {
         return ranges
     }
 
-    private fun popMatching(stack: MutableList<OpenToken>, type: OpenTokenType): OpenToken? {
+    private fun popMatching(
+        stack: MutableList<OpenToken>,
+        type: OpenTokenType,
+    ): OpenToken? {
         for (i in stack.indices.reversed()) {
             if (stack[i].type == type) {
                 return stack.removeAt(i)
@@ -65,7 +67,10 @@ internal object FoldingRangeBuilder {
         return null
     }
 
-    private data class OpenToken(val type: OpenTokenType, val startLine: Int)
+    private data class OpenToken(
+        val type: OpenTokenType,
+        val startLine: Int,
+    )
 
     private enum class OpenTokenType { BRACE, BRACKET, EMBED }
 }

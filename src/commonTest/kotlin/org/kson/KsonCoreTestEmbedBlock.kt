@@ -12,17 +12,17 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """,
             """
-                %
-                    this is a raw embed
-                %%
+            %
+                this is a raw embed
+            %%
             """.trimIndent(),
             """
-               |2
-                     this is a raw embed
+            |2
+                  this is a raw embed
             """.trimIndent(),
             """
-                "    this is a raw embed"
-            """.trimIndent()
+            "    this is a raw embed"
+            """.trimIndent(),
         )
 
         assertParsesTo(
@@ -32,19 +32,18 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """,
             """
-                %sql
-                    select * from something
-                %%
+            %sql
+                select * from something
+            %%
             """.trimIndent(),
             """
-                |2
-                      select * from something
+            |2
+                  select * from something
             """.trimIndent(),
             """
-                "    select * from something"
-            """.trimIndent()
+            "    select * from something"
+            """.trimIndent(),
         )
-
 
         assertParsesTo(
             """
@@ -53,17 +52,17 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """,
             """
-                %sql: database
-                    select * from something
-                %%
+            %sql: database
+                select * from something
+            %%
             """.trimIndent(),
             """
-                |2
-                      select * from something
+            |2
+                  select * from something
             """.trimIndent(),
             """
-                "    select * from something"
-            """.trimIndent()
+            "    select * from something"
+            """.trimIndent(),
         )
 
         assertParsesTo(
@@ -73,17 +72,17 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                 %%
             """,
             """
-                %sql: ::::::::::::database::::::
-                    select * from something
-                %%
+            %sql: ::::::::::::database::::::
+                select * from something
+            %%
             """.trimIndent(),
             """
-                |2
-                      select * from something
+            |2
+                  select * from something
             """.trimIndent(),
             """
-                "    select * from something"
-            """.trimIndent()
+            "    select * from something"
+            """.trimIndent(),
         )
     }
 
@@ -91,43 +90,43 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbedBlockWithAlternativeDelimiter() {
         assertParsesTo(
             """
-                $
-                    this is a raw embed with alternative delimiter
-                $$
+            $
+                this is a raw embed with alternative delimiter
+            $$
             """.trimIndent(),
             // note that we prefer the primary %% delimiter in our transpiler output
             """
-                %
-                    this is a raw embed with alternative delimiter
-                %%
+            %
+                this is a raw embed with alternative delimiter
+            %%
             """.trimIndent(),
             """
-                |2
-                      this is a raw embed with alternative delimiter
+            |2
+                  this is a raw embed with alternative delimiter
             """.trimIndent(),
             """
-                "    this is a raw embed with alternative delimiter"
-            """.trimIndent()
+            "    this is a raw embed with alternative delimiter"
+            """.trimIndent(),
         )
 
         assertParsesTo(
             """
-                $${"sql"}
-                    select * from something
-                $$
+            $${"sql"}
+                select * from something
+            $$
             """.trimIndent(),
             """
-                %sql
-                    select * from something
-                %%
+            %sql
+                select * from something
+            %%
             """.trimIndent(),
             """
-                |2
-                      select * from something
+            |2
+                  select * from something
             """.trimIndent(),
             """
-                "    select * from something"
-            """.trimIndent()
+            "    select * from something"
+            """.trimIndent(),
         )
     }
 
@@ -153,7 +152,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
             "this is an escaped delim %%\nwhereas in this case, this is not $\\$"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertParsesTo(
@@ -173,7 +172,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
             "more %% %% %% than $$ should yield a $$-delimited block"
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -196,7 +195,7 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent(),
             """
             "these double $$ dollars are %%%% embedded but escaped"
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 
@@ -204,542 +203,572 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
     fun testEmbedBlockEndingInSlash() {
         assertParsesTo(
             """
-                %
-                %\%%
+            %
+            %\%%
             """.trimIndent(),
             """
-                %
-                %\
-                %%
+            %
+            %\
+            %%
             """.trimIndent(),
             """
-                |
-                  %\
+            |
+              %\
             """.trimIndent(),
             """
-                "%\\"
-            """.trimIndent()
+            "%\\"
+            """.trimIndent(),
         )
     }
 
     @Test
     fun testEmbedBlockTagsRetainment() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
         assertParsesTo(
             """
-                %
-                content%%
+            %
+            content%%
             """.trimIndent(),
             """
-                %
-                content
-                %%
+            %
+            content
+            %%
             """.trimIndent(),
             """
-                embedContent: |
-                  content
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
-        )
-
-        assertParsesTo(
-            """
-                %sql
-                content%%
+            {
+              "embedContent": "content"
+            }
             """.trimIndent(),
-            """
-                %sql
-                content
-                %%
-            """.trimIndent(),
-            """
-                embedTag: "sql"
-                embedContent: |
-                  content
-            """.trimIndent(),
-            """
-                {
-                  "embedTag": "sql",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            compileSettings = compileSettings,
         )
 
         assertParsesTo(
             """
-                %:meta
-                content%%
+            %sql
+            content%%
             """.trimIndent(),
             """
-                %:meta
-                content
-                %%
+            %sql
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: ":meta"
-                embedContent: |
-                  content
+            embedTag: "sql"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": ":meta",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "sql",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         assertParsesTo(
             """
-                %sql: "server=10.0.1.174;uid=root;database=company"
-                content%%
+            %:meta
+            content%%
             """.trimIndent(),
             """
-                %sql: "server=10.0.1.174;uid=root;database=company"
-                content
-                %%
+            %:meta
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: "sql: \"server=10.0.1.174;uid=root;database=company\""
-                embedContent: |
-                  content
+            embedTag: ":meta"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "sql: \"server=10.0.1.174;uid=root;database=company\"",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": ":meta",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
+        )
+
+        assertParsesTo(
+            """
+            %sql: "server=10.0.1.174;uid=root;database=company"
+            content%%
+            """.trimIndent(),
+            """
+            %sql: "server=10.0.1.174;uid=root;database=company"
+            content
+            %%
+            """.trimIndent(),
+            """
+            embedTag: "sql: \"server=10.0.1.174;uid=root;database=company\""
+            embedContent: |
+              content
+            """.trimIndent(),
+            """
+            {
+              "embedTag": "sql: \"server=10.0.1.174;uid=root;database=company\"",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockFromObject() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
+
+        assertParsesTo(
+            """
+            embedBlock:
+              "embedContent": "content\n"
+            """.trimIndent(),
+            """
+            embedBlock: %
+              content
+              
+              %%
+            """.trimIndent(),
+            """
+            embedBlock:
+              embedContent: |
+                content
+                
+            """.trimIndent(),
+            """
+            {
+              "embedBlock": {
+                "embedContent": "content\n"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         assertParsesTo(
             """
-               embedBlock:
-                 "embedContent": "content\n"
+            embedBlock:
+              "embedContent": "content\n"
+              "unrelatedKey": "is not an embed block"
             """.trimIndent(),
             """
-                embedBlock: %
-                  content
-                  
-                  %%
+            embedBlock:
+              embedContent: 'content\n'
+              unrelatedKey: 'is not an embed block'
             """.trimIndent(),
             """
-                embedBlock:
-                  embedContent: |
-                    content
-                    
+            embedBlock:
+              embedContent: "content\n"
+              unrelatedKey: "is not an embed block"
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedContent": "content\n"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
-        )
-
-        assertParsesTo(
-            """
-               embedBlock:
-                 "embedContent": "content\n"
-                 "unrelatedKey": "is not an embed block"
+            {
+              "embedBlock": {
+                "embedContent": "content\n",
+                "unrelatedKey": "is not an embed block"
+              }
+            }
             """.trimIndent(),
-            """
-                embedBlock:
-                  embedContent: 'content\n'
-                  unrelatedKey: 'is not an embed block'
-            """.trimIndent(),
-            """
-                embedBlock:
-                  embedContent: "content\n"
-                  unrelatedKey: "is not an embed block"
-            """.trimIndent(),
-            """
-                {
-                  "embedBlock": {
-                    "embedContent": "content\n",
-                    "unrelatedKey": "is not an embed block"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            compileSettings = compileSettings,
         )
     }
 
     @Test
-    fun testEmbedBlockFromObjectWithoutStrings(){
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+    fun testEmbedBlockFromObjectWithoutStrings() {
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         assertParsesTo(
             """
-               embedBlock:
-                 "embedContent": {not: content}
-                 "unrelatedKey": "is not an embed block"
+            embedBlock:
+              "embedContent": {not: content}
+              "unrelatedKey": "is not an embed block"
             """.trimIndent(),
             """
-                embedBlock:
-                  embedContent:
-                    not: content
-                    .
-                  unrelatedKey: 'is not an embed block'
+            embedBlock:
+              embedContent:
+                not: content
+                .
+              unrelatedKey: 'is not an embed block'
             """.trimIndent(),
             """
-                embedBlock:
-                  embedContent:
-                    not: content
-                  unrelatedKey: "is not an embed block"
+            embedBlock:
+              embedContent:
+                not: content
+              unrelatedKey: "is not an embed block"
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedContent": {
-                      "not": "content"
-                    },
-                    "unrelatedKey": "is not an embed block"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedContent": {
+                  "not": "content"
+                },
+                "unrelatedKey": "is not an embed block"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedContentWithUnrelatedKeyNotDecodedAsEmbedBlock() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // An object with "embedContent" and a non-embed key should remain an object, not decode as an embed block
         assertParsesTo(
             """
-               wrapper:
-                 "embedContent": "content"
-                 "other": "value"
+            wrapper:
+              "embedContent": "content"
+              "other": "value"
             """.trimIndent(),
             """
-                wrapper:
-                  embedContent: content
-                  other: value
+            wrapper:
+              embedContent: content
+              other: value
             """.trimIndent(),
             """
-                wrapper:
-                  embedContent: content
-                  other: value
+            wrapper:
+              embedContent: content
+              other: value
             """.trimIndent(),
             """
-                {
-                  "wrapper": {
-                    "embedContent": "content",
-                    "other": "value"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "wrapper": {
+                "embedContent": "content",
+                "other": "value"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockTagWithValidEscapes() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // Tag with \t escape — raw text "my\ttag" is preserved as the tag value
         assertParsesTo(
             """
-                %my\ttag
-                content%%
+            %my\ttag
+            content%%
             """.trimIndent(),
             """
-                %my\ttag
-                content
-                %%
+            %my\ttag
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: "my\ttag"
-                embedContent: |
-                  content
+            embedTag: "my\ttag"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "my\ttag",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "my\ttag",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // Tag with unicode escape — raw text "\u0041tag" is preserved as the tag value
         assertParsesTo(
             """
-                %\u0041tag
-                content%%
+            %\u0041tag
+            content%%
             """.trimIndent(),
             """
-                %\u0041tag
-                content
-                %%
+            %\u0041tag
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: "\u0041tag"
-                embedContent: |
-                  content
+            embedTag: "\u0041tag"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "\u0041tag",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "\u0041tag",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // Tag with escaped backslash — raw text "path\\to" is preserved as the tag value
         assertParsesTo(
             """
-                %path\\to
-                content%%
+            %path\\to
+            content%%
             """.trimIndent(),
             """
-                %path\\to
-                content
-                %%
+            %path\\to
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: "path\\to"
-                embedContent: |
-                  content
+            embedTag: "path\\to"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "path\\to",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "path\\to",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockTagWithMetadataAndEscapes() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // Tag with metadata containing escapes — the full raw tag text including
         // the metadata portion is preserved, with backslashes and quotes intact
         assertParsesTo(
             """
-                %sql: "conn\tstring"
-                content%%
+            %sql: "conn\tstring"
+            content%%
             """.trimIndent(),
             """
-                %sql: "conn\tstring"
-                content
-                %%
+            %sql: "conn\tstring"
+            content
+            %%
             """.trimIndent(),
             """
-                embedTag: "sql: \"conn\tstring\""
-                embedContent: |
-                  content
+            embedTag: "sql: \"conn\tstring\""
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "sql: \"conn\tstring\"",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "sql: \"conn\tstring\"",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockTagFromObjectWithEscapes() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // Verify bijection: object with embedTag containing escapes roundtrips through embed block form
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "my\ttag"
-                 "embedContent": "content"
+            embedBlock:
+              "embedTag": "my\ttag"
+              "embedContent": "content"
             """.trimIndent(),
             """
-                embedBlock: %my\ttag
-                  content
-                  %%
+            embedBlock: %my\ttag
+              content
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "my\ttag"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "my\ttag"
+              embedContent: |
+                content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "my\ttag",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "my\ttag",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockTagFromObjectWithUnquotedTag() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // Verify that an object with an unquoted embedTag value decodes as an embed block
         assertParsesTo(
             """
-                embedBlock:
-                  embedTag: sql
-                  "embedContent": "content"
+            embedBlock:
+              embedTag: sql
+              "embedContent": "content"
             """.trimIndent(),
             """
-                embedBlock: %sql
-                  content
-                  %%
+            embedBlock: %sql
+              content
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "sql"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "sql"
+              embedContent: |
+                content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "sql",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "sql",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockFromObjectWithLiteralNewlineInTag() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         assertParsesTo(
             """
-                embedBlock:
-                  embedTag: "line1
-                line2"
-                  embedContent: content""".trimIndent(),
-            """
-                embedBlock: %line1\nline2
-                  content
-                  %%""".trimIndent(),
-            """
-                embedBlock:
-                  embedTag: "line1\nline2"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "line1
+            line2"
+              embedContent: content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "line1\nline2",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            embedBlock: %line1\nline2
+              content
+              %%
+            """.trimIndent(),
+            """
+            embedBlock:
+              embedTag: "line1\nline2"
+              embedContent: |
+                content
+            """.trimIndent(),
+            """
+            {
+              "embedBlock": {
+                "embedTag": "line1\nline2",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockTagWithLiteralTabInJsonObjectRendering() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         assertParsesTo(
             "%my\ttag\ncontent%%",
             """
-                %my\ttag
-                content
-                %%
+            %my\ttag
+            content
+            %%
             """.trimIndent(),
             """
-                  embedTag: "my\ttag"
-                  embedContent: |
-                    content
+            embedTag: "my\ttag"
+            embedContent: |
+              content
             """.trimIndent(),
             """
-                {
-                  "embedTag": "my\ttag",
-                  "embedContent": "content"
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedTag": "my\ttag",
+              "embedContent": "content"
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbedBlockFromObjectWithDelimiterSequenceInTag() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "has %% embed $$ delims"
-                 "embedContent": "content"
+            embedBlock:
+              "embedTag": "has %% embed $$ delims"
+              "embedContent": "content"
             """.trimIndent(),
             """
-                embedBlock: %has %% embed $$ delims
-                  content
-                  %%
+            embedBlock: %has %% embed $$ delims
+              content
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "has %% embed $$ delims"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "has %% embed $$ delims"
+              embedContent: |
+                content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "has %% embed $$ delims",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "has %% embed $$ delims",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // alternate delimter
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "has %% embed $$ delims"
-                 "embedContent": "content with %% to force dollar-delimiters"
+            embedBlock:
+              "embedTag": "has %% embed $$ delims"
+              "embedContent": "content with %% to force dollar-delimiters"
             """.trimIndent(),
             $$"""
                 embedBlock: $has %% embed $$ delims
@@ -747,83 +776,86 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   $$
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "has %% embed $$ delims"
-                  embedContent: |
-                    content with %% to force dollar-delimiters
+            embedBlock:
+              embedTag: "has %% embed $$ delims"
+              embedContent: |
+                content with %% to force dollar-delimiters
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "has %% embed $$ delims",
-                    "embedContent": "content with %% to force dollar-delimiters"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "has %% embed $$ delims",
+                "embedContent": "content with %% to force dollar-delimiters"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // tag is entirely a delimiter sequence
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "%%"
-                 "embedContent": "content"
+            embedBlock:
+              "embedTag": "%%"
+              "embedContent": "content"
             """.trimIndent(),
             """
-                embedBlock: %%%
-                  content
-                  %%
+            embedBlock: %%%
+              content
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "%%"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "%%"
+              embedContent: |
+                content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "%%",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "%%",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // tag ends with a delimiter sequence
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "tag%%"
-                 "embedContent": "content"
+            embedBlock:
+              "embedTag": "tag%%"
+              "embedContent": "content"
             """.trimIndent(),
             """
-                embedBlock: %tag%%
-                  content
-                  %%
+            embedBlock: %tag%%
+              content
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "tag%%"
-                  embedContent: |
-                    content
+            embedBlock:
+              embedTag: "tag%%"
+              embedContent: |
+                content
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "tag%%",
-                    "embedContent": "content"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "tag%%",
+                "embedContent": "content"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         // both delimiters in both tag and content, requiring escaping
         assertParsesTo(
             """
-               embedBlock:
-                 "embedTag": "%%$$"
-                 "embedContent": "has %% and $$"
+            embedBlock:
+              "embedTag": "%%$$"
+              "embedContent": "has %% and $$"
             """.trimIndent(),
             $$"""
                 embedBlock: %%%$$
@@ -831,178 +863,186 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
                   %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedTag: "%%$$"
-                  embedContent: |
-                    has %% and $$
+            embedBlock:
+              embedTag: "%%$$"
+              embedContent: |
+                has %% and $$
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedTag": "%%$$",
-                    "embedContent": "has %% and $$"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedTag": "%%$$",
+                "embedContent": "has %% and $$"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
     @Test
     fun testEmbeddedEmbedBlockFromObject() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
+
+        assertParsesTo(
+            """
+            embedBlock:
+              "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
+            """.trimIndent(),
+            """
+            embedBlock: $
+              embeddedEmbed: %
+              EMBED CONTENT
+              %%
+              
+              $$
+            """.trimIndent(),
+            """
+            embedBlock:
+              embedContent: |
+                embeddedEmbed: %
+                EMBED CONTENT
+                %%
+                
+            """.trimIndent(),
+            """
+            {
+              "embedBlock": {
+                "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
 
         assertParsesTo(
             """
-               embedBlock:
-                 "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
+            embedBlock:
+              "embedContent": "embeddedEmbed: $\nEMBED WITH %\\% CONTENT\n$$\n"
             """.trimIndent(),
             """
-                embedBlock: $
-                  embeddedEmbed: %
-                  EMBED CONTENT
-                  %%
-                  
-                  $$
+            embedBlock: %
+              embeddedEmbed: $
+              EMBED WITH %\\% CONTENT
+              $$
+              
+              %%
             """.trimIndent(),
             """
-                embedBlock:
-                  embedContent: |
-                    embeddedEmbed: %
-                    EMBED CONTENT
-                    %%
-                    
+            embedBlock:
+              embedContent: |
+                embeddedEmbed: ${'$'}
+                EMBED WITH %\% CONTENT
+                ${'$'}${'$'}
+                
             """.trimIndent(),
             """
-                {
-                  "embedBlock": {
-                    "embedContent": "embeddedEmbed: %\nEMBED CONTENT\n%%\n"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
-        )
-
-        assertParsesTo(
-            """
-               embedBlock:
-                 "embedContent": "embeddedEmbed: $\nEMBED WITH %\\% CONTENT\n$$\n"
+            {
+              "embedBlock": {
+                "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %\\% CONTENT\n${'$'}${'$'}\n"
+              }
+            }
             """.trimIndent(),
-            """
-                embedBlock: %
-                  embeddedEmbed: $
-                  EMBED WITH %\\% CONTENT
-                  $$
-                  
-                  %%
-            """.trimIndent(),
-            """
-                embedBlock:
-                  embedContent: |
-                    embeddedEmbed: ${'$'}
-                    EMBED WITH %\% CONTENT
-                    ${'$'}${'$'}
-                    
-            """.trimIndent(),
-            """
-                {
-                  "embedBlock": {
-                    "embedContent": "embeddedEmbed: ${'$'}\nEMBED WITH %\\% CONTENT\n${'$'}${'$'}\n"
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            compileSettings = compileSettings,
         )
     }
+
     @Test
     fun testEmbedBlockTrailingNewlineStripping() {
         // %% on own line with no trailing newline — content has no trailing \n
         assertParsesTo(
             """
-                %
-                hello
-                %%
+            %
+            hello
+            %%
             """.trimIndent(),
             """
-                %
-                hello
-                %%
+            %
+            hello
+            %%
             """.trimIndent(),
             """
-                |
-                  hello
+            |
+              hello
             """.trimIndent(),
             """
-                "hello"
-            """.trimIndent()
+            "hello"
+            """.trimIndent(),
         )
 
         // %% on own line with indented blank line — content preserves trailing \n
         assertParsesTo(
             """
-                    %
-                    hello
-                    
-                    %%
-                    """.trimIndent(),
+            %
+            hello
+            
+            %%
+            """.trimIndent(),
             """
-                    %
-                    hello
-                    
-                    %%""".trimIndent(),
+            %
+            hello
+            
+            %%
+            """.trimIndent(),
             """
-                    |
-                      hello
-                      
-                    """.trimIndent(),
+            |
+              hello
+              
+            """.trimIndent(),
             """
-                "hello\n"
-            """.trimIndent()
+            "hello\n"
+            """.trimIndent(),
         )
 
         // inline %% — content has no trailing \n (unchanged behavior)
         assertParsesTo(
             """
-                %
-                hello%%
+            %
+            hello%%
             """.trimIndent(),
             """
-                %
-                hello
-                %%
+            %
+            hello
+            %%
             """.trimIndent(),
             """
-                |
-                  hello
+            |
+              hello
             """.trimIndent(),
             """
-                "hello"
-            """.trimIndent()
+            "hello"
+            """.trimIndent(),
         )
     }
 
     @Test
     fun testEmbedBlockTrailingSpaces() {
-        val compileSettings = KsonCoreTest.CompileSettings(
-            yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
-            jsonSettings = Json(retainEmbedTags = true)
-        )
+        val compileSettings =
+            KsonCoreTest.CompileSettings(
+                yamlSettings = CompileTarget.Yaml(retainEmbedTags = true),
+                jsonSettings = Json(retainEmbedTags = true),
+            )
 
         // The key fix: a string of spaces is representable and roundtrips correctly
         assertParsesTo(
             """
-               embedBlock:
-                 "embedContent": "    "
+            embedBlock:
+              "embedContent": "    "
             """.trimIndent(),
             "embedBlock: %\n      \n  %%",
             "embedBlock:\n  embedContent: |4\n        ",
             """
-                {
-                  "embedBlock": {
-                    "embedContent": "    "
-                  }
-                }
-            """.trimIndent(), compileSettings = compileSettings
+            {
+              "embedBlock": {
+                "embedContent": "    "
+              }
+            }
+            """.trimIndent(),
+            compileSettings = compileSettings,
         )
     }
 
@@ -1014,8 +1054,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             "%\n    hello\n%%",
             "|2\n      hello",
             """
-                "    hello"
-            """.trimIndent()
+            "    hello"
+            """.trimIndent(),
         )
     }
 
@@ -1027,8 +1067,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             "%\n\n%%",
             "|\n  ",
             """
-                ""
-            """.trimIndent()
+            ""
+            """.trimIndent(),
         )
 
         // Content = "\n" — needs two blank content lines (one real, one stripped by %% on own line)
@@ -1037,8 +1077,8 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             "%\n\n\n%%",
             "|\n  \n  ",
             """
-                "\n"
-            """.trimIndent()
+            "\n"
+            """.trimIndent(),
         )
     }
 }

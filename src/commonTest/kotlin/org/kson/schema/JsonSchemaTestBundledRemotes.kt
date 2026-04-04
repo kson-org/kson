@@ -40,7 +40,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """${'$'}ref to ${'$'}ref finds location-independent ${'$'}id -> non-number is invalid"""
+            """${'$'}ref to ${'$'}ref finds location-independent ${'$'}id -> non-number is invalid""",
         )
     }
 
@@ -63,7 +63,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """remote ref -> remote ref valid"""
+            """remote ref -> remote ref valid""",
         )
     }
 
@@ -85,7 +85,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """remote ref -> remote ref invalid"""
+            """remote ref -> remote ref invalid""",
         )
     }
 
@@ -115,7 +115,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """fragment within remote ref -> remote fragment valid"""
+            """fragment within remote ref -> remote fragment valid""",
         )
     }
 
@@ -144,7 +144,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """fragment within remote ref -> remote fragment invalid"""
+            """fragment within remote ref -> remote fragment invalid""",
         )
     }
 
@@ -174,7 +174,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """ref within remote ref -> ref within ref valid"""
+            """ref within remote ref -> ref within ref valid""",
         )
     }
 
@@ -203,7 +203,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """ref within remote ref -> ref within ref invalid"""
+            """ref within remote ref -> ref within ref invalid""",
         )
     }
 
@@ -236,7 +236,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """base URI change -> base URI change ref valid"""
+            """base URI change -> base URI change ref valid""",
         )
     }
 
@@ -268,7 +268,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """base URI change -> base URI change ref invalid"""
+            """base URI change -> base URI change ref invalid""",
         )
     }
 
@@ -308,7 +308,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """base URI change - change folder -> number is valid"""
+            """base URI change - change folder -> number is valid""",
         )
     }
 
@@ -347,7 +347,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """base URI change - change folder -> string is invalid"""
+            """base URI change - change folder -> string is invalid""",
         )
     }
 
@@ -391,7 +391,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """base URI change - change folder in subschema -> number is valid"""
+            """base URI change - change folder in subschema -> number is valid""",
         )
     }
 
@@ -434,7 +434,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """base URI change - change folder in subschema -> string is invalid"""
+            """base URI change - change folder in subschema -> string is invalid""",
         )
     }
 
@@ -465,7 +465,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """Location-independent identifier in remote ref -> integer is valid"""
+            """Location-independent identifier in remote ref -> integer is valid""",
         )
     }
 
@@ -495,7 +495,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """Location-independent identifier in remote ref -> string is invalid"""
+            """Location-independent identifier in remote ref -> string is invalid""",
         )
     }
 
@@ -532,7 +532,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """remote ref with ref to definitions -> valid"""
+            """remote ref with ref to definitions -> valid""",
         )
     }
 
@@ -568,7 +568,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """remote ref with ref to definitions -> invalid"""
+            """remote ref with ref to definitions -> invalid""",
         )
     }
 
@@ -607,7 +607,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """retrieved nested refs resolve relative to their URI not ${'$'}id -> string is valid"""
+            """retrieved nested refs resolve relative to their URI not ${'$'}id -> string is valid""",
         )
     }
 
@@ -645,7 +645,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """retrieved nested refs resolve relative to their URI not ${'$'}id -> number is invalid"""
+            """retrieved nested refs resolve relative to their URI not ${'$'}id -> number is invalid""",
         )
     }
 
@@ -688,7 +688,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """root ref in remote ref -> string is valid"""
+            """root ref in remote ref -> string is valid""",
         )
     }
 
@@ -730,7 +730,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             true,
-            """root ref in remote ref -> null is valid"""
+            """root ref in remote ref -> null is valid""",
         )
     }
 
@@ -774,7 +774,7 @@ class JsonSchemaTestBundledRemotes : JsonSchemaTest {
                 }
             """,
             false,
-            """root ref in remote ref -> object is invalid"""
+            """root ref in remote ref -> object is invalid""",
         )
     }
 }

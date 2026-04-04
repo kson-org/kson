@@ -12,5 +12,5 @@ package org.kson.validation
  * @param filepath The filepath of the document being validated, if available
  */
 data class SourceContext(
-    val filepath: String? = null
+    val filepath: String? = null,
 )

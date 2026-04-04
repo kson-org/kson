@@ -6,12 +6,12 @@ import org.kson.value.*
  * Builds [DocumentSymbol] trees from [KsonValue] AST nodes.
  */
 internal object DocumentSymbolBuilder {
+    fun build(ksonValue: KsonValue): List<DocumentSymbol> = listOf(createSymbol("root", ksonValue))
 
-    fun build(ksonValue: KsonValue): List<DocumentSymbol> {
-        return listOf(createSymbol("root", ksonValue))
-    }
-
-    private fun createSymbol(name: String, value: KsonValue): DocumentSymbol {
+    private fun createSymbol(
+        name: String,
+        value: KsonValue,
+    ): DocumentSymbol {
         val range = value.toRange()
         return when (value) {
             is KsonObject -> createObjectSymbol(value, name, range)
@@ -24,21 +24,29 @@ internal object DocumentSymbolBuilder {
         }
     }
 
-    private fun createObjectSymbol(obj: KsonObject, name: String, range: Range): DocumentSymbol {
-        val children = obj.propertyMap.map { (_, prop) ->
-            createPropertySymbol(prop.propName, prop.propValue)
-        }
+    private fun createObjectSymbol(
+        obj: KsonObject,
+        name: String,
+        range: Range,
+    ): DocumentSymbol {
+        val children =
+            obj.propertyMap.map { (_, prop) ->
+                createPropertySymbol(prop.propName, prop.propValue)
+            }
         return DocumentSymbol(
             name = name,
             kind = DocumentSymbolKind.OBJECT,
             range = range,
             selectionRange = range,
             detail = "{${obj.propertyMap.size} properties}",
-            children = children
+            children = children,
         )
     }
 
-    private fun createPropertySymbol(keyString: KsonString, value: KsonValue): DocumentSymbol {
+    private fun createPropertySymbol(
+        keyString: KsonString,
+        value: KsonValue,
+    ): DocumentSymbol {
         val keyRange = keyString.toRange()
         return DocumentSymbol(
             name = keyString.value,
@@ -46,25 +54,34 @@ internal object DocumentSymbolBuilder {
             range = keyRange,
             selectionRange = keyRange,
             detail = "key",
-            children = listOf(createSymbol(keyString.value, value))
+            children = listOf(createSymbol(keyString.value, value)),
         )
     }
 
-    private fun createArraySymbol(array: KsonList, name: String, range: Range): DocumentSymbol {
-        val children = array.elements.mapIndexed { index, element ->
-            createSymbol("[${index}]", element)
-        }
+    private fun createArraySymbol(
+        array: KsonList,
+        name: String,
+        range: Range,
+    ): DocumentSymbol {
+        val children =
+            array.elements.mapIndexed { index, element ->
+                createSymbol("[$index]", element)
+            }
         return DocumentSymbol(
             name = name,
             kind = DocumentSymbolKind.ARRAY,
             range = range,
             selectionRange = range,
             detail = "[${array.elements.size} items]",
-            children = children
+            children = children,
         )
     }
 
-    private fun createEmbedSymbol(embed: EmbedBlock, name: String, range: Range): DocumentSymbol {
+    private fun createEmbedSymbol(
+        embed: EmbedBlock,
+        name: String,
+        range: Range,
+    ): DocumentSymbol {
         val tag = embed.embedTag?.value ?: "embed"
         return DocumentSymbol(
             name = name,
@@ -72,19 +89,22 @@ internal object DocumentSymbolBuilder {
             range = range,
             selectionRange = range,
             detail = tag,
-            children = emptyList()
+            children = emptyList(),
         )
     }
 
-    private fun createPrimitiveSymbol(name: String, range: Range, kind: DocumentSymbolKind, detail: String): DocumentSymbol {
-        return DocumentSymbol(
+    private fun createPrimitiveSymbol(
+        name: String,
+        range: Range,
+        kind: DocumentSymbolKind,
+        detail: String,
+    ): DocumentSymbol =
+        DocumentSymbol(
             name = name,
             kind = kind,
             range = range,
             selectionRange = range,
             detail = detail,
-            children = emptyList()
+            children = emptyList(),
         )
-    }
-
 }

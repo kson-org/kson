@@ -42,15 +42,16 @@ class KsonTrimIndentHandler {
             if (indentText.contentEquals(
                     text.subSequence(
                         lineRange.startOffset,
-                        lineRange.startOffset + minIndent
-                    )
+                        lineRange.startOffset + minIndent,
+                    ),
                 )
             ) {
                 val startOffset = lineRange.startOffset.coerceAtLeast(valueTextRange.startOffset) + minIndent
                 val endOffset = (lineRange.endOffset + 1).coerceAtMost(valueTextRange.endOffset)
                 ranges.add(TextRange(startOffset, endOffset))
-            } else ranges.add(lineRange)
-
+            } else {
+                ranges.add(lineRange)
+            }
         }
         return ranges.mapNotNull { it.intersection(valueTextRange) }
     }

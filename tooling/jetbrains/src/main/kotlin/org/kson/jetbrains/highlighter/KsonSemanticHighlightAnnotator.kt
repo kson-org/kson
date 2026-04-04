@@ -13,13 +13,20 @@ import org.kson.parser.ParsedElementType
  *
  * Since we don't require any indices we can implement [DumbAware]
  */
-class KsonSemanticHighlightAnnotator : Annotator, DumbAware {
-    override fun annotate(element: PsiElement, holder: AnnotationHolder) {
+class KsonSemanticHighlightAnnotator :
+    Annotator,
+    DumbAware {
+    override fun annotate(
+        element: PsiElement,
+        holder: AnnotationHolder,
+    ) {
         // Implement syntax highlighter that distinguishes regular strings from object keys.
-        if (elem(ParsedElementType.OBJECT_KEY) == element.node.elementType){
-            holder.newSilentAnnotation(HighlightSeverity.INFORMATION).textAttributes(
-                KsonSyntaxHighlighter.getTextAttributesKey(KsonSyntaxHighlighter.KsonColorTag.KSON_OBJECT_KEY)
-            ).create()
+        if (elem(ParsedElementType.OBJECT_KEY) == element.node.elementType) {
+            holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .textAttributes(
+                    KsonSyntaxHighlighter.getTextAttributesKey(KsonSyntaxHighlighter.KsonColorTag.KSON_OBJECT_KEY),
+                ).create()
         }
     }
 }

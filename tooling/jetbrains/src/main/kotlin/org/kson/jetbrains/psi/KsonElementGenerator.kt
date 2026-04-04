@@ -18,7 +18,9 @@ import org.kson.parser.behavior.embedblock.EmbedDelim
  * @param project The project context in which the elements will be generated
  */
 
-class KsonElementGenerator(project: Project) {
+class KsonElementGenerator(
+    project: Project,
+) {
     private var myProject: Project = project
 
     /**
@@ -30,11 +32,16 @@ class KsonElementGenerator(project: Project) {
      * @param indentText of the embed content
      * @return created embed content
      */
-    fun createEmbedBlock(embedDelim: EmbedDelim, content: String, tag: String="",  indentText: String = ""): KsonEmbedBlock {
+    fun createEmbedBlock(
+        embedDelim: EmbedDelim,
+        content: String,
+        tag: String = "",
+        indentText: String = "",
+    ): KsonEmbedBlock {
         val indentedContent = content.lines().map { indentText + it }.joinToString("\n")
         val fileContent =
             """
-            |${embedDelim.openDelimiter}${tag}
+            |${embedDelim.openDelimiter}$tag
             |$indentedContent${embedDelim.closeDelimiter}
             """.trimMargin()
         val file = createDummyFile(fileContent)
@@ -53,7 +60,7 @@ class KsonElementGenerator(project: Project) {
         return psiFileFactory.createFileFromText(
             "dummy." + KsonFileType.defaultExtension,
             KsonFileType,
-            content
+            content,
         )
     }
 }

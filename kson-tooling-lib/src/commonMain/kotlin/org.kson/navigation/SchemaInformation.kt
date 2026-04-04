@@ -3,21 +3,21 @@ package org.kson.navigation
 import org.kson.CompletionItem
 import org.kson.CompletionKind
 import org.kson.parser.Location
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
+import org.kson.value.navigation.jsonpointer.JsonPointer
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
-import org.kson.value.KsonValue as InternalKsonValue
-import org.kson.value.KsonObject as InternalKsonObject
-import org.kson.value.KsonList as InternalKsonList
-import org.kson.value.KsonString as InternalKsonString
-import org.kson.value.KsonNumber as InternalKsonNumber
 import org.kson.value.EmbedBlock as InternalEmbedBlock
 import org.kson.value.KsonBoolean as InternalKsonBoolean
+import org.kson.value.KsonList as InternalKsonList
 import org.kson.value.KsonNull as InternalKsonNull
+import org.kson.value.KsonNumber as InternalKsonNumber
+import org.kson.value.KsonObject as InternalKsonObject
+import org.kson.value.KsonString as InternalKsonString
+import org.kson.value.KsonValue as InternalKsonValue
 
-internal object SchemaInformation{
+internal object SchemaInformation {
     /**
      * Get info for the node in a schema, found by using the
      * [documentPointer] to navigate the schema
@@ -45,7 +45,7 @@ internal object SchemaInformation{
      */
     fun getSchemaLocations(
         schemaValue: InternalKsonValue,
-        documentPointer: JsonPointer
+        documentPointer: JsonPointer,
     ): List<Location> {
         val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
         return resolvedSchemas.map {
@@ -70,12 +70,13 @@ internal object SchemaInformation{
         schemaValue: InternalKsonValue,
         documentPointer: JsonPointer,
         validSchemas: List<ResolvedRef>? = null,
-        documentValue: InternalKsonValue? = null
+        documentValue: InternalKsonValue? = null,
     ): List<CompletionItem> {
         val resolvedSchemas = validSchemas ?: SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
-        val allCompletions = resolvedSchemas
-            .flatMap { it.resolvedValue.extractCompletions() }
-            .distinctBy { it.label } // Remove duplicates based on label
+        val allCompletions =
+            resolvedSchemas
+                .flatMap { it.resolvedValue.extractCompletions() }
+                .distinctBy { it.label } // Remove duplicates based on label
 
         // Only filter if:
         // 1. Document value is provided
@@ -93,8 +94,9 @@ internal object SchemaInformation{
         // Get the current object at the completion location
         // If we can't find an object, it means the caret is before the object literal,
         // so we shouldn't filter (e.g., "user: <caret>{" - object exists but path doesn't reach it yet)
-        val currentObject = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer) as? InternalKsonObject
-            ?: return allCompletions
+        val currentObject =
+            KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer) as? InternalKsonObject
+                ?: return allCompletions
 
         // Get the set of already-filled property names
         val filledProperties = currentObject.propertyLookup.keys
@@ -197,13 +199,12 @@ fun InternalKsonValue.extractSchemaInfo(): String? {
     }.takeIf { it.isNotEmpty() }
 }
 
-
 /**
  * Format a KsonValue for display in info.
  * Converts values to a readable string representation.
  */
-fun InternalKsonValue.formatValueForDisplay(): String {
-    return when (this) {
+fun InternalKsonValue.formatValueForDisplay(): String =
+    when (this) {
         is InternalKsonList -> "[${this.elements.joinToString(",") { it.formatValueForDisplay() }}]"
         is InternalKsonBoolean -> this.value.toString()
         is InternalEmbedBlock -> "<embed>"
@@ -212,7 +213,6 @@ fun InternalKsonValue.formatValueForDisplay(): String {
         is InternalKsonObject -> "{...}"
         is InternalKsonString -> this.value
     }
-}
 
 /**
  * Extract completion items from a schema node based on the completion context.
@@ -220,12 +220,10 @@ fun InternalKsonValue.formatValueForDisplay(): String {
  * @param context The completion context (property name or value)
  * @return List of completion items
  */
-internal fun InternalKsonValue.extractCompletions(
-): List<CompletionItem> {
+internal fun InternalKsonValue.extractCompletions(): List<CompletionItem> {
     if (this !is InternalKsonObject) return emptyList()
     return extractValueCompletions()
 }
-
 
 /**
  * Extract completions from a schema node.
@@ -239,13 +237,14 @@ internal fun InternalKsonValue.extractCompletions(
 private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     // Check if this schema represents an object type
     // If so, we should provide property completions instead of value completions
-    val isObjectType = when (val typeValue = propertyLookup["type"]) {
-        is InternalKsonString -> typeValue.value == "object"
-        is InternalKsonList -> {
-            typeValue.elements.any { (it as? InternalKsonString)?.value == "object" }
+    val isObjectType =
+        when (val typeValue = propertyLookup["type"]) {
+            is InternalKsonString -> typeValue.value == "object"
+            is InternalKsonList -> {
+                typeValue.elements.any { (it as? InternalKsonString)?.value == "object" }
+            }
+            else -> propertyLookup.containsKey("properties") // Has properties = likely object schema
         }
-        else -> propertyLookup.containsKey("properties") // Has properties = likely object schema
-    }
 
     if (isObjectType) {
         return extractPropertyCompletions()
@@ -261,8 +260,8 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
                     label = enumValue.formatValueForDisplay(),
                     detail = "enum value",
                     documentation = this.extractSchemaInfo(),
-                    kind = CompletionKind.VALUE
-                )
+                    kind = CompletionKind.VALUE,
+                ),
             )
         }
         return completions
@@ -298,7 +297,6 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     return completions
 }
 
-
 /**
  * Extract property name completions from an object schema.
  *
@@ -306,15 +304,16 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
  * for each available property.
  */
 private fun InternalKsonObject.extractPropertyCompletions(): List<CompletionItem> {
-    val properties = (propertyLookup["properties"] as? InternalKsonObject)
-        ?: return emptyList()
+    val properties =
+        (propertyLookup["properties"] as? InternalKsonObject)
+            ?: return emptyList()
 
     return properties.propertyLookup.map { (propName, propSchema) ->
         CompletionItem(
             label = propName,
             detail = extractTypeHint(propSchema),
-            documentation = propSchema.extractSchemaInfo(),  // Reuse existing function!
-            kind = CompletionKind.PROPERTY
+            documentation = propSchema.extractSchemaInfo(), // Reuse existing function!
+            kind = CompletionKind.PROPERTY,
         )
     }
 }

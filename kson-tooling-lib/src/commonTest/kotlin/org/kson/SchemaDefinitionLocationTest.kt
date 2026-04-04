@@ -7,7 +7,6 @@ import kotlin.test.*
  * Tests for [KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
  */
 class SchemaDefinitionLocationTest {
-
     /**
      * Helper to test definition location.
      *
@@ -18,10 +17,16 @@ class SchemaDefinitionLocationTest {
      *
      * If schemaWithCaret does NOT contain any <caret> markers, the test verifies that the result is null or empty.
      */
-    private fun assertDefinitionLocation(schemaWithCaret: String, documentWithCaret: String) {
+    private fun assertDefinitionLocation(
+        schemaWithCaret: String,
+        documentWithCaret: String,
+    ) {
         val caretMarker = "<caret>"
 
-        fun createCoordinates(document: String, caretIndex: Int): Coordinates? {
+        fun createCoordinates(
+            document: String,
+            caretIndex: Int,
+        ): Coordinates? {
             if (caretIndex == -1) {
                 return null
             }
@@ -35,7 +40,9 @@ class SchemaDefinitionLocationTest {
 
         // Process document
         val docCaretIndex = documentWithCaret.indexOf(caretMarker)
-        val docCoordinates = createCoordinates(documentWithCaret, docCaretIndex) ?: throw IllegalArgumentException("Document must contain $caretMarker marker")
+        val docCoordinates =
+            createCoordinates(documentWithCaret, docCaretIndex)
+                ?: throw IllegalArgumentException("Document must contain $caretMarker marker")
         val document = documentWithCaret.replace(caretMarker, "")
 
         // Process schema - find all <caret> markers (they come in pairs: open and close)
@@ -63,7 +70,13 @@ class SchemaDefinitionLocationTest {
         val schema = schemaWithCaret.replace(caretMarker, "")
 
         // Get the actual location result
-        val locations = KsonTooling.getSchemaLocationAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), docCoordinates.line, docCoordinates.column)
+        val locations =
+            KsonTooling.getSchemaLocationAtLocation(
+                KsonTooling.parse(document),
+                KsonTooling.parse(schema),
+                docCoordinates.line,
+                docCoordinates.column,
+            )
 
         // Insert <caret> markers into the actual schema to visualize where the returned locations are
         val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
@@ -72,23 +85,26 @@ class SchemaDefinitionLocationTest {
         assertEquals(
             schemaWithCaret,
             actualSchemaWithCarets,
-            "Schema definition locations do not match. Expected vs Actual with <caret> markers:"
+            "Schema definition locations do not match. Expected vs Actual with <caret> markers:",
         )
-
     }
 
     /**
      * Helper function to insert <caret> markers into the schema at the locations returned by the function.
      * This allows for easy visual comparison of expected vs actual locations.
      */
-    private fun buildActualSchemaWithCarets(schema: String, locations: List<Range>): String {
+    private fun buildActualSchemaWithCarets(
+        schema: String,
+        locations: List<Range>,
+    ): String {
         val caretMarker = "<caret>"
 
         // Sort locations by position (descending) so we can insert from end to start without affecting indices
-        val sortedLocations = locations.sortedWith(
-            compareByDescending<Range> { it.startLine }
-                .thenByDescending { it.startColumn }
-        )
+        val sortedLocations =
+            locations.sortedWith(
+                compareByDescending<Range> { it.startLine }
+                    .thenByDescending { it.startColumn },
+            )
 
         val lines = schema.lines().toMutableList()
 
@@ -100,7 +116,8 @@ class SchemaDefinitionLocationTest {
 
             // Insert start marker
             val startLine = lines[location.startLine]
-            lines[location.startLine] = startLine.substring(0, location.startColumn) + caretMarker + startLine.substring(location.startColumn)
+            lines[location.startLine] =
+                startLine.substring(0, location.startColumn) + caretMarker + startLine.substring(location.startColumn)
         }
 
         return lines.joinToString("\n")
@@ -109,7 +126,8 @@ class SchemaDefinitionLocationTest {
     @Test
     fun testGetSchemaLocationAtLocation_simpleStringProperty() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -122,18 +140,20 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 name: <caret>John
                 age: 30
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_numberProperty() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -146,18 +166,20 @@ class SchemaDefinitionLocationTest {
                     }<caret>
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 name: John
                 age: <caret>30
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_nestedObject() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -175,19 +197,21 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 person:
                   name: <caret>Alice
                   age: 25
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_arrayItems() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -200,19 +224,21 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 tags:
                   - <caret>kotlin
                   - multiplatform
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_deeplyNestedArray() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -228,8 +254,9 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 matrix:
                   -
                     - <caret>1
@@ -237,22 +264,24 @@ class SchemaDefinitionLocationTest {
                   -
                     - 3
                     - 4
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_noSchemaForProperty() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {}
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 undefinedProp: <caret>value
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -262,21 +291,24 @@ class SchemaDefinitionLocationTest {
         // navigate broken documents. The cursor is inside the root object,
         // so the schema location for the root object type is returned.
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 <caret>{
                   "type": "object"
                 }<caret>
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 {inva<caret>lid kson
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_refDefinition() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -299,18 +331,20 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 items:
                   - name: <caret>foo
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_additionalProperties() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "additionalProperties": <caret>{
@@ -318,17 +352,19 @@ class SchemaDefinitionLocationTest {
                     "description": "Any additional string field"
                   }<caret>
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 customField: <caret>customValue
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_patternProperties() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "patternProperties": {
@@ -338,11 +374,12 @@ class SchemaDefinitionLocationTest {
                     }<caret>
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 field_1: <caret>value1
                 field_2: value2
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -351,7 +388,8 @@ class SchemaDefinitionLocationTest {
         // When cursor is on the property key, with forDefinition=true,
         // it should point to the property's schema definition (not drop the last element)
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -360,17 +398,19 @@ class SchemaDefinitionLocationTest {
                     }<caret>
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 user<caret>name: johndoe
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testGetSchemaLocationAtLocation_refDefinition_onPropertyKey() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -393,11 +433,12 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 items:
                   - name<caret>: foo
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -406,7 +447,8 @@ class SchemaDefinitionLocationTest {
         // Property defined in multiple anyOf branches should return only the valid location
         // Document has name: value (string), so only the string branch validates
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "anyOf": [
@@ -428,10 +470,11 @@ class SchemaDefinitionLocationTest {
                     }
                   ]
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 name: <caret>value
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -439,7 +482,8 @@ class SchemaDefinitionLocationTest {
     fun testGetSchemaLocationAtLocation_allOf_multipleLocations() {
         // Property defined in multiple allOf branches should return multiple locations
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "allOf": [
@@ -459,10 +503,11 @@ class SchemaDefinitionLocationTest {
                     }
                   ]
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 shared: <caret>test
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -471,7 +516,8 @@ class SchemaDefinitionLocationTest {
         // For anyOf with discriminator, only the valid branch should be shown
         // Document has type: email, so only the email branch validates
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -503,11 +549,12 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 notification:
                   type<caret>: email
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
@@ -517,7 +564,8 @@ class SchemaDefinitionLocationTest {
         // only the valid branch should be shown based on the actual value
         // Document has value: test (a string), so only the string branch validates
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 {
                   "type": "object",
                   "properties": {
@@ -557,18 +605,20 @@ class SchemaDefinitionLocationTest {
                     }
                   }
                 }
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 data:
                   value<caret>: test
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
 
     @Test
     fun testJumpToDefinition_anyOfInArray_Test() {
         assertDefinitionLocation(
-            schemaWithCaret = """
+            schemaWithCaret =
+                """
                 '${'$'}defs':
                   UrlSource:
                     type: object
@@ -585,11 +635,11 @@ class SchemaDefinitionLocationTest {
                     items:
                       anyOf:
                         - '${'$'}ref': '#/${'$'}defs/UrlSource'
-            """.trimIndent(),
-            documentWithCaret = """
+                """.trimIndent(),
+            documentWithCaret =
+                """
                 - ur<caret>l: 'https://example.com/file.exe'
-            """.trimIndent()
+                """.trimIndent(),
         )
     }
-
 }

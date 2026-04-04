@@ -5,7 +5,6 @@ import kotlin.test.Test
 class JsonSchemaTestArray : JsonSchemaTest {
     @Test
     fun testEnforceConstraintsForMultipleTypes() {
-
         assertKsonEnforcesSchema(
             """
                 [1, "string", true]
@@ -13,7 +12,8 @@ class JsonSchemaTestArray : JsonSchemaTest {
             """
                 {"contains": { "type": "boolean" }}
             """,
-            true)
+            true,
+        )
 
         assertKsonEnforcesSchema(
             """
@@ -22,6 +22,7 @@ class JsonSchemaTestArray : JsonSchemaTest {
             """
                 {"contains": { "type": "boolean" }}
             """,
-            false)
+            false,
+        )
     }
 }

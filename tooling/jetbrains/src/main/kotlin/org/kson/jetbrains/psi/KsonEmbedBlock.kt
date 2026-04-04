@@ -7,7 +7,9 @@ import org.kson.parser.TokenType
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
-class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
+class KsonEmbedBlock(
+    node: ASTNode,
+) : KsonPsiElement(node) {
     val embedBlockTag: String
         get() = node.findChildByType(elem(TokenType.EMBED_TAG))?.text ?: ""
 
@@ -16,7 +18,6 @@ class KsonEmbedBlock(node: ASTNode) : KsonPsiElement(node) {
 
     val embedContent: KsonEmbedContent?
         get() = node.findChildByType(elem(TokenType.EMBED_CONTENT))?.psi as? KsonEmbedContent
-
 
     companion object {
         private fun getDelim(host: KsonEmbedBlock): EmbedDelim {

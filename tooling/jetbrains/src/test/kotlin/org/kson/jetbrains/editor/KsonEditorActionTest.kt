@@ -32,14 +32,21 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param getValue a function which returns the current value the config property
      * @param setValue a function which sets the value of the config property
      */
-    sealed class ConfigProperty<T>(private val getValue: () -> T, private val setValue: (T) -> Unit) {
-        class AUTOINSERT_PAIR_QUOTE: ConfigProperty<Boolean>(
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE },
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE = it })
+    sealed class ConfigProperty<T>(
+        private val getValue: () -> T,
+        private val setValue: (T) -> Unit,
+    ) {
+        class AutoInsertPairQuote :
+            ConfigProperty<Boolean>(
+                { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE },
+                { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_QUOTE = it },
+            )
 
-        class AUTOINSERT_PAIR_BRACKET: ConfigProperty<Boolean>(
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET },
-            { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET = it })
+        class AutoInsertPairBracked :
+            ConfigProperty<Boolean>(
+                { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET },
+                { CodeInsightSettings.getInstance().AUTOINSERT_PAIR_BRACKET = it },
+            )
 
         /**
          * Set the [ConfigProperty] to the given [Boolean], returning its previous/original value after the set
@@ -66,7 +73,11 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param valueForTestLambda the value to set for [configProperty] in preparation for executing [testLambda]
      * @param testLambda the test code to execute with [configProperty] set to [valueForTestLambda]
      */
-    fun <T> withConfigSetting(configProperty: ConfigProperty<T>, valueForTestLambda: T, testLambda: () -> Unit) {
+    fun <T> withConfigSetting(
+        configProperty: ConfigProperty<T>,
+        valueForTestLambda: T,
+        testLambda: () -> Unit,
+    ) {
         val originalValue = configProperty.set(valueForTestLambda)
         try {
             testLambda()
@@ -79,10 +90,14 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * Call this method to test behavior when the "Comment with Line Comment" action is executed.
      * See class documentation for more info: [KsonEditorActionTest]
      */
-    fun doLineCommentTest(before: String, expected: String) {
+    fun doLineCommentTest(
+        before: String,
+        expected: String,
+    ) {
         doExecuteActionTest(before, expected) {
             CommentByLineCommentAction().actionPerformedImpl(
-                myFixture.project, myFixture.editor
+                myFixture.project,
+                myFixture.editor,
             )
         }
     }
@@ -97,10 +112,17 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param fileType defaults to [KsonFileType] which is what will mostly be tested, but can be overridden for special
      *                  cases such testing to ensure that a Kson behavior does NOT appear for another filetype
      */
-    fun doCharTest(before: String, charToType: Char, expected: String, fileType: LanguageFileType = KsonFileType) {
+    fun doCharTest(
+        before: String,
+        charToType: Char,
+        expected: String,
+        fileType: LanguageFileType = KsonFileType,
+    ) {
         val typedAction = TypedAction.getInstance()
         doExecuteActionTest(
-            before, expected, fileType
+            before,
+            expected,
+            fileType,
         ) {
             typedAction.actionPerformed(myFixture.editor, charToType, (myFixture.editor as EditorEx).dataContext)
         }
@@ -117,7 +139,12 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
      * @param fileType defaults to [KsonFileType] which is what will mostly be tested, but can be overridden for special
      *                  cases such testing to ensure that a Kson behavior does NOT appear for another filetype
      */
-    fun doIdeActionTest(before: String, ideActionId: String, expected: String, fileType: LanguageFileType = KsonFileType) {
+    fun doIdeActionTest(
+        before: String,
+        ideActionId: String,
+        expected: String,
+        fileType: LanguageFileType = KsonFileType,
+    ) {
         validateTestStrings(before, expected)
         myFixture.configureByText(fileType, before)
         myFixture.performEditorAction(ideActionId)
@@ -125,7 +152,10 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
     }
 
     private fun doExecuteActionTest(
-        before: String, expected: String, fileType: LanguageFileType = KsonFileType, action: Runnable
+        before: String,
+        expected: String,
+        fileType: LanguageFileType = KsonFileType,
+        action: Runnable,
     ) {
         validateTestStrings(before, expected)
         myFixture.configureByText(fileType, before)
@@ -133,15 +163,21 @@ abstract class KsonEditorActionTest : BasePlatformTestCase() {
         myFixture.checkResult(expected)
     }
 
-    private fun performWriteAction(project: Project, action: Runnable) {
+    private fun performWriteAction(
+        project: Project,
+        action: Runnable,
+    ) {
         ApplicationManager.getApplication().runWriteAction {
             CommandProcessor.getInstance().executeCommand(project, action, "Test Command", null)
         }
     }
 
-    private fun validateTestStrings(before: String, expected: String) {
+    private fun validateTestStrings(
+        before: String,
+        expected: String,
+    ) {
         require(
-            !(!before.contains("<caret>") || !expected.contains("<caret>"))
+            !(!before.contains("<caret>") || !expected.contains("<caret>")),
         ) { "Test strings must contain \"<caret>\" to indicate caret position" }
     }
 }

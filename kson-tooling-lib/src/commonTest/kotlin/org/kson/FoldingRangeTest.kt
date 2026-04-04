@@ -3,7 +3,6 @@ package org.kson
 import kotlin.test.*
 
 class FoldingRangeTest {
-
     @Test
     fun testSingleLineDocumentHasNoRanges() {
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse("key: value"))
@@ -12,12 +11,13 @@ class FoldingRangeTest {
 
     @Test
     fun testMultiLineObject() {
-        val content = """
+        val content =
+            """
             {
               name: "Alice"
               age: 30
             }
-        """.trimIndent()
+            """.trimIndent()
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
 
         assertEquals(1, ranges.size)
@@ -28,13 +28,14 @@ class FoldingRangeTest {
 
     @Test
     fun testNestedObjects() {
-        val content = """
+        val content =
+            """
             {
               person: {
                 name: "Alice"
               }
             }
-        """.trimIndent()
+            """.trimIndent()
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
 
         assertEquals(2, ranges.size)
@@ -52,13 +53,14 @@ class FoldingRangeTest {
 
     @Test
     fun testMultiLineArray() {
-        val content = """
+        val content =
+            """
             [
               1
               2
               3
             ]
-        """.trimIndent()
+            """.trimIndent()
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
 
         assertEquals(1, ranges.size)
@@ -69,12 +71,13 @@ class FoldingRangeTest {
 
     @Test
     fun testEmbedBlock() {
-        val content = """
+        val content =
+            """
             query: ${'$'}sql
               SELECT *
               FROM users
               ${'$'}${'$'}
-        """.trimIndent()
+            """.trimIndent()
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
 
         assertEquals(1, ranges.size)
@@ -97,7 +100,8 @@ class FoldingRangeTest {
 
     @Test
     fun testMixedFoldableRegions() {
-        val content = """
+        val content =
+            """
             {
               items: [
                 "one"
@@ -107,7 +111,7 @@ class FoldingRangeTest {
                 console.log("hi")
                 ${'$'}${'$'}
             }
-        """.trimIndent()
+            """.trimIndent()
         val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
 
         assertEquals(3, ranges.size)

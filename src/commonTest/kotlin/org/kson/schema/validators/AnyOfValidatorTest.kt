@@ -10,30 +10,30 @@ class AnyOfValidatorTest : JsonSchemaTest {
     fun testAnyOfCommonValidationErrors() {
         assertKsonSchemaErrors(
             """
-                description: 99
-                thing: false
+            description: 99
+            thing: false
             """.trimIndent(),
             """
-                anyOf:
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      thing:
-                        type: number
+            anyOf:
+              - properties:
+                  description:
+                    type: string
+                    .
+                  thing:
+                    type: number
 
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      .
-                    required:
-                      - required_prop
+              - properties:
+                  description:
+                    type: string
+                    .
+                  .
+                required:
+                  - required_prop
             """.trimIndent(),
             listOf(
                 // note that since `description` is wrong for ALL the sub-schemas, we get a precise error for it.
-                SCHEMA_VALUE_TYPE_MISMATCH
-            )
+                SCHEMA_VALUE_TYPE_MISMATCH,
+            ),
         )
     }
 
@@ -41,41 +41,43 @@ class AnyOfValidatorTest : JsonSchemaTest {
     fun testAnyOfDiverseValidationErrors() {
         assertKsonSchemaErrors(
             """
-                description: "describer"
-                think: false
+            description: "describer"
+            think: false
             """.trimIndent(),
             """
-                anyOf:
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      think:
-                        type: number
+            anyOf:
+              - properties:
+                  description:
+                    type: string
+                    .
+                  think:
+                    type: number
 
-                  - properties:
-                      description:
-                        type: string
-                        .
-                      .
-                    required:
-                      - required_prop
+              - properties:
+                  description:
+                    type: string
+                    .
+                  .
+                required:
+                  - required_prop
             """.trimIndent(),
             listOf(
                 SCHEMA_ANY_OF_VALIDATION_FAILED,
                 // sub-schema errors are rolled up into this error
-                SCHEMA_SUB_SCHEMA_ERRORS)
+                SCHEMA_SUB_SCHEMA_ERRORS,
+            ),
         )
     }
 
     @Test
     fun testSubSchemaErrorsIncludeLocationAndTitle() {
-        val errors = assertKsonSchemaErrors(
-            """
+        val errors =
+            assertKsonSchemaErrors(
+                """
                 name: test
                 value: hello
-            """.trimIndent(),
-            """
+                """.trimIndent(),
+                """
                 anyOf:
                   - title: NumberModel
                     properties:
@@ -98,12 +100,12 @@ class AnyOfValidatorTest : JsonSchemaTest {
                         .
                       .
                     additionalProperties: false
-            """.trimIndent(),
-            listOf(
-                SCHEMA_ANY_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                """.trimIndent(),
+                listOf(
+                    SCHEMA_ANY_OF_VALIDATION_FAILED,
+                    SCHEMA_SUB_SCHEMA_ERRORS,
+                ),
             )
-        )
 
         val subSchemaMessage = errors[1].message.toString()
         assertContains(subSchemaMessage, "'NumberModel': ['Property 'value': Expected one of: number, but got: string' at 2.8]")

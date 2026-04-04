@@ -1,11 +1,11 @@
 package org.kson.jetbrains.parser
 
 import com.intellij.psi.tree.IElementType
-import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.jetbrains.KsonLanguage
 import org.kson.parser.ElementType
-import org.kson.parser.TokenType
 import org.kson.parser.ParsedElementType
+import org.kson.parser.TokenType
+import org.kson.stdlibx.collections.toImmutableMap
 
 /**
  * Get the [IElementType] instance corresponding to the given [ElementType].
@@ -42,10 +42,11 @@ interface KsonLexedElementType {
  * Our static collection of [IElementTokenType] used in parsing.  See the doc on [elem] for notes on why this
  * must be private and these must ONLY be created here
  */
-private val LEXED_ELEMENT: Map<TokenType, IElementType> = TokenType.entries
-    .associateWith {
-        IElementTokenType(it)
-    }.toImmutableMap()
+private val LEXED_ELEMENT: Map<TokenType, IElementType> =
+    TokenType.entries
+        .associateWith {
+            IElementTokenType(it)
+        }.toImmutableMap()
 
 /**
  * Our static collection of [IElementParserElementType] used in parsing.  See the doc on [elem] for notes on why this
@@ -57,14 +58,16 @@ private val PARSED_ELEMENT: Map<ParsedElementType, IElementType> =
 /**
  * A class adapting [TokenType] to [IElementType] for our plugin
  */
-private data class IElementTokenType(override val tokenType: TokenType) :
+private data class IElementTokenType(
+    override val tokenType: TokenType,
+) : IElementType("[Kson-lexed] " + tokenType.name, KsonLanguage),
     ElementType by tokenType,
-    KsonLexedElementType,
-    IElementType("[Kson-lexed] " + tokenType.name, KsonLanguage)
+    KsonLexedElementType
 
 /**
  * A class adapting [ParsedElementType] to [IElementType] for our plugin
  */
-private class IElementParserElementType(parsedElementType: ParsedElementType) :
-    ElementType by parsedElementType,
-    IElementType("[Kson-parsed] " + parsedElementType.name, KsonLanguage)
+private class IElementParserElementType(
+    parsedElementType: ParsedElementType,
+) : IElementType("[Kson-parsed] " + parsedElementType.name, KsonLanguage),
+    ElementType by parsedElementType
