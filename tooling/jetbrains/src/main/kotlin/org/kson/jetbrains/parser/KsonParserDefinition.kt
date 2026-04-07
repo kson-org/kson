@@ -25,8 +25,10 @@ class KsonParserDefinition : ParserDefinition {
         return KsonParser()
     }
 
-    override fun getFileNodeType(): IFileElementType {
-        return IFileElementType(KsonLanguage)
+    override fun getFileNodeType(): IFileElementType = FILE_NODE_TYPE
+
+    companion object {
+        private val FILE_NODE_TYPE = IFileElementType(KsonLanguage)
     }
 
     override fun getCommentTokens(): TokenSet {
