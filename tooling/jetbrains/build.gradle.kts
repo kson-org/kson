@@ -26,7 +26,15 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 
     intellijPlatform {
-        intellijIdeaCommunity(properties("platformVersion"))
+        // IC was merged into a single "IntelliJ IDEA" artifact starting with 2025.3
+        val version = properties("platformVersion")
+        val major = version.substringBefore(".").toInt()
+        val minor = version.substringAfter(".").substringBefore(".").toInt()
+        if (major > 2025 || (major == 2025 && minor >= 3)) {
+            intellijIdea(version)
+        } else {
+            intellijIdeaCommunity(version)
+        }
         bundledPlugin("org.intellij.intelliLang")
 
         pluginVerifier()
