@@ -20,7 +20,7 @@ export default defineConfig({
                 inlineDynamicImports: false,
             }
         },
-        minify: 'esbuild',
+        minify: 'oxc',
         sourcemap: true,
     },
     server: {
