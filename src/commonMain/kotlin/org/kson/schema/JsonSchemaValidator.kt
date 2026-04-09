@@ -7,10 +7,6 @@ import org.kson.value.*
 
 // schema todo capture file/location info from schema to link back to schema def?
 interface JsonSchemaValidator: Validator {
-    /**
-     * Validates that the given [ksonValue] satisfies this [JsonNumberValidator].  Logs any validation errors to the
-     * given [messageSink]
-     */
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
@@ -55,12 +51,14 @@ abstract class JsonObjectValidator : JsonSchemaValidator {
 }
 
 abstract class JsonStringValidator : JsonSchemaValidator {
-    override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
-        if (ksonValue !is KsonString) {
-            return
+    final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
+        val stringValue = when (ksonValue) {
+            is KsonString -> ksonValue
+            is EmbedBlock -> ksonValue.embedContent
+            else -> return
         }
 
-        validateString(ksonValue, messageSink)
+        validateString(stringValue, messageSink)
     }
 
     abstract fun validateString(node: KsonString, messageSink: MessageSink)
