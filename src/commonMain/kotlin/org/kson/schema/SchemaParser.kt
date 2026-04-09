@@ -38,11 +38,12 @@ object SchemaParser {
         schemaValue: KsonValue,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         return when (schemaValue) {
             is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup)
+            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, idLookup, propertyName = propertyName)
             else -> {
                 messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
                 null
@@ -54,7 +55,8 @@ object SchemaParser {
         schemaObject: KsonObject,
         messageSink: MessageSink,
         currentBaseUri: String,
-        idLookup: SchemaIdLookup
+        idLookup: SchemaIdLookup,
+        propertyName: String? = null
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
 
@@ -127,7 +129,7 @@ object SchemaParser {
 
         val typeValidator = schemaProperties["type"]?.let { typeValue ->
             when (typeValue) {
-                is KsonString -> TypeValidator(typeValue.value)
+                is KsonString -> TypeValidator(typeValue.value, propertyName)
                 is KsonList -> {
                     val typeArrayEntries = ArrayList<String>()
                     for (element in typeValue.elements) {
@@ -137,7 +139,7 @@ object SchemaParser {
                             messageSink.error(element.location, SCHEMA_TYPE_ARRAY_ENTRY_ERROR.create())
                         }
                     }
-                    TypeValidator(typeArrayEntries)
+                    TypeValidator(typeArrayEntries, propertyName)
                 }
 
                 else -> {
@@ -210,7 +212,9 @@ object SchemaParser {
 
         schemaProperties["pattern"]?.let { pattern ->
             if (pattern is KsonString) {
-                validators.add(PatternValidator(pattern.value))
+                runCatching { Regex(pattern.value) }
+                    .onSuccess { validators.add(PatternValidator(it)) }
+                    .onFailure { messageSink.error(pattern.location, SCHEMA_INVALID_REGEX.create("pattern", pattern.value)) }
             } else {
                 messageSink.error(pattern.location, SCHEMA_STRING_REQUIRED.create("pattern"))
             }
@@ -225,25 +229,15 @@ object SchemaParser {
         }
 
         schemaProperties["items"]?.let { itemsValue ->
-            val additionalItemsValidator = schemaProperties["additionalItems"]?.let { additionalItems ->
-                when (additionalItems) {
-                    is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value)
-                    else -> AdditionalItemsSchemaValidator(
-                        parseSchemaElement(
-                            additionalItems,
-                            messageSink,
-                            updatedBaseUri,
-                            idLookup
-                        )
-                    )
-                }
-            }
-
             when (itemsValue) {
                 is KsonList -> {
-                    val leadingItemsValidator = LeadingItemsTupleValidator(itemsValue.elements.mapNotNull {
+                    val tupleSchemas = itemsValue.elements.mapNotNull {
                         parseSchemaElement(it, messageSink, updatedBaseUri, idLookup)
-                    })
+                    }
+                    val leadingItemsValidator = LeadingItemsTupleValidator(tupleSchemas)
+                    val additionalItemsValidator = parseAdditionalItemsValidator(
+                        schemaProperties, tupleSchemas.size, messageSink, updatedBaseUri, idLookup
+                    )
                     validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                 }
 
@@ -251,6 +245,9 @@ object SchemaParser {
                     val itemsSchema = parseSchemaElement(itemsValue, messageSink, updatedBaseUri, idLookup)
                     if (itemsSchema != null) {
                         val leadingItemsValidator = LeadingItemsSchemaValidator(itemsSchema)
+                        val additionalItemsValidator = parseAdditionalItemsValidator(
+                            schemaProperties, 0, messageSink, updatedBaseUri, idLookup
+                        )
                         validators.add(ItemsValidator(leadingItemsValidator, additionalItemsValidator))
                     } else {
                         // no-op todo this shouldn't be necessary - bug in Intellij inspections?
@@ -296,7 +293,7 @@ object SchemaParser {
         val propertySchemas = schemaProperties["properties"]?.let { properties ->
             if (properties is KsonObject) {
                 properties.propertyMap.entries.associate { (_, value) ->
-                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
+                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup, value.propName.value)
                 }
             } else {
                 messageSink.error(properties.location, SCHEMA_OBJECT_REQUIRED.create("properties"))
@@ -304,11 +301,18 @@ object SchemaParser {
             }
         }
 
-        val patternPropertySchemas = schemaProperties["patternProperties"]?.let { patternProperties ->
+        val compiledPatterns = schemaProperties["patternProperties"]?.let { patternProperties ->
             if (patternProperties is KsonObject) {
-                patternProperties.propertyMap.entries.associate { (_, value) ->
-                    value.propName to parseSchemaElement(value.propValue, messageSink, updatedBaseUri, idLookup)
+                val validEntries = mutableListOf<CompiledPatternSchema>()
+                for ((_, prop) in patternProperties.propertyMap.entries) {
+                    runCatching { Regex(prop.propName.value) }
+                        .onSuccess { regex ->
+                            val schema = parseSchemaElement(prop.propValue, messageSink, updatedBaseUri, idLookup)
+                            validEntries.add(CompiledPatternSchema(regex, schema))
+                        }
+                        .onFailure { messageSink.error(prop.propName.location, SCHEMA_INVALID_REGEX.create("patternProperties", prop.propName.value)) }
                 }
+                validEntries
             } else {
                 messageSink.error(patternProperties.location, SCHEMA_OBJECT_REQUIRED.create("patternProperties"))
                 null
@@ -317,20 +321,14 @@ object SchemaParser {
 
         val additionalPropertiesValidator = schemaProperties["additionalProperties"]?.let { additionalProperties ->
             when (additionalProperties) {
-                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value)
-                else -> AdditionalPropertiesSchemaValidator(
-                    parseSchemaElement(
-                        additionalProperties,
-                        messageSink,
-                        updatedBaseUri,
-                        idLookup
-                    )
-                )
+                is KsonBoolean -> AdditionalPropertiesBooleanValidator(additionalProperties.value, title)
+                else -> parseSchemaElement(additionalProperties, messageSink, updatedBaseUri, idLookup)
+                    ?.let { AdditionalPropertiesSchemaValidator(it) }
             }
         }
 
-        if (propertySchemas != null || patternPropertySchemas != null || additionalPropertiesValidator != null) {
-            validators.add(PropertiesValidator(propertySchemas, patternPropertySchemas, additionalPropertiesValidator))
+        if (propertySchemas != null || compiledPatterns != null || additionalPropertiesValidator != null) {
+            validators.add(PropertiesValidator(propertySchemas, compiledPatterns, additionalPropertiesValidator))
         }
 
         schemaProperties["required"]?.let { required ->
@@ -416,11 +414,14 @@ object SchemaParser {
         }
 
         schemaProperties["not"]?.let { not ->
-            validators.add(NotValidator(parseSchemaElement(not, messageSink, updatedBaseUri, idLookup)))
+            parseSchemaElement(not, messageSink, updatedBaseUri, idLookup)?.let { notSchema ->
+                validators.add(NotValidator(notSchema))
+            }
         }
 
         schemaProperties["if"]?.let { ifElement ->
             val ifSchema = parseSchemaElement(ifElement, messageSink, updatedBaseUri, idLookup)
+                ?: return@let // Can't evaluate if/then/else without a valid "if" schema
             val thenSchema =
                 schemaProperties["then"]?.let { parseSchemaElement(it, messageSink, updatedBaseUri, idLookup) }
             val elseSchema =
@@ -434,45 +435,56 @@ object SchemaParser {
                 return@let
             }
 
-            val dependencyMap = dependencies.propertyLookup.mapValues { (_, value) ->
-                if (value is KsonList) {
-                    val dependencyArrayEntries = mutableSetOf<KsonString>()
-                    for (element in value.elements) {
-                        if (element is KsonString) {
-                            dependencyArrayEntries.add(element)
-                        } else {
-                            messageSink.error(element.location, SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED.create())
+            val dependencyMap = buildMap<String, DependencyValidator> {
+                dependencies.propertyLookup.forEach { (key, value) ->
+                    if (value is KsonList) {
+                        val dependencyArrayEntries = mutableSetOf<KsonString>()
+                        for (element in value.elements) {
+                            if (element is KsonString) {
+                                dependencyArrayEntries.add(element)
+                            } else {
+                                messageSink.error(element.location, SCHEMA_DEPENDENCIES_ARRAY_STRING_REQUIRED.create())
+                            }
+                        }
+                        put(key, DependencyValidatorArray(dependencyArrayEntries))
+                    } else {
+                        val depSchema = parseSchemaElement(value, messageSink, updatedBaseUri, idLookup)
+                        if (depSchema != null) {
+                            put(key, DependencyValidatorSchema(depSchema))
                         }
                     }
-                    return@mapValues DependencyValidatorArray(dependencyArrayEntries)
-                } else {
-                    return@mapValues DependencyValidatorSchema(
-                        parseSchemaElement(
-                            value,
-                            messageSink,
-                            updatedBaseUri,
-                            idLookup
-                        )
-                    )
                 }
             }
             validators.add(DependenciesValidator(dependencyMap))
         }
 
         schemaProperties["propertyNames"]?.let { propertyNames ->
-            validators.add(
-                PropertyNamesValidator(
-                    parseSchemaElement(
-                        propertyNames,
-                        messageSink,
-                        updatedBaseUri,
-                        idLookup
-                    )
-                )
-            )
+            parseSchemaElement(propertyNames, messageSink, updatedBaseUri, idLookup)?.let { propertyNamesSchema ->
+                validators.add(PropertyNamesValidator(propertyNamesSchema))
+            }
         }
 
         return JsonObjectSchema(title, description, comment, default, definitions, typeValidator, validators)
+    }
+
+    private fun parseAdditionalItemsValidator(
+        schemaProperties: Map<String, KsonValue>,
+        tupleLength: Int,
+        messageSink: MessageSink,
+        currentBaseUri: String,
+        idLookup: SchemaIdLookup
+    ): AdditionalItemsValidator? {
+        return schemaProperties["additionalItems"]?.let { additionalItems ->
+            when (additionalItems) {
+                is KsonBoolean -> AdditionalItemsBooleanValidator(additionalItems.value, tupleLength)
+                else -> parseSchemaElement(
+                    additionalItems,
+                    messageSink,
+                    currentBaseUri,
+                    idLookup
+                )?.let { AdditionalItemsSchemaValidator(it) }
+            }
+        }
     }
 }
 

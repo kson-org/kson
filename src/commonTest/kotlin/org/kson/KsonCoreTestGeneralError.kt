@@ -37,6 +37,9 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
     @Test
     fun testIllegalCharacterError() {
         assertParserRejectsSource("key: \\value", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("{key: \\value}", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("[\\value]", listOf(ILLEGAL_CHARACTERS))
+        assertParserRejectsSource("- \\value", listOf(ILLEGAL_CHARACTERS))
     }
 
     @Test

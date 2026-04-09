@@ -73,8 +73,7 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -143,8 +142,7 @@ class SchemaDraft7SuiteTest_minItems : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {

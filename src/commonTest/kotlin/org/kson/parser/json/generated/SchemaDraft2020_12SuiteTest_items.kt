@@ -163,8 +163,7 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -214,8 +213,7 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -572,8 +570,7 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
             """
                 [
                     [
-                        {
-                        },
+                        {},
                         {
                             "foo": null
                         }
@@ -907,19 +904,15 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "items": false
                 }
@@ -953,12 +946,9 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "items": false
                 }
@@ -993,12 +983,9 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "items": false
                 }
@@ -1034,12 +1021,9 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "items": false
                 }
@@ -1070,12 +1054,9 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        },
-                        {
-                        },
-                        {
-                        }
+                        {},
+                        {},
+                        {}
                     ],
                     "items": false
                 }
@@ -1252,8 +1233,7 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        }
+                        {}
                     ],
                     "items": false
                 }
@@ -1287,8 +1267,7 @@ class SchemaDraft2020_12SuiteTest_items : JsonSchemaTest {
                 {
                     "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
                     "prefixItems": [
-                        {
-                        }
+                        {}
                     ],
                     "items": false
                 }

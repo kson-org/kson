@@ -137,8 +137,7 @@ class SchemaDraft7SuiteTest_contains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -162,8 +161,7 @@ class SchemaDraft7SuiteTest_contains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -297,8 +295,7 @@ class SchemaDraft7SuiteTest_contains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -344,8 +341,7 @@ class SchemaDraft7SuiteTest_contains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -538,8 +534,7 @@ class SchemaDraft7SuiteTest_contains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {

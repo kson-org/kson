@@ -8,8 +8,8 @@ import org.kson.value.*
 /**
  * Json Schema `type:` validator
  */
-class TypeValidator(private val allowedTypes: List<String>) {
-  constructor(type: String) : this(listOf(type))
+class TypeValidator(private val allowedTypes: List<String>, private val propertyName: String? = null) {
+  constructor(type: String, propertyName: String? = null) : this(listOf(type), propertyName)
 
   /**
    * Validates whether the given [ksonValue] is valid according to this [TypeValidator].
@@ -33,13 +33,13 @@ class TypeValidator(private val allowedTypes: List<String>) {
       is KsonObject -> "object"
       is EmbedBlock -> "string"
     }
-    
+
     if (!allowedTypes.contains(nodeType)
       // if our node is an integer, this type is valid if the more-general "number" is an allowedType
       && !(nodeType == "integer" && allowedTypes.contains("number"))
       // embed blocks are strings, but also validate as objects so schemas can constrain their tag/content
       && !(ksonValue is EmbedBlock && allowedTypes.contains("object"))) {
-      messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(allowedTypes.joinToString(), nodeType))
+      messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(propertyName ?: "", allowedTypes.joinToString(), nodeType))
       return false
     }
 

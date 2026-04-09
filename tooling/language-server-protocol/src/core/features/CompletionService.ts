@@ -31,12 +31,12 @@ export class CompletionService {
             position.character
         );
 
-        if (!ksonCompletions || ksonCompletions.length === 0) {
+        // Convert Kotlin completion items to LSP CompletionItem format
+        const items = ksonCompletions?.asJsReadonlyArrayView()?.map(this.toLspCompletionItem);
+
+        if (!items || items.length === 0) {
             return null;
         }
-
-        // Convert Kotlin completion items to LSP CompletionItem format
-        const items = ksonCompletions.asJsReadonlyArrayView().map(this.toLspCompletionItem);
 
         return {
             isIncomplete: false,

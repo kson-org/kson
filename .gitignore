@@ -32,6 +32,8 @@ dist
 gradle/jdk
 # intellij settings
 .idea
+# IntelliJ Platform Gradle Plugin v2 cache
+.intellijPlatform
 # kotlin metadata
 .kotlin
 # node generated files

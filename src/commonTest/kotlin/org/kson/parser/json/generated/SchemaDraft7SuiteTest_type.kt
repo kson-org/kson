@@ -134,8 +134,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -157,8 +156,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -334,8 +332,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -357,8 +354,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -534,8 +530,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -557,8 +552,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -690,8 +684,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -713,8 +706,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -846,8 +838,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -869,8 +860,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1046,8 +1036,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1069,8 +1058,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1268,8 +1256,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1291,8 +1278,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -1455,8 +1441,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                {
-                }
+                {}
             """,
             """
                 {
@@ -1481,8 +1466,7 @@ class SchemaDraft7SuiteTest_type : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {

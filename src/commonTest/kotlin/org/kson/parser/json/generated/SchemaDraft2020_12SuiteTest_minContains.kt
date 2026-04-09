@@ -49,8 +49,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -73,8 +72,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -214,8 +212,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -462,8 +459,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -592,8 +588,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -734,8 +729,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
@@ -801,8 +795,7 @@ class SchemaDraft2020_12SuiteTest_minContains : JsonSchemaTest {
         
         assertKsonEnforcesSchema(
             """
-                [
-                ]
+                []
             """,
             """
                 {
