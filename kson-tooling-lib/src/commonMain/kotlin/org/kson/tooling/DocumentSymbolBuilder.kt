@@ -1,6 +1,13 @@
-package org.kson
+package org.kson.tooling
 
-import org.kson.value.*
+import org.kson.value.EmbedBlock
+import org.kson.value.KsonBoolean
+import org.kson.value.KsonList
+import org.kson.value.KsonNull
+import org.kson.value.KsonNumber
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
+import org.kson.value.KsonValue
 
 /**
  * Builds [DocumentSymbol] trees from [KsonValue] AST nodes.
@@ -16,11 +23,11 @@ internal object DocumentSymbolBuilder {
         return when (value) {
             is KsonObject -> createObjectSymbol(value, name, range)
             is KsonList -> createArraySymbol(value, name, range)
-            is EmbedBlock -> createEmbedSymbol(value, name, range)
             is KsonString -> createPrimitiveSymbol(name, range, DocumentSymbolKind.STRING, value.value)
             is KsonNumber -> createPrimitiveSymbol(name, range, DocumentSymbolKind.NUMBER, value.value.asString)
             is KsonBoolean -> createPrimitiveSymbol(name, range, DocumentSymbolKind.BOOLEAN, value.value.toString())
             is KsonNull -> createPrimitiveSymbol(name, range, DocumentSymbolKind.NULL, "null")
+            is EmbedBlock -> createEmbedSymbol(value, name, range)
         }
     }
 

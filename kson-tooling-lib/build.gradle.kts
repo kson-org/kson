@@ -22,12 +22,16 @@ kotlin {
         binaries.library()
         useEsModules()
         generateTypeScriptDefinitions()
+        compilerOptions {
+            freeCompilerArgs.add("-Xes-long-as-bigint")
+        }
     }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(project(":"))
+                implementation(project(":kson-lib"))
             }
         }
         val commonTest by getting {

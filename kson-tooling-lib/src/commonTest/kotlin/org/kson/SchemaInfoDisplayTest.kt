@@ -1,6 +1,7 @@
 package org.kson
 
-import org.kson.navigation.extractSchemaInfo
+import org.kson.tooling.KsonTooling
+import org.kson.tooling.navigation.extractSchemaInfo
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull

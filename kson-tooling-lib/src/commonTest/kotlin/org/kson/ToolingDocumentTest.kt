@@ -1,5 +1,7 @@
 package org.kson
 
+import org.kson.tooling.DocumentSymbolKind
+import org.kson.tooling.KsonTooling
 import kotlin.test.*
 
 class ToolingDocumentTest {
@@ -48,7 +50,7 @@ class ToolingDocumentTest {
 
     @Test
     fun testSchemaIdExtraction() {
-        val doc = KsonTooling.parse("""{ "${'$'}schema": "http://json-schema.org/draft-07/schema#", "type": "object" }""")
+        val doc = KsonTooling.parse($$"""{ "$schema": "http://json-schema.org/draft-07/schema#", "type": "object" }""")
         assertEquals("http://json-schema.org/draft-07/schema#", doc.schemaId)
     }
 
@@ -66,13 +68,13 @@ class ToolingDocumentTest {
 
     @Test
     fun testSchemaIdExtractionFromKsonSyntax() {
-        val doc = KsonTooling.parse(""""${'$'}schema": "http://json-schema.org/draft-07/schema#"""")
+        val doc = KsonTooling.parse($$""""$schema": "http://json-schema.org/draft-07/schema#"""")
         assertEquals("http://json-schema.org/draft-07/schema#", doc.schemaId)
     }
 
     @Test
     fun testSchemaIdNullWhenNotString() {
-        val doc = KsonTooling.parse("""{ "${'$'}schema": 42 }""")
+        val doc = KsonTooling.parse($$"""{ "$schema": 42 }""")
         assertNull(doc.schemaId)
     }
 

@@ -2,11 +2,12 @@ package org.kson
 
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.SchemaFilteringService
 import org.kson.value.KsonValue
 import kotlin.test.*
 
 /**
- * Unit tests for [SchemaFilteringService]
+ * Unit tests for [org.kson.tooling.SchemaFilteringService]
  *
  * These tests focus on the schema filtering logic in isolation,
  * without going through the full public API.

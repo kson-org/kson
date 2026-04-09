@@ -1,9 +1,10 @@
 package org.kson
 
+import org.kson.tooling.KsonTooling
 import kotlin.test.*
 
 /**
- * Tests for [KsonTooling] hover information functionality
+ * Tests for [org.kson.tooling.KsonTooling] hover information functionality
  */
 class SchemaInfoLocationTest {
 

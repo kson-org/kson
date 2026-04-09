@@ -1,5 +1,7 @@
 package org.kson
 
+import org.kson.tooling.KsonTooling
+import org.kson.tooling.Range
 import kotlin.test.*
 
 class SiblingKeyTest {

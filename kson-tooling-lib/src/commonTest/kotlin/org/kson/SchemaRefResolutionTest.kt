@@ -1,10 +1,11 @@
 package org.kson
 
 import org.kson.parser.Coordinates
+import org.kson.tooling.KsonTooling
 import kotlin.test.*
 
 /**
- * Tests for [KsonTooling.resolveRefAtLocation] - jump to definition within schema documents
+ * Tests for [org.kson.tooling.KsonTooling.resolveRefAtLocation] - jump to definition within schema documents
  */
 class SchemaRefResolutionTest {
 

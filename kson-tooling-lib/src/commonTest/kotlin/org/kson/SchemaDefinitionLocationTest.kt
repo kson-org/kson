@@ -1,10 +1,12 @@
 package org.kson
 
 import org.kson.parser.Coordinates
+import org.kson.tooling.KsonTooling
+import org.kson.tooling.Range
 import kotlin.test.*
 
 /**
- * Tests for [KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
+ * Tests for [org.kson.tooling.KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
  */
 class SchemaDefinitionLocationTest {
 

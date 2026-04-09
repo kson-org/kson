@@ -1,5 +1,8 @@
 package org.kson
 
+import org.kson.tooling.CompletionItem
+import org.kson.tooling.CompletionKind
+import org.kson.tooling.KsonTooling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -10,7 +13,7 @@ class SchemaCompletionLocationTest {
     /**
      * Helper to get completions at the <caret> position in the document
      */
-    private fun getCompletionsAtCaret(schema: String, documentWithCaret: String): List<CompletionItem>? {
+    private fun getCompletionsAtCaret(schema: String, documentWithCaret: String): List<CompletionItem> {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }

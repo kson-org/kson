@@ -1,12 +1,15 @@
 @file:OptIn(ExperimentalJsExport::class)
 
-package org.kson
+package org.kson.tooling
 
+import org.kson.CoreCompileConfig
+import org.kson.KsonCore
 import org.kson.ast.AstNode
 import org.kson.ast.KsonRoot
 import org.kson.ast.KsonRootImpl
 import org.kson.parser.Lexer
 import org.kson.parser.Token
+import org.kson.validation.SourceContext
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
@@ -28,8 +31,10 @@ import kotlin.js.JsExport
  * Created via [KsonTooling.parse].
  */
 @JsExport
-class ToolingDocument internal constructor(val content: String) {
-    private val parseResult = KsonCore.parseToAst(content, CoreCompileConfig(ignoreErrors = true))
+class ToolingDocument internal constructor(val content: String, internal val sourceContext: SourceContext = SourceContext()) {
+    private val parseResult = KsonCore.parseToAst(content,
+        CoreCompileConfig(ignoreErrors = true, sourceContext = sourceContext)
+    )
 
     /**
      * The parsed [KsonValue] from error-tolerant parsing, or null if the
@@ -61,7 +66,7 @@ class ToolingDocument internal constructor(val content: String) {
      */
     val schemaId: String? by lazy {
         val obj = ksonValue as? KsonObject ?: return@lazy null
-        val schemaValue = obj.propertyMap["\$schema"]?.propValue as? KsonString ?: return@lazy null
+        val schemaValue = obj.propertyMap[$$"$schema"]?.propValue as? KsonString ?: return@lazy null
         schemaValue.value
     }
 

@@ -1,4 +1,4 @@
-package org.kson
+package org.kson.tooling
 
 import org.kson.parser.Token
 import org.kson.parser.TokenType
@@ -25,7 +25,13 @@ internal object FoldingRangeBuilder {
                 TokenType.CURLY_BRACE_R -> {
                     val open = popMatching(stack, OpenTokenType.BRACE)
                     if (open != null && token.lexeme.location.start.line > open.startLine) {
-                        ranges.add(StructuralRange(open.startLine, token.lexeme.location.start.line, StructuralRangeKind.OBJECT))
+                        ranges.add(
+                            StructuralRange(
+                                open.startLine,
+                                token.lexeme.location.start.line,
+                                StructuralRangeKind.OBJECT
+                            )
+                        )
                     }
                 }
 
@@ -35,7 +41,13 @@ internal object FoldingRangeBuilder {
                 TokenType.SQUARE_BRACKET_R -> {
                     val open = popMatching(stack, OpenTokenType.BRACKET)
                     if (open != null && token.lexeme.location.start.line > open.startLine) {
-                        ranges.add(StructuralRange(open.startLine, token.lexeme.location.start.line, StructuralRangeKind.ARRAY))
+                        ranges.add(
+                            StructuralRange(
+                                open.startLine,
+                                token.lexeme.location.start.line,
+                                StructuralRangeKind.ARRAY
+                            )
+                        )
                     }
                 }
 
@@ -45,7 +57,13 @@ internal object FoldingRangeBuilder {
                 TokenType.EMBED_CLOSE_DELIM -> {
                     val open = popMatching(stack, OpenTokenType.EMBED)
                     if (open != null && token.lexeme.location.start.line > open.startLine) {
-                        ranges.add(StructuralRange(open.startLine, token.lexeme.location.start.line, StructuralRangeKind.EMBED))
+                        ranges.add(
+                            StructuralRange(
+                                open.startLine,
+                                token.lexeme.location.start.line,
+                                StructuralRangeKind.EMBED
+                            )
+                        )
                     }
                 }
 

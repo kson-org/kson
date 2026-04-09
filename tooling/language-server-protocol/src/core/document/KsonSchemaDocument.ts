@@ -33,7 +33,7 @@ export class KsonSchemaDocument extends KsonDocument {
     getMetaSchemaToolingDocument(): ToolingDocument | undefined {
         if (!this.metaSchemaDocument) return undefined;
         if (!this._metaSchemaToolingDocument) {
-            this._metaSchemaToolingDocument = KsonTooling.getInstance().parse(this.metaSchemaDocument.getText());
+            this._metaSchemaToolingDocument = KsonTooling.getInstance().parse(this.metaSchemaDocument.getText(), this.metaSchemaDocument.uri);
         }
         return this._metaSchemaToolingDocument;
     }

@@ -1,4 +1,4 @@
-package org.kson
+package org.kson.tooling
 
 import org.kson.ast.*
 import org.kson.parser.Token

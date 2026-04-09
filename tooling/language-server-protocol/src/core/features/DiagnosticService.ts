@@ -23,13 +23,13 @@ export class DiagnosticService {
     }
 
     private getDiagnostics(document: KsonDocument): Diagnostic[] {
-        const schema = isKsonSchemaDocument(document)
-            ? document.getMetaSchemaDocument()
-            : document.getSchemaDocument();
-        const schemaContent = schema?.getText();
+        const toolingDoc = document.getToolingDocument();
+        const schemaToolingDoc = isKsonSchemaDocument(document)
+            ? document.getMetaSchemaToolingDocument()
+            : document.getSchemaToolingDocument();
 
         const messages = KsonTooling.getInstance()
-            .validateDocument(document.getText(), schemaContent ?? null)
+            .validateDocument(toolingDoc, schemaToolingDoc ?? null)
             .asJsReadonlyArrayView();
 
         return messages.map(msg => toDiagnostic(msg));
