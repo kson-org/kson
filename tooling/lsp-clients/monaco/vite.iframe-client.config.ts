@@ -19,7 +19,7 @@ export default defineConfig({
             fileName: () => 'kson-editor.js',
             formats: ['iife'],
         },
-        minify: 'esbuild',
+        minify: 'oxc',
         sourcemap: false,
     },
 });

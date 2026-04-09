@@ -16,7 +16,7 @@ export default defineConfig({
         rollupOptions: {
             input: resolve(__dirname, 'kson-editor.html'),
         },
-        minify: 'esbuild',
+        minify: 'oxc',
         sourcemap: false,
     },
 });
