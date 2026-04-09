@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalJsExport::class)
 
-package tooling
+package org.kson.tooling
 
 import org.kson.CoreCompileConfig
 import org.kson.KsonCore
@@ -19,7 +19,7 @@ import kotlin.js.JsExport
 /**
  * A pre-parsed KSON document that can be shared across multiple tooling operations.
  *
- * Parses with [org.kson.CoreCompileConfig.ignoreErrors] = true so that partial results are
+ * Parses with [CoreCompileConfig.ignoreErrors] = true so that partial results are
  * available even for documents with syntax errors. This gives better editor behavior:
  * features like folding, semantic tokens, and document symbols continue to work in
  * broken documents rather than returning empty results.

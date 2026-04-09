@@ -1,6 +1,7 @@
 package org.kson
 
-import tooling.navigation.extractSchemaInfo
+import org.kson.tooling.KsonTooling
+import org.kson.tooling.navigation.extractSchemaInfo
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -283,7 +284,7 @@ class SchemaInfoDisplayTest {
         """
 
         // Get hover info for the name field (line 2, pointing to "John")
-        val hoverInfo = tooling.KsonTooling.getSchemaInfoAtLocation(tooling.KsonTooling.parse(document), tooling.KsonTooling.parse(schema), 2, 15)
+        val hoverInfo = KsonTooling.getSchemaInfoAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), 2, 15)
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("User's full name"))
         assertTrue(hoverInfo.contains("*Type:* `string`"))
@@ -323,7 +324,7 @@ class SchemaInfoDisplayTest {
         """
 
         // Get hover info (line 2, pointing to "Alice" value)
-        val hoverInfo = tooling.KsonTooling.getSchemaInfoAtLocation(tooling.KsonTooling.parse(document), tooling.KsonTooling.parse(schema), 2, 17)
+        val hoverInfo = KsonTooling.getSchemaInfoAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), 2, 17)
         assertNotNull(hoverInfo)
         assertTrue(hoverInfo.contains("**User Name**"))
         assertTrue(hoverInfo.contains("The name of the user"))

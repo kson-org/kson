@@ -1,7 +1,7 @@
 package org.kson
 
-import tooling.DocumentSymbolKind
-import tooling.KsonTooling
+import org.kson.tooling.DocumentSymbolKind
+import org.kson.tooling.KsonTooling
 import kotlin.test.*
 
 class ToolingDocumentTest {

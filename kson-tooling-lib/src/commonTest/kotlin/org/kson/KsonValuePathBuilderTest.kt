@@ -1,9 +1,9 @@
 package org.kson
 
-import tooling.navigation.KsonValuePathBuilder
+import org.kson.tooling.navigation.KsonValuePathBuilder
 import org.kson.parser.Coordinates
 import org.kson.value.navigation.json_pointer.JsonPointer
-import tooling.KsonTooling.parse
+import org.kson.tooling.KsonTooling.parse
 import kotlin.test.*
 
 /**

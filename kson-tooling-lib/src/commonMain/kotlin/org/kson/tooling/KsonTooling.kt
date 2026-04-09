@@ -1,11 +1,11 @@
 @file:OptIn(ExperimentalJsExport::class)
 @file:JsExport
 
-package tooling
+package org.kson.tooling
 
-import tooling.navigation.KsonValuePathBuilder
-import tooling.navigation.SchemaInformation
-import tooling.navigation.extractSchemaInfo
+import org.kson.tooling.navigation.KsonValuePathBuilder
+import org.kson.tooling.navigation.SchemaInformation
+import org.kson.tooling.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
 import org.kson.schema.ResolvedRef
 import org.kson.value.navigation.json_pointer.JsonPointer

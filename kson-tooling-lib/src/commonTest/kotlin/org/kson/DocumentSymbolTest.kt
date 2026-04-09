@@ -1,52 +1,54 @@
 package org.kson
 
+import org.kson.tooling.DocumentSymbolKind
+import org.kson.tooling.KsonTooling
 import kotlin.test.*
 
 class DocumentSymbolTest {
 
     @Test
     fun testSimpleObject() {
-        val doc = tooling.KsonTooling.parse("""
+        val doc = KsonTooling.parse("""
             {
                 "name": "John",
                 "age": 30,
                 "active": true
             }
         """.trimIndent())
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
         assertEquals("root", root.name)
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, root.kind)
+        assertEquals(DocumentSymbolKind.OBJECT, root.kind)
         assertEquals(3, root.children.size)
 
         val name = root.children[0]
         assertEquals("name", name.name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, name.kind)
+        assertEquals(DocumentSymbolKind.KEY, name.kind)
         assertEquals("key", name.detail)
         assertEquals(1, name.children.size)
-        assertEquals(tooling.DocumentSymbolKind.STRING, name.children[0].kind)
+        assertEquals(DocumentSymbolKind.STRING, name.children[0].kind)
         assertEquals("John", name.children[0].detail)
 
         val age = root.children[1]
         assertEquals("age", age.name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, age.kind)
+        assertEquals(DocumentSymbolKind.KEY, age.kind)
         assertEquals(1, age.children.size)
-        assertEquals(tooling.DocumentSymbolKind.NUMBER, age.children[0].kind)
+        assertEquals(DocumentSymbolKind.NUMBER, age.children[0].kind)
         assertEquals("30", age.children[0].detail)
 
         val active = root.children[2]
         assertEquals("active", active.name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, active.kind)
+        assertEquals(DocumentSymbolKind.KEY, active.kind)
         assertEquals(1, active.children.size)
-        assertEquals(tooling.DocumentSymbolKind.BOOLEAN, active.children[0].kind)
+        assertEquals(DocumentSymbolKind.BOOLEAN, active.children[0].kind)
         assertEquals("true", active.children[0].detail)
     }
 
     @Test
     fun testNestedObjects() {
-        val doc = tooling.KsonTooling.parse("""
+        val doc = KsonTooling.parse("""
             {
                 "user": {
                     "name": "Jane",
@@ -56,7 +58,7 @@ class DocumentSymbolTest {
                 }
             }
         """.trimIndent())
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
@@ -64,11 +66,11 @@ class DocumentSymbolTest {
 
         val userKey = root.children[0]
         assertEquals("user", userKey.name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, userKey.kind)
+        assertEquals(DocumentSymbolKind.KEY, userKey.kind)
         assertEquals(1, userKey.children.size)
 
         val userObj = userKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, userObj.kind)
+        assertEquals(DocumentSymbolKind.OBJECT, userObj.kind)
         assertEquals(2, userObj.children.size)
 
         val settingsKey = userObj.children[1]
@@ -76,14 +78,14 @@ class DocumentSymbolTest {
         assertEquals(1, settingsKey.children.size)
 
         val settingsObj = settingsKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, settingsObj.kind)
+        assertEquals(DocumentSymbolKind.OBJECT, settingsObj.kind)
         assertEquals(1, settingsObj.children.size)
         assertEquals("theme", settingsObj.children[0].name)
     }
 
     @Test
     fun testArrays() {
-        val doc = tooling.KsonTooling.parse("""
+        val doc = KsonTooling.parse("""
             {
                 "items": [
                     "apple",
@@ -93,41 +95,41 @@ class DocumentSymbolTest {
                 ]
             }
         """.trimIndent())
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         val itemsKey = root.children[0]
         assertEquals("items", itemsKey.name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, itemsKey.kind)
+        assertEquals(DocumentSymbolKind.KEY, itemsKey.kind)
         assertEquals(1, itemsKey.children.size)
 
         val itemsArray = itemsKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.ARRAY, itemsArray.kind)
+        assertEquals(DocumentSymbolKind.ARRAY, itemsArray.kind)
         assertEquals("[4 items]", itemsArray.detail)
         assertEquals(4, itemsArray.children.size)
 
         assertEquals("[0]", itemsArray.children[0].name)
-        assertEquals(tooling.DocumentSymbolKind.STRING, itemsArray.children[0].kind)
+        assertEquals(DocumentSymbolKind.STRING, itemsArray.children[0].kind)
 
         assertEquals("[1]", itemsArray.children[1].name)
-        assertEquals(tooling.DocumentSymbolKind.NUMBER, itemsArray.children[1].kind)
+        assertEquals(DocumentSymbolKind.NUMBER, itemsArray.children[1].kind)
 
         assertEquals("[2]", itemsArray.children[2].name)
-        assertEquals(tooling.DocumentSymbolKind.NULL, itemsArray.children[2].kind)
+        assertEquals(DocumentSymbolKind.NULL, itemsArray.children[2].kind)
 
         assertEquals("[3]", itemsArray.children[3].name)
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, itemsArray.children[3].kind)
+        assertEquals(DocumentSymbolKind.OBJECT, itemsArray.children[3].kind)
     }
 
     @Test
     fun testEmptyObjectsAndArrays() {
-        val doc = tooling.KsonTooling.parse("""
+        val doc = KsonTooling.parse("""
             {
                 "emptyObject": {},
                 "emptyArray": []
             }
         """.trimIndent())
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         assertEquals(2, root.children.size)
@@ -135,75 +137,75 @@ class DocumentSymbolTest {
         val emptyObjKey = root.children[0]
         assertEquals("emptyObject", emptyObjKey.name)
         val emptyObj = emptyObjKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, emptyObj.kind)
+        assertEquals(DocumentSymbolKind.OBJECT, emptyObj.kind)
         assertEquals("{0 properties}", emptyObj.detail)
         assertEquals(0, emptyObj.children.size)
 
         val emptyArrKey = root.children[1]
         assertEquals("emptyArray", emptyArrKey.name)
         val emptyArr = emptyArrKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.ARRAY, emptyArr.kind)
+        assertEquals(DocumentSymbolKind.ARRAY, emptyArr.kind)
         assertEquals("[0 items]", emptyArr.detail)
         assertEquals(0, emptyArr.children.size)
     }
 
     @Test
     fun testRootArray() {
-        val doc = tooling.KsonTooling.parse("""["item1", "item2", "item3"]""")
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val doc = KsonTooling.parse("""["item1", "item2", "item3"]""")
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
         assertEquals("root", root.name)
-        assertEquals(tooling.DocumentSymbolKind.ARRAY, root.kind)
+        assertEquals(DocumentSymbolKind.ARRAY, root.kind)
         assertEquals(3, root.children.size)
     }
 
     @Test
     fun testPrimitiveRoots() {
-        val stringSymbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("\"hello\""))
+        val stringSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("\"hello\""))
         assertEquals(1, stringSymbols.size)
-        assertEquals(tooling.DocumentSymbolKind.STRING, stringSymbols[0].kind)
+        assertEquals(DocumentSymbolKind.STRING, stringSymbols[0].kind)
         assertEquals("hello", stringSymbols[0].detail)
 
-        val numberSymbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("42"))
+        val numberSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("42"))
         assertEquals(1, numberSymbols.size)
-        assertEquals(tooling.DocumentSymbolKind.NUMBER, numberSymbols[0].kind)
+        assertEquals(DocumentSymbolKind.NUMBER, numberSymbols[0].kind)
         assertEquals("42", numberSymbols[0].detail)
 
-        val boolSymbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("false"))
+        val boolSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("false"))
         assertEquals(1, boolSymbols.size)
-        assertEquals(tooling.DocumentSymbolKind.BOOLEAN, boolSymbols[0].kind)
+        assertEquals(DocumentSymbolKind.BOOLEAN, boolSymbols[0].kind)
         assertEquals("false", boolSymbols[0].detail)
 
-        val nullSymbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("null"))
+        val nullSymbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("null"))
         assertEquals(1, nullSymbols.size)
-        assertEquals(tooling.DocumentSymbolKind.NULL, nullSymbols[0].kind)
+        assertEquals(DocumentSymbolKind.NULL, nullSymbols[0].kind)
         assertEquals("null", nullSymbols[0].detail)
     }
 
     @Test
     fun testEmptyDocument() {
-        val symbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse(""))
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse(""))
         assertEquals(0, symbols.size)
     }
 
     @Test
     fun testInvalidDocument() {
-        val symbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("{ invalid json }"))
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("{ invalid json }"))
         assertEquals(0, symbols.size)
     }
 
     @Test
     fun testEmbedBlock() {
-        val doc = tooling.KsonTooling.parse("""
+        val doc = KsonTooling.parse("""
             {
                 "code": ${"$"}bash
                     echo hello
                 ${"$$"}
             }
         """.trimIndent())
-        val symbols = tooling.KsonTooling.getDocumentSymbols(doc)
+        val symbols = KsonTooling.getDocumentSymbols(doc)
 
         val root = symbols[0]
         val codeKey = root.children[0]
@@ -211,25 +213,25 @@ class DocumentSymbolTest {
         assertEquals(1, codeKey.children.size)
 
         val embed = codeKey.children[0]
-        assertEquals(tooling.DocumentSymbolKind.EMBED, embed.kind)
+        assertEquals(DocumentSymbolKind.EMBED, embed.kind)
         assertEquals("bash", embed.detail)
     }
 
     @Test
     fun testUnquotedKeys() {
-        val symbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("name: John"))
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("name: John"))
 
         assertEquals(1, symbols.size)
         val root = symbols[0]
-        assertEquals(tooling.DocumentSymbolKind.OBJECT, root.kind)
+        assertEquals(DocumentSymbolKind.OBJECT, root.kind)
         assertEquals(1, root.children.size)
         assertEquals("name", root.children[0].name)
-        assertEquals(tooling.DocumentSymbolKind.KEY, root.children[0].kind)
+        assertEquals(DocumentSymbolKind.KEY, root.children[0].kind)
     }
 
     @Test
     fun testRangesArePopulated() {
-        val symbols = tooling.KsonTooling.getDocumentSymbols(tooling.KsonTooling.parse("{\"key\": \"value\"}"))
+        val symbols = KsonTooling.getDocumentSymbols(KsonTooling.parse("{\"key\": \"value\"}"))
 
         val root = symbols[0]
         assertEquals(0, root.range.startLine)

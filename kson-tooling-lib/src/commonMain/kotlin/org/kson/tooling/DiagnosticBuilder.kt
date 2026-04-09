@@ -1,4 +1,4 @@
-package tooling
+package org.kson.tooling
 
 import org.kson.Kson
 import org.kson.Message

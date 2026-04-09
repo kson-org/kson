@@ -1,10 +1,12 @@
 package org.kson
 
 import org.kson.parser.Coordinates
+import org.kson.tooling.KsonTooling
+import org.kson.tooling.Range
 import kotlin.test.*
 
 /**
- * Tests for [tooling.KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
+ * Tests for [org.kson.tooling.KsonTooling.getSchemaLocationAtLocation] "jump to definition" functionality
  */
 class SchemaDefinitionLocationTest {
 
@@ -63,7 +65,7 @@ class SchemaDefinitionLocationTest {
         val schema = schemaWithCaret.replace(caretMarker, "")
 
         // Get the actual location result
-        val locations = tooling.KsonTooling.getSchemaLocationAtLocation(tooling.KsonTooling.parse(document), tooling.KsonTooling.parse(schema), docCoordinates.line, docCoordinates.column)
+        val locations = KsonTooling.getSchemaLocationAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), docCoordinates.line, docCoordinates.column)
 
         // Insert <caret> markers into the actual schema to visualize where the returned locations are
         val actualSchemaWithCarets = buildActualSchemaWithCarets(schema, locations)
@@ -81,12 +83,12 @@ class SchemaDefinitionLocationTest {
      * Helper function to insert <caret> markers into the schema at the locations returned by the function.
      * This allows for easy visual comparison of expected vs actual locations.
      */
-    private fun buildActualSchemaWithCarets(schema: String, locations: List<tooling.Range>): String {
+    private fun buildActualSchemaWithCarets(schema: String, locations: List<Range>): String {
         val caretMarker = "<caret>"
 
         // Sort locations by position (descending) so we can insert from end to start without affecting indices
         val sortedLocations = locations.sortedWith(
-            compareByDescending<tooling.Range> { it.startLine }
+            compareByDescending<Range> { it.startLine }
                 .thenByDescending { it.startColumn }
         )
 

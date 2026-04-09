@@ -1,4 +1,4 @@
-package tooling
+package org.kson.tooling
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location

@@ -1,8 +1,9 @@
 @file:OptIn(ExperimentalJsExport::class)
 @file:JsExport
 
-package tooling
+package org.kson.tooling
 
+import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.value.navigation.json_pointer.JsonPointer
@@ -10,6 +11,8 @@ import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
 import org.kson.schema.SchemaResolutionType
+import org.kson.value.KsonObject
+import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
@@ -44,7 +47,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
-        documentValue: org.kson.value.KsonValue?,
+        documentValue: KsonValue?,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Check if we need to filter based on combinators
@@ -79,7 +82,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
     private fun requiresValidationFiltering(ref: ResolvedRef): Boolean {
         return ref.resolutionType == SchemaResolutionType.ANY_OF ||
             ref.resolutionType == SchemaResolutionType.ONE_OF ||
-            (ref.resolvedValue as? org.kson.value.KsonObject)?.let { obj ->
+            (ref.resolvedValue as? KsonObject)?.let { obj ->
                 obj.propertyLookup.containsKey("oneOf") || obj.propertyLookup.containsKey("anyOf")
             } ?: false
     }
@@ -100,7 +103,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      */
     private fun filterByValidation(
         candidateSchemas: List<ResolvedRef>,
-        documentValue: org.kson.value.KsonValue,
+        documentValue: KsonValue,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
         // Get the object to validate against
@@ -131,7 +134,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      */
     private fun isSchemaValidForDocument(
         ref: ResolvedRef,
-        targetValue: org.kson.value.KsonValue
+        targetValue: KsonValue
     ): Boolean {
         val messageSink = MessageSink()
         val schema = SchemaParser.parseSchemaElement(
@@ -171,7 +174,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * @param errors All validation errors
      * @return Only the errors that indicate real incompatibility
      */
-    private fun filterInsignificantErrors(errors: List<org.kson.parser.LoggedMessage>): List<org.kson.parser.LoggedMessage> {
+    private fun filterInsignificantErrors(errors: List<LoggedMessage>): List<LoggedMessage> {
         return errors.filter { loggedMessage ->
             loggedMessage.message.type !in IGNORABLE_ERROR_TYPES
         }

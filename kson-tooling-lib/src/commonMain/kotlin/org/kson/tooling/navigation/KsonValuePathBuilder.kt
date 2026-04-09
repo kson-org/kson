@@ -1,4 +1,4 @@
-package tooling.navigation
+package org.kson.tooling.navigation
 
 import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
@@ -10,7 +10,7 @@ import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
 import org.kson.walker.navigateToLocationWithPointer
-import tooling.ToolingDocument
+import org.kson.tooling.ToolingDocument
 
 /**
  * Context information about a token at a specific location.

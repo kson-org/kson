@@ -1,4 +1,4 @@
-package tooling
+package org.kson.tooling
 
 import org.kson.value.EmbedBlock
 import org.kson.value.KsonBoolean

@@ -1,4 +1,4 @@
-package tooling
+package org.kson.tooling
 
 /**
  * Finds sibling key ranges for a cursor position in a KSON document.

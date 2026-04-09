@@ -2,11 +2,12 @@ package org.kson
 
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.SchemaFilteringService
 import org.kson.value.KsonValue
 import kotlin.test.*
 
 /**
- * Unit tests for [tooling.SchemaFilteringService]
+ * Unit tests for [org.kson.tooling.SchemaFilteringService]
  *
  * These tests focus on the schema filtering logic in isolation,
  * without going through the full public API.
@@ -24,7 +25,7 @@ class SchemaFilteringServiceTest {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         val parsedDocument = KsonCore.parseToAst(document).ksonValue
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val filteringService = tooling.SchemaFilteringService(schemaIdLookup)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
         val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(JsonPointer(""))
         return filteringService.getValidSchemas(candidateSchemas, parsedDocument, JsonPointer("")).map { it.resolvedValue }
     }
