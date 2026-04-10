@@ -1,6 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {KsonTooling, ToolingDocument} from 'kson-tooling';
-import {KsonDocument} from './KsonDocument.js';
+import {ToolingDocument} from 'kson-tooling';
+import {KsonDocument, parseTextDocument} from './KsonDocument.js';
 
 /**
  * A KsonDocument that represents a schema file.
@@ -33,7 +33,7 @@ export class KsonSchemaDocument extends KsonDocument {
     getMetaSchemaToolingDocument(): ToolingDocument | undefined {
         if (!this.metaSchemaDocument) return undefined;
         if (!this._metaSchemaToolingDocument) {
-            this._metaSchemaToolingDocument = KsonTooling.getInstance().parse(this.metaSchemaDocument.getText(), this.metaSchemaDocument.uri);
+            this._metaSchemaToolingDocument = parseTextDocument(this.metaSchemaDocument);
         }
         return this._metaSchemaToolingDocument;
     }

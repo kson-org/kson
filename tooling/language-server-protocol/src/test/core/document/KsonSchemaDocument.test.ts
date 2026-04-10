@@ -1,8 +1,7 @@
 import {describe, it} from 'mocha';
 import * as assert from 'assert';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {KsonTooling} from 'kson-tooling';
-import {KsonDocument} from '../../../core/document/KsonDocument.js';
+import {KsonDocument, parseTextDocument} from '../../../core/document/KsonDocument.js';
 import {KsonSchemaDocument, isKsonSchemaDocument} from '../../../core/document/KsonSchemaDocument.js';
 
 describe('KsonSchemaDocument', () => {
@@ -24,7 +23,7 @@ describe('KsonSchemaDocument', () => {
 
     function createSchemaDocument(metaSchema?: TextDocument): KsonSchemaDocument {
         const textDoc = TextDocument.create('file:///my-schema.kson', 'kson', 1, schemaContent);
-        const toolingDoc = KsonTooling.getInstance().parse(schemaContent);
+        const toolingDoc = parseTextDocument(textDoc);
         return new KsonSchemaDocument(textDoc, toolingDoc, metaSchema);
     }
 
@@ -64,7 +63,7 @@ describe('KsonSchemaDocument', () => {
         it('should return false for plain KsonDocument', () => {
             const content = '{ "name": "test" }';
             const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-            const toolingDoc = KsonTooling.getInstance().parse(content);
+            const toolingDoc = parseTextDocument(textDoc);
             const doc = new KsonDocument(textDoc, toolingDoc);
             assert.strictEqual(isKsonSchemaDocument(doc), false);
         });
@@ -72,7 +71,7 @@ describe('KsonSchemaDocument', () => {
         it('should return false for KsonDocument with schema', () => {
             const content = '{ "name": "test" }';
             const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-            const toolingDoc = KsonTooling.getInstance().parse(content);
+            const toolingDoc = parseTextDocument(textDoc);
             const schemaDoc = TextDocument.create('file:///schema.kson', 'kson', 1, '{ "type": "object" }');
             const doc = new KsonDocument(textDoc, toolingDoc, schemaDoc);
             assert.strictEqual(isKsonSchemaDocument(doc), false);
@@ -87,7 +86,7 @@ describe('KsonDocument.getSchemaId', () => {
     "type": "object"
 }`;
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const toolingDoc = parseTextDocument(textDoc);
         const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), 'http://json-schema.org/draft-07/schema#');
@@ -96,7 +95,7 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined when no $schema field', () => {
         const content = '{ "type": "object" }';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const toolingDoc = parseTextDocument(textDoc);
         const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);
@@ -105,7 +104,7 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined for non-object document', () => {
         const content = '"just a string"';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const toolingDoc = parseTextDocument(textDoc);
         const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);
@@ -114,7 +113,7 @@ describe('KsonDocument.getSchemaId', () => {
     it('should return undefined when $schema is not a string', () => {
         const content = '{ "$schema": 42 }';
         const textDoc = TextDocument.create('file:///test.kson', 'kson', 1, content);
-        const toolingDoc = KsonTooling.getInstance().parse(content);
+        const toolingDoc = parseTextDocument(textDoc);
         const doc = new KsonDocument(textDoc, toolingDoc);
 
         assert.strictEqual(doc.getSchemaId(), undefined);

@@ -1,7 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {Position} from 'vscode-languageserver';
-import {KsonTooling} from 'kson-tooling';
-import {KsonDocument} from '../core/document/KsonDocument.js';
+import {KsonDocument, parseTextDocument} from '../core/document/KsonDocument.js';
 import {KsonSchemaDocument} from '../core/document/KsonSchemaDocument.js';
 
 export const TEST_URI = 'file:///test.kson';
@@ -12,7 +11,7 @@ export const SCHEMA_URI = 'file:///schema.kson';
  */
 export function createKsonDocument(content: string, schemaContent?: string): KsonDocument {
     const textDoc = TextDocument.create(TEST_URI, 'kson', 1, content);
-    const toolingDoc = KsonTooling.getInstance().parse(content);
+    const toolingDoc = parseTextDocument(textDoc);
     const schemaDoc = schemaContent
         ? TextDocument.create(SCHEMA_URI, 'kson', 1, schemaContent)
         : undefined;
@@ -24,7 +23,7 @@ export function createKsonDocument(content: string, schemaContent?: string): Kso
  */
 export function createKsonSchemaDocument(content: string, metaSchemaContent?: string): KsonSchemaDocument {
     const textDoc = TextDocument.create(SCHEMA_URI, 'kson', 1, content);
-    const toolingDoc = KsonTooling.getInstance().parse(content);
+    const toolingDoc = parseTextDocument(textDoc);
     const metaSchemaDoc = metaSchemaContent
         ? TextDocument.create('bundled://metaschema/draft-07.schema.kson', 'kson', 1, metaSchemaContent)
         : undefined;

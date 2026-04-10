@@ -3,6 +3,15 @@ import {TextDocument} from "vscode-languageserver-textdocument";
 import {KsonTooling, ToolingDocument} from 'kson-tooling';
 
 /**
+ * Parse a {@link TextDocument} into a {@link ToolingDocument}, threading the
+ * document's URI through as source context so validators can see which
+ * document a diagnostic belongs to.
+ */
+export function parseTextDocument(textDocument: TextDocument): ToolingDocument {
+    return KsonTooling.getInstance().parse(textDocument.getText(), textDocument.uri);
+}
+
+/**
  * Kson Document Entry.
  * This class wraps a standard {@link TextDocument} with its pre-parsed
  * {@link ToolingDocument}, so every tooling operation on the same document
@@ -66,7 +75,7 @@ export class KsonDocument implements TextDocument {
         const schema = this.getSchemaDocument();
         if (!schema) return undefined;
         if (!this._schemaToolingDocument) {
-            this._schemaToolingDocument = KsonTooling.getInstance().parse(schema.getText(), schema.uri);
+            this._schemaToolingDocument = parseTextDocument(schema);
         }
         return this._schemaToolingDocument;
     }
