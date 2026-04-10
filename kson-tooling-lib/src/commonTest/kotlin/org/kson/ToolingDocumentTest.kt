@@ -85,6 +85,21 @@ class ToolingDocumentTest {
     }
 
     @Test
+    fun testParseThreadsFilepathIntoSourceContext() {
+        // Pinning contract: KsonTooling.parse(content, filepath) must make the
+        // filepath visible to validators via SourceContext. No validator currently
+        // reads this field, so this test is the only regression anchor guarding
+        // the plumbing — without it, the URI can be silently dropped and no
+        // behavioral test will catch it.
+        val withPath = KsonTooling.parse("name: John", "file:///foo.kson")
+        assertEquals("file:///foo.kson", withPath.sourceContext.filepath)
+
+        // The default remains null when no filepath is supplied.
+        val withoutPath = KsonTooling.parse("name: John")
+        assertNull(withoutPath.sourceContext.filepath)
+    }
+
+    @Test
     fun testBrokenDocumentGracefulDegradation() {
         val doc = KsonTooling.parse("{ unclosed")
 

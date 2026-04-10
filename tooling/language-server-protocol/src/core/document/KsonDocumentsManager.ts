@@ -1,6 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {KsonTooling, ToolingDocument} from 'kson-tooling';
-import {KsonDocument} from "./KsonDocument.js";
+import {ToolingDocument} from 'kson-tooling';
+import {KsonDocument, parseTextDocument} from "./KsonDocument.js";
 import {KsonSchemaDocument} from "./KsonSchemaDocument.js";
 import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
 import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
@@ -62,7 +62,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                 content: string
             ): KsonDocument => {
                 const textDocument = TextDocument.create(uri, languageId, version, content);
-                const toolingDocument = KsonTooling.getInstance().parse(content);
+                const toolingDocument = parseTextDocument(textDocument);
                 return resolveDocument(provider, textDocument, toolingDocument);
             },
             update: (
@@ -75,7 +75,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
                     changes,
                     version
                 );
-                const toolingDocument = KsonTooling.getInstance().parse(textDocument.getText());
+                const toolingDocument = parseTextDocument(textDocument);
                 // Reuse the existing schema/metaschema — it only changes when schema
                 // config changes, which triggers refreshDocumentSchemas() separately.
                 if (ksonDocument instanceof KsonSchemaDocument) {
