@@ -3,11 +3,13 @@ package org.kson
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.tooling.SchemaFilteringService
+import org.kson.value.KsonObject
+import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import kotlin.test.*
 
 /**
- * Unit tests for [org.kson.tooling.SchemaFilteringService]
+ * Unit tests for [SchemaFilteringService]
  *
  * These tests focus on the schema filtering logic in isolation,
  * without going through the full public API.
@@ -15,24 +17,45 @@ import kotlin.test.*
 class SchemaFilteringServiceTest {
 
     /**
-     * Helper function to set up schema filtering and return valid schemas for a given document.
-     *
-     * @param schema The schema definition as a string
-     * @param document The document to validate against the schema
-     * @return List of valid schemas after filtering
+     * Parses [schema] and [document], navigates to [documentPointer] in the schema,
+     * and returns the valid schemas after [SchemaFilteringService] has expanded
+     * combinators and filtered incompatible branches.
      */
-    private fun getValidSchemasForDocument(schema: String, document: String): List<KsonValue> {
+    private fun getValidSchemasForDocument(
+        schema: String,
+        document: String,
+        documentPointer: JsonPointer = JsonPointer("")
+    ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         val parsedDocument = KsonCore.parseToAst(document).ksonValue
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(JsonPointer(""))
-        return filteringService.getValidSchemas(candidateSchemas, parsedDocument, JsonPointer("")).map { it.resolvedValue }
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
+        return filteringService.getValidSchemas(candidateSchemas, parsedDocument, documentPointer).map { it.resolvedValue }
+    }
+
+    /**
+     * Reads the string value at `properties.<propertyName>.<fieldName>` for a
+     * schema branch, or null if the branch doesn't have one. Used to identify
+     * which branch of a `oneOf` survived filtering by reading a discriminating
+     * sub-field of a property's schema (e.g. `properties.type.const` or
+     * `properties.value.type`).
+     */
+    private fun propertyFieldOf(
+        schema: KsonValue,
+        propertyName: String,
+        fieldName: String
+    ): String? {
+        val obj = schema as? KsonObject ?: return null
+        val properties = obj.propertyLookup["properties"] as? KsonObject ?: return null
+        val prop = properties.propertyLookup[propertyName] as? KsonObject ?: return null
+        return (prop.propertyLookup[fieldName] as? KsonString)?.value
     }
 
     @Test
     fun testGetValidSchemas_withOneOfCombinator_filtersIncompatibleSchemas() {
-        // Schema with oneOf combinator
+        // Two branches discriminated by `type` const. Document says `type: email`,
+        // so only the email branch should survive; the sms branch must be dropped.
         val schema = """
             oneOf:
               - type: object
@@ -49,25 +72,23 @@ class SchemaFilteringServiceTest {
                     type: string
         """.trimIndent()
 
-        // Document with type: email (should only match first branch)
         val document = """
             type: email
         """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // Should filter to only the email branch (oneOf creates 2 branches, only 1 should be valid)
-        // Note: The filtering happens after expansion, so we expect 1 valid schema
-        assertTrue(validSchemas.size >= 1, "Should have at least 1 valid schema")
-
-        // The valid schema should be the one with type: email (first branch)
-        // We can verify this by checking that it validates against our document
-        // Since the filtering already happened, any returned schema is compatible
+        // Parent + email branch (sms filtered out)
+        assertEquals(2, validSchemas.size, "Should return parent + email branch only")
+        val survivingConsts = validSchemas.mapNotNull { propertyFieldOf(it, "type", "const") }
+        assertEquals(listOf("email"), survivingConsts, "Only the email branch should survive")
     }
 
     @Test
-    fun testGetValidSchemas_withAnyOfCombinator_filtersIncompatibleSchemas() {
-        // Schema with anyOf combinator
+    fun testGetValidSchemas_withAnyOfCombinator_bothBranchesCompatible() {
+        // Document has `name` and `age`. Branch 1 describes name+age, branch 2 describes
+        // name+role. Both branches are compatible because missing required props are
+        // ignored and there's no additionalProperties:false on branch 2. So both survive.
         val schema = """
             anyOf:
               - type: object
@@ -84,7 +105,6 @@ class SchemaFilteringServiceTest {
                     type: string
         """.trimIndent()
 
-        // Document with 'age' property (should only match first branch)
         val document = """
             name: John
             age: 30
@@ -92,16 +112,14 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // Should filter to compatible branches only
-        assertTrue(validSchemas.size >= 1, "Should have at least 1 valid schema")
-        // Since document has 'age: 30' (number), only first branch should be valid
-        // The second branch expects 'role' which is not present, but missing required props are ignored,
-        // so we might get both branches. Let's just verify we get at least one.
+        // Parent + both branches — nothing to filter out.
+        assertEquals(3, validSchemas.size, "Should return parent + both anyOf branches (both are compatible)")
     }
 
     @Test
     fun testGetValidSchemas_withAllOfCombinator_includesAllBranches() {
-        // Schema with allOf combinator - all branches should always be included
+        // allOf never filters — all branches must hold simultaneously, so the
+        // filter returns them all verbatim (plus the parent schema).
         val schema = """
             allOf:
               - type: object
@@ -120,31 +138,27 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // allOf should include all branches (no filtering) plus the parent schema
         assertEquals(3, validSchemas.size, "allOf should include parent + all branches without filtering")
     }
 
     @Test
     fun testGetValidSchemas_withInvalidDocument_fallsBackToUnfilteredSchemas() {
-        // Schema with oneOf
+        // When the document doesn't parse, the filter has nothing to validate against
+        // and must fall back to the fully expanded schema list (parent + all branches).
         val schema = """
             oneOf:
               - type: string
               - type: number
         """.trimIndent()
 
-        // Invalid document (not parseable)
-        val invalidDocument = "{ invalid json"
+        val validSchemas = getValidSchemasForDocument(schema, "{ invalid json")
 
-        val validSchemas = getValidSchemasForDocument(schema, invalidDocument)
-
-        // Should fall back to all expanded schemas without filtering (parent + branches)
         assertEquals(3, validSchemas.size, "Should return parent + all branches when document doesn't parse")
     }
 
     @Test
     fun testGetValidSchemas_withNoCombinators_returnsAllSchemas() {
-        // Simple schema without combinators
+        // No combinators means no filtering — the single candidate passes through.
         val schema = """
             type: object
             properties:
@@ -160,13 +174,14 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // Should return all candidate schemas since there are no combinators (only 1 in this case)
-        assertEquals(1, validSchemas.size, "Should return all schemas when no combinators")
+        assertEquals(1, validSchemas.size, "Should return a single schema when there are no combinators")
     }
 
     @Test
     fun testGetValidSchemas_ignoresRequiredPropertyErrors() {
-        // Schema with required properties
+        // Document has only `name`, but both branches require additional properties.
+        // Missing-required errors are expected during completion and must not
+        // disqualify a branch, so both survive.
         val schema = """
             oneOf:
               - type: object
@@ -185,21 +200,49 @@ class SchemaFilteringServiceTest {
                     type: string
         """.trimIndent()
 
-        // Document with only 'name' (missing required 'email' or 'phone')
-        // Both branches should still be valid because missing required props are ignored
         val document = """
             name: John
         """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // Both branches should be valid (missing required properties are ignored during filtering) plus parent
-        assertEquals(3, validSchemas.size, "Parent + both branches should be valid - missing required props are ignored")
+        assertEquals(
+            3, validSchemas.size,
+            "Parent + both branches should be valid — missing required props are ignored"
+        )
+    }
+
+    @Test
+    fun testGetValidSchemas_withNonRootPointerToMissingValue_returnsAllBranches() {
+        // Navigation to /query returns null because the document doesn't have
+        // a `query` key yet. The filter must return all expanded candidates
+        // rather than validating against the root document (which would fail
+        // additionalProperties:false on every branch).
+        val schema = """
+            type: object
+            properties:
+              query:
+                oneOf:
+                  - type: string
+                  - type: number
+        """.trimIndent()
+
+        val document = """
+            name: test
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/query"))
+
+        assertEquals(
+            3, validSchemas.size,
+            "Parent + both oneOf branches should be returned when the target value doesn't exist yet"
+        )
     }
 
     @Test
     fun testGetValidSchemas_filtersBasedOnTypeViolations() {
-        // Schema with different type requirements
+        // Document has `value: hello` (a string). Only the string branch is compatible;
+        // the number branch is filtered out.
         val schema = """
             oneOf:
               - type: object
@@ -212,14 +255,45 @@ class SchemaFilteringServiceTest {
                     type: number
         """.trimIndent()
 
-        // Document with string value (should only match first branch)
         val document = """
             value: hello
         """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        // Should filter to only the string branch plus parent
-        assertEquals(2, validSchemas.size, "Should match parent + the string branch")
+        assertEquals(2, validSchemas.size, "Should match parent + exactly one branch")
+        val survivingValueTypes = validSchemas.mapNotNull { propertyFieldOf(it, "value", "type") }
+        assertEquals(
+            listOf("string"), survivingValueTypes,
+            "Only the string branch should survive; the number branch must be filtered out"
+        )
+    }
+
+    @Test
+    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutIncompatibleBranches() {
+        // Document is a list; both branches expect objects. No branch survives —
+        // only the parent (oneOf container) remains.
+        val schema = """
+            oneOf:
+              - type: object
+                properties:
+                  field:
+                    type: string
+              - type: object
+                properties:
+                  and:
+                    type: array
+        """.trimIndent()
+
+        val document = """
+            - item
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document)
+
+        assertEquals(
+            1, validSchemas.size,
+            "Only the parent schema should remain when target type doesn't match any branch"
+        )
     }
 }
