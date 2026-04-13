@@ -131,9 +131,11 @@ fun InternalKsonValue.extractSchemaInfo(): String? {
         }
 
         // Description (main documentation)
-        (props["description"] as? InternalKsonString)?.value?.let {
-            append("$it\n\n")
-        }
+        when (val desc = props["description"]) {
+            is InternalKsonString -> desc.value
+            is InternalEmbedBlock -> desc.embedContent.value
+            else -> null
+        }?.let { append("$it\n\n") }
 
         // Type information
         when (val typeValue: InternalKsonValue? = props["type"]) {

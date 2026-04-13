@@ -34,6 +34,26 @@ class SchemaInfoDisplayTest {
     }
 
     @Test
+    fun testExtractHoverWithEmbedBlockDescription() {
+        val hoverInfo = getHoverInfo("""
+            {
+                title: "Query"
+                description: %
+                  Multi-line documentation
+                  written in an embed block
+                %%
+                type: "string"
+            }
+        """)
+
+        assertNotNull(hoverInfo)
+        assertTrue(hoverInfo.contains("Multi-line documentation"))
+        assertTrue(hoverInfo.contains("written in an embed block"))
+        assertTrue(hoverInfo.contains("**Query**"))
+        assertTrue(hoverInfo.contains("*Type:* `string`"))
+    }
+
+    @Test
     fun testExtractHoverWithDescriptionOnly() {
         val hoverInfo = getHoverInfo("""
             {
