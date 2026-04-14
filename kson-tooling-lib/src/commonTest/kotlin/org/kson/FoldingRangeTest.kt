@@ -261,6 +261,86 @@ class FoldingRangeTest {
     }
 
     @Test
+    fun testDeeplyNestedObjects() {
+        val content = """
+            root:
+              level1:
+                level2:
+                  level3:
+                    value: "deep"
+        """.trimIndent()
+        val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
+
+        val root = ranges.single { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 0 }
+        assertEquals(4, root.endLine)
+
+        val level1 = ranges.single { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 1 }
+        assertEquals(4, level1.endLine)
+
+        val level2 = ranges.single { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 2 }
+        assertEquals(4, level2.endLine)
+
+        val level3 = ranges.single { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 3 }
+        assertEquals(4, level3.endLine)
+    }
+
+    @Test
+    fun testDeeplyNestedDashListsAndObjects() {
+        val content = """
+            items:
+              - name: "First"
+                children:
+                  - id: 1
+                    meta:
+                      tag: "a"
+                      .
+                  - id: 2
+                    meta:
+                      tag: "b"
+                      .
+                  =
+              - name: "Second"
+                children:
+                  - id: 3
+                    meta:
+                      tag: "c"
+        """.trimIndent()
+        val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
+
+        val items = ranges.single { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 0 }
+        assertEquals(16, items.endLine)
+
+        assertTrue(
+            ranges.any { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 2 },
+            "Expected the children block to produce a foldable property range"
+        )
+
+        assertTrue(
+            ranges.any { it.kind == StructuralRangeKind.PROPERTY && it.startLine == 4 },
+            "Expected the nested meta block to produce a foldable property range"
+        )
+    }
+
+    @Test
+    fun testNestedStructureInsideEmbed() {
+        val content = $$"""
+            query: $sql
+              select * from users
+              where id in (
+                \$\$ nested:
+                  inner:
+                    value: 1
+              )
+              $$
+        """.trimIndent()
+        val ranges = KsonTooling.getStructuralRanges(KsonTooling.parse(content))
+
+        val embedRange = ranges.single { it.kind == StructuralRangeKind.EMBED }
+        assertEquals(0, embedRange.startLine)
+        assertEquals(7, embedRange.endLine)
+    }
+
+    @Test
     fun testEmbedInDashListFoldsIndependently() {
         val content = """
             key: value
