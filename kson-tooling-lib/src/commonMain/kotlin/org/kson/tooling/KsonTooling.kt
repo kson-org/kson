@@ -201,14 +201,15 @@ object KsonTooling {
     /**
      * Get structural ranges (foldable regions) from a pre-parsed [ToolingDocument].
      *
-     * Identifies multi-line objects, arrays, and embed blocks that can
-     * be collapsed in an editor. Single-line constructs are excluded.
+     * Identifies multi-line objects, arrays (bracket, angle-bracket, and dash),
+     * object properties, embed blocks, and comment blocks that can be collapsed
+     * in an editor. Single-line constructs are excluded.
      *
      * @param document The pre-parsed KSON document
      * @return List of structural ranges, each spanning at least two lines
      */
     fun getStructuralRanges(document: ToolingDocument): List<StructuralRange> {
-        return FoldingRangeBuilder.build(document.tokens)
+        return FoldingRangeBuilder.build(document.rootAstNode, document.tokens)
     }
 
     /**
@@ -411,7 +412,9 @@ data class StructuralRange(val startLine: Int, val endLine: Int, val kind: Struc
 enum class StructuralRangeKind {
     OBJECT,
     ARRAY,
-    EMBED
+    EMBED,
+    PROPERTY,
+    COMMENT
 }
 
 /**
