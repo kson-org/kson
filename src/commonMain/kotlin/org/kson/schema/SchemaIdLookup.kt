@@ -1,5 +1,6 @@
 package org.kson.schema
 
+import org.kson.parser.MessageSink
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
@@ -28,14 +29,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         idMap[KsonDraft7MetaSchema.ID] = KsonDraft7MetaSchema.schemaValue
 
         if (schemaRootValue is KsonObject) {
-            val rootBaseUri = schemaRootValue.propertyLookup["\$id"]?.let { idValue ->
-                if (idValue is KsonString) {
-                    idValue.value
-                } else {
-                    // this $id is completely invalid
-                    null
-                }
-            } ?: ""
+            val rootBaseUri = rootBaseUri()
 
             // Store the root schema at its baseUri
             idMap[rootBaseUri] = schemaRootValue
@@ -44,6 +38,11 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             walkSchemaForIds(schemaRootValue, idMap, rootBaseUri)
         }
     }
+
+    private fun rootBaseUri(): String =
+        (schemaRootValue as? KsonObject)?.propertyLookup["\$id"]
+            ?.let { (it as? KsonString)?.value }
+            ?: ""
 
     /**
      * Resolves a `$ref` reference string to the corresponding schema value.
@@ -90,49 +89,78 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         val expanded = mutableListOf<ResolvedRef>()
 
         for (ref in schemas) {
-            val schemaObj = ref.resolvedValue as? KsonObject
-
-            if (schemaObj != null) {
-                var addedBranches = false
-                // Track where to insert the parent (to add it first)
-                val branchesStartIndex = expanded.size
-
-                // Check for oneOf
-                (schemaObj.propertyLookup["oneOf"] as? KsonList)?.elements?.forEach { branch ->
-                    val resolved = resolveRefIfPresent(branch, ref.resolvedValueBaseUri)
-                    expanded.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, SchemaResolutionType.ONE_OF))
-                    addedBranches = true
-                }
-
-                // Check for anyOf
-                (schemaObj.propertyLookup["anyOf"] as? KsonList)?.elements?.forEach { branch ->
-                    val resolved = resolveRefIfPresent(branch, ref.resolvedValueBaseUri)
-                    expanded.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, SchemaResolutionType.ANY_OF))
-                    addedBranches = true
-                }
-
-                // Check for allOf
-                (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
-                    val resolved = resolveRefIfPresent(branch, ref.resolvedValueBaseUri)
-                    expanded.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, SchemaResolutionType.ALL_OF))
-                    addedBranches = true
-                }
-
-                if (addedBranches) {
-                    // Include the parent schema to preserve its properties (e.g., description, title, constraints)
-                    // Insert at the start so it appears first in hover info
-                    expanded.add(branchesStartIndex, ref)
-                } else {
-                    // If we didn't add any branches, keep the original schema
-                    expanded.add(ref)
-                }
-            } else {
-                // Not an object, keep as-is
-                expanded.add(ref)
-            }
+            expandSingleSchema(ref, expanded)
         }
 
         return expanded
+    }
+
+    /**
+     * Recursively expand a single schema's combinators and conditionals.
+     *
+     * Expands oneOf/anyOf/allOf into individual branches and if/then/else into
+     * conditional branches, resolving any $ref along the way.  Branches are
+     * themselves expanded recursively so that nested structures (e.g. allOf
+     * containing if/then) are fully flattened.
+     *
+     * The parent schema is preserved alongside its branches so that its own
+     * properties (title, description, constraints) remain available.
+     */
+    private fun expandSingleSchema(ref: ResolvedRef, expanded: MutableList<ResolvedRef>) {
+        val schemaObj = ref.resolvedValue as? KsonObject
+
+        if (schemaObj == null) {
+            expanded.add(ref)
+            return
+        }
+
+        var addedBranches = false
+        // Track where to insert the parent (to add it first)
+        val branchesStartIndex = expanded.size
+
+        fun addBranch(branch: KsonValue, baseUri: String, resolutionType: SchemaResolutionType) {
+            val resolved = resolveRefIfPresent(branch, baseUri)
+            // Preserve the parentBranch from navigation through expansion — the
+            // branch context from the original oneOf/anyOf is still the right one
+            // for sibling filtering regardless of how deeply the schema expands.
+            val branchRef = ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, resolutionType, ref.parentBranch)
+            expandSingleSchema(branchRef, expanded)
+            addedBranches = true
+        }
+
+        // Check for oneOf
+        (schemaObj.propertyLookup["oneOf"] as? KsonList)?.elements?.forEach { branch ->
+            addBranch(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ONE_OF)
+        }
+
+        // Check for anyOf
+        (schemaObj.propertyLookup["anyOf"] as? KsonList)?.elements?.forEach { branch ->
+            addBranch(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ANY_OF)
+        }
+
+        // Check for allOf
+        (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
+            addBranch(branch, ref.resolvedValueBaseUri, SchemaResolutionType.ALL_OF)
+        }
+
+        // Check for if/then/else conditionals
+        if (schemaObj.propertyLookup.containsKey("if")) {
+            schemaObj.propertyLookup["then"]?.let { thenBranch ->
+                addBranch(thenBranch, ref.resolvedValueBaseUri, SchemaResolutionType.IF_THEN)
+            }
+            schemaObj.propertyLookup["else"]?.let { elseBranch ->
+                addBranch(elseBranch, ref.resolvedValueBaseUri, SchemaResolutionType.IF_ELSE)
+            }
+        }
+
+        if (addedBranches) {
+            // Include the parent schema to preserve its properties (e.g., description, title, constraints)
+            // Insert at the start so it appears first in hover info
+            expanded.add(branchesStartIndex, ref)
+        } else {
+            // If we didn't add any branches, keep the original schema
+            expanded.add(ref)
+        }
     }
 
 
@@ -165,8 +193,9 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      */
     fun navigateByDocumentPointer(
         documentPointer: JsonPointer,
+        documentValue: KsonValue? = null,
     ): List<ResolvedRef> {
-        val startingBaseUri = ""
+        val startingBaseUri = rootBaseUri()
         val documentPathTokens = documentPointer.tokens
         if (documentPathTokens.isEmpty()) {
             // Even at root, resolve $ref if present
@@ -176,6 +205,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         // Track all current schema nodes we're exploring (can branch out due to combinators)
         var currentNodes = listOf(resolveRefIfPresent(schemaRootValue, startingBaseUri))
+        // Track the document value at the current navigation level for if/then evaluation
+        var currentDocumentValue = documentValue
 
         for (token in documentPathTokens) {
             val nextNodes = mutableListOf<ResolvedRef>()
@@ -203,19 +234,24 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                     navigateArrayItems(node, updatedBaseUri)
                 } else {
                     // Object navigation: go to "properties" wrapper, then the property
-                    navigateObjectProperty(node, token, updatedBaseUri)
+                    navigateObjectProperty(node, token, updatedBaseUri, currentDocumentValue)
                 }
 
-                // Resolve $ref for each navigated node
+                // Resolve $ref for each navigated node, preserving parentBranch context
                 for (navNode in navigatedNodes) {
                     val resolved = resolveRefIfPresent(navNode.resolvedValue, navNode.resolvedValueBaseUri)
-                    nextNodes.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, navNode.resolutionType))
+                    nextNodes.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, navNode.resolutionType, navNode.parentBranch))
                 }
             }
 
             currentNodes = nextNodes
             if (currentNodes.isEmpty()) {
                 break
+            }
+
+            // Advance document value in parallel with schema navigation
+            currentDocumentValue = currentDocumentValue?.let { docVal ->
+                KsonValueWalker.navigateWithJsonPointer(docVal, JsonPointer.fromTokens(listOf(token)))
             }
         }
 
@@ -254,17 +290,29 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             ))
         }
 
+        // If no items found, search through if/then/else conditionals
+        if (results.isEmpty() && schemaNode.propertyLookup.containsKey("if")) {
+            results.addAll(navigateThroughConditionals(
+                schemaNode = schemaNode,
+                currentBaseUri = currentBaseUri,
+                recursiveNavigate = { schema, baseUri -> navigateArrayItems(schema, baseUri) }
+            ))
+        }
+
         return results
     }
 
     /**
-     * Resolves a $ref in a schema value if present.
+     * Resolves a `$ref` in a schema value if present.
      *
-     * @param value The schema value that might contain a $ref
+     * Public to support downstream `$ref` resolution within schema branches, e.g.,
+     * when checking property constraints inside oneOf/anyOf branches.
+     *
+     * @param value The schema value that might contain a `$ref`
      * @param currentBaseUri The current base URI for resolving the reference
-     * @return A ResolvedRef with the resolved value and base URI
+     * @return A [ResolvedRef] with the resolved value and base URI
      */
-    private fun resolveRefIfPresent(value: KsonValue, currentBaseUri: String): ResolvedRef {
+    fun resolveRefIfPresent(value: KsonValue, currentBaseUri: String): ResolvedRef {
         if (value is KsonObject) {
             val refValue = value.propertyLookup["\$ref"] as? KsonString
             if (refValue != null) {
@@ -282,11 +330,9 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * For each combinator branch, it resolves any $ref, then delegates to the caller's
      * navigation function to continue traversal.
      *
-     * Example for array navigation:
-     * ```
-     * schema: { anyOf: [{ items: {...} }, { items: {...} }] }
-     * -> finds both items schemas and tags them as ANY_OF
-     * ```
+     * For oneOf/anyOf results, the branch schema is attached as [ResolvedRef.parentBranch]
+     * so that downstream filtering can validate sibling property constraints that aren't
+     * visible from the leaf schema alone.
      *
      * @param schemaNode The schema node containing combinators
      * @param currentBaseUri The current base URI for $ref resolution
@@ -303,18 +349,22 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         fun processCombinator(combinator: KsonValue?, combinatorType: SchemaResolutionType) {
             val combinatorList = combinator as? KsonList ?: return
+            val attachParentBranch = combinatorType in setOf(SchemaResolutionType.ONE_OF, SchemaResolutionType.ANY_OF)
 
             for (element in combinatorList.elements) {
                 val resolved = resolveRefIfPresent(element, currentBaseUri)
 
                 if (resolved.resolvedValue is KsonObject) {
-                    // Continue navigation through this combinator branch
                     val nestedResults = recursiveNavigate(resolved.resolvedValue, resolved.resolvedValueBaseUri)
 
-                    // Tag results with combinator type if appropriate
+                    // Attach parentBranch for oneOf/anyOf so downstream filtering
+                    // can check sibling constraints.
                     results.addAll(nestedResults.map { ref ->
                         if (shouldTagWithCombinator(ref.resolutionType)) {
-                            ref.copy(resolutionType = combinatorType)
+                            ref.copy(
+                                resolutionType = combinatorType,
+                                parentBranch = if (attachParentBranch) resolved else null
+                            )
                         } else {
                             ref
                         }
@@ -331,22 +381,83 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     }
 
     /**
+     * Navigate through if/then/else conditional schemas.
+     *
+     * When [documentValue] is available, evaluates the "if" condition against it
+     * and only includes the matching branch (then or else).  When unavailable,
+     * includes both branches so that all possible schemas are discoverable.
+     *
+     * @param schemaNode The schema node containing if/then/else
+     * @param currentBaseUri The current base URI for $ref resolution
+     * @param documentValue The document value at this schema level, used to evaluate the "if" condition
+     * @param recursiveNavigate How to continue navigation within each branch
+     */
+    private fun navigateThroughConditionals(
+        schemaNode: KsonObject,
+        currentBaseUri: String,
+        documentValue: KsonValue? = null,
+        recursiveNavigate: (schema: KsonObject, baseUri: String) -> List<ResolvedRef>
+    ): List<ResolvedRef> {
+        val results = mutableListOf<ResolvedRef>()
+
+        fun processConditionalBranch(branch: KsonValue?, resolutionType: SchemaResolutionType) {
+            branch ?: return
+            val resolved = resolveRefIfPresent(branch, currentBaseUri)
+            if (resolved.resolvedValue is KsonObject) {
+                val nestedResults = recursiveNavigate(resolved.resolvedValue, resolved.resolvedValueBaseUri)
+                // Unlike navigateThroughCombinators, we always tag results with the
+                // conditional type.  This tagging is what SchemaFilteringService uses
+                // to identify branches that need validation-based filtering.
+                results.addAll(nestedResults.map { ref ->
+                    ref.copy(resolutionType = resolutionType)
+                })
+            }
+        }
+
+        // When we have a document value, evaluate the "if" condition to determine
+        // which branch to include.  This is critical when the "if" condition
+        // checks a sibling property that isn't visible from the target property.
+        val ifCondition = schemaNode.propertyLookup["if"]
+        if (documentValue != null && ifCondition != null) {
+            val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), currentBaseUri, this)
+            if (ifSchema != null) {
+                val conditionMatches = ifSchema.isValid(documentValue, MessageSink())
+                if (conditionMatches) {
+                    processConditionalBranch(schemaNode.propertyLookup["then"], SchemaResolutionType.IF_THEN)
+                } else {
+                    processConditionalBranch(schemaNode.propertyLookup["else"], SchemaResolutionType.IF_ELSE)
+                }
+                return results
+            }
+        }
+
+        // No document value or couldn't parse if condition — include both branches
+        processConditionalBranch(schemaNode.propertyLookup["then"], SchemaResolutionType.IF_THEN)
+        processConditionalBranch(schemaNode.propertyLookup["else"], SchemaResolutionType.IF_ELSE)
+
+        return results
+    }
+
+    /**
      * Navigate an object schema to find all sub-schemas for a property.
      *
      * Handles multiple JSON Schema patterns:
      * 1. Direct property lookup in "properties"
      * 2. Pattern matching via "patternProperties" (can match multiple patterns)
      * 3. Combinator schemas ("allOf", "anyOf", "oneOf")
-     * 4. Fallback to "additionalProperties"
+     * 4. Conditional schemas ("if"/"then"/"else")
+     * 5. Fallback to "additionalProperties"
      *
      * Returns a list because a property can be defined in multiple places:
      * - Multiple patternProperties can match
      * - Property can exist in multiple combinator branches
+     * - Property can exist in both then and else conditional branches
      */
     private fun navigateObjectProperty(
         schemaNode: KsonObject,
         propertyName: String,
-        currentBaseUri: String
+        currentBaseUri: String,
+        documentValue: KsonValue? = null
     ): List<ResolvedRef> {
         val results = mutableListOf<ResolvedRef>()
 
@@ -377,12 +488,22 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             results.addAll(navigateThroughCombinators(
                 schemaNode = schemaNode,
                 currentBaseUri = currentBaseUri,
-                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri) },
+                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri, documentValue) },
                 shouldTagWithCombinator = { it in listOf(
                     SchemaResolutionType.DIRECT_PROPERTY,
                     SchemaResolutionType.PATTERN_PROPERTY,
                     SchemaResolutionType.ADDITIONAL_PROPERTY
                 )}
+            ))
+        }
+
+        // Try if/then/else conditionals
+        if (schemaNode.propertyLookup.containsKey("if")) {
+            results.addAll(navigateThroughConditionals(
+                schemaNode = schemaNode,
+                currentBaseUri = currentBaseUri,
+                documentValue = documentValue,
+                recursiveNavigate = { schema, baseUri -> navigateObjectProperty(schema, propertyName, baseUri, documentValue) }
             ))
         }
 
@@ -603,14 +724,30 @@ enum class SchemaResolutionType {
     ANY_OF,
     /** Schema from "oneOf" combinator - exactly one branch must be valid */
     ONE_OF,
+    /** Schema from "then" branch of an if/then conditional */
+    IF_THEN,
+    /** Schema from "else" branch of an if/then/else conditional */
+    IF_ELSE,
     /** Root schema or schema resolved via $ref */
     ROOT
 }
 
+/**
+ * A schema node resolved during navigation, carrying the context of how it was found.
+ *
+ * @param resolvedValue The schema value at this location
+ * @param resolvedValueBaseUri The base URI for resolving `$ref` within this schema
+ * @param resolutionType How this schema was reached (direct property, combinator branch, etc.)
+ * @param parentBranch For schemas found inside a oneOf/anyOf branch, the branch schema that
+ *   contained this result.  This allows downstream filtering (e.g., [SchemaFilteringService])
+ *   to validate the branch against the parent document object — checking sibling property
+ *   constraints that aren't visible from the leaf schema alone.
+ */
 data class ResolvedRef(
     val resolvedValue: KsonValue,
     val resolvedValueBaseUri: String,
-    val resolutionType: SchemaResolutionType = SchemaResolutionType.ROOT
+    val resolutionType: SchemaResolutionType = SchemaResolutionType.ROOT,
+    val parentBranch: ResolvedRef? = null
 )
 
 /**

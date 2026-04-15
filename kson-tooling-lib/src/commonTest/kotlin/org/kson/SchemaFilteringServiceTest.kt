@@ -1,11 +1,12 @@
 package org.kson
 
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.KsonTooling
 import org.kson.tooling.SchemaFilteringService
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.*
 
 /**
@@ -27,10 +28,10 @@ class SchemaFilteringServiceTest {
         documentPointer: JsonPointer = JsonPointer("")
     ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val parsedDocument = KsonCore.parseToAst(document).ksonValue
+        val parsedDocument = KsonTooling.parse(document)
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, parsedDocument.ksonValue)
         return filteringService.getValidSchemas(candidateSchemas, parsedDocument, documentPointer).map { it.resolvedValue }
     }
 
@@ -270,9 +271,64 @@ class SchemaFilteringServiceTest {
     }
 
     @Test
-    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutIncompatibleBranches() {
-        // Document is a list; both branches expect objects. No branch survives —
-        // only the parent (oneOf container) remains.
+    fun testGetValidSchemas_withIfThen_filtersIncompatibleConditionalBranches() {
+        // allOf with if/then blocks that select a $ref based on a sibling property.
+        // params is only reachable via if/then (no anyOf), isolating the filtering.
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "DogParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "treats": { "type": "integer" }
+                        }
+                    },
+                    "CatParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "naps": { "type": "integer" }
+                        }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
+                    },
+                    {
+                        "if": { "properties": { "kind": { "const": "cat" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val document = """
+            {
+                "kind": "dog",
+                "params": {
+                    "treats": 5
+                }
+            }
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/params"))
+
+        assertEquals(1, validSchemas.size, "Only DogParams should survive filtering")
+
+        val schema0 = validSchemas.single() as org.kson.value.KsonObject
+        val propertyNames = (schema0.propertyLookup["properties"] as? org.kson.value.KsonObject)?.propertyLookup?.keys ?: emptySet()
+        assertTrue("treats" in propertyNames, "DogParams properties should be present, got: $propertyNames")
+    }
+
+    @Test
+    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches() {
         val schema = """
             oneOf:
               - type: object
@@ -291,9 +347,8 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        assertEquals(
-            1, validSchemas.size,
-            "Only the parent schema should remain when target type doesn't match any branch"
-        )
+        // Only the parent oneOf container remains — both branches expect objects
+        // but the document is a list, so neither branch is compatible.
+        assertEquals(1, validSchemas.size, "Only the parent oneOf should remain when no branch matches the document type")
     }
 }
