@@ -46,8 +46,7 @@ test.describe('Iframe Embed', () => {
         expect(newValue).toBe('{ name: "updated" }');
 
         // Verify the iframe editor actually received the new content.
-        const iframeContent = await editorFrame.locator('.view-lines').textContent();
-        expect(iframeContent!.replace(/\u00A0/g, ' ')).toContain('updated');
+        await expect(editorFrame.locator('.view-lines')).toContainText('updated');
 
         // dispose() should remove the iframe.
         await page.evaluate(() => {
