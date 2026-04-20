@@ -179,40 +179,10 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
         for (token in documentPathTokens) {
             val nextNodes = mutableListOf<ResolvedRef>()
-
             for ((node, baseUri) in currentNodes) {
-                if (node !is KsonObject) {
-                    continue
-                }
-
-                // Track $id changes for proper URI resolution
-                var updatedBaseUri = baseUri
-                node.propertyLookup[$$"$id"]?.let { idValue ->
-                    if (idValue is KsonString) {
-                        val fullyQualifiedId = resolveUri(idValue.value, baseUri)
-                        updatedBaseUri = fullyQualifiedId.toString()
-                    }
-                }
-
-                // Determine if this is an array index or property name
-                val isArrayIndex = token.toIntOrNull() != null
-
-                val navigatedNodes = if (isArrayIndex) {
-                    // Array navigation: go to "items" schema
-                    // We ignore the actual index - all array elements use the same schema
-                    navigateArrayItems(node, updatedBaseUri)
-                } else {
-                    // Object navigation: go to "properties" wrapper, then the property
-                    navigateObjectProperty(node, token, updatedBaseUri)
-                }
-
-                // Resolve $ref for each navigated node
-                for (navNode in navigatedNodes) {
-                    val resolved = resolveRefIfPresent(navNode.resolvedValue, navNode.resolvedValueBaseUri)
-                    nextNodes.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, navNode.resolutionType))
-                }
+                if (node !is KsonObject) continue
+                stepOneTokenIntoSchema(node, baseUri, token, nextNodes)
             }
-
             currentNodes = nextNodes
             if (currentNodes.isEmpty()) {
                 break
@@ -220,6 +190,39 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         }
 
         return currentNodes
+    }
+
+    private fun stepOneTokenIntoSchema(
+        node: KsonObject,
+        baseUri: String,
+        token: String,
+        out: MutableList<ResolvedRef>,
+    ) {
+        // Track $id changes for proper URI resolution
+        val idValue = node.propertyLookup[$$"$id"]
+        val updatedBaseUri = if (idValue is KsonString) {
+            resolveUri(idValue.value, baseUri).toString()
+        } else {
+            baseUri
+        }
+
+        // Determine if this is an array index or property name
+        val isArrayIndex = token.toIntOrNull() != null
+
+        val navigatedNodes = if (isArrayIndex) {
+            // Array navigation: go to "items" schema
+            // We ignore the actual index - all array elements use the same schema
+            navigateArrayItems(node, updatedBaseUri)
+        } else {
+            // Object navigation: go to "properties" wrapper, then the property
+            navigateObjectProperty(node, token, updatedBaseUri)
+        }
+
+        // Resolve $ref for each navigated node
+        for (navNode in navigatedNodes) {
+            val resolved = resolveRefIfPresent(navNode.resolvedValue, navNode.resolvedValueBaseUri)
+            out.add(ResolvedRef(resolved.resolvedValue, resolved.resolvedValueBaseUri, navNode.resolutionType))
+        }
     }
 
     /**
@@ -242,10 +245,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         }
 
         // If no items found directly, search through combinators
-        if (results.isEmpty() &&
-            (schemaNode.propertyLookup.containsKey("allOf") ||
-             schemaNode.propertyLookup.containsKey("anyOf") ||
-             schemaNode.propertyLookup.containsKey("oneOf"))) {
+        val hasCombinator = schemaNode.propertyLookup.keys.any { it in combinatorKeywords }
+        if (results.isEmpty() && hasCombinator) {
             results.addAll(navigateThroughCombinators(
                 schemaNode = schemaNode,
                 currentBaseUri = currentBaseUri,
@@ -397,6 +398,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     }
 
     companion object {
+        private val combinatorKeywords = setOf("allOf", "anyOf", "oneOf")
+
         /**
          * Recursively walks a schema value to collect all `$id` entries with fully-qualified URIs.
          *
@@ -626,13 +629,10 @@ private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, cur
     var updatedBaseUri = currentBaseUri
 
     for (token in pointer.tokens) {
-        // Update base URI if current node has a $id property
-        if (node is KsonObject) {
-            node.propertyLookup["\$id"]?.let { idValue ->
-                if (idValue is KsonString) {
-                    updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
-                }
-            }
+        // Update base URI if current node has an $id property
+        val idValue = (node as? KsonObject)?.propertyLookup["\$id"]
+        if (idValue is KsonString) {
+            updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
         }
 
         // Navigate to next node

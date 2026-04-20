@@ -297,6 +297,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
 
     companion object {
         val ignoredTokens = setOf(WHITESPACE, COMMENT)
+        private val commentlessTokenTypes = setOf(COMMENT, WHITESPACE, EMBED_PREAMBLE_NEWLINE, STRING_CONTENT)
     }
 
     private val sourceScanner = SourceScanner(source)
@@ -518,12 +519,12 @@ class Lexer(source: String, gapFree: Boolean = false) {
          * in case the user is mistakenly just starting it with a digit.  We'll give a helpful error
          * in [NumberParser]
          */
-        while (StringUnquoted.isUnquotedBodyChar(sourceScanner.peek())
-            || sourceScanner.peek() == '+'
-            || sourceScanner.peek() == '-'
-            || sourceScanner.peek() == '.') sourceScanner.advance()
+        while (looksLikeNumberChar(sourceScanner.peek())) sourceScanner.advance()
         addLiteralToken(NUMBER)
     }
+
+    private fun looksLikeNumberChar(char: Char?): Boolean =
+        char != null && (StringUnquoted.isUnquotedBodyChar(char) || char == '+' || char == '-' || char == '.')
 
     /**
      * Convenience method for adding a [tokenType] [Token] with a "literal" value---i.e. its value is the
@@ -561,12 +562,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
      */
     private data class CommentMetadata(val comments: List<String>, val lookaheadTokens: List<Token>)
     private fun commentMetadataForCurrentToken(currentTokenType: TokenType): CommentMetadata {
-        // comments don't get associated with these types
-        if (currentTokenType == COMMENT
-            || currentTokenType == WHITESPACE
-            || currentTokenType == EMBED_PREAMBLE_NEWLINE
-            || currentTokenType == STRING_CONTENT
-        ) {
+        if (currentTokenType in commentlessTokenTypes) {
             return CommentMetadata(emptyList(), emptyList())
         }
 

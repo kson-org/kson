@@ -33,42 +33,53 @@ class IndentValidator {
                                     messageType: MessageType,
                                     messageSink: MessageSink) {
         when (node) {
-            is ObjectNode -> {
-                node.properties.forEach { property ->
-                    if (property.location.start.column < minNestingColumn) {
-                        messageSink.error(property.location.trimToFirstLine(), messageType.create())
-                    }
-
-                    if (property is ObjectPropertyNodeImpl) {
-                        validateNodeNesting(property.value, property.key.location.start.column + 1,
-                            OBJECT_PROPERTY_NESTING_ISSUE, messageSink)
-                    }
-                }
-            }
-            is ListNode -> {
-                node.elements.forEach { element ->
-                    if (element.location.start.column < minNestingColumn) {
-                        messageSink.error(element.location.trimToFirstLine(), messageType.create())
-                    }
-
-                    if (element is ListElementNodeImpl) {
-                        val minListNestingColumn = if (element.location.startOffset < element.value.location.startOffset) {
-                            // this list element starts before its value, i.e. has a dash, so ensure its value is nested
-                            element.location.start.column + 1
-                        } else {
-                            // this list element has no dash, so no extra nesting is needed
-                            element.location.start.column
-                        }
-                        validateNodeNesting(element.value, minListNestingColumn, DASH_LIST_ITEMS_NESTING_ISSUE, messageSink)
-                    }
-                }
-            }
+            is ObjectNode -> validateObjectNodeNesting(node, minNestingColumn, messageType, messageSink)
+            is ListNode -> validateListNodeNesting(node, minNestingColumn, messageType, messageSink)
             is EmbedBlockNode, is UnquotedStringNode, is QuotedStringNode,
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
             is KsonValueNodeError -> {
                 if (node.location.start.column < minNestingColumn) {
                     messageSink.error(node.location.trimToFirstLine(), messageType.create())
                 }
+            }
+        }
+    }
+
+    private fun validateObjectNodeNesting(
+        node: ObjectNode,
+        minNestingColumn: Int,
+        messageType: MessageType,
+        messageSink: MessageSink,
+    ) {
+        node.properties.forEach { property ->
+            if (property.location.start.column < minNestingColumn) {
+                messageSink.error(property.location.trimToFirstLine(), messageType.create())
+            }
+            if (property is ObjectPropertyNodeImpl) {
+                validateNodeNesting(property.value, property.key.location.start.column + 1,
+                    OBJECT_PROPERTY_NESTING_ISSUE, messageSink)
+            }
+        }
+    }
+
+    private fun validateListNodeNesting(
+        node: ListNode,
+        minNestingColumn: Int,
+        messageType: MessageType,
+        messageSink: MessageSink,
+    ) {
+        node.elements.forEach { element ->
+            if (element.location.start.column < minNestingColumn) {
+                messageSink.error(element.location.trimToFirstLine(), messageType.create())
+            }
+            if (element is ListElementNodeImpl) {
+                // an element with a dash has location offset before its value, so its value must sit one column deeper
+                val minListNestingColumn = if (element.location.startOffset < element.value.location.startOffset) {
+                    element.location.start.column + 1
+                } else {
+                    element.location.start.column
+                }
+                validateNodeNesting(element.value, minListNestingColumn, DASH_LIST_ITEMS_NESTING_ISSUE, messageSink)
             }
         }
     }

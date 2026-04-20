@@ -50,6 +50,10 @@ import org.kson.stdlibx.exceptions.FatalParseException
  */
 class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int = DEFAULT_MAX_NESTING_LEVEL) {
 
+    companion object {
+        private val reservedKeywordTokens = setOf(NULL, TRUE, FALSE)
+    }
+
     /**
      * root -> ksonValue <end-of-file>
      */
@@ -538,10 +542,8 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         val keywordMark = builder.mark()
 
         // helpful errors for keywords that clash with reserved words
-        if ((builder.getTokenType() == NULL
-                    || builder.getTokenType() == TRUE
-                    || builder.getTokenType() == FALSE
-                ) && builder.lookAhead(1) == COLON) {
+        val isReservedWordKey = builder.getTokenType() in reservedKeywordTokens && builder.lookAhead(1) == COLON
+        if (isReservedWordKey) {
             val reservedWord = builder.getTokenText()
             builder.advanceLexer()
             keywordMark.error(OBJECT_KEYWORD_RESERVED_WORD.create(reservedWord))

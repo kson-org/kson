@@ -38,34 +38,7 @@ internal object SelectionRangeBuilder {
         val range = value.toRange()
 
         when (value) {
-            is KsonObject -> {
-                for ((_, prop) in value.propertyMap) {
-                    val keyLoc = prop.propName.location
-                    val valueLoc = prop.propValue.location
-
-                    val propertyRange = Range(
-                        keyLoc.start.line, keyLoc.start.column,
-                        valueLoc.end.line, valueLoc.end.column
-                    )
-
-                    if (containsPosition(propertyRange, cursor)) {
-                        val descendedIntoValue = collectAncestors(prop.propValue, cursor, ancestors)
-
-                        if (!descendedIntoValue) {
-                            // Cursor is on the key itself
-                            val keyRange = prop.propName.toRange()
-                            if (containsPosition(keyRange, cursor)) {
-                                ancestors.add(keyRange)
-                            }
-                        }
-
-                        ancestors.add(propertyRange)
-                        ancestors.add(range)
-                        return true
-                    }
-                }
-            }
-
+            is KsonObject -> if (collectObjectAncestors(value, cursor, ancestors, range)) return true
             is KsonList -> {
                 for (element in value.elements) {
                     if (collectAncestors(element, cursor, ancestors)) {
@@ -86,6 +59,36 @@ internal object SelectionRangeBuilder {
         // Leaf node or cursor is on container delimiters (e.g. { or })
         ancestors.add(range)
         return true
+    }
+
+    private fun collectObjectAncestors(
+        value: KsonObject,
+        cursor: Coordinates,
+        ancestors: MutableList<Range>,
+        containerRange: Range,
+    ): Boolean {
+        for ((_, prop) in value.propertyMap) {
+            val keyLoc = prop.propName.location
+            val valueLoc = prop.propValue.location
+            val propertyRange = Range(
+                keyLoc.start.line, keyLoc.start.column,
+                valueLoc.end.line, valueLoc.end.column
+            )
+            if (!containsPosition(propertyRange, cursor)) continue
+
+            val descendedIntoValue = collectAncestors(prop.propValue, cursor, ancestors)
+            if (!descendedIntoValue) {
+                // Cursor is on the key itself
+                val keyRange = prop.propName.toRange()
+                if (containsPosition(keyRange, cursor)) {
+                    ancestors.add(keyRange)
+                }
+            }
+            ancestors.add(propertyRange)
+            ancestors.add(containerRange)
+            return true
+        }
+        return false
     }
 
     private fun deduplicate(ranges: List<Range>): List<Range> {

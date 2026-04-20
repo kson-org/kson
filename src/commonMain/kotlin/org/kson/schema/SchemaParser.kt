@@ -51,6 +51,7 @@ object SchemaParser {
         }
     }
 
+    @Suppress("NestedBlockDepth") // baselined as LongMethod/CyclomaticComplexMethod; a full refactor is its own story
     private fun parseObjectSchema(
         schemaObject: KsonObject,
         messageSink: MessageSink,

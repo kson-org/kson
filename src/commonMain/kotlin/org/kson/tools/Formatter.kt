@@ -94,6 +94,7 @@ class IndentFormatter(
         "This formatter is no long a good general purpose formatter. " +
                 "See the TODO in this class's doc for details"
     )
+    @Suppress("NestedBlockDepth")
     private fun indent(source: String, snippetNestingLevel: Int? = null): String {
         if (source.isBlank() && snippetNestingLevel == null) return ""
         val tokens = Lexer(source, gapFree = true).tokenize()
@@ -275,12 +276,14 @@ class IndentFormatter(
         val indent = indentType.indentString.repeat(nestingLevel)
         val lines = content.split('\n')
 
+        val contentHasTrailingNewline = content.endsWith('\n')
         return lines.mapIndexed { index, line ->
             /**
              * If [content] ends in a newline, the next line does not belong to it,
              * so don't indent it unless our caller demands it
              */
-            if (!keepTrailingIndent && index == lines.lastIndex && line.isEmpty() && content.endsWith('\n')) {
+            val isDanglingTrailingLine = index == lines.lastIndex && line.isEmpty() && contentHasTrailingNewline
+            if (!keepTrailingIndent && isDanglingTrailingLine) {
                 line
             } else {
                 indent + line
@@ -293,6 +296,7 @@ class IndentFormatter(
      * Note: trims leading whitespace tokens/lines, and may gather multiple lines of underlying source in one logical
      *   "token line" when appropriate
      */
+    @Suppress("NestedBlockDepth") // this helper is only used by the @Deprecated `indent` above
     private fun splitTokenLines(tokens: List<Token>): MutableList<List<Token>> {
         val tokenLines = mutableListOf<List<Token>>()
         var currentLine = mutableListOf<Token>()
