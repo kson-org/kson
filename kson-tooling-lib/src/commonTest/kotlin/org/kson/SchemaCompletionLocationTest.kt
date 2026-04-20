@@ -31,6 +31,69 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testConstValueCompletions() {
+        val schema = """
+            {
+                type: object
+                properties: {
+                    status: {
+                        const: "active"
+                        description: "Always active"
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                status: "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions for const value")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("active"), labels, "Should offer only the const value")
+    }
+
+    @Test
+    fun testIfThenNarrowsConstValueForSiblingProperty() {
+        // if/then narrows a property to a const based on a sibling value
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" },
+                    "breed": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "kind": { "const": "dog" } },
+                            "required": ["kind"]
+                        },
+                        "then": {
+                            "properties": {
+                                "breed": { "const": "labrador" }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "kind": "dog",
+                "breed": "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertTrue("labrador" in labels, "Should include const from matching if/then, got: $labels")
+    }
+
+    @Test
     fun testEnumValueCompletions() {
         val schema = """
             {
