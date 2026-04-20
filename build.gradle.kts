@@ -221,6 +221,9 @@ fun applyDetekt(project: Project) = with(project) {
         config.setFrom(files("$rootDir/detekt.yml"))
         basePath = rootDir.absolutePath
         source.setFrom(files("src"))
+        // Known structural findings on the existing codebase are grandfathered per-module.
+        // New code is still scrutinized against the rules.
+        baseline = file("detekt-baseline.xml")
     }
     val transpileConfig = rootProject.tasks.named("transpileDetektConfigTask")
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
@@ -232,5 +235,8 @@ fun applyDetekt(project: Project) = with(project) {
             sarif.required.set(false)
             md.required.set(false)
         }
+    }
+    tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+        dependsOn(transpileConfig)
     }
 }

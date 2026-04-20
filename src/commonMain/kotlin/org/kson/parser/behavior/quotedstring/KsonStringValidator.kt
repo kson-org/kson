@@ -20,6 +20,7 @@ import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.FatalParseException
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
  * Validates that all strings for a given [KsonRoot] contain only valid KSON strings, i.e. strings which exactly follow
@@ -207,7 +208,7 @@ class KsonStringValidator {
         fun peek(): Char = if (!eof()) {
             source[currentIndex]
         } else {
-            throw RuntimeException("`eof()` should be checked before calling this")
+            throw ShouldNotHappenException("`eof()` should be checked before calling this")
         }
 
         fun advance() {

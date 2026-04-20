@@ -2,6 +2,7 @@ package org.kson.jetbrains.parser
 
 import com.intellij.psi.tree.IElementType
 import org.kson.stdlibx.collections.toImmutableMap
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.jetbrains.KsonLanguage
 import org.kson.parser.ElementType
 import org.kson.parser.TokenType
@@ -21,13 +22,13 @@ import org.kson.parser.ParsedElementType
 fun elem(elementType: ElementType): IElementType {
     if (elementType is TokenType) {
         return LEXED_ELEMENT[elementType]
-            ?: throw RuntimeException("Bug: all " + TokenType::class.simpleName + " items should be defined in this map")
+            ?: throw ShouldNotHappenException("Bug: all " + TokenType::class.simpleName + " items should be defined in this map")
     } else if (elementType is ParsedElementType) {
         return PARSED_ELEMENT[elementType]
-            ?: throw RuntimeException("Bug: all " + ParsedElementType::class.simpleName + " items should be defined in this map")
+            ?: throw ShouldNotHappenException("Bug: all " + ParsedElementType::class.simpleName + " items should be defined in this map")
     }
 
-    throw RuntimeException("Bug: all " + ElementType::class.simpleName + " instances should be defined in the above maps")
+    throw ShouldNotHappenException("Bug: all " + ElementType::class.simpleName + " instances should be defined in the above maps")
 }
 
 /**

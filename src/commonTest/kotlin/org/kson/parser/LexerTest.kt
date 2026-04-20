@@ -1,6 +1,7 @@
 package org.kson.parser
 
 import org.kson.parser.TokenType.*
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -71,7 +72,7 @@ class LexerTest {
         // automatically clip off the always-trailing EOF so test-writers don't need to worry about it
         val eofToken = tokens.last()
         if (eofToken.tokenType != EOF) {
-            throw Exception("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
+            throw ShouldNotHappenException("Tokenize should always produce a list of tokens ending in EOF... what's going on?")
         }
 
         // assert EOF renders how we want when we render token lists to strings

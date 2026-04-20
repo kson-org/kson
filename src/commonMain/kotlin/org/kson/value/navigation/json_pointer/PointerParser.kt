@@ -83,7 +83,7 @@ abstract class PointerParser(internal val pointerString: String) {
         if (!jsonPointer()) {
             return ParseResult.Error(
                 error
-                    ?: throw RuntimeException("must always set `error` for a failed parse")
+                    ?: throw ShouldNotHappenException("must always set `error` for a failed parse")
             )
         }
 

@@ -1,5 +1,7 @@
 package org.kson.parser.messages
 
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
+
 /**
  * Severity levels for messages
  */
@@ -208,10 +210,8 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badControlCharArg = parsedArgs.getArg("Control Character")
-            if (badControlCharArg?.length != 1) {
-                throw IllegalArgumentException("Expected arg to be a single control character")
-            }
-            val badControlChar = badControlCharArg[0]
+            require(badControlCharArg?.length == 1) { "Expected arg to be a single control character" }
+            val badControlChar = badControlCharArg!![0]
 
             return "Non-whitespace control characters must not be embedded directly in strings. " +
                     "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
@@ -875,17 +875,15 @@ enum class MessageType(
     fun create(vararg args: String?): Message {
         val givenArgs = ArrayList<String>()
         for ((index, value) in args.withIndex()) {
-            if (value == null) {
-                throw IllegalArgumentException(
-                    "Illegal `null` arg at position $index of the given `args`.  Message arguments must not be `null`."
-                )
+            requireNotNull(value) {
+                "Illegal `null` arg at position $index of the given `args`.  Message arguments must not be `null`."
             }
             givenArgs.add(value)
         }
         val expectedArgs = expectedArgs()
         val numExpectedArgs = expectedArgs.size
         if (givenArgs.size != numExpectedArgs) {
-            throw RuntimeException(
+            throw ShouldNotHappenException(
                 "`${this::class.simpleName}.${this::create.name}` requires $numExpectedArgs arg(s) for: ${
                     renderArgList(expectedArgs, "`")
                 }, but got ${givenArgs.size}: " + renderArgList(givenArgs)

@@ -106,7 +106,7 @@ class IndentFormatter(
          */
         val nesting = ArrayDeque<TokenType>()
         if (snippetNestingLevel != null) {
-            for (i in 1..snippetNestingLevel) {
+            repeat(snippetNestingLevel) {
                 /**
                  * We'll denote our snippet nests with the [WHITESPACE] token since they
                  * are "synthetic" nests represent indents to preserve in the input
@@ -225,7 +225,7 @@ class IndentFormatter(
                 result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
             }
 
-            for (i in 1..toBeClosedNestCount) {
+            repeat(toBeClosedNestCount) {
                 if (nextNests.isNotEmpty()) {
                     nextNests.removeLastOrNull()
                 } else if (nesting.isNotEmpty()) {

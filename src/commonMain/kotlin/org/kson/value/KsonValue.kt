@@ -219,7 +219,7 @@ fun AstNode.toKsonValue(): KsonValue {
         /**
          * Must have a fully valid [AstNodeImpl] to create an [KsonValue] for it
          */
-        throw RuntimeException("Cannot create ${KsonValue::class.simpleName} Node from a ${this::class.simpleName}")
+        throw ShouldNotHappenException("Cannot create ${KsonValue::class.simpleName} Node from a ${this::class.simpleName}")
     }
     return when (this) {
         is KsonRootImpl -> rootNode.toKsonValue()
