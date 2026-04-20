@@ -19,14 +19,13 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 /**
- * Service for filtering schemas based on validation against document content.
+ * Filters JSON Schema combinator (oneOf/anyOf/allOf) and conditional (if/then/else)
+ * branches by the document content, so IDE features only see compatible schemas.
  *
- * This service handles the validation-based filtering logic for JSON Schema combinators
- * (oneOf/anyOf/allOf) and conditionals (if/then/else), ensuring that only compatible
- * schemas are used for IDE features like completions, hover info, and jump-to-definition.
- *
- * The filtering uses a "soft" validation approach: a schema is included if the existing
- * properties don't contradict it, even if required properties are missing.
+ * Validation is "soft": a schema survives if existing properties don't contradict it,
+ * even if required properties are missing.  [getValidSchemas] runs sibling-compat
+ * first (uses the partial value, works on broken documents) then leaf validation
+ * (uses the full value); each pass skips when its input has nothing to filter.
  */
 class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
 
