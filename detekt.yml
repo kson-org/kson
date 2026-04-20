@@ -1,0 +1,47 @@
+# !!!!!
+# THIS FILE IS AUTO-GENERATED FROM detekt.kson
+# DO NOT EDIT! IT WILL BE OVERWRITTEN ON NEXT BUILD
+# TO MODIFY, EDIT detekt.kson AND RUN ANY GRADLE TASK
+# !!!!!
+build:
+  maxIssues: 0
+# Overrides on top of the packaged detekt defaults.
+# See https://detekt.dev/docs/rules/overview for all available rules.
+complexity:
+  LongMethod:
+    active: true
+    threshold: 80
+
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 8
+
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 25
+    thresholdInClasses: 25
+    thresholdInInterfaces: 25
+    thresholdInObjects: 25
+    thresholdInEnums: 25
+
+
+style:
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+  WildcardImport:
+    active: false
+  ReturnCount:
+    active: true
+    max: 6
+
+  ForbiddenComment:
+    active: false
+
+naming:
+  PackageNaming:
+    active: false
