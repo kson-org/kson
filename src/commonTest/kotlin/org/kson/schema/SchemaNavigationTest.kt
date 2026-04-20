@@ -715,8 +715,7 @@ class SchemaNavigationTest {
 
     @Test
     fun testNavigateAllOfWithIfThen() {
-        // This mirrors the orchestra.schema.kson pattern:
-        // allOf contains if/then blocks that conditionally constrain properties
+        // allOf contains if/then blocks that select a $ref based on a sibling property
         val schema = """
             {
                 "${'$'}defs": {

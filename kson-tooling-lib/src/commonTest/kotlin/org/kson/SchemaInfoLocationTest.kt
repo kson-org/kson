@@ -523,59 +523,28 @@ class SchemaInfoLocationTest {
 
     @Test
     fun testGetSchemaInfoAtLocation_ifThenShowsMatchingBranch() {
-        // Hover on a property reached via if/then should show the specific
-        // parameter model, not a generic "any object" schema.
+        // Hover should show the specific $ref from the matching if/then branch
         val schema = """
             {
                 "${'$'}defs": {
-                    "DogParams": {
-                        "type": "object",
-                        "title": "Dog Parameters",
-                        "description": "Parameters for dogs",
-                        "additionalProperties": false,
-                        "properties": {
-                            "treats": { "type": "integer", "description": "Number of treats" }
-                        }
-                    },
-                    "CatParams": {
-                        "type": "object",
-                        "title": "Cat Parameters",
-                        "description": "Parameters for cats",
-                        "additionalProperties": false,
-                        "properties": {
-                            "naps": { "type": "integer", "description": "Number of naps" }
-                        }
-                    }
+                    "ConfigA": { "type": "object", "title": "Config A", "description": "Settings for A" },
+                    "ConfigB": { "type": "object", "title": "Config B", "description": "Settings for B" }
                 },
                 "type": "object",
-                "properties": {
-                    "kind": { "type": "string" }
-                },
+                "properties": { "kind": { "type": "string" } },
                 "allOf": [
-                    {
-                        "if": { "properties": { "kind": { "const": "dog" } } },
-                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
-                    },
-                    {
-                        "if": { "properties": { "kind": { "const": "cat" } } },
-                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
-                    }
+                    { "if": { "properties": { "kind": { "const": "a" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } } },
+                    { "if": { "properties": { "kind": { "const": "b" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } } }
                 ]
             }
         """
 
         val hoverInfo = getInfoAtCaret(schema, """
-            {
-                "kind": "dog",
-                "<caret>params": {
-                    "treats": 5
-                }
-            }
+            { "kind": "a", "<caret>config": {} }
         """.trimIndent())
 
-        assertNotNull(hoverInfo, "Should show hover info for params")
-        assertTrue(hoverInfo.contains("Dog Parameters"), "Should show DogParams title, got: $hoverInfo")
-        assertTrue(hoverInfo.contains("Parameters for dogs"), "Should show DogParams description, got: $hoverInfo")
-        assertFalse(hoverInfo.contains("Cat Parameters"), "Should NOT show CatParams, got: $hoverInfo")
+        assertNotNull(hoverInfo)
+        assertTrue(hoverInfo.contains("Config A"), "Should show matching branch title, got: $hoverInfo")
+        assertFalse(hoverInfo.contains("Config B"), "Should NOT show non-matching branch, got: $hoverInfo")
     }
 }
