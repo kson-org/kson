@@ -30,34 +30,32 @@ import kotlin.js.JsExport
 class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
 
     /**
-     * Get valid schemas for a document path, applying expansion and two-pass filtering.
+     * Get valid schemas for a document path, applying two-pass filtering.
      *
-     * This function:
-     * 1. Expands combinator schemas (oneOf/anyOf/allOf) and conditionals (if/then/else) into individual branches
-     * 2. Filters oneOf/anyOf branches by sibling property constraints (using [ToolingDocument.partialKsonValue])
-     * 3. Filters remaining branches by leaf-level validation (using [ToolingDocument.ksonValue])
+     * Navigation already flattens combinators and conditionals into individual branches
+     * at every level, so this function only needs to:
+     * 1. Filter oneOf/anyOf branches by sibling property constraints (using [ToolingDocument.partialKsonValue])
+     * 2. Filter remaining branches by leaf-level validation (using [ToolingDocument.ksonValue])
      *
      * The two passes use different document values because sibling filtering must work
      * even when the document has parse errors at the cursor position (where only the
      * partial value is available), while leaf validation needs the fully parsed tree.
      *
-     * @param candidateSchemas The schemas found at the document path
+     * @param candidateSchemas The schemas found at the document path (already flattened)
      * @param document The parsed document providing both full and partial value trees
      * @param documentPointer The [JsonPointer] to the location in the document
-     * @return List of valid schemas after expansion and filtering
+     * @return List of valid schemas after filtering
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
         document: ToolingDocument,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
-        val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
-
         val partialDocumentValue = document.partialKsonValue
         val afterSiblingFilter = if (partialDocumentValue != null) {
-            filterBySiblingCompatibility(expandedSchemas, partialDocumentValue, documentPointer)
+            filterBySiblingCompatibility(candidateSchemas, partialDocumentValue, documentPointer)
         } else {
-            expandedSchemas
+            candidateSchemas
         }
 
         val hasBranchesThatRequireValidation = afterSiblingFilter.any { ref ->

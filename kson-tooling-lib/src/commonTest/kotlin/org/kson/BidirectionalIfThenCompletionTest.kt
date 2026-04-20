@@ -2,7 +2,9 @@ package org.kson
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * End-to-end tests for bidirectional if/then completion narrowing.
@@ -134,5 +136,65 @@ class BidirectionalIfThenCompletionTest : SchemaCompletionTest {
             """{"job": "<caret>"}""",
             listOf("DBT_RUN", "DBT_TEST", "SNOW_QUERY", "SNOW_TEST"),
             "Without integration sibling, all jobs should be offered")
+    }
+
+    /**
+     * Regression: when `if` matches at the root, the `else` branch's properties
+     * must not leak into property completions.  Previously a doc-blind expansion
+     * pass ran after navigation and emitted both branches; soft validation couldn't
+     * see the `if` predicate (which lives on the parent) and both properties
+     * survived.  Navigation now flattens conditionals doc-aware at every level,
+     * including the target.
+     */
+    @Test
+    fun testIfMatchesRootDoesNotLeakElseBranch() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": { "kind": { "type": "string" } },
+                "if":   { "properties": { "kind": { "const": "dog" } }, "required": ["kind"] },
+                "then": { "properties": { "bark": { "type": "boolean" } } },
+                "else": { "properties": { "meow": { "type": "boolean" } } }
+            }
+        """
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "kind": "dog",
+                <caret>
+            }
+        """.trimIndent())
+        assertNotNull(completions)
+        val labels = completions.map { it.label }.sorted()
+        assertTrue("bark" in labels, "bark must be present when if matches, got: $labels")
+        assertFalse("meow" in labels, "meow must not leak from else when if matches, got: $labels")
+    }
+
+    /**
+     * Analog to [testIfMatchesRootDoesNotLeakElseBranch] one level deeper: a property
+     * whose schema body is itself an if/then/else must narrow based on that property's
+     * own document value, not leak both branches.
+     */
+    @Test
+    fun testIfMatchesNestedPropertyDoesNotLeakElseBranch() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "properties": { "kind": { "type": "string" } },
+                        "if":   { "properties": { "kind": { "const": "dog" } }, "required": ["kind"] },
+                        "then": { "properties": { "bark": { "type": "boolean" } } },
+                        "else": { "properties": { "meow": { "type": "boolean" } } }
+                    }
+                }
+            }
+        """
+        val completions = getCompletionsAtCaret(schema,
+            """{ "config": { <caret> "kind": "dog" } }""")
+        assertNotNull(completions)
+        val labels = completions.map { it.label }.sorted()
+        assertTrue("bark" in labels, "bark must be present when nested if matches, got: $labels")
+        assertFalse("meow" in labels, "meow must not leak from nested else when if matches, got: $labels")
     }
 }

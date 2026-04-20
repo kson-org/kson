@@ -10,6 +10,7 @@ import org.kson.value.KsonString as InternalKsonString
 import org.kson.value.KsonBoolean as InternalKsonBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 
 class SchemaNavigationTest {
@@ -447,6 +448,45 @@ class SchemaNavigationTest {
         assertEquals("string", ((uuidResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
+    /**
+     * When a property's schema body has its own oneOf, flatten's inner branches must
+     * carry *themselves* (the nearest-enclosing branch) as [ResolvedRef.parentBranch] —
+     * not the outer oneOf wrapper reached during navigation.  Sibling-compatibility
+     * filtering validates the parentBranch's declared properties against document
+     * siblings; using the outer wrapper's properties instead of the inner branch would
+     * filter against the wrong constraint set.
+     */
+    @Test
+    fun testNestedOneOfUsesNearestEnclosingAsParentBranch() {
+        val schema = """
+            {
+                "oneOf": [
+                    {
+                        "properties": {
+                            "config": {
+                                "oneOf": [
+                                    { "title": "InnerA", "properties": { "foo": { "type": "string" } } },
+                                    { "title": "InnerB", "properties": { "bar": { "type": "string" } } }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+        val results = navigateSchemaFull(schema, listOf("config"))
+        // [configParent, innerA, innerB]
+        assertEquals(3, results.size)
+        val innerAParent = results[1].parentBranch?.resolvedValue as? InternalKsonObject
+        val innerBParent = results[2].parentBranch?.resolvedValue as? InternalKsonObject
+        assertNotNull(innerAParent)
+        assertNotNull(innerBParent)
+        assertEquals("InnerA", (innerAParent.propertyLookup["title"] as? InternalKsonString)?.value,
+            "parentBranch of inner A must be the inner branch itself, not the outer oneOf wrapper")
+        assertEquals("InnerB", (innerBParent.propertyLookup["title"] as? InternalKsonString)?.value,
+            "parentBranch of inner B must be the inner branch itself, not the outer oneOf wrapper")
+    }
+
     @Test
     fun testNavigateAllOf() {
         val schema = """
@@ -537,9 +577,15 @@ class SchemaNavigationTest {
                     - '${'$'}ref': '#/${'$'}defs/NumberType'
         """
 
-        // This test verifies that navigation works when anyOf contains $ref
+        // Navigation flattens at every level. Stepping "0" lands on the array branch's
+        // items schema (which is itself an anyOf over NumberType), and flatten at the
+        // target expands that inner anyOf: parent items + one resolved NumberType branch.
         val results = navigateSchema(schema, listOf("0"))
-        assertEquals(1, results.size, "Root schema should return single result")
+        assertEquals(2, results.size, "Expected items parent + one flattened anyOf branch")
+        val itemsSchema = results[0] as InternalKsonObject
+        assertNotNull(itemsSchema.propertyLookup["anyOf"], "First result should be the items schema with its inner anyOf")
+        val numberBranch = results[1] as InternalKsonObject
+        assertEquals("number", (numberBranch.propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -571,13 +617,20 @@ class SchemaNavigationTest {
               - '${'$'}ref': '#/${'$'}defs/ComplexRecipe'
         """
 
+        // Navigation reaches the context property via the outer anyOf → $ref → properties.
+        // flatten runs at every level, so the context's own inner anyOf (object | null)
+        // is expanded too: context parent + 2 flattened branches = 3 results.
         val results = navigateSchema(schema, listOf("context"))
-        assertEquals(1, results.size, "Should find context property through anyOf → \$ref")
+        assertEquals(3, results.size, "Expected context schema + 2 inner anyOf branches")
 
-        val contextSchema = results.single() as InternalKsonObject
+        val contextSchema = results[0] as InternalKsonObject
         assertEquals("Context", (contextSchema.propertyLookup["title"] as? InternalKsonString)?.value)
         assertEquals("Defines arbitrary key-value pairs for Jinja interpolation",
                      (contextSchema.propertyLookup["description"] as? InternalKsonString)?.value)
+        val branchTypes = results.drop(1).map {
+            ((it as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+        }
+        assertEquals(listOf("object", "null"), branchTypes, "Inner anyOf branches should be object and null")
     }
 
     @Test
