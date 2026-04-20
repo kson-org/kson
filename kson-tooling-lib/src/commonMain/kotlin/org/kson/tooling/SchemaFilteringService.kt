@@ -9,7 +9,6 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
-import org.kson.schema.SchemaResolutionType
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -104,7 +103,7 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * pinned by `testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches`.
      */
     private fun requiresValidationFiltering(ref: ResolvedRef): Boolean {
-        return ref.resolutionType in FILTERABLE_RESOLUTION_TYPES ||
+        return ref.resolutionType.requiresValidationFiltering ||
             (ref.resolvedValue as? KsonObject)?.let { obj ->
                 obj.propertyLookup.containsKey("oneOf") ||
                 obj.propertyLookup.containsKey("anyOf") ||
@@ -140,14 +139,12 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
             ?: return candidateSchemas
 
         val filtered = candidateSchemas.filter { ref ->
-            when (ref.resolutionType) {
-                // For anyOf/oneOf and if/then/else, check if the current document state is compatible
-                SchemaResolutionType.ANY_OF,
-                SchemaResolutionType.ONE_OF,
-                SchemaResolutionType.IF_THEN,
-                SchemaResolutionType.IF_ELSE -> isSchemaValidForDocument(ref, targetValue)
-                // For all other types (direct property, allOf, etc.), include them
-                else -> true
+            // Only check branches whose inclusion is conditional (oneOf/anyOf, if/then/else);
+            // direct properties, allOf, and friends always apply.
+            if (ref.resolutionType.requiresValidationFiltering) {
+                isSchemaValidForDocument(ref, targetValue)
+            } else {
+                true
             }
         }
 
@@ -156,8 +153,8 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         // unfiltered set in that case.  Structural targets reflect committed intent.
         val isScalarTarget = targetValue !is KsonObject && targetValue !is KsonList
         if (isScalarTarget) {
-            val filterableBefore = candidateSchemas.count { it.resolutionType in FILTERABLE_RESOLUTION_TYPES }
-            val filterableAfter = filtered.count { it.resolutionType in FILTERABLE_RESOLUTION_TYPES }
+            val filterableBefore = candidateSchemas.count { it.resolutionType.requiresValidationFiltering }
+            val filterableAfter = filtered.count { it.resolutionType.requiresValidationFiltering }
             if (filterableBefore > 0 && filterableAfter == 0) return candidateSchemas
         }
         return filtered
@@ -271,18 +268,6 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         private val IGNORABLE_ERROR_TYPES = setOf(
             MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING,
             MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES
-        )
-
-        /**
-         * Resolution types that require validation-based filtering.
-         * These are schema branches where multiple alternatives exist and
-         * only compatible ones should be shown.
-         */
-        private val FILTERABLE_RESOLUTION_TYPES = setOf(
-            SchemaResolutionType.ANY_OF,
-            SchemaResolutionType.ONE_OF,
-            SchemaResolutionType.IF_THEN,
-            SchemaResolutionType.IF_ELSE
         )
     }
 }

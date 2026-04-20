@@ -6,7 +6,6 @@ import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
-import org.kson.schema.SchemaResolutionType
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import org.kson.value.KsonValue as InternalKsonValue
@@ -111,23 +110,6 @@ internal object SchemaInformation{
 }
 
 /**
- * Resolution types where schemas constrain each other (intersection semantics).
- * A value must satisfy ALL reductive schemas simultaneously, so value completions
- * from these schemas are intersected (e.g., a base property's enum intersected with
- * an if/then branch's narrower enum or const).
- */
-private val REDUCTIVE_RESOLUTION_TYPES = setOf(
-    SchemaResolutionType.DIRECT_PROPERTY,
-    SchemaResolutionType.PATTERN_PROPERTY,
-    SchemaResolutionType.ADDITIONAL_PROPERTY,
-    SchemaResolutionType.ARRAY_ITEMS,
-    SchemaResolutionType.ALL_OF,
-    SchemaResolutionType.IF_THEN,
-    SchemaResolutionType.IF_ELSE,
-    SchemaResolutionType.ROOT
-)
-
-/**
  * Extract completions from resolved schemas, applying JSON Schema narrowing semantics.
  *
  * JSON Schema combinators have different semantics for completions:
@@ -141,8 +123,8 @@ private val REDUCTIVE_RESOLUTION_TYPES = setOf(
  * @return Deduplicated list of completion items respecting narrowing semantics
  */
 private fun extractCompletionsWithNarrowing(resolvedSchemas: List<ResolvedRef>): List<CompletionItem> {
-    val reductive = resolvedSchemas.filter { it.resolutionType in REDUCTIVE_RESOLUTION_TYPES }
-    val additive = resolvedSchemas.filter { it.resolutionType !in REDUCTIVE_RESOLUTION_TYPES }
+    val reductive = resolvedSchemas.filter { it.resolutionType.isReductive }
+    val additive = resolvedSchemas.filter { !it.resolutionType.isReductive }
 
     // Get completions from each reductive schema separately
     val perSchemaCompletions = reductive.map { it.resolvedValue.extractCompletions() }
