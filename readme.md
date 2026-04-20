@@ -94,6 +94,31 @@ We welcome you to dive in this project to explore, experiment, or contribute. A 
 ./gradlew jvmTest --continuous --tests "org.kson.parser.LexerTest" 
 ```
 
+#### Static analysis (detekt)
+
+[Detekt](https://detekt.dev) runs on every Kotlin module. Rule config lives in
+[`detekt.kson`](detekt.kson), which is transpiled to `detekt.yml` at build time
+(the `.yml` is gitignored — edit the `.kson` instead).
+
+Each module carries a `detekt-baseline.xml` file listing grandfathered findings
+from before detekt was introduced. Detekt ignores these existing issues but
+still fails the build on anything new, so new code is held to the current
+rules while pre-existing debt can be paid down incrementally.
+
+To refresh the baselines after paying down debt (or after tightening rules):
+
+```sh
+# 1. Must be green first — proves no NEW findings are hiding
+./gradlew detekt
+
+# 2. Regenerate the baseline snapshots against current findings
+./gradlew detektBaseline
+
+# 3. Diff should only show <ID> lines being removed. If anything is added,
+#    step 1 didn't really pass.
+git diff '**/detekt-baseline.xml'
+```
+
 ## Releases
 
 - See the [Tags](https://github.com/kson-org/kson/tags) page for the list of released KSON versions.
