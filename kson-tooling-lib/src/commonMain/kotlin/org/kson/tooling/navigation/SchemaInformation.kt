@@ -6,6 +6,7 @@ import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
+import org.kson.schema.SchemaResolutionType
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import org.kson.value.KsonValue as InternalKsonValue
@@ -73,9 +74,7 @@ internal object SchemaInformation{
         documentValue: InternalKsonValue? = null
     ): List<CompletionItem> {
         val resolvedSchemas = validSchemas ?: SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
-        val allCompletions = resolvedSchemas
-            .flatMap { it.resolvedValue.extractCompletions() }
-            .distinctBy { it.label } // Remove duplicates based on label
+        val allCompletions = extractCompletionsWithNarrowing(resolvedSchemas)
 
         // Only filter if:
         // 1. Document value is provided
@@ -109,6 +108,81 @@ internal object SchemaInformation{
             }
         }
     }
+}
+
+/**
+ * Resolution types where schemas constrain each other (intersection semantics).
+ * A value must satisfy ALL reductive schemas simultaneously, so value completions
+ * from these schemas are intersected (e.g., a base property's enum intersected with
+ * an if/then branch's narrower enum or const).
+ */
+private val REDUCTIVE_RESOLUTION_TYPES = setOf(
+    SchemaResolutionType.DIRECT_PROPERTY,
+    SchemaResolutionType.PATTERN_PROPERTY,
+    SchemaResolutionType.ADDITIONAL_PROPERTY,
+    SchemaResolutionType.ARRAY_ITEMS,
+    SchemaResolutionType.ALL_OF,
+    SchemaResolutionType.IF_THEN,
+    SchemaResolutionType.IF_ELSE,
+    SchemaResolutionType.ROOT
+)
+
+/**
+ * Extract completions from resolved schemas, applying JSON Schema narrowing semantics.
+ *
+ * JSON Schema combinators have different semantics for completions:
+ * - **Reductive** (allOf, if/then/else, direct properties): a value must satisfy all
+ *   schemas simultaneously. When multiple reductive schemas provide value completions,
+ *   only values present in ALL schemas are valid (intersection semantics).
+ * - **Additive** (anyOf, oneOf): a value must satisfy at least one branch.
+ *   Completions from different branches are alternatives and are merged.
+ *
+ * @param resolvedSchemas The schemas found at the document path, with resolution type metadata
+ * @return Deduplicated list of completion items respecting narrowing semantics
+ */
+private fun extractCompletionsWithNarrowing(resolvedSchemas: List<ResolvedRef>): List<CompletionItem> {
+    val reductive = resolvedSchemas.filter { it.resolutionType in REDUCTIVE_RESOLUTION_TYPES }
+    val additive = resolvedSchemas.filter { it.resolutionType !in REDUCTIVE_RESOLUTION_TYPES }
+
+    // Get completions from each reductive schema separately
+    val perSchemaCompletions = reductive.map { it.resolvedValue.extractCompletions() }
+
+    // Partition into value and property completions per schema
+    val perSchemaValueCompletions = perSchemaCompletions
+        .map { completions -> completions.filter { it.kind == CompletionKind.VALUE } }
+        .filter { it.isNotEmpty() }
+
+    // Property completions are unioned (not intersected) because allOf schemas can each
+    // contribute additional properties — the full set is the union of all branches.
+    val allPropertyCompletions = perSchemaCompletions
+        .flatMap { completions -> completions.filter { it.kind == CompletionKind.PROPERTY } }
+
+    // Reductive value completions: intersect when multiple schemas constrain the values.
+    // A value must satisfy ALL reductive schemas, so only values present in every schema's
+    // completions are valid. Falls back to union if intersection is empty (e.g., when
+    // multiple unfiltered if/then branches are all included because no document value
+    // was available to evaluate conditions).
+    val reductiveValueCompletions = if (perSchemaValueCompletions.size > 1) {
+        val labelSets = perSchemaValueCompletions.map { completions ->
+            completions.map { it.label }.toSet()
+        }
+        val intersection = labelSets.reduce { acc, set -> acc.intersect(set) }
+
+        if (intersection.isNotEmpty()) {
+            // Keep completions from the narrowest schema (fewest values) for better detail/docs
+            val narrowest = perSchemaValueCompletions.minBy { it.size }
+            narrowest.filter { it.label in intersection }
+        } else {
+            perSchemaValueCompletions.flatten()
+        }
+    } else {
+        perSchemaValueCompletions.flatten()
+    }
+
+    val reductiveCompletions = allPropertyCompletions + reductiveValueCompletions
+    val additiveCompletions = additive.flatMap { it.resolvedValue.extractCompletions() }
+
+    return (reductiveCompletions + additiveCompletions).distinctBy { it.label }
 }
 
 /**
