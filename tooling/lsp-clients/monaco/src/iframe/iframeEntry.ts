@@ -3,8 +3,8 @@
  *
  * This script runs inside the iframe created by KsonEditorClient.  It posts
  * `kson:ready` to the parent, waits for `kson:init` with the initial value
- * and options, creates the editor, and relays content changes back via
- * `kson:change`.
+ * and options, creates the editor, and relays user content changes back via
+ * `kson:change` (programmatic setValue flushes are not relayed).
  */
 
 import { createKsonEditor, type KsonEditor } from '../index.js';
@@ -49,9 +49,10 @@ async function init(msg: InitMessage): Promise<KsonEditor> {
         editorOptions: msg.editorOptions as Record<string, unknown> | undefined,
     });
 
-    // Relay content changes to the parent.
     const model = ksonEditor.editor.getModel()!;
-    model.onDidChangeContent(() => {
+    model.onDidChangeContent((e) => {
+        // Parent setValue makes the model emit isFlush — don't round-trip it back as a user change.
+        if (e.isFlush) return;
         window.parent.postMessage(
             { type: 'kson:change', value: model.getValue() },
             '*',

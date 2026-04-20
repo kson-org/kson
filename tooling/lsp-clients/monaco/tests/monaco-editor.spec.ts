@@ -22,22 +22,10 @@ test.describe('Monaco KSON Editor - Smoke Test', () => {
         await expect(editors.first()).toBeVisible({timeout: 10000});
         await expect(editors).toHaveCount(2);
 
-        // Wait for line numbers to render
-        await page.waitForSelector('.line-numbers', {state: 'visible'});
-        await page.waitForTimeout(1000); // Allow time for content rendering
-
-        // Verify the left editor displays the expected content
-        const leftEditorContent = await page.evaluate(() => {
-            const container = document.getElementById('editor-left');
-            if (!container) return '';
-            const lines = container.querySelectorAll('.view-line');
-            return Array.from(lines)
-                .map(line => line.textContent || '')
-                .join('\n');
-        });
-
-        const normalizedLeft = leftEditorContent.replace(/\u00A0/g, ' ').trim();
-        expect(normalizedLeft).toContain('kson-monaco-editor');
+        // Verify the left editor displays the expected content.
+        await expect(
+            page.locator('#editor-left .view-lines')
+        ).toContainText('kson-monaco-editor');
 
         // Verify syntax highlighting (multiple token classes present)
         const tokenClasses = await page.evaluate(() => {
