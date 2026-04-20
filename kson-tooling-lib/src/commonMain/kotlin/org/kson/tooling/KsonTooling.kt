@@ -159,9 +159,13 @@ object KsonTooling {
     ): List<CompletionItem> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, document.partialKsonValue)
 
-        return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
+        val filteringService = SchemaFilteringService(schemaIdLookup)
+        val validSchemas = filteringService.getValidSchemas(candidateSchemas, document.ksonValue, documentPointer)
+
+        return SchemaInformation.getCompletions(parsedSchema, documentPointer, validSchemas, document.ksonValue)
     }
 
     /**
