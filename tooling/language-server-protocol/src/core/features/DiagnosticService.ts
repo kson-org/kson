@@ -7,12 +7,15 @@ import {
 import {KsonDocument} from '../document/KsonDocument';
 import {isKsonSchemaDocument} from '../document/KsonSchemaDocument';
 import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from 'kson-tooling';
+import {DEFAULT_CONFIG_NAMESPACE} from '../commands/CommandType.js';
 
 /**
  * Service responsible for providing diagnostic information for Kson documents.
  * Delegates to Kotlin's KsonTooling for validation.
  */
 export class DiagnosticService {
+
+    constructor(private readonly configNamespace: string = DEFAULT_CONFIG_NAMESPACE) {}
 
     createDocumentDiagnosticReport(document: KsonDocument | null | undefined): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];
@@ -32,20 +35,20 @@ export class DiagnosticService {
             .validateDocument(toolingDoc, schemaToolingDoc ?? null)
             .asJsReadonlyArrayView();
 
-        return messages.map(msg => toDiagnostic(msg));
+        return messages.map(msg => this.toDiagnostic(msg));
     }
-}
 
-function toDiagnostic(msg: DiagnosticMessage): Diagnostic {
-    return {
-        range: {
-            start: {line: msg.range.startLine, character: msg.range.startColumn},
-            end: {line: msg.range.endLine, character: msg.range.endColumn}
-        },
-        severity: msg.severity === KtSeverity.ERROR
-            ? DiagnosticSeverity.Error
-            : DiagnosticSeverity.Warning,
-        source: 'kson',
-        message: msg.message
-    };
+    private toDiagnostic(msg: DiagnosticMessage): Diagnostic {
+        return {
+            range: {
+                start: {line: msg.range.startLine, character: msg.range.startColumn},
+                end: {line: msg.range.endLine, character: msg.range.endColumn}
+            },
+            severity: msg.severity === KtSeverity.ERROR
+                ? DiagnosticSeverity.Error
+                : DiagnosticSeverity.Warning,
+            source: this.configNamespace,
+            message: msg.message
+        };
+    }
 }

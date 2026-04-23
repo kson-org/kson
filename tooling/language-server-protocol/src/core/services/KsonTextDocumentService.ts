@@ -38,6 +38,11 @@ import {FoldingRangeService} from '../features/FoldingRangeService.js';
 import {SelectionRangeService} from '../features/SelectionRangeService.js';
 import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
 import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
+import {
+    DEFAULT_CONFIG_NAMESPACE,
+    fromWireCommandId,
+    toWireCommandId,
+} from '../commands/CommandType.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
 
 
@@ -64,10 +69,11 @@ export class KsonTextDocumentService {
     constructor(
         private documentManager: KsonDocumentsManager,
         private createCommandExecutor: CommandExecutorFactory,
-        private workspaceRoot: string | null = null
+        private workspaceRoot: string | null = null,
+        private configNamespace: string = DEFAULT_CONFIG_NAMESPACE
     ) {
         this.formattingService = new FormattingService();
-        this.diagnosticService = new DiagnosticService();
+        this.diagnosticService = new DiagnosticService(configNamespace);
         this.semanticTokensService = new SemanticTokensService();
         this.codeLensService = new CodeLensService();
         this.documentHighlightService = new DocumentHighlightService();
@@ -158,7 +164,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.formattingService.formatDocument(document, this.configuration.kson.formatOptions);
+            return this.formattingService.formatDocument(document, this.configuration.formatOptions);
         } catch (error) {
             this.connection.console.error(`Error formatting document: ${error}`);
             return [];
@@ -183,14 +189,19 @@ export class KsonTextDocumentService {
 
     private async onCodeLens(params: CodeLensParams): Promise<CodeLens[]> {
         try {
-            if (!this.configuration.kson.codeLensEnabled) {
+            if (!this.configuration.codeLensEnabled) {
                 return [];
             }
             const document = this.documentManager.get(params.textDocument.uri);
             if (!document) {
                 return [];
             }
-            return this.codeLensService.getCodeLenses(document);
+            return this.codeLensService.getCodeLenses(document).map(lens => ({
+                ...lens,
+                command: lens.command
+                    ? {...lens.command, command: toWireCommandId(lens.command.command, this.configNamespace)}
+                    : lens.command,
+            }));
         } catch (error) {
             this.connection.console.error(`Error providing code lenses: ${error}`);
             return [];
@@ -199,7 +210,10 @@ export class KsonTextDocumentService {
 
     private async onExecuteCommand(params: ExecuteCommandParams): Promise<any> {
         try {
-            return await this.commandExecutor.execute(params);
+            const commandType = fromWireCommandId(params.command, this.configNamespace);
+            return await this.commandExecutor.execute(
+                commandType ? {...params, command: commandType} : params
+            );
         } catch (error) {
             this.connection.console.error(`Error executing command: ${error}`);
             this.connection.window.showErrorMessage(`Command execution failed: ${error}`);
