@@ -13,7 +13,25 @@ export interface LanguageConfiguration {
     fileExtensions: string[];
     /** Bundled schema mappings extracted from package.json */
     bundledSchemas: BundledSchemaMapping[];
+    /**
+     * Prefix for VSCode commands and configuration keys (e.g. "kson").
+     * Read from {@link CONFIG_NAMESPACE_MANIFEST_FIELD} field in package.json.
+     * Falls back to the first language id, then to "kson", so standalone kson
+     * installs keep working.
+     */
+    configNamespace: string;
 }
+
+/**
+ * Root-level package.json field naming the namespace for VSCode commands and
+ * configuration keys. A build toolchain that produces a non-default extension
+ * (e.g. a derived one using a different `languageId`) sets this so the derived
+ * extension doesn't collide with the base kson extension on install.
+ */
+const CONFIG_NAMESPACE_MANIFEST_FIELD = 'ksonConfigNamespace';
+
+/** Default namespace used by the standalone kson extension. */
+const DEFAULT_CONFIG_NAMESPACE = 'kson';
 
 let cachedConfig: LanguageConfiguration | null = null;
 
@@ -32,6 +50,15 @@ export function getLanguageConfiguration(): LanguageConfiguration {
  */
 export function isKsonLanguage(languageId: string): boolean {
     return getLanguageConfiguration().languageIds.includes(languageId);
+}
+
+/**
+ * Namespace prefix for this extension's commands and configuration keys at
+ * runtime. Contribution keys in package.json (commands, configuration
+ * properties) are static and must be rewritten separately when forking.
+ */
+export function getConfigNamespace(): string {
+    return getLanguageConfiguration().configNamespace;
 }
 
 /**
@@ -55,7 +82,10 @@ export function initializeLanguageConfig(packageJson: any): void {
             .flatMap((lang: any) => lang.extensions || [])
             .filter(Boolean)
             .map((ext: string) => ext.replace(/^\./, '')),
-        bundledSchemas
+        bundledSchemas,
+        configNamespace:
+            packageJson?.[CONFIG_NAMESPACE_MANIFEST_FIELD]
+            || DEFAULT_CONFIG_NAMESPACE
     };
 }
 

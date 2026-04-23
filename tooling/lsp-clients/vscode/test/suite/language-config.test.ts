@@ -1,5 +1,5 @@
 import { assert } from './assert';
-import { initializeLanguageConfig, getLanguageConfiguration, isKsonLanguage, resetLanguageConfiguration } from '../../src/config/languageConfig';
+import { initializeLanguageConfig, getLanguageConfiguration, getConfigNamespace, isKsonLanguage, resetLanguageConfiguration } from '../../src/config/languageConfig';
 
 describe('Language Configuration Tests', () => {
 
@@ -117,4 +117,32 @@ describe('Language Configuration Tests', () => {
             assert.ok(config.bundledSchemas.some(s => s.fileExtension === 'config'));
         });
     });
+
+    describe('configNamespace', () => {
+        it('Should default to "kson" when no languages are declared and no field is set', () => {
+            initWithLanguages([]);
+            assert.strictEqual(getConfigNamespace(), 'kson');
+        });
+
+        it('Should use the ksonConfigNamespace manifest field when present', () => {
+            initializeLanguageConfig({
+                ksonConfigNamespace: 'config',
+                contributes: { languages: [{ id: 'config', extensions: ['.config'] }] }
+            });
+            assert.strictEqual(getConfigNamespace(), 'config');
+        });
+
+        it('Should prefer the manifest field over languages[0].id', () => {
+            initializeLanguageConfig({
+                ksonConfigNamespace: 'config',
+                contributes: { languages: [{ id: 'different', extensions: ['.different'] }] }
+            });
+            assert.strictEqual(getConfigNamespace(), 'config');
+        });
+
+        it('Should fall back to "kson" for a standalone kson install (no manifest field, language id is kson)', () => {
+            initWithLanguages([{ id: 'kson', extensions: ['.kson'] }]);
+            assert.strictEqual(getConfigNamespace(), 'kson');
+        });
+    })
 });
