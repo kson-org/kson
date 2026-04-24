@@ -7,7 +7,6 @@
     <ID>CyclomaticComplexMethod:KsonBuilder.kt$KsonBuilder$private fun toAst(marker: KsonMarker): AstNode</ID>
     <ID>CyclomaticComplexMethod:KsonValue.kt$fun AstNode.toKsonValue(): KsonValue</ID>
     <ID>CyclomaticComplexMethod:Lexer.kt$Lexer$private fun scan()</ID>
-    <ID>CyclomaticComplexMethod:SchemaParser.kt$SchemaParser$@Suppress("NestedBlockDepth") // baselined as LongMethod/CyclomaticComplexMethod; a full refactor is its own story private fun parseObjectSchema( schemaObject: KsonObject, messageSink: MessageSink, currentBaseUri: String, idLookup: SchemaIdLookup, propertyName: String? = null ): JsonSchema?</ID>
     <ID>CyclomaticComplexMethod:TreeNavigation.kt$TreeNavigator$private fun processSingleToken( currentNodes: List&lt;N>, token: PointerParser.Tokens ): List&lt;N></ID>
     <ID>CyclomaticComplexMethod:TypeValidator.kt$TypeValidator$fun validate(ksonValue: KsonValue, messageSink: MessageSink): Boolean</ID>
     <ID>LargeClass:FormatterTest.kt$FormatterTest</ID>
@@ -77,7 +76,6 @@
     <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_99()</ID>
     <ID>LongMethod:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref$@Test fun jsonSchemaSuiteTest_30()</ID>
     <ID>LongMethod:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref$@Test fun jsonSchemaSuiteTest_31()</ID>
-    <ID>LongMethod:SchemaParser.kt$SchemaParser$@Suppress("NestedBlockDepth") // baselined as LongMethod/CyclomaticComplexMethod; a full refactor is its own story private fun parseObjectSchema( schemaObject: KsonObject, messageSink: MessageSink, currentBaseUri: String, idLookup: SchemaIdLookup, propertyName: String? = null ): JsonSchema?</ID>
     <ID>LoopWithTooManyJumpStatements:KsonStringValidator.kt$KsonStringValidator$while</ID>
     <ID>LoopWithTooManyJumpStatements:Parser.kt$Parser$while</ID>
     <ID>ReturnCount:SubParseableTest.kt$SubParseableTest$private fun findEmbeddedSRC(ksonValue: KsonValue): KsonString?</ID>
