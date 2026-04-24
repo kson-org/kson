@@ -2368,4 +2368,18 @@ class FormatterTest {
             embedBlockRules = listOf(embedRule("/scripts/build")),
         )
     }
+
+    @Test
+    fun testMalformedInputWithEmbedRulesDoesNotThrow() {
+        // Regression: format() used to throw ShouldNotHappenException when the AST contained hidden
+        // AstNodeError nodes (parsed with ignoreErrors = true) while embed block rules were active.
+        val malformedInput = "version: v1name: namepipeline:  g1:    tasks:      task1:"
+        val withRules = format(
+            malformedInput,
+            KsonFormatterConfig(embedBlockRules = listOf(embedRule("/pipeline/**/tasks/*")))
+        )
+        val withoutRules = format(malformedInput, KsonFormatterConfig())
+        // With unrecoverable parse state, the embed rules fall back to a no-op — output matches the rule-free path.
+        assertEquals(withoutRules, withRules)
+    }
 }
