@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import {BaseLanguageClient} from 'vscode-languageclient';
 import * as path from 'path';
-import { isKsonLanguage } from '../../config/languageConfig';
+import { isKsonLanguage, getConfigNamespace } from '../../config/languageConfig';
 
 /**
  * Response from the LSP server for schema information
@@ -26,7 +26,7 @@ export class StatusBarManager {
             vscode.StatusBarAlignment.Right,
             100
         );
-        this.statusBarItem.command = 'kson.selectSchema';
+        this.statusBarItem.command = `${getConfigNamespace()}.selectSchema`;
     }
 
     /**

@@ -127,7 +127,7 @@ describe('KsonTextDocumentService', () => {
         it('should return empty array when codeLens is disabled', async () => {
             openDocument('key: value');
 
-            const config = ksonSettingsWithDefaults({kson: {codeLens: {enable: false}}});
+            const config = ksonSettingsWithDefaults({codeLens: {enable: false}});
             service.updateConfiguration(config);
 
             const result = await connection.requestCodeLens(TEST_URI);
