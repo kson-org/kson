@@ -328,6 +328,70 @@ class SchemaFilteringServiceTest {
     }
 
     @Test
+    fun testGetValidSchemas_branchDiscriminatedByRequired_doesNotNarrow() {
+        // Branches discriminate via `required`, not via `properties.<name>.const/enum/type`.
+        // Sibling-compat filtering only inspects the branch's `properties` map, so the
+        // `required` arrays cannot narrow during completion — only the `a`-branch is
+        // satisfied by the document, but both branches still survive.  Pins the
+        // documented limitation in `isBranchCompatibleWithSiblings`.
+        val schema = """
+            oneOf:
+              - required: [a]
+                properties:
+                  payload:
+                    type: string
+              - required: [b]
+                properties:
+                  payload:
+                    type: number
+        """.trimIndent()
+
+        val document = """
+            a: present
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document)
+        val survivingPayloadTypes = validSchemas.mapNotNull { propertyFieldOf(it, "payload", "type") }
+        assertEquals(
+            listOf("number", "string"), survivingPayloadTypes.sorted(),
+            "Both branches survive: required-based discrimination does not narrow during completion"
+        )
+    }
+
+    @Test
+    fun testGetValidSchemas_whenEveryBranchContradictsSiblings_dropsAllBranches() {
+        // Branches gate on `kind` const. Document says `kind: gamma`, which matches
+        // neither branch. Completing /payload, sibling-compat filtering must drop
+        // both branches' payload schemas — no silent fallback to the unfiltered set,
+        // which would surface completions from incompatible branches.
+        val schema = """
+            oneOf:
+              - properties:
+                  kind:
+                    const: alpha
+                  payload:
+                    type: string
+              - properties:
+                  kind:
+                    const: beta
+                  payload:
+                    type: number
+        """.trimIndent()
+
+        val document = """
+            kind: gamma
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/payload"))
+        val survivingPayloadTypes = validSchemas.mapNotNull { (it as? KsonObject)?.propertyLookup?.get("type") as? KsonString }
+            .map { it.value }
+        assertEquals(
+            emptyList(), survivingPayloadTypes,
+            "No branch's payload schema should survive when sibling kind matches no branch's const"
+        )
+    }
+
+    @Test
     fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches() {
         val schema = """
             oneOf:

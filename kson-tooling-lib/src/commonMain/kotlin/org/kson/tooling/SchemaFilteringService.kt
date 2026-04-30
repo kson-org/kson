@@ -74,7 +74,9 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      *
      * For schemas with [ResolvedRef.parentBranch] set, checks whether the parent
      * branch's property constraints (const/enum) are compatible with the document's
-     * sibling values. Falls back to unfiltered schemas if all branches are eliminated.
+     * sibling values.  When every branch contradicts the document, the result
+     * legitimately drops them all — completions from incompatible branches would
+     * be misleading.
      */
     private fun filterBySiblingCompatibility(
         schemas: List<ResolvedRef>,
@@ -84,14 +86,10 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         val hasParentBranches = schemas.any { it.parentBranch != null }
         if (!hasParentBranches) return schemas
 
-        val filtered = schemas.filter { ref ->
+        return schemas.filter { ref ->
             val parentBranch = ref.parentBranch
             parentBranch == null || isBranchCompatibleWithSiblings(parentBranch, documentValue, documentPointer)
         }
-
-        val branchesBefore = schemas.count { it.parentBranch != null }
-        val branchesAfter = filtered.count { it.parentBranch != null }
-        return if (branchesBefore > 0 && branchesAfter == 0) schemas else filtered
     }
 
     /**
@@ -227,6 +225,21 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
      * The property being completed (last token of [documentPointer]) is excluded since its
      * value is incomplete during completion — validating mid-typing input would spuriously
      * reject the branch.
+     *
+     * **Scope of narrowing.**  Only constraints reachable via the branch's `properties` map
+     * narrow.  The following branch shapes are intentionally NOT considered:
+     *  - Top-level `type` / `enum` / `const` on the branch itself (these constrain the parent
+     *    object as a whole, not a sibling property).
+     *  - `required` and `dependencies` — under soft validation these surface as
+     *    [MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING] /
+     *    [MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES], which are intentionally
+     *    ignored during completion (see [IGNORABLE_ERROR_TYPES]); they could only narrow
+     *    if completion treated incomplete documents as final, which it doesn't.
+     *
+     * Discriminator-shaped unions (each branch pins one or more sibling properties via
+     * `properties: { … const/enum/type … }`) — the dominant pattern this filtering exists
+     * for — are fully covered.  Branches that discriminate purely via the shapes above
+     * will not narrow.
      *
      * @param parentBranch The oneOf/anyOf branch that contained this result
      * @param documentValue The root document value
