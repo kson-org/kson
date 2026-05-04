@@ -43,8 +43,7 @@ server in a Web Worker.
 | `value`         | `string`                                        | Initial editor content.                                           |
 | `uri`           | `string`                                        | Document URI for LSP identification. Default `'inmemory://kson/document.kson'`. |
 | `editorOptions` | `monaco.editor.IStandaloneEditorConstructionOptions` | Forwarded to `monaco.editor.create()`.                       |
-| `lspOptions`    | `LspOptions` (see below)                        | Options forwarded to the language server at initialization.       |
-| `shared`        | `Pick<KsonEditor, 'bridge' \| 'worker' \| 'serverCapabilities'>` | Reuse the language server from another editor. When set, `lspOptions` is ignored. |
+| `lspOptions`    | `LspOptions` (see below)                        | Options forwarded to the language server at initialization. Honored on the first editor; ignored on subsequent ones (they join the running server). |
 
 #### `LspOptions`
 
@@ -64,13 +63,13 @@ validation, completions, and hover.  The most specific extension wins (e.g.
 | Property             | Type                                 | Description                                    |
 |----------------------|--------------------------------------|------------------------------------------------|
 | `editor`             | `monaco.editor.IStandaloneCodeEditor`| The underlying Monaco editor instance.         |
-| `bridge`             | `KsonLspBridge`                      | The LSP bridge (pass to `shared` to reuse).    |
+| `bridge`             | `KsonLspBridge`                      | The LSP bridge (shared with all editors on the page). |
 | `worker`             | `Worker`                             | The language server Web Worker.                |
 | `serverCapabilities` | `ServerCapabilities`                 | Capabilities reported by the language server.  |
 | `dispose()`          | `() => void`                         | Dispose the editor, bridge, and worker.        |
 
-Only one language server can be active.  Pass the first editor as `shared`
-to connect additional editors to the same server.
+Only one language server runs per page.  Additional editors join it
+automatically; the worker is torn down when the last editor is disposed.
 
 #### Additional exports
 

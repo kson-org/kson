@@ -1,9 +1,9 @@
 import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import { KsonLspBridge, type KsonLspBridgeOptions, type ServerCapabilities } from './bridge/index.js';
+import { type KsonLspBridge, type KsonLspBridgeOptions, type ServerCapabilities } from './bridge/index.js';
 import { registerKsonLanguage, KSON_LANGUAGE_ID } from './language/ksonLanguage.js';
+import { acquireLsp, releaseLsp } from './lspRegistry.js';
 import { TabBar } from './TabBar.js';
-import workerUrl from './worker/ksonServer?worker&url';
 
 // Monaco needs a worker factory for its built-in editor features (tokenization, etc.).
 // Only set one if the consumer hasn't already configured their own.
@@ -27,13 +27,6 @@ export interface KsonEditorOptions {
 
     /** Options forwarded to the LSP server during initialization. */
     lspOptions?: KsonLspBridgeOptions['initializationOptions'];
-
-    /**
-     * Share an existing language server by passing the bridge and worker from
-     * a previously created KsonEditor.  When set, `lspOptions` is ignored
-     * (the server is already initialized).
-     */
-    shared?: Pick<KsonEditor, 'bridge' | 'worker' | 'serverCapabilities'>;
 }
 
 export interface KsonEditor {
@@ -53,9 +46,6 @@ export interface KsonEditor {
     dispose(): void;
 }
 
-/** Tracks whether a primary (non-shared) bridge has been created. */
-let activeBridge: KsonLspBridge | null = null;
-
 /** Extracts a human-readable label from a document URI (e.g. "project.kson"). */
 function labelFromUri(uri: monaco.Uri): string {
     const path = uri.path || uri.toString();
@@ -69,10 +59,9 @@ function labelFromUri(uri: monaco.Uri): string {
  * diagnostics, hover, go-to-definition, formatting, semantic tokens, etc. all work
  * via a lightweight JSON-RPC bridge (no @codingame or monaco-languageclient dependency).
  *
- * The first call creates the language server.  Additional editors must share it by
- * passing `shared: firstEditor` — creating a second independent server would cause
- * duplicate language providers in Monaco, leading to doubled completions and other
- * confusing behavior.
+ * The language server is shared across all editors on the page (refcounted via
+ * lspRegistry) — the first editor spins it up, the last one to dispose tears it
+ * down.
  */
 export async function createKsonEditor(
     container: HTMLElement,
@@ -82,34 +71,7 @@ export async function createKsonEditor(
 
     const uri = monaco.Uri.parse(options?.uri ?? 'inmemory://kson/document.kson');
 
-    // Either reuse a shared bridge/worker or create new ones.
-    const isShared = !!options?.shared;
-    let worker: Worker;
-    let bridge: KsonLspBridge;
-    let capabilities: ServerCapabilities;
-
-    if (options?.shared) {
-        worker = options.shared.worker;
-        bridge = options.shared.bridge;
-        capabilities = options.shared.serverCapabilities;
-    } else {
-        if (activeBridge) {
-            throw new Error(
-                'A KSON language server is already running. ' +
-                'Pass { shared: existingEditor } to share it instead of creating a second one.',
-            );
-        }
-
-        worker = new Worker(workerUrl, {
-            type: 'module',
-            name: 'KsonLanguageServer',
-        });
-
-        bridge = new KsonLspBridge(worker);
-        const result = await bridge.initialize({ initializationOptions: options?.lspOptions });
-        capabilities = result.capabilities;
-        activeBridge = bridge;
-    }
+    const { bridge, worker, serverCapabilities: capabilities } = await acquireLsp(options?.lspOptions);
 
     // Wrap the container in a flex column so the tab bar and editor stack vertically.
     const wrapper = document.createElement('div');
@@ -173,28 +135,26 @@ export async function createKsonEditor(
 
     // Create read-only models for bundled schemas so go-to-definition can navigate to them.
     // The LSP server uses URIs like bundled://schema/kson.schema.kson for these.
-    // Skip when sharing — the primary editor already created these.
+    // The registry guarantees a single set of schema models per page (getModel guard).
     const schemaModels: monaco.editor.ITextModel[] = [];
-    if (!isShared) {
-        for (const schema of options?.lspOptions?.bundledSchemas ?? []) {
-            const schemaUri = monaco.Uri.parse(`bundled://schema/${schema.fileExtension}.schema.kson`);
-            if (!monaco.editor.getModel(schemaUri)) {
-                schemaModels.push(monaco.editor.createModel(schema.schemaContent, KSON_LANGUAGE_ID, schemaUri));
-                schemaUris.add(schemaUri.toString());
-            }
+    for (const schema of options?.lspOptions?.bundledSchemas ?? []) {
+        const schemaUri = monaco.Uri.parse(`bundled://schema/${schema.fileExtension}.schema.kson`);
+        if (!monaco.editor.getModel(schemaUri)) {
+            schemaModels.push(monaco.editor.createModel(schema.schemaContent, KSON_LANGUAGE_ID, schemaUri));
+            schemaUris.add(schemaUri.toString());
         }
-        for (const meta of options?.lspOptions?.bundledMetaSchemas ?? []) {
-            const metaUri = monaco.Uri.parse(`bundled://metaschema/${meta.name}.schema.kson`);
-            if (!monaco.editor.getModel(metaUri)) {
-                schemaModels.push(monaco.editor.createModel(meta.schemaContent, KSON_LANGUAGE_ID, metaUri));
-                schemaUris.add(metaUri.toString());
-            }
+    }
+    for (const meta of options?.lspOptions?.bundledMetaSchemas ?? []) {
+        const metaUri = monaco.Uri.parse(`bundled://metaschema/${meta.name}.schema.kson`);
+        if (!monaco.editor.getModel(metaUri)) {
+            schemaModels.push(monaco.editor.createModel(meta.schemaContent, KSON_LANGUAGE_ID, metaUri));
+            schemaUris.add(metaUri.toString());
         }
+    }
 
-        // Open schema models in the LSP so they get semantic tokens
-        for (const m of schemaModels) {
-            bridge.openReadOnlyDocument(m.uri.toString(), m.getValue());
-        }
+    // Open schema models in the LSP so they get semantic tokens
+    for (const m of schemaModels) {
+        bridge.openReadOnlyDocument(m.uri.toString(), m.getValue());
     }
 
     // Standalone Monaco doesn't know how to open a different model (no IEditorService).
@@ -239,12 +199,8 @@ export async function createKsonEditor(
             tabBar.dispose();
             openerDisposable.dispose();
             trackingDisposable.dispose();
-            if (!isShared) {
-                bridge.dispose();
-                worker.terminate();
-                for (const m of schemaModels) m.dispose();
-                activeBridge = null;
-            }
+            for (const m of schemaModels) m.dispose();
+            releaseLsp();
             editor.dispose();
             model.dispose();
             wrapper.remove();
