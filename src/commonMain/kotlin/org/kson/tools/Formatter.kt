@@ -24,9 +24,9 @@ fun format(ksonSource: String, formatterConfig: KsonFormatterConfig = KsonFormat
 
     val astParseResult = parseToAst(ksonSource, CoreCompileConfig(ignoreErrors = true))
 
-    // Pre-process: find all nodes that should be formatted as embed blocks
-    val embedBlockResolution = if (formatterConfig.embedBlockRules.isNotEmpty() && !astParseResult.hasErrors()) {
-        resolveEmbedBlocks(astParseResult.ast, formatterConfig.embedBlockRules)
+    val ksonValue = astParseResult.ksonValue
+    val embedBlockResolution = if (formatterConfig.embedBlockRules.isNotEmpty() && ksonValue != null) {
+        resolveEmbedBlocks(ksonValue, formatterConfig.embedBlockRules)
     } else {
         EmbedBlockResolution.EMPTY
     }
