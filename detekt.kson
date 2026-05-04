@@ -23,14 +23,6 @@ complexity:
     thresholdInObjects: 25
     thresholdInEnums: 25
     .
-  NestedBlockDepth:
-    active: true
-    threshold: 6
-    .
-  ComplexCondition:
-    active: true
-    threshold: 10
-    .
   .
 
 style:

@@ -213,22 +213,23 @@ class KsonRootImpl(
                 }
 
                 if (compileTarget.preserveComments && documentEndComments.isNotEmpty()) {
-                    val endComments = documentEndComments.joinToString("\n")
-                    ksonDocument += if (ksonDocument.endsWith(endComments)) {
-                        // endComments are already embedded in the document, likely as part of a trailing error
-                        ""
-                    } else {
-                        if (compileTarget is Kson && compileTarget.formatConfig.formattingStyle == COMPACT) {
-                            "\n" + endComments
-                        } else {
-                            "\n\n" + endComments
-                        }
-                    }
+                    ksonDocument += appendedEndComments(ksonDocument, compileTarget)
                 }
 
                 ksonDocument
             }
         }
+    }
+
+    private fun appendedEndComments(ksonDocument: String, compileTarget: CompileTarget): String {
+        val endComments = documentEndComments.joinToString("\n")
+        if (ksonDocument.endsWith(endComments)) {
+            // endComments are already embedded in the document, likely as part of a trailing error
+            return ""
+        }
+        val isCompactKson = compileTarget is Kson && compileTarget.formatConfig.formattingStyle == COMPACT
+        val separator = if (isCompactKson) "\n" else "\n\n"
+        return separator + endComments
     }
 }
 
@@ -386,10 +387,11 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun delimitedObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val delimitedPropertyIndent = if (value is ListNode || value is ObjectNode ||
-            // check if we're compiling an embed block to an object
-            (compileTarget is Json && value is EmbedBlockNode && compileTarget.retainEmbedTags)
-        ) {
+        // check if we're compiling an embed block to an object
+        val isEmbedBlockAsJsonObject =
+            compileTarget is Json && value is EmbedBlockNode && compileTarget.retainEmbedTags
+        val valueProvidesOwnIndent = value is ListNode || value is ObjectNode || isEmbedBlockAsJsonObject
+        val delimitedPropertyIndent = if (valueProvidesOwnIndent) {
             // For delimited lists and objects, don't increase their indent here - they provide their own indent nest
             indent.clone(true)
         } else {
@@ -401,12 +403,12 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun undelimitedObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return if (
-            (value is ListNode && value.elements.isNotEmpty()) ||
-            (value is ObjectNode && value.properties.isNotEmpty()) ||
-            // check if we're compiling an embed block to an object
-            (compileTarget is Yaml && value is EmbedBlockNode && compileTarget.retainEmbedTags)
-        ) {
+        val hasNonEmptyListValue = value is ListNode && value.elements.isNotEmpty()
+        val hasNonEmptyObjectValue = value is ObjectNode && value.properties.isNotEmpty()
+        // check if we're compiling an embed block to an object
+        val isEmbedBlockAsYamlObject =
+            compileTarget is Yaml && value is EmbedBlockNode && compileTarget.retainEmbedTags
+        return if (hasNonEmptyListValue || hasNonEmptyObjectValue || isEmbedBlockAsYamlObject) {
             // For non-empty lists and objects, put the value on the next line
             key.toSourceWithNext(indent, value, compileTarget) + "\n" +
                     value.toSourceWithNext(indent.next(false), nextNode, compileTarget)

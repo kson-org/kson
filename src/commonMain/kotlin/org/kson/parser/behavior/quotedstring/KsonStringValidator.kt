@@ -43,31 +43,9 @@ class KsonStringValidator {
 
     private fun validateNode(node: KsonValueNode, messageSink: MessageSink) {
         when (node) {
-            is ObjectNode -> {
-                node.properties.forEach { property ->
-                    if (property is ObjectPropertyNodeImpl) {
-                        // Validate the key if it's a quoted string
-                        if (property.key is ObjectKeyNodeImpl) {
-                            val keyNode = property.key.key
-                            if (keyNode is QuotedStringNode) {
-                                validateQuotedString(keyNode, messageSink)
-                            }
-                        }
-                        // Recursively validate the value
-                        validateNode(property.value, messageSink)
-                    }
-                }
-            }
-            is ListNode -> {
-                node.elements.forEach { element ->
-                    if (element is ListElementNodeImpl) {
-                        validateNode(element.value, messageSink)
-                    }
-                }
-            }
-            is QuotedStringNode -> {
-                validateQuotedString(node, messageSink)
-            }
+            is ObjectNode -> validateObjectProperties(node, messageSink)
+            is ListNode -> validateListElements(node, messageSink)
+            is QuotedStringNode -> validateQuotedString(node, messageSink)
             is EmbedBlockNode -> {
                 val tagNode = node.embedTagNode
                 if (tagNode is QuotedStringNode) {
@@ -79,6 +57,29 @@ class KsonStringValidator {
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
             is KsonValueNodeError -> {
                 // No string validation needed
+            }
+        }
+    }
+
+    private fun validateObjectProperties(node: ObjectNode, messageSink: MessageSink) {
+        node.properties.forEach { property ->
+            if (property !is ObjectPropertyNodeImpl) return@forEach
+            // Validate the key if it's a quoted string
+            if (property.key is ObjectKeyNodeImpl) {
+                val keyNode = property.key.key
+                if (keyNode is QuotedStringNode) {
+                    validateQuotedString(keyNode, messageSink)
+                }
+            }
+            // Recursively validate the value
+            validateNode(property.value, messageSink)
+        }
+    }
+
+    private fun validateListElements(node: ListNode, messageSink: MessageSink) {
+        node.elements.forEach { element ->
+            if (element is ListElementNodeImpl) {
+                validateNode(element.value, messageSink)
             }
         }
     }
@@ -108,57 +109,75 @@ class KsonStringValidator {
                 continue
             }
 
-            // Check for escape sequences
-            if (char == '\\') {
-                val escapeStartLocation = scanner.currentLocation()
-                scanner.advance() // consume backslash
-
-                if (scanner.eof()) {
-                    // Incomplete escape at end of string
-                    messageSink.error(escapeStartLocation, MessageType.STRING_BAD_ESCAPE.create("\\"))
-                    break
-                }
-
-                val nextChar = scanner.peek()
-
-                if (nextChar == 'u') {
-                    // Unicode escape - must be \uXXXX where X is hex digit
-                    // Collect up to 5 more chars (\u + 4 hex digits)
-                    val escapeBuilder = StringBuilder("\\")
-                    var charsConsumed = 0
-                    while (!scanner.eof() && charsConsumed < 5 && !isWhitespace(scanner.peek())) {
-                        escapeBuilder.append(scanner.peek())
-                        scanner.advance()
-                        charsConsumed++
-                    }
-
-                    val escapeText = escapeBuilder.toString()
-                    if (!isValidUnicodeEscape(escapeText)) {
-                        val errorLocation = Location.create(
-                            escapeStartLocation.start.line, escapeStartLocation.start.column,
-                            escapeStartLocation.start.line, escapeStartLocation.start.column + escapeText.length,
-                            escapeStartLocation.startOffset, escapeStartLocation.startOffset + escapeText.length
-                        )
-                        messageSink.error(errorLocation, MessageType.STRING_BAD_UNICODE_ESCAPE.create(escapeText))
-                    }
-                } else {
-                    // Regular escape - check if it's valid
-                    if (!isValidStringEscape(nextChar)) {
-                        val escapeText = "\\$nextChar"
-                        val errorLocation = Location.create(
-                            escapeStartLocation.start.line, escapeStartLocation.start.column,
-                            escapeStartLocation.start.line, escapeStartLocation.start.column + 2,
-                            escapeStartLocation.startOffset, escapeStartLocation.startOffset + 2
-                        )
-                        messageSink.error(errorLocation, MessageType.STRING_BAD_ESCAPE.create(escapeText))
-                    }
-                    scanner.advance() // consume the escaped character
-                }
-            } else {
-                // Regular character - just advance
+            if (char != '\\') {
                 scanner.advance()
+                continue
             }
+
+            validateEscapeSequence(scanner, messageSink)
         }
+    }
+
+    private fun validateEscapeSequence(scanner: StringContentScanner, messageSink: MessageSink) {
+        val escapeStartLocation = scanner.currentLocation()
+        scanner.advance() // consume backslash
+
+        if (scanner.eof()) {
+            // Incomplete escape at end of string
+            messageSink.error(escapeStartLocation, MessageType.STRING_BAD_ESCAPE.create("\\"))
+            return
+        }
+
+        val nextChar = scanner.peek()
+        if (nextChar == 'u') {
+            validateUnicodeEscape(scanner, escapeStartLocation, messageSink)
+        } else {
+            validateRegularEscape(scanner, nextChar, escapeStartLocation, messageSink)
+        }
+    }
+
+    private fun validateUnicodeEscape(
+        scanner: StringContentScanner,
+        escapeStartLocation: Location,
+        messageSink: MessageSink
+    ) {
+        // Unicode escape - must be \uXXXX where X is hex digit
+        // Collect up to 5 more chars (\u + 4 hex digits)
+        val escapeBuilder = StringBuilder("\\")
+        var charsConsumed = 0
+        while (!scanner.eof() && charsConsumed < 5 && !isWhitespace(scanner.peek())) {
+            escapeBuilder.append(scanner.peek())
+            scanner.advance()
+            charsConsumed++
+        }
+
+        val escapeText = escapeBuilder.toString()
+        if (!isValidUnicodeEscape(escapeText)) {
+            val errorLocation = Location.create(
+                escapeStartLocation.start.line, escapeStartLocation.start.column,
+                escapeStartLocation.start.line, escapeStartLocation.start.column + escapeText.length,
+                escapeStartLocation.startOffset, escapeStartLocation.startOffset + escapeText.length
+            )
+            messageSink.error(errorLocation, MessageType.STRING_BAD_UNICODE_ESCAPE.create(escapeText))
+        }
+    }
+
+    private fun validateRegularEscape(
+        scanner: StringContentScanner,
+        nextChar: Char,
+        escapeStartLocation: Location,
+        messageSink: MessageSink
+    ) {
+        if (!isValidStringEscape(nextChar)) {
+            val escapeText = "\\$nextChar"
+            val errorLocation = Location.create(
+                escapeStartLocation.start.line, escapeStartLocation.start.column,
+                escapeStartLocation.start.line, escapeStartLocation.start.column + 2,
+                escapeStartLocation.startOffset, escapeStartLocation.startOffset + 2
+            )
+            messageSink.error(errorLocation, MessageType.STRING_BAD_ESCAPE.create(escapeText))
+        }
+        scanner.advance() // consume the escaped character
     }
 
     private fun isWhitespace(char: Char?): Boolean {
