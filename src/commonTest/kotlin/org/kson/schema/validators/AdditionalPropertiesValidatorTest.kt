@@ -111,105 +111,42 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
     }
 
     @Test
-    fun testOneOfCombinatorUsesRefShortNames() {
+    fun testCombinatorUsesRefShortNames() {
         // Two lone `$ref`s to untitled `$defs` entries — the combinator description should name them
         // by the last JSON Pointer token (e.g. "TaskGroupModel") rather than the raw ref string.
-        // Both branches fail the same way (string is not an object), so `OneOfValidator`'s
-        // universal-message collapsing emits a single `SCHEMA_VALUE_TYPE_MISMATCH`.
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "oneOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskGroupModel"},
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskGroupModel": {"type": "object"},
-                        "TaskModel": {"type": "object"}
+        // Both branches fail the same way (string is not an object); `OneOfValidator`'s universal-message
+        // collapsing and `MessageSink`'s (location, message) dedup each yield a single
+        // `SCHEMA_VALUE_TYPE_MISMATCH` in the final list.
+        for ((keyword, prefix) in listOf("oneOf" to "one of", "anyOf" to "any of", "allOf" to "all of")) {
+            val errors = assertKsonSchemaErrors(
+                """
+                    task_a: "oops, should be an object"
+                """,
+                """
+                    {
+                        "additionalProperties": {
+                            "$keyword": [
+                                {"${'$'}ref": "#/${'$'}defs/TaskGroupModel"},
+                                {"${'$'}ref": "#/${'$'}defs/TaskModel"}
+                            ]
+                        },
+                        "${'$'}defs": {
+                            "TaskGroupModel": {"type": "object"},
+                            "TaskModel": {"type": "object"}
+                        }
                     }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
+                """,
+                listOf(
+                    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
+                    SCHEMA_VALUE_TYPE_MISMATCH
+                )
             )
-        )
 
-        assertEquals(
-            "Property 'task_a' must conform to 'one of: TaskGroupModel, TaskModel'",
-            errors[0].message.toString()
-        )
-    }
-
-    @Test
-    fun testAnyOfCombinatorUsesRefShortNames() {
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "anyOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskGroupModel"},
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskGroupModel": {"type": "object"},
-                        "TaskModel": {"type": "object"}
-                    }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
+            assertEquals(
+                "Property 'task_a' must conform to '$prefix: TaskGroupModel, TaskModel'",
+                errors[0].message.toString()
             )
-        )
-
-        assertEquals(
-            "Property 'task_a' must conform to 'any of: TaskGroupModel, TaskModel'",
-            errors[0].message.toString()
-        )
-    }
-
-    @Test
-    fun testAllOfCombinatorUsesRefShortNames() {
-        // `MessageSink` deduplicates identical (location, message) pairs, so the two branches'
-        // matching `SCHEMA_VALUE_TYPE_MISMATCH`es collapse to one in the final list.
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "allOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskGroupModel"},
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskGroupModel": {"type": "object"},
-                        "TaskModel": {"type": "object"}
-                    }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
-            )
-        )
-
-        assertEquals(
-            "Property 'task_a' must conform to 'all of: TaskGroupModel, TaskModel'",
-            errors[0].message.toString()
-        )
+        }
     }
 
     @Test
@@ -246,37 +183,39 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
     }
 
     @Test
-    fun testOneOfWithAnonymousBranchFallsBackToGeneric() {
+    fun testCombinatorWithAnonymousBranchFallsBackToGeneric() {
         // Strict all-or-nothing: an anonymous branch (no title, no ref) poisons the combinator
         // description, so we fall back to the generic "JSON Object Schema" rather than emit a
         // partial list that invites the reader to assume those are the only allowed shapes.
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "oneOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"},
-                            {"type": "object", "properties": {"foo": {}}}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskModel": {"type": "object"}
+        for (keyword in listOf("oneOf", "anyOf", "allOf")) {
+            val errors = assertKsonSchemaErrors(
+                """
+                    task_a: "oops, should be an object"
+                """,
+                """
+                    {
+                        "additionalProperties": {
+                            "$keyword": [
+                                {"${'$'}ref": "#/${'$'}defs/TaskModel"},
+                                {"type": "object", "properties": {"foo": {}}}
+                            ]
+                        },
+                        "${'$'}defs": {
+                            "TaskModel": {"type": "object"}
+                        }
                     }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
+                """,
+                listOf(
+                    SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
+                    SCHEMA_VALUE_TYPE_MISMATCH
+                )
             )
-        )
 
-        assertEquals(
-            "Property 'task_a' must conform to 'JSON Object Schema'",
-            errors[0].message.toString()
-        )
+            assertEquals(
+                "Property 'task_a' must conform to 'JSON Object Schema'",
+                errors[0].message.toString()
+            )
+        }
     }
 
     @Test
@@ -361,70 +300,6 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
         )
 
         assertEquals("Property 'task_a' must conform to 'TaskModel'", errors[0].message.toString())
-    }
-
-    @Test
-    fun testAnyOfWithAnonymousBranchFallsBackToGeneric() {
-        // Mirror of `testOneOfWithAnonymousBranchFallsBackToGeneric` for `anyOf`.
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "anyOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"},
-                            {"type": "object", "properties": {"foo": {}}}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskModel": {"type": "object"}
-                    }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
-            )
-        )
-
-        assertEquals(
-            "Property 'task_a' must conform to 'JSON Object Schema'",
-            errors[0].message.toString()
-        )
-    }
-
-    @Test
-    fun testAllOfWithAnonymousBranchFallsBackToGeneric() {
-        // Mirror of `testOneOfWithAnonymousBranchFallsBackToGeneric` for `allOf`.
-        val errors = assertKsonSchemaErrors(
-            """
-                task_a: "oops, should be an object"
-            """,
-            """
-                {
-                    "additionalProperties": {
-                        "allOf": [
-                            {"${'$'}ref": "#/${'$'}defs/TaskModel"},
-                            {"type": "object", "properties": {"foo": {}}}
-                        ]
-                    },
-                    "${'$'}defs": {
-                        "TaskModel": {"type": "object"}
-                    }
-                }
-            """,
-            listOf(
-                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
-                SCHEMA_VALUE_TYPE_MISMATCH
-            )
-        )
-
-        assertEquals(
-            "Property 'task_a' must conform to 'JSON Object Schema'",
-            errors[0].message.toString()
-        )
     }
 
     @Test

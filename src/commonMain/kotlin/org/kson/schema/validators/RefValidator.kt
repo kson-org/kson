@@ -72,11 +72,6 @@ class RefValidator(
  * Extract the last JSON Pointer token from a `$ref` string's fragment.  Returns `null` when the
  * fragment is empty, blank, not a rooted JSON Pointer (i.e. doesn't start with `#/`), or fails to
  * parse — those shapes have no meaningful tail token to use as a name.
- *
- * Examples:
- *   `#/$defs/TaskModel` -> `TaskModel`
- *   `#` or `""`         -> null (no tokens)
- *   `#foo`              -> null (not a rooted pointer)
  */
 private fun pointerTail(refString: String): String? {
     val fragment = parseUri(refString).fragment
