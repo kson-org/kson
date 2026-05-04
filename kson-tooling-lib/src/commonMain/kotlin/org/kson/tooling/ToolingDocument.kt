@@ -13,6 +13,7 @@ import org.kson.validation.SourceContext
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.toKsonValueOrNull
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -54,6 +55,19 @@ class ToolingDocument internal constructor(val content: String, internal val sou
      * where error nodes are treated as leaves.
      */
     internal val rootAstNode: AstNode? get() = (parseResult.ast as? KsonRootImpl)?.rootNode
+
+    /**
+     * Partial [KsonValue] that skips error nodes rather than returning null.
+     *
+     * Falls back to [ksonValue] when available (no errors), otherwise builds a
+     * partial tree from the AST by silently dropping properties/elements that
+     * contain parse errors. This allows IDE features like completion narrowing
+     * to see successfully-parsed sibling values even when the cursor position
+     * has an incomplete value (e.g. `key:` with no value yet).
+     */
+    internal val partialKsonValue: KsonValue? by lazy {
+        ksonValue ?: rootAstNode?.toKsonValueOrNull()
+    }
 
     /** Full gap-free token list (includes WHITESPACE and COMMENT). */
     internal val tokens: List<Token> get() = parseResult.lexedTokens

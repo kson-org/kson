@@ -6,92 +6,112 @@ package org.kson.tooling
 import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
-import org.kson.schema.SchemaResolutionType
+import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
 /**
- * Service for filtering schemas based on validation against document content.
+ * Filters JSON Schema combinator (oneOf/anyOf/allOf) and conditional (if/then/else)
+ * branches by the document content, so IDE features only see compatible schemas.
  *
- * This service handles the validation-based filtering logic for JSON Schema combinators
- * (oneOf/anyOf/allOf), ensuring that only compatible schemas are used for IDE features
- * like completions, hover info, and jump-to-definition.
- *
- * The filtering uses a "soft" validation approach: a schema is included if the existing
- * properties don't contradict it, even if required properties are missing.
+ * Validation is "soft": a schema survives if existing properties don't contradict it,
+ * even if required properties are missing.  [getValidSchemas] runs sibling-compat
+ * first (uses the partial value, works on broken documents) then leaf validation
+ * (uses the full value); each pass skips when its input has nothing to filter.
  */
 class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
 
     /**
-     * Get valid schemas for a document path, applying combinator expansion and filtering.
+     * Get valid schemas for a document path, applying two-pass filtering.
      *
-     * This function:
-     * 1. Expands combinator schemas (oneOf/anyOf/allOf) into individual branches
-     * 2. Filters branches based on validation against the current document (for oneOf/anyOf)
-     * 3. Returns all branches for allOf and direct properties (no filtering needed)
+     * Navigation already flattens combinators and conditionals into individual branches
+     * at every level, so this function only needs to:
+     * 1. Filter oneOf/anyOf branches by sibling property constraints (using [ToolingDocument.partialKsonValue])
+     * 2. Filter remaining branches by leaf-level validation (using [ToolingDocument.ksonValue])
      *
-     * @param candidateSchemas The schemas found at the document path
-     * @param documentValue The pre-parsed document value, or null if the document
-     *   couldn't be parsed. When null, combinator filtering is skipped and all
-     *   expanded schemas are returned.
+     * The two passes use different document values because sibling filtering must work
+     * even when the document has parse errors at the cursor position (where only the
+     * partial value is available), while leaf validation needs the fully parsed tree.
+     *
+     * @param candidateSchemas The schemas found at the document path (already flattened)
+     * @param document The parsed document providing both full and partial value trees
      * @param documentPointer The [JsonPointer] to the location in the document
-     * @return List of valid schemas after expansion and filtering
+     * @return List of valid schemas after filtering
      */
     fun getValidSchemas(
         candidateSchemas: List<ResolvedRef>,
-        documentValue: KsonValue?,
+        document: ToolingDocument,
         documentPointer: JsonPointer
     ): List<ResolvedRef> {
-        // Check if we need to filter based on combinators
-        // This includes both schemas directly tagged as combinators AND schemas that contain combinator properties
-        // Note: Only oneOf/anyOf require validation-based filtering.
-        // allOf always includes all branches (no filtering needed).
-        val hasCombinatorsThatRequireValidation = candidateSchemas.any { ref ->
-            requiresValidationFiltering(ref)
+        val partialDocumentValue = document.partialKsonValue
+        val afterSiblingFilter = if (partialDocumentValue != null) {
+            filterBySiblingCompatibility(candidateSchemas, partialDocumentValue, documentPointer)
+        } else {
+            candidateSchemas
         }
 
-        // Always expand combinators to get individual branches
-        val expandedSchemas = schemaIdLookup.expandCombinators(candidateSchemas)
-
-        // Filter if needed (for oneOf/anyOf that require validation)
-        return if (hasCombinatorsThatRequireValidation && documentValue != null) {
-            filterByValidation(expandedSchemas, documentValue, documentPointer)
+        val hasBranchesThatRequireValidation = afterSiblingFilter.any { ref ->
+            requiresValidationFiltering(ref)
+        }
+        val documentValue = document.ksonValue
+        return if (hasBranchesThatRequireValidation && documentValue != null) {
+            filterByValidation(afterSiblingFilter, documentValue, documentPointer)
         } else {
-            // No filtering needed (no combinators, or document unavailable)
-            expandedSchemas
+            afterSiblingFilter
         }
     }
 
     /**
-     * Checks if a schema reference requires validation-based filtering.
+     * Filters oneOf/anyOf branches by sibling property compatibility.
      *
-     * Only oneOf/anyOf combinators require validation filtering. allOf combinators
-     * always include all branches.
-     *
-     * @param ref The schema reference to check
-     * @return true if the schema requires validation filtering
+     * For schemas with [ResolvedRef.parentBranch] set, checks whether the parent
+     * branch's property constraints (const/enum) are compatible with the document's
+     * sibling values.  When every branch contradicts the document, the result
+     * legitimately drops them all — completions from incompatible branches would
+     * be misleading.
+     */
+    private fun filterBySiblingCompatibility(
+        schemas: List<ResolvedRef>,
+        documentValue: KsonValue,
+        documentPointer: JsonPointer
+    ): List<ResolvedRef> {
+        val hasParentBranches = schemas.any { it.parentBranch != null }
+        if (!hasParentBranches) return schemas
+
+        return schemas.filter { ref ->
+            val parentBranch = ref.parentBranch
+            parentBranch == null || isBranchCompatibleWithSiblings(parentBranch, documentValue, documentPointer)
+        }
+    }
+
+    /**
+     * True for filterable resolution types and for parent refs that still carry
+     * `oneOf`/`anyOf`/`if` keys after their children were extracted by navigation —
+     * pinned by `testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches`.
      */
     private fun requiresValidationFiltering(ref: ResolvedRef): Boolean {
-        return ref.resolutionType == SchemaResolutionType.ANY_OF ||
-            ref.resolutionType == SchemaResolutionType.ONE_OF ||
+        return ref.resolutionType.requiresValidationFiltering ||
             (ref.resolvedValue as? KsonObject)?.let { obj ->
-                obj.propertyLookup.containsKey("oneOf") || obj.propertyLookup.containsKey("anyOf")
+                obj.propertyLookup.containsKey("oneOf") ||
+                obj.propertyLookup.containsKey("anyOf") ||
+                obj.propertyLookup.containsKey("if")
             } ?: false
     }
 
     /**
      * Filters schemas based on validation against the current document.
      *
-     * For schemas resolved via combinators (anyOf/oneOf), this validates them against
-     * the parent object to ensure only compatible schemas contribute completions.
+     * For schemas resolved via combinators (anyOf/oneOf) or conditionals (if/then/else),
+     * this validates them against the document value to ensure only compatible schemas
+     * contribute completions.
      *
      * This uses a "soft" validation approach: a schema is included if the existing
      * properties don't contradict it, even if required properties are missing.
@@ -113,15 +133,26 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         val targetValue = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer)
             ?: return candidateSchemas
 
-        return candidateSchemas.filter { ref ->
-            when (ref.resolutionType) {
-                // For anyOf/oneOf, check if the current document state is compatible
-                SchemaResolutionType.ANY_OF,
-                SchemaResolutionType.ONE_OF -> isSchemaValidForDocument(ref, targetValue)
-                // For all other types (direct property, allOf, etc.), include them
-                else -> true
+        val filtered = candidateSchemas.filter { ref ->
+            // Only check branches whose inclusion is conditional (oneOf/anyOf, if/then/else);
+            // direct properties, allOf, and friends always apply.
+            if (ref.resolutionType.requiresValidationFiltering) {
+                isSchemaValidForDocument(ref, targetValue)
+            } else {
+                true
             }
         }
+
+        // Scalar targets are often a placeholder being typed into; validating against
+        // it can spuriously eliminate every enum/const branch, so fall back to the
+        // unfiltered set in that case.  Structural targets reflect committed intent.
+        val isScalarTarget = targetValue !is KsonObject && targetValue !is KsonList
+        if (isScalarTarget) {
+            val filterableBefore = candidateSchemas.count { it.resolutionType.requiresValidationFiltering }
+            val filterableAfter = filtered.count { it.resolutionType.requiresValidationFiltering }
+            if (filterableBefore > 0 && filterableAfter == 0) return candidateSchemas
+        }
+        return filtered
     }
 
     /**
@@ -181,6 +212,62 @@ class SchemaFilteringService(private val schemaIdLookup: SchemaIdLookup) {
         return errors.filter { loggedMessage ->
             loggedMessage.message.type !in IGNORABLE_ERROR_TYPES
         }
+    }
+
+    /**
+     * Checks if a oneOf/anyOf branch is compatible with the document's sibling properties.
+     *
+     * For each property the branch declares, if that property has a value in the document,
+     * validates the value against its schema using [isSchemaValidForDocument] — the same
+     * soft-validation path used for leaf filtering.  This catches const, enum, type, pattern,
+     * and any other constraint the branch puts on its sibling properties.
+     *
+     * The property being completed (last token of [documentPointer]) is excluded since its
+     * value is incomplete during completion — validating mid-typing input would spuriously
+     * reject the branch.
+     *
+     * **Scope of narrowing.**  Only constraints reachable via the branch's `properties` map
+     * narrow.  The following branch shapes are intentionally NOT considered:
+     *  - Top-level `type` / `enum` / `const` on the branch itself (these constrain the parent
+     *    object as a whole, not a sibling property).
+     *  - `required` and `dependencies` — under soft validation these surface as
+     *    [MessageType.SCHEMA_REQUIRED_PROPERTY_MISSING] /
+     *    [MessageType.SCHEMA_MISSING_REQUIRED_DEPENDENCIES], which are intentionally
+     *    ignored during completion (see [IGNORABLE_ERROR_TYPES]); they could only narrow
+     *    if completion treated incomplete documents as final, which it doesn't.
+     *
+     * Discriminator-shaped unions (each branch pins one or more sibling properties via
+     * `properties: { … const/enum/type … }`) — the dominant pattern this filtering exists
+     * for — are fully covered.  Branches that discriminate purely via the shapes above
+     * will not narrow.
+     *
+     * @param parentBranch The oneOf/anyOf branch that contained this result
+     * @param documentValue The root document value
+     * @param documentPointer Path to the property being completed
+     */
+    private fun isBranchCompatibleWithSiblings(
+        parentBranch: ResolvedRef,
+        documentValue: KsonValue,
+        documentPointer: JsonPointer
+    ): Boolean {
+        val propertyBeingCompleted = documentPointer.tokens.lastOrNull() ?: return true
+        val parentPointer = JsonPointer.fromTokens(documentPointer.tokens.dropLast(1))
+        val parentDocValue = KsonValueWalker.navigateWithJsonPointer(documentValue, parentPointer)
+            as? KsonObject ?: return true
+
+        val branchSchema = parentBranch.resolvedValue as? KsonObject ?: return true
+        val branchProperties = (branchSchema.propertyLookup["properties"] as? KsonObject)
+            ?: return true
+
+        for ((propName, propSchemaValue) in branchProperties.propertyLookup) {
+            if (propName == propertyBeingCompleted) continue
+
+            val docValue = parentDocValue.propertyLookup[propName] ?: continue
+            val propRef = schemaIdLookup.resolveRefIfPresent(propSchemaValue, parentBranch.resolvedValueBaseUri)
+            if (!isSchemaValidForDocument(propRef, docValue)) return false
+        }
+
+        return true
     }
 
     companion object {

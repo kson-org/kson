@@ -2,12 +2,15 @@ package org.kson.schema
 
 import org.kson.KsonCore
 import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.schema.ResolvedRef
+import org.kson.schema.SchemaResolutionType
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
 import org.kson.value.KsonString as InternalKsonString
 import org.kson.value.KsonBoolean as InternalKsonBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 
 class SchemaNavigationTest {
@@ -16,9 +19,15 @@ class SchemaNavigationTest {
      * Helper to navigate schema and get all result values
      */
     private fun navigateSchema(schema: String, path: List<String>): List<InternalKsonValue> {
+        return navigateSchemaFull(schema, path).map { it.resolvedValue }
+    }
+
+    /**
+     * Helper to navigate schema and get full [ResolvedRef] results (including resolution type)
+     */
+    private fun navigateSchemaFull(schema: String, path: List<String>): List<ResolvedRef> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
             SchemaIdLookup(it).navigateByDocumentPointer(JsonPointer.fromTokens(path))
-                .map { it.resolvedValue }
         } ?: emptyList()
     }
 
@@ -439,6 +448,45 @@ class SchemaNavigationTest {
         assertEquals("string", ((uuidResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
+    /**
+     * When a property's schema body has its own oneOf, flatten's inner branches must
+     * carry *themselves* (the nearest-enclosing branch) as [ResolvedRef.parentBranch] —
+     * not the outer oneOf wrapper reached during navigation.  Sibling-compatibility
+     * filtering validates the parentBranch's declared properties against document
+     * siblings; using the outer wrapper's properties instead of the inner branch would
+     * filter against the wrong constraint set.
+     */
+    @Test
+    fun testNestedOneOfUsesNearestEnclosingAsParentBranch() {
+        val schema = """
+            {
+                "oneOf": [
+                    {
+                        "properties": {
+                            "config": {
+                                "oneOf": [
+                                    { "title": "InnerA", "properties": { "foo": { "type": "string" } } },
+                                    { "title": "InnerB", "properties": { "bar": { "type": "string" } } }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+        val results = navigateSchemaFull(schema, listOf("config"))
+        // [configParent, innerA, innerB]
+        assertEquals(3, results.size)
+        val innerAParent = results[1].parentBranch?.resolvedValue as? InternalKsonObject
+        val innerBParent = results[2].parentBranch?.resolvedValue as? InternalKsonObject
+        assertNotNull(innerAParent)
+        assertNotNull(innerBParent)
+        assertEquals("InnerA", (innerAParent.propertyLookup["title"] as? InternalKsonString)?.value,
+            "parentBranch of inner A must be the inner branch itself, not the outer oneOf wrapper")
+        assertEquals("InnerB", (innerBParent.propertyLookup["title"] as? InternalKsonString)?.value,
+            "parentBranch of inner B must be the inner branch itself, not the outer oneOf wrapper")
+    }
+
     @Test
     fun testNavigateAllOf() {
         val schema = """
@@ -529,9 +577,15 @@ class SchemaNavigationTest {
                     - '${'$'}ref': '#/${'$'}defs/NumberType'
         """
 
-        // This test verifies that navigation works when anyOf contains $ref
+        // Navigation flattens at every level. Stepping "0" lands on the array branch's
+        // items schema (which is itself an anyOf over NumberType), and flatten at the
+        // target expands that inner anyOf: parent items + one resolved NumberType branch.
         val results = navigateSchema(schema, listOf("0"))
-        assertEquals(1, results.size, "Root schema should return single result")
+        assertEquals(2, results.size, "Expected items parent + one flattened anyOf branch")
+        val itemsSchema = results[0] as InternalKsonObject
+        assertNotNull(itemsSchema.propertyLookup["anyOf"], "First result should be the items schema with its inner anyOf")
+        val numberBranch = results[1] as InternalKsonObject
+        assertEquals("number", (numberBranch.propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
@@ -563,13 +617,20 @@ class SchemaNavigationTest {
               - '${'$'}ref': '#/${'$'}defs/ComplexRecipe'
         """
 
+        // Navigation reaches the context property via the outer anyOf → $ref → properties.
+        // flatten runs at every level, so the context's own inner anyOf (object | null)
+        // is expanded too: context parent + 2 flattened branches = 3 results.
         val results = navigateSchema(schema, listOf("context"))
-        assertEquals(1, results.size, "Should find context property through anyOf → \$ref")
+        assertEquals(3, results.size, "Expected context schema + 2 inner anyOf branches")
 
-        val contextSchema = results.single() as InternalKsonObject
+        val contextSchema = results[0] as InternalKsonObject
         assertEquals("Context", (contextSchema.propertyLookup["title"] as? InternalKsonString)?.value)
         assertEquals("Defines arbitrary key-value pairs for Jinja interpolation",
                      (contextSchema.propertyLookup["description"] as? InternalKsonString)?.value)
+        val branchTypes = results.drop(1).map {
+            ((it as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value
+        }
+        assertEquals(listOf("object", "null"), branchTypes, "Inner anyOf branches should be object and null")
     }
 
     @Test
@@ -635,6 +696,177 @@ class SchemaNavigationTest {
         val emailResults = navigateSchema(schema, listOf("email"))
         assertEquals(1, emailResults.size)
         assertEquals("string", ((emailResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateIfThen() {
+        // Use JSON syntax inside { } to avoid KSON plain-object termination issues with if/then
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "if": {
+                    "properties": {
+                        "kind": { "const": "dog" }
+                    }
+                },
+                "then": {
+                    "properties": {
+                        "bark": { "type": "boolean", "description": "Does it bark?" }
+                    }
+                }
+            }
+        """
+
+        // "bark" is only reachable via the then branch
+        val barkResults = navigateSchema(schema, listOf("bark"))
+        assertEquals(1, barkResults.size, "Expected to find 'bark' through if/then")
+        val barkSchema = barkResults.single() as InternalKsonObject
+        assertEquals("boolean", (barkSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("Does it bark?", (barkSchema.propertyLookup["description"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateIfThenElse() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "if": {
+                    "properties": {
+                        "kind": { "const": "dog" }
+                    }
+                },
+                "then": {
+                    "properties": {
+                        "bark": { "type": "boolean" }
+                    }
+                },
+                "else": {
+                    "properties": {
+                        "meow": { "type": "boolean" }
+                    }
+                }
+            }
+        """
+
+        // Both then and else branches should be navigable, with correct resolution types
+        val barkResults = navigateSchemaFull(schema, listOf("bark"))
+        assertEquals(1, barkResults.size, "Expected to find 'bark' through then branch")
+        assertEquals(SchemaResolutionType.IF_THEN, barkResults.single().resolutionType)
+        assertEquals("boolean", ((barkResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        val meowResults = navigateSchemaFull(schema, listOf("meow"))
+        assertEquals(1, meowResults.size, "Expected to find 'meow' through else branch")
+        assertEquals(SchemaResolutionType.IF_ELSE, meowResults.single().resolutionType)
+        assertEquals("boolean", ((meowResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateAllOfWithIfThen() {
+        // allOf contains if/then blocks that select a $ref based on a sibling property
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "DogParams": {
+                        "type": "object",
+                        "properties": {
+                            "treats": { "type": "integer" }
+                        }
+                    },
+                    "CatParams": {
+                        "type": "object",
+                        "properties": {
+                            "naps": { "type": "integer" }
+                        }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "kind": { "const": "dog" }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "params": {
+                                    "${'$'}ref": "#/${'$'}defs/DogParams"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "kind": { "const": "cat" }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "params": {
+                                    "${'$'}ref": "#/${'$'}defs/CatParams"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        // Navigate to "params" — should find it in both allOf if/then branches
+        val paramsResults = navigateSchema(schema, listOf("params"))
+        assertEquals(2, paramsResults.size, "Expected params from both if/then branches")
+
+        // Navigate deeper: params.treats should resolve through the DogParams $ref
+        val treatsResults = navigateSchema(schema, listOf("params", "treats"))
+        assertEquals(1, treatsResults.size, "Expected to find 'treats' through DogParams ref")
+        assertEquals("integer", ((treatsResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // Navigate deeper: params.naps should resolve through the CatParams $ref
+        val napsResults = navigateSchema(schema, listOf("params", "naps"))
+        assertEquals(1, napsResults.size, "Expected to find 'naps' through CatParams ref")
+        assertEquals("integer", ((napsResults.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigateIfThenWithArrayItems() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "if": {
+                    "properties": {
+                        "kind": { "const": "list" }
+                    }
+                },
+                "then": {
+                    "properties": {
+                        "items": {
+                            "type": "array",
+                            "items": { "type": "string", "description": "A list item" }
+                        }
+                    }
+                }
+            }
+        """
+
+        // Navigate through if/then to array items
+        val itemResults = navigateSchema(schema, listOf("items", "0"))
+        assertEquals(1, itemResults.size, "Expected to navigate through if/then into array items")
+        val itemSchema = itemResults.single() as InternalKsonObject
+        assertEquals("string", (itemSchema.propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("A list item", (itemSchema.propertyLookup["description"] as? InternalKsonString)?.value)
     }
 
     @Test

@@ -1,11 +1,12 @@
 package org.kson
 
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.KsonTooling
 import org.kson.tooling.SchemaFilteringService
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.*
 
 /**
@@ -27,10 +28,10 @@ class SchemaFilteringServiceTest {
         documentPointer: JsonPointer = JsonPointer("")
     ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val parsedDocument = KsonCore.parseToAst(document).ksonValue
+        val parsedDocument = KsonTooling.parse(document)
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         val filteringService = SchemaFilteringService(schemaIdLookup)
-        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
+        val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer, parsedDocument.ksonValue)
         return filteringService.getValidSchemas(candidateSchemas, parsedDocument, documentPointer).map { it.resolvedValue }
     }
 
@@ -270,9 +271,128 @@ class SchemaFilteringServiceTest {
     }
 
     @Test
-    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutIncompatibleBranches() {
-        // Document is a list; both branches expect objects. No branch survives —
-        // only the parent (oneOf container) remains.
+    fun testGetValidSchemas_withIfThen_filtersIncompatibleConditionalBranches() {
+        // allOf with if/then blocks that select a $ref based on a sibling property.
+        // params is only reachable via if/then (no anyOf), isolating the filtering.
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "DogParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "treats": { "type": "integer" }
+                        }
+                    },
+                    "CatParams": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "naps": { "type": "integer" }
+                        }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
+                    },
+                    {
+                        "if": { "properties": { "kind": { "const": "cat" } } },
+                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
+                    }
+                ]
+            }
+        """.trimIndent()
+
+        val document = """
+            {
+                "kind": "dog",
+                "params": {
+                    "treats": 5
+                }
+            }
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/params"))
+
+        assertEquals(1, validSchemas.size, "Only DogParams should survive filtering")
+
+        val schema0 = validSchemas.single() as org.kson.value.KsonObject
+        val propertyNames = (schema0.propertyLookup["properties"] as? org.kson.value.KsonObject)?.propertyLookup?.keys ?: emptySet()
+        assertTrue("treats" in propertyNames, "DogParams properties should be present, got: $propertyNames")
+    }
+
+    @Test
+    fun testGetValidSchemas_branchDiscriminatedByRequired_doesNotNarrow() {
+        // Branches discriminate via `required`, not via `properties.<name>.const/enum/type`.
+        // Sibling-compat filtering only inspects the branch's `properties` map, so the
+        // `required` arrays cannot narrow during completion — only the `a`-branch is
+        // satisfied by the document, but both branches still survive.  Pins the
+        // documented limitation in `isBranchCompatibleWithSiblings`.
+        val schema = """
+            oneOf:
+              - required: [a]
+                properties:
+                  payload:
+                    type: string
+              - required: [b]
+                properties:
+                  payload:
+                    type: number
+        """.trimIndent()
+
+        val document = """
+            a: present
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document)
+        val survivingPayloadTypes = validSchemas.mapNotNull { propertyFieldOf(it, "payload", "type") }
+        assertEquals(
+            listOf("number", "string"), survivingPayloadTypes.sorted(),
+            "Both branches survive: required-based discrimination does not narrow during completion"
+        )
+    }
+
+    @Test
+    fun testGetValidSchemas_whenEveryBranchContradictsSiblings_dropsAllBranches() {
+        // Branches gate on `kind` const. Document says `kind: gamma`, which matches
+        // neither branch. Completing /payload, sibling-compat filtering must drop
+        // both branches' payload schemas — no silent fallback to the unfiltered set,
+        // which would surface completions from incompatible branches.
+        val schema = """
+            oneOf:
+              - properties:
+                  kind:
+                    const: alpha
+                  payload:
+                    type: string
+              - properties:
+                  kind:
+                    const: beta
+                  payload:
+                    type: number
+        """.trimIndent()
+
+        val document = """
+            kind: gamma
+        """.trimIndent()
+
+        val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/payload"))
+        val survivingPayloadTypes = validSchemas.mapNotNull { (it as? KsonObject)?.propertyLookup?.get("type") as? KsonString }
+            .map { it.value }
+        assertEquals(
+            emptyList(), survivingPayloadTypes,
+            "No branch's payload schema should survive when sibling kind matches no branch's const"
+        )
+    }
+
+    @Test
+    fun testGetValidSchemas_withTypeMismatchAtTarget_filtersOutAllBranches() {
         val schema = """
             oneOf:
               - type: object
@@ -291,9 +411,8 @@ class SchemaFilteringServiceTest {
 
         val validSchemas = getValidSchemasForDocument(schema, document)
 
-        assertEquals(
-            1, validSchemas.size,
-            "Only the parent schema should remain when target type doesn't match any branch"
-        )
+        // Only the parent oneOf container remains — both branches expect objects
+        // but the document is a list, so neither branch is compatible.
+        assertEquals(1, validSchemas.size, "Only the parent oneOf should remain when no branch matches the document type")
     }
 }
