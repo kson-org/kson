@@ -23,9 +23,18 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    port: 5173,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: 'npm run dev',
+      port: 5173,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      // React demo lives in its own workspace; run from the lsp-clients root so npm resolves it.
+      command: 'npm run dev -w @kson/monaco-react-demo',
+      cwd: '..',
+      port: 5176,
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

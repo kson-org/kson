@@ -7,7 +7,8 @@
   "workspaces": [
     "shared",
     "vscode",
-    "monaco"
+    "monaco",
+    "monaco/demos/react"
   ],
   "scripts": {
     "buildMonaco": "npm run compile && npm run build -w monaco",
@@ -20,7 +21,8 @@
     "vscode": "npm run compile && npm run vscode -w vscode",
     "monaco": "npm run compile && npm run dev -w monaco",
     "demoLibrary": "npm run compile && npm run demo:library -w monaco",
-    "demoIframe": "npm run compile && npm run demo:iframe -w monaco"
+    "demoIframe": "npm run compile && npm run demo:iframe -w monaco",
+    "demoReact": "npm run compile && npm run dev -w @kson/monaco-react-demo"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

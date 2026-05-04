@@ -17,17 +17,30 @@
   },
   "author": "",
   "license": "ISC",
+  "exports": {
+    ".":       { "import": "./dist/index.js",       "types": "./dist/index.d.ts" },
+    "./react": { "import": "./dist/react/index.js", "types": "./dist/react/index.d.ts" }
+  },
+  "files": ["dist", "readme.md"],
   "dependencies": {
     "@kson/lsp-shared": "file:../shared"
   },
   "peerDependencies": {
-    "monaco-editor": ">=0.50.0"
+    "monaco-editor": ">=0.50.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
   },
   "devDependencies": {
     "@playwright/test": "^1.53.2",
+    "@types/react": "^18.3.0",
     "happy-dom": "^20.8.4",
     "monaco-editor": "^0.52.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "vite": "^8.0.0",
+    "vite-plugin-dts": "^5.0.0",
     "vitest": "^4.1.0"
   }
 }

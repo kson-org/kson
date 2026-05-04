@@ -85,6 +85,11 @@ tasks {
         dependsOn("npm_run_buildMonacoIframe")
     }
 
+    register<PixiExecTask>("npm_run_demoReact") {
+        command=listOf("npm", "run", "demoReact")
+        dependsOn(npmInstall)
+    }
+
     check {
         dependsOn(test)
         /**
