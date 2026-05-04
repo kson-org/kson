@@ -457,7 +457,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
          * $ref parsing use case.
          * TODO we likely want to consider implementing a more formal parser implementation based on that specification
          */
-        private fun parseUri(uri: String): RefUriParts {
+        internal fun parseUri(uri: String): RefUriParts {
             val origin = if (uri.contains("://")) {
                 val scheme = uri.substringBefore("://")
                 val authority = uri.substringAfter("://")
