@@ -46,8 +46,7 @@ test.describe('Iframe Embed', () => {
         expect(newValue).toBe('{ name: "updated" }');
 
         // Verify the iframe editor actually received the new content.
-        const iframeContent = await editorFrame.locator('.view-lines').textContent();
-        expect(iframeContent!.replace(/\u00A0/g, ' ')).toContain('updated');
+        await expect(editorFrame.locator('.view-lines')).toContainText('updated');
 
         // dispose() should remove the iframe.
         await page.evaluate(() => {
@@ -74,5 +73,32 @@ test.describe('Iframe Embed', () => {
 
         // onChange should have fired with the updated content.
         await expect(output).toContainText('change:', { timeout: 5000 });
+    });
+
+    test('setValue does not fire onChange', async ({ page }) => {
+        await page.goto('http://localhost:5173/tests/iframe-embed.html');
+
+        const output = page.locator('#output');
+        await expect(output).toContainText('ready', { timeout: 15000 });
+
+        const editorFrame = page.frameLocator('iframe');
+        await expect(editorFrame.locator('.monaco-editor')).toBeVisible({ timeout: 10000 });
+
+        // Programmatic setValue — must not be echoed back as onChange.
+        await page.evaluate(() => {
+            (window as any).__ksonEditor.setValue('{ name: "from-setValue" }');
+        });
+
+        // Trigger a real user edit, prefixing a distinctive character so the
+        // user-edit echo differs from the (wrongly-relayed) setValue echo.
+        // postMessage is FIFO, so once the user-edit echo reaches the parent,
+        // any suppressed setValue echo would have reached it first — safe sync point.
+        await editorFrame.locator('.view-lines').click();
+        await page.keyboard.press('Home');
+        await page.keyboard.type('X');
+        await expect(output).toContainText('change:X{ name: "from-setValue" }', { timeout: 5000 });
+
+        // The setValue payload alone must never appear as a change event.
+        await expect(output).not.toContainText('change:{ name: "from-setValue" }');
     });
 });

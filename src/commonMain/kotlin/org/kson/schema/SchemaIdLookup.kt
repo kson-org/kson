@@ -28,14 +28,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         idMap[KsonDraft7MetaSchema.ID] = KsonDraft7MetaSchema.schemaValue
 
         if (schemaRootValue is KsonObject) {
-            val rootBaseUri = schemaRootValue.propertyLookup["\$id"]?.let { idValue ->
-                if (idValue is KsonString) {
-                    idValue.value
-                } else {
-                    // this $id is completely invalid
-                    null
-                }
-            } ?: ""
+            val rootBaseUri = rootBaseUri()
 
             // Store the root schema at its baseUri
             idMap[rootBaseUri] = schemaRootValue
@@ -44,6 +37,11 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             walkSchemaForIds(schemaRootValue, idMap, rootBaseUri)
         }
     }
+
+    private fun rootBaseUri(): String =
+        (schemaRootValue as? KsonObject)?.propertyLookup["\$id"]
+            ?.let { (it as? KsonString)?.value }
+            ?: ""
 
     /**
      * Resolves a `$ref` reference string to the corresponding schema value.
@@ -166,7 +164,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     fun navigateByDocumentPointer(
         documentPointer: JsonPointer,
     ): List<ResolvedRef> {
-        val startingBaseUri = ""
+        val startingBaseUri = rootBaseUri()
         val documentPathTokens = documentPointer.tokens
         if (documentPathTokens.isEmpty()) {
             // Even at root, resolve $ref if present

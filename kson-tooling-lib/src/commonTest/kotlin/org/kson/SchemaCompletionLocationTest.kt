@@ -1603,4 +1603,116 @@ class SchemaCompletionLocationTest {
               .
             .
     """
+
+    @Test
+    fun testOneOfWithRefAtRootProvidesPropertyCompletions() {
+        val schema = $$"""
+            oneOf:
+              - '$ref': '#/$defs/Model'
+                description: 'A model resource'
+              - '$ref': '#/$defs/View'
+                description: 'A view resource'
+                .
+            '$defs':
+              Model:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: model
+                    .
+                  source:
+                    type: string
+                    .
+                  .
+                .
+              View:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: view
+                    .
+                  base:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        val completions = getCompletionsAtCaret(schema, "<caret>")
+
+        assertEquals(
+            setOf("id", "type", "source", "base"),
+            completions.map { it.label }.toSet()
+        )
+    }
+
+    @Test
+    fun testOneOfWithRefAtRootWithEmbedDescription() {
+        // Root schema with $id and %markdown embed block description alongside oneOf
+        val schema = $$"""
+            '$schema': 'http://json-schema.org/draft-07/schema#'
+            '$id': 'test.schema.kson'
+            title: 'Test Resource'
+            description: %markdown
+              # Test Resource
+
+              Each file is either a `model` or a `view`.
+              Use `type: model` or `type: view` to discriminate.
+              %%
+            oneOf:
+              - '$ref': '#/$defs/Model'
+                description: 'A model resource'
+              - '$ref': '#/$defs/View'
+                description: 'A view resource'
+                .
+            '$defs':
+              Model:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: model
+                    .
+                  source:
+                    type: string
+                    .
+                  .
+                .
+              View:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: view
+                    .
+                  base:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        val completions = getCompletionsAtCaret(schema, "<caret>")
+
+        assertEquals(
+            setOf("id", "type", "source", "base"),
+            completions.map { it.label }.toSet()
+        )
+    }
 }
