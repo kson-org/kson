@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Escaping.kt$fun renderForJsonString(content: String): String</ID>
+    <ID>CyclomaticComplexMethod:Formatter.kt$IndentFormatter$@Deprecated( "This formatter is no long a good general purpose formatter. " + "See the TODO in this class's doc for details" ) private fun indent(source: String, snippetNestingLevel: Int? = null): String</ID>
+    <ID>CyclomaticComplexMethod:KsonBuilder.kt$KsonBuilder$private fun toAst(marker: KsonMarker): AstNode</ID>
+    <ID>CyclomaticComplexMethod:KsonValue.kt$fun AstNode.toKsonValue(): KsonValue</ID>
+    <ID>CyclomaticComplexMethod:Lexer.kt$Lexer$private fun scan()</ID>
+    <ID>CyclomaticComplexMethod:SchemaParser.kt$SchemaParser$private fun parseObjectSchema( schemaObject: KsonObject, messageSink: MessageSink, currentBaseUri: String, idLookup: SchemaIdLookup, propertyName: String? = null ): JsonSchema?</ID>
+    <ID>CyclomaticComplexMethod:TreeNavigation.kt$TreeNavigator$private fun processSingleToken( currentNodes: List&lt;N>, token: PointerParser.Tokens ): List&lt;N></ID>
+    <ID>CyclomaticComplexMethod:TypeValidator.kt$TypeValidator$fun validate(ksonValue: KsonValue, messageSink: MessageSink): Boolean</ID>
+    <ID>LargeClass:FormatterTest.kt$FormatterTest</ID>
+    <ID>LargeClass:JsonSchemaTestBundledRemotes.kt$JsonSchemaTestBundledRemotes : JsonSchemaTest</ID>
+    <ID>LargeClass:JsonSuiteTest.kt$JsonSuiteTest</ID>
+    <ID>LargeClass:KsonCoreTestComment.kt$KsonCoreTestComment : KsonCoreTest</ID>
+    <ID>LargeClass:KsonCoreTestEmbedBlock.kt$KsonCoreTestEmbedBlock : KsonCoreTest</ID>
+    <ID>LargeClass:LexerTest.kt$LexerTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_allOf.kt$SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_const.kt$SchemaDraft2020_12SuiteTest_const : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_dynamicRef.kt$SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_enum.kt$SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_format.kt$SchemaDraft2020_12SuiteTest_format : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_items.kt$SchemaDraft2020_12SuiteTest_items : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_not.kt$SchemaDraft2020_12SuiteTest_not : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_oneOf.kt$SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_properties.kt$SchemaDraft2020_12SuiteTest_properties : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_ref.kt$SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_refRemote.kt$SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_type.kt$SchemaDraft2020_12SuiteTest_type : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_unevaluatedItems.kt$SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft2020_12SuiteTest_uniqueItems.kt$SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_allOf.kt$SchemaDraft7SuiteTest_allOf : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_const.kt$SchemaDraft7SuiteTest_const : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_dependencies.kt$SchemaDraft7SuiteTest_dependencies : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_enum.kt$SchemaDraft7SuiteTest_enum : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_format.kt$SchemaDraft7SuiteTest_format : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_items.kt$SchemaDraft7SuiteTest_items : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_not.kt$SchemaDraft7SuiteTest_not : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_oneOf.kt$SchemaDraft7SuiteTest_oneOf : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_properties.kt$SchemaDraft7SuiteTest_properties : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_type.kt$SchemaDraft7SuiteTest_type : JsonSchemaTest</ID>
+    <ID>LargeClass:SchemaDraft7SuiteTest_uniqueItems.kt$SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest</ID>
+    <ID>LargeClass:TreeNavigationTest.kt$TreeNavigationTest</ID>
+    <ID>LongMethod:Formatter.kt$IndentFormatter$@Deprecated( "This formatter is no long a good general purpose formatter. " + "See the TODO in this class's doc for details" ) private fun indent(source: String, snippetNestingLevel: Int? = null): String</ID>
+    <ID>LongMethod:FormatterTest.kt$FormatterTest$@Test fun testCompactFormattingStyleNestedStructures()</ID>
+    <ID>LongMethod:FormatterTest.kt$FormatterTest$@Test fun testMultipleTrailingContent()</ID>
+    <ID>LongMethod:KsonBuilder.kt$KsonBuilder$private fun toAst(marker: KsonMarker): AstNode</ID>
+    <ID>LongMethod:KsonCoreTestComment.kt$KsonCoreTestComment$@Test fun testCommentPreservationOnLists()</ID>
+    <ID>LongMethod:KsonCoreTestEmbedBlock.kt$KsonCoreTestEmbedBlock$@Test fun testEmbedBlockFromObjectWithDelimiterSequenceInTag()</ID>
+    <ID>LongMethod:KsonCoreTestEmbedBlock.kt$KsonCoreTestEmbedBlock$@Test fun testEmbedBlockTagsRetainment()</ID>
+    <ID>LongMethod:KsonCoreTestList.kt$KsonCoreTestList$@Test fun testSquareBracketListSource()</ID>
+    <ID>LongMethod:KsonValueTest.kt$KsonValueTest$@Test fun testksonValueComprehensive()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_ref.kt$SchemaDraft2020_12SuiteTest_ref$@Test fun jsonSchemaSuiteTest_28()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_ref.kt$SchemaDraft2020_12SuiteTest_ref$@Test fun jsonSchemaSuiteTest_29()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_100()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_101()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_102()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_103()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_104()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_105()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_106()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_107()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_108()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_89()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_90()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_91()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_92()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_93()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_94()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_95()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_96()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_97()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_98()</ID>
+    <ID>LongMethod:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties$@Test fun jsonSchemaSuiteTest_99()</ID>
+    <ID>LongMethod:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref$@Test fun jsonSchemaSuiteTest_30()</ID>
+    <ID>LongMethod:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref$@Test fun jsonSchemaSuiteTest_31()</ID>
+    <ID>LongMethod:SchemaParser.kt$SchemaParser$private fun parseObjectSchema( schemaObject: KsonObject, messageSink: MessageSink, currentBaseUri: String, idLookup: SchemaIdLookup, propertyName: String? = null ): JsonSchema?</ID>
+    <ID>LoopWithTooManyJumpStatements:KsonStringValidator.kt$KsonStringValidator$while</ID>
+    <ID>LoopWithTooManyJumpStatements:Parser.kt$Parser$while</ID>
+    <ID>ReturnCount:SubParseableTest.kt$SubParseableTest$private fun findEmbeddedSRC(ksonValue: KsonValue): KsonString?</ID>
+    <ID>SpreadOperator:Immutable.kt$ImmutableMap.Companion$(*inner.toList().toTypedArray())</ID>
+    <ID>ThrowsCount:KsonBuilder.kt$KsonBuilder$private fun toAst(marker: KsonMarker): AstNode</ID>
+    <ID>ThrowsCount:KsonValue.kt$fun AstNode.toKsonValue(): KsonValue</ID>
+  </CurrentIssues>
+</SmellBaseline>

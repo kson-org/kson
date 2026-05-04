@@ -33,9 +33,7 @@ class SchemaRefResolutionTest {
 
         // Find the cursor position
         val cursorIndex = schemaWithMarkers.indexOf(cursorMarker)
-        if (cursorIndex == -1) {
-            throw IllegalArgumentException("Schema must contain a $cursorMarker marker for cursor position")
-        }
+        require(cursorIndex != -1) { "Schema must contain a $cursorMarker marker for cursor position" }
 
         val cursorCoordinates = createCoordinates(schemaWithMarkers, cursorIndex)
 

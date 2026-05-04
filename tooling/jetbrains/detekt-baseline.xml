@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:KsonEnterHandlerDelegate.kt$KsonEnterHandlerDelegate$@Suppress("SameReturnValue") // Only need to return `Continue` right now. private fun preprocessEnter( file: PsiFile, editor: Editor, offset: Int, ): Result</ID>
+    <ID>CyclomaticComplexMethod:KsonSyntaxHighlighter.kt$KsonSyntaxHighlighter$override fun getTokenHighlights(elementType: IElementType): Array&lt;TextAttributesKey></ID>
+    <ID>LongMethod:KsonBackspaceHandlerDelegateTest.kt$KsonBackspaceHandlerDelegateTest$fun testDeleteEmptyEmbedDelimitersPairs()</ID>
+    <ID>LongMethod:KsonTypedHandlerDelegateTest.kt$KsonTypedHandlerDelegateTest$fun testEmbedDelimiterAutoInsert()</ID>
+    <ID>ReturnCount:KsonTypedHandlerDelegate.kt$KsonTypedHandlerDelegate$override fun beforeCharTyped( char: Char, project: Project, editor: Editor, file: PsiFile, fileType: FileType ): Result</ID>
+    <ID>ThrowsCount:KsonElementType.kt$fun elem(elementType: ElementType): IElementType</ID>
+  </CurrentIssues>
+</SmellBaseline>
