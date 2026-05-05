@@ -1289,7 +1289,7 @@ class SchemaCompletionLocationTest {
 
     @Test
     fun testCompletionsAtValuePositionWithRefToAnyOf() {
-        val schema = searchExpressionSchema()
+        val schema = searchExpressionSchema
 
         // Cursor directly at the value position for query (which $refs to SearchExpression anyOf)
         val completions = getCompletionsAtCaret(schema, $$"""
@@ -1471,7 +1471,7 @@ class SchemaCompletionLocationTest {
 
     @Test
     fun testCompletionsInsideDashListWithRefToAnyOf() {
-        val schema = searchExpressionSchema()
+        val schema = searchExpressionSchema
 
         // Cursor inside an and: dash-list array nested in query
         val completions = getCompletionsAtCaret(schema, $$"""
@@ -1492,7 +1492,7 @@ class SchemaCompletionLocationTest {
 
     @Test
     fun testNoCompletionsInsideDelimitedListWhenSchemaExpectsObject() {
-        val schema = searchExpressionSchema()
+        val schema = searchExpressionSchema
 
         // Cursor inside a [] delimited list, but schema expects objects (SearchTerm
         // or AndExpression). The structural mismatch means no branch is compatible.
@@ -1513,7 +1513,7 @@ class SchemaCompletionLocationTest {
 
     @Test
     fun testNoCompletionsInsideEmptyDelimitedDashListWhenSchemaExpectsObject() {
-        val schema = searchExpressionSchema()
+        val schema = searchExpressionSchema
 
         // Cursor inside an empty delimited dash-list `<>`, but schema expects
         // objects (SearchTerm or AndExpression). Exercises the ANGLE_BRACKET_L
@@ -1560,7 +1560,7 @@ class SchemaCompletionLocationTest {
         assertTrue("config" !in labels, "Should NOT include 'config' (parent property)")
     }
 
-    private fun searchExpressionSchema() = $$"""
+    private val searchExpressionSchema = $$"""
         type: object
         additionalProperties: false
         properties:

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Kson.kt$private fun convertTokens(internalTokens: List&lt;InternalToken>): List&lt;Token></ID>
+    <ID>LongMethod:Kson.kt$private fun convertTokens(internalTokens: List&lt;InternalToken>): List&lt;Token></ID>
+  </CurrentIssues>
+</SmellBaseline>

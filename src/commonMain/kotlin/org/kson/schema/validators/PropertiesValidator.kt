@@ -32,16 +32,7 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         // Then validate pattern properties - need to check ALL patterns for each property
         compiledPatterns?.let { patterns ->
             objectProperties.forEach { (propertyName, propertyValue) ->
-                var matchedAnyPattern = false
-
-                patterns.forEach { (regex, schema) ->
-                    if (regex.containsMatchIn(propertyName)) {
-                        matchedAnyPattern = true
-                        schema?.validate(propertyValue, messageSink)
-                    }
-                }
-
-                if (matchedAnyPattern) {
+                if (validatePatternMatches(propertyName, propertyValue, patterns, messageSink)) {
                     seenKeys.add(propertyName)
                 }
             }
@@ -50,6 +41,22 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         // Finally, validate additional properties
         val remainingProperties = node.propertyMap.filter { !seenKeys.contains(it.key) }
         additionalPropertiesValidator?.validateProperties(remainingProperties, node.location, messageSink)
+    }
+
+    private fun validatePatternMatches(
+        propertyName: String,
+        propertyValue: org.kson.value.KsonValue,
+        patterns: List<CompiledPatternSchema>,
+        messageSink: MessageSink,
+    ): Boolean {
+        var matchedAnyPattern = false
+        patterns.forEach { (regex, schema) ->
+            if (regex.containsMatchIn(propertyName)) {
+                matchedAnyPattern = true
+                schema?.validate(propertyValue, messageSink)
+            }
+        }
+        return matchedAnyPattern
     }
 }
 

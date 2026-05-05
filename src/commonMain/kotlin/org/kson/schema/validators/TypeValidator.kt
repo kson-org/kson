@@ -34,11 +34,11 @@ class TypeValidator(private val allowedTypes: List<String>, private val property
       is EmbedBlock -> "string"
     }
 
-    if (!allowedTypes.contains(nodeType)
-      // if our node is an integer, this type is valid if the more-general "number" is an allowedType
-      && !(nodeType == "integer" && allowedTypes.contains("number"))
-      // embed blocks are strings, but also validate as objects so schemas can constrain their tag/content
-      && !(ksonValue is EmbedBlock && allowedTypes.contains("object"))) {
+    // if our node is an integer, this type is valid if the more-general "number" is an allowedType
+    val integerAcceptedAsNumber = nodeType == "integer" && allowedTypes.contains("number")
+    // embed blocks are strings, but also validate as objects so schemas can constrain their tag/content
+    val embedAcceptedAsObject = ksonValue is EmbedBlock && allowedTypes.contains("object")
+    if (!allowedTypes.contains(nodeType) && !integerAcceptedAsNumber && !embedAcceptedAsObject) {
       messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_TYPE_MISMATCH.create(propertyName ?: "", allowedTypes.joinToString(), nodeType))
       return false
     }

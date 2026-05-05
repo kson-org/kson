@@ -16,6 +16,7 @@ plugins {
     kotlin("plugin.serialization")
     id("com.vanniktech.maven.publish") version "0.30.0"
     id("org.jetbrains.dokka") version "2.0.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -44,13 +45,20 @@ tasks {
         yamlFile.set(project.file(".circleci/config.yml"))
     }
 
+    val transpileDetektConfigTask by register<TranspileKsonToYaml>("transpileDetektConfigTask") {
+        ksonFile.set(project.file("detekt.kson"))
+        yamlFile.set(project.file("detekt.yml"))
+    }
+
     register<VerifyCleanCheckoutTask>("verifyCleanCheckout")
 
     withType<Task> {
-        // make every task except itself depend on generateJsonTestSuiteTask and transpileCircleCIConfigTask to
-        // ensure it's always up-to-date before any other build steps
-        if (name != generateJsonTestSuiteTask.name && name != transpileCircleCiConfigTask.name ) {
-            dependsOn(generateJsonTestSuiteTask, transpileCircleCiConfigTask)
+        // make every task except itself depend on generateJsonTestSuiteTask, transpileCircleCIConfigTask,
+        // and transpileDetektConfigTask to ensure they're always up-to-date before any other build steps
+        if (name != generateJsonTestSuiteTask.name
+            && name != transpileCircleCiConfigTask.name
+            && name != transpileDetektConfigTask.name) {
+            dependsOn(generateJsonTestSuiteTask, transpileCircleCiConfigTask, transpileDetektConfigTask)
         }
     }
 
@@ -198,5 +206,37 @@ mavenPublishing {
             developerConnection.set("scm:git:git@github.com:kson-org/kson.git")
             url.set("https://github.com/kson-org/kson")
         }
+    }
+}
+
+allprojects {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") { applyDetekt(project) }
+    plugins.withId("org.jetbrains.kotlin.jvm") { applyDetekt(project) }
+}
+
+fun applyDetekt(project: Project) = with(project) {
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
+        buildUponDefaultConfig = true
+        config.setFrom(files("$rootDir/detekt.yml"))
+        basePath = rootDir.absolutePath
+        source.setFrom(files("src"))
+        // Known structural findings on the existing codebase are grandfathered per-module.
+        // New code is still scrutinized against the rules.
+        baseline = file("detekt-baseline.xml")
+    }
+    val transpileConfig = rootProject.tasks.named("transpileDetektConfigTask")
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        dependsOn(transpileConfig)
+        reports {
+            html.required.set(true)
+            xml.required.set(false)
+            txt.required.set(true)
+            sarif.required.set(false)
+            md.required.set(false)
+        }
+    }
+    tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+        dependsOn(transpileConfig)
     }
 }

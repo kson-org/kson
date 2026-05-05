@@ -187,7 +187,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
                         // add the old-school guardrail here
-                        throw RuntimeException("Missing case for ${TokenType::class.simpleName}.${marker.element}")
+                        throw ShouldNotHappenException("Missing case for ${TokenType::class.simpleName}.${marker.element}")
                     }
                 }
             }
@@ -361,7 +361,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                     else -> {
                         // Kotlin seems to having trouble validating that our when is exhaustive here, so we
                         // add the old-school guardrail here
-                        throw RuntimeException("Missing case for ${ParsedElementType::class.simpleName}.${marker.element}")
+                        throw ShouldNotHappenException("Missing case for ${ParsedElementType::class.simpleName}.${marker.element}")
                     }
                 }
             }

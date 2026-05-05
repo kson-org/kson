@@ -11,6 +11,7 @@ import org.kson.jetbrains.highlighter.KsonSyntaxHighlighter.KsonColorTag.*
 import org.kson.jetbrains.parser.KsonLexedElementType
 import org.kson.jetbrains.parser.KsonLexer
 import org.kson.parser.TokenType
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer(): Lexer {
@@ -101,12 +102,12 @@ class KsonSyntaxHighlighter : SyntaxHighlighterBase() {
 
         fun getTextAttributesKey(colorTag: KsonColorTag): TextAttributesKey {
             return textAttributesMap[colorTag]
-                ?: throw RuntimeException("This color tag should have an entry in textAttributesMap: $colorTag")
+                ?: throw ShouldNotHappenException("This color tag should have an entry in textAttributesMap: $colorTag")
         }
 
         private fun getPackedTextAttributes(colorTag: KsonColorTag): Array<TextAttributesKey> {
             return packedTextAttributesMap[colorTag]
-                ?: throw RuntimeException("This color tag should have an entry in packedTextAttributesMap: $colorTag")
+                ?: throw ShouldNotHappenException("This color tag should have an entry in packedTextAttributesMap: $colorTag")
         }
     }
 }

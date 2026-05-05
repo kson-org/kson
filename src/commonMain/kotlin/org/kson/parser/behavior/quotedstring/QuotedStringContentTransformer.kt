@@ -91,57 +91,58 @@ private fun unescapeAndTrackEscapes(content: String): Pair<String, List<EscapeIn
     var i = 0
     while (i < content.length) {
         val char = content[i]
-
-        if (char == '\\' && i + 1 < content.length) {
-            val rawStart = i
-            when (val escaped = content[i + 1]) {
-                '"', '\\', '/', '\'' -> {
-                    sb.append(escaped)
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                'b' -> {
-                    sb.append('\b')
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                'f' -> {
-                    sb.append('\u000C')
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                'n' -> {
-                    sb.append('\n')
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                'r' -> {
-                    sb.append('\r')
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                't' -> {
-                    sb.append('\t')
-                    escapes.add(EscapeInfo(rawStart, 2, 1))
-                    i += 2
-                }
-                'u' -> {
-                    val (chars, consumed) = handleUnicodeEscape(content.substring(i))
-                    for (c in chars) {
-                        sb.append(c)
-                    }
-                    escapes.add(EscapeInfo(rawStart, consumed, chars.size))
-                    i += consumed
-                }
-                else -> {
-                    // Unknown escape sequence, append backslash as is
-                    sb.append(char)
-                    i++
-                }
-            }
-        } else {
+        val isStartOfEscape = char == '\\' && i + 1 < content.length
+        if (!isStartOfEscape) {
             sb.append(char)
             i++
+            continue
+        }
+
+        val rawStart = i
+        when (val escaped = content[i + 1]) {
+            '"', '\\', '/', '\'' -> {
+                sb.append(escaped)
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            'b' -> {
+                sb.append('\b')
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            'f' -> {
+                sb.append('\u000C')
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            'n' -> {
+                sb.append('\n')
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            'r' -> {
+                sb.append('\r')
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            't' -> {
+                sb.append('\t')
+                escapes.add(EscapeInfo(rawStart, 2, 1))
+                i += 2
+            }
+            'u' -> {
+                val (chars, consumed) = handleUnicodeEscape(content.substring(i))
+                for (c in chars) {
+                    sb.append(c)
+                }
+                escapes.add(EscapeInfo(rawStart, consumed, chars.size))
+                i += consumed
+            }
+            else -> {
+                // Unknown escape sequence, append backslash as is
+                sb.append(char)
+                i++
+            }
         }
     }
 

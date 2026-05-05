@@ -17,6 +17,15 @@ import org.kson.jetbrains.util.getIndentType
 import org.kson.jetbrains.util.getLineIndentLevel
 
 class KsonEnterHandlerDelegate : EnterHandlerDelegate {
+    companion object {
+        private val matchingDelimiterPairs = setOf(
+            '{' to '}',
+            '[' to ']',
+            '<' to '>',
+            '>' to '<',
+        )
+    }
+
     override fun preprocessEnter(
         file: PsiFile, editor: Editor, caretOffset: Ref<Int>, caretAdvance: Ref<Int>, dataContext: DataContext,
         originalHandler: EditorActionHandler?
@@ -84,14 +93,11 @@ class KsonEnterHandlerDelegate : EnterHandlerDelegate {
              * ]
              * ```
              */
-            if ((before == '{' && after == '}') ||
-                (before == '[' && after == ']') ||
-                (before == '<' && after == '>') ||
-                // TODO this is to help indenting tags in injected xml-like languages, which should not be our
-                //   responsibility, but it seems Kotlin has the same workaround [https://github.com/JetBrains/intellij-community/blob/4d2499e460bd6ab6425de24517d0050b65a78f99/plugins/kotlin/base/code-insight/minimal/src/org/jetbrains/kotlin/idea/editor/KotlinMultilineStringEnterHandler.kt#L82].
-                //   Can we figure out how to delegate to the injected language?
-                (before == '>' && after == '<')
-            ) {
+            // TODO the '>' / '<' pair is to help indenting tags in injected xml-like languages, which should not be our
+            //   responsibility, but it seems Kotlin has the same workaround [https://github.com/JetBrains/intellij-community/blob/4d2499e460bd6ab6425de24517d0050b65a78f99/plugins/kotlin/base/code-insight/minimal/src/org/jetbrains/kotlin/idea/editor/KotlinMultilineStringEnterHandler.kt#L82].
+            //   Can we figure out how to delegate to the injected language?
+            val caretBetweenMatchingDelimiters = (before to after) in matchingDelimiterPairs
+            if (caretBetweenMatchingDelimiters) {
                 // Remove any whitespace we found between the delimiters
                 if (afterIndex > offset) {
                     document.deleteString(offset, afterIndex)

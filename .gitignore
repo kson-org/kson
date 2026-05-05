@@ -42,3 +42,6 @@ node_modules
 .pixi
 pixiw
 pixiw.bat
+
+# auto-generated from detekt.kson by transpileDetektConfigTask
+detekt.yml

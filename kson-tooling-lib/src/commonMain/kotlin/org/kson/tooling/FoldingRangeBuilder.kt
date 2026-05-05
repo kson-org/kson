@@ -72,26 +72,29 @@ internal object FoldingRangeBuilder {
         var blockStartLine = -1
         var blockEndLine = -1
 
-        for (token in tokens) {
-            if (token.tokenType == TokenType.COMMENT) {
-                val line = token.lexeme.location.start.line
-                if (blockStartLine < 0 || line != blockEndLine + 1) {
-                    if (blockStartLine >= 0 && blockEndLine > blockStartLine) {
-                        ranges.add(StructuralRange(blockStartLine, blockEndLine, StructuralRangeKind.COMMENT))
-                    }
-                    blockStartLine = line
-                }
-                blockEndLine = line
-            } else if (token.tokenType != TokenType.WHITESPACE) {
-                if (blockStartLine >= 0 && blockEndLine > blockStartLine) {
-                    ranges.add(StructuralRange(blockStartLine, blockEndLine, StructuralRangeKind.COMMENT))
-                }
-                blockStartLine = -1
+        fun flushBlock() {
+            if (blockStartLine >= 0 && blockEndLine > blockStartLine) {
+                ranges.add(StructuralRange(blockStartLine, blockEndLine, StructuralRangeKind.COMMENT))
             }
         }
 
-        if (blockStartLine >= 0 && blockEndLine > blockStartLine) {
-            ranges.add(StructuralRange(blockStartLine, blockEndLine, StructuralRangeKind.COMMENT))
+        for (token in tokens) {
+            when {
+                token.tokenType == TokenType.COMMENT -> {
+                    val line = token.lexeme.location.start.line
+                    if (blockStartLine < 0 || line != blockEndLine + 1) {
+                        flushBlock()
+                        blockStartLine = line
+                    }
+                    blockEndLine = line
+                }
+                token.tokenType != TokenType.WHITESPACE -> {
+                    flushBlock()
+                    blockStartLine = -1
+                }
+            }
         }
+
+        flushBlock()
     }
 }

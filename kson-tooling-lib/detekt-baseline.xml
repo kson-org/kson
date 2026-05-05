@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:KsonValuePathBuilder.kt$KsonValuePathBuilder$private fun adjustPathForLocationContext( pointer: JsonPointer, lastToken: Token?, targetNode: AstNode, isLocationInsideToken: Boolean, includePropertyKeys: Boolean, meaningfulTokens: List&lt;Token> ): JsonPointer</ID>
+    <ID>CyclomaticComplexMethod:SchemaInformation.kt$fun InternalKsonValue.extractSchemaInfo(): String?</ID>
+    <ID>CyclomaticComplexMethod:SemanticTokenBuilder.kt$SemanticTokenBuilder$private fun collectKeyTokens(node: AstNode, keyTokens: MutableSet&lt;Token>)</ID>
+    <ID>LargeClass:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest</ID>
+    <ID>LongMethod:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest$@Test fun testCompletionsAtValuePositionWithRefToAnyOfWithDescription()</ID>
+    <ID>LongMethod:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest$@Test fun testOneOfCompletionsFilteredByExistingProperties()</ID>
+    <ID>LoopWithTooManyJumpStatements:SchemaDefinitionLocationTest.kt$SchemaDefinitionLocationTest$while</ID>
+    <ID>ReturnCount:KsonTooling.kt$KsonTooling$fun resolveRefAtLocation( schema: ToolingDocument, line: Int, column: Int ): List&lt;Range></ID>
+  </CurrentIssues>
+</SmellBaseline>
