@@ -1,0 +1,12 @@
+{
+  "name": "kson-monaco-demo-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Playwright integration tests for the @kson/monaco-editor consumer demos.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2"
+  }
+}

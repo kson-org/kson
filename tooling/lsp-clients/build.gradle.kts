@@ -121,8 +121,36 @@ tasks {
         dependsOn(installDemoReact)
     }
 
+    // Single Playwright suite covering all three external-consumer demos.
+    val demosDir = layout.projectDirectory.dir("demos")
+
+    val installTestDemos = register<PixiExecTask>("npm_install_testDemos") {
+        command=listOf("npm", "ci")
+        workingDirectory.set(demosDir)
+        doNotTrackState("npm already tracks its own state")
+        dependsOn(buildMonaco)
+        dependsOn(buildMonacoIframe)
+        dependsOn(installDemoLibrary)
+        dependsOn(installDemoIframe)
+        dependsOn(installDemoReact)
+    }
+
+    val playwrightInstallTestDemos = register<PixiExecTask>("playwrightInstall_testDemos") {
+        command=listOf("npx", "playwright", "install", "chromium")
+        workingDirectory.set(demosDir)
+        doNotTrackState("playwright already tracks its own state")
+        dependsOn(installTestDemos)
+    }
+
+    val testDemos = register<PixiExecTask>("npm_run_testDemos") {
+        command=listOf("npm", "test")
+        workingDirectory.set(demosDir)
+        dependsOn(playwrightInstallTestDemos)
+    }
+
     check {
         dependsOn(test)
+        dependsOn(testDemos)
         /**
          * TODO - Ideally this task is "npm_run_buildPlugins" building both plugins, however, for now the Monaco Vite build
          * is too unpredictable in CI
@@ -142,5 +170,8 @@ tasks {
         delete("demos/library/node_modules")
         delete("demos/iframe/node_modules")
         delete("demos/react/node_modules")
+        delete("demos/node_modules")
+        delete("demos/test-results")
+        delete("demos/playwright-report")
     }
 }
