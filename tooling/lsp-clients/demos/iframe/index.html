@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>KSON Editor — Iframe Demo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="layout">
+        <div class="guide">
+            <div class="guide-content">
+                <h1>Iframe Demo</h1>
+                <p class="subtitle">
+                    Drop-in embed via a script tag — no npm or bundler required.
+                    Consumes the iframe assets shipped in <code>@kson/monaco-editor/dist-iframe</code>.
+                </p>
+
+                <h2>1. Include the script</h2>
+                <p>
+                    Copy <code>dist-iframe/</code> to your static assets, then
+                    add a single script tag:
+                </p>
+                <pre><code>&lt;script src="kson-editor.js"&gt;&lt;/script&gt;</code></pre>
+
+                <h2>2. Create an editor</h2>
+                <pre><code>const editor = await KsonEditor.create(
+    document.getElementById('editor'),
+    {
+        value: '{ name: "hello" }',
+        schema: {
+            fileExtension: 'kson',
+            schemaContent: mySchema,
+        },
+        onChange(value) {
+            console.log('changed:', value);
+        },
+    },
+);</code></pre>
+
+                <h2>3. Read and write content</h2>
+                <pre><code>editor.getValue();</code></pre>
+                <button class="try-btn" id="btn-get" disabled>Run getValue()</button>
+
+                <pre><code>editor.setValue('{\n  name: "updated"\n}');</code></pre>
+                <button class="try-btn" id="btn-set" disabled>Run setValue()</button>
+
+                <h2>4. Clean up</h2>
+                <pre><code>editor.dispose();</code></pre>
+                <button class="try-btn" id="btn-dispose" disabled>Run dispose()</button>
+
+                <h2>Options</h2>
+                <pre><code>{
+  value?: string,
+  uri?: string,
+  schema?: {
+    fileExtension: string,
+    schemaContent: string,
+  },
+  editorOptions?: Record&lt;string, unknown&gt;,
+  onChange?: (value: string) =&gt; void,
+  baseUrl?: string,
+}</code></pre>
+            </div>
+
+            <div id="log"><span class="log-label">// output appears here</span></div>
+        </div>
+
+        <div id="editor"></div>
+    </div>
+
+    <script src="/kson-editor.js"></script>
+    <script src="./main.js"></script>
+</body>
+
+</html>

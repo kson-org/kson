@@ -10,9 +10,7 @@ import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as monaco from 'monaco-editor';
 import { Editor, loader } from '@monaco-editor/react';
-
-// Co-located demo: relative import into the library source. Real consumers import from '@kson/monaco-editor/react'.
-import { useKsonLsp } from '../../src/react/index.js';
+import { useKsonLsp } from '@kson/monaco-editor/react';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 // Must run before any <Editor> renders — otherwise @monaco-editor/react
@@ -124,6 +122,21 @@ useKsonLsp(editor, { lspOptions: {...} });
     return new EditorWorker(); // default
   },
 };`}</code></pre>
+                    <p>
+                        The <code>?worker</code> import this demo uses is Vite syntax.
+                        For webpack, swap the import for <code>new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url))</code>;
+                        for Next.js, load the editor with <code>dynamic(..., {`{ ssr: false }`})</code> since
+                        Monaco is browser-only.
+                    </p>
+
+                    <h2>4. Model URI must end in <code>.kson</code></h2>
+                    <p>
+                        The LSP keys schemas on the file extension via the model's URI.
+                        With <code>@monaco-editor/react</code>, <code>defaultPath</code> is what
+                        controls that URI — give each editor a distinct path ending in
+                        <code>.kson</code> or the language server won't pick it up.
+                    </p>
+                    <pre><code>{`<Editor language="kson" defaultPath="config.kson" ... />`}</code></pre>
                 </div>
             </div>
 
@@ -145,8 +158,7 @@ useKsonLsp(editor, { lspOptions: {...} });
                         <Editor
                             language="kson"
                             defaultValue={SAMPLE_KSON}
-                            // The schema is keyed on the .kson extension — make sure
-                            // the model URI ends in .kson so the LSP picks it up.
+                            // URI must end in .kson so the LSP picks it up — see step 4.
                             defaultPath="config-1.kson"
                             options={{
                                 minimap: { enabled: false },

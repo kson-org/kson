@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>KSON Editor — Library Demo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="layout">
+        <div class="guide">
+            <div class="guide-content">
+                <h1>Library Demo</h1>
+                <p class="subtitle">
+                    ES module import — for apps that bundle Monaco with vite, webpack, etc.
+                    Consumes <code>@kson/monaco-editor</code> as a third-party package.
+                </p>
+
+                <h2>1. Create an editor</h2>
+                <p>
+                    <code>createKsonEditor</code> starts a language server in a
+                    Web Worker and returns the editor handle.
+                </p>
+                <pre><code>import { createKsonEditor }
+    from '@kson/monaco-editor';
+
+const editor = await createKsonEditor(
+    document.getElementById('editor'),
+    {
+        value: '{ name: "hello" }',
+        lspOptions: {
+            bundledSchemas: [{
+                fileExtension: 'kson',
+                schemaContent: mySchema,
+            }],
+            enableBundledSchemas: true,
+        },
+    },
+);</code></pre>
+                <p>
+                    Two editors are mounted side-by-side; both share a single
+                    LSP worker via the refcounted registry.
+                </p>
+
+                <h2>2. Read and write content</h2>
+                <p>
+                    Buttons below operate on <strong>editor 1</strong> only.
+                    Editor 2 is there to demonstrate registry sharing.
+                </p>
+                <pre><code>editor.editor.getValue();</code></pre>
+                <button class="try-btn" id="btn-get" disabled>Run getValue()</button>
+
+                <pre><code>editor.editor.setValue('...');</code></pre>
+                <button class="try-btn" id="btn-set" disabled>Run setValue()</button>
+
+                <h2>3. Listen for changes</h2>
+                <pre><code>editor.editor.onDidChangeModelContent(
+    () => { /* ... */ },
+);</code></pre>
+                <p>Change events appear in the log below as you type.</p>
+
+                <h2>4. Clean up</h2>
+                <p>
+                    Disposing editor 1 releases one ref on the shared LSP;
+                    editor 2 keeps the worker alive.
+                </p>
+                <pre><code>editor.dispose();</code></pre>
+                <button class="try-btn" id="btn-dispose" disabled>Dispose editor 1</button>
+                <button class="try-btn" id="btn-dispose-2" disabled>Dispose editor 2</button>
+            </div>
+
+            <div id="log"><span class="log-label">// output appears here</span></div>
+        </div>
+
+        <div class="editors">
+            <div class="editor-pane">
+                <div class="label">editor 1 — document-1.kson</div>
+                <div class="body" id="editor-1"></div>
+            </div>
+            <div class="editor-pane">
+                <div class="label">editor 2 — document-2.kson</div>
+                <div class="body" id="editor-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+</body>
+
+</html>
