@@ -7,7 +7,7 @@ describe('Language Configuration Tests', () => {
     afterEach(() => resetLanguageConfiguration());
 
     function initWithLanguages(languages: any[]) {
-        initializeLanguageConfig({ contributes: { languages } });
+        initializeLanguageConfig({ ksonConfigNamespace: 'kson', contributes: { languages } });
     }
 
     describe('getLanguageConfiguration', () => {
@@ -119,9 +119,15 @@ describe('Language Configuration Tests', () => {
     });
 
     describe('configNamespace', () => {
-        it('Should default to "kson" when no languages are declared and no field is set', () => {
-            initWithLanguages([]);
-            assert.strictEqual(getConfigNamespace(), 'kson');
+        it('Should throw when the ksonConfigNamespace manifest field is missing', () => {
+            let caught: Error | null = null;
+            try {
+                initializeLanguageConfig({ contributes: { languages: [{ id: 'kson', extensions: ['.kson'] }] } });
+            } catch (e) {
+                caught = e as Error;
+            }
+            assert.ok(caught, 'expected initializeLanguageConfig to throw');
+            assert.ok(caught!.message.includes('ksonConfigNamespace'), `error message should name the field, got: ${caught!.message}`);
         });
 
         it('Should use the ksonConfigNamespace manifest field when present', () => {

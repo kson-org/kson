@@ -58,7 +58,7 @@ export function startKsonServer(
     // Variables to store state during initialization
     let workspaceRootUri: URI | undefined;
     let hasConfigurationCapability = false;
-    let configNamespace = DEFAULT_CONFIG_NAMESPACE;
+    let configNamespace: string;
 
     // Create logger that uses the connection
     const logger = {

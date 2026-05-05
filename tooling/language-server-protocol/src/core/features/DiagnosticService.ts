@@ -7,7 +7,6 @@ import {
 import {KsonDocument} from '../document/KsonDocument';
 import {isKsonSchemaDocument} from '../document/KsonSchemaDocument';
 import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from 'kson-tooling';
-import {DEFAULT_CONFIG_NAMESPACE} from '../commands/CommandType.js';
 
 /**
  * Service responsible for providing diagnostic information for Kson documents.
@@ -15,7 +14,7 @@ import {DEFAULT_CONFIG_NAMESPACE} from '../commands/CommandType.js';
  */
 export class DiagnosticService {
 
-    constructor(private readonly configNamespace: string = DEFAULT_CONFIG_NAMESPACE) {}
+    constructor(private readonly configNamespace: string) {}
 
     createDocumentDiagnosticReport(document: KsonDocument | null | undefined): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];

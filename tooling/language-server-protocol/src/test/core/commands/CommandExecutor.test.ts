@@ -11,7 +11,7 @@ import {
     TextEdit,
     ApplyWorkspaceEditResult, Range
 } from "vscode-languageserver";
-import {CommandType} from "../../../core/commands/CommandType";
+import {CommandType, toWireCommandId} from "../../../core/commands/CommandType";
 import {FormattingStyle} from "kson";
 import {RemoteWorkspace} from "vscode-languageserver/lib/common/server";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
@@ -35,10 +35,12 @@ class WorkspaceConnectionStub extends ConnectionStub {
     }
 }
 
+const TEST_NAMESPACE = 'test-ns';
+
 function createTestSetup() {
     const connection = new ConnectionStub();
     const documentsManager = new KsonDocumentsManager();
-    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor);
+    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_NAMESPACE);
     
     documentsManager.listen(connection);
     service.connect(connection);
@@ -76,7 +78,7 @@ function buildWorkspaceEdit(uri: string, replaceRange: Range, newText: string): 
 
 function buildCommandParams(command: CommandType, uri: string, style: FormattingStyle): ExecuteCommandParams {
     return {
-        command,
+        command: toWireCommandId(command, TEST_NAMESPACE),
         arguments: [{ documentUri: uri, formattingStyle: style }]
     };
 }

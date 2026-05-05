@@ -1,5 +1,3 @@
-import { DEFAULT_CONFIG_NAMESPACE } from 'kson-language-server';
-
 /**
  * Configuration for bundled schemas mapped by file extension.
  */
@@ -17,7 +15,7 @@ export interface LanguageConfiguration {
     bundledSchemas: BundledSchemaMapping[];
     /**
      * Prefix for VSCode commands and configuration keys (e.g. "kson").
-     * Read from {@link CONFIG_NAMESPACE_MANIFEST_FIELD}, defaulting to "kson".
+     * Required; read from {@link CONFIG_NAMESPACE_MANIFEST_FIELD}.
      */
     configNamespace: string;
 }
@@ -28,8 +26,9 @@ export interface LanguageConfiguration {
  * (e.g. a derived one using a different `languageId`) sets this so the derived
  * extension doesn't collide with the base kson extension on install.
  *
- * A derived extension's manifest must keep three things in sync: (1) set
- * `ksonConfigNamespace` to the new namespace; (2) rewrite static contribution
+ * Every manifest must set this field; a derived extension keeps two things
+ * in sync: (1) set `ksonConfigNamespace` to its namespace (required — the base
+ * `kson` extension also sets this explicitly); (2) rewrite static contribution
  * keys — `contributes.commands[].command` ids and `contributes.configuration.properties`
  * keys — to live under that prefix instead of `kson.*`. Runtime call sites all
  * route through {@link getConfigNamespace}, so no source changes are required.
@@ -71,6 +70,15 @@ export function getConfigNamespace(): string {
 export function initializeLanguageConfig(packageJson: any): void {
     const languages = packageJson?.contributes?.languages || [];
 
+    const configNamespace = packageJson?.[CONFIG_NAMESPACE_MANIFEST_FIELD];
+    if (!configNamespace) {
+        throw new Error(
+            `Missing required package.json field "${CONFIG_NAMESPACE_MANIFEST_FIELD}". ` +
+            `A fork must declare this field at the top level of its manifest to name the ` +
+            `namespace under which its commands and configuration keys live.`
+        );
+    }
+
     // Extract bundled schema mappings using file extension from lang.extensions[0]
     const bundledSchemas: BundledSchemaMapping[] = languages
         .filter((lang: any) => lang.extensions?.[0] && lang.bundledSchema)
@@ -86,9 +94,7 @@ export function initializeLanguageConfig(packageJson: any): void {
             .filter(Boolean)
             .map((ext: string) => ext.replace(/^\./, '')),
         bundledSchemas,
-        configNamespace:
-            packageJson?.[CONFIG_NAMESPACE_MANIFEST_FIELD]
-            || DEFAULT_CONFIG_NAMESPACE
+        configNamespace
     };
 }
 

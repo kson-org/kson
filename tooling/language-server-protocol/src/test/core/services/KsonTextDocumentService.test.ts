@@ -15,6 +15,7 @@ import {ksonSettingsWithDefaults} from "../../../core/KsonSettings.js";
 import {pos} from "../../TestHelpers";
 
 describe('KsonTextDocumentService', () => {
+    const TEST_NAMESPACE = 'test-ns';
     let connection: ConnectionStub;
     let service: KsonTextDocumentService;
     let documentsManager: KsonDocumentsManager;
@@ -23,7 +24,7 @@ describe('KsonTextDocumentService', () => {
     beforeEach(() => {
         connection = new ConnectionStub();
         documentsManager = new KsonDocumentsManager();
-        service = new KsonTextDocumentService(documentsManager, createCommandExecutor);
+        service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_NAMESPACE);
 
         documentsManager.listen(connection);
         service.connect(connection)
@@ -95,7 +96,7 @@ describe('KsonTextDocumentService', () => {
 
             assert.strictEqual(result.items.length, 1, "Should have exactly 1 diagnostic for trailing token");
             assert.strictEqual(result.items[0].severity, DiagnosticSeverity.Error);
-            assert.strictEqual(result.items[0].source, 'kson');
+            assert.strictEqual(result.items[0].source, TEST_NAMESPACE);
         });
 
         it('should return empty items when document is not found', async () => {

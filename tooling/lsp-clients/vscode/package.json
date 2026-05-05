@@ -2,6 +2,7 @@
   "name": "kson",
   "displayName": "KSON",
   "description": "Provides language support for the Kson data format.",
+  "ksonConfigNamespace": "kson",
   "authors": [
     {
       "name": "KSON",

@@ -39,7 +39,6 @@ import {SelectionRangeService} from '../features/SelectionRangeService.js';
 import {CommandExecutorBase} from '../commands/CommandExecutor.base.js';
 import { CommandExecutorFactory } from '../commands/CommandExecutorFactory.js';
 import {
-    DEFAULT_CONFIG_NAMESPACE,
     fromWireCommandId,
     toWireCommandId,
 } from '../commands/CommandType.js';
@@ -70,7 +69,7 @@ export class KsonTextDocumentService {
         private documentManager: KsonDocumentsManager,
         private createCommandExecutor: CommandExecutorFactory,
         private workspaceRoot: string | null = null,
-        private configNamespace: string = DEFAULT_CONFIG_NAMESPACE
+        private configNamespace: string
     ) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService(configNamespace);
