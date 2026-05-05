@@ -6,8 +6,8 @@ the same language server used by the VS Code extension.
 
 Two distribution modes:
 
-- **Library** (`dist/kson-monaco.js`) — ES module for apps that already use
-  Monaco and a bundler.
+- **Library** (`dist/index.js`, with `dist/react/index.js` for the React hook) —
+  ES modules for apps that already use Monaco and a bundler.
 - **Iframe** (`dist-iframe/`) — self-contained, drop-in embed for any page.
   No npm or bundler required.
 
@@ -23,6 +23,9 @@ buttons for every API method.
 # Iframe demo — uses the pre-built iframe assets via a script tag
 ./gradlew tooling:lsp-clients:npm_run_buildMonacoIframe
 ./gradlew tooling:lsp-clients:npm_run_demoIframe
+
+# React demo — attachKsonLsp inside @monaco-editor/react
+./gradlew tooling:lsp-clients:npm_run_demoReact
 ```
 
 ## Library API
@@ -43,8 +46,7 @@ server in a Web Worker.
 | `value`         | `string`                                        | Initial editor content.                                           |
 | `uri`           | `string`                                        | Document URI for LSP identification. Default `'inmemory://kson/document.kson'`. |
 | `editorOptions` | `monaco.editor.IStandaloneEditorConstructionOptions` | Forwarded to `monaco.editor.create()`.                       |
-| `lspOptions`    | `LspOptions` (see below)                        | Options forwarded to the language server at initialization.       |
-| `shared`        | `Pick<KsonEditor, 'bridge' \| 'worker' \| 'serverCapabilities'>` | Reuse the language server from another editor. When set, `lspOptions` is ignored. |
+| `lspOptions`    | `LspOptions` (see below)                        | Options forwarded to the language server at initialization. Honored on the first editor; ignored on subsequent ones (they join the running server). |
 
 #### `LspOptions`
 
@@ -64,22 +66,58 @@ validation, completions, and hover.  The most specific extension wins (e.g.
 | Property             | Type                                 | Description                                    |
 |----------------------|--------------------------------------|------------------------------------------------|
 | `editor`             | `monaco.editor.IStandaloneCodeEditor`| The underlying Monaco editor instance.         |
-| `bridge`             | `KsonLspBridge`                      | The LSP bridge (pass to `shared` to reuse).    |
+| `bridge`             | `KsonLspBridge`                      | The LSP bridge (shared with all editors on the page). |
 | `worker`             | `Worker`                             | The language server Web Worker.                |
 | `serverCapabilities` | `ServerCapabilities`                 | Capabilities reported by the language server.  |
 | `dispose()`          | `() => void`                         | Dispose the editor, bridge, and worker.        |
 
-Only one language server can be active.  Pass the first editor as `shared`
-to connect additional editors to the same server.
+Only one language server runs per page.  Additional editors join it
+automatically; the worker is torn down when the last editor is disposed.
 
 #### Additional exports
 
-| Export                  | Description                                          |
-|-------------------------|------------------------------------------------------|
-| `registerKsonLanguage`  | Register the KSON language with Monaco (called automatically by `createKsonEditor`). |
-| `KSON_LANGUAGE_ID`      | The language identifier string (`'kson'`).           |
-| `KsonLspBridge`         | The LSP bridge class, for advanced use.              |
-| `TabBar`                | The tab bar component used for multi-document navigation. |
+| Export                  | Sub-path                          | Description                                          |
+|-------------------------|-----------------------------------|------------------------------------------------------|
+| `attachKsonLsp`         | `@kson/monaco-editor`             | Attach the LSP to an editor you already created (e.g. via `@monaco-editor/react`).  See `demos/react/` for a worked example. |
+| `useKsonLsp`            | `@kson/monaco-editor/react`       | React hook over `attachKsonLsp` — handles the StrictMode-safe attach/detach lifecycle for you. |
+| `registerKsonLanguage`  | `@kson/monaco-editor`             | Register the KSON language with Monaco (called automatically by `createKsonEditor`). |
+| `KSON_LANGUAGE_ID`      | `@kson/monaco-editor`             | The language identifier string (`'kson'`).           |
+| `KsonLspBridge`         | `@kson/monaco-editor`             | The LSP bridge class, for advanced use.              |
+| `TabBar`                | `@kson/monaco-editor`             | The tab bar component used for multi-document navigation. |
+
+### React (`@monaco-editor/react`)
+
+For apps that already render Monaco via `@monaco-editor/react`, the
+`useKsonLsp` hook from `@kson/monaco-editor/react` is a one-line
+drop-in.  Three pieces are required:
+
+```tsx
+import * as monaco from 'monaco-editor';
+import { Editor, loader } from '@monaco-editor/react';
+import { useKsonLsp } from '@kson/monaco-editor/react';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+
+// 1. Reuse the bundled monaco — otherwise @monaco-editor/react fetches a
+// second copy from a CDN and our LSP providers register against the wrong module.
+loader.config({ monaco });
+
+// 2. Wire the default-label worker — kson tokenization runs there.
+self.MonacoEnvironment = { getWorker: () => new editorWorker() };
+
+function MyEditor() {
+    const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+    // 3. Attach the LSP — handles StrictMode and async attach/detach for you.
+    useKsonLsp(editor, { lspOptions: { /* bundledSchemas, ... */ } });
+    return <Editor language="kson" onMount={setEditor} />;
+}
+```
+
+`useKsonLsp` calls `attachKsonLsp` under the hood, bakes in the
+cancelled-flag dance that guards the unmount-before-attach race, and
+disposes the LSP refcount on unmount.  Options are read once when the
+editor first becomes non-null; re-mount the editor if you need to
+change schemas.  See `demos/react/main.tsx` for a runnable example
+(`./gradlew tooling:lsp-clients:npm_run_demoReact`).
 
 ## Iframe API
 

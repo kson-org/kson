@@ -1,0 +1,17 @@
+{
+  "name": "kson-monaco-library-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "External consumer demo for @kson/monaco-editor — ES module import path.",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@kson/monaco-editor": "file:../../monaco",
+    "monaco-editor": "^0.52.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0"
+  }
+}

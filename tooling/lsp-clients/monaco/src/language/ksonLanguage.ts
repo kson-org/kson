@@ -12,7 +12,7 @@ export const KSON_LANGUAGE_ID = 'kson';
 
 let registered = false;
 
-/** Register the KSON language with Monaco.  Safe to call multiple times. */
+/** Register the KSON language with Monaco.  Idempotent. */
 export function registerKsonLanguage(): void {
     if (registered) return;
     registered = true;

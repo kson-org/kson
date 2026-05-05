@@ -1,0 +1,41 @@
+* { margin: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: #fafafa; }
+
+.layout { display: flex; height: 100vh; }
+.guide {
+    width: 380px; min-width: 380px;
+    padding: 24px; overflow-y: auto;
+    border-right: 1px solid #e0e0e0;
+    background: #fff;
+    display: flex; flex-direction: column;
+}
+.guide-content { flex: 1; }
+.guide h1 { font-size: 1.2em; margin-bottom: 4px; }
+.guide .subtitle { color: #666; font-size: 0.85em; margin-bottom: 20px; }
+.guide h2 { font-size: 0.95em; margin: 20px 0 8px; color: #333; }
+.guide p { font-size: 0.85em; color: #555; line-height: 1.5; margin-bottom: 8px; }
+.guide pre {
+    background: #f5f5f5; border: 1px solid #e8e8e8; border-radius: 4px;
+    padding: 10px 12px; font-size: 0.8em; overflow-x: auto;
+    line-height: 1.5; margin-bottom: 8px;
+}
+.guide code {
+    background: #f0f0f0; padding: 1px 5px; border-radius: 3px;
+    font-size: 0.9em;
+}
+.guide pre code { background: none; padding: 0; }
+
+.editors {
+    flex: 1; min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background: #e0e0e0;
+}
+.editor-pane { min-width: 0; display: flex; flex-direction: column; }
+.editor-pane + .editor-pane { border-left: 2px solid #e0e0e0; }
+.editor-pane .label {
+    padding: 6px 12px; font-size: 0.78em; font-weight: 600;
+    background: #fafafa; color: #333;
+    border-bottom: 1px solid #e0e0e0;
+}
+.editor-pane .body { flex: 1; min-height: 0; }

@@ -1,0 +1,16 @@
+{
+  "name": "kson-monaco-iframe-demo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "External consumer demo for @kson/monaco-editor — iframe drop-in script tag.",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@kson/monaco-editor": "file:../../monaco"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0"
+  }
+}
