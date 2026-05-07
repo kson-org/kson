@@ -29,7 +29,8 @@ data class EmbedBlockResolution(
  * Only StringNode instances need tracking - EmbedBlockNode instances are already embed blocks
  * and will format correctly using their existing tags.
  *
- * @param rootValue The root [KsonValue] to process
+ * @param rootValue The root [KsonValue] to process — obtain via [org.kson.AstParseResult.ksonValue],
+ *   which safely returns null when conversion fails.
  * @param rules The embed block rules to match against document paths
  * @return An EmbedBlockResolution containing the map of StringNodes to their matching rules
  */

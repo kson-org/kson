@@ -248,9 +248,9 @@ object SchemaParser {
             messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
             return RefOutcome.Failed
         }
-        val refValidator = RefValidator(resolvedValue, idLookup)
+        val refValidator = RefValidator(resolvedValue, idLookup, refString.value)
         return RefOutcome.Resolved(
-            JsonObjectSchema(null, refString.value, null, null, null, null, listOf(refValidator))
+            JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
         )
     }
 

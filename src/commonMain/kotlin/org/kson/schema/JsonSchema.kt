@@ -5,9 +5,16 @@ import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
 import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
+import org.kson.schema.validators.AllOfValidator
+import org.kson.schema.validators.AnyOfValidator
+import org.kson.schema.validators.OneOfValidator
+import org.kson.schema.validators.RefValidator
 import org.kson.schema.validators.TypeValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.Validator
+
+/** Fallback description used when a schema has no title, description, or recognizable structure to describe. */
+private const val GENERIC_OBJECT_SCHEMA_DESCRIPTION = "JSON Object Schema"
 
 /**
  * Base [JsonSchema] type that [KsonValue]s may be validated against
@@ -42,7 +49,56 @@ class JsonObjectSchema(
 ) : JsonSchema {
 
   override fun descriptionWithDefault(): String {
-    return description ?: title ?: "JSON Object Schema"
+    return description ?: title ?: synthesizeDescription() ?: GENERIC_OBJECT_SCHEMA_DESCRIPTION
+  }
+
+  /**
+   * Derive a human-friendly description from the schema's structure when no `title` or `description` is
+   * declared. Recognizes two common shapes:
+   *   - a lone `$ref` whose target can be named (via [RefValidator.refShortName])
+   *   - a lone `oneOf` / `anyOf` / `allOf` whose branches can each be named
+   *
+   * Returns `null` when the structure is too generic to describe meaningfully (e.g. an anonymous object
+   * with no combinators, or a combinator with any anonymous branch), leaving the caller to fall
+   * back to [GENERIC_OBJECT_SCHEMA_DESCRIPTION].
+   */
+  private fun synthesizeDescription(): String? {
+    val sole = schemaValidators.singleOrNull() ?: return null
+    return when (sole) {
+      is RefValidator -> sole.refShortName()
+      is OneOfValidator -> combinatorDescription("one of", sole.oneOf)
+      is AnyOfValidator -> combinatorDescription("any of", sole.anyOf)
+      is AllOfValidator -> combinatorDescription("all of", sole.allOf)
+      else -> null
+    }
+  }
+
+  /**
+   * Joins each branch's [branchName] under [prefix].  Strict all-or-nothing: returns `null` as soon
+   * as any branch is anonymous (no title, no nameable `$ref`), so that we never emit a partial list
+   * that invites the reader to assume those are the only allowed shapes.
+   */
+  private fun combinatorDescription(prefix: String, branches: List<JsonSchema>): String? {
+    if (branches.isEmpty()) return null
+    val names = branches.map { branchName(it) ?: return null }
+    return "$prefix: ${names.joinToString(", ")}"
+  }
+
+  /**
+   * A short, human-recognizable name for a combinator [branch], or `null` if the branch is anonymous.
+   *
+   * Preference order:
+   *   1. an explicit `title` on the branch
+   *   2. [RefValidator.refShortName] for a branch whose sole validator is a `$ref`
+   *
+   * Returns `null` for anything that doesn't fit this shape, so that [combinatorDescription] can bail
+   * to its generic fallback rather than emit a misleading partial list.
+   */
+  private fun branchName(branch: JsonSchema): String? {
+    if (branch !is JsonObjectSchema) return null
+    branch.title?.let { return it }
+    val sole = branch.schemaValidators.singleOrNull() as? RefValidator ?: return null
+    return sole.refShortName()
   }
 
   /**
