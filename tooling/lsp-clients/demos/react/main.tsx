@@ -12,6 +12,7 @@ import * as monaco from 'monaco-editor';
 import { Editor, loader } from '@monaco-editor/react';
 import { useKsonLsp } from '@kson/monaco-editor/react';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 
 // Must run before any <Editor> renders — otherwise @monaco-editor/react
 // race-fetches a second monaco from CDN and our LSP providers register
@@ -21,13 +22,13 @@ loader.config({ monaco });
 // Expose monaco for browser-based smoke tests.
 (window as unknown as { monaco: typeof monaco }).monaco = monaco;
 
-// Worker factory.  Monaco's built-in features (tokenization, diff,
-// json/css/html/ts) all use named workers; kson uses the plain editor.worker.
-// The default branch is what attachKsonLsp relies on.
+// Worker factory.  Monaco passes the language label so we can return the
+// matching worker; kson tokenization runs in the default editor.worker, and
+// the json editor below needs its own json.worker for language services.
 if (!self.MonacoEnvironment) {
     self.MonacoEnvironment = {
-        getWorker(_workerId: string, _label: string): Worker {
-            // Add label-specific branches (json, typescript, ...) here as you need them.
+        getWorker(_workerId: string, label: string): Worker {
+            if (label === 'json') return new jsonWorker();
             return new editorWorker();
         },
     };
@@ -73,7 +74,6 @@ function App() {
     useKsonLsp(kson1, {
         lspOptions: {
             bundledSchemas: [{ fileExtension: 'kson', schemaContent: SAMPLE_SCHEMA }],
-            enableBundledSchemas: true,
         },
     });
     useKsonLsp(kson2);
@@ -112,14 +112,16 @@ useKsonLsp(editor, { lspOptions: {...} });
 
                     <h2>3. Worker factory cohabitation</h2>
                     <p>
-                        KSON tokenization runs in the default <code>editor.worker</code>.
-                        If you already define <code>MonacoEnvironment.getWorker</code>,
-                        keep your label-specific branches and add a default fallback:
+                        KSON tokenization runs in the default <code>editor.worker</code>;
+                        Monaco's other language services (json, typescript, …) load
+                        their own workers by label.  Branch on the <code>label</code>
+                        argument so each language gets its matching worker — the
+                        default branch is what KSON uses.
                     </p>
                     <pre><code>{`self.MonacoEnvironment = {
   getWorker(_id, label) {
     if (label === 'json') return new JsonWorker();
-    return new EditorWorker(); // default
+    return new EditorWorker(); // default — KSON
   },
 };`}</code></pre>
                     <p>

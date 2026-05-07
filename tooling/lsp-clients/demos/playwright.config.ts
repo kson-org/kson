@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Single Playwright config covering all three external consumer demos —
- * library (5174), iframe (5175), react (5176).
+ * vanilla (5174), iframe (5175), react (5176).
  *
  * Each demo runs its own Vite dev server; we boot all three so a single
  * `playwright test` invocation exercises every consumer integration.
@@ -32,7 +32,7 @@ export default defineConfig({
     webServer: [
         {
             command: 'npm run dev',
-            cwd: './library',
+            cwd: './vanilla',
             port: 5174,
             reuseExistingServer: !process.env.CI,
             timeout: 120 * 1000,
