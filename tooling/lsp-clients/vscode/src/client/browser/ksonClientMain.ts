@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { LanguageClient } from 'vscode-languageclient/browser';
 import { createClientOptions } from '../../config/clientOptions';
-import { initializeLanguageConfig, getConfigNamespace } from '../../config/languageConfig';
+import { initializeLanguageConfig } from '../../config/languageConfig';
 import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
 import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 
@@ -12,7 +12,7 @@ import { registerBundledSchemaContentProvider } from '../common/BundledSchemaCon
 export async function activate(context: vscode.ExtensionContext) {
     // Initialize language configuration from package.json
     initializeLanguageConfig(context.extension.packageJSON);
-    const configNamespace = getConfigNamespace();
+    const name = context.extension.packageJSON.name;
 
     // Create log output channel
     const logOutputChannel = vscode.window.createOutputChannel('Kson Language Server', { log: true });
@@ -36,8 +36,8 @@ export async function activate(context: vscode.ExtensionContext) {
         const clientOptions = createClientOptions(logOutputChannel, {
             bundledSchemas,
             bundledMetaSchemas,
-            enableBundledSchemas: areBundledSchemasEnabled(),
-            configNamespace
+            enableBundledSchemas: areBundledSchemasEnabled(name),
+            distributionId: name
         });
 
         // In test environments, we need to support the vscode-test-web scheme
@@ -55,8 +55,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
 
         const languageClient = new LanguageClient(
-            `${configNamespace}-browser`,
-            'KSON Language Server (Browser)',
+            `${name}-browser`,
+            `${name} Language Server (Browser)`,
             clientOptions,
             worker
         );

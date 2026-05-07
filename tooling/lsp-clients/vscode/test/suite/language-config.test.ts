@@ -1,5 +1,5 @@
 import { assert } from './assert';
-import { initializeLanguageConfig, getLanguageConfiguration, getConfigNamespace, isKsonLanguage, resetLanguageConfiguration } from '../../src/config/languageConfig';
+import { initializeLanguageConfig, getLanguageConfiguration, isKsonLanguage, resetLanguageConfiguration } from '../../src/config/languageConfig';
 
 describe('Language Configuration Tests', () => {
 
@@ -7,7 +7,7 @@ describe('Language Configuration Tests', () => {
     afterEach(() => resetLanguageConfiguration());
 
     function initWithLanguages(languages: any[]) {
-        initializeLanguageConfig({ ksonConfigNamespace: 'kson', contributes: { languages } });
+        initializeLanguageConfig({ contributes: { languages } });
     }
 
     describe('getLanguageConfiguration', () => {
@@ -118,32 +118,4 @@ describe('Language Configuration Tests', () => {
         });
     });
 
-    describe('configNamespace', () => {
-        it('Should throw when the ksonConfigNamespace manifest field is missing', () => {
-            let caught: Error | null = null;
-            try {
-                initializeLanguageConfig({ contributes: { languages: [{ id: 'kson', extensions: ['.kson'] }] } });
-            } catch (e) {
-                caught = e as Error;
-            }
-            assert.ok(caught, 'expected initializeLanguageConfig to throw');
-            assert.ok(caught!.message.includes('ksonConfigNamespace'), `error message should name the field, got: ${caught!.message}`);
-        });
-
-        it('Should use the ksonConfigNamespace manifest field when present', () => {
-            initializeLanguageConfig({
-                ksonConfigNamespace: 'config',
-                contributes: { languages: [{ id: 'config', extensions: ['.config'] }] }
-            });
-            assert.strictEqual(getConfigNamespace(), 'config');
-        });
-
-        it('Should prefer the manifest field over languages[0].id', () => {
-            initializeLanguageConfig({
-                ksonConfigNamespace: 'config',
-                contributes: { languages: [{ id: 'different', extensions: ['.different'] }] }
-            });
-            assert.strictEqual(getConfigNamespace(), 'config');
-        });
-    })
 });

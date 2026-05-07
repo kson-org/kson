@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getLanguageConfiguration, getConfigNamespace, BundledSchemaMapping } from './languageConfig';
+import { getLanguageConfiguration, BundledSchemaMapping } from './languageConfig';
 
 import type { BundledSchemaConfig, BundledMetaSchemaConfig } from 'kson-language-server';
 export type { BundledSchemaConfig, BundledMetaSchemaConfig };
@@ -115,7 +115,7 @@ async function loadSchemaFile(
 /**
  * Check if bundled schemas are enabled via VS Code settings.
  */
-export function areBundledSchemasEnabled(): boolean {
-    const config = vscode.workspace.getConfiguration(getConfigNamespace());
+export function areBundledSchemasEnabled(name: string): boolean {
+    const config = vscode.workspace.getConfiguration(name);
     return config.get<boolean>('enableBundledSchemas', true);
 }

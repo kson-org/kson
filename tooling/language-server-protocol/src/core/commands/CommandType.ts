@@ -1,13 +1,9 @@
 /**
  * Enum defining all commands the Kson Language Server can execute.
  *
- * Values are **unqualified** ids used as internal discriminators (executor
- * switch, {@link ./CommandParameters} keys). The VSCode/LSP wire form prepends
- * the active configuration namespace via {@link toWireCommandId} and is
- * stripped again in {@link fromWireCommandId}, so a client built under a
- * non-default namespace (e.g. `config.plainFormat`) can coexist with the
- * base `kson` extension in the same VSCode host without command-registration
- * collisions.
+ * Values are unqualified ids used internally as discriminators. On the wire,
+ * they are prefixed with the active distribution id via {@link toWireCommandId}
+ * and stripped again in {@link fromWireCommandId}.
  */
 export enum CommandType {
     /** Format the document as plain Kson */
@@ -30,13 +26,6 @@ export enum CommandType {
 }
 
 /**
- * Default configuration namespace used by the base kson extension and by the
- * server when the client hasn't specified otherwise via initializationOptions.
- * Commands and client settings both live under this prefix on the wire.
- */
-export const DEFAULT_CONFIG_NAMESPACE = 'kson';
-
-/**
  * Get all unqualified command ids.
  */
 export function getAllCommandIds(): CommandType[] {
@@ -45,19 +34,19 @@ export function getAllCommandIds(): CommandType[] {
 
 /**
  * Build the VSCode/LSP wire id for a command by prepending the active
- * configuration namespace.
+ * distribution id.
  */
-export function toWireCommandId(commandId: CommandType | string, namespace: string): string {
-    return `${namespace}.${commandId}`;
+export function toWireCommandId(commandId: CommandType | string, distributionId: string): string {
+    return `${distributionId}.${commandId}`;
 }
 
 /**
  * Parse a wire command id back to its {@link CommandType}, or return
- * `undefined` if the id is not namespaced under `namespace` or doesn't resolve
- * to a known command.
+ * `undefined` if the id is not prefixed by `distributionId` or doesn't
+ * resolve to a known command.
  */
-export function fromWireCommandId(wireId: string, namespace: string): CommandType | undefined {
-    const prefix = `${namespace}.`;
+export function fromWireCommandId(wireId: string, distributionId: string): CommandType | undefined {
+    const prefix = `${distributionId}.`;
     if (!wireId.startsWith(prefix)) {
         return undefined;
     }

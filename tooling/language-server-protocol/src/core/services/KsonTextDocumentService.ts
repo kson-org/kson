@@ -69,10 +69,10 @@ export class KsonTextDocumentService {
         private documentManager: KsonDocumentsManager,
         private createCommandExecutor: CommandExecutorFactory,
         private workspaceRoot: string | null = null,
-        private configNamespace: string
+        private distributionId: string
     ) {
         this.formattingService = new FormattingService();
-        this.diagnosticService = new DiagnosticService(configNamespace);
+        this.diagnosticService = new DiagnosticService(distributionId);
         this.semanticTokensService = new SemanticTokensService();
         this.codeLensService = new CodeLensService();
         this.documentHighlightService = new DocumentHighlightService();
@@ -198,7 +198,7 @@ export class KsonTextDocumentService {
             return this.codeLensService.getCodeLenses(document).map(lens => ({
                 ...lens,
                 command: lens.command
-                    ? {...lens.command, command: toWireCommandId(lens.command.command, this.configNamespace)}
+                    ? {...lens.command, command: toWireCommandId(lens.command.command, this.distributionId)}
                     : lens.command,
             }));
         } catch (error) {
@@ -209,7 +209,7 @@ export class KsonTextDocumentService {
 
     private async onExecuteCommand(params: ExecuteCommandParams): Promise<any> {
         try {
-            const commandType = fromWireCommandId(params.command, this.configNamespace);
+            const commandType = fromWireCommandId(params.command, this.distributionId);
             return await this.commandExecutor.execute(
                 commandType ? {...params, command: commandType} : params
             );

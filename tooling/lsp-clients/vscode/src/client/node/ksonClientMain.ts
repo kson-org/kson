@@ -10,7 +10,7 @@ import {
     createClientOptions
 } from '../../config/clientOptions';
 import {StatusBarManager} from '../common/StatusBarManager';
-import { isKsonLanguage, initializeLanguageConfig, getConfigNamespace } from '../../config/languageConfig';
+import { isKsonLanguage, initializeLanguageConfig } from '../../config/languageConfig';
 import { loadBundledSchemas, loadBundledMetaSchemas, areBundledSchemasEnabled } from '../../config/bundledSchemaLoader';
 import { registerBundledSchemaContentProvider } from '../common/BundledSchemaContentProvider';
 import { CommandType, toWireCommandId } from 'kson-language-server';
@@ -22,7 +22,7 @@ import { CommandType, toWireCommandId } from 'kson-language-server';
 export async function activate(context: vscode.ExtensionContext) {
     // Initialize language configuration from package.json
     initializeLanguageConfig(context.extension.packageJSON);
-    const configNamespace = getConfigNamespace();
+    const name = context.extension.packageJSON.name;
 
     // Create log output channel
     const logOutputChannel = vscode.window.createOutputChannel('Kson Language Server', {log: true});
@@ -55,10 +55,10 @@ export async function activate(context: vscode.ExtensionContext) {
         const clientOptions: LanguageClientOptions = createClientOptions(logOutputChannel, {
             bundledSchemas,
             bundledMetaSchemas,
-            enableBundledSchemas: areBundledSchemasEnabled(),
-            configNamespace
+            enableBundledSchemas: areBundledSchemasEnabled(name),
+            distributionId: name
         });
-        const languageClient = new LanguageClient(configNamespace, serverOptions, clientOptions, false)
+        const languageClient = new LanguageClient(name, serverOptions, clientOptions, false)
 
         await languageClient.start();
 
@@ -88,7 +88,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         // Register the schema selection command
         context.subscriptions.push(
-            vscode.commands.registerCommand(`${configNamespace}.selectSchema`, async () => {
+            vscode.commands.registerCommand(`${name}.selectSchema`, async () => {
                 const editor = vscode.window.activeTextEditor;
                 if (!editor || !isKsonLanguage(editor.document.languageId)) {
                     vscode.window.showWarningMessage('Please open a KSON file first.');
@@ -136,7 +136,7 @@ export async function activate(context: vscode.ExtensionContext) {
                     // Execute the remove schema command via LSP
                     try {
                         await languageClient.sendRequest('workspace/executeCommand', {
-                            command: toWireCommandId(CommandType.REMOVE_SCHEMA, configNamespace),
+                            command: toWireCommandId(CommandType.REMOVE_SCHEMA, name),
                             arguments: [{
                                 documentUri: editor.document.uri.toString()
                             }]
@@ -154,7 +154,7 @@ export async function activate(context: vscode.ExtensionContext) {
                     try {
                         // Execute the associate schema command via LSP
                         await languageClient.sendRequest('workspace/executeCommand', {
-                            command: toWireCommandId(CommandType.ASSOCIATE_SCHEMA, configNamespace),
+                            command: toWireCommandId(CommandType.ASSOCIATE_SCHEMA, name),
                             arguments: [{
                                 documentUri: editor.document.uri.toString(),
                                 schemaPath: schemaPath

@@ -11,7 +11,7 @@ import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {isKsonSchemaDocument} from './core/document/KsonSchemaDocument.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
-import {DEFAULT_CONFIG_NAMESPACE, getAllCommandIds, toWireCommandId} from './core/commands/CommandType.js';
+import {getAllCommandIds, toWireCommandId} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
 import {BundledSchemaProvider, BundledSchemaConfig, BundledMetaSchemaConfig} from './core/schema/BundledSchemaProvider.js';
@@ -30,12 +30,11 @@ export interface KsonInitializationOptions {
     /** Whether bundled schemas are enabled */
     enableBundledSchemas?: boolean;
     /**
-     * Prefix for the client's configuration keys (defaults to "kson"). The
-     * server uses this when pulling settings from the client, so a client
-     * built under a different namespace reads `<ns>.format.*` /
-     * `<ns>.codeLens.*` instead of the base `kson.*`.
+     * Identifier under which this server instance's host-visible artifacts are
+     * registered: command-id prefix on the wire, diagnostic source, and the
+     * configuration section pulled from the client. Defaults to "kson".
      */
-    configNamespace?: string;
+    distributionId?: string;
 }
 
 type SchemaProviderFactory = (
@@ -55,10 +54,17 @@ export function startKsonServer(
     createSchemaProvider: SchemaProviderFactory,
     createCommandExecutor: CommandExecutorFactory
 ): void {
+    /**
+     * Default distribution id, used when the client hasn't supplied one via
+     * initializationOptions.
+     */
+    const DEFAULT_DISTRIBUTION_ID = "kson";
+
+
     // Variables to store state during initialization
     let workspaceRootUri: URI | undefined;
     let hasConfigurationCapability = false;
-    let configNamespace: string;
+    let distributionId: string;
 
     // Create logger that uses the connection
     const logger = {
@@ -88,7 +94,7 @@ export function startKsonServer(
         const bundledSchemas = initOptions?.bundledSchemas ?? [];
         const bundledMetaSchemas = initOptions?.bundledMetaSchemas ?? [];
         const enableBundledSchemas = initOptions?.enableBundledSchemas ?? true;
-        configNamespace = initOptions?.configNamespace ?? DEFAULT_CONFIG_NAMESPACE;
+        distributionId = initOptions?.distributionId ?? DEFAULT_DISTRIBUTION_ID;
 
         // Create the appropriate schema provider for this environment (file system or no-op)
         const fileSystemSchemaProvider = await createSchemaProvider(workspaceRootUri, logger);
@@ -126,7 +132,7 @@ export function startKsonServer(
             documentManager,
             createCommandExecutor,
             workspaceRoot,
-            configNamespace
+            distributionId
         );
 
         // Setup document handling and connect services
@@ -148,7 +154,7 @@ export function startKsonServer(
 
             // Diagnostics (pull model preferred)
             diagnosticProvider: {
-                identifier: configNamespace,
+                identifier: distributionId,
                 interFileDependencies: false,
                 workspaceDiagnostics: false
             } as DiagnosticRegistrationOptions,
@@ -158,11 +164,10 @@ export function startKsonServer(
                 resolveProvider: false
             },
 
-            // Execute command — advertise ids under the active namespace so a
-            // client built under a non-default namespace doesn't collide with
-            // the base `kson.*` registrations in VSCode's global command registry.
+            // Execute command — advertise ids prefixed by the active
+            // distribution id
             executeCommandProvider: {
-                commands: getAllCommandIds().map(id => toWireCommandId(id, configNamespace))
+                commands: getAllCommandIds().map(id => toWireCommandId(id, distributionId))
             },
 
             // Folding ranges
@@ -201,7 +206,7 @@ export function startKsonServer(
 
     // Pull configuration from the client
     async function pullConfiguration(): Promise<void> {
-        const settings = await connection.workspace.getConfiguration(configNamespace);
+        const settings = await connection.workspace.getConfiguration(distributionId);
         const configuration = ksonSettingsWithDefaults(settings);
         textDocumentService.updateConfiguration(configuration);
     }
@@ -211,7 +216,7 @@ export function startKsonServer(
         if (hasConfigurationCapability) {
             // Register for configuration change notifications
             connection.client.register(DidChangeConfigurationNotification.type, {
-                section: configNamespace
+                section: distributionId
             });
             // Pull initial configuration
             await pullConfiguration();
@@ -284,9 +289,9 @@ export function startKsonServer(
     });
 
     // Handle configuration changes. Per LSP, the push model sends the full
-    // settings object, so our slice arrives at `change.settings.<ns>`.
+    // settings object, so our slice arrives at `change.settings.<distributionId>`.
     connection.onDidChangeConfiguration(async (change) => {
-        const scoped = change.settings?.[configNamespace];
+        const scoped = change.settings?.[distributionId];
 
         if (hasConfigurationCapability) {
             // Pull configuration from the client (pull model)

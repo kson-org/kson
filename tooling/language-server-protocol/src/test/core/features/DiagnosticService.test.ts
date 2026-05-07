@@ -10,8 +10,8 @@ import {createKsonDocument} from '../../TestHelpers.js';
 
 
 describe('KSON Diagnostics', () => {
-    const TEST_NAMESPACE = 'test-ns';
-    const diagnosticService = new DiagnosticService(TEST_NAMESPACE);
+    const TEST_DISTRIBUTION_ID = 'test-ns';
+    const diagnosticService = new DiagnosticService(TEST_DISTRIBUTION_ID);
 
     function getDiagnostics(content: string, schemaContent?: string): Diagnostic[] {
         const ksonDocument = createKsonDocument(content, schemaContent);
@@ -30,7 +30,7 @@ describe('KSON Diagnostics', () => {
         it('should report error for empty document', () => {
             const diagnostics = assertDiagnosticCount('', 1);
             assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error);
-            assert.strictEqual(diagnostics[0].source, TEST_NAMESPACE);
+            assert.strictEqual(diagnostics[0].source, TEST_DISTRIBUTION_ID);
         });
 
         it('should report no diagnostics for valid document', () => {
@@ -67,10 +67,10 @@ describe('KSON Diagnostics', () => {
             assert.strictEqual(diagnostics[1].severity, DiagnosticSeverity.Warning);
         });
 
-        it('should set source to the configured namespace on all diagnostics', () => {
+        it('should set source to the configured distribution id on all diagnostics', () => {
             const diagnostics = getDiagnostics('');
             for (const d of diagnostics) {
-                assert.strictEqual(d.source, TEST_NAMESPACE);
+                assert.strictEqual(d.source, TEST_DISTRIBUTION_ID);
             }
         });
 
@@ -136,7 +136,7 @@ describe('KSON Diagnostics', () => {
             // Should still return at least the document parse errors, not crash
             assert.ok(diagnostics.length > 0, 'Should return document parse errors even when schema is invalid');
             for (const d of diagnostics) {
-                assert.strictEqual(d.source, TEST_NAMESPACE);
+                assert.strictEqual(d.source, TEST_DISTRIBUTION_ID);
             }
         });
 
@@ -154,7 +154,7 @@ describe('KSON Diagnostics', () => {
         assert.ok(diagnostics.length > 0);
         // All diagnostics should come from parse errors only
         for (const d of diagnostics) {
-            assert.strictEqual(d.source, TEST_NAMESPACE);
+            assert.strictEqual(d.source, TEST_DISTRIBUTION_ID);
         }
     });
 

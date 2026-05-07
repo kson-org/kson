@@ -14,7 +14,7 @@ import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from '
  */
 export class DiagnosticService {
 
-    constructor(private readonly configNamespace: string) {}
+    constructor(private readonly distributionId: string) {}
 
     createDocumentDiagnosticReport(document: KsonDocument | null | undefined): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];
@@ -46,7 +46,7 @@ export class DiagnosticService {
             severity: msg.severity === KtSeverity.ERROR
                 ? DiagnosticSeverity.Error
                 : DiagnosticSeverity.Warning,
-            source: this.configNamespace,
+            source: this.distributionId,
             message: msg.message
         };
     }

@@ -35,12 +35,12 @@ class WorkspaceConnectionStub extends ConnectionStub {
     }
 }
 
-const TEST_NAMESPACE = 'test-ns';
+const TEST_DISTRIBUTION_ID = 'test-ns';
 
 function createTestSetup() {
     const connection = new ConnectionStub();
     const documentsManager = new KsonDocumentsManager();
-    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_NAMESPACE);
+    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_DISTRIBUTION_ID);
     
     documentsManager.listen(connection);
     service.connect(connection);
@@ -78,7 +78,7 @@ function buildWorkspaceEdit(uri: string, replaceRange: Range, newText: string): 
 
 function buildCommandParams(command: CommandType, uri: string, style: FormattingStyle): ExecuteCommandParams {
     return {
-        command: toWireCommandId(command, TEST_NAMESPACE),
+        command: toWireCommandId(command, TEST_DISTRIBUTION_ID),
         arguments: [{ documentUri: uri, formattingStyle: style }]
     };
 }

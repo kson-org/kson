@@ -13,27 +13,7 @@ export interface LanguageConfiguration {
     fileExtensions: string[];
     /** Bundled schema mappings extracted from package.json */
     bundledSchemas: BundledSchemaMapping[];
-    /**
-     * Prefix for VSCode commands and configuration keys (e.g. "kson").
-     * Required; read from {@link CONFIG_NAMESPACE_MANIFEST_FIELD}.
-     */
-    configNamespace: string;
 }
-
-/**
- * Root-level package.json field naming the namespace for VSCode commands and
- * configuration keys. A build toolchain that produces a non-default extension
- * (e.g. a derived one using a different `languageId`) sets this so the derived
- * extension doesn't collide with the base kson extension on install.
- *
- * Every manifest must set this field; a derived extension keeps two things
- * in sync: (1) set `ksonConfigNamespace` to its namespace (required — the base
- * `kson` extension also sets this explicitly); (2) rewrite static contribution
- * keys — `contributes.commands[].command` ids and `contributes.configuration.properties`
- * keys — to live under that prefix instead of `kson.*`. Runtime call sites all
- * route through {@link getConfigNamespace}, so no source changes are required.
- */
-const CONFIG_NAMESPACE_MANIFEST_FIELD = 'ksonConfigNamespace';
 
 let cachedConfig: LanguageConfiguration | null = null;
 
@@ -55,29 +35,11 @@ export function isKsonLanguage(languageId: string): boolean {
 }
 
 /**
- * Namespace prefix for this extension's commands and configuration keys at
- * runtime. Contribution keys in package.json (commands, configuration
- * properties) are static and must be rewritten separately when forking.
- */
-export function getConfigNamespace(): string {
-    return getLanguageConfiguration().configNamespace;
-}
-
-/**
  * Initialize language configuration from extension's package.json.
  * Call this early in the activate function.
  */
 export function initializeLanguageConfig(packageJson: any): void {
     const languages = packageJson?.contributes?.languages || [];
-
-    const configNamespace = packageJson?.[CONFIG_NAMESPACE_MANIFEST_FIELD];
-    if (!configNamespace) {
-        throw new Error(
-            `Missing required package.json field "${CONFIG_NAMESPACE_MANIFEST_FIELD}". ` +
-            `A fork must declare this field at the top level of its manifest to name the ` +
-            `namespace under which its commands and configuration keys live.`
-        );
-    }
 
     // Extract bundled schema mappings using file extension from lang.extensions[0]
     const bundledSchemas: BundledSchemaMapping[] = languages
@@ -93,8 +55,7 @@ export function initializeLanguageConfig(packageJson: any): void {
             .flatMap((lang: any) => lang.extensions || [])
             .filter(Boolean)
             .map((ext: string) => ext.replace(/^\./, '')),
-        bundledSchemas,
-        configNamespace
+        bundledSchemas
     };
 }
 
