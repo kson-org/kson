@@ -5,7 +5,7 @@ downstream project, covering the three consumer styles the package supports:
 
 | Demo                      | Integration style                                                          | Port |
 | ------------------------- | -------------------------------------------------------------------------- | ---- |
-| [`library/`](library/)    | Vanilla TS app importing `createKsonEditor` from `@kson/monaco-editor`.    | 5174 |
+| [`vanilla/`](vanilla/)    | Vanilla TS app importing `createKsonEditor` from `@kson/monaco-editor`.    | 5174 |
 | [`iframe/`](iframe/)      | Static page dropping in `kson-editor.js` via a `<script>` tag.             | 5175 |
 | [`react/`](react/)        | `@monaco-editor/react` app attaching the LSP via the `useKsonLsp` hook.    | 5176 |
 
@@ -14,7 +14,7 @@ Pick the one that matches your stack and copy from it.
 ## Run
 
 ```bash
-./gradlew tooling:lsp-clients:npm_run_demoLibrary
+./gradlew tooling:lsp-clients:npm_run_demoVanilla
 ./gradlew tooling:lsp-clients:npm_run_demoIframe
 ./gradlew tooling:lsp-clients:npm_run_demoReact
 ```

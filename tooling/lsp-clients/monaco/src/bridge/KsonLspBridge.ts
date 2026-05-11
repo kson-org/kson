@@ -66,6 +66,22 @@ interface ApplyWorkspaceEditParams {
     };
 }
 
+/**
+ * Default `enableBundledSchemas` from the presence of `bundledSchemas`: if
+ * the consumer passed any schemas they want them on, otherwise leave the
+ * feature off.  An explicit boolean from the consumer always wins.
+ */
+function withInferredSchemaToggle(
+    options: KsonLspBridgeOptions['initializationOptions'],
+): KsonLspBridgeOptions['initializationOptions'] {
+    if (!options) return options;
+    if (options.enableBundledSchemas !== undefined) return options;
+    return {
+        ...options,
+        enableBundledSchemas: (options.bundledSchemas?.length ?? 0) > 0,
+    };
+}
+
 export class KsonLspBridge {
     private readonly connection: JsonRpcConnection;
     private readonly disposables: monaco.IDisposable[] = [];
@@ -108,7 +124,7 @@ export class KsonLspBridge {
             },
             rootUri: null,
             workspaceFolders: null,
-            initializationOptions: options?.initializationOptions,
+            initializationOptions: withInferredSchemaToggle(options?.initializationOptions),
         });
 
         this.connection.sendNotification('initialized', {});

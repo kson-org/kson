@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * mount through one shared LSP worker (refcounted registry), and the
  * bundled JSON Schema produces diagnostics on editor 1.
  */
-test.describe('Library demo', () => {
+test.describe('Vanilla demo', () => {
     test('two editors mount via the shared registry; get/setValue work', async ({ page }) => {
         await page.goto('http://localhost:5174');
 

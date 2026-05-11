@@ -77,21 +77,21 @@ tasks {
 
     // External demos — each consumes @kson/monaco-editor as a third-party package
     // (file:../../monaco), exercising the export map and shipped types/dist artifacts.
-    val demoLibraryDir = layout.projectDirectory.dir("demos/library")
+    val demoVanillaDir = layout.projectDirectory.dir("demos/vanilla")
     val demoIframeDir = layout.projectDirectory.dir("demos/iframe")
     val demoReactDir = layout.projectDirectory.dir("demos/react")
 
-    val installDemoLibrary = register<PixiExecTask>("npm_install_demoLibrary") {
+    val installDemoVanilla = register<PixiExecTask>("npm_install_demoVanilla") {
         command=listOf("npm", "ci")
-        workingDirectory.set(demoLibraryDir)
+        workingDirectory.set(demoVanillaDir)
         doNotTrackState("npm already tracks its own state")
         dependsOn(buildMonaco)
     }
 
-    register<PixiExecTask>("npm_run_demoLibrary") {
+    register<PixiExecTask>("npm_run_demoVanilla") {
         command=listOf("npm", "run", "dev")
-        workingDirectory.set(demoLibraryDir)
-        dependsOn(installDemoLibrary)
+        workingDirectory.set(demoVanillaDir)
+        dependsOn(installDemoVanilla)
     }
 
     val installDemoIframe = register<PixiExecTask>("npm_install_demoIframe") {
@@ -130,7 +130,7 @@ tasks {
         doNotTrackState("npm already tracks its own state")
         dependsOn(buildMonaco)
         dependsOn(buildMonacoIframe)
-        dependsOn(installDemoLibrary)
+        dependsOn(installDemoVanilla)
         dependsOn(installDemoIframe)
         dependsOn(installDemoReact)
     }
@@ -167,7 +167,7 @@ tasks {
         delete("monaco/node_modules")
         delete("monaco/dist-iframe")
         delete("shared/out")
-        delete("demos/library/node_modules")
+        delete("demos/vanilla/node_modules")
         delete("demos/iframe/node_modules")
         delete("demos/react/node_modules")
         delete("demos/node_modules")

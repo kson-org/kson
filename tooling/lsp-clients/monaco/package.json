@@ -1,5 +1,5 @@
 {
-  "name": "@kson/monaco-editor",
+  "name": "@kson_org/monaco-editor",
   "//": "[[kson-version-num]]",
   "version": "0.3.0-dev.0",
   "description": "Monaco editor with KSON language support and LSP integration",
@@ -11,13 +11,32 @@
     "test": "vitest run",
     "build:iframe": "vite build --config vite.iframe.config.ts && vite build --config vite.iframe-client.config.ts"
   },
-  "author": "",
+  "author": {
+    "name": "KSON",
+    "email": "kson@kson.org"
+  },
   "license": "ISC",
+  "homepage": "https://github.com/kson-org/kson",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kson-org/kson.git"
+  },
+  "keywords": [
+    "kson",
+    "monaco",
+    "monaco-editor",
+    "lsp",
+    "language-server",
+    "editor"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".":       { "import": "./dist/index.js",       "types": "./dist/index.d.ts" },
     "./react": { "import": "./dist/react/index.js", "types": "./dist/react/index.d.ts" }
   },
-  "files": ["dist", "dist-iframe", "readme.md"],
+  "files": ["dist", "readme.md"],
   "dependencies": {
     "@kson/lsp-shared": "file:../shared"
   },

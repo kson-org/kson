@@ -52,7 +52,9 @@ change schemas.
 - Call `loader.config({ monaco })` before any `<Editor>` mounts so
   `@monaco-editor/react` reuses your bundled monaco instead of fetching a
   second copy from a CDN.
-- Provide a `MonacoEnvironment.getWorker` default branch that returns
-  the standard `editor.worker` — KSON tokenization runs there.
+- Provide a `MonacoEnvironment.getWorker` factory that branches on the
+  `label` argument: return `editor.worker` for the default branch (KSON
+  runs there), and return the matching worker for any other Monaco
+  language services you use (`json`, `typescript`, …).
 - End each kson model's URI in `.kson` (via `<Editor defaultPath="...">`)
   so the LSP recognizes the file extension.

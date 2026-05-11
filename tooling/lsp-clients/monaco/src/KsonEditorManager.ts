@@ -1,20 +1,9 @@
 import * as monaco from 'monaco-editor';
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { type KsonLspBridge, type KsonLspBridgeOptions, type ServerCapabilities } from './bridge/index.js';
 import { createBundledSchemaModels, isBundledSchemaUri } from './bundledSchemas.js';
 import { registerKsonLanguage, KSON_LANGUAGE_ID } from './language/ksonLanguage.js';
 import { acquireLsp, releaseLsp } from './lspRegistry.js';
 import { TabBar } from './TabBar.js';
-
-// Monaco needs a worker factory for its built-in editor features (tokenization, etc.).
-// Only set one if the consumer hasn't already configured their own.
-if (!self.MonacoEnvironment) {
-    self.MonacoEnvironment = {
-        getWorker(): Worker {
-            return new editorWorker();
-        },
-    };
-}
 
 export interface KsonEditorOptions {
     /** Initial editor content. */

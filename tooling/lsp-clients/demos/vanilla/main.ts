@@ -1,4 +1,13 @@
 import { createKsonEditor } from '@kson/monaco-editor';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+
+if (!self.MonacoEnvironment) {
+    self.MonacoEnvironment = {
+        getWorker(_workerId: string, _label: string): Worker {
+            return new editorWorker();
+        },
+    };
+}
 
 const logEl = document.getElementById('log')!;
 let firstLog = true;
@@ -40,7 +49,6 @@ const editor1 = await createKsonEditor(document.getElementById('editor-1')!, {
     value: '{\n  # Try adding an unknown key to see schema validation\n  name: "my-project"\n  version: "1.0.0"\n  tags: ["demo" "editor"]\n}',
     lspOptions: {
         bundledSchemas: [{ fileExtension: 'kson', schemaContent: schema }],
-        enableBundledSchemas: true,
     },
 });
 
