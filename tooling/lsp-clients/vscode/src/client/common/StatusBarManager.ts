@@ -26,7 +26,7 @@ export class StatusBarManager {
             vscode.StatusBarAlignment.Right,
             100
         );
-        this.statusBarItem.command = 'kson.selectSchema';
+        this.statusBarItem.command = `${client.name}.selectSchema`;
     }
 
     /**

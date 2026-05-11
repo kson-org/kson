@@ -2,23 +2,29 @@ import {LSPAny} from "vscode-languageserver";
 import {FormatOptions, FormattingStyle, IndentType} from "kson";
 
 /**
- * Configuration settings for the Kson language server
+ * Configuration settings for the Kson language server.
+ *
+ * These are the already-unwrapped settings — the server has stripped the
+ * configuration namespace (e.g. "kson") before calling
+ * {@link ksonSettingsWithDefaults}.
  */
 export interface KsonSettings {
-    kson: {
-        formatOptions: FormatOptions;
-        codeLensEnabled: boolean;
-    };
+    formatOptions: FormatOptions;
+    codeLensEnabled: boolean;
 }
 
 /**
  * Create new [KsonSettings] from LSP settings, applying defaults where needed.
+ *
+ * Input is the object returned by `connection.workspace.getConfiguration(ns)`,
+ * so the shape is `{ format?: {...}, codeLens?: {...} }` without any outer
+ * namespace key.
  */
 export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettings> {
     // Create IndentType based on the provided settings
     let indentType: IndentType;
-    if (settings?.kson?.format) {
-        const format = settings.kson.format;
+    if (settings?.format) {
+        const format = settings.format;
         if (format.insertSpaces === false) {
             indentType = IndentType.Tabs;
         } else {
@@ -33,9 +39,9 @@ export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettin
 
     // Create FormattingStyle based on the provided settings
     let formatStyle: FormattingStyle
-    if (settings?.kson?.format?.formattingStyle) {
+    if (settings?.format?.formattingStyle) {
         // Map lowercase string to uppercase enum value exhaustively
-        const style = settings.kson.format.formattingStyle.toLowerCase();
+        const style = settings.format.formattingStyle.toLowerCase();
         switch (style) {
             case 'plain':
                 formatStyle = FormattingStyle.PLAIN;
@@ -53,12 +59,10 @@ export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettin
     }
 
     // CodeLens enabled by default
-    const codeLensEnabled = settings?.kson?.codeLens?.enable !== false;
+    const codeLensEnabled = settings?.codeLens?.enable !== false;
 
     return {
-        kson: {
-            formatOptions: new FormatOptions(indentType, formatStyle),
-            codeLensEnabled
-        }
+        formatOptions: new FormatOptions(indentType, formatStyle),
+        codeLensEnabled
     };
 }

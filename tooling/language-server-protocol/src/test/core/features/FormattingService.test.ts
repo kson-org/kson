@@ -22,19 +22,14 @@ describe('KSON Formatter', () => {
             KsonTooling.getInstance().parse(unformatted),
         );
 
-        const ksonSettings = ksonSettingsWithDefaults(
-            {
-                kson:
-                    {
-                        format: {
-                            insertSpaces: insertSpaces,
-                            tabSize: 2
-                        }
-                    }
+        const ksonSettings = ksonSettingsWithDefaults({
+            format: {
+                insertSpaces: insertSpaces,
+                tabSize: 2
             }
-        )
+        })
 
-        const edits = formattingService.formatDocument(ksonDocument, ksonSettings.kson.formatOptions);
+        const edits = formattingService.formatDocument(ksonDocument, ksonSettings.formatOptions);
         const formatted = applyEdits(document, edits);
 
         assert.strictEqual(formatted, expected, 'should have a matching formatted document');

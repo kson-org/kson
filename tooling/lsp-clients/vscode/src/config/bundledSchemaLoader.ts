@@ -115,7 +115,7 @@ async function loadSchemaFile(
 /**
  * Check if bundled schemas are enabled via VS Code settings.
  */
-export function areBundledSchemasEnabled(): boolean {
-    const config = vscode.workspace.getConfiguration('kson');
+export function areBundledSchemasEnabled(name: string): boolean {
+    const config = vscode.workspace.getConfiguration(name);
     return config.get<boolean>('enableBundledSchemas', true);
 }

@@ -117,4 +117,5 @@ describe('Language Configuration Tests', () => {
             assert.ok(config.bundledSchemas.some(s => s.fileExtension === 'config'));
         });
     });
+
 });

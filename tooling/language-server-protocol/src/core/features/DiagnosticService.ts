@@ -14,6 +14,8 @@ import {KsonTooling, DiagnosticMessage, DiagnosticSeverity as KtSeverity} from '
  */
 export class DiagnosticService {
 
+    constructor(private readonly distributionId: string) {}
+
     createDocumentDiagnosticReport(document: KsonDocument | null | undefined): DocumentDiagnosticReport {
         const diagnostics = document ? this.getDiagnostics(document) : [];
         return {
@@ -32,20 +34,20 @@ export class DiagnosticService {
             .validateDocument(toolingDoc, schemaToolingDoc ?? null)
             .asJsReadonlyArrayView();
 
-        return messages.map(msg => toDiagnostic(msg));
+        return messages.map(msg => this.toDiagnostic(msg));
     }
-}
 
-function toDiagnostic(msg: DiagnosticMessage): Diagnostic {
-    return {
-        range: {
-            start: {line: msg.range.startLine, character: msg.range.startColumn},
-            end: {line: msg.range.endLine, character: msg.range.endColumn}
-        },
-        severity: msg.severity === KtSeverity.ERROR
-            ? DiagnosticSeverity.Error
-            : DiagnosticSeverity.Warning,
-        source: 'kson',
-        message: msg.message
-    };
+    private toDiagnostic(msg: DiagnosticMessage): Diagnostic {
+        return {
+            range: {
+                start: {line: msg.range.startLine, character: msg.range.startColumn},
+                end: {line: msg.range.endLine, character: msg.range.endColumn}
+            },
+            severity: msg.severity === KtSeverity.ERROR
+                ? DiagnosticSeverity.Error
+                : DiagnosticSeverity.Warning,
+            source: this.distributionId,
+            message: msg.message
+        };
+    }
 }
