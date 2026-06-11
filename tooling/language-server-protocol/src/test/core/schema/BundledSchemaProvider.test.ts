@@ -130,10 +130,10 @@ describe('BundledSchemaProvider', () => {
 
         it('should match multi-dot extensions correctly', () => {
             const ksonSchema = '{ "type": "kson" }';
-            const orchestraSchema = '{ "type": "orchestra" }';
+            const extSchema = '{ "type": "ext" }';
             const schemas: BundledSchemaConfig[] = [
                 { fileExtension: 'kson', schemaContent: ksonSchema },
-                { fileExtension: 'orchestra.kson', schemaContent: orchestraSchema }
+                { fileExtension: 'ext.kson', schemaContent: extSchema }
             ];
             const provider = new BundledSchemaProvider({ schemas, logger });
 
@@ -142,10 +142,10 @@ describe('BundledSchemaProvider', () => {
             assert.ok(simpleSchema);
             assert.strictEqual(simpleSchema!.getText(), ksonSchema);
 
-            // Multi-dot .orchestra.kson file should match the longer 'orchestra.kson' extension
-            const orchestraResult = provider.getSchemaForDocument('file:///my-config.orchestra.kson');
-            assert.ok(orchestraResult);
-            assert.strictEqual(orchestraResult!.getText(), orchestraSchema);
+            // Multi-dot .ext.kson file should match the longer 'ext.kson' extension
+            const extResult = provider.getSchemaForDocument('file:///my-config.ext.kson');
+            assert.ok(extResult);
+            assert.strictEqual(extResult!.getText(), extSchema);
         });
 
         it('should prefer longer extension when multiple match', () => {
