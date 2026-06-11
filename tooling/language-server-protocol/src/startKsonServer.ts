@@ -11,7 +11,7 @@ import {KsonDocumentsManager} from './core/document/KsonDocumentsManager.js';
 import {isKsonSchemaDocument} from './core/document/KsonSchemaDocument.js';
 import {KsonTextDocumentService} from './core/services/KsonTextDocumentService.js';
 import {KSON_LEGEND} from './core/features/SemanticTokensService.js';
-import {getAllCommandIds} from './core/commands/CommandType.js';
+import {getAllCommandIds, toWireCommandId} from './core/commands/CommandType.js';
 import { ksonSettingsWithDefaults } from './core/KsonSettings.js';
 import {SchemaProvider} from './core/schema/SchemaProvider.js';
 import {BundledSchemaProvider, BundledSchemaConfig, BundledMetaSchemaConfig} from './core/schema/BundledSchemaProvider.js';
@@ -29,6 +29,12 @@ export interface KsonInitializationOptions {
     bundledMetaSchemas?: BundledMetaSchemaConfig[];
     /** Whether bundled schemas are enabled */
     enableBundledSchemas?: boolean;
+    /**
+     * Identifier under which this server instance's host-visible artifacts are
+     * registered: command-id prefix on the wire, diagnostic source, and the
+     * configuration section pulled from the client. Defaults to "kson".
+     */
+    distributionId?: string;
 }
 
 type SchemaProviderFactory = (
@@ -48,9 +54,17 @@ export function startKsonServer(
     createSchemaProvider: SchemaProviderFactory,
     createCommandExecutor: CommandExecutorFactory
 ): void {
+    /**
+     * Default distribution id, used when the client hasn't supplied one via
+     * initializationOptions.
+     */
+    const DEFAULT_DISTRIBUTION_ID = "kson";
+
+
     // Variables to store state during initialization
     let workspaceRootUri: URI | undefined;
     let hasConfigurationCapability = false;
+    let distributionId: string;
 
     // Create logger that uses the connection
     const logger = {
@@ -80,6 +94,7 @@ export function startKsonServer(
         const bundledSchemas = initOptions?.bundledSchemas ?? [];
         const bundledMetaSchemas = initOptions?.bundledMetaSchemas ?? [];
         const enableBundledSchemas = initOptions?.enableBundledSchemas ?? true;
+        distributionId = initOptions?.distributionId ?? DEFAULT_DISTRIBUTION_ID;
 
         // Create the appropriate schema provider for this environment (file system or no-op)
         const fileSystemSchemaProvider = await createSchemaProvider(workspaceRootUri, logger);
@@ -116,7 +131,8 @@ export function startKsonServer(
         textDocumentService = new KsonTextDocumentService(
             documentManager,
             createCommandExecutor,
-            workspaceRoot
+            workspaceRoot,
+            distributionId
         );
 
         // Setup document handling and connect services
@@ -138,7 +154,7 @@ export function startKsonServer(
 
             // Diagnostics (pull model preferred)
             diagnosticProvider: {
-                identifier: 'kson',
+                identifier: distributionId,
                 interFileDependencies: false,
                 workspaceDiagnostics: false
             } as DiagnosticRegistrationOptions,
@@ -148,9 +164,10 @@ export function startKsonServer(
                 resolveProvider: false
             },
 
-            // Execute command
+            // Execute command — advertise ids prefixed by the active
+            // distribution id
             executeCommandProvider: {
-                commands: getAllCommandIds()
+                commands: getAllCommandIds().map(id => toWireCommandId(id, distributionId))
             },
 
             // Folding ranges
@@ -189,8 +206,8 @@ export function startKsonServer(
 
     // Pull configuration from the client
     async function pullConfiguration(): Promise<void> {
-        const settings = await connection.workspace.getConfiguration('kson');
-        const configuration = ksonSettingsWithDefaults({ kson: settings });
+        const settings = await connection.workspace.getConfiguration(distributionId);
+        const configuration = ksonSettingsWithDefaults(settings);
         textDocumentService.updateConfiguration(configuration);
     }
 
@@ -199,7 +216,7 @@ export function startKsonServer(
         if (hasConfigurationCapability) {
             // Register for configuration change notifications
             connection.client.register(DidChangeConfigurationNotification.type, {
-                section: 'kson'
+                section: distributionId
             });
             // Pull initial configuration
             await pullConfiguration();
@@ -271,21 +288,20 @@ export function startKsonServer(
         }
     });
 
-    // Handle configuration changes
+    // Handle configuration changes. Per LSP, the push model sends the full
+    // settings object, so our slice arrives at `change.settings.<distributionId>`.
     connection.onDidChangeConfiguration(async (change) => {
+        const scoped = change.settings?.[distributionId];
+
         if (hasConfigurationCapability) {
             // Pull configuration from the client (pull model)
             await pullConfiguration();
         } else {
-            // Fallback to reading pushed settings
-            const configuration = ksonSettingsWithDefaults(change.settings);
-            textDocumentService.updateConfiguration(configuration);
+            textDocumentService.updateConfiguration(ksonSettingsWithDefaults(scoped));
         }
 
-        // Check if bundled schema setting changed
-        if (bundledSchemaProvider && change.settings?.kson?.enableBundledSchemas !== undefined) {
-            const enabled = change.settings.kson.enableBundledSchemas;
-            bundledSchemaProvider.setEnabled(enabled);
+        if (bundledSchemaProvider && scoped?.enableBundledSchemas !== undefined) {
+            bundledSchemaProvider.setEnabled(scoped.enableBundledSchemas);
             notifySchemaChange();
         }
 

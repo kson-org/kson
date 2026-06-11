@@ -151,9 +151,9 @@ export class BundledSchemaProvider implements SchemaProvider {
      * Checks if the URI ends with any registered extension (preceded by a dot).
      * If multiple extensions match, returns the longest one (most specific).
      *
-     * For example, with extensions ['kson', 'orchestra.kson']:
+     * For example, with extensions ['kson', 'ext.kson']:
      * - 'file:///test.kson' matches 'kson'
-     * - 'file:///test.orchestra.kson' matches 'orchestra.kson' (longer/more specific)
+     * - 'file:///test.ext.kson' matches 'ext.kson' (longer/more specific)
      *
      * @param uri The URI to match against available extensions
      * @returns The matched file extension, or undefined if none match
