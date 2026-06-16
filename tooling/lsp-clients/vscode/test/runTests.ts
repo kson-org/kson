@@ -4,6 +4,7 @@ import {
     downloadAndUnzipVSCode,
     runTests as runNodeTests,
 } from '@vscode/test-electron';
+import {getVSCodeTestCachePath} from './vscodeTestCache';
 
 /**
  * Test runner script that runs the smoke tests by installing the kson plugin in a vscode instance.
@@ -11,6 +12,7 @@ import {
  * run, just the node (`test-node`) or just the browser (`test-browser`) tests.
  *
  */
+
 async function main() {
     try {
         // test-browser or test-node or test-all
@@ -50,7 +52,7 @@ async function main() {
             const extensionNodeTestsPath = path.resolve(__dirname, './test/index.node.js');
 
             console.log('Downloading VS Code...');
-            const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+            const vscodeExecutablePath = await downloadAndUnzipVSCode({ version: 'stable', cachePath: getVSCodeTestCachePath() });
             console.log('VS Code download complete.');
 
             await runNodeTests({
