@@ -19,11 +19,12 @@ each editor and ensures that features are implemented in one place, improving pe
 ### Prerequisites
 
 * Node.js (v20.0.0 or higher)
+* pnpm (provided by the project's pixi environment)
 
 ### Installation
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Build
@@ -31,7 +32,7 @@ npm install
 To compile the TypeScript source code, run:
 
 ```bash
-npm run build
+pnpm run compile
 ```
 
 ### Testing
@@ -39,7 +40,7 @@ npm run build
 To run the test suite:
 
 ```bash
-npm test
+pnpm test
 ```
 
 [1] Visual Studio Code. (2025). *Language Server Extension Guide*. Retrieved

@@ -20,13 +20,15 @@ Pick the one that matches your stack and copy from it.
 ```
 
 Each task builds `@kson/monaco-editor` first (the iframe demo also builds
-`dist-iframe/`), runs `npm install` inside the demo directory, then starts
-vite on the port above.
+`dist-iframe/`), runs a standalone `pnpm install` inside the demo directory,
+then starts vite on the port above.
 
 ## Layout note
 
-Each demo lives **outside** the npm workspaces array, has its own
-`node_modules`, and resolves `@kson/monaco-editor` via `file:../../monaco`
-through the package's export map — i.e. the same way a downstream user
-installs it. This keeps the examples honest: what works here is what works
-when someone adds the package to their own project.
+Each demo lives **outside** the pnpm workspace (it installs with
+`--ignore-workspace`), has its own `node_modules`, and resolves
+`@kson/monaco-editor` via `file:../../monaco` as a **packed** third-party
+package — pnpm honours the `files` allowlist, so the demo sees only what a
+downstream `npm install` would ship, not the monaco source. This keeps the
+examples honest: what works here is what works when someone adds the package
+to their own project.

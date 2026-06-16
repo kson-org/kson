@@ -16,6 +16,7 @@ version = "0.1.0"
 [dependencies]
 nodejs = "24.*"
 python = "3.13.*"
+pnpm = ">=10"
 
 [target.win-64.dependencies]
 vc14_runtime = "14.44.*"
