@@ -149,8 +149,8 @@ Demos and dev commands for working in the source repo:
 # React demo — attachKsonLsp inside @monaco-editor/react
 ./gradlew tooling:lsp-clients:npm_run_demoReact
 
-# Dev server (vite, with HMR)
-./gradlew tooling:lsp-clients:npm_run_monaco
+# Iframe demo
+./gradlew tooling:lsp-clients:npm_run_demoIframe
 
 # Build library
 ./gradlew tooling:lsp-clients:npm_run_buildMonaco
