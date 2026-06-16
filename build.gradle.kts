@@ -53,13 +53,24 @@ tasks {
     register<VerifyCleanCheckoutTask>("verifyCleanCheckout")
 
     withType<Task> {
-        // make every task except itself depend on generateJsonTestSuiteTask, transpileCircleCIConfigTask,
-        // and transpileDetektConfigTask to ensure they're always up-to-date before any other build steps
-        if (name != generateJsonTestSuiteTask.name
-            && name != transpileCircleCiConfigTask.name
+        // the tiny transpile tasks stay universal so config files are always fresh before any build step
+        if (name != transpileCircleCiConfigTask.name
             && name != transpileDetektConfigTask.name) {
-            dependsOn(generateJsonTestSuiteTask, transpileCircleCiConfigTask, transpileDetektConfigTask)
+            dependsOn(transpileCircleCiConfigTask, transpileDetektConfigTask)
         }
+    }
+
+    // the generated tests live under src/commonTest, so every task that reads them must run after the
+    // generator: each platform's test compile (KotlinCompile is JVM-only, Kotlin/JS differs) and detekt
+    // (scans src/). Wiring only these keeps the ~257M clone off assemble/`-x test`.
+    matching { it.name.startsWith("compileTestKotlin") }.configureEach {
+        dependsOn(generateJsonTestSuiteTask)
+    }
+    withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        dependsOn(generateJsonTestSuiteTask)
+    }
+    withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+        dependsOn(generateJsonTestSuiteTask)
     }
 
     val javaVersion = "11"
