@@ -21,11 +21,6 @@ tasks {
         dependsOn(npmInstall)
     }
 
-    register<PixiExecTask>("npm_run_monaco") {
-        command=listOf("npm", "run", "monaco")
-        dependsOn(npmInstall)
-    }
-
     val test = register<PixiExecTask>("npm_run_test") {
         command=listOf("npm", "run", "test")
         dependsOn(npmInstall)
@@ -50,7 +45,7 @@ tasks {
                 println("@kson/monaco-editor built successfully!")
                 println("  Output: ${distDir.absolutePath}")
                 println()
-                println("Dev server:  ./gradlew tooling:lsp-clients:npm_run_monaco")
+                println("Try it:      ./gradlew tooling:lsp-clients:npm_run_demoIframe")
                 println("Full docs:   tooling/lsp-clients/monaco/readme.md")
                 println("=".repeat(60))
             }

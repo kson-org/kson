@@ -5,9 +5,7 @@
   "description": "Monaco editor with KSON language support and LSP integration",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
     "test": "vitest run",
     "build:iframe": "vite build --config vite.iframe.config.ts && vite build --config vite.iframe-client.config.ts"
   },

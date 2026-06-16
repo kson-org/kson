@@ -2,12 +2,14 @@
 
 This project contains clients of the [Language Server Protocol](../language-server-protocol). Currently, we have
 a [Monaco](./monaco) client and a [VS Code](./vscode) client.
-The monaco clients can be run with the following gradlew tasks:
+
+The VS Code client can be run with:
 
 ```shell
-./gradlew tooling:lsp-clients:npm_run_monaco
 ./gradlew tooling:lsp-clients:npm_run_vscode
 ```
+
+The Monaco client ships as a library; for a runnable editor see the external [demos](./demos/readme.md).
 
 ## Features
 
