@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as path from 'path';
 import {runTests as runBrowserTests} from '@vscode/test-web';
 import {
@@ -55,11 +56,15 @@ async function main() {
             const vscodeExecutablePath = await downloadAndUnzipVSCode({ version: 'stable', cachePath: getVSCodeTestCachePath() });
             console.log('VS Code download complete.');
 
+            // keep the user-data dir on a short path; the default in-repo .vscode-test/user-data
+            // overflows macOS's 103-char Unix-socket limit in deeply nested checkouts
+            const userDataDir = path.join(os.tmpdir(), 'vscode-kson-test');
+
             await runNodeTests({
                 vscodeExecutablePath,
                 extensionDevelopmentPath,
                 extensionTestsPath: extensionNodeTestsPath,
-                launchArgs: [testWorkspacePath]
+                launchArgs: ['--user-data-dir', userDataDir, testWorkspacePath]
             });
         }
 
