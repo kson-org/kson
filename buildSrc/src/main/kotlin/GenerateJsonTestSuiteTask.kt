@@ -4,6 +4,7 @@ import org.kson.jsonsuite.JsonSuiteGitCheckout
 import org.kson.jsonsuite.JsonTestSuiteGenerator
 import org.kson.jsonsuite.SchemaSuiteGitCheckout
 import java.io.File
+import java.nio.file.Path
 
 /**
  * The Git SHAs in [JSONTestSuite](https://github.com/nst/JSONTestSuite) and [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
@@ -18,47 +19,36 @@ const val schemaTestSuiteSHA = "9fc880bfb6d8ccd093bc82431f17d13681ffae8e"
  * This task exposes [JsonTestSuiteGenerator] to our Gradle build, ensuring the task's
  * [inputs and outputs](https://docs.gradle.org/current/userguide/more_about_tasks.html#sec:task_inputs_outputs)
  * are properly defined so that we support incremental builds (and so that, for instance, the task re-runs
- * if/when the test at [getGeneratedTestPath] is deleted)
+ * if/when the generated tests at [getGeneratedClassDirectory] are deleted)
  */
 open class GenerateJsonTestSuiteTask : DefaultTask() {
-    private val jsonTestSuiteGenerator: JsonTestSuiteGenerator
+    private val projectRoot: Path = project.projectDir.toPath()
+    private val sourceRoot: Path = projectRoot.resolve("src/commonTest/kotlin/")
+    private val classPackage = "org.kson.parser.json.generated"
 
-    init {
-        val projectRoot = project.projectDir.toPath()
-        val destinationDir = projectRoot.resolve("buildSrc").resolve("support/jsonsuite")
-
-        val sourceRoot = projectRoot.resolve("src/commonTest/kotlin/")
-
-        val jsonSuiteGitCheckout = JsonSuiteGitCheckout(jsonTestSuiteSHA, destinationDir)
-        val schemaSuiteGitCheckout = SchemaSuiteGitCheckout(schemaTestSuiteSHA, destinationDir)
-
-        jsonTestSuiteGenerator = JsonTestSuiteGenerator(
-            jsonSuiteGitCheckout,
-            schemaSuiteGitCheckout,
-            projectRoot,
-            sourceRoot,
-            "org.kson.parser.json.generated"
-        )
-
-        // ensure we're out of date when/if the repo of test source files is deleted
-        outputs.upToDateWhen {
-            jsonSuiteGitCheckout.checkoutDir.exists()
-                    && schemaSuiteGitCheckout.checkoutDir.exists()
-        }
-    }
-
+    // output dir depends only on the source root + package, not on the (lazily cloned) test-suite checkout
     @OutputDirectory
     fun getGeneratedClassDirectory(): File {
-        return jsonTestSuiteGenerator.testClassPackageDir.toFile()
+        return sourceRoot.resolve(classPackage.replace('.', '/')).toFile()
     }
 
     @TaskAction
     fun generate() {
-        jsonTestSuiteGenerator.generate()
+        // construct the checkouts here (not in init) so the clone only happens when this task actually runs
+        val destinationDir = projectRoot.resolve("buildSrc").resolve("support/jsonsuite")
+        val jsonSuiteGitCheckout = JsonSuiteGitCheckout(jsonTestSuiteSHA, destinationDir)
+        val schemaSuiteGitCheckout = SchemaSuiteGitCheckout(schemaTestSuiteSHA, destinationDir)
+        JsonTestSuiteGenerator(
+            jsonSuiteGitCheckout,
+            schemaSuiteGitCheckout,
+            projectRoot,
+            sourceRoot,
+            classPackage
+        ).generate()
     }
 
     @Internal
     override fun getDescription(): String? {
-        return "Generates the JSON Test files in ${jsonTestSuiteGenerator.testClassPackageDir}"
+        return "Generates the JSON Test files in ${getGeneratedClassDirectory()}"
     }
 }

@@ -5,12 +5,14 @@ import {
   downloadAndUnzipVSCode,
   resolveCliArgsFromVSCodeExecutablePath
 } from '@vscode/test-electron';
+import {getVSCodeTestCachePath} from './vscodeTestCache';
 
 /**
  * VS Code extension launcher with VSIX.
  *
  * This script downloads VS Code, installs the VSIX package, and launches VS Code.
  */
+
 async function main() {
   try {
     console.log(`Starting VS Code with VSIX...`);
@@ -20,7 +22,7 @@ async function main() {
     const vsixPath = path.resolve(projectRootPath, './dist/vscode-kson-plugin.vsix');
 
     console.log('Downloading VS Code...');
-    const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+    const vscodeExecutablePath = await downloadAndUnzipVSCode({ version: 'stable', cachePath: getVSCodeTestCachePath() });
     console.log('VS Code download complete.');
 
     const [cliPath] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
