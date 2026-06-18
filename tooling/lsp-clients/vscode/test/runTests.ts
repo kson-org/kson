@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as path from 'path';
 import {runTests as runBrowserTests} from '@vscode/test-web';
 import {
@@ -53,11 +54,13 @@ async function main() {
             const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
             console.log('VS Code download complete.');
 
+            const userDataDir = path.join(os.tmpdir(), 'vscode-kson-userdata');
+
             await runNodeTests({
                 vscodeExecutablePath,
                 extensionDevelopmentPath,
                 extensionTestsPath: extensionNodeTestsPath,
-                launchArgs: [testWorkspacePath]
+                launchArgs: [testWorkspacePath, '--user-data-dir', userDataDir]
             });
         }
 
