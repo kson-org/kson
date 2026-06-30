@@ -187,6 +187,53 @@ class OneOfValidatorTest : JsonSchemaTest {
     }
 
     /**
+     * The motivating real-world discriminator shape is `{ type: string, const: X }` — a `const` with a
+     * sibling `type` — not the bare `{ const: X }` the other tests use.  The sibling `type` parses into
+     * a separate type-validator, so the property's `schemaValidators` is still just `[ConstValidator]`
+     * and discriminator detection selects the matching branch exactly as it does for a bare `const`.
+     */
+    @Test
+    fun testOneOfDiscriminatorWithSiblingTypeSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "A"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "type": "string", "const": "A" },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": {
+                        "kind": { "type": "string", "const": "B" },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            // only branch A's error — no SCHEMA_ONE_OF_VALIDATION_FAILED, no SCHEMA_SUB_SCHEMA_ERRORS dump
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            ),
+            // and it lands inside `params`, the value the user must actually fix
+            listOf(
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+            )
+        )
+
+        // branch A selected via the `{ type, const }` discriminator: its `alpha` requirement surfaces, not `beta`
+        assertContains(errors[0].message.toString(), "alpha")
+    }
+
+    /**
      * When the discriminator value matches no branch's `const`, collapse to one enum error at the
      * discriminator value rather than dumping every branch.
      */

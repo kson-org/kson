@@ -36,14 +36,16 @@ internal fun reportNoSubSchemaMatchErrors(
         messageSink.error(ksonValue.location.trimToFirstLine(), noMatchMessage)
 
         // for the other subSchema-specific messages, we write one group message anchored to
-        // the beginning of the object
-        val subSchemaErrors = matchAttemptMessageSinks.joinToString("\n\n") { matchAttemptSink ->
-            "'" + matchAttemptSink.label + "': [" +
+        // the beginning of the object, rendered as nested bullets: one bullet per sub-schema,
+        // each of its errors on an indented sub-bullet with a base-1 `(line:column)` location
+        val subSchemaErrors = matchAttemptMessageSinks.joinToString("\n") { matchAttemptSink ->
+            "- ${matchAttemptSink.label}:\n" +
                     matchAttemptSink.messageSink
                         .loggedMessages()
-                        .joinToString(",") {
-                            "'${it.message}' at ${it.location.start}"
-                        } + "]"
+                        .joinToString("\n") {
+                            val start = it.location.start
+                            "    - ${it.message} (${start.line + 1}:${start.column + 1})"
+                        }
         }
 
         messageSink.error(ksonValue.location.trimToFirstLine(), SCHEMA_SUB_SCHEMA_ERRORS.create(subSchemaErrors))
