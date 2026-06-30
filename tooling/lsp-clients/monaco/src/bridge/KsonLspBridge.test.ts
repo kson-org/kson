@@ -197,14 +197,14 @@ describe('KsonLspBridge.registerLspCommands — format indentation injection', (
 
         const handler = monacoStubEditor.__getCommand('kson.associateSchema');
         expect(handler).toBeDefined();
-        const pending = handler!(null, { documentUri: TARGET_URI, schemaName: 'config' });
+        const pending = handler!(null, { documentUri: TARGET_URI, schemaPath: 'config' });
         worker.respondTo('workspace/executeCommand');
         await pending;
 
         const exec = worker.posted.find((m) => m.method === 'workspace/executeCommand');
         expect(exec?.params).toEqual({
             command: 'kson.associateSchema',
-            arguments: [{ documentUri: TARGET_URI, schemaName: 'config' }],
+            arguments: [{ documentUri: TARGET_URI, schemaPath: 'config' }],
         });
 
         bridge.dispose();
