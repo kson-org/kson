@@ -87,17 +87,6 @@
           "default": true,
           "description": "Enable bundled schemas for configured KSON languages. When enabled, KSON languages with bundled schemas will automatically provide hover, completions, and validation."
         },
-        "kson.format.tabSize": {
-          "type": "number",
-          "default": 2,
-          "minimum": 1,
-          "description": "Number of spaces for indentation"
-        },
-        "kson.format.insertSpaces": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use spaces instead of tabs for indentation"
-        },
         "kson.format.formattingStyle": {
           "type": "string",
           "enum": [
