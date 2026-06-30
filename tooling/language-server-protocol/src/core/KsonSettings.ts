@@ -1,5 +1,5 @@
 import {LSPAny} from "vscode-languageserver";
-import {FormatOptions, FormattingStyle, IndentType} from "kson";
+import {FormattingStyle} from "kson";
 
 /**
  * Configuration settings for the Kson language server.
@@ -7,9 +7,12 @@ import {FormatOptions, FormattingStyle, IndentType} from "kson";
  * These are the already-unwrapped settings — the server has stripped the
  * configuration namespace (e.g. "kson") before calling
  * {@link ksonSettingsWithDefaults}.
+ *
+ * Indentation is intentionally absent here: it is driven per-request by the
+ * editor's `FormattingOptions` (the "Spaces/Tabs" toggle), not by config.
  */
 export interface KsonSettings {
-    formatOptions: FormatOptions;
+    formattingStyle: FormattingStyle;
     codeLensEnabled: boolean;
 }
 
@@ -21,22 +24,6 @@ export interface KsonSettings {
  * namespace key.
  */
 export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettings> {
-    // Create IndentType based on the provided settings
-    let indentType: IndentType;
-    if (settings?.format) {
-        const format = settings.format;
-        if (format.insertSpaces === false) {
-            indentType = IndentType.Tabs;
-        } else {
-            // Default to spaces with the specified or default tab size
-            const tabSize = format.tabSize ?? 2;
-            indentType = new IndentType.Spaces(tabSize);
-        }
-    } else {
-        // Use the default from the Kotlin library
-        indentType = new IndentType.Spaces(2);
-    }
-
     // Create FormattingStyle based on the provided settings
     let formatStyle: FormattingStyle
     if (settings?.format?.formattingStyle) {
@@ -62,7 +49,7 @@ export function ksonSettingsWithDefaults(settings?: LSPAny): Required<KsonSettin
     const codeLensEnabled = settings?.codeLens?.enable !== false;
 
     return {
-        formatOptions: new FormatOptions(indentType, formatStyle),
+        formattingStyle: formatStyle,
         codeLensEnabled
     };
 }

@@ -9,18 +9,27 @@ export interface CommandParameters {
     [CommandType.PLAIN_FORMAT ]: {
         documentUri: string;
         formattingStyle: FormattingStyle;
+        // Indentation is injected by the client middleware from the active editor.
+        insertSpaces?: boolean;
+        tabSize?: number;
     };
     [CommandType.COMPACT_FORMAT ]: {
         documentUri: string;
         formattingStyle: FormattingStyle;
+        insertSpaces?: boolean;
+        tabSize?: number;
     };
     [CommandType.DELIMITED_FORMAT]: {
         documentUri: string;
         formattingStyle: FormattingStyle;
+        insertSpaces?: boolean;
+        tabSize?: number;
     };
     [CommandType.CLASSIC_FORMAT]: {
         documentUri: string;
         formattingStyle: FormattingStyle;
+        insertSpaces?: boolean;
+        tabSize?: number;
     };
     [CommandType.ASSOCIATE_SCHEMA]: {
         documentUri: string;
