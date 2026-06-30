@@ -36,7 +36,8 @@
   },
   "files": ["dist", "readme.md"],
   "dependencies": {
-    "@kson/lsp-shared": "file:../shared"
+    "@kson/lsp-shared": "file:../shared",
+    "kson-language-server": "file:../../language-server-protocol"
   },
   "peerDependencies": {
     "monaco-editor": ">=0.50.0",
