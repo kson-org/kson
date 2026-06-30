@@ -7,7 +7,9 @@ import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.AllOfValidator
 import org.kson.schema.validators.AnyOfValidator
+import org.kson.schema.validators.ConstValidator
 import org.kson.schema.validators.OneOfValidator
+import org.kson.schema.validators.PropertiesValidator
 import org.kson.schema.validators.RefValidator
 import org.kson.schema.validators.TypeValidator
 import org.kson.validation.SourceContext
@@ -99,6 +101,30 @@ class JsonObjectSchema(
     branch.title?.let { return it }
     val sole = branch.schemaValidators.singleOrNull() as? RefValidator ?: return null
     return sole.refShortName()
+  }
+
+  /**
+   * For each property this object schema pins to a single `const`, maps the property name to that
+   * constant value.  A property qualifies only when its schema is *solely* a [ConstValidator] (e.g.
+   * `{ "const": "AIRBYTE_CLOUD" }`).
+   *
+   * Used by [OneOfValidator] to recognize a discriminated union: a `oneOf` whose branches are all
+   * keyed by a shared property pinned to distinct `const` values.
+   */
+  internal fun constPinnedProperties(): Map<String, KsonValue> {
+    val propertySchemas = schemaValidators
+      .filterIsInstance<PropertiesValidator>()
+      .firstOrNull()
+      ?.propertySchemas
+      ?: return emptyMap()
+    return buildMap {
+      propertySchemas.forEach { (propertyName, propertySchema) ->
+        val sole = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()
+        if (sole is ConstValidator) {
+          put(propertyName.value, sole.const)
+        }
+      }
+    }
   }
 
   /**

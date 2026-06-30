@@ -12,7 +12,7 @@ import org.kson.schema.JsonSchema
 /** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
 data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
 
-class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchema?>?,
+class PropertiesValidator(internal val propertySchemas: Map<KsonString, JsonSchema?>?,
                           private val compiledPatterns: List<CompiledPatternSchema>?,
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
