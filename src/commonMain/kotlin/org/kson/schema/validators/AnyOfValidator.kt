@@ -19,7 +19,11 @@ class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator
         }
 
         if (!anyValid) {
-            reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ANY_OF_VALIDATION_FAILED.create())
+            // Prefer a focused error against the discriminator-selected branch; fall back to
+            // dumping every branch's errors only when this isn't a discriminated union.
+            if (!reportDiscriminatedUnionError(anyOf, ksonValue, messageSink, sourceContext)) {
+                reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ANY_OF_VALIDATION_FAILED.create())
+            }
         }
     }
 }

@@ -7,7 +7,6 @@ import org.kson.parser.NumberParser
 import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.AllOfValidator
 import org.kson.schema.validators.AnyOfValidator
-import org.kson.schema.validators.ConstValidator
 import org.kson.schema.validators.OneOfValidator
 import org.kson.schema.validators.PropertiesValidator
 import org.kson.schema.validators.RefValidator
@@ -104,14 +103,15 @@ class JsonObjectSchema(
   }
 
   /**
-   * For each property this object schema pins to a single `const`, maps the property name to that
-   * constant value.  A property qualifies only when its schema is *solely* a [ConstValidator] (e.g.
-   * `{ "const": "AIRBYTE_CLOUD" }`).
+   * For each property this object schema pins to a finite value set — via a sole `const` or `enum`
+   * validator (e.g. `{ "const": "A" }` or `{ "enum": ["A", "B"] }`) — maps the property name to that
+   * set of pinned values.  A property qualifies only when its schema's sole validator reports a
+   * non-null, non-empty [JsonSchemaValidator.pinnedValues].
    *
-   * Used by [OneOfValidator] to recognize a discriminated union: a `oneOf` whose branches are all
-   * keyed by a shared property pinned to distinct `const` values.
+   * Used by [OneOfValidator] and [AnyOfValidator] to recognize a discriminated union: a combinator
+   * whose branches are all keyed by a shared property pinned to pairwise-disjoint value sets.
    */
-  internal fun constPinnedProperties(): Map<String, KsonValue> {
+  internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
     val propertySchemas = schemaValidators
       .filterIsInstance<PropertiesValidator>()
       .firstOrNull()
@@ -119,9 +119,10 @@ class JsonObjectSchema(
       ?: return emptyMap()
     return buildMap {
       propertySchemas.forEach { (propertyName, propertySchema) ->
-        val sole = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()
-        if (sole is ConstValidator) {
-          put(propertyName.value, sole.const)
+        val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
+        // An empty pinned set (e.g. `enum: []`) carries no discriminating information, so it doesn't count as a pin.
+        if (!pinned.isNullOrEmpty()) {
+          put(propertyName.value, pinned)
         }
       }
     }

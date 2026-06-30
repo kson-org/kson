@@ -6,10 +6,12 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonSchemaValidator
 import org.kson.validation.SourceContext
 
-class ConstValidator(internal val const: KsonValue) : JsonSchemaValidator {
+class ConstValidator(private val const: KsonValue) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue != const) {
             messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_NOT_EQUAL_TO_CONST.create(const.toDisplayString()))
         }
     }
+
+    override fun pinnedValues(): Set<KsonValue> = setOf(const)
 }

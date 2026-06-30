@@ -8,6 +8,9 @@ import org.kson.value.*
 // schema todo capture file/location info from schema to link back to schema def?
 interface JsonSchemaValidator: Validator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
+
+    /** The finite set of values this validator restricts its target to (const/enum), or null if it doesn't pin to a finite set. */
+    fun pinnedValues(): Set<KsonValue>? = null
 }
 
 abstract class JsonNumberValidator : JsonSchemaValidator {

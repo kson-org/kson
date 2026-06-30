@@ -446,4 +446,176 @@ class OneOfValidatorTest : JsonSchemaTest {
             )
         )
     }
+
+    /**
+     * A single-value `enum` pins a property exactly like `const` (`kind: { enum: ["A"] }`), so the
+     * generalized [org.kson.schema.JsonSchemaValidator.pinnedValues] abstraction discriminates on it:
+     * `kind: "A"` selects branch A and we report only its deeper `params` failure (missing `alpha`),
+     * not branch B's `beta`.
+     */
+    @Test
+    fun testOneOfSingleValueEnumDiscriminatorSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "A"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "enum": ["A"] },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": {
+                        "kind": { "enum": ["B"] },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            ),
+            // the selected branch's failure lands inside `params`
+            listOf(
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+            )
+        )
+
+        // branch A selected via its single-value `enum`: its `alpha` requirement surfaces, not `beta`
+        assertContains(errors[0].message.toString(), "alpha")
+    }
+
+    /**
+     * A multi-value `enum` pins a property to a *set* of values; as long as the branches' sets are
+     * disjoint they still discriminate.  Branch A pins `kind` to `["A", "B"]` and branch B to `["C"]`,
+     * so the document's `kind: "B"` selects branch A — surfacing its `alpha` requirement, not branch
+     * B's `gamma` — proving the whole value set, not just the first element, maps to the branch.
+     */
+    @Test
+    fun testOneOfMultiValueEnumDiscriminatorSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "B"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "enum": ["A", "B"] },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": {
+                        "kind": { "enum": ["C"] },
+                        "params": { "type": "object", "required": ["gamma"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            ),
+            listOf(
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+            )
+        )
+
+        // `kind: "B"` is the second element of branch A's `["A", "B"]`, so branch A's `alpha` surfaces
+        assertContains(errors[0].message.toString(), "alpha")
+    }
+
+    /**
+     * Overlapping `enum` sets across branches can't discriminate: branch A pins `kind` to `["A", "B"]`
+     * and branch B to `["B", "C"]`, so `"B"` would select two branches.  The disjointness rule
+     * disqualifies `kind` entirely, so we keep the full per-branch dump rather than arbitrarily
+     * picking one of the overlapping branches.
+     */
+    @Test
+    fun testOneOfOverlappingEnumSetsDoNotDiscriminate() {
+        assertKsonSchemaErrors(
+            """
+                kind: "A"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "enum": ["A", "B"] },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": {
+                        "kind": { "enum": ["B", "C"] },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+    }
+
+    /**
+     * An empty `enum: []` pins the property to no values, so it carries zero discriminating information
+     * and must not count as a discriminator pin.  Only branch A really pins `kind` here (branch B's
+     * `enum: []` is skipped), leaving a single pin — too few to form a discriminator — so a `kind` that
+     * matches no branch keeps the full per-branch dump instead of a bogus closed-union "must be one of"
+     * error synthesized from the empty pin.
+     */
+    @Test
+    fun testOneOfEmptyEnumSetDoesNotDiscriminate() {
+        assertKsonSchemaErrors(
+            """
+                kind: "Z"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "enum": ["A"] },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": {
+                        "kind": { "enum": [] },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+    }
 }
