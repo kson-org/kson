@@ -1,6 +1,6 @@
 import { CommandType } from './CommandType.js';
 import { Command } from 'vscode-languageserver';
-import { FormattingStyle } from 'kson';
+import { FormattingStyleId } from '../formattingStyle.js';
 
 /**
  * Type-safe mapping of command types to their expected parameter structures
@@ -8,26 +8,27 @@ import { FormattingStyle } from 'kson';
 export interface CommandParameters {
     [CommandType.PLAIN_FORMAT ]: {
         documentUri: string;
-        formattingStyle: FormattingStyle;
+        // Carried as the style id (lowercase enum name); the server maps it via formattingStyleFromId.
+        formattingStyle: FormattingStyleId;
         // Indentation is injected by the client middleware from the active editor.
         insertSpaces?: boolean;
         tabSize?: number;
     };
     [CommandType.COMPACT_FORMAT ]: {
         documentUri: string;
-        formattingStyle: FormattingStyle;
+        formattingStyle: FormattingStyleId;
         insertSpaces?: boolean;
         tabSize?: number;
     };
     [CommandType.DELIMITED_FORMAT]: {
         documentUri: string;
-        formattingStyle: FormattingStyle;
+        formattingStyle: FormattingStyleId;
         insertSpaces?: boolean;
         tabSize?: number;
     };
     [CommandType.CLASSIC_FORMAT]: {
         documentUri: string;
-        formattingStyle: FormattingStyle;
+        formattingStyle: FormattingStyleId;
         insertSpaces?: boolean;
         tabSize?: number;
     };
