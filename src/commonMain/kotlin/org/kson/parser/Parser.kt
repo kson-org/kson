@@ -553,6 +553,20 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
+        // helpful error for keys with an illegal start char: the lexer scans tokens that start with a digit or
+        // '-' generously as NUMBER tokens (see Lexer.number), so a NUMBER immediately followed by a COLON is an
+        // attempt to use such a token as a key, which is illegal for unquoted keys
+        val isInvalidStartCharKey = builder.getTokenType() == NUMBER && builder.lookAhead(1) == COLON
+        if (isInvalidStartCharKey) {
+            val invalidKey = builder.getTokenText()
+            builder.advanceLexer()
+            keywordMark.error(OBJECT_KEY_INVALID_START_CHAR.create(invalidKey))
+
+            // advance past the COLON
+            builder.advanceLexer()
+            return true
+        }
+
         // try to parse a keyword in the style of "string followed by :"
         if (string() && builder.getTokenType() == COLON) {
             keywordMark.done(OBJECT_KEY)
