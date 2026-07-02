@@ -13,6 +13,7 @@ import {
 } from "vscode-languageserver";
 import {CommandType, toWireCommandId} from "../../../core/commands/CommandType";
 import {FormattingStyle} from "kson";
+import {FormattingStyleId, formattingStyleId} from "../../../core/formattingStyle";
 import {RemoteWorkspace} from "vscode-languageserver/lib/common/server";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 
@@ -76,7 +77,7 @@ function buildWorkspaceEdit(uri: string, replaceRange: Range, newText: string): 
     };
 }
 
-function buildCommandParams(command: CommandType, uri: string, style: FormattingStyle): ExecuteCommandParams {
+function buildCommandParams(command: CommandType, uri: string, style: FormattingStyleId): ExecuteCommandParams {
     return {
         command: toWireCommandId(command, TEST_DISTRIBUTION_ID),
         arguments: [{ documentUri: uri, formattingStyle: style }]
@@ -125,7 +126,7 @@ describe('KSON Command Executor', () => {
         const expected = buildWorkspaceEdit(TEST_URI,
             Range.create(0, 0, 0, 10)
             , 'x: 1');
-        const commandParams = buildCommandParams(CommandType.PLAIN_FORMAT, TEST_URI, FormattingStyle.PLAIN);
+        const commandParams = buildCommandParams(CommandType.PLAIN_FORMAT, TEST_URI, formattingStyleId(FormattingStyle.PLAIN));
         
         await executeAndAssertCommand(content, expected, commandParams);
     });
@@ -138,7 +139,7 @@ describe('KSON Command Executor', () => {
             '}'
         ].join('\n');
         const expected = buildWorkspaceEdit(TEST_URI, Range.create(0, 0, 0, 10), expectedContent);
-        const commandParams = buildCommandParams(CommandType.DELIMITED_FORMAT, TEST_URI, FormattingStyle.DELIMITED);
+        const commandParams = buildCommandParams(CommandType.DELIMITED_FORMAT, TEST_URI, formattingStyleId(FormattingStyle.DELIMITED));
         
         await executeAndAssertCommand(content, expected, commandParams);
     });
@@ -146,7 +147,7 @@ describe('KSON Command Executor', () => {
     it('should execute compact formatting', async () => {
         const content = '{"x" : 1, "y" : 2}';
         const expected = buildWorkspaceEdit(TEST_URI, Range.create(0, 0, 0, 18), 'x:1 y:2');
-        const commandParams = buildCommandParams(CommandType.COMPACT_FORMAT, TEST_URI, FormattingStyle.COMPACT);
+        const commandParams = buildCommandParams(CommandType.COMPACT_FORMAT, TEST_URI, formattingStyleId(FormattingStyle.COMPACT));
         
         await executeAndAssertCommand(content, expected, commandParams);
     });
@@ -160,7 +161,7 @@ describe('KSON Command Executor', () => {
             '}'
         ].join('\n');
         const expected = buildWorkspaceEdit(TEST_URI, Range.create(0, 0, 0, 18), expectedContent);
-        const commandParams = buildCommandParams(CommandType.CLASSIC_FORMAT, TEST_URI, FormattingStyle.CLASSIC);
+        const commandParams = buildCommandParams(CommandType.CLASSIC_FORMAT, TEST_URI, formattingStyleId(FormattingStyle.CLASSIC));
 
         await executeAndAssertCommand(content, expected, commandParams);
     });

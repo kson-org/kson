@@ -8,6 +8,7 @@ import {FormattingService} from '../features/FormattingService.js';
 import {CommandType} from './CommandType.js';
 import {CommandParameters, isValidCommand} from './CommandParameters.js';
 import {FormatOptions, IndentType} from 'kson';
+import {formattingStyleFromId} from '../formattingStyle.js';
 import {KsonDocument} from "../document/KsonDocument.js";
 
 /**
@@ -66,7 +67,7 @@ export abstract class CommandExecutorBase {
 
                 return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
                     indentType,
-                    formatArgs.formattingStyle,
+                    formattingStyleFromId(formatArgs.formattingStyle),
                 ));
             }
             case CommandType.ASSOCIATE_SCHEMA: {
