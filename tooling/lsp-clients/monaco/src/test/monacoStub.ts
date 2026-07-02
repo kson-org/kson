@@ -20,18 +20,42 @@ export const Uri = {
     parse: (uri: string) => ({ toString: () => uri, scheme: 'file', path: uri }),
 };
 
+// Test seams: the bridge registers server commands and resolves models by uri.
+// These registries let tests invoke a registered command and control the
+// indentation a model reports. The `__` helpers are not part of the real
+// monaco-editor API.
+const registeredCommands = new Map<string, (...args: unknown[]) => unknown>();
+const modelsByUri = new Map<string, unknown>();
+
 export const editor = {
-    registerCommand: () => ({ dispose: () => {} }),
+    registerCommand: (id: string, handler: (...args: unknown[]) => unknown) => {
+        registeredCommands.set(id, handler);
+        return { dispose: () => registeredCommands.delete(id) };
+    },
     registerEditorOpener: () => ({ dispose: () => {} }),
     createModel: () => ({}),
-    getModel: () => null,
+    getModel: (uri?: { toString(): string }) =>
+        uri ? modelsByUri.get(uri.toString()) ?? null : null,
     setModelMarkers: () => {},
+    /** Test-only: retrieve a handler registered via registerCommand. */
+    __getCommand: (id: string) => registeredCommands.get(id),
+    /** Test-only: register a model so getModel(uri) resolves it. */
+    __setModel: (uri: string, model: unknown) => { modelsByUri.set(uri, model); },
+    /** Test-only: clear all registered commands and models. */
+    __reset: () => { registeredCommands.clear(); modelsByUri.clear(); },
 };
 
 export const languages = {
     register: () => {},
     setLanguageConfiguration: () => {},
     setMonarchTokensProvider: () => {},
+    registerCompletionItemProvider: () => ({ dispose: () => {} }),
+    registerHoverProvider: () => ({ dispose: () => {} }),
+    registerDefinitionProvider: () => ({ dispose: () => {} }),
+    registerDocumentSymbolProvider: () => ({ dispose: () => {} }),
+    registerDocumentHighlightProvider: () => ({ dispose: () => {} }),
+    registerDocumentFormattingEditProvider: () => ({ dispose: () => {} }),
+    registerCodeLensProvider: () => ({ dispose: () => {} }),
     CompletionItemKind: {
         Text: 0, Method: 1, Function: 2, Constructor: 3, Field: 4,
         Variable: 5, Class: 6, Interface: 7, Module: 8, Property: 9,

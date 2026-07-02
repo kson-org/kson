@@ -45,9 +45,9 @@ describe('KsonTextDocumentService', () => {
     }
 
     describe('Formatting', () => {
-        async function assertFormatting(content: string, expected: string) {
+        async function assertFormatting(content: string, expected: string, tabSize = 2, insertSpaces = true) {
             openDocument(content);
-            const result = await connection.requestFormatting(TEST_URI);
+            const result = await connection.requestFormatting(TEST_URI, tabSize, insertSpaces);
             assert.ok(result, "should not get a null or undefined result");
 
             const textEdits = result as TextEdit[];
@@ -66,6 +66,24 @@ describe('KsonTextDocumentService', () => {
                 '  age: 30'
             ].join('\n');
             await assertFormatting('person:{name:"John",age:30}', expected);
+        });
+
+        it('should indent with tabs when insertSpaces is false', async () => {
+            const expected = [
+                'person:',
+                '\tname: John',
+                '\tage: 30'
+            ].join('\n');
+            await assertFormatting('person:{name:"John",age:30}', expected, 2, false);
+        });
+
+        it('should honor a non-default tabSize', async () => {
+            const expected = [
+                'person:',
+                '    name: John',
+                '    age: 30'
+            ].join('\n');
+            await assertFormatting('person:{name:"John",age:30}', expected, 4, true);
         });
 
         it('should return empty array when document is not found', async () => {
