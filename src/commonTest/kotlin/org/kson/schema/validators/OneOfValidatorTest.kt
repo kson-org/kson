@@ -53,6 +53,37 @@ class OneOfValidatorTest : JsonSchemaTest {
         }
     """.trimIndent()
 
+    /**
+     * A discriminated union whose branches are written as `$ref`s into `$defs` — the dominant
+     * real-world shape.  Each branch pins `kind` to a distinct `const` and requires a different
+     * `params` property, so it discriminates exactly like the inline unions above, but only once
+     * detection resolves through the refs to the targets' properties.
+     */
+    private val refDiscriminatedUnion = """
+        {
+          "oneOf": [
+            { "${'$'}ref": "#/${'$'}defs/A" },
+            { "${'$'}ref": "#/${'$'}defs/B" }
+          ],
+          "${'$'}defs": {
+            "A": {
+              "properties": {
+                "kind": { "const": "A" },
+                "params": { "type": "object", "required": ["alpha"] }
+              },
+              "required": ["kind"]
+            },
+            "B": {
+              "properties": {
+                "kind": { "const": "B" },
+                "params": { "type": "object", "required": ["beta"] }
+              },
+              "required": ["kind"]
+            }
+          }
+        }
+    """.trimIndent()
+
     @Test
     fun testOneOfCommonValidationErrors() {
         assertKsonSchemaErrors(
@@ -612,6 +643,144 @@ class OneOfValidatorTest : JsonSchemaTest {
                   ]
                 }
             """.trimIndent(),
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+    }
+
+    /**
+     * The discriminator-aware reporting fires even when branches are written as `$ref`s (the common
+     * real-world shape): `kind: "A"` resolves through the ref to branch A and surfaces only its deeper
+     * `params` failure (missing `alpha`), not branch B's `beta`.
+     */
+    @Test
+    fun testOneOfRefBranchDiscriminatorSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "A"
+                params: {}
+            """.trimIndent(),
+            refDiscriminatedUnion,
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            ),
+            // the selected branch's failure lands inside `params`, exactly as the inline union's does
+            listOf(
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+            )
+        )
+
+        // branch A selected through its `$ref`: its `alpha` requirement surfaces, not branch B's `beta`
+        assertContains(errors[0].message.toString(), "alpha")
+    }
+
+    /**
+     * A closed `$ref` union whose discriminator matches no branch collapses to one enum error at the
+     * discriminator value, just as the inline closed union does — detection reads the pins through the refs.
+     */
+    @Test
+    fun testOneOfRefBranchDiscriminatorMatchesNoBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "Z"
+                params: {}
+            """.trimIndent(),
+            refDiscriminatedUnion,
+            listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            // the enum error hangs off the `kind` value `Z`, the discriminator the user must fix
+            listOf(
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
+            )
+        )
+
+        assertContains(errors[0].message.toString(), "Value must be one of: \"A\", \"B\"")
+    }
+
+    /**
+     * A discriminated union may mix an inline branch with a `$ref` branch: both pins are read (the
+     * inline `const` and the ref target's), so `kind: "B"` resolves through the ref to branch B and
+     * surfaces only its `beta` requirement — proving the ref branch's pin drove discrimination.
+     */
+    @Test
+    fun testOneOfMixedInlineAndRefBranchesDiscriminate() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "B"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "const": "A" },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["kind"]
+                    },
+                    { "${'$'}ref": "#/${'$'}defs/B" }
+                  ],
+                  "${'$'}defs": {
+                    "B": {
+                      "properties": {
+                        "kind": { "const": "B" },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["kind"]
+                    }
+                  }
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            ),
+            listOf(
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+            )
+        )
+
+        // branch B selected through its `$ref`, alongside the inline branch A: its `beta` requirement surfaces
+        assertContains(errors[0].message.toString(), "beta")
+    }
+
+    /**
+     * Detection reads a `$ref` branch's target pins directly and does not follow property-level refs:
+     * the `node` target pins `kind` but its `child` property is itself a `$ref` back to `node`, which
+     * detection ignores.  Only the `node` branch pins `kind` (the other branch pins nothing), so a
+     * single pinned branch is too few to form a discriminator and we keep the full per-branch dump.
+     */
+    @Test
+    fun testOneOfRefBranchWithSelfReferentialPropertyDoesNotDiscriminate() {
+        assertKsonSchemaErrors(
+            """
+                kind: "node"
+                child: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    { "${'$'}ref": "#/${'$'}defs/node" },
+                    {
+                      "properties": { "value": { "type": "boolean" } },
+                      "required": ["value"]
+                    }
+                  ],
+                  "${'$'}defs": {
+                    "node": {
+                      "properties": {
+                        "kind": { "const": "node" },
+                        "child": { "${'$'}ref": "#/${'$'}defs/node" }
+                      },
+                      "required": ["child"]
+                    }
+                  }
+                }
+            """.trimIndent(),
+            // only `node` pins `kind`, so no discriminator forms and we keep the full per-branch dump
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
                 SCHEMA_SUB_SCHEMA_ERRORS

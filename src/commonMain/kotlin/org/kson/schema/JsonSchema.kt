@@ -98,9 +98,11 @@ class JsonObjectSchema(
   private fun branchName(branch: JsonSchema): String? {
     if (branch !is JsonObjectSchema) return null
     branch.title?.let { return it }
-    val sole = branch.schemaValidators.singleOrNull() as? RefValidator ?: return null
-    return sole.refShortName()
+    return branch.soleRefValidator()?.refShortName()
   }
+
+  /** This schema's sole validator when that validator is a `$ref`, else `null` (i.e. it isn't a lone `$ref`). */
+  private fun soleRefValidator(): RefValidator? = schemaValidators.singleOrNull() as? RefValidator
 
   /**
    * For each property this object schema pins to a finite value set — via a sole `const` or `enum`
@@ -108,15 +110,34 @@ class JsonObjectSchema(
    * set of pinned values.  A property qualifies only when its schema's sole validator reports a
    * non-null, non-empty [JsonSchemaValidator.pinnedValues].
    *
+   * When this schema declares no properties of its own but is a lone `$ref` — the dominant shape for
+   * `oneOf`/`anyOf` branches (`oneOf: [{ $ref: … }]`) — resolves a single level through the ref to read
+   * the target's own pins, so `$ref`-based discriminated unions are recognized just like inline ones.
+   * A target that is itself only another `$ref` contributes no pins.
+   *
    * Used by [OneOfValidator] and [AnyOfValidator] to recognize a discriminated union: a combinator
    * whose branches are all keyed by a shared property pinned to pairwise-disjoint value sets.
    */
   internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
+    ownPinnedProperties()?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's pins.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownPinnedProperties() ?: emptyMap()
+  }
+
+  /**
+   * The discriminator pins declared by this schema's own `properties` (its [PropertiesValidator]), or
+   * `null` when it declares none.  Reads only this schema's own validators — never resolves a `$ref` —
+   * so [pinnedProperties] can unwrap a lone `$ref` exactly one level without chaining through aliases.
+   * A property contributes only when its schema's sole validator reports a non-null, non-empty
+   * [JsonSchemaValidator.pinnedValues].
+   */
+  private fun ownPinnedProperties(): Map<String, Set<KsonValue>>? {
     val propertySchemas = schemaValidators
       .filterIsInstance<PropertiesValidator>()
       .firstOrNull()
-      ?.propertySchemas
-      ?: return emptyMap()
+      ?.propertySchemas ?: return null
+
     return buildMap {
       propertySchemas.forEach { (propertyName, propertySchema) ->
         val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
