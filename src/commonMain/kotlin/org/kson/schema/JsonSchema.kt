@@ -10,6 +10,7 @@ import org.kson.schema.validators.AnyOfValidator
 import org.kson.schema.validators.OneOfValidator
 import org.kson.schema.validators.PropertiesValidator
 import org.kson.schema.validators.RefValidator
+import org.kson.schema.validators.RequiredValidator
 import org.kson.schema.validators.TypeValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.Validator
@@ -148,6 +149,60 @@ class JsonObjectSchema(
       }
     }
   }
+
+  /**
+   * The property names this schema requires — via its [RequiredValidator] — resolving one level
+   * through a lone `$ref` exactly as [pinnedProperties] does, so a `$ref`-based branch contributes its
+   * target's requirements.  Empty when neither this schema nor its ref target declares `required`.
+   *
+   * Unioned with [declaredPropertyNames] to form a branch's *known* property names for presence-based
+   * union narrowing, when no value-based discriminator applies.
+   */
+  internal fun requiredProperties(): Set<String> {
+    ownRequiredProperties()?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's requirements.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownRequiredProperties() ?: emptySet()
+  }
+
+  /**
+   * The property names this schema's own [RequiredValidator] declares, or `null` when it declares none —
+   * mirroring [ownPinnedProperties] so [requiredProperties] can unwrap a lone `$ref` exactly one level
+   * without chaining through aliases.
+   */
+  private fun ownRequiredProperties(): Set<String>? =
+    schemaValidators.filterIsInstance<RequiredValidator>()
+      .firstOrNull()
+      ?.required
+      ?.mapTo(mutableSetOf()) { it.value }
+
+  /**
+   * The property names this schema *declares* — the keys of its `properties` (its [PropertiesValidator]) —
+   * resolving one level through a lone `$ref` exactly as [requiredProperties] does.  Empty when neither
+   * this schema nor its ref target declares any `properties`.
+   *
+   * Unioned with [requiredProperties] to form a branch's *known* property names: a document carrying a
+   * property a branch declares — even as an *optional* property — counts as that branch recognizing it,
+   * so presence-based narrowing matches every branch that knows the property, not only those requiring it.
+   */
+  internal fun declaredPropertyNames(): Set<String> {
+    ownDeclaredPropertyNames()?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's declared properties.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownDeclaredPropertyNames() ?: emptySet()
+  }
+
+  /**
+   * The keys of this schema's own `properties` ([PropertiesValidator]), or `null` when it declares none —
+   * mirroring [ownRequiredProperties] so [declaredPropertyNames] can unwrap a lone `$ref` exactly one
+   * level without chaining through aliases.
+   */
+  private fun ownDeclaredPropertyNames(): Set<String>? =
+    schemaValidators.filterIsInstance<PropertiesValidator>()
+      .firstOrNull()
+      ?.propertySchemas
+      ?.keys
+      ?.mapTo(mutableSetOf()) { it.value }
 
   /**
    * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]

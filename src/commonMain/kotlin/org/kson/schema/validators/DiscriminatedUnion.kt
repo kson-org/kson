@@ -3,6 +3,7 @@ package org.kson.schema.validators
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
 import org.kson.parser.MessageSink
+import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
@@ -53,6 +54,57 @@ internal fun reportDiscriminatedUnionError(
 }
 
 /**
+ * A presence-based fallback for unions that carry no value discriminator: narrow to the branch(es)
+ * the document's properties point at, then dump only those.  Each branch's *known* property names are
+ * the properties it declares (via `properties`) unioned with those it requires — so a branch recognizes
+ * a property it declares even as *optional*, not only ones it requires.  A property is *distinguishing*
+ * when it's a known property of at least one branch but not of every branch; a branch matches when the
+ * document carries at least one distinguishing property that branch knows.
+ *
+ * Reports via [reportNoSubSchemaMatchErrors] with the caller's already-collected [matchAttemptMessageSinks]
+ * filtered to the matched branches — only when the matched set is a non-empty *strict* subset of the
+ * branches, i.e. presence genuinely narrowed the union.  The output is whatever the full dump would
+ * produce for that subset: a multi-branch match keeps the dump shape with just fewer, more relevant
+ * bullets, while a single-branch match collapses to that branch's bare messages — no [noMatchMessage]
+ * header and no nested sub-schema-errors bullets.  Returns `false` (letting the caller run the full dump)
+ * when nothing matches or every branch matches.  Only [JsonObjectSchema] branches carry known
+ * properties; others never match.
+ */
+internal fun reportPresenceBasedUnionError(
+    branches: List<JsonSchema>,
+    ksonValue: KsonValue,
+    messageSink: MessageSink,
+    matchAttemptMessageSinks: List<LabelledMessageSink>,
+    noMatchMessage: Message
+): Boolean {
+    if (ksonValue !is KsonObject) return false
+
+    val knownByBranch = branches.map { branch ->
+        (branch as? JsonObjectSchema)?.let { it.declaredPropertyNames() + it.requiredProperties() } ?: emptySet()
+    }
+    // Distinguishing: a known property of some branch but not all — only these can tell branches apart.
+    val distinguishing = knownByBranch.flatten().toSet()
+        .filter { property -> knownByBranch.count { property in it } < branches.size }
+        .toSet()
+
+    val presentProperties = ksonValue.propertyLookup.keys
+    val matchedIndices = knownByBranch.indices.filter { i ->
+        knownByBranch[i].any { it in distinguishing && it in presentProperties }
+    }
+
+    // Only report when presence narrowed to a non-empty strict subset; otherwise let the caller dump.
+    if (matchedIndices.isEmpty() || matchedIndices.size == branches.size) return false
+
+    reportNoSubSchemaMatchErrors(
+        ksonValue,
+        messageSink,
+        matchedIndices.map { matchAttemptMessageSinks[it] },
+        noMatchMessage
+    )
+    return true
+}
+
+/**
  * Detects a discriminator: a property pinned to *pairwise-disjoint* value sets by at least two
  * branches.  Branches that don't pin the property (wildcard / negative / non-object branches) are
  * tolerated and simply left out of the value→branch map.  When several properties qualify, the one
@@ -82,10 +134,10 @@ private fun detectDiscriminator(branches: List<JsonSchema>): Discriminator? {
         val disjoint = pinningBranches.all { (values, branch) ->
             values.all { value -> branchByValue.put(value, branch) == null }
         }
-        if (!disjoint) continue
-
-        best = Discriminator(property, branchByValue, pinningBranches.size == branches.size)
-        bestBranchCount = pinningBranches.size
+        if (disjoint) {
+            best = Discriminator(property, branchByValue, pinningBranches.size == branches.size)
+            bestBranchCount = pinningBranches.size
+        }
     }
     return best
 }

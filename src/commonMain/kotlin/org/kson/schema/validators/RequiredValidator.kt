@@ -6,7 +6,7 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 
-class RequiredValidator(private val required: List<KsonString>) : JsonObjectValidator() {
+class RequiredValidator(internal val required: List<KsonString>) : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink) {
         val propertyNames = node.propertyMap.keys
         val missingProperties = required.filter { !propertyNames.contains(it.value) }

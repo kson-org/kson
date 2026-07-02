@@ -28,10 +28,12 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             matchedSchemas.size == 1 -> { /* success */ }
 
             matchedSchemas.isEmpty() -> {
-                // Prefer a focused error against the discriminator-selected branch; fall back to
-                // dumping every branch's errors only when this isn't a discriminated union.
-                if (!reportDiscriminatedUnionError(oneOf, ksonValue, messageSink, sourceContext)) {
-                    reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ONE_OF_VALIDATION_FAILED.create())
+                // Narrow before dumping: first by discriminator value, then by which branches' required
+                // properties the document carries; dump every branch only when neither narrows the union.
+                val noMatchMessage = SCHEMA_ONE_OF_VALIDATION_FAILED.create()
+                if (!reportDiscriminatedUnionError(oneOf, ksonValue, messageSink, sourceContext) &&
+                    !reportPresenceBasedUnionError(oneOf, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
+                    reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
                 }
             }
 

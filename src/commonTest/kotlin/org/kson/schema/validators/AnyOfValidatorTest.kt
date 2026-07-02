@@ -2,10 +2,13 @@ package org.kson.schema.validators
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class AnyOfValidatorTest : JsonSchemaTest {
     /**
@@ -38,12 +41,16 @@ class AnyOfValidatorTest : JsonSchemaTest {
         }
     """.trimIndent()
 
+    /**
+     * The document carries only the *shared* `description` property (known by both branches, so not
+     * distinguishing), so presence-based narrowing declines and the full-dump machinery runs — and since
+     * `description` is wrong for every branch, its error is extracted as the single precise message.
+     */
     @Test
     fun testAnyOfCommonValidationErrors() {
         assertKsonSchemaErrors(
             """
                 description: 99
-                thing: false
             """.trimIndent(),
             """
                 anyOf:
@@ -70,13 +77,8 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     @Test
-    fun testAnyOfDiverseValidationErrors() {
-        assertKsonSchemaErrors(
-            """
-                description: "describer"
-                think: false
-            """.trimIndent(),
-            """
+    fun testAnyOfPresenceNarrowsOnOptionalDeclaredProperty() {
+        val anyOfSchemaRequired = """
                 anyOf:
                   - properties:
                       description:
@@ -84,6 +86,11 @@ class AnyOfValidatorTest : JsonSchemaTest {
                         .
                       think:
                         type: number
+                        .
+                      .
+                    required:
+                      - required_branch_1
+                      =
 
                   - properties:
                       description:
@@ -91,13 +98,26 @@ class AnyOfValidatorTest : JsonSchemaTest {
                         .
                       .
                     required:
-                      - required_prop
+                      - required_branch_2
+                """.trimIndent()
+        assertKsonSchemaErrors(
+            """
+                description: "describer"
+                think: false
             """.trimIndent(),
+            anyOfSchemaRequired,
             listOf(
-                SCHEMA_ANY_OF_VALIDATION_FAILED,
-                // sub-schema errors are rolled up into this error
-                SCHEMA_SUB_SCHEMA_ERRORS)
-        )
+                SCHEMA_VALUE_TYPE_MISMATCH, SCHEMA_REQUIRED_PROPERTY_MISSING
+            ))
+
+        assertKsonSchemaErrors(
+            """
+                description: "describer"
+            """.trimIndent(),
+            anyOfSchemaRequired,
+            listOf(
+                SCHEMA_ANY_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS
+            ))
     }
 
     @Test
@@ -362,5 +382,83 @@ class AnyOfValidatorTest : JsonSchemaTest {
         )
 
         assertContains(errors[0].message.toString(), "Value must be one of: \"A\", \"B\"")
+    }
+
+    /**
+     * The presence-based fallback is shared with `oneOf`, so it fires under `anyOf` too: with no value
+     * discriminator, the present `selector_a` (required only by branch A) narrows to branch A and only
+     * its missing `needs_a` surfaces — proving the shared narrowing is wired into `anyOf`.
+     */
+    @Test
+    fun testAnyOfPresenceSelectsSingleMatchingBranch() {
+        val errors = assertKsonSchemaErrors(
+            """
+                selector_a: "present"
+            """.trimIndent(),
+            """
+                {
+                  "anyOf": [
+                    {
+                      "properties": { "selector_a": { "type": "string" }, "needs_a": { "type": "string" } },
+                      "required": ["selector_a", "needs_a"]
+                    },
+                    {
+                      "properties": { "selector_b": { "type": "string" }, "needs_b": { "type": "string" } },
+                      "required": ["selector_b", "needs_b"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            )
+        )
+
+        assertContains(errors[0].message.toString(), "needs_a")
+        assertFalse(errors[0].message.toString().contains("needs_b"))
+    }
+
+    /**
+     * A multi-branch presence match under `anyOf` narrows the dump to the branches keyed by the present
+     * `shared` property (A and B), dropping branch C, and anchors it to the `anyOf`-specific no-match
+     * message — confirming the fallback threads the caller's own message through the shared helper.
+     */
+    @Test
+    fun testAnyOfPresenceReportsAllMatchingBranches() {
+        val errors = assertKsonSchemaErrors(
+            """
+                shared: "x"
+            """.trimIndent(),
+            """
+                {
+                  "anyOf": [
+                    {
+                      "title": "BranchA",
+                      "properties": { "shared": { "type": "string" }, "only_a": { "type": "string" } },
+                      "required": ["shared", "only_a"]
+                    },
+                    {
+                      "title": "BranchB",
+                      "properties": { "shared": { "type": "string" }, "only_b": { "type": "string" } },
+                      "required": ["shared", "only_b"]
+                    },
+                    {
+                      "title": "BranchC",
+                      "properties": { "gamma": { "type": "string" } },
+                      "required": ["gamma"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ANY_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+
+        val dump = errors[1].message.toString()
+        assertContains(dump, "BranchA")
+        assertContains(dump, "BranchB")
+        assertFalse(dump.contains("BranchC"))
     }
 }
