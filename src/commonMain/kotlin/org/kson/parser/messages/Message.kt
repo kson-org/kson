@@ -174,6 +174,16 @@ enum class MessageType(
             return "`$reservedWord` cannot be used as an object key"
         }
     },
+    OBJECT_KEY_INVALID_START_CHAR {
+        override fun expectedArgs(): List<String> {
+            return listOf("Object key")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val objectKey = parsedArgs.getArg("Object key")
+            return "`$objectKey` cannot be used as an object key. Unquoted keys must start with a letter or `_`"
+        }
+    },
     IGNORED_OBJECT_END_DOT {
         override fun expectedArgs(): List<String> {
             return emptyList()
