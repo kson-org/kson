@@ -4,9 +4,9 @@ import org.kson.CleanGitCheckout
 import java.nio.file.Path
 
 class JsonSuiteGitCheckout(jsonTestSuiteSHA: String, destinationDir: Path)
-    : CleanGitCheckout("https://github.com/nst/JSONTestSuite.git", jsonTestSuiteSHA, destinationDir, "JSONTestSuite", dirtyMessage)
+    : CleanGitCheckout("https://github.com/nst/JSONTestSuite.git", jsonTestSuiteSHA, destinationDir, "JSONTestSuite", dirtyMessage, sparsePaths = listOf("test_parsing"))
 class SchemaSuiteGitCheckout(schemaTestSuiteSHA: String, destinationDir: Path)
-    : CleanGitCheckout("https://github.com/json-schema-org/JSON-Schema-Test-Suite.git", schemaTestSuiteSHA, destinationDir, "JSON-Schema-Test-Suite", dirtyMessage)
+    : CleanGitCheckout("https://github.com/json-schema-org/JSON-Schema-Test-Suite.git", schemaTestSuiteSHA, destinationDir, "JSON-Schema-Test-Suite", dirtyMessage, sparsePaths = listOf("tests"))
 
 /**
  * The rationale for why these [CleanGitCheckout]s must be clean

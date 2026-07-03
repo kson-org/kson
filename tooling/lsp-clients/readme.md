@@ -11,6 +11,10 @@ The VS Code client can be run with:
 
 The Monaco client ships as a library; for a runnable editor see the external [demos](./demos/readme.md).
 
+The VS Code tests download a copy of VS Code into a shared, kson-namespaced OS cache
+(`~/Library/Caches/kson-vscode-test`, `~/.cache/kson-vscode-test`, or `%APPDATA%\kson-vscode-test`)
+so multiple checkouts and CI reuse one download. Override the location with `VSCODE_TEST_CACHE`.
+
 ## Features
 
 - Syntax highlighting for `.kson` files

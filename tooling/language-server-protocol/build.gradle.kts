@@ -4,20 +4,22 @@ plugins {
 
 tasks {
     val npmInstall = register<PixiExecTask>("npmInstall") {
-        // Use `npm ci` for reproducible installs from the lock file
-        command=listOf("npm", "ci")
+        // `--frozen-lockfile` gives reproducible installs from pnpm-lock.yaml;
+        // hoisted keeps a flat node_modules (npm-identical layout) while still
+        // hardlinking from pnpm's shared global store.
+        command=listOf("pnpm", "install", "--frozen-lockfile", "--config.node-linker=hoisted")
         dependsOn(":kson-lib:jsNodeProductionLibraryDistribution")
         dependsOn(":kson-tooling-lib:jsNodeProductionLibraryDistribution")
-        doNotTrackState("npm already tracks its own state")
+        doNotTrackState("pnpm already tracks its own state")
     }
 
     register<PixiExecTask>("npm_run_compile") {
-        command=listOf("npm", "run", "compile")
+        command=listOf("pnpm", "run", "compile")
         dependsOn(npmInstall)
     }
 
     register<PixiExecTask>("npm_run_test") {
-        command=listOf("npm", "run", "test")
+        command=listOf("pnpm", "run", "test")
         dependsOn("npm_run_compile")
     }
 

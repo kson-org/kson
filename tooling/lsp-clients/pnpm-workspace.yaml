@@ -1,0 +1,11 @@
+# Flat node_modules so esbuild/vite/vitest/vsce see the same layout as npm,
+# while still hardlinking from pnpm's shared global store.
+nodeLinker: hoisted
+
+# Demos are intentionally excluded: each is a standalone install that consumes
+# @kson/monaco-editor via file: as a packed third-party package. Listing them
+# here would symlink the package to source and defeat that test intent.
+packages:
+  - shared
+  - vscode
+  - monaco

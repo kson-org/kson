@@ -3,6 +3,7 @@ package org.kson
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.Status
 import java.io.File
+import java.io.IOException
 import java.nio.file.Path
 
 class NoRepoException(msg: String) : RuntimeException(msg)
@@ -34,17 +35,21 @@ internal fun formatGitStatusReport(status: Status, untracked: Set<String> = empt
  * @param cloneName the name of the directory in [cloneParentDir] to clone [repoUri] into
  * @param dirtyMessage optionally provide a short sentence explaining why this directory must be clean.  Will be added
  *                     to the [DirtyRepoException] message thrown on a dirty repo
+ * @param sparsePaths when empty, [repoUri] is fully cloned via JGit and verified clean.  When non-empty, only these
+ *                    subdirs are materialized at [checkoutSHA] via a sparse + treeless + shallow fetch using the
+ *                    system `git` CLI, transferring only the few MB we read instead of cloning the full repo
  */
 open class CleanGitCheckout(private val repoUri: String,
                             private val checkoutSHA: String,
                             private val cloneParentDir: Path,
                             cloneName: String,
-                            private val dirtyMessage: String? = null
+                            private val dirtyMessage: String? = null,
+                            private val sparsePaths: List<String> = emptyList()
     ) {
     val checkoutDir: File = File(cloneParentDir.toFile(), cloneName)
 
     init {
-        ensureCleanGitCheckout()
+        if (sparsePaths.isEmpty()) ensureCleanGitCheckout() else ensureSparseCheckout()
     }
 
     private fun ensureCleanGitCheckout() {
@@ -113,6 +118,98 @@ open class CleanGitCheckout(private val repoUri: String,
         val git = Git.open(dir)
         git.checkout().setName(commit).call()
     }
+
+    /** Materializes [sparsePaths] at [checkoutSHA] via the system `git` CLI, verifying cleanliness and refetching as needed. */
+    private fun ensureSparseCheckout() {
+        if (!File(checkoutDir, ".git").exists()) {
+            refetchSparse()
+            return
+        }
+        val dirtyEntries = sparseDirtyEntries()
+        when {
+            dirtyEntries == null -> refetchSparse()
+            dirtyEntries.isNotEmpty() -> throwSparseDirty(dirtyEntries)
+            alreadyAtSha() -> return
+            else -> refetchSparse()
+        }
+    }
+
+    private fun refetchSparse() {
+        checkoutDir.deleteRecursively()
+        checkoutDir.mkdirs()
+        fetchSparse()
+    }
+
+    private fun alreadyAtSha(): Boolean = readGit("rev-parse", "HEAD")?.trim() == checkoutSHA
+
+    /** Non-acceptable `git status --porcelain` paths in [checkoutDir], or null if the status command failed. */
+    private fun sparseDirtyEntries(): List<String>? {
+        val porcelain = readGit("status", "--porcelain") ?: return null
+        return porcelain.lineSequence()
+            .filter { it.isNotBlank() }
+            .map { it.substring(3) }
+            .filter { it !in acceptableUntrackedFiles }
+            .toList()
+    }
+
+    private fun throwSparseDirty(dirtyEntries: List<String>): Nothing {
+        val customDirtyMessage = if (dirtyMessage != null) { dirtyMessage + "\n" } else { "" }
+        throw DirtyRepoException(
+            "ERROR: Dirty git status in `$checkoutDir`.\n$customDirtyMessage" +
+            "Suggested fixes:\n" +
+                    "- either clean up the git status in `$checkoutDir`\n" +
+                    "- or, delete `$checkoutDir`\n" +
+                    "  so it is refetched on the next build" +
+                    "\n\n# Dirty Git Status in `$checkoutDir`:\n${dirtyEntries.joinToString("\n")}")
+    }
+
+    private fun fetchSparse() {
+        runGit("init", "-q")
+        runGit("remote", "add", "origin", repoUri)
+        runGit("config", "core.sparseCheckout", "true")
+        // anchored, non-cone patterns: pull only these top-level dirs, not any nested dir of the same name
+        runGit("sparse-checkout", "set", *sparsePaths.map { "/$it/" }.toTypedArray())
+        runGit("fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", checkoutSHA)
+        runGit("checkout", "-q", checkoutSHA)
+    }
+
+    /** Runs `git` in [checkoutDir], throwing a [RuntimeException] on failure. */
+    private fun runGit(vararg args: String) {
+        val command = listOf("git", *args)
+        val process = try {
+            ProcessBuilder(command)
+                .directory(checkoutDir)
+                .redirectErrorStream(true)
+                .start()
+        } catch (e: IOException) {
+            throw RuntimeException(gitGuidance("could not run `${command.joinToString(" ")}`: ${e.message}"), e)
+        }
+        val output = process.inputStream.bufferedReader().readText()
+        if (process.waitFor() != 0) {
+            throw RuntimeException(
+                gitGuidance(
+                    "`${command.joinToString(" ")}` failed in `$checkoutDir`:\n$output"
+                )
+            )
+        }
+    }
+
+    /** Runs a read-only `git` in [checkoutDir], returning combined output or null on failure. */
+    private fun readGit(vararg args: String): String? {
+        val process = try {
+            ProcessBuilder(listOf("git", *args))
+                .directory(checkoutDir)
+                .redirectErrorStream(true)
+                .start()
+        } catch (e: IOException) {
+            return null
+        }
+        val output = process.inputStream.bufferedReader().readText()
+        return if (process.waitFor() == 0) output else null
+    }
+
+    private fun gitGuidance(message: String) =
+        "$message\nThis requires a working system `git`; ensure `git` is installed and on your PATH."
 }
 
 /**
