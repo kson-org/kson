@@ -39,7 +39,7 @@ object KsonTooling {
      * When multiple valid schemas exist, their information is combined with separators.
      *
      * @param document The pre-parsed document being edited
-     * @param schema The pre-parsed schema for the document
+     * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return Formatted text, or null if no schema info available
@@ -50,7 +50,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): String? {
-        val parsedSchema = schema.ksonValue ?: return null
+        val parsedSchema = schema.partialKsonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
         val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
@@ -69,7 +69,7 @@ object KsonTooling {
      * for schemas compatible with the existing document properties.
      *
      * @param document The pre-parsed document being edited
-     * @param schema The pre-parsed schema for the document
+     * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return List of Range objects with zero-based coordinates, or empty list if no schema info available
@@ -80,7 +80,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range> {
-        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
         val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
@@ -101,7 +101,7 @@ object KsonTooling {
      * resolves it to the target location within the same schema document.
      * Only internal references (starting with #) are supported.
      *
-     * @param schema The pre-parsed schema document
+     * @param schema The pre-parsed schema document, read error-tolerantly so a localized parse error still drives results
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return List of Range objects pointing to the referenced schema location(s), or empty list if not a ref or not found
@@ -111,7 +111,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<Range> {
-        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
@@ -149,7 +149,7 @@ object KsonTooling {
      * suggestions based on the schema.
      *
      * @param document The pre-parsed document being edited
-     * @param schema The pre-parsed schema for the document
+     * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results
      * @param line The zero-based line number
      * @param column The zero-based column number
      * @return List of completion items, or empty list if no completions available
@@ -160,7 +160,7 @@ object KsonTooling {
         line: Int,
         column: Int
     ): List<CompletionItem> {
-        val parsedSchema = schema.ksonValue ?: return emptyList()
+        val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val caretPath = KsonValuePathBuilder(document, Coordinates(line, column)).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
         val validSchemas = resolveSchemas(parsedSchema, document, caretPath.pointer, caretPath.placeholderLocation)
 
