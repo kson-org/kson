@@ -66,6 +66,11 @@ commands:
             =
       - restore_cache:
           keys:
+            - 'v1-<< parameters.platform >>-konan-{{ checksum "settings.gradle.kts" }}'
+            - 'v1-<< parameters.platform >>-konan-'
+            =
+      - restore_cache:
+          keys:
             - 'v1-<< parameters.platform >>-vscode-tests'
           .
         .
@@ -89,6 +94,11 @@ commands:
             - './gradle/jdk'
             - './buildSrc/gradle/jdk'
           key: 'v1-<< parameters.platform >>-jdk-{{ checksum "jdk.properties" }}'
+
+      - save_cache:
+          paths:
+            - '~/.konan'
+          key: 'v1-<< parameters.platform >>-konan-{{ checksum "settings.gradle.kts" }}'
 
       - save_cache:
           paths:
