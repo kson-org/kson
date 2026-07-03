@@ -17,6 +17,9 @@ importers:
       '@kson/lsp-shared':
         specifier: file:../shared
         version: link:../shared
+      kson-language-server:
+        specifier: file:../../language-server-protocol
+        version: file:../language-server-protocol
     devDependencies:
       '@types/react':
         specifier: ^18.3.0
