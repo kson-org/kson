@@ -263,6 +263,14 @@ internal fun InternalKsonValue.extractCompletions(
 }
 
 
+/** True when this schema describes an object type (via `type` or the presence of `properties`). */
+private fun InternalKsonObject.isObjectSchema(): Boolean =
+    when (val typeValue = propertyLookup["type"]) {
+        is InternalKsonString -> typeValue.value == "object"
+        is InternalKsonList -> typeValue.elements.any { (it as? InternalKsonString)?.value == "object" }
+        else -> propertyLookup.containsKey("properties") // Has properties = likely object schema
+    }
+
 /**
  * Extract completions from a schema node.
  *
@@ -274,17 +282,8 @@ internal fun InternalKsonValue.extractCompletions(
  * - Null value (if type is null or includes null)
  */
 private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
-    // Check if this schema represents an object type
-    // If so, we should provide property completions instead of value completions
-    val isObjectType = when (val typeValue = propertyLookup["type"]) {
-        is InternalKsonString -> typeValue.value == "object"
-        is InternalKsonList -> {
-            typeValue.elements.any { (it as? InternalKsonString)?.value == "object" }
-        }
-        else -> propertyLookup.containsKey("properties") // Has properties = likely object schema
-    }
-
-    if (isObjectType) {
+    // An object schema offers property completions rather than value completions.
+    if (isObjectSchema()) {
         return extractPropertyCompletions()
     }
 

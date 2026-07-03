@@ -304,12 +304,9 @@ private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, cur
 
     for (token in pointer.tokens) {
         // Update base URI if current node has a $id property
-        if (node is KsonObject) {
-            node.propertyLookup["\$id"]?.let { idValue ->
-                if (idValue is KsonString) {
-                    updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
-                }
-            }
+        val idValue = (node as? KsonObject)?.propertyLookup["\$id"]
+        if (idValue is KsonString) {
+            updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
         }
 
         // Navigate to next node

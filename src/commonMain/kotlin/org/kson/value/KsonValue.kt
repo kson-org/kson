@@ -232,58 +232,67 @@ fun AstNode.toKsonValue(): KsonValue = toKsonValueInternal(skipErrors = false)
 fun AstNode.toKsonValueOrNull(): KsonValue? = toKsonValueInternal(skipErrors = true)
 
 private fun AstNode.toKsonValueInternal(skipErrors: Boolean): KsonValue? {
-    if (this !is AstNodeImpl) {
-        if (skipErrors) return null
-        /**
-         * Must have a fully valid [AstNodeImpl] to create an [KsonValue] for it
-         */
-        throw ShouldNotHappenException("Cannot create ${KsonValue::class.simpleName} Node from a ${this::class.simpleName}")
-    }
-    return when (this) {
-        is AstNodeError -> {
-            if (skipErrors) null
-            else throw UnsupportedOperationException("Cannot create Valid Ast Node from ${this::class.simpleName}")
+    // only a fully valid AstNodeImpl can back a KsonValue
+    val node = this as? AstNodeImpl
+        ?: return failConversion(skipErrors) {
+            ShouldNotHappenException("Cannot create ${KsonValue::class.simpleName} Node from a ${this::class.simpleName}")
         }
-        is KsonRootImpl -> rootNode.toKsonValueInternal(skipErrors)
-        is ObjectNode -> {
-            val props = properties.mapNotNull { prop ->
-                val propImpl = prop as? ObjectPropertyNodeImpl
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("this AST is fully valid")
-                val propKey = propImpl.key as? ObjectKeyNodeImpl
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("this AST is fully valid")
-                val keyName = propKey.key.toKsonValueInternal(skipErrors) as? KsonString
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("object key must convert to KsonString")
-                val propValue = propImpl.value.toKsonValueInternal(skipErrors)
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("property value must convert to a KsonValue")
-                keyName.value to KsonObjectProperty(keyName, propValue)
-            }
-            KsonObject(props.toMap(), this)
+    return when (node) {
+        is AstNodeError -> failConversion(skipErrors) {
+            UnsupportedOperationException("Cannot create Valid Ast Node from ${node::class.simpleName}")
         }
-        is ListNode -> {
-            val elems = elements.mapNotNull { elem ->
-                val listElementNode = elem as? ListElementNodeImpl
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("this AST is fully valid")
-                listElementNode.value.toKsonValueInternal(skipErrors)
-                    ?: if (skipErrors) return@mapNotNull null
-                    else throw ShouldNotHappenException("list element must convert to a KsonValue")
-            }
-            KsonList(elems, this)
-        }
-        is EmbedBlockNode -> EmbedBlock(this)
-        is StringNodeImpl -> KsonString(this)
-        is NumberNode -> KsonNumber(this)
-        is TrueNode -> KsonBoolean(this)
-        is FalseNode -> KsonBoolean(this)
-        is NullNode -> KsonNull(this)
-        is KsonValueNodeImpl -> this.toKsonValueInternal(skipErrors)
-        is ObjectKeyNodeImpl, is ObjectPropertyNodeImpl, is ListElementNodeImpl -> {
-            if (skipErrors) null
-            else throw ShouldNotHappenException("these are processed above in their container case")
+        is KsonRootImpl -> node.rootNode.toKsonValueInternal(skipErrors)
+        is ObjectNode -> node.toKsonObjectValue(skipErrors)
+        is ListNode -> node.toKsonListValue(skipErrors)
+        is EmbedBlockNode -> EmbedBlock(node)
+        is StringNodeImpl -> KsonString(node)
+        is NumberNode -> KsonNumber(node)
+        is TrueNode -> KsonBoolean(node)
+        is FalseNode -> KsonBoolean(node)
+        is NullNode -> KsonNull(node)
+        is KsonValueNodeImpl -> node.toKsonValueInternal(skipErrors)
+        is ObjectKeyNodeImpl, is ObjectPropertyNodeImpl, is ListElementNodeImpl -> failConversion(skipErrors) {
+            ShouldNotHappenException("these are processed above in their container case")
         }
     }
 }
+
+/**
+ * Converts an [ObjectNode] to a [KsonObject].  Each error-bearing property is dropped when
+ * [skipErrors] is set, otherwise it throws — see [failConversion].
+ */
+private fun ObjectNode.toKsonObjectValue(skipErrors: Boolean): KsonObject {
+    val props = properties.mapNotNull { prop ->
+        val propImpl = prop as? ObjectPropertyNodeImpl
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("this AST is fully valid") }
+        val propKey = propImpl.key as? ObjectKeyNodeImpl
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("this AST is fully valid") }
+        val keyName = propKey.key.toKsonValueInternal(skipErrors) as? KsonString
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("object key must convert to KsonString") }
+        val propValue = propImpl.value.toKsonValueInternal(skipErrors)
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("property value must convert to a KsonValue") }
+        keyName.value to KsonObjectProperty(keyName, propValue)
+    }
+    return KsonObject(props.toMap(), this)
+}
+
+/**
+ * Converts a [ListNode] to a [KsonList].  Each error-bearing element is dropped when
+ * [skipErrors] is set, otherwise it throws — see [failConversion].
+ */
+private fun ListNode.toKsonListValue(skipErrors: Boolean): KsonList {
+    val elems = elements.mapNotNull { elem ->
+        val listElementNode = elem as? ListElementNodeImpl
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("this AST is fully valid") }
+        listElementNode.value.toKsonValueInternal(skipErrors)
+            ?: return@mapNotNull failConversion(skipErrors) { ShouldNotHappenException("list element must convert to a KsonValue") }
+    }
+    return KsonList(elems, this)
+}
+
+/**
+ * Handles an unconvertible AST node during [toKsonValueInternal]: returns null to drop it when
+ * [skipErrors] is set, otherwise throws [exception] to flag an unexpected strict conversion.
+ */
+private inline fun failConversion(skipErrors: Boolean, exception: () -> Throwable): Nothing? =
+    if (skipErrors) null else throw exception()

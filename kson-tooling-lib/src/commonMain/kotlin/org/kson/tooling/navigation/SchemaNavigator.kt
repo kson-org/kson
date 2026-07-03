@@ -192,16 +192,7 @@ internal class SchemaNavigator(
             }
 
             val patternProperties = schemaObj.propertyLookup["patternProperties"] as? KsonObject
-            patternProperties?.propertyMap?.forEach { (pattern, property) ->
-                try {
-                    if (Regex(pattern).containsMatchIn(token)) {
-                        stepped.add(property.propValue to SchemaResolutionType.PATTERN_PROPERTY)
-                    }
-                } catch (_: Throwable) {
-                    // Invalid regex pattern, skip it
-                    // Use Throwable to catch JavaScript SyntaxError and other platform-specific errors
-                }
-            }
+            addPatternPropertyMatches(patternProperties, token, stepped)
 
             if (stepped.isEmpty()) {
                 schemaObj.propertyLookup["additionalProperties"]?.let {
@@ -218,6 +209,27 @@ internal class SchemaNavigator(
                 resolved.resolvedValueBaseUri,
                 inheritedType ?: stepType
             )
+        }
+    }
+
+    /**
+     * Adds each [patternProperties] entry whose regex matches [token] to [stepped].
+     * Invalid regex patterns are skipped — Throwable also catches JavaScript SyntaxError
+     * and other platform-specific errors.
+     */
+    private fun addPatternPropertyMatches(
+        patternProperties: KsonObject?,
+        token: String,
+        stepped: MutableList<Pair<KsonValue, SchemaResolutionType>>
+    ) {
+        patternProperties?.propertyMap?.forEach { (pattern, property) ->
+            try {
+                if (Regex(pattern).containsMatchIn(token)) {
+                    stepped.add(property.propValue to SchemaResolutionType.PATTERN_PROPERTY)
+                }
+            } catch (_: Throwable) {
+                // Invalid regex pattern, skip it
+            }
         }
     }
 
@@ -306,24 +318,8 @@ internal class SchemaNavigator(
             addBranch(branch, SchemaResolutionType.ALL_OF)
         }
 
-        val ifCondition = schemaObj.propertyLookup["if"]
-        if (ifCondition != null) {
-            when (evaluateIf(ifCondition, ref.resolvedValueBaseUri, docVal)) {
-                IfState.MATCH -> schemaObj.propertyLookup["then"]?.let {
-                    addBranch(it, SchemaResolutionType.IF_THEN)
-                }
-                IfState.NO_MATCH -> schemaObj.propertyLookup["else"]?.let {
-                    addBranch(it, SchemaResolutionType.IF_ELSE)
-                }
-                IfState.UNDETERMINED -> {
-                    schemaObj.propertyLookup["then"]?.let {
-                        addBranch(it, SchemaResolutionType.IF_THEN)
-                    }
-                    schemaObj.propertyLookup["else"]?.let {
-                        addBranch(it, SchemaResolutionType.IF_ELSE)
-                    }
-                }
-            }
+        conditionalBranches(schemaObj, ref.resolvedValueBaseUri, docVal).forEach { (branch, resolutionType) ->
+            addBranch(branch, resolutionType)
         }
 
         if (addedBranches) {
@@ -334,6 +330,29 @@ internal class SchemaNavigator(
 
         inProgress.removeAt(inProgress.size - 1)
         return results
+    }
+
+    /**
+     * The `then`/`else` branches an `if` conditional contributes, per [evaluateIf] against [docVal]:
+     * a matching `if` yields `then`; a contradicted `if` yields `else`; an undecidable `if` yields both.
+     * Empty when there is no `if`.  Ordering (`then` before `else`) matches the flattened result order.
+     */
+    private fun conditionalBranches(
+        schemaObj: KsonObject,
+        baseUri: String,
+        docVal: KsonValue?
+    ): List<Pair<KsonValue, SchemaResolutionType>> {
+        val ifCondition = schemaObj.propertyLookup["if"] ?: return emptyList()
+        val thenBranch = schemaObj.propertyLookup["then"]
+        val elseBranch = schemaObj.propertyLookup["else"]
+        return when (evaluateIf(ifCondition, baseUri, docVal)) {
+            IfState.MATCH -> listOfNotNull(thenBranch?.let { it to SchemaResolutionType.IF_THEN })
+            IfState.NO_MATCH -> listOfNotNull(elseBranch?.let { it to SchemaResolutionType.IF_ELSE })
+            IfState.UNDETERMINED -> listOfNotNull(
+                thenBranch?.let { it to SchemaResolutionType.IF_THEN },
+                elseBranch?.let { it to SchemaResolutionType.IF_ELSE }
+            )
+        }
     }
 
     /**
