@@ -43,6 +43,7 @@ import {
     toWireCommandId,
 } from '../commands/CommandType.js';
 import {KsonSettings, ksonSettingsWithDefaults} from '../KsonSettings.js';
+import {FormatOptions, IndentType} from 'kson';
 
 
 /**
@@ -106,7 +107,6 @@ export class KsonTextDocumentService {
             this.connection,
             this.documentManager,
             this.formattingService,
-            () => this.configuration,
             this.workspaceRoot
         );
 
@@ -163,7 +163,12 @@ export class KsonTextDocumentService {
             if (!document) {
                 return [];
             }
-            return this.formattingService.formatDocument(document, this.configuration.formatOptions);
+            // The editor's indentation arrives per-request; it is the source of truth.
+            const indentType = params.options.insertSpaces
+                ? new IndentType.Spaces(params.options.tabSize)
+                : IndentType.Tabs;
+            const formatOptions = new FormatOptions(indentType, this.configuration.formattingStyle);
+            return this.formattingService.formatDocument(document, formatOptions);
         } catch (error) {
             this.connection.console.error(`Error formatting document: ${error}`);
             return [];

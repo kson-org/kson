@@ -6,6 +6,7 @@
  */
 
 import * as monaco from 'monaco-editor';
+import { CommandType } from 'kson-language-server';
 import { KSON_LANGUAGE_ID } from '../language/ksonLanguage.js';
 import { JsonRpcConnection } from './JsonRpcConnection.js';
 import {
@@ -32,6 +33,19 @@ import {
     type LspSemanticTokensLegend,
     type LspDiagnostic,
 } from './lspToMonaco.js';
+
+/** Wire ids for the four formatting commands are `${distributionId}.${CommandType}`. */
+const FORMAT_COMMAND_TYPES: CommandType[] = [
+    CommandType.PLAIN_FORMAT,
+    CommandType.DELIMITED_FORMAT,
+    CommandType.COMPACT_FORMAT,
+    CommandType.CLASSIC_FORMAT,
+];
+
+/** Match a format command by its wire-id suffix, staying agnostic to the distribution id. */
+function isFormatCommandId(command: string): boolean {
+    return FORMAT_COMMAND_TYPES.some(type => command.endsWith(`.${type}`));
+}
 
 const DIAGNOSTIC_DEBOUNCE_MS = 300;
 
@@ -281,6 +295,20 @@ export class KsonLspBridge {
             this.disposables.push(
                 monaco.editor.registerCommand(commandId, async (_accessor, ...args: unknown[]) => {
                     try {
+                        // The editor's indentation (the Spaces/Tabs toggle) is the source of truth
+                        // for formatting. textDocument/formatting carries it automatically, but the
+                        // CodeLens format buttons run commands with no such params — inject it from
+                        // the target model so the buttons honor the editor setting too.
+                        if (isFormatCommandId(commandId)) {
+                            const first = (args[0] ?? {}) as { documentUri?: string };
+                            const model = first.documentUri
+                                ? monaco.editor.getModel(monaco.Uri.parse(first.documentUri))
+                                : null;
+                            const options = model?.getOptions();
+                            const insertSpaces = options?.insertSpaces ?? true;
+                            const tabSize = options?.tabSize ?? 2;
+                            args = [{ ...first, insertSpaces, tabSize }, ...args.slice(1)];
+                        }
                         await this.connection.sendRequest('workspace/executeCommand', {
                             command: commandId,
                             arguments: args,

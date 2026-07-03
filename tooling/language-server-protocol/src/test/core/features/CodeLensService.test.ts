@@ -2,7 +2,8 @@ import {CodeLensService} from '../../../core/features/CodeLensService.js';
 import {CommandType} from '../../../core/commands/CommandType.js';
 import {describe, it} from 'mocha';
 import assert from 'assert';
-import {FormattingStyle} from 'kson'
+import {FormattingStyle} from 'kson';
+import {formattingStyleId} from '../../../core/formattingStyle.js';
 import {createKsonDocument, TEST_URI} from '../../TestHelpers.js';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {KsonDocument, parseTextDocument} from '../../../core/document/KsonDocument.js';
@@ -44,10 +45,10 @@ describe('CodeLensService', () => {
         const document = createKsonDocument('key: value');
         const lenses = service.getCodeLenses(document);
 
-        assert.strictEqual(lenses[0].command?.arguments?.[0].formattingStyle, FormattingStyle.PLAIN);
-        assert.strictEqual(lenses[1].command?.arguments?.[0].formattingStyle, FormattingStyle.DELIMITED);
-        assert.strictEqual(lenses[2].command?.arguments?.[0].formattingStyle, FormattingStyle.CLASSIC);
-        assert.strictEqual(lenses[3].command?.arguments?.[0].formattingStyle, FormattingStyle.COMPACT);
+        assert.strictEqual(lenses[0].command?.arguments?.[0].formattingStyle, formattingStyleId(FormattingStyle.PLAIN));
+        assert.strictEqual(lenses[1].command?.arguments?.[0].formattingStyle, formattingStyleId(FormattingStyle.DELIMITED));
+        assert.strictEqual(lenses[2].command?.arguments?.[0].formattingStyle, formattingStyleId(FormattingStyle.CLASSIC));
+        assert.strictEqual(lenses[3].command?.arguments?.[0].formattingStyle, formattingStyleId(FormattingStyle.COMPACT));
     });
 
     it('should place all lenses at line 0, character 0', () => {
