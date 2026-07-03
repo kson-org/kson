@@ -2,10 +2,7 @@ package org.kson.tooling.navigation
 
 import org.kson.tooling.CompletionItem
 import org.kson.tooling.CompletionKind
-import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.schema.ResolvedRef
-import org.kson.schema.SchemaIdLookup
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import org.kson.value.KsonValue as InternalKsonValue
@@ -19,63 +16,23 @@ import org.kson.value.KsonNull as InternalKsonNull
 
 internal object SchemaInformation{
     /**
-     * Get info for the node in a schema, found by using the
-     * [documentPointer] to navigate the schema
-     *
-     * When multiple schemas match (e.g., property defined in multiple combinator branches),
-     * returns info from the first match.
-     *
-     * @param schemaValue The schema for the document (as KsonValue)
-     * @param documentPointer The [JsonPointer] to the [org.kson.value.KsonValue] in the document
-     */
-    fun getSchemaInfo(
-        schemaValue: InternalKsonValue,
-        documentPointer: JsonPointer,
-    ): String? {
-        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
-        return resolvedSchemas.firstOrNull()?.resolvedValue?.extractSchemaInfo()
-    }
-
-    /**
-     * Get [Location]'s for node in a schema, found by using the
-     * [documentPointer] to navigate the schema
-     *
-     * @param schemaValue The schema for the document (as KsonValue)
-     * @param documentPointer The [JsonPointer] to the [org.kson.value.KsonValue] in the document
-     */
-    fun getSchemaLocations(
-        schemaValue: InternalKsonValue,
-        documentPointer: JsonPointer
-    ): List<Location> {
-        val resolvedSchemas = SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
-        return resolvedSchemas.map {
-            it.resolvedValue.location
-        }
-    }
-
-    /**
      * Get completion suggestions for the node in a schema, found by using the
      * [documentPointer] to navigate the schema
      *
      * When multiple schemas match (e.g., property defined in multiple combinator branches),
      * merges completions from all matching schemas.
      *
-     * @param schemaValue The schema for the document (as KsonValue)
      * @param documentPointer The [JsonPointer] to the [org.kson.value.KsonValue] in the document
-     * @param validSchemas Pre-filtered list of valid schemas (optional). If not provided, all schemas at the path will be used.
-     * @param documentValue The current document value (optional). If provided, used to filter out already-filled properties.
+     * @param validSchemas Pre-filtered list of valid schemas at the path
+     * @param documentValue The current document value, or null; when present, filters out already-filled properties
      * @return List of completion items
      */
     fun getCompletions(
-        schemaValue: InternalKsonValue,
         documentPointer: JsonPointer,
-        validSchemas: List<ResolvedRef>? = null,
-        documentValue: InternalKsonValue? = null
+        validSchemas: List<NavigatedSchema>,
+        documentValue: InternalKsonValue?
     ): List<CompletionItem> {
-        val resolvedSchemas = validSchemas ?: SchemaIdLookup(schemaValue).navigateByDocumentPointer(documentPointer)
-        val allCompletions = resolvedSchemas
-            .flatMap { it.resolvedValue.extractCompletions() }
-            .distinctBy { it.label } // Remove duplicates based on label
+        val allCompletions = extractCompletionsWithNarrowing(validSchemas)
 
         // Only filter if:
         // 1. Document value is provided
@@ -110,6 +67,83 @@ internal object SchemaInformation{
         }
     }
 }
+
+/**
+ * Extract completions from resolved schemas, applying JSON Schema narrowing semantics.
+ *
+ * Branches reach here already narrowed against the document by navigation; their
+ * resolution type says how their completions combine:
+ *
+ * Property-name completions are always **unioned** — allOf/oneOf/anyOf branches each
+ * contribute keys, and the valid set is their union.
+ *
+ * Value completions combine by group, and a value must satisfy every group that is
+ * present (the groups are intersected):
+ * - **base** (direct property, allOf, array items, root): the value must satisfy every
+ *   such schema simultaneously, so their value-enums are intersected.
+ * - **if/then & if/else**: mutually-exclusive alternatives — their value-enums are
+ *   **unioned**, not intersected, so a value valid in only one branch isn't dropped.
+ * - **oneOf/anyOf**: alternatives whose value-enums are unioned, but still bounded by
+ *   the base — the union is intersected against the base enum, so a value the base
+ *   forbids is never offered.
+ *
+ * @param resolvedSchemas The schemas found at the document path, with resolution type metadata
+ * @return Deduplicated list of completion items respecting narrowing semantics
+ */
+private fun extractCompletionsWithNarrowing(resolvedSchemas: List<NavigatedSchema>): List<CompletionItem> {
+    val perSchema = resolvedSchemas.map { it.resolutionType to it.resolvedValue.extractCompletions() }
+
+    val propertyCompletions = perSchema.flatMap { (_, completions) ->
+        completions.filter { it.kind == CompletionKind.PROPERTY }
+    }
+
+    // The non-empty per-schema VALUE-completion lists for branches matching [predicate].
+    fun valueSets(predicate: (SchemaResolutionType) -> Boolean): List<List<CompletionItem>> =
+        perSchema.filter { (type, _) -> predicate(type) }
+            .map { (_, completions) -> completions.filter { it.kind == CompletionKind.VALUE } }
+            .filter { it.isNotEmpty() }
+
+    val baseSets = valueSets { it.isReductive && it != SchemaResolutionType.IF_THEN && it != SchemaResolutionType.IF_ELSE }
+    val conditionalSets = valueSets { it == SchemaResolutionType.IF_THEN || it == SchemaResolutionType.IF_ELSE }
+    val additiveSets = valueSets { !it.isReductive }
+
+    // base schemas are intersected with each other; conditional and additive branches
+    // are each unioned within their group.  null means "this group imposes no value
+    // constraint" (no schema in it offered value completions).
+    val baseLabels = baseSets.takeIf { it.isNotEmpty() }
+        ?.map { set -> set.map { it.label }.toSet() }
+        ?.reduce { acc, set -> acc.intersect(set) }
+    val conditionalLabels = conditionalSets.flatten().map { it.label }.toSet().takeIf { conditionalSets.isNotEmpty() }
+    val additiveLabels = additiveSets.flatten().map { it.label }.toSet().takeIf { additiveSets.isNotEmpty() }
+
+    val constraintSets = listOfNotNull(baseLabels, conditionalLabels, additiveLabels)
+    val valueCompletions = if (constraintSets.isEmpty()) {
+        emptyList()
+    } else {
+        val allowedLabels = constraintSets.reduce { acc, set -> acc.intersect(set) }
+        (baseSets + conditionalSets + additiveSets).flatten().filter { it.label in allowedLabels }
+    }
+
+    return (propertyCompletions + valueCompletions).distinctBy { it.label }
+}
+
+/**
+ * True if this branch contributes value completions that must be intersected with other
+ * reductive branches — a value must satisfy all reductive schemas simultaneously (e.g., a
+ * base property's enum intersected with an if/then's narrower enum).  Additive branches
+ * (oneOf/anyOf) merge their completions as alternatives instead.
+ *
+ * Exhaustive by design: adding a new [SchemaResolutionType] forces a compile error here so
+ * the reductive-vs-additive classification is an explicit decision, not a default.
+ */
+private val SchemaResolutionType.isReductive: Boolean
+    get() = when (this) {
+        SchemaResolutionType.DIRECT_PROPERTY, SchemaResolutionType.PATTERN_PROPERTY,
+        SchemaResolutionType.ADDITIONAL_PROPERTY, SchemaResolutionType.ARRAY_ITEMS,
+        SchemaResolutionType.ALL_OF, SchemaResolutionType.IF_THEN,
+        SchemaResolutionType.IF_ELSE, SchemaResolutionType.ROOT -> true
+        SchemaResolutionType.ANY_OF, SchemaResolutionType.ONE_OF -> false
+    }
 
 /**
  * Extract schema information from a schema node.
@@ -234,6 +268,7 @@ internal fun InternalKsonValue.extractCompletions(
  *
  * Provides completions for:
  * - Object properties (if type is object)
+ * - Const value (if const is defined)
  * - Enum values (if enum is defined)
  * - Boolean values (if type is boolean)
  * - Null value (if type is null or includes null)
@@ -254,6 +289,19 @@ private fun InternalKsonObject.extractValueCompletions(): List<CompletionItem> {
     }
 
     val completions = mutableListOf<CompletionItem>()
+
+    // If const exists, offer that single value
+    propertyLookup["const"]?.let { constValue ->
+        completions.add(
+            CompletionItem(
+                label = constValue.formatValueForDisplay(),
+                detail = "const value",
+                documentation = this.extractSchemaInfo(),
+                kind = CompletionKind.VALUE
+            )
+        )
+        return completions
+    }
 
     // If enum exists, offer those values
     (propertyLookup["enum"] as? InternalKsonList)?.let { enumList ->

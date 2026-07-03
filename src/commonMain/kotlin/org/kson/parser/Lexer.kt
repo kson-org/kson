@@ -171,6 +171,14 @@ data class Location(
             startOffset + trimmedLength
         )
     }
+
+    /**
+     * True when [other] falls entirely within this [Location]'s span (offset-inclusive on both
+     * ends).  Companion to [containsCoordinates], which tests a single point rather than a span.
+     */
+    operator fun contains(other: Location): Boolean =
+        startOffset <= other.startOffset && other.endOffset <= endOffset
+
     companion object {
         /**
          * Creates a new [Location] instance using line and column positions directly.

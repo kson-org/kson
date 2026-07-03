@@ -3,11 +3,14 @@
 
 package org.kson.tooling
 
+import org.kson.tooling.navigation.CaretPath
 import org.kson.tooling.navigation.KsonValuePathBuilder
+import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaInformation
+import org.kson.tooling.navigation.SchemaNavigator
 import org.kson.tooling.navigation.extractSchemaInfo
 import org.kson.parser.Coordinates
-import org.kson.schema.ResolvedRef
+import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.validation.SourceContext
@@ -49,9 +52,9 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.ksonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
-        val schemaInfos = context.validSchemas.mapNotNull { ref ->
+        val schemaInfos = validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
         }
 
@@ -79,9 +82,9 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
-        return context.validSchemas.map {
+        return validSchemas.map {
             Range(
                 it.resolvedValue.location.start.line,
                 it.resolvedValue.location.start.column,
@@ -158,10 +161,34 @@ object KsonTooling {
         column: Int
     ): List<CompletionItem> {
         val parsedSchema = schema.ksonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition(includePropertyKeys = false) ?: return emptyList()
-        val context = ResolvedSchemaContext.resolveAndFilterSchemas(parsedSchema, document.ksonValue, documentPointer)
+        val caretPath = KsonValuePathBuilder(document, Coordinates(line, column)).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
+        val validSchemas = resolveSchemas(parsedSchema, document, caretPath.pointer, caretPath.placeholderLocation)
 
-        return SchemaInformation.getCompletions(context.schemaIdLookup.schemaRootValue, documentPointer, context.validSchemas, context.parsedDocument)
+        val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.ksonValue)
+
+        // A caret resting past the end of a complete, committed value (e.g. `key: 'value'|`) is done
+        // choosing a value, so further value suggestions there are noise.  Property suggestions
+        // (filling out an object) and value suggestions for an empty or still-being-edited slot
+        // (including the caret between a string's quotes) are left untouched.
+        return if (caretIsPastCommittedValue(document, caretPath)) {
+            completions.filterNot { it.kind == CompletionKind.VALUE }
+        } else {
+            completions
+        }
+    }
+
+    /**
+     * True when the caret rests past a complete, committed scalar value at the completion target —
+     * the `key: 'value'|` position.  [CaretPath.caretPastValueToken] (computed by the path builder
+     * from the value's trailing source token) marks that the caret has moved beyond the value's
+     * closing token rather than still sitting inside it (e.g. between a string's quotes), and implies
+     * a value-authoring context.  We additionally require a parseable committed value at the pointer,
+     * so an unparseable or not-yet-committed value is never treated as finished.
+     */
+    private fun caretIsPastCommittedValue(document: ToolingDocument, caretPath: CaretPath): Boolean {
+        if (!caretPath.caretPastValueToken) return false
+        val committedDocument = document.ksonValue ?: return false
+        return KsonValueWalker.navigateWithJsonPointer(committedDocument, caretPath.pointer) != null
     }
 
     /**
@@ -280,40 +307,30 @@ object KsonTooling {
     }
 
     /**
-     * Internal helper data class to hold the result of schema resolution and filtering.
+     * Navigate to the schemas governing a document path.
+     *
+     * Creates a [SchemaIdLookup] and navigates to the candidate schemas at the pointer.
+     * Navigation flattens combinators and conditionals into individual branches and
+     * narrows them doc-aware at every level (see [SchemaNavigator.navigate]),
+     * so no separate filtering pass is needed.
+     *
+     * Uses [ToolingDocument.partialKsonValue] so narrowing can see successfully-parsed
+     * sibling values even when the document has parse errors at the cursor.
+     *
+     * [placeholderLocation] is the span of the value the caret is authoring; it is passed to the
+     * navigator, which forgives validation errors raised inside it so the half-typed value can't
+     * disqualify the branches it selects among.  Completion passes it; hover / go-to-def leave it
+     * null so the committed leaf narrows.
      */
-    private data class ResolvedSchemaContext(
-        val schemaIdLookup: SchemaIdLookup,
-        val validSchemas: List<ResolvedRef>,
-        val parsedDocument: KsonValue?
-    ){
-        companion object {
-            /**
-             * Common helper to navigate and filter schemas based on a document path.
-             *
-             * Encapsulates the repeated pattern of:
-             * 1. Creating a SchemaIdLookup from the pre-parsed schema
-             * 2. Navigating to candidate schemas
-             * 3. Filtering schemas based on validation against the pre-parsed document
-             *
-             * @param parsedSchema The pre-parsed schema value
-             * @param documentValue The pre-parsed document value (may be null for broken documents)
-             * @param documentPointer The [JsonPointer] to navigate to in the schema
-             */
-            fun resolveAndFilterSchemas(
-                parsedSchema: KsonValue,
-                documentValue: KsonValue?,
-                documentPointer: JsonPointer
-            ): ResolvedSchemaContext {
-                val schemaIdLookup = SchemaIdLookup(parsedSchema)
-                val candidateSchemas = schemaIdLookup.navigateByDocumentPointer(documentPointer)
-
-                val filteringService = SchemaFilteringService(schemaIdLookup)
-                val validSchemas = filteringService.getValidSchemas(candidateSchemas, documentValue, documentPointer)
-
-                return ResolvedSchemaContext(schemaIdLookup, validSchemas, documentValue)
-            }
-        }
+    private fun resolveSchemas(
+        parsedSchema: KsonValue,
+        document: ToolingDocument,
+        documentPointer: JsonPointer,
+        placeholderLocation: Location? = null
+    ): List<NavigatedSchema> {
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        return SchemaNavigator(schemaIdLookup, placeholderLocation)
+            .navigate(documentPointer, document.partialKsonValue)
     }
 }
 

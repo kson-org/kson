@@ -594,4 +594,70 @@ class SchemaDefinitionLocationTest {
         )
     }
 
+    @Test
+    fun testJumpToDefinition_arrayItem_filteredByOwnValue() {
+        // Each array item is an anyOf discriminated by its own `type` value.  Go-to-def on a
+        // property of an item resolves to the single branch the item's committed value selects:
+        // the leaf value is authoritative for navigation, unlike in completion.
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "properties": {
+                          "type": { "const": "foo" },
+                          "config": <caret>{
+                            "type": "string",
+                            "description": "config for foo"
+                          }<caret>
+                        }
+                      },
+                      {
+                        "properties": {
+                          "type": { "const": "bar" },
+                          "config": {
+                            "type": "number",
+                            "description": "config for bar"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                - type: foo
+                  config<caret>: hello
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_ifThenResolvesInBrokenDocument() {
+        // "config" is only reachable via if/then, and the document has a
+        // parse error (missing value after "other":).  The partial AST
+        // still recovers "kind": "a" so the if/then condition can evaluate.
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                    "${'$'}defs": {
+                        "ConfigA": <caret>{ "type": "object", "description": "Settings for A" }<caret>,
+                        "ConfigB": { "type": "object", "description": "Settings for B" }
+                    },
+                    "type": "object",
+                    "properties": { "kind": { "type": "string" } },
+                    "allOf": [
+                        { "if": { "properties": { "kind": { "const": "a" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } } },
+                        { "if": { "properties": { "kind": { "const": "b" } } }, "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } } }
+                    ]
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                { "kind": "a", "other": , "<caret>config": {} }
+            """.trimIndent()
+        )
+    }
+
 }

@@ -34,13 +34,23 @@ describe('CompletionService', () => {
         assert.strictEqual(labels, null);
     });
 
-    it('should return enum value completions for quoted strings', () => {
-        const labels = getCompletionLabels('{\n    status: "active"\n}', pos(1, 20), ENUM_SCHEMA);
+    it('should return enum value completions while typing a quoted value', () => {
+        // Caret right after partial content, before the (auto-closed) close quote: still authoring,
+        // so as-you-type enum completion must work.
+        const labels = getCompletionLabels('{\n    status: "ac"\n}', pos(1, 15), ENUM_SCHEMA);
 
-        assert.ok(labels, 'Completions should not be null');
+        assert.ok(labels, 'Completions should not be null while authoring a quoted value');
         assert.ok(labels.includes('active'));
         assert.ok(labels.includes('inactive'));
         assert.ok(labels.includes('pending'));
+    });
+
+    it('should not return value completions after a committed quoted value', () => {
+        // Caret past the closing quote of a finished value (`status: "active"|`) — nothing left to
+        // choose, so value completions are suppressed.
+        const labels = getCompletionLabels('{\n    status: "active"\n}', pos(1, 20), ENUM_SCHEMA);
+
+        assert.strictEqual(labels, null, 'No value completions should be offered after a committed value');
     });
 
     it('should return enum value completions for unquoted values', () => {

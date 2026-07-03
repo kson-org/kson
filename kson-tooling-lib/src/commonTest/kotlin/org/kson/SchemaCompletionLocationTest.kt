@@ -6,6 +6,7 @@ import org.kson.tooling.KsonTooling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SchemaCompletionLocationTest {
@@ -27,6 +28,176 @@ class SchemaCompletionLocationTest {
         val document = documentWithCaret.replace(caretMarker, "")
 
         return KsonTooling.getCompletionsAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
+    }
+
+    @Test
+    fun testConstValueCompletions() {
+        val schema = """
+            {
+                type: object
+                properties: {
+                    status: {
+                        const: "active"
+                        description: "Always active"
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                status: "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions for const value")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("active"), labels, "Should offer only the const value")
+    }
+
+    @Test
+    fun testIfThenNarrowsConstValueForSiblingProperty() {
+        // if/then narrows a property to a const based on a sibling value
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" },
+                    "breed": { "type": "string" }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "kind": { "const": "dog" } },
+                            "required": ["kind"]
+                        },
+                        "then": {
+                            "properties": {
+                                "breed": { "const": "labrador" }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "kind": "dog",
+                "breed": "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("labrador"), labels, "Should narrow to only the const value, got: $labels")
+    }
+
+    @Test
+    fun testIfThenNarrowsEnumValueForSiblingProperty() {
+        // if/then narrows a property's enum based on a sibling value.
+        // The base property has all enum values; the matching if/then branch
+        // constrains it to a subset via intersection semantics.
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "integration": { "type": "string" },
+                    "job": {
+                        "type": "string",
+                        "enum": ["SNOW_QUERY", "SNOW_TEST", "DBT_RUN", "DBT_TEST"]
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "integration": { "const": "SNOWFLAKE" } },
+                            "required": ["integration"]
+                        },
+                        "then": {
+                            "properties": {
+                                "job": { "enum": ["SNOW_QUERY", "SNOW_TEST"] }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": { "integration": { "const": "DBT" } },
+                            "required": ["integration"]
+                        },
+                        "then": {
+                            "properties": {
+                                "job": { "enum": ["DBT_RUN", "DBT_TEST"] }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "integration": "SNOWFLAKE",
+                "job": "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("SNOW_QUERY", "SNOW_TEST"), labels.sorted(),
+            "Should narrow to SNOWFLAKE jobs only, got: $labels")
+    }
+
+    @Test
+    fun testIfThenEnumNarrowingFallsBackWhenNoSiblingValue() {
+        // When no sibling value is set, all enum values should be available
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "integration": { "type": "string" },
+                    "job": {
+                        "type": "string",
+                        "enum": ["SNOW_QUERY", "DBT_RUN"]
+                    }
+                },
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": { "integration": { "const": "SNOWFLAKE" } },
+                            "required": ["integration"]
+                        },
+                        "then": {
+                            "properties": {
+                                "job": { "enum": ["SNOW_QUERY"] }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": { "integration": { "const": "DBT" } },
+                            "required": ["integration"]
+                        },
+                        "then": {
+                            "properties": {
+                                "job": { "enum": ["DBT_RUN"] }
+                            }
+                        }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "job": "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertEquals(listOf("DBT_RUN", "SNOW_QUERY"), labels.sorted(),
+            "Should include all enum values when integration is not set, got: $labels")
     }
 
     @Test
@@ -154,6 +325,116 @@ class SchemaCompletionLocationTest {
 
         // Should have 3 items total
         assertEquals(3, completions.size, "Should have 3 values (true, false, null)")
+    }
+
+    /**
+     * A value typed `anyOf[string, null]` — the null branch contributes a `null` VALUE completion,
+     * used to exercise the "caret past a committed value" suppression in [testNoValueCompletionsAfterCommittedScalar].
+     */
+    private val nullableValueSchema = """
+        {
+            type: object
+            properties: {
+                value: {
+                    anyOf: [
+                        { type: string }
+                        { type: "null" }
+                    ]
+                }
+            }
+        }
+    """
+
+    @Test
+    fun testNoValueCompletionsAfterCommittedScalar() {
+        // Caret rests right after a complete, committed value: there's nothing left to choose, so the
+        // null-branch `null` suggestion must be suppressed.
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: "committed"<caret>
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return a (possibly empty) completion list")
+        assertTrue(
+            completions.none { it.kind == CompletionKind.VALUE },
+            "Caret after a committed value should offer no value completions, got: ${completions.map { it.label }}"
+        )
+        assertTrue("null" !in completions.map { it.label }, "Should not suggest 'null' after a committed value")
+    }
+
+    @Test
+    fun testValueCompletionsOfferedForEmptySlot() {
+        // An empty value slot (no committed value) still offers the null-branch suggestion.
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: <caret>
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions for an empty value slot")
+        assertTrue("null" in completions.map { it.label },
+            "Empty slot should still offer 'null', got: ${completions.map { it.label }}")
+    }
+
+    @Test
+    fun testValueCompletionsOfferedInsideEmptyQuotes() {
+        // Caret between the quotes of an empty string is still authoring the value — it precedes the
+        // close-quote token — so value suggestions must remain (this is how narrowing tests probe a slot).
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: "<caret>"
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions inside empty quotes")
+        assertTrue("null" in completions.map { it.label },
+            "Caret inside empty quotes should still offer 'null', got: ${completions.map { it.label }}")
+    }
+
+    @Test
+    fun testValueCompletionsOfferedWhenCaretWithinValue() {
+        // Caret at the start of an existing value (about to replace it) still offers value suggestions.
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: <caret>null
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions when replacing a value")
+        assertTrue("null" in completions.map { it.label },
+            "Caret within a value should still offer 'null', got: ${completions.map { it.label }}")
+    }
+
+    @Test
+    fun testValueCompletionsBoundaryAtClosingQuote() {
+        // The "finished value" boundary is the closing quote, not the content.  A caret BEFORE the
+        // close quote is still authoring (as you type a quoted enum value), so completions remain; a
+        // caret AFTER the close quote is done, so they are suppressed.
+        val enumSchema = """
+            { type: object, properties: { status: { type: string, enum: ["active", "inactive", "pending"] } } }
+        """
+
+        val beforeQuote = getCompletionsAtCaret(enumSchema, """{ status: "active<caret>" }""")
+        assertTrue("active" in beforeQuote.map { it.label },
+            "Caret before the closing quote should still offer enum values, got: ${beforeQuote.map { it.label }}")
+
+        val afterQuote = getCompletionsAtCaret(enumSchema, """{ status: "active"<caret> }""")
+        assertTrue(afterQuote.none { it.kind == CompletionKind.VALUE },
+            "Caret after the closing quote should suppress value completions, got: ${afterQuote.map { it.label }}")
+    }
+
+    @Test
+    fun testValueCompletionsWhileTypingUnquotedValue() {
+        // The caret at the end of a half-typed unquoted token is the normal typing position —
+        // it must offer completions just like the quoted `"activ<caret>"` position does.
+        val enumSchema = """
+            { type: object, properties: { status: { type: string, enum: ["active", "inactive", "pending"] } } }
+        """
+        val completions = getCompletionsAtCaret(enumSchema, """{ status: activ<caret> }""")
+        assertNotNull(completions, "Should return completions while typing an unquoted value")
+        assertTrue("active" in completions.map { it.label },
+            "Mid-typing an unquoted value should offer enum values, got: ${completions.map { it.label }}")
     }
 
     @Test
@@ -1173,6 +1454,18 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testFilledSiblingPropertyNotResuggestedInBrokenDocument() {
+        // `name:` has no value yet (parse error), but `age` is committed — it must not be re-suggested.
+        val schema = """
+            { type: object, properties: { name: { type: string }, age: { type: number } } }
+        """
+        val completions = getCompletionsAtCaret(schema, "age: 3\nname: <caret>")
+        assertNotNull(completions)
+        assertTrue(completions.none { it.label == "age" },
+            "Committed sibling 'age' must not be re-suggested, got: ${completions.map { it.label }}")
+    }
+
+    @Test
     fun testCompletionsExcludeAlreadyFilledPropertiesInArrayItems() {
         // Test that properties already filled in array items are excluded from completions
         val schema = """
@@ -1491,14 +1784,60 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testCompletionsInEmptyArrayItemOfRecursiveAnyOf() {
+        // An empty array item whose schema is a recursive anyOf offers the UNION of both
+        // branches: the half-typed item must not disqualify either alternative.
+        val schema = $$"""
+            {
+              "type": "object",
+              "properties": {
+                "config": { "$ref": "#/$defs/Node" }
+              },
+              "$defs": {
+                "Node": {
+                  "anyOf": [
+                    { "$ref": "#/$defs/Leaf" },
+                    { "$ref": "#/$defs/Group" }
+                  ]
+                },
+                "Leaf": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": { "foo": { "type": "string" }, "bar": { "type": "string" } }
+                },
+                "Group": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": { "items": { "type": "array", "items": { "$ref": "#/$defs/Node" } } }
+                }
+              }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            config:
+              items:
+                - <caret>
+        """.trimIndent())
+
+        val labels = completions.map { it.label }.toSet()
+        assertEquals(
+            setOf("foo", "bar", "items"),
+            labels,
+            "Empty recursive-anyOf array item offers the union of both branches, got: $labels"
+        )
+    }
+
+    @Test
     fun testNoCompletionsInsideDelimitedListWhenSchemaExpectsObject() {
         val schema = searchExpressionSchema
 
         // Cursor inside a [] delimited list, but schema expects objects (SearchTerm
-        // or AndExpression). The structural mismatch means no branch is compatible.
-        // This also exercises the SQUARE_BRACKET_L guard in the path builder: the
-        // path must point at /query (not drop to root), otherwise the filter would
-        // see root-level completions leak through.
+        // or AndExpression). Like testNoCompletionsInsideEmptyDelimitedDashListWhenSchemaExpectsObject,
+        // the structural mismatch (list where object expected) eliminates every anyOf
+        // branch, so we should return no completions rather than leak object-property
+        // suggestions into a list context. Also exercises the SQUARE_BRACKET_L guard in
+        // the path builder: the path must target /query (not drop to root).
         val completions = getCompletionsAtCaret(schema, $$"""
             '$schema': test
             query:
@@ -1508,7 +1847,11 @@ class SchemaCompletionLocationTest {
         """.trimIndent())
 
         assertNotNull(completions)
-        assertTrue(completions.isEmpty(), "Should have no completions when document structure doesn't match schema, got: ${completions.map { it.label }}")
+        assertTrue(
+            completions.isEmpty(),
+            "Should have no completions: the path must target /query, and list-at-object " +
+                "filters out every anyOf branch. Got: ${completions.map { it.label }}"
+        )
     }
 
     @Test
@@ -1558,6 +1901,115 @@ class SchemaCompletionLocationTest {
         val labels = completions.map { it.label }
         assertTrue("name" in labels, "Should include 'name' from config schema, got: $labels")
         assertTrue("config" !in labels, "Should NOT include 'config' (parent property)")
+    }
+
+    @Test
+    fun testIfThenCompletionsIncludeConditionalProperties() {
+        // Test that properties from if/then branches appear in completions
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "kind": { "type": "string" }
+                },
+                "if": {
+                    "properties": {
+                        "kind": { "const": "dog" }
+                    }
+                },
+                "then": {
+                    "properties": {
+                        "bark": { "type": "boolean" }
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            {
+                "kind": "dog",
+                <caret>
+            }
+        """.trimIndent())
+
+        assertNotNull(completions, "Should return completions")
+        val labels = completions.map { it.label }
+        assertTrue("bark" in labels, "Should include 'bark' from then branch, got: $labels")
+    }
+
+    @Test
+    fun testAllOfWithIfThenCompletionsIncludeConditionalProperties() {
+        // allOf if/then should surface properties from matching branches
+        val schema = """
+            {
+                "type": "object",
+                "properties": { "kind": { "type": "string" } },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "dog" } } },
+                        "then": { "properties": { "bark": { "type": "boolean" } } }
+                    }
+                ]
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            { "kind": "dog", <caret> }
+        """.trimIndent())
+
+        assertNotNull(completions)
+        assertTrue("bark" in completions.map { it.label }, "Should include 'bark' from then branch")
+    }
+
+    @Test
+    fun testIfThenFiltersNestedPropertyCompletionsBySiblingValue() {
+        // A nested property's completions should be narrowed by if/then evaluation
+        // against a sibling at the parent level.  The base "config" allows any
+        // properties; the if/then narrows to a specific $ref based on "kind".
+        val schema = """
+            {
+                "${'$'}defs": {
+                    "Item": {
+                        "type": "object",
+                        "properties": {
+                            "kind": { "type": "string" },
+                            "config": { "additionalProperties": true, "type": "object" }
+                        },
+                        "allOf": [
+                            {
+                                "if": { "properties": { "kind": { "const": "a" } }, "required": ["kind"] },
+                                "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigA" } } }
+                            },
+                            {
+                                "if": { "properties": { "kind": { "const": "b" } }, "required": ["kind"] },
+                                "then": { "properties": { "config": { "${'$'}ref": "#/${'$'}defs/ConfigB" } } }
+                            }
+                        ]
+                    },
+                    "ConfigA": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": { "alpha": { "type": "string" } }
+                    },
+                    "ConfigB": {
+                        "type": "object", "additionalProperties": false,
+                        "properties": { "beta": { "type": "string" } }
+                    }
+                },
+                "type": "object",
+                "properties": {
+                    "items": { "type": "object", "additionalProperties": { "${'$'}ref": "#/${'$'}defs/Item" } }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, """
+            { "items": { "x": { "kind": "a", "config": { <caret> } } } }
+        """.trimIndent())
+
+        assertNotNull(completions)
+        val labels = completions.map { it.label }
+        assertTrue("alpha" in labels, "Should include 'alpha' from ConfigA, got: $labels")
+        assertFalse("beta" in labels, "Should NOT include 'beta' from ConfigB, got: $labels")
     }
 
     private val searchExpressionSchema = $$"""
@@ -1649,9 +2101,69 @@ class SchemaCompletionLocationTest {
 
         val completions = getCompletionsAtCaret(schema, "<caret>")
 
+        val labels = completions.map { it.label }.toSet()
         assertEquals(
             setOf("id", "type", "source", "base"),
-            completions.map { it.label }.toSet()
+            labels,
+            "Empty document offers the union of both oneOf branches' properties, got: $labels"
+        )
+    }
+
+    @Test
+    fun testOneOfWithRefAtRootWithSchemaMetadata() {
+        // Root schema with $schema, $id, title, description alongside oneOf
+        val schema = $$"""
+            '$schema': 'http://json-schema.org/draft-07/schema#'
+            '$id': 'test.schema.kson'
+            title: 'Test Resource'
+            description: 'A test resource that is either a Model or a View'
+            oneOf:
+              - '$ref': '#/$defs/Model'
+                description: 'A model resource'
+              - '$ref': '#/$defs/View'
+                description: 'A view resource'
+                .
+            '$defs':
+              Model:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: model
+                    .
+                  source:
+                    type: string
+                    .
+                  .
+                .
+              View:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    .
+                  type:
+                    type: string
+                    const: view
+                    .
+                  base:
+                    type: string
+                    .
+                  .
+                .
+              .
+        """
+
+        val completions = getCompletionsAtCaret(schema, "<caret>")
+
+        val labels = completions.map { it.label }.toSet()
+        assertEquals(
+            setOf("id", "type", "source", "base"),
+            labels,
+            "Empty document offers the union of both oneOf branches' properties, got: $labels"
         )
     }
 
