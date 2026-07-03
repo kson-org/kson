@@ -27,9 +27,13 @@ sealed interface JsonSchema: Validator {
   fun descriptionWithDefault(): String
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 
-  fun isValid(ksonValue: KsonValue, messageSink: MessageSink): Boolean {
+  fun isValid(
+    ksonValue: KsonValue,
+    messageSink: MessageSink,
+    sourceContext: SourceContext = SourceContext()
+  ): Boolean {
     val numErrors = messageSink.loggedMessages().size
-    validate(ksonValue, messageSink)
+    validate(ksonValue, messageSink, sourceContext)
     return messageSink.loggedMessages().size == numErrors
   }
 }
@@ -114,7 +118,7 @@ class JsonObjectSchema(
 
     // no `type` violations, run all other validators configured for this schema
     schemaValidators.forEach { validator ->
-      validator.validate(ksonValue, messageSink)
+      validator.validate(ksonValue, messageSink, sourceContext)
     }
   }
 }

@@ -10,12 +10,12 @@ class IfValidator(private val ifSchema: JsonSchema, private val thenSchema: Json
     JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val tmpMessageSink = MessageSink()
-        if (ifSchema.isValid(ksonValue, tmpMessageSink)) {
+        if (ifSchema.isValid(ksonValue, tmpMessageSink, sourceContext)) {
             // if condition is true, run then schema if it exists
-            thenSchema?.validate(ksonValue, messageSink)
+            thenSchema?.validate(ksonValue, messageSink, sourceContext)
         } else {
             // if condition is false, run else schema if it exists
-            elseSchema?.validate(ksonValue, messageSink)
+            elseSchema?.validate(ksonValue, messageSink, sourceContext)
         }
     }
 }

@@ -4,9 +4,10 @@ import org.kson.value.KsonString
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonStringValidator
+import org.kson.validation.SourceContext
 
 class PatternValidator(private val pattern: Regex) : JsonStringValidator() {
-    override fun validateString(node: KsonString, messageSink: MessageSink) {
+    override fun validateString(node: KsonString, messageSink: MessageSink, sourceContext: SourceContext) {
         val str = node.value
         if (!pattern.containsMatchIn(str)) {
             messageSink.error(node.location, MessageType.SCHEMA_STRING_PATTERN_MISMATCH.create(pattern.pattern))

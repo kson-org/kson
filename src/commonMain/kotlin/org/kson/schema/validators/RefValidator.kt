@@ -64,7 +64,7 @@ class RefValidator(
         }
 
         // Validate the value against our referenced schema
-        schema.validate(ksonValue, messageSink)
+        schema.validate(ksonValue, messageSink, sourceContext)
     }
 }
 

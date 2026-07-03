@@ -8,6 +8,7 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
 import org.kson.schema.JsonSchema
+import org.kson.validation.SourceContext
 
 /** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
 data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
@@ -17,14 +18,14 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
 
-    override fun validateObject(node: KsonObject, messageSink: MessageSink) {
+    override fun validateObject(node: KsonObject, messageSink: MessageSink, sourceContext: SourceContext) {
         val objectProperties = node.propertyLookup
         val seenKeys = mutableSetOf<String>()
 
         // First, validate regular properties
         propertySchemas?.forEach { (key, schema) ->
             objectProperties[key.value]?.let { objectProperty ->
-                schema?.validate(objectProperty, messageSink)
+                schema?.validate(objectProperty, messageSink, sourceContext)
             }
             seenKeys.add(key.value)
         }
@@ -32,7 +33,7 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         // Then validate pattern properties - need to check ALL patterns for each property
         compiledPatterns?.let { patterns ->
             objectProperties.forEach { (propertyName, propertyValue) ->
-                if (validatePatternMatches(propertyName, propertyValue, patterns, messageSink)) {
+                if (validatePatternMatches(propertyName, propertyValue, patterns, messageSink, sourceContext)) {
                     seenKeys.add(propertyName)
                 }
             }
@@ -40,7 +41,7 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
 
         // Finally, validate additional properties
         val remainingProperties = node.propertyMap.filter { !seenKeys.contains(it.key) }
-        additionalPropertiesValidator?.validateProperties(remainingProperties, node.location, messageSink)
+        additionalPropertiesValidator?.validateProperties(remainingProperties, node.location, messageSink, sourceContext)
     }
 
     private fun validatePatternMatches(
@@ -48,12 +49,13 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
         propertyValue: org.kson.value.KsonValue,
         patterns: List<CompiledPatternSchema>,
         messageSink: MessageSink,
+        sourceContext: SourceContext,
     ): Boolean {
         var matchedAnyPattern = false
         patterns.forEach { (regex, schema) ->
             if (regex.containsMatchIn(propertyName)) {
                 matchedAnyPattern = true
-                schema?.validate(propertyValue, messageSink)
+                schema?.validate(propertyValue, messageSink, sourceContext)
             }
         }
         return matchedAnyPattern
@@ -61,11 +63,11 @@ class PropertiesValidator(private val propertySchemas: Map<KsonString, JsonSchem
 }
 
 sealed interface AdditionalPropertiesValidator {
-    fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink)
+    fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
 data class AdditionalPropertiesBooleanValidator(val allowed: Boolean, private val schemaTitle: String?) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
+    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink, sourceContext: SourceContext) {
         if (!allowed && remainingProperties.isNotEmpty()) {
             remainingProperties.forEach { (_, property) ->
                 messageSink.error(property.propName.location, MessageType.SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED.create(property.propName.value, schemaTitle ?: ""))
@@ -75,10 +77,10 @@ data class AdditionalPropertiesBooleanValidator(val allowed: Boolean, private va
 }
 
 data class AdditionalPropertiesSchemaValidator(val schema: JsonSchema) : AdditionalPropertiesValidator {
-    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink) {
+    override fun validateProperties(remainingProperties: Map<String, KsonObjectProperty>, location: Location, messageSink: MessageSink, sourceContext: SourceContext) {
         remainingProperties.forEach { (_, property) ->
             val propertyMessageSink = MessageSink()
-            schema.validate(property.propValue, propertyMessageSink)
+            schema.validate(property.propValue, propertyMessageSink, sourceContext)
             if (propertyMessageSink.hasMessages()) {
                 messageSink.error(
                     property.propName.location,
