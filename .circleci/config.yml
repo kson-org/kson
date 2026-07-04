@@ -63,6 +63,9 @@ commands:
             - "v1-<< parameters.platform >>-dependencies-"
       - restore_cache:
           keys:
+            - "v1-<< parameters.platform >>-gradle-build-cache-"
+      - restore_cache:
+          keys:
             - "v1-<< parameters.platform >>-rattler-{{ checksum \"kson-lib/pixi.lock\" }}"
             - "v1-<< parameters.platform >>-rattler-"
       - restore_cache:
@@ -82,6 +85,11 @@ commands:
           paths:
             - "~/.gradle"
           key: "v1-<< parameters.platform >>-dependencies-{{ checksum \"build.gradle.kts\" }}"
+
+      - save_cache:
+          paths:
+            - "~/.gradle/caches/build-cache-1"
+          key: "v1-<< parameters.platform >>-gradle-build-cache-{{ .Revision }}"
 
       - save_cache:
           paths:
@@ -237,6 +245,8 @@ jobs:
 
     environment:
       JVM_OPTS: "-Xmx3200m"
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
+
     steps:
       - checkout
       - "clean-git-config":
@@ -267,6 +277,7 @@ jobs:
     working_directory: "~/repo"
     environment:
       JVM_OPTS: "-Xmx3200m"
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
       TERM: dumb
       DISPLAY: ":99"
 
@@ -298,6 +309,8 @@ jobs:
       xcode: "16.4.0"
     resource_class: "m4pro.medium"
     working_directory: "~/repo"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
     steps:
       - run:
           name: "Install Chrome"
@@ -322,6 +335,8 @@ jobs:
     docker:
       - image: "cimg/python:3.11"
     working_directory: "~/repo"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
     steps:
       - checkout
       - "clean-git-config":
@@ -352,6 +367,8 @@ jobs:
     docker:
       - image: "cimg/python:3.11"
     working_directory: "~/repo"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
     steps:
       - "setup-python-test":
           platform: linux
@@ -370,6 +387,8 @@ jobs:
     macos:
       xcode: "14.2.0"
     working_directory: "~/repo"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
     steps:
       - "setup-python-test":
           platform: macos
@@ -389,6 +408,8 @@ jobs:
       size: medium
 
     working_directory: "~/repo"
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
     steps:
       - "setup-python-test":
           platform: windows
