@@ -62,10 +62,6 @@ commands:
             =
       - restore_cache:
           keys:
-            - 'v1-<< parameters.platform >>-gradle-build-cache-'
-            =
-      - restore_cache:
-          keys:
             - 'v1-<< parameters.platform >>-rattler-{{ checksum "kson-lib/pixi.lock" }}'
             - 'v1-<< parameters.platform >>-rattler-'
             =
@@ -92,11 +88,6 @@ commands:
 
       - save_cache:
           paths:
-            - '~/.gradle/caches/build-cache-1'
-          key: 'v1-<< parameters.platform >>-gradle-build-cache-{{ .Revision }}'
-
-      - save_cache:
-          paths:
             - '~/.cache/rattler'
             - '~/Library/Caches/rattler'
             - '~/AppData/Local/rattler'
@@ -108,6 +99,27 @@ commands:
             - '~/Library/Caches/uv'
             - '~/AppData/Local/uv'
           key: 'v1-<< parameters.platform >>-uv-{{ checksum "lib-python/uv.lock" }}'
+          .
+        .
+    .
+  # Gradle build cache, scoped to build-linux-amd64 only (keeps stale cached output out of release artifacts).
+  # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
+  'restore-gradle-build-cache':
+    description: 'Restore the Gradle build cache for build-linux-amd64'
+    steps:
+      - restore_cache:
+          keys:
+            - 'v1-linux-amd64-gradle-build-cache-'
+          .
+        .
+    .
+  'save-gradle-build-cache':
+    description: 'Save the Gradle build cache for build-linux-amd64 (see runbook above)'
+    steps:
+      - save_cache:
+          paths:
+            - '~/.gradle/caches/build-cache-1'
+          key: 'v1-linux-amd64-gradle-build-cache-{{ .Revision }}'
           .
         .
     .
@@ -272,7 +284,6 @@ jobs:
       .
     environment:
       JVM_OPTS: '-Xmx3200m'
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
       .
     steps:
       - checkout
@@ -326,12 +337,14 @@ jobs:
 
       - 'restore-gradle-caches':
           platform: 'linux-amd64'
+      - 'restore-gradle-build-cache'
 
       - 'clean-git-config':
           shell: bash
       # Cross-platform Gradle tasks
       - 'gradle-core-tasks'
       - 'store-native-artifacts'
+      - 'save-gradle-build-cache'
       - 'save-gradle-caches':
           platform: 'linux-amd64'
           .
@@ -343,9 +356,6 @@ jobs:
       .
     resource_class: 'm4pro.medium'
     working_directory: '~/repo'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
-      .
     steps:
       - run:
           name: 'Install Chrome'
@@ -373,9 +383,6 @@ jobs:
       - image: 'cimg/python:3.11'
         .
     working_directory: '~/repo'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
-      .
     steps:
       - checkout
       - 'clean-git-config':
@@ -409,9 +416,6 @@ jobs:
       - image: 'cimg/python:3.11'
         .
     working_directory: '~/repo'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
-      .
     steps:
       - 'setup-python-test':
           platform: linux
@@ -432,9 +436,6 @@ jobs:
       xcode: '14.2.0'
       .
     working_directory: '~/repo'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
-      .
     steps:
       - 'setup-python-test':
           platform: macos
@@ -455,9 +456,6 @@ jobs:
       size: medium
       .
     working_directory: '~/repo'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.caching=true'
-      .
     steps:
       - 'setup-python-test':
           platform: windows

@@ -75,7 +75,7 @@ krossover {
     }
 }
 
-// krossover's KSP processor writes api.json here as an undeclared side effect; declare it as an output so the build cache restores it on a cache hit (upstream plugin bug)
+// krossover's KSP processor writes api.json here as an undeclared side effect; declare it as an output so the build cache restores it.
 afterEvaluate {
     tasks.named("kspKotlinJvm") {
         outputs.file(layout.buildDirectory.file("kotlin/krossover/metadata/api.json"))
