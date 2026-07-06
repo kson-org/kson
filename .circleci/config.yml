@@ -66,7 +66,11 @@ commands:
             - "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
       - restore_cache:
           keys:
-            - "v1-<< parameters.platform >>-vscode-tests"
+            - "v2-<< parameters.platform >>-vscode-tests"
+      - restore_cache:
+          keys:
+            - "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
+            - "v1-<< parameters.platform >>-pnpm-store-"
 
   "save-gradle-caches":
     description: "Save Gradle and JDK caches"
@@ -89,9 +93,18 @@ commands:
 
       - save_cache:
           paths:
-            - "./tooling/lsp-clients/vscode/.vscode-test"
+            # Mirror vscodeTestCache.ts OS defaults for the VS Code electron download
             - "./tooling/lsp-clients/vscode/.vscode-test-web"
-          key: "v1-<< parameters.platform >>-vscode-tests"
+            - "~/.cache/kson-vscode-test"
+            - "~/Library/Caches/kson-vscode-test"
+            - "~/AppData/Roaming/kson-vscode-test"
+          key: "v2-<< parameters.platform >>-vscode-tests"
+
+      - save_cache:
+          paths:
+            - "~/.local/share/pnpm/store"
+            - "~/Library/pnpm/store"
+          key: "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
 
 
   "clean-git-config":

@@ -31,10 +31,10 @@ abstract class JsonArrayValidator : JsonSchemaValidator {
             return
         }
 
-        validateArray(ksonValue, messageSink)
+        validateArray(ksonValue, messageSink, sourceContext)
     }
 
-    abstract fun validateArray(node: KsonList, messageSink: MessageSink)
+    abstract fun validateArray(node: KsonList, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
 abstract class JsonObjectValidator : JsonSchemaValidator {
@@ -47,10 +47,10 @@ abstract class JsonObjectValidator : JsonSchemaValidator {
             return
         }
 
-        validateObject(ksonObject, messageSink)
+        validateObject(ksonObject, messageSink, sourceContext)
     }
 
-    abstract fun validateObject(node: KsonObject, messageSink: MessageSink)
+    abstract fun validateObject(node: KsonObject, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
 abstract class JsonStringValidator : JsonSchemaValidator {
@@ -61,10 +61,10 @@ abstract class JsonStringValidator : JsonSchemaValidator {
             else -> return
         }
 
-        validateString(stringValue, messageSink)
+        validateString(stringValue, messageSink, sourceContext)
     }
 
-    abstract fun validateString(node: KsonString, messageSink: MessageSink)
+    abstract fun validateString(node: KsonString, messageSink: MessageSink, sourceContext: SourceContext)
 
     /**
      * Count Unicode code points in a string, not UTF-16 code units.

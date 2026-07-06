@@ -5,9 +5,13 @@ import org.kson.value.KsonString
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonObjectValidator
+import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 
 class RequiredValidator(internal val required: List<KsonString>) : JsonObjectValidator() {
-    override fun validateObject(node: KsonObject, messageSink: MessageSink) {
+    override fun validateObject(node: KsonObject, messageSink: MessageSink, sourceContext: SourceContext) {
+        // a not-yet-typed required property is mere incompleteness, never a contradiction
+        if (sourceContext.mode == ValidationMode.PARTIAL) return
         val propertyNames = node.propertyMap.keys
         val missingProperties = required.filter { !propertyNames.contains(it.value) }
         if (missingProperties.isNotEmpty()) {

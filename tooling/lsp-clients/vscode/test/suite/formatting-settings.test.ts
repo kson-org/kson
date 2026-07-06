@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import {createTestFile, cleanUp, pollUntil} from './common';
+import { assert } from './assert';
 
 
 describe('Formatting Settings Test Suite', () => {
@@ -12,6 +13,16 @@ describe('Formatting Settings Test Suite', () => {
         // always fetch from the workspace to ensure we see the latest edits
         return vscode.workspace.openTextDocument(testFileUri!);
     };
+
+    /**
+     * Show the test document and set the editor's indentation (the "Spaces/Tabs"
+     * status-bar toggle), which is the source of truth the formatter reads.
+     */
+    async function showWithIndentation(insertSpaces: boolean, tabSize: number): Promise<vscode.TextEditor> {
+        const editor = await vscode.window.showTextDocument(await document());
+        editor.options = { insertSpaces, tabSize };
+        return editor;
+    }
 
     /**
      * Format the document and poll until the result matches the expected text.
@@ -48,10 +59,9 @@ describe('Formatting Settings Test Suite', () => {
     })
 
     afterEach(async () => {
-        // Reset all kson settings to defaults before cleaning up
+        // Reset kson settings to defaults before cleaning up. Indentation is per-editor
+        // (gone when the editor closes in cleanUp), so only the style needs resetting.
         const config = vscode.workspace.getConfiguration('kson');
-        await config.update('format.insertSpaces', undefined, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.tabSize', undefined, vscode.ConfigurationTarget.Workspace);
         await config.update('format.formattingStyle', undefined, vscode.ConfigurationTarget.Workspace);
 
         if (testFileUri) {
@@ -60,12 +70,8 @@ describe('Formatting Settings Test Suite', () => {
         }
     });
 
-    it('Should format with 8 spaces when insertSpaces is true', async () => {
-        // Update settings to use spaces with 8-space indentation
-        const config = vscode.workspace.getConfiguration('kson');
-        await config.update('format.insertSpaces', true, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.tabSize', 8, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.formattingStyle', 'plain', vscode.ConfigurationTarget.Workspace);
+    it('Should format with 8 spaces when the editor uses 8-wide spaces', async () => {
+        await showWithIndentation(true, 8);
 
         const expectedText = [
             'a: 1',
@@ -76,12 +82,8 @@ describe('Formatting Settings Test Suite', () => {
         await formatAndAwait(expectedText);
     }).timeout(10000);
 
-    it('Should format with tabs when insertSpaces is false', async () => {
-        // Update settings to use tabs
-        const config = vscode.workspace.getConfiguration('kson');
-        await config.update('format.insertSpaces', false, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.tabSize', 4, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.formattingStyle', 'plain', vscode.ConfigurationTarget.Workspace);
+    it('Should format with tabs when the editor uses tabs', async () => {
+        await showWithIndentation(false, 4);
 
         const expectedText = [
             'a: 1',
@@ -93,11 +95,12 @@ describe('Formatting Settings Test Suite', () => {
     }).timeout(10000);
 
     it('Should format delimited when formattingStyle is delimited', async () => {
-        // Update settings to use delimited formatting with spaces
+        // Style has no editor equivalent, so it stays a kson config key.
         const config = vscode.workspace.getConfiguration('kson');
-        await config.update('format.insertSpaces', true, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.tabSize', 2, vscode.ConfigurationTarget.Workspace);
         await config.update('format.formattingStyle', "delimited", vscode.ConfigurationTarget.Workspace);
+
+        // Pin the editor indentation so the delimited output is deterministic.
+        await showWithIndentation(true, 2);
 
         const expectedText = [
             '{',
@@ -111,7 +114,7 @@ describe('Formatting Settings Test Suite', () => {
         await formatAndAwait(expectedText);
     }).timeout(10000);
 
-    it('Should update formatting when settings change dynamically', async () => {
+    it('Should update formatting when the editor indentation changes', async () => {
         const expectedSpacesText = [
             'a: 1',
             'b:',
@@ -123,18 +126,47 @@ describe('Formatting Settings Test Suite', () => {
             '\tc: 2'
         ].join('\n');
 
-        const config = vscode.workspace.getConfiguration('kson');
-
         // First format with spaces
-        await config.update('format.insertSpaces', true, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.tabSize', 2, vscode.ConfigurationTarget.Workspace);
-        await config.update('format.formattingStyle', 'plain', vscode.ConfigurationTarget.Workspace);
-
+        const editor = await showWithIndentation(true, 2);
         await formatAndAwait(expectedSpacesText);
 
-        // Now change to tabs
-        await config.update('format.insertSpaces', false, vscode.ConfigurationTarget.Workspace);
-
+        // Now switch the same editor to tabs
+        editor.options = { insertSpaces: false, tabSize: 2 };
         await formatAndAwait(expectedTabsText);
+    }).timeout(15000);
+
+    it('Should honor the editor indentation when running a CodeLens format command', async () => {
+        // Resolve the real CodeLenses so we invoke the exact wire command + args the buttons use.
+        const lenses = await pollUntil(
+            () => vscode.commands.executeCommand<vscode.CodeLens[]>('vscode.executeCodeLensProvider', testFileUri!),
+            result => !!result && result.length > 0,
+            { timeout: 5000, message: 'No code lenses resolved' }
+        );
+
+        const plainLens = lenses.find(lens => lens.command?.command.endsWith('.plainFormat'));
+        assert.ok(plainLens?.command, 'Expected a plainFormat code lens');
+
+        // Drive the editor to tabs; the client middleware must inject this into the command.
+        await showWithIndentation(false, 4);
+
+        const expectedText = [
+            'a: 1',
+            'b:',
+            '\tc: 2'
+        ].join('\n');
+
+        // Invoking the wire command routes through the LanguageClient executeCommand
+        // middleware, which injects the active editor's indentation into the args.
+        await pollUntil(
+            async () => {
+                await vscode.commands.executeCommand(
+                    plainLens!.command!.command,
+                    ...(plainLens!.command!.arguments ?? [])
+                );
+                return (await document()).getText().replace(/\r\n/g, '\n');
+            },
+            text => text === expectedText,
+            { timeout: 5000, interval: 100, message: `Expected tab-indented formatting:\n${expectedText}` }
+        );
     }).timeout(15000);
 });

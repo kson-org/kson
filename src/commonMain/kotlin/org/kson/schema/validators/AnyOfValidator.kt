@@ -10,9 +10,13 @@ import org.kson.validation.SourceContext
 class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val matchAttemptMessageSinks: MutableList<LabelledMessageSink> = mutableListOf()
+        /**
+         * valid when at least one branch holds; in [org.kson.validation.ValidationMode.PARTIAL] mode branches are evaluated partially,
+         * so a branch survives unless the document actively contradicts it
+         */
         val anyValid = anyOf.any {
             val anyOfMessageSink = MessageSink()
-            it.validate(ksonValue, anyOfMessageSink)
+            it.validate(ksonValue, anyOfMessageSink, sourceContext)
             matchAttemptMessageSinks.add(LabelledMessageSink(it.descriptionWithDefault(), anyOfMessageSink))
             // were we valid
             !anyOfMessageSink.hasMessages()

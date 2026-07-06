@@ -87,17 +87,6 @@
           "default": true,
           "description": "Enable bundled schemas for configured KSON languages. When enabled, KSON languages with bundled schemas will automatically provide hover, completions, and validation."
         },
-        "kson.format.tabSize": {
-          "type": "number",
-          "default": 2,
-          "minimum": 1,
-          "description": "Number of spaces for indentation"
-        },
-        "kson.format.insertSpaces": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use spaces instead of tabs for indentation"
-        },
         "kson.format.formattingStyle": {
           "type": "string",
           "enum": [
@@ -134,15 +123,15 @@
     "node": "24.x"
   },
   "scripts": {
-    "package": "npm run check-types && tsx esbuild.ts --production",
-    "packagePlugin": "rimraf ./dist && npm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
-    "compile": "npm run check-types && tsx esbuild.ts --tests",
+    "package": "pnpm run check-types && tsx esbuild.ts --production",
+    "packagePlugin": "rimraf ./dist && pnpm run package && vsce package --no-dependencies --out dist/vscode-kson-plugin.vsix",
+    "compile": "pnpm run check-types && tsx esbuild.ts --tests",
     "compile-tests": "tsx esbuild.ts --tests",
     "check-types": "tsc --noEmit",
-    "vscode": "npm run packagePlugin && tsx test/runExtension.ts",
-    "testDesktop": "npm run compile-tests && node dist/runTests.js test-node",
-    "testBrowser": "npm run compile-tests && node dist/runTests.js test-browser",
-    "test": "npm run testDesktop && npm run testBrowser"
+    "vscode": "pnpm run packagePlugin && tsx test/runExtension.ts",
+    "testDesktop": "pnpm run compile-tests && node dist/runTests.js test-node",
+    "testBrowser": "pnpm run compile-tests && node dist/runTests.js test-browser",
+    "test": "pnpm run testDesktop && pnpm run testBrowser"
   },
   "dependencies": {
     "@kson/lsp-shared": "file:../shared",

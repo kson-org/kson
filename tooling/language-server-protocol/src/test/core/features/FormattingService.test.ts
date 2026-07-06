@@ -4,7 +4,7 @@ import {KsonDocument} from '../../../core/document/KsonDocument.js';
 import {KsonTooling} from 'kson-tooling';
 import {describe, it} from 'mocha';
 import assert from "assert";
-import {ksonSettingsWithDefaults} from "../../../core/KsonSettings";
+import {FormatOptions, FormattingStyle, IndentType} from 'kson';
 
 /**
  * Tests for testing the JSON document formatting functionality.
@@ -22,14 +22,10 @@ describe('KSON Formatter', () => {
             KsonTooling.getInstance().parse(unformatted),
         );
 
-        const ksonSettings = ksonSettingsWithDefaults({
-            format: {
-                insertSpaces: insertSpaces,
-                tabSize: 2
-            }
-        })
+        const indentType = insertSpaces ? new IndentType.Spaces(2) : IndentType.Tabs;
+        const formatOptions = new FormatOptions(indentType, FormattingStyle.PLAIN);
 
-        const edits = formattingService.formatDocument(ksonDocument, ksonSettings.formatOptions);
+        const edits = formattingService.formatDocument(ksonDocument, formatOptions);
         const formatted = applyEdits(document, edits);
 
         assert.strictEqual(formatted, expected, 'should have a matching formatted document');

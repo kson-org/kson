@@ -1,7 +1,9 @@
 package org.kson
 
+import org.kson.tooling.navigation.CaretPath
 import org.kson.tooling.navigation.KsonValuePathBuilder
 import org.kson.parser.Coordinates
+import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.tooling.KsonTooling.parse
 import kotlin.test.*
@@ -371,6 +373,136 @@ class KsonValuePathBuilderTest {
             """.trimIndent(),
             expectedPath = JsonPointer.fromTokens(listOf("key\twith\ttabs")),
             includePropertyKeys = true
+        )
+    }
+
+    /**
+     * Helper to test the completion placeholder span ([CaretPath.placeholderLocation]) at the
+     * <caret> position. The placeholder is only populated for completion (includePropertyKeys =
+     * false), so that is the mode asserted here.
+     *
+     * [expectedPlaceholderText], when non-null, is the exact source substring the placeholder must
+     * span; it must occur exactly once in the document so its location is unambiguous. Pass null to
+     * assert the caret contributes no placeholder.
+     */
+    private fun assertPlaceholderAtCaret(documentWithCaret: String, expectedPlaceholderText: String?) {
+        val caretMarker = "<caret>"
+        val caretIndex = documentWithCaret.indexOf(caretMarker)
+        require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
+
+        // Calculate line and column
+        val beforeCaret = documentWithCaret.take(caretIndex)
+        val line = beforeCaret.count { it == '\n' }
+        val column = caretIndex - (beforeCaret.lastIndexOf('\n') + 1)
+
+        // Remove caret marker from document
+        val document = documentWithCaret.replace(caretMarker, "")
+
+        val caretPath: CaretPath? = KsonValuePathBuilder(parse(document), Coordinates(line, column))
+            .buildCaretPath(includePropertyKeys = false)
+        val placeholder = caretPath?.placeholderLocation
+
+        val expected = expectedPlaceholderText?.let { text ->
+            val start = document.indexOf(text)
+            require(start >= 0) { "Expected placeholder text not found in document: \"$text\"" }
+            require(document.indexOf(text, start + 1) < 0) { "Expected placeholder text is ambiguous: \"$text\"" }
+            locationOf(document, start, start + text.length)
+        }
+
+        assertEquals(expected, placeholder, "Placeholder span does not match expected value")
+    }
+
+    /** Builds the [Location] covering the half-open offset range [[startOffset], [endOffset]) in [document]. */
+    private fun locationOf(document: String, startOffset: Int, endOffset: Int): Location {
+        fun coordinatesAt(offset: Int): Coordinates {
+            val prefix = document.take(offset)
+            return Coordinates(prefix.count { it == '\n' }, offset - (prefix.lastIndexOf('\n') + 1))
+        }
+        return Location(coordinatesAt(startOffset), coordinatesAt(endOffset), startOffset, endOffset)
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_scalarCaretInside() {
+        // The caret sits inside a scalar value, so that scalar's own span is the placeholder.
+        assertPlaceholderAtCaret(
+            """
+            name: Jo<caret>hn
+            age: 30
+            """.trimIndent(),
+            expectedPlaceholderText = "John"
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_quotedScalarExcludesQuotes() {
+        // For a quoted string the placeholder spans the content, not the surrounding quotes.
+        assertPlaceholderAtCaret(
+            """
+            name: "Jo<caret>hn"
+            """.trimIndent(),
+            expectedPlaceholderText = "John"
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_freshDashListItem() {
+        // A fresh dash-list item's placeholder is the enclosing property (key through dash), so its
+        // incomplete item can't disqualify sibling-discriminated branches.
+        assertPlaceholderAtCaret(
+            """
+            items:
+              - <caret>
+            """.trimIndent(),
+            expectedPlaceholderText = "items:\n  -"
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_freshDashListItemAfterCommittedItem() {
+        // The excluded span is the whole property, reaching past an already-committed sibling item.
+        assertPlaceholderAtCaret(
+            """
+            items:
+              - one
+              - <caret>
+            """.trimIndent(),
+            expectedPlaceholderText = "items:\n  - one\n  -"
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_insideListLiteralIsNull() {
+        // A list literal is a committed structural choice whose own type must still narrow, so it
+        // contributes no placeholder.
+        assertPlaceholderAtCaret(
+            """
+            value: [<caret>]
+            """.trimIndent(),
+            expectedPlaceholderText = null
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_onListLiteralIsNull() {
+        // Same when the caret is on the list literal's opening bracket rather than inside it.
+        assertPlaceholderAtCaret(
+            """
+            value: <caret>[]
+            """.trimIndent(),
+            expectedPlaceholderText = null
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_propertyNameLineIsNull() {
+        // A fresh property-name line follows a committed sibling's last token (not a dash), so there
+        // is no placeholder and the committed sibling still narrows.
+        assertPlaceholderAtCaret(
+            """
+            name: John
+            <caret>
+            """.trimIndent(),
+            expectedPlaceholderText = null
         )
     }
 }

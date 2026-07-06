@@ -7,8 +7,8 @@ import {KsonDocumentsManager} from '../document/KsonDocumentsManager.js';
 import {FormattingService} from '../features/FormattingService.js';
 import {CommandType} from './CommandType.js';
 import {CommandParameters, isValidCommand} from './CommandParameters.js';
-import {FormatOptions} from 'kson';
-import type {KsonSettings} from '../KsonSettings.js';
+import {FormatOptions, IndentType} from 'kson';
+import {formattingStyleFromId} from '../formattingStyle.js';
 import {KsonDocument} from "../document/KsonDocument.js";
 
 /**
@@ -20,7 +20,6 @@ export abstract class CommandExecutorBase {
         protected connection: Connection,
         protected documentManager: KsonDocumentsManager,
         protected formattingService: FormattingService,
-        protected getConfiguration: () => Required<KsonSettings>,
         protected workspaceRoot: string | null = null
     ) {
     }
@@ -58,11 +57,17 @@ export abstract class CommandExecutorBase {
             case CommandType.DELIMITED_FORMAT:
             case CommandType.COMPACT_FORMAT:
             case CommandType.CLASSIC_FORMAT: {
-                const indentType = this.getConfiguration().formatOptions.indentType;
+                const formatArgs = commandArgs as CommandParameters[CommandType.PLAIN_FORMAT];
+
+                // Indentation is injected by the client from the active editor; fall back to
+                // two-space indent when absent so the server stays robust without a client.
+                const indentType = formatArgs.insertSpaces === false
+                    ? IndentType.Tabs
+                    : new IndentType.Spaces(formatArgs.tabSize ?? 2);
 
                 return this.executeFormat(commandArgs.documentUri, document, new FormatOptions(
                     indentType,
-                    (commandArgs as CommandParameters[CommandType.PLAIN_FORMAT]).formattingStyle,
+                    formattingStyleFromId(formatArgs.formattingStyle),
                 ));
             }
             case CommandType.ASSOCIATE_SCHEMA: {

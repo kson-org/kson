@@ -45,6 +45,48 @@ class KsonCoreTestObjectError : KsonCoreTestError {
     }
 
     @Test
+    fun testHelpfulErrorForInvalidKeyStartChars() {
+        // keys that start with a digit or a `-` are lexed as numbers, so they cannot be used as unquoted keys
+        assertParserRejectsSource(
+            """
+               key: value
+               1one: "can't start a key with a digit"
+               99: "can't use a bare number as a key"
+               -one: "can't start a key with a dash"
+               -99: "can't use a negative number as a key"
+            """.trimIndent(),
+            listOf(
+                OBJECT_KEY_INVALID_START_CHAR,
+                OBJECT_KEY_INVALID_START_CHAR,
+                OBJECT_KEY_INVALID_START_CHAR,
+                OBJECT_KEY_INVALID_START_CHAR
+            )
+        )
+
+        // the error still fires with whitespace between the key and its colon
+        assertParserRejectsSource(
+            """
+               key   : value
+               1one   : "can't start a key with a digit"
+               -one   : "can't start a key with a dash"
+            """.trimIndent(),
+            listOf(OBJECT_KEY_INVALID_START_CHAR, OBJECT_KEY_INVALID_START_CHAR)
+        )
+
+        // ...and inside `{}`-delimited objects
+        assertParserRejectsSource(
+            """
+               {
+                 test: true
+                 1haaa: 22
+                 -haaa: 22
+               }
+            """.trimIndent(),
+            listOf(OBJECT_KEY_INVALID_START_CHAR, OBJECT_KEY_INVALID_START_CHAR)
+        )
+    }
+
+    @Test
     fun testIgnoredEndDotError() {
         assertParserRejectsSource("""
             {
