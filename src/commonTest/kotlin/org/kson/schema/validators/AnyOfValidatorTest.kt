@@ -166,7 +166,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
      * The discriminated-union reporting is shared with `oneOf`: an `anyOf` whose branches are keyed by
      * distinct `const`s selects the branch the document's discriminator picks.  `kind: "A"` selects
      * branch A, surfacing only its deeper `params` failure (missing `alpha`) — proving the shared
-     * [reportDiscriminatedUnionError] helper is wired into `anyOf`, not just `oneOf`.
+     * [reportUnionMatchFailure] helper is wired into `anyOf`, not just `oneOf`.
      */
     @Test
     fun testAnyOfDiscriminatorSelectsMatchingBranch() {

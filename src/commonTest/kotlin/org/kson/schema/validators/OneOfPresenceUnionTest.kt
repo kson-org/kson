@@ -7,7 +7,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 
 /**
- * The presence-based fallback tier: when no value discriminator applies, narrow the union to the
+ * The presence-based fallback: when no value discriminator applies, narrow the union to the
  * branch(es) whose *known* (declared ∪ required) properties the document actually carries, and
  * report only those.  Value-based discrimination keeps priority when both could apply.
  */
@@ -168,7 +168,7 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
     }
 
     /**
-     * When both tiers could apply — the branches share a value discriminator (`kind` pinned to distinct
+     * When both strategies could apply — the branches share a value discriminator (`kind` pinned to distinct
      * consts) *and* have distinct required properties — the value discriminator wins.  The document's
      * `kind: "A"` selects branch A (surfacing its missing `alpha`), even though the present `beta` would
      * have made presence narrow to branch B instead.

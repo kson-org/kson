@@ -10,6 +10,39 @@ import org.kson.schema.JsonSchema
 import org.kson.validation.SourceContext
 
 /**
+ * Reports why a document failed to match any branch of a `oneOf` / `anyOf` union, narrowing the
+ * reported errors to the branch(es) that actually matter before resorting to a full per-branch dump.
+ * The strategies below run in priority order; the first to report wins:
+ *
+ *  1. [selectDiscriminatedBranch] — a *value discriminator* (a shared property pinned to
+ *     pairwise-disjoint value sets) selects the single branch the document's value picks, or proves
+ *     a closed union's value out of range with one [SCHEMA_ENUM_VALUE_NOT_ALLOWED].
+ *  2. [narrowByPresence] — no value discriminator applies, so narrow to the branch(es) whose *known*
+ *     properties the document actually carries and dump only those.
+ *  3. [reportNoSubSchemaMatchErrors] — nothing narrowed the union, so dump every branch.
+ *
+ * Always emits at least one error: each strategy that handles reporting emits ≥1 message, and the final
+ * dump is unconditional.  Returns [Unit] rather than a handled/not-handled flag so callers can't
+ * accidentally skip the dump — the safety invariant is enforced here, not at the call site.
+ *
+ * [sourceContext] is threaded to [selectDiscriminatedBranch]'s deep re-validation so the selected branch is re-checked
+ * under the same context that already proved every branch fails (preserving the ≥1-error invariant).
+ */
+internal fun reportUnionMatchFailure(
+    branches: List<JsonSchema>,
+    ksonValue: KsonValue,
+    messageSink: MessageSink,
+    matchAttemptMessageSinks: List<LabelledMessageSink>,
+    noMatchMessage: Message,
+    sourceContext: SourceContext
+) {
+    if (!selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) &&
+        !narrowByPresence(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
+        reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
+    }
+}
+
+/**
  * When [branches] form a discriminated union — some shared property is pinned to *pairwise-disjoint*
  * value sets (via `const` or `enum`) by at least two branches — report against the branch the
  * document's discriminator value selects, rather than dumping every branch's errors:
@@ -24,7 +57,7 @@ import org.kson.validation.SourceContext
  * Returns `true` when it handled reporting (so the caller skips the generic dump), `false` when
  * [branches] are not a discriminated union or the document lacks the discriminator property.
  */
-internal fun reportDiscriminatedUnionError(
+private fun selectDiscriminatedBranch(
     branches: List<JsonSchema>,
     ksonValue: KsonValue,
     messageSink: MessageSink,
@@ -70,7 +103,7 @@ internal fun reportDiscriminatedUnionError(
  * when nothing matches or every branch matches.  Only [JsonObjectSchema] branches carry known
  * properties; others never match.
  */
-internal fun reportPresenceBasedUnionError(
+private fun narrowByPresence(
     branches: List<JsonSchema>,
     ksonValue: KsonValue,
     messageSink: MessageSink,

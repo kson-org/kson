@@ -42,13 +42,10 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             matchedSchemas.size == 1 -> { /* success */ }
 
             matchedSchemas.isEmpty() -> {
-                // Narrow before dumping: first by discriminator value, then by which branches' required
-                // properties the document carries; dump every branch only when neither narrows the union.
-                val noMatchMessage = SCHEMA_ONE_OF_VALIDATION_FAILED.create()
-                if (!reportDiscriminatedUnionError(oneOf, ksonValue, messageSink, sourceContext) &&
-                    !reportPresenceBasedUnionError(oneOf, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
-                    reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
-                }
+                reportUnionMatchFailure(
+                    oneOf, ksonValue, messageSink, matchAttemptMessageSinks,
+                    SCHEMA_ONE_OF_VALIDATION_FAILED.create(), sourceContext
+                )
             }
 
             else -> {
