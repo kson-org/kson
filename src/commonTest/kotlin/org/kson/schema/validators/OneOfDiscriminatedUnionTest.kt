@@ -4,6 +4,8 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
+import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFalse
@@ -661,5 +663,54 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
 
         // branch B selected through its `$ref`, alongside the inline branch A: its `beta` requirement surfaces
         assertContains(errors[0].message.toString(), "beta")
+    }
+
+    /**
+     * PARTIAL-mode guard mirror for `oneOf`: the closed union that collapses to one hard
+     * [SCHEMA_ENUM_VALUE_NOT_ALLOWED] in FULL mode (see [testOneOfDiscriminatorMatchesNoBranch]) falls
+     * back to the plain per-branch dump in [ValidationMode.PARTIAL], where a half-typed discriminator
+     * shouldn't receive a hard narrowing error.
+     */
+    @Test
+    fun testOneOfPartialModeSkipsHardEnumNarrowing() {
+        val closedUnion = """
+            {
+              "oneOf": [
+                {
+                  "properties": {
+                    "kind": { "const": "A" },
+                    "params": { "type": "object", "required": ["alpha"] }
+                  },
+                  "required": ["kind"]
+                },
+                {
+                  "properties": {
+                    "kind": { "const": "B" },
+                    "params": { "type": "object", "required": ["beta"] }
+                  },
+                  "required": ["kind"]
+                }
+              ]
+            }
+        """.trimIndent()
+        val document = """
+            kind: "Z"
+            params: {}
+        """.trimIndent()
+
+        // FULL mode: the closed union proves `kind: "Z"` out of range with one hard enum error
+        assertKsonSchemaErrors(
+            document,
+            closedUnion,
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+        )
+
+        // PARTIAL mode: the guard skips union narrowing, so no hard enum error — just the plain per-branch dump
+        assertKsonSchemaErrors(
+            document,
+            closedUnion,
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
     }
 }

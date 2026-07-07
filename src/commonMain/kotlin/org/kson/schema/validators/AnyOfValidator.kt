@@ -6,6 +6,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_ANY_OF_VALIDATION_FAILED
 import org.kson.schema.JsonSchema
 import org.kson.schema.JsonSchemaValidator
 import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 
 class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
@@ -23,10 +24,17 @@ class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator
         }
 
         if (!anyValid) {
-            reportUnionMatchFailure(
-                anyOf, ksonValue, messageSink, matchAttemptMessageSinks,
-                SCHEMA_ANY_OF_VALIDATION_FAILED.create(), sourceContext
-            )
+            // PARTIAL mode: a half-typed document shouldn't get union narrowing's hard errors
+            // (e.g. SCHEMA_ENUM_VALUE_NOT_ALLOWED on a closed union), so skip it and
+            // fall back to the plain per-branch dump — mirroring OneOfValidator.
+            if (sourceContext.mode == ValidationMode.PARTIAL) {
+                reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ANY_OF_VALIDATION_FAILED.create())
+            } else {
+                reportUnionMatchFailure(
+                    anyOf, ksonValue, messageSink, matchAttemptMessageSinks,
+                    SCHEMA_ANY_OF_VALIDATION_FAILED.create(), sourceContext
+                )
+            }
         }
     }
 }
