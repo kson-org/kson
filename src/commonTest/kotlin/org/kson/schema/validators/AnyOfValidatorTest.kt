@@ -293,12 +293,14 @@ class AnyOfValidatorTest : JsonSchemaTest {
 
     /**
      * An *open* `anyOf` union — a trailing wildcard branch (`kind: { type: string }`) pins nothing — can't
-     * prove a non-matching `kind` invalid, so a no-match document keeps the full per-branch dump rather
-     * than collapsing to an enum error.
+     * prove a non-matching `kind` invalid, so discriminator selection declines rather than collapsing to an enum error.  But
+     * the two pinned branches each pin `kind` to a value the document contradicts (`Z` is outside {A}, {B}),
+     * so elimination drops them and narrows to the lone surviving wildcard branch, surfacing its deeper
+     * `gamma` requirement instead of dumping every branch.
      */
     @Test
-    fun testAnyOfOpenUnionNoMatchDumps() {
-        assertKsonSchemaErrors(
+    fun testAnyOfOpenUnionNoMatchNarrowsToUnpinnedBranch() {
+        val errors = assertKsonSchemaErrors(
             """
                 kind: "Z"
                 params: {}
@@ -331,10 +333,51 @@ class AnyOfValidatorTest : JsonSchemaTest {
                 }
             """.trimIndent(),
             listOf(
-                SCHEMA_ANY_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_REQUIRED_PROPERTY_MISSING
             )
         )
+
+        // the two pinned branches are eliminated by `kind: Z`; only the wildcard branch's `gamma` remains
+        assertContains(errors[0].message.toString(), "gamma")
+    }
+
+    /**
+     * Elimination is shared with `oneOf`, so a single pinned branch the document contradicts is
+     * dropped under `anyOf` too: only branch A pins `kind` (too few to discriminate), but `kind: "B"` is
+     * outside its `["A"]`, so branch A is eliminated and the union narrows to the unpinned branch, whose
+     * missing `value` surfaces alone instead of a full dump.
+     */
+    @Test
+    fun testAnyOfSinglePinnedBranchMismatchEliminates() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "B"
+            """.trimIndent(),
+            """
+                {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "kind": { "const": "A" },
+                        "extra_a": { "type": "string" }
+                      },
+                      "required": ["kind", "extra_a"]
+                    },
+                    {
+                      "properties": { "value": { "type": "boolean" } },
+                      "required": ["value"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            )
+        )
+
+        // branch A (pinned `kind: "A"`) is eliminated by `kind: "B"`; only the unpinned branch's `value` remains
+        assertContains(errors[0].message.toString(), "value")
+        assertFalse(errors[0].message.toString().contains("extra_a"))
     }
 
     /**

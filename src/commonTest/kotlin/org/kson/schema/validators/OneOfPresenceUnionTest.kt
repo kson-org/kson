@@ -7,9 +7,11 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 
 /**
- * The presence-based fallback: when no value discriminator applies, narrow the union to the
- * branch(es) whose *known* (declared ∪ required) properties the document actually carries, and
- * report only those.  Value-based discrimination keeps priority when both could apply.
+ * Presence narrowing — the `M` half of the elimination∩presence composition.  None of the
+ * branches here carries a pin the document contradicts, so every branch survives elimination and the
+ * composition degenerates to pure presence: narrow the union to the branch(es) whose *known*
+ * (declared ∪ required) properties the document actually carries, and report only those.  Value-based
+ * discrimination keeps priority when both could apply.
  */
 class OneOfPresenceUnionTest : JsonSchemaTest {
     /**

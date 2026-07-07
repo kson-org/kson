@@ -112,32 +112,35 @@ class JsonObjectSchema(
   /**
    * For each property this object schema pins to a finite value set — via a sole `const` or `enum`
    * validator (e.g. `{ "const": "A" }` or `{ "enum": ["A", "B"] }`) — maps the property name to that
-   * set of pinned values.  A property qualifies only when its schema's sole validator reports a
-   * non-null, non-empty [JsonSchemaValidator.pinnedValues].
+   * set of pinned values.  A property qualifies when its schema's sole validator reports a non-null
+   * [JsonSchemaValidator.pinnedValues].  By default an *empty* pin (`enum: []`) is dropped: it selects
+   * no value, so it carries no discriminating information.  [includeEmptyPins] keeps empty pins for
+   * branch *elimination* — an empty pin definitively rejects whatever value the document supplies.
    *
    * When this schema declares no properties of its own but is a lone `$ref` — the dominant shape for
    * `oneOf`/`anyOf` branches (`oneOf: [{ $ref: … }]`) — resolves a single level through the ref to read
    * the target's own pins, so `$ref`-based discriminated unions are recognized just like inline ones.
    * A target that is itself only another `$ref` contributes no pins.
    *
-   * Used by [OneOfValidator] and [AnyOfValidator] to recognize a discriminated union: a combinator
-   * whose branches are all keyed by a shared property pinned to pairwise-disjoint value sets.
+   * Drives union-error narrowing: discriminator detection reads it in the default mode (branches
+   * keyed by a shared property pinned to pairwise-disjoint sets), while elimination reads it with
+   * [includeEmptyPins] to drop any branch whose pin the document's value contradicts.
    */
-  internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
-    ownPinnedProperties()?.let { return it }
+  internal fun pinnedProperties(includeEmptyPins: Boolean = false): Map<String, Set<KsonValue>> {
+    ownPinnedProperties(includeEmptyPins)?.let { return it }
     // Lone $ref branch: resolve one level to read the target's pins.
     val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
-    return refTarget?.ownPinnedProperties() ?: emptyMap()
+    return refTarget?.ownPinnedProperties(includeEmptyPins) ?: emptyMap()
   }
 
   /**
-   * The discriminator pins declared by this schema's own `properties` (its [PropertiesValidator]), or
-   * `null` when it declares none.  Reads only this schema's own validators — never resolves a `$ref` —
-   * so [pinnedProperties] can unwrap a lone `$ref` exactly one level without chaining through aliases.
-   * A property contributes only when its schema's sole validator reports a non-null, non-empty
-   * [JsonSchemaValidator.pinnedValues].
+   * The pins declared by this schema's own `properties` (its [PropertiesValidator]), or `null` when it
+   * declares none.  Reads only this schema's own validators — never resolves a `$ref` — so
+   * [pinnedProperties] can unwrap a lone `$ref` exactly one level without chaining through aliases.  A
+   * property contributes when its schema's sole validator reports a non-null [JsonSchemaValidator.pinnedValues];
+   * an *empty* pin (`enum: []`) is kept only when [includeEmptyPins] is set (see [pinnedProperties]).
    */
-  private fun ownPinnedProperties(): Map<String, Set<KsonValue>>? {
+  private fun ownPinnedProperties(includeEmptyPins: Boolean): Map<String, Set<KsonValue>>? {
     val propertySchemas = schemaValidators
       .filterIsInstance<PropertiesValidator>()
       .firstOrNull()
@@ -146,8 +149,9 @@ class JsonObjectSchema(
     return buildMap {
       propertySchemas.forEach { (propertyName, propertySchema) ->
         val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
-        // An empty pinned set (e.g. `enum: []`) carries no discriminating information, so it doesn't count as a pin.
-        if (!pinned.isNullOrEmpty()) {
+        // `pinned != null` marks a const/enum-pinned property; an empty pin selects nothing, so it
+        // counts only for elimination ([includeEmptyPins]), never for discriminator detection.
+        if (pinned != null && (includeEmptyPins || pinned.isNotEmpty())) {
           put(propertyName.value, pinned)
         }
       }
