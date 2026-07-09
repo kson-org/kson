@@ -1,8 +1,8 @@
 import org.eclipse.jgit.api.Git
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import org.kson.DirtyRepoException
-import org.kson.formatGitStatusReport
+import org.kson.gitcheckout.DirtyRepoException
+import org.kson.gitcheckout.formatGitStatusReport
 
 /**
  * Verifies that the project's git checkout has no uncommitted changes to tracked files.

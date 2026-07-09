@@ -1,12 +1,20 @@
 package org.kson.jsonsuite
 
-import org.kson.CleanGitCheckout
+import org.kson.gitcheckout.CleanGitCheckout
 import java.nio.file.Path
 
-class JsonSuiteGitCheckout(jsonTestSuiteSHA: String, destinationDir: Path)
-    : CleanGitCheckout("https://github.com/nst/JSONTestSuite.git", jsonTestSuiteSHA, destinationDir, "JSONTestSuite", dirtyMessage, sparsePaths = listOf("test_parsing"))
-class SchemaSuiteGitCheckout(schemaTestSuiteSHA: String, destinationDir: Path)
-    : CleanGitCheckout("https://github.com/json-schema-org/JSON-Schema-Test-Suite.git", schemaTestSuiteSHA, destinationDir, "JSON-Schema-Test-Suite", dirtyMessage, sparsePaths = listOf("tests"))
+fun JsonSuiteGitCheckout(jsonTestSuiteSHA: String, destinationDir: Path): CleanGitCheckout =
+    CleanGitCheckout(
+        "https://github.com/nst/JSONTestSuite.git", jsonTestSuiteSHA, destinationDir, "JSONTestSuite",
+        acceptableUntrackedFiles = setOf(".DS_Store", "Thumbs.db"), dirtyMessage = dirtyMessage
+    )
+
+fun SchemaSuiteGitCheckout(schemaTestSuiteSHA: String, destinationDir: Path): CleanGitCheckout =
+    CleanGitCheckout(
+        "https://github.com/json-schema-org/JSON-Schema-Test-Suite.git", schemaTestSuiteSHA, destinationDir,
+        "JSON-Schema-Test-Suite",
+        acceptableUntrackedFiles = setOf(".DS_Store", "Thumbs.db"), dirtyMessage = dirtyMessage
+    )
 
 /**
  * The rationale for why these [CleanGitCheckout]s must be clean

@@ -110,4 +110,5 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
 
     implementation("org.kson:kson:0.1.1")
+    implementation("org.kson:clean-git-checkout:0.0.1")
 }

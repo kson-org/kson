@@ -1,6 +1,7 @@
 package org.kson
 
 import org.eclipse.jgit.api.Git
+import org.kson.gitcheckout.formatGitStatusReport
 import java.io.File
 import java.nio.file.Files.createTempDirectory
 import kotlin.test.Test
