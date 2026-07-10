@@ -49,8 +49,8 @@ commands:
           destination: "kson-lib-static"
 
 
-  "restore-gradle-caches":
-    description: "Restore Gradle and JDK caches"
+  "restore-build-caches":
+    description: "Restore Gradle dependency, rattler, and uv caches shared by build and Python jobs"
     parameters:
       platform:
         type: string
@@ -63,17 +63,15 @@ commands:
             - "v1-<< parameters.platform >>-dependencies-"
       - restore_cache:
           keys:
-            - "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
+            - "v1-<< parameters.platform >>-rattler-{{ checksum \"kson-lib/pixi.lock\" }}"
+            - "v1-<< parameters.platform >>-rattler-"
       - restore_cache:
           keys:
-            - "v2-<< parameters.platform >>-vscode-tests"
-      - restore_cache:
-          keys:
-            - "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
-            - "v1-<< parameters.platform >>-pnpm-store-"
+            - "v1-<< parameters.platform >>-uv-{{ checksum \"lib-python/uv.lock\" }}"
+            - "v1-<< parameters.platform >>-uv-"
 
-  "save-gradle-caches":
-    description: "Save Gradle and JDK caches"
+  "save-build-caches":
+    description: "Save Gradle dependency, rattler, and uv caches shared by build and Python jobs"
     parameters:
       platform:
         type: string
@@ -87,10 +85,65 @@ commands:
 
       - save_cache:
           paths:
-            - "./gradle/jdk"
-            - "./buildSrc/gradle/jdk"
-          key: "v1-<< parameters.platform >>-jdk-{{ checksum \"jdk.properties\" }}"
+            - "~/.cache/rattler"
+            - "~/Library/Caches/rattler"
+            - "~/AppData/Local/rattler"
+          key: "v1-<< parameters.platform >>-rattler-{{ checksum \"kson-lib/pixi.lock\" }}"
 
+      - save_cache:
+          paths:
+            - "~/.cache/uv"
+            - "~/Library/Caches/uv"
+            - "~/AppData/Local/uv"
+          key: "v1-<< parameters.platform >>-uv-{{ checksum \"lib-python/uv.lock\" }}"
+
+
+  # Gradle build cache, scoped to build-linux-amd64 only (keeps stale cached output out of release artifacts).
+  # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
+  "restore-gradle-build-cache":
+    description: "Restore the Gradle build cache for build-linux-amd64"
+    steps:
+      - restore_cache:
+          keys:
+            - "v1-linux-amd64-gradle-build-cache-"
+
+  "save-gradle-build-cache":
+    description: "Save the Gradle build cache for build-linux-amd64 (see runbook above)"
+    steps:
+      - save_cache:
+          paths:
+            - "~/.gradle/caches/build-cache-1"
+          key: "v1-linux-amd64-gradle-build-cache-{{ .Revision }}"
+
+
+  "restore-gradle-caches":
+    description: "Restore all caches for the full cross-platform build jobs"
+    parameters:
+      platform:
+        type: string
+        description: "Platform identifier for cache keys"
+
+    steps:
+      - "restore-build-caches":
+          platform: "<< parameters.platform >>"
+      - restore_cache:
+          keys:
+            - "v2-<< parameters.platform >>-vscode-tests"
+      - restore_cache:
+          keys:
+            - "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
+            - "v1-<< parameters.platform >>-pnpm-store-"
+
+  "save-gradle-caches":
+    description: "Save all caches for the full cross-platform build jobs"
+    parameters:
+      platform:
+        type: string
+        description: "Platform identifier for cache keys"
+
+    steps:
+      - "save-build-caches":
+          platform: "<< parameters.platform >>"
       - save_cache:
           paths:
             # Mirror vscodeTestCache.ts OS defaults for the VS Code electron download
@@ -232,6 +285,7 @@ jobs:
     working_directory: "~/repo"
     environment:
       JVM_OPTS: "-Xmx3200m"
+      GRADLE_OPTS: "-Dorg.gradle.caching=true"
       TERM: dumb
       DISPLAY: ":99"
 
@@ -250,11 +304,13 @@ jobs:
 
       - "restore-gradle-caches":
           platform: "linux-amd64"
+      - "restore-gradle-build-cache"
       - "clean-git-config":
           shell: bash
       # Cross-platform Gradle tasks
       - "gradle-core-tasks"
       - "store-native-artifacts"
+      - "save-gradle-build-cache"
       - "save-gradle-caches":
           platform: "linux-amd64"
 
@@ -291,6 +347,8 @@ jobs:
       - checkout
       - "clean-git-config":
           shell: bash
+      - "restore-build-caches":
+          platform: "linux-amd64"
       - run:
           name: "Build Python source distribution"
           command: "./gradlew :lib-python:createSdistBuildEnvironment"
@@ -304,6 +362,8 @@ jobs:
           paths:
             - "lib-python/dist/*.tar.gz"
 
+      - "save-build-caches":
+          platform: "linux-amd64"
       - store_artifacts:
           path: "lib-python/dist"
           destination: "python-sdist"
@@ -316,8 +376,12 @@ jobs:
     steps:
       - "setup-python-test":
           platform: linux
+      - "restore-build-caches":
+          platform: "linux-amd64"
       - setup_remote_docker
       - "run-python-tests-unix"
+      - "save-build-caches":
+          platform: "linux-amd64"
       - store_artifacts:
           path: "lib-python/dist"
           destination: "python-linux-amd64"
@@ -330,7 +394,11 @@ jobs:
     steps:
       - "setup-python-test":
           platform: macos
+      - "restore-build-caches":
+          platform: "macos-python"
       - "run-python-tests-unix"
+      - "save-build-caches":
+          platform: "macos-python"
       - store_artifacts:
           path: "lib-python/dist"
           destination: "python-macos"
@@ -345,6 +413,8 @@ jobs:
     steps:
       - "setup-python-test":
           platform: windows
+      - "restore-build-caches":
+          platform: "windows-python"
       - run:
           name: "Check Python version and upgrade if needed"
           command: "python --version\npython -m pip install --upgrade pip\n"
@@ -366,6 +436,8 @@ jobs:
           name: "Build platform-specific wheel"
           command: ".\\gradlew.bat :lib-python:buildWheel --no-daemon\n"
 
+      - "save-build-caches":
+          platform: "windows-python"
       - store_artifacts:
           path: "lib-python/dist"
           destination: "python-windows"
