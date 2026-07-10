@@ -390,7 +390,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val subSchemaErrors = parsedArgs.getArg("Sub-schema error summary")
-            return "All sub-schemas reported validation errors. $subSchemaErrors"
+            return "Value matches none of these sub-schemas:\n$subSchemaErrors"
         }
     },
     SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {

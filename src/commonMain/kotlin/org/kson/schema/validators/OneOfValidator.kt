@@ -42,7 +42,10 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             matchedSchemas.size == 1 -> { /* success */ }
 
             matchedSchemas.isEmpty() -> {
-                reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ONE_OF_VALIDATION_FAILED.create())
+                reportUnionMatchFailure(
+                    oneOf, ksonValue, messageSink, matchAttemptMessageSinks,
+                    SCHEMA_ONE_OF_VALIDATION_FAILED.create(), sourceContext
+                )
             }
 
             else -> {

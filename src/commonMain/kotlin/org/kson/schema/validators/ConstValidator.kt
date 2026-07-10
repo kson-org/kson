@@ -12,4 +12,6 @@ class ConstValidator(private val const: KsonValue) : JsonSchemaValidator {
             messageSink.error(ksonValue.location, MessageType.SCHEMA_VALUE_NOT_EQUAL_TO_CONST.create(const.toDisplayString()))
         }
     }
+
+    override fun pinnedValues(): Set<KsonValue> = setOf(const)
 }
