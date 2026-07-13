@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { describe, it, beforeEach, afterEach } from 'mocha';
+import { URI } from 'vscode-uri';
 import { RemoveSchemaCommand } from '../../../core/commands/RemoveSchemaCommand.js';
 import { SCHEMA_CONFIG_FILENAME } from '../../../core/schema/SchemaConfig.js';
 import { Kson, Result } from 'kson';
@@ -62,7 +63,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Execute
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -82,7 +83,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Execute
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -100,7 +101,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Execute: Remove first association
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test1.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test1.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -130,7 +131,7 @@ describe('RemoveSchemaCommand', () => {
     it('should fail when config file does not exist', () => {
         // Don't create any config file
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -146,7 +147,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Try to remove association for a file that doesn't have one
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -167,7 +168,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Execute
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'subfolder', 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'subfolder', 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -185,7 +186,7 @@ describe('RemoveSchemaCommand', () => {
         // Execute with path that would have backslashes on Windows
         const testPath = path.join(testWorkspaceRoot, 'subfolder', 'test.kson');
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${testPath}`,
+            documentUri: URI.file(testPath).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
@@ -203,7 +204,7 @@ describe('RemoveSchemaCommand', () => {
 
         // Execute: Try to remove exact match
         const result = RemoveSchemaCommand.execute({
-            documentUri: `file://${path.join(testWorkspaceRoot, 'test.kson')}`,
+            documentUri: URI.file(path.join(testWorkspaceRoot, 'test.kson')).toString(),
             workspaceRoot: testWorkspaceRoot
         });
 
