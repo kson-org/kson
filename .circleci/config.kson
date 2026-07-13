@@ -295,12 +295,6 @@ jobs:
           name: 'Install Chrome'
           command: 'choco install googlechrome --ignore-checksums'
 
-      # We would ideally install libclang through pixi, but after _hours_ of fiddling we
-      # couldn't make the CI happy and decided to add it here instead
-      - run:
-          name: 'Install LLVM'
-          command: 'choco install llvm'
-
       - 'restore-gradle-caches':
           platform: 'win-amd64'
       # Cross-platform Gradle tasks
