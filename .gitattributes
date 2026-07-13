@@ -1,0 +1,25 @@
+# Line endings are settled here rather than by each contributor's core.autocrlf, so that a
+# clone on Windows does not turn into CRLF churn across the whole tree.
+
+# LF in the repository and in the working tree, on every platform.
+#
+# `text=auto` (rather than a bare `text`) keeps Git's binary detection in play, which matters
+# here: a few Kotlin test sources embed NUL bytes deliberately and must be left byte-for-byte
+# alone -- see src/commonTest/kotlin/org/kson/parser/LexerTest.kt.
+* text=auto eol=lf
+
+# ...except the Windows wrappers. cmd.exe wants CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ...and the shell wrappers, which must stay LF even on Windows: sh/MSYS reads a trailing \r as
+# part of the command and fails with `$'\r': command not found`.
+*.sh    text eol=lf
+gradlew text eol=lf
+uvw     text eol=lf
+
+# Binaries: don't leave these to detection.
+*.png binary
+*.jar binary
+*.zip binary
