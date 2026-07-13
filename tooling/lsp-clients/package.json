@@ -16,12 +16,5 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "keytar",
-      "@vscode/vsce-sign"
-    ]
   }
 }
