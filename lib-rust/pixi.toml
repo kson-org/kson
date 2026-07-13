@@ -19,6 +19,10 @@ rust = "1.89.0.*"
 
 [target.win-64.dependencies]
 vs2022_win-64 = ">=19.44.35207,<20"
+# Provides Library/bin/libclang-13.dll (via libclang13), which bindgen needs. There is deliberately
+# no LIBCLANG_PATH here: pixi does not expand `$CONDA_PREFIX` in [activation.env] on Windows, and
+# the DLL's name does not match what clang-sys looks for anyway. kson-sys/build.rs handles both.
+libclang = "20.*"
 
 [target.linux-64.dependencies]
 libclang = "20.*"

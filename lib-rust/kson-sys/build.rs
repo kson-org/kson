@@ -108,11 +108,69 @@ fn build_kson_from_source(
     Ok(())
 }
 
+/// bindgen finds libclang via clang-sys, which on Windows matches only the exact filenames
+/// `clang.dll` and `libclang.dll` — it has no versioned-name search there (the `libclang.so.*`
+/// globs are Linux/BSD-only). conda-forge ships the runtime as `libclang-13.dll` (13 is libclang's
+/// C API soversion, unchanged since LLVM 13), so nothing in the pixi environment matches and
+/// bindgen panics with "Unable to find libclang".
+///
+/// Copy it to the name clang-sys wants, beside the original so libclang's own dependent DLLs still
+/// resolve, then point clang-sys at that directory.
+///
+/// The directory comes from `CONDA_PREFIX`, a real environment variable pixi exports. Writing
+/// `$CONDA_PREFIX` into pixi.toml's `[activation.env]` would not work: pixi does not expand it on
+/// Windows (it does on Linux, hence the linux-* blocks there).
+///
+/// A no-op off Windows: every detail here (the `.dll` names, conda's `Library/bin` layout,
+/// clang-sys's lookup rules) is Windows-specific, so the guard lives here rather than in the
+/// caller — nowhere else has to remember it.
+fn alias_libclang_for_clang_sys() -> anyhow::Result<()> {
+    if !cfg!(target_os = "windows") {
+        return Ok(());
+    }
+
+    println!("cargo:rerun-if-env-changed=LIBCLANG_PATH");
+    println!("cargo:rerun-if-env-changed=CONDA_PREFIX");
+
+    // Someone has already pointed clang-sys at a libclang (e.g. a system LLVM): nothing to do.
+    if env::var_os("LIBCLANG_PATH").is_some() {
+        return Ok(());
+    }
+    // Not running under pixi, so there is no conda libclang to alias.
+    let Ok(conda_prefix) = env::var("CONDA_PREFIX") else {
+        return Ok(());
+    };
+
+    let dir = PathBuf::from(conda_prefix).join("Library/bin");
+    let alias = dir.join("libclang.dll");
+
+    if !alias.exists() {
+        // 13 is libclang's C API soversion, not an LLVM version: it has been 13 since LLVM 13, and
+        // pixi pins libclang to 20.*. If it ever changes, this copy fails naming the file it wanted.
+        let versioned = dir.join("libclang-13.dll");
+        fs::copy(&versioned, &alias).with_context(|| {
+            format!(
+                "failed to copy {} to {}; is the `libclang` conda package installed?",
+                versioned.display(),
+                alias.display()
+            )
+        })?;
+    }
+
+    // SAFETY: build scripts are single-threaded at this point, so no other thread can observe the
+    // environment while it is being mutated.
+    unsafe { env::set_var("LIBCLANG_PATH", &dir) };
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // Obtain kotlin artifacts
     get_kson_artifacts(&out_dir).context("Failed to copy Kotlin artifacts")?;
+
+    alias_libclang_for_clang_sys().context("Failed to make libclang discoverable for bindgen")?;
 
     // Generate bindings
     let bindings = bindgen::Builder::default()
