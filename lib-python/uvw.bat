@@ -14,10 +14,10 @@ if not exist "%UV_BIN%" (
 
     rem Use pwsh if available, because legacy powershell causes problems when launched from pwsh!
     where pwsh >nul 2>&1
-    if %errorlevel% equ 0 (
-        pwsh -NoProfile -ExecutionPolicy ByPass -Command "iwr -useb https://astral.sh/uv/install.ps1 | iex"
-    ) else (
+    if errorlevel 1 (
         powershell -NoProfile -ExecutionPolicy ByPass -Command "iwr -useb https://astral.sh/uv/install.ps1 | iex"
+    ) else (
+        pwsh -NoProfile -ExecutionPolicy ByPass -Command "iwr -useb https://astral.sh/uv/install.ps1 | iex"
     )
 
     if not exist "%UV_BIN%" (
