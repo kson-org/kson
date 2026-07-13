@@ -1,3 +1,9 @@
+allowBuilds:
+  '@playwright/browser-chromium': true
+  '@vscode/vsce-sign': true
+  esbuild: true
+  keytar: true
+
 # Flat node_modules so esbuild/vite/vitest/vsce see the same layout as npm,
 # while still hardlinking from pnpm's shared global store.
 nodeLinker: hoisted
