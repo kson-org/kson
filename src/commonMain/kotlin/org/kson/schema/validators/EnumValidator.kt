@@ -15,4 +15,6 @@ class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
             messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowedValues))
         }
     }
+
+    override fun pinnedValues(): Set<KsonValue> = enum.elements.toSet()
 }

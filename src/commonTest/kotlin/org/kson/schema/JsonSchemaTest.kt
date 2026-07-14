@@ -5,6 +5,7 @@ import org.kson.KsonCore
 import org.kson.parser.Location
 import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
+import org.kson.validation.SourceContext
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -31,15 +32,20 @@ interface JsonSchemaTest {
             message)
     }
 
+    /**
+     * Pass a [sourceContext] carrying [org.kson.validation.ValidationMode.PARTIAL] to exercise
+     * draft-mode validation; it defaults to a full validation.
+     */
     fun assertKsonSchemaErrors(
         ksonSource: String,
         schemaJson: String,
         expectedParseMessageTypes: List<MessageType>,
-        message: String? = null): List<LoggedMessage> {
+        message: String? = null,
+        sourceContext: SourceContext = SourceContext()): List<LoggedMessage> {
         val jsonSchema = assertValidSchema(schemaJson)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
-            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
+            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)
         )
 
         assertTrue(parseResult.messages.isNotEmpty(), "Expected schema validation errors but got none")

@@ -8,7 +8,7 @@ import org.kson.schema.JsonObjectValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
-class RequiredValidator(private val required: List<KsonString>) : JsonObjectValidator() {
+class RequiredValidator(internal val required: List<KsonString>) : JsonObjectValidator() {
     override fun validateObject(node: KsonObject, messageSink: MessageSink, sourceContext: SourceContext) {
         // a not-yet-typed required property is mere incompleteness, never a contradiction
         if (sourceContext.mode == ValidationMode.PARTIAL) return

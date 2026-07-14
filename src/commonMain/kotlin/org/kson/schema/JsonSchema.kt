@@ -8,7 +8,9 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.validators.AllOfValidator
 import org.kson.schema.validators.AnyOfValidator
 import org.kson.schema.validators.OneOfValidator
+import org.kson.schema.validators.PropertiesValidator
 import org.kson.schema.validators.RefValidator
+import org.kson.schema.validators.RequiredValidator
 import org.kson.schema.validators.TypeValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.Validator
@@ -101,9 +103,114 @@ class JsonObjectSchema(
   private fun branchName(branch: JsonSchema): String? {
     if (branch !is JsonObjectSchema) return null
     branch.title?.let { return it }
-    val sole = branch.schemaValidators.singleOrNull() as? RefValidator ?: return null
-    return sole.refShortName()
+    return branch.soleRefValidator()?.refShortName()
   }
+
+  /** This schema's sole validator when that validator is a `$ref`, else `null` (i.e. it isn't a lone `$ref`). */
+  private fun soleRefValidator(): RefValidator? = schemaValidators.singleOrNull() as? RefValidator
+
+  /**
+   * For each property this object schema pins to a finite value set — via a sole `const` or `enum`
+   * validator (e.g. `{ "const": "A" }` or `{ "enum": ["A", "B"] }`) — maps the property name to that
+   * set of pinned values.  A property qualifies when its schema's sole validator reports a non-null
+   * [JsonSchemaValidator.pinnedValues].  By default an *empty* pin (`enum: []`) is dropped: it selects
+   * no value, so it carries no discriminating information.  [includeEmptyPins] keeps empty pins for
+   * branch *elimination* — an empty pin definitively rejects whatever value the document supplies.
+   *
+   * When this schema declares no properties of its own but is a lone `$ref` — the dominant shape for
+   * `oneOf`/`anyOf` branches (`oneOf: [{ $ref: … }]`) — resolves a single level through the ref to read
+   * the target's own pins, so `$ref`-based discriminated unions are recognized just like inline ones.
+   * A target that is itself only another `$ref` contributes no pins.
+   *
+   * Drives union-error narrowing: discriminator detection reads it in the default mode (branches
+   * keyed by a shared property pinned to pairwise-disjoint sets), while elimination reads it with
+   * [includeEmptyPins] to drop any branch whose pin the document's value contradicts.
+   */
+  internal fun pinnedProperties(includeEmptyPins: Boolean = false): Map<String, Set<KsonValue>> {
+    ownPinnedProperties(includeEmptyPins)?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's pins.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownPinnedProperties(includeEmptyPins) ?: emptyMap()
+  }
+
+  /**
+   * The pins declared by this schema's own `properties` (its [PropertiesValidator]), or `null` when it
+   * declares none.  Reads only this schema's own validators — never resolves a `$ref` — so
+   * [pinnedProperties] can unwrap a lone `$ref` exactly one level without chaining through aliases.  A
+   * property contributes when its schema's sole validator reports a non-null [JsonSchemaValidator.pinnedValues];
+   * an *empty* pin (`enum: []`) is kept only when [includeEmptyPins] is set (see [pinnedProperties]).
+   */
+  private fun ownPinnedProperties(includeEmptyPins: Boolean): Map<String, Set<KsonValue>>? {
+    val propertySchemas = schemaValidators
+      .filterIsInstance<PropertiesValidator>()
+      .firstOrNull()
+      ?.propertySchemas ?: return null
+
+    return buildMap {
+      propertySchemas.forEach { (propertyName, propertySchema) ->
+        val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
+        // `pinned != null` marks a const/enum-pinned property; an empty pin selects nothing, so it
+        // counts only for elimination ([includeEmptyPins]), never for discriminator detection.
+        if (pinned != null && (includeEmptyPins || pinned.isNotEmpty())) {
+          put(propertyName.value, pinned)
+        }
+      }
+    }
+  }
+
+  /**
+   * The property names this schema requires — via its [RequiredValidator] — resolving one level
+   * through a lone `$ref` exactly as [pinnedProperties] does, so a `$ref`-based branch contributes its
+   * target's requirements.  Empty when neither this schema nor its ref target declares `required`.
+   *
+   * Unioned with [declaredPropertyNames] to form a branch's *known* property names for presence-based
+   * union narrowing, when no value-based discriminator applies.
+   */
+  internal fun requiredProperties(): Set<String> {
+    ownRequiredProperties()?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's requirements.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownRequiredProperties() ?: emptySet()
+  }
+
+  /**
+   * The property names this schema's own [RequiredValidator] declares, or `null` when it declares none —
+   * mirroring [ownPinnedProperties] so [requiredProperties] can unwrap a lone `$ref` exactly one level
+   * without chaining through aliases.
+   */
+  private fun ownRequiredProperties(): Set<String>? =
+    schemaValidators.filterIsInstance<RequiredValidator>()
+      .firstOrNull()
+      ?.required
+      ?.mapTo(mutableSetOf()) { it.value }
+
+  /**
+   * The property names this schema *declares* — the keys of its `properties` (its [PropertiesValidator]) —
+   * resolving one level through a lone `$ref` exactly as [requiredProperties] does.  Empty when neither
+   * this schema nor its ref target declares any `properties`.
+   *
+   * Unioned with [requiredProperties] to form a branch's *known* property names: a document carrying a
+   * property a branch declares — even as an *optional* property — counts as that branch recognizing it,
+   * so presence-based narrowing matches every branch that knows the property, not only those requiring it.
+   */
+  internal fun declaredPropertyNames(): Set<String> {
+    ownDeclaredPropertyNames()?.let { return it }
+    // Lone $ref branch: resolve one level to read the target's declared properties.
+    val refTarget = soleRefValidator()?.resolvedSchema() as? JsonObjectSchema
+    return refTarget?.ownDeclaredPropertyNames() ?: emptySet()
+  }
+
+  /**
+   * The keys of this schema's own `properties` ([PropertiesValidator]), or `null` when it declares none —
+   * mirroring [ownRequiredProperties] so [declaredPropertyNames] can unwrap a lone `$ref` exactly one
+   * level without chaining through aliases.
+   */
+  private fun ownDeclaredPropertyNames(): Set<String>? =
+    schemaValidators.filterIsInstance<PropertiesValidator>()
+      .firstOrNull()
+      ?.propertySchemas
+      ?.keys
+      ?.mapTo(mutableSetOf()) { it.value }
 
   /**
    * Validates a [KsonValue] against this schema, logging any validation errors to the [messageSink]

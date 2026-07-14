@@ -75,6 +75,13 @@ krossover {
     }
 }
 
+// krossover's KSP processor writes api.json here as an undeclared side effect; declare it as an output so the build cache restores it.
+afterEvaluate {
+    tasks.named("kspKotlinJvm") {
+        outputs.file(layout.buildDirectory.file("kotlin/krossover/metadata/api.json"))
+    }
+}
+
 // Task to copy browser distribution after building
 tasks.register("copyBrowserDistribution") {
     description = "Copy browser JS distribution to js-package/browser"
