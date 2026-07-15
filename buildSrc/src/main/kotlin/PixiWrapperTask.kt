@@ -74,8 +74,11 @@ exec "${'$'}PIXI_BIN" "${'$'}@"
     private fun generateWindowsWrapper(dir: File, installDir: String) {
         val wrapper = File(dir, "pixiw.bat")
         val installDirWindows = installDir.replace("/", "\\")
-        
-        wrapper.writeText("""
+
+        // Written with CRLF: cmd.exe wants it, and the root .gitattributes checks `.bat` files out
+        // that way. Emitting LF here would leave `pixiw.bat` dirty after every build on Unix, where
+        // the missing `pixiw` triggers a regeneration of both wrappers.
+        wrapper.writeText(crlf("""
 @echo off
 
 rem Simple Pixi wrapper for Windows that auto-installs Pixi locally if needed
@@ -101,6 +104,8 @@ if not exist "%PIXI_BIN%" (
 
 rem Execute Pixi with all arguments
 "%PIXI_BIN%" %*
-        """.trimIndent())
+        """.trimIndent()))
     }
+
+    private fun crlf(text: String) = text.replace("\r\n", "\n").replace("\n", "\r\n")
 }

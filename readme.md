@@ -94,6 +94,15 @@ We welcome you to dive in this project to explore, experiment, or contribute. A 
 ./gradlew jvmTest --continuous --tests "org.kson.parser.LexerTest" 
 ```
 
+#### Troubleshooting setup:
+
+* **Windows: build output is full of mojibake** (`Γö£ΓöÇ` where `├─` was meant, `Γ£à` for a check mark). The Windows console defaults to a legacy code page (typically 437) and misreads the build's UTF-8 output; the bytes themselves are fine. Switch the console to UTF-8 before building:
+
+  ```sh
+  chcp 65001        # cmd.exe / PowerShell
+  chcp.com 65001    # Git Bash — bash won't resolve the bare `chcp`
+  ```
+
 #### Static analysis (detekt)
 
 [Detekt](https://detekt.dev) runs on every Kotlin module. Rule config lives in
@@ -123,8 +132,6 @@ git diff '**/detekt-baseline.xml'
 
 - See the [Tags](https://github.com/kson-org/kson/tags) page for the list of released KSON versions.
 - See the [Release Process Documentation](docs/release_process.md) for details on performing releases.
-
-#### Troubleshooting setup:
 
 ### Kson Editors and Tooling
 KSON can be used in VS Code or IntelliJ with a simple gradle command.
