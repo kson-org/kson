@@ -1,7 +1,7 @@
 {
   "name": "@kson_org/monaco-editor",
   "//": "[[kson-version-num]]",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0-dev.1",
   "description": "Monaco editor with KSON language support and LSP integration",
   "type": "module",
   "scripts": {
@@ -35,10 +35,6 @@
     "./react": { "import": "./dist/react/index.js", "types": "./dist/react/index.d.ts" }
   },
   "files": ["dist", "dist-iframe", "readme.md"],
-  "dependencies": {
-    "@kson/lsp-shared": "file:../shared",
-    "kson-language-server": "file:../../language-server-protocol"
-  },
   "peerDependencies": {
     "monaco-editor": ">=0.50.0",
     "react": ">=18.0.0"
@@ -47,8 +43,10 @@
     "react": { "optional": true }
   },
   "devDependencies": {
+    "@kson/lsp-shared": "file:../shared",
     "@types/react": "^18.3.0",
     "happy-dom": "^20.8.4",
+    "kson-language-server": "file:../../language-server-protocol",
     "monaco-editor": "^0.52.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
