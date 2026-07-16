@@ -4,6 +4,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import org.kson.gitcheckout.CleanGitCheckout
 import java.io.File
 import java.nio.file.Path
 
@@ -18,15 +19,15 @@ import java.nio.file.Path
  * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
  * superset of JSON
  *
- * @param jsonSuiteGitCheckout an instance of [JsonSuiteGitCheckout]
- * @param schemaSuiteGitCheckout an instance of [SchemaSuiteGitCheckout]
+ * @param jsonSuiteGitCheckout the [JSONTestSuite](https://github.com/nst/JSONTestSuite) checkout (a [CleanGitCheckout])
+ * @param schemaSuiteGitCheckout the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) checkout (a [CleanGitCheckout])
  * @param sourceRootDir The directory to consider the src root - [classPackage] will be used to determine which
  *   sub-folder relative to [sourceRootDir] to place generated tests into
  * @param classPackage The package to place the generated tests into
  */
 class JsonTestSuiteGenerator(
-    private val jsonSuiteGitCheckout: JsonSuiteGitCheckout,
-    private val schemaSuiteGitCheckout: SchemaSuiteGitCheckout,
+    private val jsonSuiteGitCheckout: CleanGitCheckout,
+    private val schemaSuiteGitCheckout: CleanGitCheckout,
     private val projectRoot: Path,
     private val sourceRootDir: Path,
     private val classPackage: String
@@ -105,7 +106,7 @@ private class JsonTestData(
                 if (!rawTestName.startsWith("n_")) {
                     throw RuntimeException("Invalid use of ${JsonTestEditType.ACCEPT_N_FOR_SUPERSET::class.simpleName}: this edit only applies to overriding `n_`-type rejection tests")
                 }
-                return ResultEnumData.acceptEntryForKson
+                ResultEnumData.acceptEntryForKson
             }
             JsonTestEditType.SKIP_NEEDS_INVESTIGATION, JsonTestEditType.NONE -> {
                 when {

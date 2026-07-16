@@ -1,6 +1,6 @@
 import org.eclipse.jgit.api.Git
 import org.gradle.testfixtures.ProjectBuilder
-import org.kson.DirtyRepoException
+import org.kson.gitcheckout.DirtyRepoException
 import java.io.File
 import java.nio.file.Files.createTempDirectory
 import kotlin.test.Test
