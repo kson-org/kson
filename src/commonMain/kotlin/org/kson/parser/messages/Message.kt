@@ -55,7 +55,7 @@ class CoreParseMessage(private val delegate: Message) : Message by delegate
 /**
  * Enum for all our user-facing messages.
  *
- * This keep things organized for if/when we want to localize,
+ * This keeps things organized for if/when we want to localize,
  * and also facilitates easy/robust testing against [MessageType] types (rather than for instance brittle string
  * matches on error message content)
  */
@@ -926,6 +926,12 @@ enum class MessageType(
      * Members must implement this to format themselves as [String]s, given arguments [parsedArgs].
      *
      * [parsedArgs] maps the arg names given by [expectedArgs] to the arg values passed to [create]
+     *
+     * These implementations are the home of all our user-facing message text: wording shared between
+     * messages should be factored into constants in this file (see [UNQUOTED_STRING_START_RULE] and
+     * [STRING_QUOTING_HINT]), and no message wording should be composed anywhere else.  Keeping every
+     * string a user might see behind this method is what makes localization a tractable future
+     * project: localizing these implementations localizes Kson's messages.
      */
     protected abstract fun doFormat(parsedArgs: ParsedErrorArgs): String
 
