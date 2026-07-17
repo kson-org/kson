@@ -48,6 +48,7 @@ if [ ! -f "${'$'}PIXI_BIN" ]; then
     # Use Pixi's official installation script with custom install location
     export PIXI_HOME="${'$'}PIXI_DIR"
     export PIXI_NO_PATH_UPDATE=1
+    export PIXI_VERSION=$PINNED_PIXI_VERSION
 
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL https://pixi.sh/install.sh | bash
@@ -93,6 +94,7 @@ if not exist "%PIXI_BIN%" (
     rem Use Pixi's official installation script with custom install location
     set PIXI_HOME=%PIXI_DIR%
     set PIXI_NO_PATH_UPDATE=1
+    set PIXI_VERSION=$PINNED_PIXI_VERSION
 
     powershell -ExecutionPolicy ByPass -Command "iwr -useb https://pixi.sh/install.ps1 | iex"
 
@@ -108,4 +110,9 @@ rem Execute Pixi with all arguments
     }
 
     private fun crlf(text: String) = text.replace("\r\n", "\n").replace("\n", "\r\n")
+
+    companion object {
+        // Version of Pixi the generated wrappers pin their auto-install to.
+        private const val PINNED_PIXI_VERSION = "v0.73.0"
+    }
 }
