@@ -220,6 +220,133 @@ class KsonCoreTestString : KsonCoreTest {
     }
 
     @Test
+    fun testUnquotedStringWithDashes() {
+        assertParsesTo(
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                "kebab-case"
+            """.trimIndent()
+        )
+
+        // quoted simple strings containing dashes format to unquoted
+        assertParsesTo(
+            """
+                'kebab-case': 'v1-2-3'
+            """.trimIndent(),
+            """
+                kebab-case: v1-2-3
+            """.trimIndent(),
+            """
+                kebab-case: v1-2-3
+            """.trimIndent(),
+            """
+                {
+                  "kebab-case": "v1-2-3"
+                }
+            """.trimIndent()
+        )
+
+        // a trailing dash is part of the string, and does not disturb dash list parsing
+        assertParsesTo(
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                [
+                  "kebab-case",
+                  "trailing-"
+                ]
+            """.trimIndent()
+        )
+
+        // a leading dash is not a simple-string character, so this string stays quoted
+        assertParsesTo(
+            """
+                '-leading'
+            """.trimIndent(),
+            """
+                '-leading'
+            """.trimIndent(),
+            """
+                "-leading"
+            """.trimIndent(),
+            """
+                "-leading"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testUnquotedStringWithCombiningMarks() {
+        // हिन्दी spells with Devanagari vowel signs and a virama, which are combining marks rather than letters
+        assertParsesTo(
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                "हिन्दी"
+            """.trimIndent()
+        )
+
+        // a quoted string spelled with combining marks formats to unquoted
+        assertParsesTo(
+            """
+                'भाषा': 'हिन्दी'
+            """.trimIndent(),
+            """
+                भाषा: हिन्दी
+            """.trimIndent(),
+            """
+                भाषा: हिन्दी
+            """.trimIndent(),
+            """
+                {
+                  "भाषा": "हिन्दी"
+                }
+            """.trimIndent()
+        )
+
+        // a leading combining mark is not a simple-string character, so this string stays quoted
+        assertParsesTo(
+            """
+                'िa'
+            """.trimIndent(),
+            """
+                'िa'
+            """.trimIndent(),
+            """
+                "िa"
+            """.trimIndent(),
+            """
+                "िa"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testReservedKeywordStringsAreQuoted() {
         // Test that strings with reserved keyword content are properly quoted
         assertParsesTo(
