@@ -28,7 +28,7 @@ abstract class PixiWrapperTask : DefaultTask() {
         generateUnixWrapper(dir, installDir)
         generateWindowsWrapper(dir, installDir)
 
-        logger.lifecycle("Generated Pixi wrapper scripts in ${dir.absolutePath}")
+        logger.info("Generated Pixi wrapper scripts in ${dir.absolutePath}")
     }
 
     private fun generateUnixWrapper(dir: File, installDir: String) {
@@ -40,15 +40,16 @@ abstract class PixiWrapperTask : DefaultTask() {
 
 PIXI_DIR="${'$'}(pwd)/$installDir"
 PIXI_BIN="${'$'}PIXI_DIR/bin/pixi"
+PINNED_PIXI_VERSION="$PINNED_PIXI_VERSION"
 
-# Install Pixi locally if not present
-if [ ! -f "${'$'}PIXI_BIN" ]; then
-    echo "Installing Pixi locally to ${'$'}PIXI_DIR..."
+# Install Pixi locally if missing or off the pin: the install script overwrites in place
+if [ ! -f "${'$'}PIXI_BIN" ] || [ "${'$'}("${'$'}PIXI_BIN" --version 2>/dev/null)" != "pixi ${'$'}PINNED_PIXI_VERSION" ]; then
+    echo "Installing Pixi ${'$'}PINNED_PIXI_VERSION locally to ${'$'}PIXI_DIR..."
 
     # Use Pixi's official installation script with custom install location
     export PIXI_HOME="${'$'}PIXI_DIR"
     export PIXI_NO_PATH_UPDATE=1
-    export PIXI_VERSION=$PINNED_PIXI_VERSION
+    export PIXI_VERSION="v${'$'}PINNED_PIXI_VERSION"
 
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL https://pixi.sh/install.sh | bash
@@ -76,9 +77,7 @@ exec "${'$'}PIXI_BIN" "${'$'}@"
         val wrapper = File(dir, "pixiw.bat")
         val installDirWindows = installDir.replace("/", "\\")
 
-        // Written with CRLF: cmd.exe wants it, and the root .gitattributes checks `.bat` files out
-        // that way. Emitting LF here would leave `pixiw.bat` dirty after every build on Unix, where
-        // the missing `pixiw` triggers a regeneration of both wrappers.
+        // Written with CRLF: cmd.exe wants it, and the root .gitattributes checks `.bat` files out that way
         wrapper.writeText(crlf("""
 @echo off
 
@@ -86,24 +85,29 @@ rem Simple Pixi wrapper for Windows that auto-installs Pixi locally if needed
 
 set PIXI_DIR=%cd%\$installDirWindows
 set PIXI_BIN=%PIXI_DIR%\bin\pixi.exe
+set PINNED_PIXI_VERSION=$PINNED_PIXI_VERSION
 
-rem Install Pixi locally if not present
+rem Install Pixi locally if missing or off the pin: the install script overwrites in place
+if not exist "%PIXI_BIN%" goto install
+"%PIXI_BIN%" --version 2>nul | findstr /x /c:"pixi %PINNED_PIXI_VERSION%" >nul
+if %errorlevel% equ 0 goto run
+
+:install
+echo Installing Pixi %PINNED_PIXI_VERSION% locally to %PIXI_DIR%...
+
+rem Use Pixi's official installation script with custom install location
+set PIXI_HOME=%PIXI_DIR%
+set PIXI_NO_PATH_UPDATE=1
+set PIXI_VERSION=v%PINNED_PIXI_VERSION%
+
+powershell -ExecutionPolicy ByPass -Command "iwr -useb https://pixi.sh/install.ps1 | iex"
+
 if not exist "%PIXI_BIN%" (
-    echo Installing Pixi locally to %PIXI_DIR%...
-
-    rem Use Pixi's official installation script with custom install location
-    set PIXI_HOME=%PIXI_DIR%
-    set PIXI_NO_PATH_UPDATE=1
-    set PIXI_VERSION=$PINNED_PIXI_VERSION
-
-    powershell -ExecutionPolicy ByPass -Command "iwr -useb https://pixi.sh/install.ps1 | iex"
-
-    if not exist "%PIXI_BIN%" (
-        echo Failed to install Pixi
-        exit /b 1
-    )
+    echo Failed to install Pixi
+    exit /b 1
 )
 
+:run
 rem Execute Pixi with all arguments
 "%PIXI_BIN%" %*
         """.trimIndent()))
@@ -112,7 +116,7 @@ rem Execute Pixi with all arguments
     private fun crlf(text: String) = text.replace("\r\n", "\n").replace("\n", "\r\n")
 
     companion object {
-        // Version of Pixi the generated wrappers pin their auto-install to.
-        private const val PINNED_PIXI_VERSION = "v0.73.0"
+        // Version of Pixi the generated wrappers pin their auto-install to, exactly as `pixi --version` reports it
+        internal const val PINNED_PIXI_VERSION = "0.73.0"
     }
 }
