@@ -1,5 +1,6 @@
 package org.kson.parser.messages
 
+import org.kson.parser.behavior.StringUnquoted
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
@@ -54,7 +55,7 @@ class CoreParseMessage(private val delegate: Message) : Message by delegate
 /**
  * Enum for all our user-facing messages.
  *
- * This keep things organized for if/when we want to localize,
+ * This keeps things organized for if/when we want to localize,
  * and also facilitates easy/robust testing against [MessageType] types (rather than for instance brittle string
  * matches on error message content)
  */
@@ -174,14 +175,15 @@ enum class MessageType(
             return "`$reservedWord` cannot be used as an object key"
         }
     },
-    OBJECT_KEY_INVALID_START_CHAR {
+    OBJECT_KEY_REQUIRES_QUOTES {
         override fun expectedArgs(): List<String> {
             return listOf("Object key")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val objectKey = parsedArgs.getArg("Object key")
-            return "`$objectKey` cannot be used as an object key. Unquoted keys must start with a letter or `_`"
+            return "`$objectKey` must be quoted to be used as an object key: " +
+                    "object keys are strings, and $UNQUOTED_STRING_START_RULE"
         }
     },
     IGNORED_OBJECT_END_DOT {
@@ -254,7 +256,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val unexpectedCharacter = parsedArgs.getArg("Unexpected Character")
-            return "Invalid character `$unexpectedCharacter` found in this number"
+            return "Invalid character `$unexpectedCharacter` found in this number. $STRING_QUOTING_HINT"
         }
     },
     DANGLING_EXP_INDICATOR {
@@ -264,7 +266,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val exponentCharacter = parsedArgs.getArg("Exponent character: E or e")
-            return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent"
+            return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent. $STRING_QUOTING_HINT"
         }
     },
 
@@ -289,7 +291,8 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "A dash `-` must be followed by a space (to make a list element), or a number (to make a negative number)"
+            return "A dash `-` must be followed by a space (to make a list element), " +
+                    "or a number (to make a negative number). $STRING_QUOTING_HINT"
         }
     },
     DANGLING_DECIMAL {
@@ -298,7 +301,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "A decimal must be followed by digits"
+            return "A decimal must be followed by digits. $STRING_QUOTING_HINT"
         }
     },
     DANGLING_LIST_DASH(MessageSeverity.ERROR) {
@@ -923,6 +926,12 @@ enum class MessageType(
      * Members must implement this to format themselves as [String]s, given arguments [parsedArgs].
      *
      * [parsedArgs] maps the arg names given by [expectedArgs] to the arg values passed to [create]
+     *
+     * These implementations are the home of all our user-facing message text: wording shared between
+     * messages should be factored into constants in this file (see [UNQUOTED_STRING_START_RULE] and
+     * [STRING_QUOTING_HINT]), and no message wording should be composed anywhere else.  Keeping every
+     * string a user might see behind this method is what makes localization a tractable future
+     * project: localizing these implementations localizes Kson's messages.
      */
     protected abstract fun doFormat(parsedArgs: ParsedErrorArgs): String
 
@@ -951,6 +960,20 @@ enum class MessageType(
     }
 
 }
+
+/**
+ * User-facing statement of the rule enforced by [StringUnquoted.isUnquotedStartChar], shared by every
+ * message that explains why a value cannot be an unquoted string.  If that rule ever changes, this
+ * statement must change with it.
+ */
+internal const val UNQUOTED_STRING_START_RULE = "unquoted strings must start with a letter or `_`"
+
+/**
+ * Shared tip for messages diagnosing invalid numbers.  [org.kson.parser.Lexer] reads any value starting
+ * with a digit or `-` as a number candidate, so a value rejected as a number may well be a string missing
+ * its quotes---this tip teaches about that.
+ */
+internal const val STRING_QUOTING_HINT = "If a string was intended, add quotes: $UNQUOTED_STRING_START_RULE"
 
 private fun renderArgList(args: List<String>, quote: String = "\"") = if (args.isEmpty()) {
     "[]"

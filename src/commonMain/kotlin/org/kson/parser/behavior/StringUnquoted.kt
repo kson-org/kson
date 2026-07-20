@@ -22,6 +22,9 @@ object StringUnquoted {
 
     /**
      * Returns true if [ch] is a legal first [Char] for an unquoted Kson string
+     *
+     * This rule is stated to users by [org.kson.parser.messages.UNQUOTED_STRING_START_RULE]---if this
+     * rule ever changes, that statement must change with it
      */
     fun isUnquotedStartChar(ch: Char?): Boolean {
         ch ?: return false

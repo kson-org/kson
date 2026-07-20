@@ -45,8 +45,9 @@ class KsonCoreTestObjectError : KsonCoreTestError {
     }
 
     @Test
-    fun testHelpfulErrorForInvalidKeyStartChars() {
-        // keys that start with a digit or a `-` are lexed as numbers, so they cannot be used as unquoted keys
+    fun testHelpfulErrorForKeysRequiringQuotes() {
+        // keys that start with a digit or a `-` are lexed as numbers, and object keys are strings,
+        // so these keys must be quoted
         assertParserRejectsSource(
             """
                key: value
@@ -56,10 +57,10 @@ class KsonCoreTestObjectError : KsonCoreTestError {
                -99: "can't use a negative number as a key"
             """.trimIndent(),
             listOf(
-                OBJECT_KEY_INVALID_START_CHAR,
-                OBJECT_KEY_INVALID_START_CHAR,
-                OBJECT_KEY_INVALID_START_CHAR,
-                OBJECT_KEY_INVALID_START_CHAR
+                OBJECT_KEY_REQUIRES_QUOTES,
+                OBJECT_KEY_REQUIRES_QUOTES,
+                OBJECT_KEY_REQUIRES_QUOTES,
+                OBJECT_KEY_REQUIRES_QUOTES
             )
         )
 
@@ -70,7 +71,7 @@ class KsonCoreTestObjectError : KsonCoreTestError {
                1one   : "can't start a key with a digit"
                -one   : "can't start a key with a dash"
             """.trimIndent(),
-            listOf(OBJECT_KEY_INVALID_START_CHAR, OBJECT_KEY_INVALID_START_CHAR)
+            listOf(OBJECT_KEY_REQUIRES_QUOTES, OBJECT_KEY_REQUIRES_QUOTES)
         )
 
         // ...and inside `{}`-delimited objects
@@ -82,7 +83,7 @@ class KsonCoreTestObjectError : KsonCoreTestError {
                  -haaa: 22
                }
             """.trimIndent(),
-            listOf(OBJECT_KEY_INVALID_START_CHAR, OBJECT_KEY_INVALID_START_CHAR)
+            listOf(OBJECT_KEY_REQUIRES_QUOTES, OBJECT_KEY_REQUIRES_QUOTES)
         )
     }
 

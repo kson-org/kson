@@ -553,14 +553,14 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
-        // helpful error for keys with an illegal start char: the lexer scans tokens that start with a digit or
-        // '-' generously as NUMBER tokens (see Lexer.number), so a NUMBER immediately followed by a COLON is an
-        // attempt to use such a token as a key, which is illegal for unquoted keys
-        val isInvalidStartCharKey = builder.getTokenType() == NUMBER && builder.lookAhead(1) == COLON
-        if (isInvalidStartCharKey) {
-            val invalidKey = builder.getTokenText()
+        // helpful error for number-like keys: the lexer scans tokens that start with a digit or '-' generously
+        // as NUMBER tokens (see Lexer.number), and object keys are strings, so a NUMBER immediately followed
+        // by a COLON is a key that needs quotes
+        val isNumberLikeKey = builder.getTokenType() == NUMBER && builder.lookAhead(1) == COLON
+        if (isNumberLikeKey) {
+            val unquotedKey = builder.getTokenText()
             builder.advanceLexer()
-            keywordMark.error(OBJECT_KEY_INVALID_START_CHAR.create(invalidKey))
+            keywordMark.error(OBJECT_KEY_REQUIRES_QUOTES.create(unquotedKey))
 
             // advance past the COLON
             builder.advanceLexer()

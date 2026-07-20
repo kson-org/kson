@@ -356,7 +356,7 @@ class CommandLineInterfaceTest {
             """.trimIndent(),
             expectedOutput = OutputExpectation.Failure("""
                 [ERROR] Object properties must be `key: value` pairs at 1:4
-                [ERROR] Invalid character `.` found in this number at 3:8
+                [ERROR] Invalid character `.` found in this number. If a string was intended, add quotes: unquoted strings must start with a letter or `_` at 3:8
                 
                 
                 Tokens:
