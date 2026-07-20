@@ -58,13 +58,13 @@ Here is a KSON [list](#lists) demonstrating a variety of supported numbers:
 
 Strings in KSON are identical to [strings in JSON](https://datatracker.ietf.org/doc/html/rfc8259#section-7), except:
 
-- KSON strings may be unquoted if they are 'simple', i.e. they only contain letters (from any alphabet), numbers or underscores, and they do not start with a number
+- KSON strings may be unquoted if they are 'simple', i.e. they only contain letters (from any alphabet), numbers, underscores, or dashes. They do not start with a number or a dash.
 
 ```kson
 an_unqu0t3d_striπg
 ```
 
-One consequence of unquoted strings: a bare `true`, `false` or `null` is always its literal value, exactly as in JSON&mdash;quote it (`'true'`) when the string is intended. Likewise, since spaces, dashes and dots are not simple-string characters, strings like `The Great Gatsby`, `2020-01-01` or `kebab-case` must be quoted&mdash;unlike in YAML, `title: The Great Gatsby` is not a single string.
+One consequence of unquoted strings: a bare `true`, `false` or `null` is always its literal value, exactly as in JSON&mdash;quote it (`'true'`) when the string is intended. Likewise, a string that is not 'simple' must be quoted: `The Great Gatsby` (spaces), `v1.2` (a dot) and `2020-01-01` (a leading number) all require quotes&mdash;unlike in YAML, `title: The Great Gatsby` is not valid.
 
 - KSON strings may be quoted using a single quote rather than a double quote. Here is a [list](#lists) of strings demonstrating the difference:
 

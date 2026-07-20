@@ -610,6 +610,54 @@ class LexerTest {
     }
 
     @Test
+    fun testUnquotedStringWithDashes() {
+        val kebabTokens = assertTokenizesTo(
+            "kebab-case",
+            listOf(UNQUOTED_STRING)
+        )
+        assertEquals("kebab-case", kebabTokens[0].lexeme.text)
+
+        val digitTokens = assertTokenizesTo(
+            "a-1",
+            listOf(UNQUOTED_STRING),
+            "should allow digits after a dash"
+        )
+        assertEquals("a-1", digitTokens[0].lexeme.text)
+
+        val trailingDashTokens = assertTokenizesTo(
+            "trailing-",
+            listOf(UNQUOTED_STRING),
+            "should allow a trailing dash"
+        )
+        assertEquals("trailing-", trailingDashTokens[0].lexeme.text)
+
+        assertTokenizesTo(
+            "a- b",
+            listOf(UNQUOTED_STRING, UNQUOTED_STRING),
+            "a dash glued to the end of an unquoted string belongs to the string, and is not a LIST_DASH"
+        )
+
+        assertTokenizesTo(
+            "- kebab-case",
+            listOf(LIST_DASH, UNQUOTED_STRING),
+            "a whitespace-delimited dash is still a LIST_DASH"
+        )
+
+        assertTokenizesTo(
+            "-foo",
+            listOf(NUMBER),
+            "a leading dash never starts an unquoted string: it is lexed as a (possibly malformed) number"
+        )
+
+        val keywordPrefixTokens = assertTokenizesTo(
+            "true-ish",
+            listOf(UNQUOTED_STRING),
+            "a reserved keyword followed by a dash is an ordinary unquoted string"
+        )
+        assertEquals("true-ish", keywordPrefixTokens[0].lexeme.text)
+    }
+
+    @Test
     fun testTokenLocations() {
         assertTokenizesTo(
             """

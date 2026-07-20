@@ -30,9 +30,12 @@ object StringUnquoted {
 
     /**
      * Returns true if [ch] is a legal [Char] for the body of an unquoted Kson string
+     *
+     * Note that `-` is legal in the body but not as a start [Char], where it would
+     * clash with list dashes and negative numbers
      */
     fun isUnquotedBodyChar(ch: Char?): Boolean {
         ch ?: return false
-        return isUnquotedStartChar(ch) || ch.isDigit()
+        return isUnquotedStartChar(ch) || ch.isDigit() || ch == '-'
     }
 }

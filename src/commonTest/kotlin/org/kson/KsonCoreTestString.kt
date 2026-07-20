@@ -220,6 +220,80 @@ class KsonCoreTestString : KsonCoreTest {
     }
 
     @Test
+    fun testUnquotedStringWithDashes() {
+        assertParsesTo(
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                kebab-case
+            """.trimIndent(),
+            """
+                "kebab-case"
+            """.trimIndent()
+        )
+
+        // quoted simple strings containing dashes format to unquoted
+        assertParsesTo(
+            """
+                'kebab-case': 'v1-2-3'
+            """.trimIndent(),
+            """
+                kebab-case: v1-2-3
+            """.trimIndent(),
+            """
+                kebab-case: v1-2-3
+            """.trimIndent(),
+            """
+                {
+                  "kebab-case": "v1-2-3"
+                }
+            """.trimIndent()
+        )
+
+        // a trailing dash is part of the string, and does not disturb dash list parsing
+        assertParsesTo(
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                - kebab-case
+                - trailing-
+            """.trimIndent(),
+            """
+                [
+                  "kebab-case",
+                  "trailing-"
+                ]
+            """.trimIndent()
+        )
+
+        // a leading dash is not a simple-string character, so this string stays quoted
+        assertParsesTo(
+            """
+                '-leading'
+            """.trimIndent(),
+            """
+                '-leading'
+            """.trimIndent(),
+            """
+                "-leading"
+            """.trimIndent(),
+            """
+                "-leading"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testReservedKeywordStringsAreQuoted() {
         // Test that strings with reserved keyword content are properly quoted
         assertParsesTo(
