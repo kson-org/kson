@@ -658,6 +658,29 @@ class LexerTest {
     }
 
     @Test
+    fun testUnquotedStringWithCombiningMarks() {
+        // हिन्दी spells with Devanagari vowel signs and a virama, which are combining marks rather than letters
+        val devanagariTokens = assertTokenizesTo(
+            "हिन्दी",
+            listOf(UNQUOTED_STRING)
+        )
+        assertEquals("हिन्दी", devanagariTokens[0].lexeme.text)
+
+        assertTokenizesTo(
+            // DEVANAGARI VOWEL SIGN I with no character to attach to
+            "िa",
+            listOf(ILLEGAL_CHAR, UNQUOTED_STRING),
+            "a combining mark cannot start an unquoted string"
+        )
+
+        assertTokenizesTo(
+            "5ि",
+            listOf(NUMBER),
+            "a digit-led lexeme containing a mark is generously lexed as one malformed NUMBER, for a clear error"
+        )
+    }
+
+    @Test
     fun testTokenLocations() {
         assertTokenizesTo(
             """

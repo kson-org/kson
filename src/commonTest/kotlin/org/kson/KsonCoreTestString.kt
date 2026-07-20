@@ -294,6 +294,59 @@ class KsonCoreTestString : KsonCoreTest {
     }
 
     @Test
+    fun testUnquotedStringWithCombiningMarks() {
+        // हिन्दी spells with Devanagari vowel signs and a virama, which are combining marks rather than letters
+        assertParsesTo(
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                हिन्दी
+            """.trimIndent(),
+            """
+                "हिन्दी"
+            """.trimIndent()
+        )
+
+        // a quoted string spelled with combining marks formats to unquoted
+        assertParsesTo(
+            """
+                'भाषा': 'हिन्दी'
+            """.trimIndent(),
+            """
+                भाषा: हिन्दी
+            """.trimIndent(),
+            """
+                भाषा: हिन्दी
+            """.trimIndent(),
+            """
+                {
+                  "भाषा": "हिन्दी"
+                }
+            """.trimIndent()
+        )
+
+        // a leading combining mark is not a simple-string character, so this string stays quoted
+        assertParsesTo(
+            """
+                'िa'
+            """.trimIndent(),
+            """
+                'िa'
+            """.trimIndent(),
+            """
+                "िa"
+            """.trimIndent(),
+            """
+                "िa"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testReservedKeywordStringsAreQuoted() {
         // Test that strings with reserved keyword content are properly quoted
         assertParsesTo(
