@@ -52,12 +52,10 @@ abstract class PixiExecTask : DefaultTask() {
         val pixiwPath = getPixiWrapperPath()
         val pixiwFile = project.file(pixiwPath)
 
-        if (!pixiwFile.exists() && autoGenerateWrapper.get()) {
-            logger.lifecycle("Pixi wrapper not found at $pixiwPath, generating...")
+        if (autoGenerateWrapper.get()) {
+            // regenerate every run so wrapper changes, like a new pinned Pixi version, reach stale wrappers on disk
             generateWrapper()
-        }
-
-        if (!pixiwFile.exists()) {
+        } else if (!pixiwFile.exists()) {
             throw IllegalStateException("Pixi wrapper not found at $pixiwPath. Either create it manually or enable autoGenerateWrapper.")
         }
 
@@ -94,7 +92,8 @@ abstract class PixiExecTask : DefaultTask() {
     }
 
     private fun generateWrapper() {
-        val wrapperTask = project.tasks.pixiWrapper("_tempPixiWrapper") {
+        // named after this task so several Pixi tasks can each generate in one build without clashing
+        val wrapperTask = project.tasks.pixiWrapper("_${name}PixiWrapper") {
             outputDir.set(project.layout.projectDirectory)
             pixiInstallDir.set(this@PixiExecTask.pixiInstallDir)
         }.get()
