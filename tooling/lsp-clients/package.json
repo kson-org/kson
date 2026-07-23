@@ -6,13 +6,13 @@
   "description": "KSON Language Server Protocol Extensions",
   "scripts": {
     "buildMonaco": "pnpm run compile && pnpm --filter @kson_org/monaco-editor run build",
-    "buildVSCode": "pnpm run compile && pnpm --filter kson run packagePlugin",
+    "buildVSCode": "pnpm run compile && pnpm --filter ./vscode run packagePlugin",
     "buildMonacoIframe": "pnpm run compile && pnpm --filter @kson_org/monaco-editor run build:iframe",
     "buildPlugins": "pnpm run buildMonaco && pnpm run buildVSCode",
-    "compile": "pnpm --filter @kson/lsp-shared run compile && pnpm --filter kson run compile",
+    "compile": "pnpm --filter @kson/lsp-shared run compile && pnpm --filter ./vscode run compile",
     "clean": "pnpm -r run clean",
     "test": "pnpm run compile && pnpm -r run test",
-    "vscode": "pnpm run compile && pnpm --filter kson run vscode"
+    "vscode": "pnpm run compile && pnpm --filter ./vscode run vscode"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
