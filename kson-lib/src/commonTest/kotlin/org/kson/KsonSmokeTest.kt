@@ -79,7 +79,26 @@ class KsonSmokeTest {
         assertTrue(error.start.line == 0)
         assertTrue(error.start.column > 0)
     }
-    
+
+    @Test
+    fun testMessage_toString_rendersReadableOneBasedLocation() {
+        val input = """{"invalid": }"""
+        val result = Kson.toJson(input)
+        assertIs<Result.Failure>(result)
+        val error = result.errors.first()
+
+        val rendered = error.render()
+        assertTrue(rendered.contains(error.message))
+        assertTrue(rendered.contains("[${error.severity}]"))
+        // `start` is 0-based, but the rendered location is 1-based
+        assertTrue(rendered.endsWith("at ${error.start.line + 1}:${error.start.column + 1}"))
+
+        // toString() delegates to render(), so logging a Message never yields an
+        // object identity string
+        assertEquals(rendered, error.toString())
+        assertFalse(error.toString().contains("org.kson.Message@"))
+    }
+
     @Test
     fun testToYaml_success() {
         val input = """{"name": "test", "value": 123}"""

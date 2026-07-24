@@ -141,16 +141,26 @@ object Kson {
  * Result of a Kson conversion operation
  */
 sealed class Result {
-    class Success(val output: String) : Result()
-    class Failure(val errors: List<Message>) : Result()
+    class Success(val output: String) : Result() {
+        override fun toString(): String = "Success"
+    }
+
+    class Failure(val errors: List<Message>) : Result() {
+        override fun toString(): String = "Failure: ${errors.size} errors"
+    }
 }
 
 /**
  * A [parseSchema] result
  */
 sealed class SchemaResult {
-    class Success(val schemaValidator: SchemaValidator) : SchemaResult()
-    class Failure(val errors: List<Message>) : SchemaResult()
+    class Success(val schemaValidator: SchemaValidator) : SchemaResult() {
+        override fun toString(): String = "Success"
+    }
+
+    class Failure(val errors: List<Message>) : SchemaResult() {
+        override fun toString(): String = "Failure: ${errors.size} errors"
+    }
 }
 
 /**
@@ -383,7 +393,19 @@ enum class TokenType {
 /**
  * Represents a message logged during Kson processing
  */
-class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position)
+class Message internal constructor(val message: String, val severity: MessageSeverity, val start: Position, val end: Position) {
+    /**
+     * Render this message as human-readable text. Note that start/end [Position]
+     * are 0-based, while the line and column rendered here are 1-based.
+     */
+    fun render(): String =
+        "[$severity] $message at ${start.render1Based()}"
+
+    /**
+     * Note: delegates to [render] to avoid seeing only an object identity string.
+     */
+    override fun toString(): String = render()
+}
 
 /**
  * Represents the severity of a [Message]
@@ -401,6 +423,17 @@ enum class MessageSeverity{
  */
 class Position internal constructor(val line: Int, val column: Int) {
     internal constructor(coordinates: Coordinates) : this(coordinates.line, coordinates.column)
+
+    /**
+     *  Using 1-based line/column numbers
+     *  following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+     *  for this sort of output.
+     *
+     *  @see Coordinates.toString
+     */
+    fun render1Based(): String = "${line + 1}:${column + 1}"
+
+    override fun toString(): String = render1Based()
 }
 
 /**
