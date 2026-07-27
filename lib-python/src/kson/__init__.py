@@ -420,6 +420,29 @@ class Position(KotlinObjectBase):
 
         return cast(Any, (lambda x0: x0)(result))
 
+    def render1_based(
+        self,
+    ) -> str:
+        """ Using 1-based line/column numbers
+         following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+         for this sort of output.
+
+         @see Coordinates.toString
+        """
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/Position",
+            jni_ref,
+            b"render1Based",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (_java_string_to_python_str)(result))
+
 
 class Message(KotlinObjectBase):
     """Represents a message logged during Kson processing"""
@@ -493,6 +516,26 @@ class Message(KotlinObjectBase):
         )
 
         return cast(Any, (lambda x0: _from_kotlin_object(Position, x0))(result))
+
+    def render(
+        self,
+    ) -> str:
+        """Render this message as human-readable text. Note that start/end [Position]
+        are 0-based, while the line and column rendered here are 1-based.
+        """
+
+
+        jni_ref = self._jni_ref
+        result = _call_method(
+            b"org/kson/Message",
+            jni_ref,
+            b"render",
+            b"()Ljava/lang/String;",
+            "ObjectMethod",
+            []
+        )
+
+        return cast(Any, (_java_string_to_python_str)(result))
 
 
 class Token(KotlinObjectBase):
