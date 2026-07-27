@@ -241,6 +241,32 @@ impl Position {
 
         result
     }
+
+    /// Using 1-based line/column numbers
+    /// following [the gnu standard](https://www.gnu.org/prep/standards/html_node/Errors.html)
+    /// for this sort of output.
+    ///
+    /// @see Coordinates.toString
+    pub fn render1_based(
+        &self,
+    ) -> String {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/Position",
+            c"render1Based",
+            c"()Ljava/lang/String;",
+            CallObjectMethod,
+            self_obj,
+
+        );
+
+        FromKotlinObject::from_kotlin_object(result)
+    }
 }
 
 impl std::fmt::Debug for Position {
@@ -434,6 +460,29 @@ impl Message {
             c"org/kson/Message",
             c"getEnd",
             c"()Lorg/kson/Position;",
+            CallObjectMethod,
+            self_obj,
+
+        );
+
+        FromKotlinObject::from_kotlin_object(result)
+    }
+
+    /// Render this message as human-readable text. Note that start/end [Position]
+    /// are 0-based, while the line and column rendered here are 1-based.
+    pub fn render(
+        &self,
+    ) -> String {
+        let self_ptr = self.to_kotlin_object();
+        let self_obj = self_ptr.as_kotlin_object();
+
+
+        let (_, _detach_guard) = util::attach_thread_to_java_vm();
+        let result = call_jvm_function!(
+            util,
+            c"org/kson/Message",
+            c"render",
+            c"()Ljava/lang/String;",
             CallObjectMethod,
             self_obj,
 
