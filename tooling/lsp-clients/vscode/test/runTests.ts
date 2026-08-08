@@ -6,6 +6,7 @@ import {
     runTests as runNodeTests,
 } from '@vscode/test-electron';
 import {getVSCodeTestCachePath} from './vscodeTestCache';
+import {vscodeTestBuild} from './vscodeTestBuild';
 
 /**
  * Test runner script that runs the smoke tests by installing the kson plugin in a vscode instance.
@@ -30,7 +31,7 @@ async function main() {
          * Runs browser tests
          */
         async function testBrowser() {
-            console.log('Starting web extension tests...');
+            console.log(`Starting web extension tests against VS Code build ${vscodeTestBuild.commit}...`);
 
             const extensionBrowserTestsPath = path.resolve(__dirname, './test/index.browser.js');
             console.log('Test path:', extensionBrowserTestsPath);
@@ -41,8 +42,8 @@ async function main() {
                 folderPath: testWorkspacePath,
                 headless: false,
                 permissions: ['clipboard-read', 'clipboard-write'],
-                quality: 'stable',
-                commit: '994fd12f8d3a5aa16f17d42c041e5809167e845a'
+                quality: vscodeTestBuild.quality,
+                commit: vscodeTestBuild.commit
             });
         }
 
@@ -52,8 +53,8 @@ async function main() {
         async function testNode() {
             const extensionNodeTestsPath = path.resolve(__dirname, './test/index.node.js');
 
-            console.log('Downloading VS Code...');
-            const vscodeExecutablePath = await downloadAndUnzipVSCode({ version: 'stable', cachePath: getVSCodeTestCachePath() });
+            console.log(`Downloading VS Code ${vscodeTestBuild.version}...`);
+            const vscodeExecutablePath = await downloadAndUnzipVSCode({ version: vscodeTestBuild.version, cachePath: getVSCodeTestCachePath() });
             console.log('VS Code download complete.');
 
             // keep the user-data dir on a short path; the default in-repo .vscode-test/user-data
