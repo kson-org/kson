@@ -136,7 +136,7 @@ commands:
           platform: '<< parameters.platform >>'
       - restore_cache:
           keys:
-            - 'v2-<< parameters.platform >>-vscode-tests'
+            - 'v2-<< parameters.platform >>-vscode-tests-{{ checksum "tooling/lsp-clients/vscode/test/vscodeTestBuild.ts" }}'
             =
       - restore_cache:
           keys:
@@ -163,7 +163,7 @@ commands:
             - '~/.cache/kson-vscode-test'
             - '~/Library/Caches/kson-vscode-test'
             - '~/AppData/Roaming/kson-vscode-test'
-          key: 'v2-<< parameters.platform >>-vscode-tests'
+          key: 'v2-<< parameters.platform >>-vscode-tests-{{ checksum "tooling/lsp-clients/vscode/test/vscodeTestBuild.ts" }}'
 
       - save_cache:
           paths:

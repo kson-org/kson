@@ -15,6 +15,10 @@ The VS Code tests download a copy of VS Code into a shared, kson-namespaced OS c
 (`~/Library/Caches/kson-vscode-test`, `~/.cache/kson-vscode-test`, or `%APPDATA%\kson-vscode-test`)
 so multiple checkouts and CI reuse one download. Override the location with `VSCODE_TEST_CACHE`.
 
+The downloaded build is pinned in [vscodeTestBuild.ts](./vscode/test/vscodeTestBuild.ts)
+so that upstream VS Code releases can't break our build unexpectedly. TODO: schedule bumping
+this and other pins regularly so we keep testing against current external artifacts.
+
 ## Features
 
 - Syntax highlighting for `.kson` files
