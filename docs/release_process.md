@@ -6,6 +6,7 @@ This file documents the current (and evolving) release process for KSON.
 When `main` is ready to have a release cut from it:
 - Choose an appropriate `X.Y.Z` version number for the release by incrementing the latest tag ([see existing tags here](https://github.com/kson-org/kson/tags)) according to [Semantic Versioning](https://semver.org/) guidelines
 - Create a branch `release/X.Y.Z` for this release
+- On `main`, bump our pinned dependencies according to the process in [Regular Dependency Maintenance](dependency_maintenance.md) (this may be done in parallel to the release, or right after, but must not be neglected)
 
 #### On the `main` branch:
 - Search the codebase for `[[kson-version-num]]` again and update all version numbers to be snapshot/development versions.  Generally this will bump to the next minor version after `X.Y.Z`, ie. `X.(Y+1).0`. Here is a hopefully complete checklist of the artifacts we version and publish:

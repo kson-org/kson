@@ -132,6 +132,7 @@ git diff '**/detekt-baseline.xml'
 
 - See the [Tags](https://github.com/kson-org/kson/tags) page for the list of released KSON versions.
 - See the [Release Process Documentation](docs/release_process.md) for details on performing releases.
+- See the [Regular Dependency Maintenance Documentation](docs/dependency_maintenance.md) for the pass that keeps our pinned external versions deliberate, run at the opening of each development cycle.
 
 ### Kson Editors and Tooling
 KSON can be used in VS Code or IntelliJ with a simple gradle command.
