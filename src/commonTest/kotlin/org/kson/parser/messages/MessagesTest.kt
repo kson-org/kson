@@ -37,6 +37,15 @@ class MessagesTest {
     }
 
     @Test
+    fun testSchemaUnusableQuotesTheProblemItReports() {
+        // this message is a document's only view of a problem in another file, so it must carry
+        // both the problem and where in that file to find it
+        val message = MessageType.SCHEMA_UNUSABLE.create("3:7", "Unclosed object")
+        assertContains(message.toString(), "3:7")
+        assertContains(message.toString(), "Unclosed object")
+    }
+
+    @Test
     fun testFormatNullArgs() {
         assertFailsWith(IllegalArgumentException::class, "should blow up on null argument") {
             MessageType.EMBED_BLOCK_NO_CLOSE.create(null)

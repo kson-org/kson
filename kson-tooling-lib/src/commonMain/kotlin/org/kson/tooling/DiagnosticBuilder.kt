@@ -4,37 +4,54 @@ import org.kson.Kson
 import org.kson.Message
 import org.kson.MessageSeverity
 import org.kson.SchemaResult
+import org.kson.parser.messages.MessageType
+import org.kson.parser.messages.MessageSeverity as InternalMessageSeverity
 import org.kson.validation.SourceContext
 
 /**
  * Validates a KSON document and returns [DiagnosticMessage]s.
  *
- * If a schema is provided and valid, validation includes both parse errors and schema violations.
- * If no schema is provided or the schema fails to parse, only document parse errors are returned.
+ * If a schema is provided and parses, validation includes both parse errors and schema violations.
+ * If the schema has problems of its own, it cannot validate anything: a [MessageType.SCHEMA_UNUSABLE]
+ * is reported on the document.
  */
 internal object DiagnosticBuilder {
 
     fun build(content: String, schemaContent: String?, sourceContext: SourceContext): List<DiagnosticMessage> {
         if (schemaContent == null) {
-            return Kson.analyze(content, sourceContext.filepath).errors.map { toDiagnosticMessage(it) }
+            return documentDiagnostics(content, sourceContext)
         }
 
-        val diagnosticMessages = when (val result = Kson.parseSchema(schemaContent)) {
-            is SchemaResult.Success -> result.schemaValidator.validate(content, filepath = sourceContext.filepath)
-            is SchemaResult.Failure -> Kson.analyze(content, sourceContext.filepath).errors
+        return when (val result = Kson.parseSchema(schemaContent)) {
+            is SchemaResult.Success -> result.schemaValidator
+                .validate(content, filepath = sourceContext.filepath)
+                .map { toDiagnosticMessage(it) }
+            is SchemaResult.Failure ->
+                listOf(schemaUnusableDiagnostic(result.errors)) + documentDiagnostics(content, sourceContext)
         }
+    }
 
-        return diagnosticMessages.map { toDiagnosticMessage(it) }
+    private fun documentDiagnostics(content: String, sourceContext: SourceContext): List<DiagnosticMessage> =
+        Kson.analyze(content, sourceContext.filepath).errors.map { toDiagnosticMessage(it) }
+
+    private fun schemaUnusableDiagnostic(schemaProblems: List<Message>): DiagnosticMessage {
+        val firstProblem = schemaProblems.first()
+        val message = MessageType.SCHEMA_UNUSABLE.create(
+            firstProblem.start.render1Based(),
+            firstProblem.message
+        )
+        return DiagnosticMessage(
+            message = message.toString(),
+            severity = toDiagnosticSeverity(MessageType.SCHEMA_UNUSABLE.severity),
+            // anchor the external schema problem to the beginning of this document
+            range = Range(0, 0, 0, 0)
+        )
     }
 
     private fun toDiagnosticMessage(logged: Message): DiagnosticMessage {
-        val severity = when (logged.severity) {
-            MessageSeverity.ERROR -> DiagnosticSeverity.ERROR
-            MessageSeverity.WARNING -> DiagnosticSeverity.WARNING
-        }
         return DiagnosticMessage(
             message = logged.message,
-            severity = severity,
+            severity = toDiagnosticSeverity(logged.severity),
             range = Range(
                 logged.start.line,
                 logged.start.column,
@@ -42,5 +59,19 @@ internal object DiagnosticBuilder {
                 logged.end.column
             )
         )
+    }
+
+    private fun toDiagnosticSeverity(severity: MessageSeverity): DiagnosticSeverity {
+        return when (severity) {
+            MessageSeverity.ERROR -> DiagnosticSeverity.ERROR
+            MessageSeverity.WARNING -> DiagnosticSeverity.WARNING
+        }
+    }
+
+    private fun toDiagnosticSeverity(severity: InternalMessageSeverity): DiagnosticSeverity {
+        return when (severity) {
+            InternalMessageSeverity.ERROR -> DiagnosticSeverity.ERROR
+            InternalMessageSeverity.WARNING -> DiagnosticSeverity.WARNING
+        }
     }
 }

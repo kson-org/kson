@@ -587,6 +587,18 @@ enum class MessageType(
             return "Schema \"type\" must be a string or array of strings"
         }
     },
+    SCHEMA_UNUSABLE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Problem Location", "Schema Problem")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaProblemLocation = parsedArgs.getArg("Schema Problem Location")
+            val schemaProblem = parsedArgs.getArg("Schema Problem")
+            return "This document was not validated because its schema has problems.  " +
+                    "First problem in the schema, at $schemaProblemLocation: $schemaProblem"
+        }
+    },
     SCHEMA_VALUE_MUST_BE_MULTIPLE_OF(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return listOf("Multiple Of Value")

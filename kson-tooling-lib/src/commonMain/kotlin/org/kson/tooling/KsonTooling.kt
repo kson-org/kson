@@ -278,7 +278,7 @@ object KsonTooling {
      *
      * If a [schema] is provided, the document is validated against it.
      * Schema validation includes both parse errors and schema violations.
-     * If no schema is provided (or it fails to parse), only parse errors are returned.
+     * If no schema is provided, only parse errors are returned.
      *
      * @param document The pre-parsed document to validate
      * @param schema Optional pre-parsed schema document

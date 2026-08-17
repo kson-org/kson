@@ -259,9 +259,11 @@ class KsonSmokeTest {
         val invalidSchema = """{"type": }"""
         val result = Kson.parseSchema(invalidSchema)
         assertIs<SchemaResult.Failure>(result)
-        assertTrue(result.errors.isNotEmpty())
+        assertEquals(1, result.errors.size)
+        assertEquals(MessageSeverity.ERROR, result.errors[0].severity)
+        assertEquals("1:2", result.errors[0].start.render1Based(), "the error should point at the empty value")
     }
-    
+
     @Test
     fun testSchemaValidator_validInput() {
         val schemaKson = """{
