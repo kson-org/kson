@@ -10,23 +10,29 @@ import org.kson.schema.JsonSchema
 import org.kson.validation.SourceContext
 
 /**
- * Reports why a document failed to match any branch of a `oneOf` / `anyOf` union, narrowing the
- * reported errors to the branch(es) that actually matter before resorting to a full per-branch dump.
- * The strategies below run in priority order; the first to report wins:
+ * Reporting for a document that matched no branch of a `oneOf` / `anyOf` union: narrow the reported
+ * errors to the branch(es) that actually matter, rather than dumping every branch's complaints.
  *
- *  1. [selectDiscriminatedBranch] — a *value discriminator* (a shared property pinned to
- *     pairwise-disjoint value sets) selects the single branch the document's value picks, or proves
- *     a closed union's value out of range with one [SCHEMA_ENUM_VALUE_NOT_ALLOWED].
- *  2. [narrowByElimination] — drop any branch whose pinned value the document contradicts, then narrow
- *     the survivors by which distinguishing properties the document carries, and dump only what remains.
- *  3. [reportNoSubSchemaMatchErrors] — nothing narrowed the union, so dump every branch.
+ * Vocabulary used here and by the [JsonObjectSchema] accessors this file reads:
+ *  - *pin* — a property fixed to a finite value set by `const` or `enum`.  An *empty* pin (`enum: []`)
+ *    admits nothing, so it discriminates nothing but eliminates anything.
+ *  - *known property* — one a branch declares under `properties` (optional included) or lists in
+ *    `required`, read across everything the branch composes (`$ref`, `allOf`).
+ *  - *discriminator* — a property at least two branches pin to *pairwise-disjoint* sets, so a value
+ *    picks at most one branch.  The union is *closed* when every branch pins it.
+ *  - *distinguishing property* — one known to some branches but not all.
+ */
+
+/**
+ * Narrows and reports, trying each strategy in order until one handles it:
  *
- * Always emits at least one error: each strategy that handles reporting emits ≥1 message, and the final
- * dump is unconditional.  Returns [Unit] rather than a handled/not-handled flag so callers can't
- * accidentally skip the dump — the safety invariant is enforced here, not at the call site.
+ *  1. [selectDiscriminatedBranch] — the document's discriminator value picks a branch (or proves
+ *     itself out of range in a closed union).
+ *  2. [narrowByShape] — drop branches the document contradicts, keep those it looks like.
+ *  3. [reportNoSubSchemaMatchErrors] — nothing narrowed; dump every branch.
  *
- * [sourceContext] is threaded to [selectDiscriminatedBranch]'s deep re-validation so the selected branch is re-checked
- * under the same context that already proved every branch fails (preserving the ≥1-error invariant).
+ * Always emits at least one error: every strategy emits ≥1 message and the final dump is
+ * unconditional.  Returns [Unit] rather than a handled flag so callers can't skip that dump.
  */
 internal fun reportUnionMatchFailure(
     branches: List<JsonSchema>,
@@ -37,25 +43,21 @@ internal fun reportUnionMatchFailure(
     sourceContext: SourceContext
 ) {
     if (!selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) &&
-        !narrowByElimination(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
+        !narrowByShape(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
         reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
     }
 }
 
 /**
- * When [branches] form a discriminated union — some shared property is pinned to *pairwise-disjoint*
- * value sets (via `const` or `enum`) by at least two branches — report against the branch the
- * document's discriminator value selects, rather than dumping every branch's errors:
+ * Reports against the branch the document's discriminator selects:
  *
- *  - the value matches one branch's pinned set: report only that branch's errors (the real failure
- *    lives deeper in the document, e.g. a missing required property)
- *  - the value matches no branch, and *every* branch pins the discriminator (a closed union):
- *    report one [SCHEMA_ENUM_VALUE_NOT_ALLOWED] at the value, listing the allowed values
- *  - the value matches no branch, but a wildcard/negative branch leaves the union open: we can't
- *    prove the value invalid, so fall back to the caller's dump
+ *  - value matches one branch's pin: report only that branch's errors — the real failure is deeper
+ *  - value matches none and the union is closed: one [SCHEMA_ENUM_VALUE_NOT_ALLOWED] listing the
+ *    allowed values
+ *  - value matches none but a wildcard branch leaves the union open: we can't call the value wrong,
+ *    so decline
  *
- * Returns `true` when it handled reporting (so the caller skips the generic dump), `false` when
- * [branches] are not a discriminated union or the document lacks the discriminator property.
+ * Returns `true` when it reported, `false` when there is no discriminator or the document lacks it.
  */
 private fun selectDiscriminatedBranch(
     branches: List<JsonSchema>,
@@ -69,46 +71,30 @@ private fun selectDiscriminatedBranch(
 
     val selectedBranch = discriminator.branchByValue[discriminatorValue]
     when {
-        // The document picks exactly one branch; report only that branch's (deeper) errors.
         selectedBranch != null -> selectedBranch.validate(ksonValue, messageSink, sourceContext)
 
-        // No branch matches and every branch pins the discriminator, so the value itself is wrong.
         discriminator.allBranchesPinned -> {
             val allowedValues = discriminator.branchByValue.keys
                 .joinToString(", ") { it.toDisplayString() }
             messageSink.error(discriminatorValue.location, SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowedValues))
         }
 
-        // No branch matches but a wildcard/negative branch might legitimately accept this value,
-        // so we can't claim "must be one of …" — fall back to the caller's dump.
+        // a wildcard/negative branch might legitimately accept this value
         else -> return false
     }
     return true
 }
 
 /**
- * Narrows a union with no value discriminator to the branch(es) worth reporting
- * by composing two signals over the already-failed branches.
+ * Narrows a union with no discriminator by combining [survivingBranches] (definitive: the document
+ * contradicts a pin) with [presenceMatchedBranches] (heuristic: the document carries a property the
+ * branch knows and others don't).
  *
- *  - *Elimination* (definitive): a branch is provably dead when it pins a property `p` to a value set
- *    `V` and the document carries `p` with a value ∉ `V`.  No ≥2-branch gate and no disjointness
- *    requirement — a single contradicted pin suffices.  Empty pins (`enum: []`) reject any present
- *    value, so pins are read with [JsonObjectSchema.pinnedProperties] in `includeEmptyPins` mode.
- *  - *Presence* (heuristic): a branch matches when the document carries a *distinguishing* known
- *    property — one declared or required by some but not all branches.  A branch's *known* properties
- *    are those it declares (even as optional) unioned with those it requires.  This is the exact rule
- *    the presence-only strategy used, so a pin-free union degenerates to that behavior.
- *
- * Composition, writing `S` for the surviving (not-eliminated) branches and `M` for the presence-matched:
- * report `S ∩ M` when that is a non-empty *strict* subset of the branches, else `S` when *it* is, else
- * decline (let the caller dump every branch).  Intersecting with `S` keeps presence from resurrecting a
- * branch whose own pin the document contradicts; the non-empty-strict-subset guard keeps us from
- * reporting nothing or everything.  Reports the chosen branches via [reportNoSubSchemaMatchErrors] over
- * their already-collected [matchAttemptMessageSinks] — a single chosen branch collapses to its bare
- * messages (no [noMatchMessage] header), matching that helper's existing behavior.  Only
- * [JsonObjectSchema] branches carry pins or known properties; others neither eliminate nor match.
+ * Reports `S ∩ M` when that is a non-empty *strict* subset of the branches, else `S` when it is, else
+ * declines.  Intersecting keeps presence from resurrecting a branch the document contradicts; the
+ * strict-subset guard keeps us from reporting nothing, or everything by a longer route.
  */
-private fun narrowByElimination(
+private fun narrowByShape(
     branches: List<JsonSchema>,
     ksonValue: KsonValue,
     messageSink: MessageSink,
@@ -117,27 +103,8 @@ private fun narrowByElimination(
 ): Boolean {
     if (ksonValue !is KsonObject) return false
 
-    // Elimination: keep a branch unless the document contradicts one of its pins (a present value
-    // outside the pinned set — which an empty pin can never contain).
-    val survivors = branches.indices.filter { i ->
-        val pins = (branches[i] as? JsonObjectSchema)?.pinnedProperties(includeEmptyPins = true) ?: emptyMap()
-        pins.none { (property, values) ->
-            ksonValue.propertyLookup[property]?.let { it !in values } ?: false
-        }
-    }
-
-    // Presence: a known property of some branch but not all is distinguishing; a branch matches when
-    // the document carries one such property it knows.
-    val knownByBranch = branches.map { branch ->
-        (branch as? JsonObjectSchema)?.let { it.declaredPropertyNames() + it.requiredProperties() } ?: emptySet()
-    }
-    val distinguishing = knownByBranch.flatten().toSet()
-        .filter { property -> knownByBranch.count { property in it } < branches.size }
-        .toSet()
-    val presentProperties = ksonValue.propertyLookup.keys
-    val presenceMatched = knownByBranch.indices.filter { i ->
-        knownByBranch[i].any { it in distinguishing && it in presentProperties }
-    }
+    val survivors = survivingBranches(branches, ksonValue)
+    val presenceMatched = presenceMatchedBranches(branches, ksonValue)
 
     val intersection = survivors.filter { it in presenceMatched }
     val chosen = when {
@@ -155,17 +122,38 @@ private fun narrowByElimination(
     return true
 }
 
+/**
+ * The branches the document does *not* contradict: it carries no property the branch pins to a set
+ * the document's value falls outside of.  Definitive — one contradicted pin is proof, needing neither
+ * a second branch nor disjointness.  Empty pins count, hence [includeEmptyPins].
+ */
+private fun survivingBranches(branches: List<JsonSchema>, ksonValue: KsonObject): List<Int> =
+    branches.indices.filter { i ->
+        val pins = (branches[i] as? JsonObjectSchema)?.pinnedProperties(includeEmptyPins = true) ?: emptyMap()
+        pins.none { (property, values) ->
+            ksonValue.propertyLookup[property]?.let { it !in values } ?: false
+        }
+    }
+
+/**
+ * The branches the document *looks like*: it carries a distinguishing property they know.  A
+ * heuristic — a shared property proves nothing, so only properties some branches know and others
+ * don't are consulted.  Non-[JsonObjectSchema] branches know nothing and so never match.
+ */
+private fun presenceMatchedBranches(branches: List<JsonSchema>, ksonValue: KsonObject): List<Int> {
+    val knownByBranch = branches.map { (it as? JsonObjectSchema)?.knownProperties() ?: emptySet() }
+    val distinguishing = knownByBranch.flatten().toSet()
+        .filterTo(mutableSetOf()) { property -> knownByBranch.count { property in it } < branches.size }
+    val presentProperties = ksonValue.propertyLookup.keys
+    return knownByBranch.indices.filter { i ->
+        knownByBranch[i].any { it in distinguishing && it in presentProperties }
+    }
+}
+
 /** A non-empty proper subset of [branches] — a genuine narrowing, neither empty nor the whole set. */
 private fun List<Int>.isNonEmptyStrictSubsetOf(branches: List<JsonSchema>): Boolean =
     isNotEmpty() && size < branches.size
 
-/**
- * Detects a discriminator: a property pinned to *pairwise-disjoint* value sets by at least two
- * branches.  Branches that don't pin the property (wildcard / negative / non-object branches) are
- * tolerated and simply left out of the value→branch map.  When several properties qualify, the one
- * pinned by the most branches wins (ties broken by declaration order — the first branch that pins it).
- * Returns `null` when no property qualifies.
- */
 private fun detectDiscriminator(branches: List<JsonSchema>): Discriminator? {
     // Per branch, the properties it pins to a finite value set (empty for wildcard / non-object branches).
     val branchPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties() ?: emptyMap() }

@@ -208,8 +208,8 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
 
     /**
      * A `$ref`-based union with no value discriminator (the targets pin nothing) but distinct *required*
-     * properties still narrows by presence: [org.kson.schema.JsonObjectSchema.requiredProperties] resolves
-     * through each branch's `$ref` to read its target's requirements, so the present `needs_a` selects
+     * properties still narrows by presence: [org.kson.schema.JsonObjectSchema.knownProperties] reads
+     * through each branch's `$ref` to its target's requirements, so the present `needs_a` selects
      * branch A and only its deeper `detail_a` failure surfaces, not branch B's.
      */
     @Test
