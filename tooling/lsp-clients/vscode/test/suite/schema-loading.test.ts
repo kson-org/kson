@@ -297,6 +297,43 @@ describeNode('Schema Loading Tests', () => {
         }
     }).timeout(10000);
 
+    it('Should report parse warnings alongside schema violations', async () => {
+        // The duplicated `appName` is a parse-phase warning; the missing `version` is a
+        // schema violation. Asserting both in one document is what pins the regression:
+        // the schema violation can only come from the schema, so a passing test proves the
+        // schema really was attached, and the warning proves the schema-backed path no
+        // longer discards parse diagnostics.
+        const content = [
+            'appName: "TestApp"',
+            'appName: "OtherApp"'
+        ].join('\n');
+
+        // A fresh filename: SCHEMA_FILENAME is shared by the tests above, and diagnostics
+        // left over from their content would be picked up before this document is analysed.
+        const [testFileUri, document] = await createTestFile(content, `${uuid()}.config.kson`);
+
+        try {
+            const diagnostics = await waitForDiagnostics(document.uri, 2);
+            const messages = diagnostics.map(d => d.message);
+
+            assert.ok(
+                messages.some(m => m.toLowerCase().includes('duplicate')),
+                `Expected a duplicate-key parse warning. Got: ${messages.join(', ')}`
+            );
+            assert.ok(
+                messages.some(m => m.toLowerCase().includes('version')),
+                `Expected a schema violation for the missing 'version' property, which is what
+                 proves the schema was attached. Got: ${messages.join(', ')}`
+            );
+            for (const diagnostic of diagnostics) {
+                assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Warning,
+                    `Both diagnostics are warnings. Got: ${diagnostic.message}`);
+            }
+        } finally {
+            await cleanUp(testFileUri);
+        }
+    }).timeout(10000);
+
     it('Should report errors for valid Kson file that does not follow schema', async () => {
         // Create a test file that matches the pattern but doesn't follow the schema
         // (missing required properties: appName and version)

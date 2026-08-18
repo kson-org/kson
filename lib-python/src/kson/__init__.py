@@ -976,7 +976,9 @@ class SchemaValidator(KotlinObjectBase):
         @param kson The Kson source to validate
         @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
 
-        @return A list of validation error messages, or empty list if valid
+        @return The [Message]'s from parsing [kson] followed by any schema violations, or an empty list if [kson] parses
+          cleanly and satisfies the schema. [Message]'s with [MessageSeverity.ERROR] short-circuit schema validation: an
+          unparseable document cannot be checked against a schema, so only its parse messages come back.
         """
 
         if kson is None:

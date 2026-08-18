@@ -9,8 +9,9 @@ import org.kson.validation.SourceContext
 /**
  * Validates a KSON document and returns [DiagnosticMessage]s.
  *
- * If a schema is provided and valid, validation includes both parse errors and schema violations.
- * If no schema is provided or the schema fails to parse, only document parse errors are returned.
+ * If a schema is provided and valid, validation includes both the document's parse diagnostics
+ * (errors and warnings) and the schema violations.
+ * If no schema is provided or the schema fails to parse, only document parse diagnostics are returned.
  */
 internal object DiagnosticBuilder {
 

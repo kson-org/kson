@@ -114,6 +114,38 @@ class DiagnosticTest {
     }
 
     @Test
+    fun testSchemaValidationKeepsParseWarnings() {
+        val schema = """
+            {
+                type: object
+                properties: {
+                    name: { type: string }
+                }
+            }
+        """.trimIndent()
+        val diagnostics = validateDocument("{ name: \"Alice\", name: \"Bob\" }", schema)
+        assertEquals(1, diagnostics.size, "duplicate key warning should be reported alongside schema checks")
+        assertEquals(DiagnosticSeverity.WARNING, diagnostics[0].severity)
+        assertTrue(diagnostics[0].message.contains("Duplicate key"), diagnostics[0].message)
+    }
+
+    @Test
+    fun testSchemaValidationDoesNotDuplicateParseErrors() {
+        val schema = """
+            {
+                type: object
+                properties: {
+                    name: { type: string }
+                }
+            }
+        """.trimIndent()
+        val diagnostics = validateDocument("key: \"value\" extra", schema)
+        assertEquals(1, diagnostics.size,
+            "the parse error must be reported once, not once per validation pass: $diagnostics")
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+    }
+
+    @Test
     fun testValidDocumentMatchingSchema() {
         val schema = """
             {

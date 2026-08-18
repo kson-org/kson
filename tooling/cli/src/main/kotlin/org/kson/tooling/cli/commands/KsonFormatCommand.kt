@@ -48,6 +48,8 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
         .choice("plain", "delimited", "compact", "classic")
         .default("plain")
 
+    private val strict by strictOption()
+
     override fun run() {
         super.run()  // Check for help display
 
@@ -63,8 +65,8 @@ class KsonFormatCommand : BaseKsonCommand(name = "format") {
             throw ProgramResult(1)
         }
 
-        // Validate against schema if provided
-        validateWithSchema(ksonContent)
+        // Check the document before formatting it
+        checkDocument(ksonContent, strict)
 
         val indentType = this.indentType
 

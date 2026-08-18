@@ -30,8 +30,8 @@ class ValidateCommand : BaseKsonCommand() {
         |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION -s schema.$FILE_EXTENSION
         |
         |Exit codes:
-        |${"\u0085"}  0 - No errors found
-        |${"\u0085"}  1 - Errors detected (warnings don't affect exit code)
+        |${"\u0085"}  0 - No errors or warnings found
+        |${"\u0085"}  1 - Errors or warnings detected
     """.trimMargin()
 
     private val showTokens by option("--show-tokens", help = "Display lexical tokens (for debugging)")
@@ -53,16 +53,22 @@ class ValidateCommand : BaseKsonCommand() {
             throw ProgramResult(1)
         }
 
-        // Validate against schema if provided
-        validateWithSchema(ksonContent)
+        // A schema's findings already include the document's parse messages, so they stand in for the
+        // analysis diagnostics rather than being reported next to them.
+        val schemaMessages = validateAgainstSchema(ksonContent)
+        if (schemaMessages != null && schemaMessages.isEmpty()) {
+            echo("✓ Document is valid according to the schema")
+        }
 
         // Perform analysis
         val analysis = Kson.analyze(ksonContent, getFilePath())
+        val messages = schemaMessages ?: analysis.errors
+
         var outputString = ""
-        if (analysis.errors.isEmpty()) {
+        if (messages.isEmpty()) {
             outputString += "✓ No errors or warnings found"
         } else {
-            analysis.errors.forEach { outputString += errorFormat(it) }
+            messages.forEach { outputString += errorFormat(it) }
         }
 
         if (showTokens) {
@@ -72,7 +78,7 @@ class ValidateCommand : BaseKsonCommand() {
             }
         }
 
-        if (analysis.errors.isEmpty()) {
+        if (messages.isEmpty()) {
             writeOutput(outputString)
         } else {
             echo(outputString.trimEnd(), err = true)

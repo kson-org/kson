@@ -41,6 +41,8 @@ abstract class TranspileCommand(
     private val retainEmbedTags by option("--retain-tags", help = "Retain the embed tags of embed blocks")
             .flag()
 
+    private val strict by strictOption()
+
     override fun run() {
         super.run()  // Check for help display
 
@@ -56,8 +58,8 @@ abstract class TranspileCommand(
             throw ProgramResult(1)
         }
 
-        // Validate against schema if provided
-        validateWithSchema(ksonContent)
+        // Check the document before converting it
+        checkDocument(ksonContent, strict)
 
         val options = optionsFactory(retainEmbedTags)
         when (val result = converter(ksonContent, options)) {

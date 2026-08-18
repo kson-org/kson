@@ -162,7 +162,9 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
      * @param kson The Kson source to validate
      * @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
      *
-     * @return A list of validation error messages, or empty list if valid
+     * @return The [Message]'s from parsing [kson] followed by any schema violations, or an empty list if [kson] parses
+     *   cleanly and satisfies the schema. [Message]'s with [MessageSeverity.ERROR] short-circuit schema validation: an
+     *   unparseable document cannot be checked against a schema, so only its parse messages come back.
      */
     fun validate(kson: String, filepath: String? = null): List<Message> {
         val astParseResult = KsonCore.parseToAst(
@@ -179,7 +181,7 @@ class SchemaValidator internal constructor(private val schema: JsonSchema) {
             schema.validate(ksonValue, messageSink, SourceContext(filepath))
         }
 
-        return publishMessages(messageSink.loggedMessages())
+        return publishMessages(astParseResult.messages + messageSink.loggedMessages())
     }
 }
 

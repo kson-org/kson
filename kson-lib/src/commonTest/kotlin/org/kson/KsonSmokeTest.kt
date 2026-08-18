@@ -293,6 +293,22 @@ class KsonSmokeTest {
     }
 
     @Test
+    fun testSchemaValidator_validateReportsParseWarnings() {
+        val schemaKson = """{"type": "object"}"""
+        val schemaResult = Kson.parseSchema(schemaKson)
+        assertIs<SchemaResult.Success>(schemaResult)
+
+        val validator = schemaResult.schemaValidator
+        val duplicateKeyKson = """{"name": "a", "name": "b"}"""
+        val messages = validator.validate(duplicateKeyKson)
+        assertEquals(1, messages.size,
+            "the parse-phase duplicate key warning must survive schema validation, got: " +
+                    messages.map { it.message })
+        assertEquals(MessageSeverity.WARNING, messages[0].severity)
+        assertTrue(messages[0].message.contains("Duplicate key"), messages[0].message)
+    }
+
+    @Test
     fun testPropertyKeys_basicAccess() {
         val input = """
             name: John
