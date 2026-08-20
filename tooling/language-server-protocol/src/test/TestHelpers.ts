@@ -1,5 +1,6 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {Position} from 'vscode-languageserver';
+import {DocumentUri, Position} from 'vscode-languageserver';
+import {SchemaProvider} from '../core/schema/SchemaProvider.js';
 import {KsonDocument, parseTextDocument} from '../core/document/KsonDocument.js';
 import {KsonSchemaDocument} from '../core/document/KsonSchemaDocument.js';
 
@@ -35,4 +36,33 @@ export function createKsonSchemaDocument(content: string, metaSchemaContent?: st
  */
 export function pos(line: number, character: number): Position {
     return {line, character};
+}
+
+/**
+ * Stub {@link SchemaProvider} whose document-to-schema mappings are registered directly, for tests that
+ * want a provider's answers without the disk a real one needs.
+ */
+export class SchemaProviderTestStub implements SchemaProvider {
+    private schemas: Map<string, TextDocument> = new Map();
+
+    addSchema(documentUri: DocumentUri, schema: TextDocument): void {
+        this.schemas.set(documentUri, schema);
+    }
+
+    getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined {
+        return this.schemas.get(documentUri);
+    }
+
+    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
+        return undefined;
+    }
+
+    reload(): void {}
+
+    isSchemaFile(fileUri: DocumentUri): boolean {
+        for (const schema of this.schemas.values()) {
+            if (schema.uri === fileUri) return true;
+        }
+        return false;
+    }
 }

@@ -1,40 +1,10 @@
 import {describe, it} from 'mocha';
 import * as assert from 'assert';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {DocumentUri} from 'vscode-languageserver';
 import {CompositeSchemaProvider} from '../../../core/schema/CompositeSchemaProvider';
 import {BundledSchemaProvider, BundledMetaSchemaConfig} from '../../../core/schema/BundledSchemaProvider';
 import {SchemaProvider, NoOpSchemaProvider} from '../../../core/schema/SchemaProvider';
-
-/**
- * Minimal mock that simulates FileSystemSchemaProvider behavior (URI-based lookup).
- * Only used because FileSystemSchemaProvider requires disk I/O.
- */
-class UriSchemaProvider implements SchemaProvider {
-    private schemas: Map<string, TextDocument> = new Map();
-
-    addSchema(documentUri: string, schema: TextDocument): void {
-        this.schemas.set(documentUri, schema);
-    }
-
-    getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined {
-        return this.schemas.get(documentUri);
-    }
-
-    getMetaSchemaForId(_schemaId: string): TextDocument | undefined {
-        return undefined;
-    }
-
-    reload(): void {}
-
-    isSchemaFile(fileUri: DocumentUri): boolean {
-        for (const schema of this.schemas.values()) {
-            if (schema.uri === fileUri) return true;
-        }
-        return false;
-    }
-
-}
+import {SchemaProviderTestStub} from '../../TestHelpers.js';
 
 describe('CompositeSchemaProvider', () => {
     let logs: string[] = [];
@@ -82,16 +52,16 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should return schema from first matching provider', () => {
-            const uriProvider1 = new UriSchemaProvider();
-            const uriProvider2 = new UriSchemaProvider();
+            const firstProvider = new SchemaProviderTestStub();
+            const secondProvider = new SchemaProviderTestStub();
 
             const schema1 = TextDocument.create('file:///schema1.kson', 'kson', 1, '{ "from": "first" }');
-            uriProvider1.addSchema('file:///test.kson', schema1);
+            firstProvider.addSchema('file:///test.kson', schema1);
 
             const schema2 = TextDocument.create('file:///schema2.kson', 'kson', 1, '{ "from": "second" }');
-            uriProvider2.addSchema('file:///test.kson', schema2);
+            secondProvider.addSchema('file:///test.kson', schema2);
 
-            const provider = new CompositeSchemaProvider([uriProvider1, uriProvider2], logger);
+            const provider = new CompositeSchemaProvider([firstProvider, secondProvider], logger);
             const result = provider.getSchemaForDocument('file:///test.kson');
 
             assert.ok(result);
@@ -99,14 +69,14 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should try next provider when first returns undefined', () => {
-            const uriProvider1 = new UriSchemaProvider();
-            const uriProvider2 = new UriSchemaProvider();
+            const firstProvider = new SchemaProviderTestStub();
+            const secondProvider = new SchemaProviderTestStub();
 
-            // uriProvider1 has no schema for test.kson
+            // firstProvider has no schema for test.kson
             const schema2 = TextDocument.create('file:///schema2.kson', 'kson', 1, '{ "from": "second" }');
-            uriProvider2.addSchema('file:///test.kson', schema2);
+            secondProvider.addSchema('file:///test.kson', schema2);
 
-            const provider = new CompositeSchemaProvider([uriProvider1, uriProvider2], logger);
+            const provider = new CompositeSchemaProvider([firstProvider, secondProvider], logger);
             const result = provider.getSchemaForDocument('file:///test.kson');
 
             assert.ok(result);
@@ -129,7 +99,7 @@ describe('CompositeSchemaProvider', () => {
 
         it('should prioritize file system provider over bundled (typical usage)', () => {
             // File system provider (has schema by URI) - higher priority
-            const fileSystemProvider = new UriSchemaProvider();
+            const fileSystemProvider = new SchemaProviderTestStub();
             const fsSchema = TextDocument.create('file:///workspace/schema.kson', 'kson', 1, '{ "from": "filesystem" }');
             fileSystemProvider.addSchema('file:///test.kxt', fsSchema);
 
@@ -148,7 +118,7 @@ describe('CompositeSchemaProvider', () => {
 
         it('should fall back to bundled when file system has no schema', () => {
             // File system provider with no schema
-            const fileSystemProvider = new UriSchemaProvider();
+            const fileSystemProvider = new SchemaProviderTestStub();
 
             // Bundled provider has schema
             const bundledProvider = new BundledSchemaProvider({
@@ -214,14 +184,14 @@ describe('CompositeSchemaProvider', () => {
             assert.strictEqual(result, undefined);
         });
 
-        it('should work with UriSchemaProvider (returns undefined)', () => {
-            const uriProvider = new UriSchemaProvider();
+        it('should skip a provider with no metaschemas', () => {
+            const noMetaSchemaProvider = new SchemaProviderTestStub();
             const metaSchemas: BundledMetaSchemaConfig[] = [
                 { schemaId: 'http://json-schema.org/draft-07/schema#', name: 'draft-07', schemaContent: '{ "metaschema": true }' }
             ];
             const bundledProvider = new BundledSchemaProvider({ schemas: [], metaSchemas, logger });
 
-            const composite = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
+            const composite = new CompositeSchemaProvider([noMetaSchemaProvider, bundledProvider], logger);
             const result = composite.getMetaSchemaForId('http://json-schema.org/draft-07/schema#');
 
             assert.ok(result);
@@ -236,13 +206,13 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should return true when any provider considers it a schema file', () => {
-            const uriProvider = new UriSchemaProvider();
+            const noSchemaProvider = new SchemaProviderTestStub();
             const bundledProvider = new BundledSchemaProvider({
                 schemas: [{ fileExtension: 'kxt', schemaContent: '{}' }],
                 logger
             });
 
-            const provider = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
+            const provider = new CompositeSchemaProvider([noSchemaProvider, bundledProvider], logger);
             assert.strictEqual(provider.isSchemaFile('bundled://schema/kxt.schema.kson'), true);
         });
 
@@ -262,15 +232,15 @@ describe('CompositeSchemaProvider', () => {
         });
 
         it('should check all provider types', () => {
-            const uriProvider = new UriSchemaProvider();
-            uriProvider.addSchema('file:///test.kson', TextDocument.create('file:///my-schema.kson', 'kson', 1, '{}'));
+            const stubProvider = new SchemaProviderTestStub();
+            stubProvider.addSchema('file:///test.kson', TextDocument.create('file:///my-schema.kson', 'kson', 1, '{}'));
 
             const bundledProvider = new BundledSchemaProvider({
                 schemas: [{ fileExtension: 'kxt', schemaContent: '{}' }],
                 logger
             });
 
-            const provider = new CompositeSchemaProvider([uriProvider, bundledProvider], logger);
+            const provider = new CompositeSchemaProvider([stubProvider, bundledProvider], logger);
 
             assert.strictEqual(provider.isSchemaFile('file:///my-schema.kson'), true);
             assert.strictEqual(provider.isSchemaFile('bundled://schema/kxt.schema.kson'), true);

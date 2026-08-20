@@ -20,7 +20,7 @@ export interface SchemaMapping {
 }
 
 /**
- * The root configuration object for .kson-schema.json
+ * The root configuration object for .kson-schema.kson
  */
 export interface SchemaConfig {
     /**

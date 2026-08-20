@@ -183,6 +183,24 @@ class DiagnosticTest {
     }
 
     /**
+     * A schema with KSON warnings that describes a legal schema may be used
+     *
+     * The document breaks the schema twice on purpose: an unusable schema is reported once
+     * ([testSchemaWithSeveralProblemsIsReportedOnce]), so a second violation can only come from a
+     * schema that ran.
+     */
+    @Test
+    fun testSchemaWithWarningsInItsSourceIsStillUsed() {
+        val schemaWithDuplicateKey =
+            "{ type: object, type: object, properties: { a: { type: number }, b: { type: number } } }"
+        val diagnostics = validateDocument("""{ a: "x", b: "y" }""", schemaWithDuplicateKey)
+        assertEquals(
+            2, diagnostics.size,
+            "expected the document's schema violations to be reported, got: $diagnostics"
+        )
+    }
+
+    /**
      * An empty schema file is a routine state on the way to writing one, and every document it governs
      * is unvalidated until it says something.
      */
