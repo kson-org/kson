@@ -53,11 +53,11 @@ class CommandLineInterfaceTest {
 
         when(expectedOutput){
             is OutputExpectation.Failure -> {
-                assertEquals(result.statusCode, 1)
-                assertEquals(result.stderr, expectedOutput.message)
+                assertEquals(1, result.statusCode)
+                assertEquals(expectedOutput.message, result.stderr)
             }
             is OutputExpectation.Success -> {
-                assertEquals(outputFile.readText(), expectedOutput.message)
+                assertEquals(expectedOutput.message, outputFile.readText())
             }
         }
 
