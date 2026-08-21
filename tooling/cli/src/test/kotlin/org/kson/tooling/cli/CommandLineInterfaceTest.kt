@@ -10,6 +10,7 @@ import org.kson.tooling.cli.generated.CLI_NAME
 import org.kson.tooling.cli.generated.KSON_VERSION
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 enum class SubCommands{
     JSON,
@@ -21,6 +22,12 @@ enum class SubCommands{
 sealed class OutputExpectation {
     data class Success(val message: String) : OutputExpectation()
     data class Failure(val message: String) : OutputExpectation()
+
+    /**
+     * A failure identified by what its report mentions rather than by its full text, for reports whose
+     * wording belongs to the messages being relayed rather than to this command line.
+     */
+    data class FailureMentioning(val fragments: List<String>) : OutputExpectation()
 }
 
 class CommandLineInterfaceTest {
@@ -29,11 +36,19 @@ class CommandLineInterfaceTest {
         subCommand: SubCommands,
         input: String,
         expectedOutput: OutputExpectation,
-        vararg args: String
+        vararg args: String,
+        schema: String? = null
     ) {
         val inputFile = File.createTempFile("input", ".kson")
         inputFile.deleteOnExit()
         inputFile.writeText(input)
+
+        val schemaArgs = schema?.let {
+            val schemaFile = File.createTempFile("schema", ".kson")
+            schemaFile.deleteOnExit()
+            schemaFile.writeText(it)
+            listOf("-s", schemaFile.absolutePath)
+        } ?: emptyList()
 
         val outputFile = File.createTempFile("output", ".txt")
         outputFile.deleteOnExit()
@@ -41,7 +56,7 @@ class CommandLineInterfaceTest {
         val commandArgs = listOf(
             "-i", inputFile.absolutePath,
             "-o", outputFile.absolutePath
-        ) + args
+        ) + schemaArgs + args
 
         val mainCommand = when(subCommand) {
             SubCommands.JSON -> JsonCommand()
@@ -58,6 +73,15 @@ class CommandLineInterfaceTest {
             }
             is OutputExpectation.Success -> {
                 assertEquals(expectedOutput.message, outputFile.readText())
+            }
+            is OutputExpectation.FailureMentioning -> {
+                assertEquals(1, result.statusCode, "expected a failing command, stderr was: ${result.stderr}")
+                expectedOutput.fragments.forEach {
+                    assertTrue(
+                        result.stderr.contains(it),
+                        "expected the report to mention \"$it\", stderr was: ${result.stderr}"
+                    )
+                }
             }
         }
 
@@ -608,5 +632,77 @@ class CommandLineInterfaceTest {
                 "Version output for '$flag' should contain version number, but was: ${result.output}"
             }
         }
+    }
+
+    private val requiresAgeSchema = """
+        {
+          type: object
+          properties: { name: { type: string } }
+          required: ["age"]
+        }
+    """.trimIndent()
+
+    @Test
+    fun testValidateWithSchemaAcceptsAConformingDocument() {
+        assertCommand(
+            subCommand = SubCommands.VALIDATE,
+            input = """{ name: "Alice", age: 30 }""",
+            expectedOutput = OutputExpectation.Success("\u2713 No errors or warnings found"),
+            schema = requiresAgeSchema
+        )
+    }
+
+    @Test
+    fun testValidateWithSchemaFailsOnASchemaViolation() {
+        assertCommand(
+            subCommand = SubCommands.VALIDATE,
+            input = """{ name: "Alice" }""",
+            expectedOutput = OutputExpectation.FailureMentioning(listOf("age")),
+            schema = requiresAgeSchema
+        )
+    }
+
+    @Test
+    fun testJsonWithSchemaFailsOnASchemaViolation() {
+        assertCommand(
+            subCommand = SubCommands.JSON,
+            input = """{ name: "Alice" }""",
+            expectedOutput = OutputExpectation.FailureMentioning(listOf("age")),
+            schema = requiresAgeSchema
+        )
+    }
+
+    /**
+     * Transpiling tolerates a document's own warnings, and asking to be held to a schema does not change
+     * that: this document has a duplicate key but breaks no schema rule, so the transpilation succeeds.
+     */
+    @Test
+    fun testJsonWithSchemaTranspilesADocumentCarryingItsOwnWarnings() {
+        assertCommand(
+            subCommand = SubCommands.JSON,
+            input = """{ name: "Alice", name: "Bob" }""",
+            expectedOutput = OutputExpectation.Success("""
+                {
+                  "name": "Alice",
+                  "name": "Bob"
+                }
+            """.trimIndent()),
+            schema = """
+                {
+                  type: object
+                  properties: { name: { type: string } }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testSchemaThatCannotBeUsedStopsTheCommand() {
+        assertCommand(
+            subCommand = SubCommands.JSON,
+            input = """{ name: "Alice" }""",
+            expectedOutput = OutputExpectation.FailureMentioning(listOf("Failed to parse schema")),
+            schema = "{ type: object"
+        )
     }
 }
