@@ -6,7 +6,6 @@ import org.kson.ast.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
-import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
@@ -347,9 +346,9 @@ class Json(
  */
 data class CoreCompileConfig(
     /**
-     * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
+     * The [JSON Schema](https://json-schema.org/) to enforce in this compilation, or null to enforce no schema
      */
-    val schemaJson: JsonSchema = NO_SCHEMA,
+    val schemaJson: JsonSchema? = null,
     /**
      * Whether we do the extra work to build an AST patched with [AstNodeError]'s. This could be set to false when
      * formatting for example, since we're only interested in collecting the error nodes and running validators.
@@ -363,17 +362,10 @@ data class CoreCompileConfig(
     /**
      * List of validators that are run on a complete KsonValue
      */
-    val validators: List<Validator> = listOf(schemaJson),
+    val validators: List<Validator> = listOfNotNull(schemaJson),
 
     /**
      * Context information for the source
      */
     val sourceContext: SourceContext = SourceContext()
 )
-
-/**
- * A [JsonBooleanSchema] specifying just `true` is the "trivial" schema that matches everything,
- * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
- * for more detail
- */
-private val NO_SCHEMA = JsonBooleanSchema(true)
