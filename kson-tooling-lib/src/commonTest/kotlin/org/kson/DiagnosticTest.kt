@@ -139,6 +139,37 @@ class DiagnosticTest {
         assertEquals(0, diagnostics.size)
     }
 
+    /**
+     * Regression test for an issue where warnings were not included in diagnostics when schema validation was
+     * requested
+     */
+    @Test
+    fun testSchemaViolationsFollowTheDocumentsOwnMessages() {
+        val schema = """
+            {
+                type: object
+                properties: { name: { type: string } }
+                required: ["age"]
+            }
+        """.trimIndent()
+        val diagnostics = validateDocument("{ name: \"Alice\", name: \"Bob\" }", schema)
+        assertEquals(2, diagnostics.size, "expected the duplicate key and the schema violation, got: $diagnostics")
+        assertTrue(diagnostics[0].message.contains("Duplicate key"), diagnostics[0].message)
+        assertTrue(diagnostics[1].message.contains("age"), diagnostics[1].message)
+    }
+
+    /**
+     * Regression test for an issue seen in development where attempting to validate a document
+     * with errors against a schema resulted in the document's parse error messages being duplicated
+     */
+    @Test
+    fun testUnparseableDocumentMessagesNotAffectedBySchemaCheck() {
+        val schema = "{ type: object }"
+        val diagnostics = validateDocument("key: \"value\" extra", schema)
+        assertEquals(1, diagnostics.size, "the parse error must be reported once, got: $diagnostics")
+        assertEquals(DiagnosticSeverity.ERROR, diagnostics[0].severity)
+    }
+
     @Test
     fun testUnusableSchemaIsReportedAlongsideDocumentParseErrors() {
         val ksonDocWithError = "key: \"value\" extra"

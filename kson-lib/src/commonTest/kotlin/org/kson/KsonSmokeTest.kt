@@ -313,6 +313,50 @@ class KsonSmokeTest {
         assertTrue(errors.isNotEmpty())
     }
 
+    /**
+     * [SchemaValidator.validate] only returns message from validating against its schema
+     */
+    @Test
+    fun testSchemaValidator_reportsOnlySchemaViolations() {
+        val schemaKson = """{"type": "object", "properties": {"name": {"type": "string"}}}"""
+        val schemaResult = Kson.parseSchema(schemaKson)
+        assertIs<SchemaResult.Success>(schemaResult)
+
+        // a duplicate key is a warning this document carries, but breaks no rule in the schema above
+        val conformingKsonWithAWarning = """{"name": "John", "name": "Bob"}"""
+        assertTrue(
+            Kson.analyze(conformingKsonWithAWarning).errors.isNotEmpty(),
+            "this document must carry a warning of its own for this test to mean anything"
+        )
+
+        assertEquals(
+            emptyList(),
+            schemaResult.schemaValidator.validate(conformingKsonWithAWarning),
+            "validate must report the schema's findings alone"
+        )
+    }
+
+    /**
+     * The companion to [testSchemaValidator_reportsOnlySchemaViolations]: handing a validator to
+     * [Kson.analyze] is how a caller asks for a document's own diagnostics *and* its schema's.
+     */
+    @Test
+    fun testAnalyzeWithSchemaReportsBothKindsOfMessage() {
+        val schemaKson = """{"type": "object", "required": ["age"]}"""
+        val schemaResult = Kson.parseSchema(schemaKson)
+        assertIs<SchemaResult.Success>(schemaResult)
+
+        val messages = Kson.analyze(
+            """{"name": "John", "name": "Bob"}""",
+            filepath = null,
+            schemaValidator = schemaResult.schemaValidator
+        ).errors.map { it.message }
+
+        assertEquals(2, messages.size, "expected the duplicate key and the missing property, got: $messages")
+        assertTrue(messages[0].contains("Duplicate key"), messages[0])
+        assertTrue(messages[1].contains("age"), messages[1])
+    }
+
     @Test
     fun testPropertyKeys_basicAccess() {
         val input = """

@@ -169,7 +169,7 @@ fn test_kson_to_yaml_failure() {
 
 #[test]
 fn test_kson_analysis() {
-    let analysis = Kson::analyze("key: [1, 2, 3, 4]", None);
+    let analysis = Kson::analyze("key: [1, 2, 3, 4]", None, None);
     assert!(analysis.errors().is_empty());
 
     // Transform tokens to strings, so we can snapshot them
@@ -223,6 +223,31 @@ fn test_kson_validate_schema() {
     insta::assert_snapshot!(output, @"0,0 to 0,2 - Expected one of: string, but got: integer");
 }
 
+#[test]
+fn test_kson_analyze_against_a_schema() {
+    let result = Kson::parse_schema(r#"{ "type": "object", "required": ["age"] }"#);
+    let Ok(success) = result else {
+        panic!("expected success, found failure")
+    };
+
+    // a duplicate key is a warning this document carries; the missing `age` is what the schema objects to
+    let analysis = Kson::analyze(
+        r#"{ name: "Alice", name: "Bob" }"#,
+        None,
+        Some(success.schema_validator()),
+    );
+
+    let errors = analysis.errors();
+    assert_eq!(
+        2,
+        errors.len(),
+        "expected the duplicate key and the missing property, got: {}",
+        messages_to_string(&errors)
+    );
+    assert!(errors[0].message().contains("Duplicate key"));
+    assert!(errors[1].message().contains("age"));
+}
+
 /// Transform messages to strings, so we can snapshot them
 fn messages_to_string(msgs: &[Message]) -> String {
     let mut output = String::new();
@@ -255,7 +280,7 @@ list:
   - 3E5
 embed:%tag
 %%"#;
-    let analysis = Kson::analyze(input, None);
+    let analysis = Kson::analyze(input, None, None);
     let kson_value = analysis.kson_value();
     assert!(kson_value.is_some());
 
@@ -343,7 +368,7 @@ fn test_property_keys_basic_access() {
     let input = r#"name: John
 age: 30
 city: 'New York'"#;
-    let analysis = Kson::analyze(input, None);
+    let analysis = Kson::analyze(input, None, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");
@@ -368,7 +393,7 @@ city: 'New York'"#;
 fn test_property_keys_with_position_information() {
     let input = r#"name: John
 age: 30"#;
-    let analysis = Kson::analyze(input, None);
+    let analysis = Kson::analyze(input, None, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");
@@ -392,7 +417,7 @@ age: 30"#;
 #[test]
 fn test_property_keys_empty_object() {
     let input = "{}";
-    let analysis = Kson::analyze(input, None);
+    let analysis = Kson::analyze(input, None, None);
     let value = analysis.kson_value().unwrap();
     let KsonValue::KsonObject(obj) = value else {
         panic!("expected object");

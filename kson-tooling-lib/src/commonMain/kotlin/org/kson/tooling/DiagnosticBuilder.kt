@@ -4,6 +4,7 @@ import org.kson.Kson
 import org.kson.Message
 import org.kson.MessageSeverity
 import org.kson.SchemaResult
+import org.kson.SchemaValidator
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageSeverity as InternalMessageSeverity
 import org.kson.validation.SourceContext
@@ -11,8 +12,8 @@ import org.kson.validation.SourceContext
 /**
  * Validates a KSON document and returns [DiagnosticMessage]s.
  *
- * If a schema is provided and parses, validation includes both parse errors and schema violations.
- * If the schema has problems of its own, it cannot validate anything: a [MessageType.SCHEMA_UNUSABLE]
+ * If a schema is provided and parses, validation includes any schema violations in addition to the document's own
+ * diagnostics. If the schema has problems of its own, it cannot validate anything: a [MessageType.SCHEMA_UNUSABLE]
  * is reported on the document.
  */
 internal object DiagnosticBuilder {
@@ -23,16 +24,19 @@ internal object DiagnosticBuilder {
         }
 
         return when (val result = Kson.parseSchema(schemaContent)) {
-            is SchemaResult.Success -> result.schemaValidator
-                .validate(content, filepath = sourceContext.filepath)
-                .map { toDiagnosticMessage(it) }
+            is SchemaResult.Success ->
+                documentDiagnostics(content, sourceContext, result.schemaValidator)
             is SchemaResult.Failure ->
                 listOf(schemaUnusableDiagnostic(result.errors)) + documentDiagnostics(content, sourceContext)
         }
     }
 
-    private fun documentDiagnostics(content: String, sourceContext: SourceContext): List<DiagnosticMessage> =
-        Kson.analyze(content, sourceContext.filepath).errors.map { toDiagnosticMessage(it) }
+    private fun documentDiagnostics(
+        content: String,
+        sourceContext: SourceContext,
+        schemaValidator: SchemaValidator? = null
+    ): List<DiagnosticMessage> =
+        Kson.analyze(content, sourceContext.filepath, schemaValidator).errors.map { toDiagnosticMessage(it) }
 
     private fun schemaUnusableDiagnostic(schemaProblems: List<Message>): DiagnosticMessage {
         val firstProblem = schemaProblems.first()

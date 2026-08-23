@@ -9,7 +9,7 @@ import com.github.ajalt.clikt.parameters.types.outputStream
 import org.kson.Kson
 import org.kson.Message
 import org.kson.SchemaResult
-import java.io.File
+import org.kson.SchemaValidator
 
 abstract class BaseKsonCommand(
     name: String? = null
@@ -59,26 +59,15 @@ abstract class BaseKsonCommand(
         output.bufferedWriter().use { it.write(content) }
     }
 
-    protected fun validateWithSchema(ksonContent: String) {
-        val schemaFile = schema ?: return
+    /**
+     * Returns [schema] parsed into a [SchemaValidator], or null when [schema] is null.
+     * An invalid non-null [schema] will exit reporting the errors that prevented parsing.
+     */
+    protected fun schemaValidator(): SchemaValidator? {
+        val schemaContent = (schema ?: return null).readText()
 
-        val schemaContent = schemaFile.readText()
-
-        when (val schemaResult = Kson.parseSchema(schemaContent)) {
-            is SchemaResult.Success -> {
-                val validationErrors = schemaResult.schemaValidator.validate(ksonContent, getFilePath())
-
-                if (validationErrors.isEmpty()) {
-                    echo("✓ Document is valid according to the schema")
-                } else {
-                    echo("Validation errors:", err = true)
-                    validationErrors.forEach { error ->
-                        echo("  ${errorFormat(error)}", err = true)
-                    }
-                    throw ProgramResult(1)
-                }
-            }
-
+        return when (val schemaResult = Kson.parseSchema(schemaContent)) {
+            is SchemaResult.Success -> schemaResult.schemaValidator
             is SchemaResult.Failure -> {
                 echo("Failed to parse schema:", err = true)
                 schemaResult.errors.forEach { error ->
@@ -86,6 +75,25 @@ abstract class BaseKsonCommand(
                 }
                 throw ProgramResult(1)
             }
+        }
+    }
+
+    /**
+     * Validates [ksonContent] against [schemaValidator], exiting on any schema validation problems, reporting those
+     * problems
+     */
+    protected fun validateWithSchema(ksonContent: String) {
+        val schemaValidator = schemaValidator() ?: return
+
+        val validationErrors = schemaValidator.validate(ksonContent, getFilePath())
+        if (validationErrors.isEmpty()) {
+            echo("✓ Document is valid according to the schema")
+        } else {
+            echo("Validation errors:", err = true)
+            validationErrors.forEach { error ->
+                echo("  ${errorFormat(error)}", err = true)
+            }
+            throw ProgramResult(1)
         }
     }
 }

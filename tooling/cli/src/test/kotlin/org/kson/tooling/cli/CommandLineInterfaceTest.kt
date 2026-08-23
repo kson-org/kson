@@ -662,6 +662,21 @@ class CommandLineInterfaceTest {
         )
     }
 
+    /**
+     * Regression test for a bug where validate would swallow a document's warnings if it was also asked to validate
+     * against a schema. Validate's whole job is to validate, so it should always report everything (including
+     * warnings) that it finds.
+     */
+    @Test
+    fun testValidateWithSchemaAlsoReportsTheDocumentsOwnWarnings() {
+        assertCommand(
+            subCommand = SubCommands.VALIDATE,
+            input = """{ name: "Alice", name: "Bob" }""",
+            expectedOutput = OutputExpectation.FailureMentioning(listOf("Duplicate key", "age")),
+            schema = requiresAgeSchema
+        )
+    }
+
     @Test
     fun testJsonWithSchemaFailsOnASchemaViolation() {
         assertCommand(
