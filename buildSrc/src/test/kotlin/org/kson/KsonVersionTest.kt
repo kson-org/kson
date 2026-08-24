@@ -22,14 +22,12 @@ class KsonVersionTest {
 
     @Test
     fun snapshotVersionIsStable() {
-        assertEquals("0.3.0-SNAPSHOT", KsonVersion.getVersion(isRelease = false))
+        assertEquals("1.2.3-SNAPSHOT", KsonVersion.getVersion("1.2.3", isRelease = false))
     }
 
     @Test
     fun releaseVersionIsBareBaseVersion() {
-        // [[kson-version-num]] This should stay in sync with the global to test that release/snapshot is correctly handled.
-        assertEquals("0.3.0", KsonVersion.getVersion(isRelease = true))
-        assertEquals("0.4.0", "0.3.0", "this should have failed")
+        assertEquals("1.2.3", KsonVersion.getVersion("1.2.3", isRelease = true))
     }
 
     @Test
@@ -43,7 +41,7 @@ class KsonVersionTest {
         val repoDir = createTempGitRepo()
         val version = KsonVersion.getPublishVersion(repoDir, isRelease = false)
         assertTrue(
-            Regex("""0\.3\.0-[0-9a-f]{8}-SNAPSHOT""").matches(version),
+            Regex("""[0-9]+\.[0-9]+\.[0-9]+-[0-9a-f]{8}-SNAPSHOT""").matches(version),
             "Expected SHA-qualified snapshot version, got: $version"
         )
     }

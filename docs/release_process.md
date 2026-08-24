@@ -20,6 +20,12 @@ When `main` is ready to have a release cut from it:
   * [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json): `X.(Y+1).0-dev.0`
   * [tooling/language-server-protocol](../tooling/language-server-protocol/package.json): `X.(Y+1).0-dev.0`
+- Run build and tests to ensure that `Cargo.lock` and `uv.lock` are updated and to ensure that tests pass:
+    ```bash
+    (cd buildSrc && ./gradlew check)
+    ./gradlew build
+    ```
+- Manufacture a commit and pull request with these changes.
 
 #### On the `release/X.Y.Z` branch:
 
