@@ -46,9 +46,9 @@ def _ensure_native_artifacts():
     if not artifacts_exist and kson_copy_dir.exists():
         print(f"Building native artifacts for {sys.platform} with bundled Gradle setup...")
 
-        gradlew = "./gradlew" if os.name != "nt" else "gradlew.bat"
+        gradlew = kson_copy_dir / ("gradlew.bat" if os.name == "nt" else "gradlew")
         result = subprocess.run(
-            [gradlew, "lib-python:build"],
+            [str(gradlew), "lib-python:build"],
             capture_output=True,
             text=True,
             cwd=kson_copy_dir,

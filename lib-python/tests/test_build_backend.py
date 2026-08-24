@@ -2,6 +2,7 @@
 
 import subprocess
 import sys
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -91,6 +92,22 @@ class TestEnsureNativeArtifacts:
                 with pytest.raises(RuntimeError, match="Failed to build native artifacts"):
                     build_backend._ensure_native_artifacts()
                 mock_run.assert_called_once()
+
+    @pytest.mark.parametrize("os_name, script", [("posix", "gradlew"), ("nt", "gradlew.bat")])
+    def test_runs_bundled_gradlew_by_absolute_path(self, tmp_path, os_name, script):
+        """The wrapper must be addressed absolutely: Windows does not resolve argv[0] against cwd."""
+        (tmp_path / "src" / "kson").mkdir(parents=True)
+        (tmp_path / "kson-sdist").mkdir()
+
+        with patch.object(build_backend, "__file__", str(tmp_path / "build_backend.py")):
+            with patch.object(build_backend, "os", SimpleNamespace(name=os_name)):
+                with patch.object(build_backend.subprocess, "run") as mock_run:
+                    mock_run.return_value = subprocess.CompletedProcess(
+                        args=[], returncode=1, stdout="", stderr="fail",
+                    )
+                    with pytest.raises(RuntimeError):
+                        build_backend._ensure_native_artifacts()
+                    assert mock_run.call_args.args[0][0] == str(tmp_path / "kson-sdist" / script)
 
     def test_errors_when_artifacts_missing_and_no_kson_sdist(self, tmp_path):
         """Raises when artifacts are missing and there's no kson-sdist to build from."""
