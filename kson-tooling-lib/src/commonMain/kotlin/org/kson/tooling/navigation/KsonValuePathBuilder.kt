@@ -1,8 +1,6 @@
 package org.kson.tooling.navigation
 
 import org.kson.ast.AstNode
-import org.kson.ast.ObjectNode
-import org.kson.ast.ObjectPropertyNodeImpl
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
@@ -12,7 +10,6 @@ import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
 import org.kson.walker.navigateToLocationWithPointer
-import org.kson.walker.navigateWithJsonPointer
 import org.kson.tooling.ToolingDocument
 
 /**
@@ -121,8 +118,7 @@ class KsonValuePathBuilder(
             targetNode = navResult.value,
             isLocationInsideToken = tokenContext.isInsideToken,
             includePropertyKeys = includePropertyKeys,
-            meaningfulTokens = document.meaningfulTokens,
-            rootNode = rootNode
+            meaningfulTokens = document.meaningfulTokens
         )
     }
 
@@ -232,8 +228,7 @@ class KsonValuePathBuilder(
         targetNode: AstNode,
         isLocationInsideToken: Boolean,
         includePropertyKeys: Boolean,
-        meaningfulTokens: List<Token>,
-        rootNode: AstNode
+        meaningfulTokens: List<Token>
     ): CaretPath {
         val colonToken = lastToken?.let { findNearestPrecedingColon(it, meaningfulTokens) }
         val colonPropertyName = colonToken?.let { findPropertyNameBeforeColon(it, meaningfulTokens) }
@@ -243,8 +238,7 @@ class KsonValuePathBuilder(
         afterColonCaretPath(pointer, colonToken, colonPropertyName, targetNode)?.let { return it }
         propertyKeyCaretPath(pointer, lastToken, isLocationInsideToken, targetNode, includePropertyKeys)
             ?.let { return it }
-        parentCaretPath(pointer, lastToken, isLocationInsideToken, includePropertyKeys, targetNode, rootNode)
-            ?.let { return it }
+        parentCaretPath(pointer, lastToken, isLocationInsideToken, includePropertyKeys)?.let { return it }
         return leafOrAsIsCaretPath(pointer, lastToken, targetNode, includePropertyKeys)
     }
 
@@ -301,32 +295,24 @@ class KsonValuePathBuilder(
 
     /**
      * Location outside the token while completing (not keeping property keys): target the parent element
-     * by dropping the last path segment.  Excludes container-opening delimiters (`[`, `{`, `<`), where the
-     * caret is inside an empty container the pointer already names and dropping would overshoot to the
-     * grandparent.  A fresh dash-list item (`- `) additionally exposes its enclosing property as the
-     * placeholder so its incomplete item never disqualifies the branches being completed; on a fresh
-     * property-name line the caret follows a committed sibling's last token (not a dash), so there is no
-     * placeholder and those committed siblings still narrow.  Returns null when the caret is not in this
-     * position.
+     * by dropping the last path segment.  Excludes the tokens that open a value the caret is now inside
+     * and the pointer already names: the container delimiters (`[`, `{`, `<`) and a list dash, which opens
+     * an element the same way.  Dropping a segment at any of those would overshoot to the grandparent.
+     * Returns null when the caret is not in this position.
      */
     private fun parentCaretPath(
         pointer: JsonPointer,
         lastToken: Token?,
         isLocationInsideToken: Boolean,
-        includePropertyKeys: Boolean,
-        targetNode: AstNode,
-        rootNode: AstNode
+        includePropertyKeys: Boolean
     ): CaretPath? {
         val targetsParent = !isLocationInsideToken && !includePropertyKeys &&
                 lastToken?.tokenType != TokenType.SQUARE_BRACKET_L &&
                 lastToken?.tokenType != TokenType.CURLY_BRACE_L &&
-                lastToken?.tokenType != TokenType.ANGLE_BRACKET_L
+                lastToken?.tokenType != TokenType.ANGLE_BRACKET_L &&
+                lastToken?.tokenType != TokenType.LIST_DASH
         if (!targetsParent) return null
-        val parentPointer = JsonPointer.fromTokens(pointer.tokens.dropLast(1))
-        val placeholder = if (lastToken?.tokenType == TokenType.LIST_DASH)
-            enclosingPropertyLocation(rootNode, parentPointer, targetNode)
-        else null
-        return CaretPath(parentPointer, placeholder)
+        return CaretPath(JsonPointer.fromTokens(pointer.tokens.dropLast(1)), placeholderLocation = null)
     }
 
     /**
@@ -347,24 +333,5 @@ class KsonValuePathBuilder(
                 lastToken.tokenType == TokenType.STRING_CLOSE_QUOTE &&
                 isAtOrAfter(location, lastToken.lexeme.location.end)
         return CaretPath(pointer, placeholder, caretPastValueToken)
-    }
-
-    /**
-     * Location of the object property at [parentPointer] whose value is [valueNode], or null when
-     * [parentPointer] is not an object or owns no such property (e.g. a dash list nested directly
-     * in another list).  The property's location spans its key through its value; passing it as the
-     * caret's incomplete region forgives the type/additional-property errors the half-typed item
-     * would otherwise trigger against sibling-discriminated branches.
-     */
-    private fun enclosingPropertyLocation(
-        rootNode: AstNode,
-        parentPointer: JsonPointer,
-        valueNode: AstNode
-    ): Location? {
-        val parent = AstNodeWalker.navigateWithJsonPointer(rootNode, parentPointer) as? ObjectNode ?: return null
-        val property = parent.properties.firstOrNull {
-            (it as? ObjectPropertyNodeImpl)?.value === valueNode
-        } ?: return null
-        return AstNodeWalker.getLocation(property)
     }
 }

@@ -30,6 +30,13 @@ class SchemaCompletionLocationTest {
         return KsonTooling.getCompletionsAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
     }
 
+    /**
+     * Helper to assert the set of labels offered at the <caret> position in the document
+     */
+    private fun assertCompletionLabels(schema: String, documentWithCaret: String, expected: Set<String>) {
+        assertEquals(expected, getCompletionsAtCaret(schema, documentWithCaret).map { it.label }.toSet())
+    }
+
     @Test
     fun testConstValueCompletions() {
         val schema = """
@@ -1826,6 +1833,31 @@ class SchemaCompletionLocationTest {
             labels,
             "Empty recursive-anyOf array item offers the union of both branches, got: $labels"
         )
+    }
+
+    /** A dash with nothing after it yet is the list's next item, so the caret completes that item */
+    @Test
+    fun testCompletionsAtFreshDashItemOfferItemValues() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "colors": {
+                        "type": "array",
+                        "items": { "enum": ["red", "green", "blue"] }
+                    },
+                    "other": { "type": "string" }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, """
+            colors:
+              - red
+              - <caret>
+              =
+            other: x
+        """.trimIndent(), setOf("blue", "green", "red"))
     }
 
     @Test
