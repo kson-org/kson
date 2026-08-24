@@ -10,7 +10,7 @@
   ],
   "publisher": "kson",
   "//": "[[kson-version-num]]",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0",
   "icon": "dist/extension/assets/kson-icon.png",
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
 {
   "name": "@kson_org/monaco-editor",
   "//": "[[kson-version-num]]",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0",
   "description": "Monaco editor with KSON language support and LSP integration",
   "type": "module",
   "scripts": {

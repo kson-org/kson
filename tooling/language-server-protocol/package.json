@@ -11,7 +11,7 @@
     }
   ],
   "//": "[[kson-version-num]]",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0",
   "description": "Kson Language Server implementation in TypeScript",
   "type": "module",
   "exports": {
