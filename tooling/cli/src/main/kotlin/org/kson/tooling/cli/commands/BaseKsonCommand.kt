@@ -80,15 +80,14 @@ abstract class BaseKsonCommand(
 
     /**
      * Validates [ksonContent] against [schemaValidator], exiting on any schema validation problems, reporting those
-     * problems
+     * problems.  Says nothing when the document conforms: commands which transpile write their result to stdout,
+     * so anything said there on success lands in the middle of that result.
      */
     protected fun validateWithSchema(ksonContent: String) {
         val schemaValidator = schemaValidator() ?: return
 
         val validationErrors = schemaValidator.validate(ksonContent, getFilePath())
-        if (validationErrors.isEmpty()) {
-            echo("✓ Document is valid according to the schema")
-        } else {
+        if (validationErrors.isNotEmpty()) {
             echo("Validation errors:", err = true)
             validationErrors.forEach { error ->
                 echo("  ${errorFormat(error)}", err = true)

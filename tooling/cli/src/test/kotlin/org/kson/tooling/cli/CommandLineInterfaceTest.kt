@@ -73,6 +73,13 @@ class CommandLineInterfaceTest {
             }
             is OutputExpectation.Success -> {
                 assertEquals(expectedOutput.message, outputFile.readText())
+                /**
+                 * On success, a command's output to `-o`/[outputFile] must be identical to what it would pipe to
+                 * another command on stdout in the non-`-o` case. Which is to say: on success of a `-o` call,
+                 * which all these tests use to put their output in [outputFile], we must have no extraneous output
+                 * direct to stdout
+                 */
+                assertEquals("", result.stdout, "a successful command must not say anything extra on stdout")
             }
             is OutputExpectation.FailureMentioning -> {
                 assertEquals(1, result.statusCode, "expected a failing command, stderr was: ${result.stderr}")
