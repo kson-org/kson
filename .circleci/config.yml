@@ -336,6 +336,7 @@ jobs:
   "build-python-sdist":
     docker:
       - image: "cimg/python:3.11"
+    resource_class: large
     working_directory: "~/repo"
     steps:
       - checkout
