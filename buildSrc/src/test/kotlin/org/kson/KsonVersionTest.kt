@@ -27,7 +27,9 @@ class KsonVersionTest {
 
     @Test
     fun releaseVersionIsBareBaseVersion() {
+        // [[kson-version-num]] This should stay in sync with the global to test that release/snapshot is correctly handled.
         assertEquals("0.3.0", KsonVersion.getVersion(isRelease = true))
+        assertEquals("0.4.0", "0.3.0", "this should have failed")
     }
 
     @Test

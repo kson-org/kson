@@ -7,7 +7,6 @@ repositories {
 }
 
 group = "org.kson"
-// [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
 val isRelease = project.findProperty("release") == "true"
 version = org.kson.KsonVersion.getVersion(isRelease = isRelease)
 kotlin {

@@ -10,7 +10,7 @@ platforms = [
     "win-64",
 ]
 # [[kson-version-num]]
-version = "0.3.0-dev"
+version = "0.4.0-dev"
 
 [tasks]
 
