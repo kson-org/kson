@@ -12,14 +12,20 @@ When `main` is ready to have a release cut from it:
   * **Gradle-based projects** use centralized version from [KsonVersion.kt](../buildSrc/src/main/kotlin/org/kson/KsonVersion.kt):
     - Update `BASE_VERSION` to `X.(Y+1).0` - this applies to kson-lib, kson-tooling-lib, tooling/jetbrains, and tooling/cli
     - Snapshot versions use stable `{BASE_VERSION}-SNAPSHOT` for builds, and SHA-qualified `{BASE_VERSION}-{gitSha}-SNAPSHOT` for Maven publishing
-  * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)-SNAPSHOT` (note this is the special incrementing internal version, update `internalBaseVersion` there)
-  * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`
+  * [KSON Core internals](../build.gradle.kts): `x.(PREVIOUS_NUM+1)` (note this is the special incrementing internal version, update `internalBaseVersion` there)
+  * lib-rust: [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs): `X.(Y+1).0-dev`, [pixi.toml](../lib-rust/pixi.toml): `X.(Y+1).0-dev`
   * [lib-python](../lib-python/pyproject.toml): `X.(Y+1).0.dev0`
   * [tooling/lsp-clients](../tooling/lsp-clients/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json): `X.(Y+1).0-dev.0`
   * [tooling/language-server-protocol](../tooling/language-server-protocol/package.json): `X.(Y+1).0-dev.0`
+- Run build and tests to ensure that `Cargo.lock` and `uv.lock` are updated and to ensure that tests pass:
+    ```bash
+    (cd buildSrc && ./gradlew check)
+    ./gradlew build
+    ```
+- Manufacture a commit and pull request with these changes.
 
 #### On the `release/X.Y.Z` branch:
 

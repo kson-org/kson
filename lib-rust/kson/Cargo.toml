@@ -1,7 +1,7 @@
 [package]
 name = "kson-rs"
 # [[kson-version-num]]
-version = "0.3.0-dev"
+version = "0.4.0-dev"
 edition = "2024"
 description = "Idiomatic Rust bindings to kson-lib"
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ default = []
 
 [dependencies]
 # [[kson-version-num]]
-kson-sys = { version = "0.3.0-dev", path = "../kson-sys" }
+kson-sys = { version = "0.4.0-dev", path = "../kson-sys" }
 
 [dev-dependencies]
 insta = "1.43.1"
