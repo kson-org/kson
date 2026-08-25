@@ -9,6 +9,11 @@ import org.kson.value.*
 interface JsonSchemaValidator: Validator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 
+    // schema todo introspection on the execution interface: this asks a validator what it *declares*,
+    //   not whether a document passes.  It exists because a schema keeps only its compiled validators,
+    //   so callers must recover declarations by casting (see JsonObjectSchema.ownPinnedProperties).
+    //   If a third consumer needs that, give JsonObjectSchema a parsed declaration model instead and
+    //   drop this method.
     /** The finite set of values this validator restricts its target to (const/enum), or null if it doesn't pin to a finite set. */
     fun pinnedValues(): Set<KsonValue>? = null
 }
