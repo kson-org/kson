@@ -214,65 +214,6 @@ commands:
           .
         .
     .
-  'setup-python-test':
-    description: 'Common setup for Python sdist testing'
-    parameters:
-      platform:
-        type: string
-        .
-      .
-    steps:
-      - checkout
-      - when:
-          condition:
-            equal:
-              - '<< parameters.platform >>'
-              - windows
-            .
-          steps:
-            - 'clean-git-config':
-                shell: powershell
-            =
-
-      - when:
-          condition:
-            not:
-              equal:
-                - '<< parameters.platform >>'
-                - windows
-              .
-            .
-          steps:
-            - 'clean-git-config':
-                shell: bash
-            =
-
-      - attach_workspace:
-          at: '~/repo'
-          .
-        .
-    .
-  'run-python-tests-unix':
-    description: 'Run Python sdist tests and build wheel for Unix-like systems'
-    steps:
-      - run:
-          name: 'Install kson from sdist'
-          command: 'python3 -m pip install lib-python/dist/kson_lang-*.tar.gz'
-
-      - run:
-          name: 'Install test dependencies'
-          command: 'python3 -m pip install pytest'
-
-      - run:
-          name: 'Run smoke tests on sdist installation'
-          command: 'python3 -m pytest lib-python -v'
-
-      - run:
-          name: 'Build platform-specific wheel'
-          command: './gradlew :lib-python:buildWheel'
-          .
-        .
-    .
   .
 # Job definitions
 jobs:
@@ -372,11 +313,10 @@ jobs:
           .
         .
     .
-  'build-python-sdist':
+  'test-python-sdist':
     docker:
       - image: 'cimg/python:3.11'
         .
-    resource_class: large
     working_directory: '~/repo'
     steps:
       - checkout
@@ -386,38 +326,37 @@ jobs:
           platform: 'linux-amd64'
       - run:
           name: 'Build Python source distribution'
-          command: './gradlew :lib-python:createSdistBuildEnvironment'
+          command: './gradlew :lib-python:buildSdist'
 
       - run:
-          name: 'Verify sdist was created'
-          command: 'ls -la lib-python/dist/\ntest -f lib-python/dist/kson_lang-*.tar.gz\n'
+          name: 'Verify the sdist is source only'
+          command: 'ls -la lib-python/dist/\ntest -f lib-python/dist/kson_lang-*.tar.gz\n# The sdist builds nothing, so it must carry none of the Gradle output that\n# `[tool.setuptools.package-data]` offers it. tests/test_manifest.py pins MANIFEST.in\n# against that list; this is the only place anyone opens the archive itself.\ntar tzf lib-python/dist/kson_lang-*.tar.gz | tee /tmp/sdist-contents.txt\n! grep -E "[.](so|dylib|dll|pyd|h)$" /tmp/sdist-contents.txt\n'
 
-      - persist_to_workspace:
-          root: '~/repo'
-          paths:
-            - 'lib-python/dist/*.tar.gz'
-            =
+      - run:
+          name: 'Verify installing the sdist fails with a useful message'
+          command: '# Refusing to build is the whole contract of the sdist, so hold it to the\n# message build_backend.py means to give: a bare install failure reads like a broken release.\n! python3 -m pip install --no-cache-dir lib-python/dist/kson_lang-*.tar.gz > /tmp/sdist-install.log 2>&1\ncat /tmp/sdist-install.log\ngrep -q "Cannot build kson-lang" /tmp/sdist-install.log\n'
 
       - 'save-build-caches':
           platform: 'linux-amd64'
-      - store_artifacts:
-          path: 'lib-python/dist'
-          destination: 'python-sdist'
           .
         .
     .
-  'test-python-sdist-linux-amd64':
+  'build-python-wheel-linux-amd64':
     docker:
       - image: 'cimg/python:3.11'
         .
     working_directory: '~/repo'
     steps:
-      - 'setup-python-test':
-          platform: linux
+      - checkout
+      - 'clean-git-config':
+          shell: bash
       - 'restore-build-caches':
           platform: 'linux-amd64'
       - setup_remote_docker
-      - 'run-python-tests-unix'
+      - run:
+          name: 'Build platform-specific wheel'
+          command: './gradlew :lib-python:buildWheel'
+
       - 'save-build-caches':
           platform: 'linux-amd64'
       - store_artifacts:
@@ -426,18 +365,22 @@ jobs:
           .
         .
     .
-  'test-python-sdist-macos':
+  'build-python-wheel-macos':
     macos:
       xcode: '16.4.0'
       .
     resource_class: 'm4pro.medium'
     working_directory: '~/repo'
     steps:
-      - 'setup-python-test':
-          platform: macos
+      - checkout
+      - 'clean-git-config':
+          shell: bash
       - 'restore-build-caches':
           platform: 'macos-python'
-      - 'run-python-tests-unix'
+      - run:
+          name: 'Build platform-specific wheel'
+          command: './gradlew :lib-python:buildWheel'
+
       - 'save-build-caches':
           platform: 'macos-python'
       - store_artifacts:
@@ -446,34 +389,18 @@ jobs:
           .
         .
     .
-  'test-python-sdist-windows':
+  'build-python-wheel-windows':
     executor:
       name: 'windows/default'
       size: medium
       .
     working_directory: '~/repo'
     steps:
-      - 'setup-python-test':
-          platform: windows
+      - checkout
+      - 'clean-git-config':
+          shell: powershell
       - 'restore-build-caches':
           platform: 'windows-python'
-      - run:
-          name: 'Check Python version and upgrade if needed'
-          command: 'python --version\npython -m pip install --upgrade pip\n'
-
-      - run:
-          name: 'Install kson from sdist'
-          command: 'python -m pip install (Get-ChildItem lib-python/dist/kson_lang-*.tar.gz).FullName\n'
-          shell: 'powershell.exe'
-
-      - run:
-          name: 'Install test dependencies'
-          command: 'python -m pip install pytest'
-
-      - run:
-          name: 'Run smoke tests on sdist installation'
-          command: 'python -m pytest lib-python -v'
-
       - run:
           name: 'Build platform-specific wheel'
           command: '.\\gradlew.bat :lib-python:buildWheel --no-daemon\n'
@@ -508,27 +435,21 @@ workflows:
     .
   'build-python-and-test':
     jobs:
-      - 'build-python-sdist':
+      - 'test-python-sdist':
           filters:
             branches:
               only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-      - 'test-python-sdist-linux-amd64':
-          requires:
-            - 'build-python-sdist'
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-
-      - 'test-python-sdist-macos':
-          requires:
-            - 'build-python-sdist'
+      - 'build-python-wheel-linux-amd64':
           filters:
             branches:
               only: '/release.*\\d+\\.\\d+\\.\\d+$/'
 
-      - 'test-python-sdist-windows':
-          requires:
-            - 'build-python-sdist'
+      - 'build-python-wheel-macos':
+          filters:
+            branches:
+              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
+
+      - 'build-python-wheel-windows':
           filters:
             branches:
               only: '/release.*\\d+\\.\\d+\\.\\d+$/'
