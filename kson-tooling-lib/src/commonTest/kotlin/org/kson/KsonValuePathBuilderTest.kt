@@ -116,6 +116,49 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
+    fun testBuildJsonPointerToPosition_keyBeingTypedInPlainObject() {
+        // the colon-less key lands in trailing content, so the path comes from `John` instead
+        assertPathAtCaret(
+            """
+            person:
+              name: John
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("person")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_keyBeingTypedAfterList() {
+        // a key can only belong to an object, so the path walks back out of the list above it
+        assertPathAtCaret(
+            """
+            person:
+              hobbies:
+                - reading
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("person")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_definitionAtKeyBeingTyped() {
+        // only completion knows the caret is mid-keystroke: a definition lookup on content the
+        // parser dropped resolves nothing rather than guessing from a token elsewhere
+        assertPathAtCaret(
+            """
+            person:
+              name: John
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.ROOT
+        )
+    }
+
+    @Test
     fun testBuildJsonPointerToPosition_nestedArrayItem() {
         assertPathAtCaret(
             """

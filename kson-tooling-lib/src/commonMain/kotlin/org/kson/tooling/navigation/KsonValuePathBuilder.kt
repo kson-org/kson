@@ -10,6 +10,7 @@ import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
 import org.kson.walker.navigateToLocationWithPointer
+import org.kson.walker.navigateWithJsonPointer
 import org.kson.tooling.ToolingDocument
 
 /**
@@ -94,6 +95,10 @@ class KsonValuePathBuilder(
      * caret coordinates is needed.  It is only populated for completion (`includePropertyKeys =
      * false`); definition/hover lookups leave it null and treat the committed value as authoritative.
      *
+     * A caret can also fall outside the tree entirely: a key with no `:` yet is not a keyword, so an
+     * undelimited object ends at it and everything from there on is trailing content.  For completion
+     * we resolve such a caret from the last token that is in the tree — see [caretOutsideTreePath].
+     *
      * @return The resolved [CaretPath], or null if the document is completely unparseable
      */
     fun buildCaretPath(includePropertyKeys: Boolean = true): CaretPath? {
@@ -101,7 +106,7 @@ class KsonValuePathBuilder(
             ?: return if (document.content.isBlank()) CaretPath(JsonPointer.ROOT, null) else null
 
         // Analyze token context using meaningful (non-whitespace) tokens
-        val tokenContext = analyzeTokenContext(document.meaningfulTokens, location)
+        val tokenContext = analyzeTokenContext(location)
 
         // Determine the search position: use token start if available, otherwise location
         val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
@@ -109,7 +114,7 @@ class KsonValuePathBuilder(
         // Navigate to the target node and build the path via the AST walker
         val navResult = AstNodeWalker.navigateToLocationWithPointer(
             rootNode, searchPosition
-        ) ?: return CaretPath(JsonPointer.ROOT, null)
+        ) ?: return caretOutsideTreePath(rootNode, includePropertyKeys)
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
@@ -123,35 +128,73 @@ class KsonValuePathBuilder(
     }
 
     /**
+     * The [CaretPath] for a caret the parser placed nothing at: past the end of the tree in trailing
+     * content, or before its start.  Resolves from the last token at or before the caret that IS in
+     * the tree, as if the caret sat in the whitespace just after that token, so a key being typed
+     * into an undelimited object—which ends that object—still completes against it.
+     *
+     * Only completion asks for this.  A definition or hover lookup has no reason to believe the
+     * caret is mid-keystroke, and reading a target off a token that may be pages away would answer
+     * a question nobody asked, so those keep resolving to the root.
+     */
+    private fun caretOutsideTreePath(rootNode: AstNode, includePropertyKeys: Boolean): CaretPath {
+        if (includePropertyKeys) return CaretPath(JsonPointer.ROOT, null)
+
+        val (anchor, navResult) = meaningfulTokensUpTo(location).asReversed().firstNotNullOfOrNull { token ->
+            AstNodeWalker.navigateToLocationWithPointer(rootNode, token.lexeme.location.start)
+                ?.let { token to it }
+        } ?: return CaretPath(JsonPointer.ROOT, null)
+
+        val caretPath = adjustPathForLocationContext(
+            pointer = navResult.pointerFromRoot,
+            lastToken = anchor,
+            targetNode = navResult.value,
+            isLocationInsideToken = false,
+            includePropertyKeys = false,
+            meaningfulTokens = document.meaningfulTokens
+        )
+        return caretPath.copy(pointer = enclosingObjectPointer(rootNode, caretPath.pointer))
+    }
+
+    /**
+     * [pointer] with any trailing list segments dropped.  A key belongs to an object, so a key typed
+     * under a list belongs to the object that owns the list: `tags:\n  - red\nother: x` reads `other`
+     * as a property of the object holding `tags`, not as part of the list.
+     */
+    private fun enclosingObjectPointer(rootNode: AstNode, pointer: JsonPointer): JsonPointer {
+        var enclosing = pointer
+        while (enclosing.tokens.isNotEmpty() && namesAList(rootNode, enclosing)) {
+            enclosing = JsonPointer.fromTokens(enclosing.tokens.dropLast(1))
+        }
+        return enclosing
+    }
+
+    /** True when [pointer] names a list in the tree rooted at [rootNode]. */
+    private fun namesAList(rootNode: AstNode, pointer: JsonPointer): Boolean {
+        val node = AstNodeWalker.navigateWithJsonPointer(rootNode, pointer) ?: return false
+        return AstNodeWalker.getChildren(node) is NodeChildren.Array
+    }
+
+    /**
      * Analyzes the token context at a specific location.
      *
      * Determines which token (if any) is at or before the location,
      * and whether the location falls within that token's bounds.
      */
-    private fun analyzeTokenContext(
-        tokens: List<Token>,
-        location: Coordinates
-    ): TokenContext {
-        val lastToken = findLastTokenBeforeLocation(tokens, location)
+    private fun analyzeTokenContext(location: Coordinates): TokenContext {
+        val lastToken = meaningfulTokensUpTo(location).lastOrNull()
         val isInsideToken = isPositionInsideToken(lastToken, location)
         return TokenContext(lastToken, isInsideToken)
     }
 
     /**
-     * Finds the last token that starts at or before the location.
+     * The meaningful tokens that start at or before the location, in document order.
      * The EOF token is excluded from consideration.
      */
-    private fun findLastTokenBeforeLocation(
-        tokens: List<Token>,
-        location: Coordinates
-    ): Token? {
-        return tokens
+    private fun meaningfulTokensUpTo(location: Coordinates): List<Token> {
+        return document.meaningfulTokens
             .dropLast(1)  // Exclude EOF token
-            .lastOrNull { token ->
-                val tokenStart = token.lexeme.location.start
-                tokenStart.line < location.line ||
-                        (tokenStart.line == location.line && tokenStart.column <= location.column)
-            }
+            .filter { isAtOrAfter(location, it.lexeme.location.start) }
     }
 
     /**
