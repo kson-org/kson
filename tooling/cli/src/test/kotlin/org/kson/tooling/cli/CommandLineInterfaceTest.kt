@@ -406,6 +406,20 @@ class CommandLineInterfaceTest {
         )
     }
 
+    /**
+     * Our stance on `validate` is that it's strict: the user asked us to validate, and any issues, including
+     * warnings, result in exit(1)
+     */
+    @Test
+    fun testValidateCommandFailsOnAWarningOnlyDocument() {
+        assertCommand(
+            SubCommands.VALIDATE,
+            input = """{ name: "Alice", name: "Bob" }""",
+            expectedOutput = OutputExpectation.Failure(
+                """[WARNING] Duplicate key "name" in object at 0:17""" + "\n"
+            )
+        )
+    }
 
     @Test
     fun testTranspileToJsonWithEmptyObject() {

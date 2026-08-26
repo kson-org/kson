@@ -30,8 +30,8 @@ class ValidateCommand : BaseKsonCommand() {
         |${"\u0085"}  $CLI_NAME validate -i file.$FILE_EXTENSION -s schema.$FILE_EXTENSION
         |
         |Exit codes:
-        |${"\u0085"}  0 - No errors found
-        |${"\u0085"}  1 - Errors detected (warnings don't affect exit code)
+        |${"\u0085"}  0 - No errors or warnings found
+        |${"\u0085"}  1 - Errors or warnings found
     """.trimMargin()
 
     private val showTokens by option("--show-tokens", help = "Display lexical tokens (for debugging)")
