@@ -6,7 +6,6 @@ import org.kson.ast.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
-import org.kson.schema.JsonBooleanSchema
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
@@ -54,7 +53,7 @@ object KsonCore {
         }
         if (tokens[initialTokenIndex].tokenType == TokenType.EOF) {
             messageSink.error(tokens[0].lexeme.location, MessageType.BLANK_SOURCE.create())
-            return AstParseResult(KsonRootError(tokens), tokens, messageSink)
+            return AstParseResult(KsonRootError(tokens), tokens, messageSink, coreCompileConfig.ignoreErrors)
         }
 
         val builder = KsonBuilder(tokens, coreCompileConfig.ignoreErrors)
@@ -71,7 +70,7 @@ object KsonCore {
 
         } catch (ex: FatalParseException) {
             messageSink.error(tokens[0].lexeme.location, MessageType.FATAL_PARSE_ERROR.create(ex.message ?: "Unknown error"))
-            return AstParseResult(KsonRootError(tokens), tokens, messageSink)
+            return AstParseResult(KsonRootError(tokens), tokens, messageSink, coreCompileConfig.ignoreErrors)
         }
 
         // If we are not interested in errors we don't have to run extra validations.
@@ -87,7 +86,7 @@ object KsonCore {
                 it.validate(ast.toKsonValue(), messageSink, coreCompileConfig.sourceContext)
             }
         }
-        return AstParseResult(ast, tokens, messageSink)
+        return AstParseResult(ast, tokens, messageSink, coreCompileConfig.ignoreErrors)
     }
 
     /**
@@ -106,9 +105,7 @@ object KsonCore {
             )
         }
         val ksonValue = astParseResult.ksonValue
-        if (ksonValue == null || astParseResult.hasErrors()) {
-            return SchemaParseResult(null, astParseResult.messages)
-        }
+            ?: return SchemaParseResult(null, astParseResult.messages)
 
         val messageSink = MessageSink()
         val jsonSchema = SchemaParser.parseSchemaRoot(ksonValue, messageSink)
@@ -184,23 +181,32 @@ interface ParseResult {
 data class AstParseResult(
     override val ast: KsonRoot,
     override val lexedTokens: List<Token>,
-    private val messageSink: MessageSink
+    private val messageSink: MessageSink,
+    /**
+     * True when this parse was performed with [CoreCompileConfig.ignoreErrors]
+     */
+    private val ignoreErrors: Boolean
 ) : ParseResult {
     override val messages = messageSink.loggedMessages()
 
     /**
-     * A [KsonValue] on the AST constructed here, or null if there were errors trying to parse
-     * (consult [messageSink] for information on any errors).
+     * A [KsonValue] on the AST constructed here, or null if this source could not be parsed into one.
      *
-     * When parsed with [CoreCompileConfig.ignoreErrors], the AST may contain
-     * [org.kson.ast.AstNodeError] nodes deeper in the tree even though [hasErrors]
-     * returns false (because error-walking is skipped). In that case [toKsonValue]
-     * fails and this property returns null.
+     * When this parse checked for errors, this is null exactly when [hasErrors] is true, and [messages]
+     * says why.  A [CoreCompileConfig.ignoreErrors] parse makes no such promise: it never looked for the
+     * problems in its source, so it may come back null having reported none of them.
      */
     val ksonValue: KsonValue? by lazy {
         if (hasErrors()) {
             null
-        } else {
+        } else if (ignoreErrors) {
+            /**
+             * An error-tolerant parse may build arbitrarily broken ASTs, so throwing when attempting to construct a
+             * [KsonValue] is expected here
+             *
+             * TODO: a refactor to disallow [ksonValue]s from [ignoreErrors] parses would be nice if possible, letting
+             *       the Kotlin compiler own guiding callers to use these types correctly
+             */
             try {
                 ast.toKsonValue()
             } catch (_: ShouldNotHappenException) {
@@ -208,6 +214,8 @@ data class AstParseResult(
             } catch (_: UnsupportedOperationException) {
                 null
             }
+        } else {
+            ast.toKsonValue()
         }
     }
 
@@ -338,9 +346,9 @@ class Json(
  */
 data class CoreCompileConfig(
     /**
-     * The [JSON Schema](https://json-schema.org/) to enforce in this compilation
+     * The [JSON Schema](https://json-schema.org/) to enforce in this compilation, or null to enforce no schema
      */
-    val schemaJson: JsonSchema = NO_SCHEMA,
+    val schemaJson: JsonSchema? = null,
     /**
      * Whether we do the extra work to build an AST patched with [AstNodeError]'s. This could be set to false when
      * formatting for example, since we're only interested in collecting the error nodes and running validators.
@@ -354,17 +362,10 @@ data class CoreCompileConfig(
     /**
      * List of validators that are run on a complete KsonValue
      */
-    val validators: List<Validator> = listOf(schemaJson),
+    val validators: List<Validator> = listOfNotNull(schemaJson),
 
     /**
      * Context information for the source
      */
     val sourceContext: SourceContext = SourceContext()
 )
-
-/**
- * A [JsonBooleanSchema] specifying just `true` is the "trivial" schema that matches everything,
- * and so is equivalent to not having a schema.  See https://json-schema.org/draft/2020-12/json-schema-core#section-4.3.2
- * for more detail
- */
-private val NO_SCHEMA = JsonBooleanSchema(true)

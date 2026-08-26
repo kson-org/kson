@@ -2175,11 +2175,18 @@ impl SchemaValidator {
 
 impl SchemaValidator {
 
-    /// Validates the given Kson source against this validator's schema.
-    /// @param kson The Kson source to validate
-    /// @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
+    /// Validates the given KSON source against this validator's schema.
     ///
-    /// @return A list of validation error messages, or empty list if valid
+    /// NOTE: this must parse [kson] in order to validate it, but does not report that parse's own messages: a
+    /// document may satisfy a schema and still carry warnings of its own.  Pass this validator to [Kson.analyze]
+    /// to see both.  The exception is [kson] which fails to parse at all: it _cannot_ be validated against this
+    /// [schema], and so those parse errors are returned instead.
+    ///
+    /// @param kson The KSON source to validate
+    /// @param filepath (Optional) filepath of the document being validated, used by validators to determine
+    /// which rules to apply
+    ///
+    /// @return A list of schema validation [Message]s, or empty list if [kson] is valid under this [schema]
     pub fn validate(
         &self,
         kson: &str,
@@ -3513,10 +3520,13 @@ impl Kson {
     /// Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
     /// tokenized version of the source.  Useful for tooling/editor support.
     /// @param kson The Kson source to analyze
-    /// @param filepath Filepath of the document being analyzed
+    /// @param filepath (Optional) Filepath of the document being analyzed
+    /// @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
+    /// able to be validated against a schema
     pub fn analyze(
         kson: &str,
         filepath: Option<&str>,
+        schema_validator: Option<SchemaValidator>,
     ) -> Analysis {
         let self_ptr = util::access_static_field(c"org/kson/Kson", c"INSTANCE", c"Lorg/kson/Kson;");
         let self_obj = self_ptr.as_kotlin_object();
@@ -3524,17 +3534,20 @@ impl Kson {
         let kson = kson_ptr.as_kotlin_object();
         let filepath_ptr = filepath.to_kotlin_object();
         let filepath = filepath_ptr.as_kotlin_object();
+        let schema_validator_ptr = schema_validator.to_kotlin_object();
+        let schema_validator = schema_validator_ptr.as_kotlin_object();
 
         let (_, _detach_guard) = util::attach_thread_to_java_vm();
         let result = call_jvm_function!(
             util,
             c"org/kson/Kson",
             c"analyze",
-            c"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/Analysis;",
+            c"(Ljava/lang/String;Ljava/lang/String;Lorg/kson/SchemaValidator;)Lorg/kson/Analysis;",
             CallObjectMethod,
             self_obj,
             kson,
             filepath,
+            schema_validator,
         );
 
         FromKotlinObject::from_kotlin_object(result)

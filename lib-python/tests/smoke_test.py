@@ -207,7 +207,7 @@ def test_kson_to_yaml_failure():
 
 
 def test_kson_analysis():
-    analysis = Kson.analyze("key: [1, 2, 3, 4]", None)
+    analysis = Kson.analyze("key: [1, 2, 3, 4]", None, None)
     assert analysis.errors() == []
 
     # Transform tokens to strings, so we can snapshot them
@@ -245,7 +245,7 @@ list:
   - 3E5
 embed:%tag
 %%"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -318,7 +318,7 @@ def test_property_keys_basic_access():
     input = """name: John
 age: 30
 city: 'New York'"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -343,7 +343,7 @@ city: 'New York'"""
 def test_property_keys_with_position_information():
     input = """name: John
 age: 30"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -365,7 +365,7 @@ age: 30"""
 
 def test_property_keys_empty_object():
     input = "{}"
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert value is not None
     assert isinstance(value, KsonValue.KsonObject)
@@ -379,7 +379,7 @@ def test_kson_value_boolean_and_null():
     input = """flag: true
 other: false
 nothing: null"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert isinstance(value, KsonValue.KsonObject)
 
@@ -405,7 +405,7 @@ num: 42
 dec: 3.14
 list: [1]
 obj: {a: b}"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()
@@ -422,7 +422,7 @@ def test_kson_value_embed_type():
     input = """key: $embed
 content here
 embed$$"""
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()
@@ -501,6 +501,19 @@ properties:
     # Validate a valid document
     errors = validator.validate("name: hello", None)
     assert errors == []
+
+
+def test_analyze_against_a_schema():
+    result = Kson.parse_schema("""type: object
+required: [age]""")
+    assert isinstance(result, SchemaResult.Success)
+
+    # a duplicate key is a warning this document carries; the missing `age` is what the schema objects to
+    analysis = Kson.analyze('{ name: "Alice", name: "Bob" }', None, result.schema_validator())
+    messages = [error.message() for error in analysis.errors()]
+    assert len(messages) == 2, messages
+    assert "Duplicate key" in messages[0]
+    assert "age" in messages[1]
 
 
 def test_parse_schema_validation_errors():
@@ -591,7 +604,7 @@ def test_kson_to_yaml_none_checks():
 
 def test_kson_analyze_none_check():
     with pytest.raises(ValueError):
-        Kson.analyze(NoneAny, NoneAny)
+        Kson.analyze(NoneAny, NoneAny, None)
 
 
 def test_kson_parse_schema_none_check():
@@ -631,7 +644,7 @@ def test_formatting_style_from_kotlin_enum():
 
 def test_number_internal_start_end():
     input = "val: 42"
-    analysis = Kson.analyze(input, None)
+    analysis = Kson.analyze(input, None, None)
     value = analysis.kson_value()
     assert isinstance(value, KsonValue.KsonObject)
     props = value.properties()

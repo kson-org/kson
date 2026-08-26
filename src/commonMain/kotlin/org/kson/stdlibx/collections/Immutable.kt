@@ -5,6 +5,10 @@ package org.kson.stdlibx.collections
  */
 
 class ImmutableList<T> private constructor(private val inner: List<T>) : List<T> by inner {
+    override fun equals(other: Any?): Boolean = inner.equals(other)
+    override fun hashCode(): Int = inner.hashCode()
+    override fun toString(): String = inner.toString()
+
     companion object {
         fun <T> create(inner: List<T>) = if (inner is ImmutableList<T>) {
             inner
@@ -15,6 +19,10 @@ class ImmutableList<T> private constructor(private val inner: List<T>) : List<T>
 }
 
 class ImmutableMap<K, V> private constructor(private val inner: Map<K, V>) : Map<K, V> by inner {
+    override fun equals(other: Any?): Boolean = inner.equals(other)
+    override fun hashCode(): Int = inner.hashCode()
+    override fun toString(): String = inner.toString()
+
     companion object {
         fun <K, V> create(inner: Map<K, V>) = if (inner is ImmutableMap<K, V>) {
             inner

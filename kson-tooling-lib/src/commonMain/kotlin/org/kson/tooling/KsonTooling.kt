@@ -276,9 +276,9 @@ object KsonTooling {
      * [SourceContext][SourceContext] are used for the
      * strict parse, so validators receive the document's filepath.
      *
-     * If a [schema] is provided, the document is validated against it.
-     * Schema validation includes both parse errors and schema violations.
-     * If no schema is provided (or it fails to parse), only parse errors are returned.
+     * If a [schema] is provided, the document is validated against it,
+     * and any schema validation messages are added to the document's
+     * parse messages
      *
      * @param document The pre-parsed document to validate
      * @param schema Optional pre-parsed schema document
