@@ -94,7 +94,159 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
 4. Manually release: we have `automaticRelease = false` as a final gate/protection, so once everything looks good at https://central.sonatype.com/publishing/deployments for this release, click Publish
 
 #### [lib-rust](../lib-rust) Publishing Process
-* todo doc process
+
+Three artifacts, published **in this order**:
+
+1. `kson-binaries` release `kson-lib-X.Y.Z` — the prebuilt native libraries
+2. `kson-sys` on crates.io
+3. `kson-rs` on crates.io
+
+Unless `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN_DIR` is set, `kson-sys`'s
+[build script](../lib-rust/kson-sys/build.rs) downloads its native library from:
+
+```
+https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_VERSION}/kson-lib-shared-{arch}-{os}.tar.gz
+```
+
+`cargo publish` verifies by building, so step 1 must be complete before step 3.
+
+##### Prerequisites
+
+- **The tag to be released checked out, with `git status` clean.** Steps 1, 2 and 3 all read
+  versions from the working tree — `KSON_LIB_VERSION` and the crate versions — so running them
+  from `main` or a feature branch publishes or verifies the wrong version.
+- A crates.io account, authenticated locally (`cargo login`), with publish rights on both
+  `kson-rs` and `kson-sys`
+- Write access to https://github.com/kson-org/kson-binaries
+- The [`gh` CLI](https://cli.github.com/), authenticated
+- A green `build-python-and-test` workflow on the release branch
+
+##### Step 1: Cut the `kson-binaries` release
+
+The native libraries are built by the release CI run and ship inside the Python wheels.
+Download those wheels and repackage their native payload.
+
+| CircleCI job | Artifact | Wheel platform tag | Release asset | Library |
+| --- | --- | --- | --- | --- |
+| `test-python-sdist-linux-amd64` | `python-linux-amd64` | `manylinux_2_34_x86_64` | `kson-lib-shared-amd64-linux.tar.gz` | `libkson.so` |
+| `test-python-sdist-macos` | `python-macos` | `macosx_11_0_arm64` | `kson-lib-shared-arm64-macos.tar.gz` | `libkson.dylib` |
+| `test-python-sdist-windows` | `python-windows` | `win_amd64` | `kson-lib-shared-amd64-windows.tar.gz` | `kson.dll` |
+
+> Job names have changed between releases; the artifact destinations have not. Confirm
+> against the release branch's `.circleci/config.kson`.
+
+Only `shared` assets are needed. `build.rs` derives the asset name from the Rust target triple
+(`aarch64` → `arm64`, `x86_64` → `amd64`; OS is `linux`, `macos`, or `windows`). Consumers on a
+combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN_DIR` themselves.
+
+1. Confirm `KSON_LIB_VERSION` in [build.rs](../lib-rust/kson-sys/build.rs) matches the tag you
+   are about to create. **If they disagree, every downstream `cargo build` 404s.**
+
+2. Download the three wheels from each job's **Artifacts** tab in the CircleCI UI. CircleCI
+   serves them as zips, so they save with a `.zip` extension:
+
+   ```bash
+   mkdir -p /tmp/kson-binaries && cd /tmp/kson-binaries
+   # save the three wheels here, e.g.
+   #   kson_lang-X.Y.Z-cp310-abi3-manylinux_2_34_x86_64.zip
+   #   kson_lang-X.Y.Z-cp310-abi3-macosx_11_0_arm64.zip
+   #   kson_lang-X.Y.Z-cp310-abi3-win_amd64.zip
+   ```
+
+   No rename is needed here — the script below accepts `.zip` or `.whl`. (Publishing to PyPI
+   *does* require renaming them back to `.whl`; see the lib-python process above.)
+
+3. Repackage each wheel's native payload. A wheel is a zip, so this needs no Python:
+
+   ```bash
+   cd /tmp/kson-binaries
+   for f in $(find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.zip' \) | sort); do
+     case "$f" in
+       *manylinux*x86_64*) asset=kson-lib-shared-amd64-linux;   lib=libkson.so ;;
+       *macosx*arm64*)     asset=kson-lib-shared-arm64-macos;   lib=libkson.dylib ;;
+       *win_amd64*)        asset=kson-lib-shared-amd64-windows; lib=kson.dll ;;
+       *) echo "skipping unrecognized artifact: $f"; continue ;;
+     esac
+     mkdir -p "stage/$asset"
+     unzip -j -q -o "$f" "kson/jni_simplified.h" "kson/$lib" -d "stage/$asset"
+     tar -czf "$asset.tar.gz" -C "stage/$asset" .
+     echo "$asset.tar.gz: $(tar tzf "$asset.tar.gz" | tr '\n' ' ')"
+   done
+   ```
+
+   Each archive is flat, rooted at `./`, and contains exactly two files: `jni_simplified.h` and
+   the platform's shared library. `jni_simplified.h` is **platform-specific** — take each one
+   from its own wheel.
+
+4. Sanity-check a tarball on your own platform before uploading:
+
+   ```bash
+   mkdir -p /tmp/kson-verify
+   tar -xzf /tmp/kson-binaries/kson-lib-shared-arm64-macos.tar.gz -C /tmp/kson-verify
+   env -u KSON_ROOT_SOURCE_DIR KSON_PREBUILT_BIN_DIR=/tmp/kson-verify \
+       cargo build --manifest-path lib-rust/kson/Cargo.toml
+   ```
+
+5. Create the release and upload all three assets:
+
+   ```bash
+   cd /tmp/kson-binaries
+   gh release create kson-lib-X.Y.Z \
+       --repo kson-org/kson-binaries \
+       --title kson-lib-X.Y.Z \
+       kson-lib-shared-amd64-linux.tar.gz \
+       kson-lib-shared-amd64-windows.tar.gz \
+       kson-lib-shared-arm64-macos.tar.gz
+   ```
+
+##### Step 2: Verify the download path
+
+No CI job covers this path. With both env vars unset:
+
+```bash
+env -u KSON_ROOT_SOURCE_DIR -u KSON_PREBUILT_BIN_DIR \
+    cargo build --manifest-path lib-rust/kson/Cargo.toml
+```
+
+A failure here means the `kson-binaries` release is missing, misnamed, or disagrees with
+`KSON_LIB_VERSION`. Fix it before continuing: published crates can only be yanked, never
+changed.
+
+##### Step 3: Publish to crates.io
+
+`kson-sys` must go first — `kson-rs` depends on it by version.
+
+1. Dry-run both crates:
+
+   ```bash
+   cargo publish --dry-run --manifest-path lib-rust/kson-sys/Cargo.toml
+   cargo publish --dry-run --manifest-path lib-rust/kson/Cargo.toml
+   ```
+
+2. Publish `kson-sys`:
+
+   ```bash
+   cargo publish --manifest-path lib-rust/kson-sys/Cargo.toml
+   ```
+
+3. Wait for the crates.io index to update (usually under a minute), then publish `kson-rs`:
+
+   ```bash
+   cargo publish --manifest-path lib-rust/kson/Cargo.toml
+   ```
+
+##### Step 4: Verify
+
+- https://crates.io/crates/kson-sys
+- https://crates.io/crates/kson-rs
+
+Confirm the new version resolves from outside the repo:
+
+```bash
+cargo new /tmp/kson-smoke && cd /tmp/kson-smoke
+cargo add kson-rs
+cargo build
+```
 
 #### [kson-lib npm package](../kson-lib) Publishing Process
 
