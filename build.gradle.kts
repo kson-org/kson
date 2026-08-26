@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
@@ -223,6 +224,41 @@ mavenPublishing {
 allprojects {
     plugins.withId("org.jetbrains.kotlin.multiplatform") { applyDetekt(project) }
     plugins.withId("org.jetbrains.kotlin.jvm") { applyDetekt(project) }
+    plugins.withId("idea") { keepGeneratedOutputOutOfTheIde(project) }
+}
+
+/**
+ * Tell IntelliJ which directories hold content that should be "excluded" (generated files, build files, etc.),
+ * so that search/navigation/inspections are scoped to the files developers actually work with.
+ * This is especially important for this project as it produces a myriad of non-Gradle-default build directories
+ * as part of its multi-platform and tooling builds.
+ *
+ * IntelliJ's Gradle import reads the exclusions that Gradle's `idea` plugin contributes to its project model,
+ * so this gives us a good in-source, version-controlled, project-level home for sharing this configuration
+ * with anyone who wishes to develop KSON.
+ *
+ * This is implemented to run outside the critical path of ordinary and CI builds: nothing here runs unless an IDE
+ * is building its project model.
+ */
+fun keepGeneratedOutputOutOfTheIde(project: Project) = with(project) {
+    /**
+     * IntelliJ only honours an exclusion on the module whose "content root" (the directory subtree a module
+     * owns) contains it, and it makes a module of every Gradle project.  So we note any nested modules (and the
+     * separate `buildSrc` project) here, so we can tell [GeneratedOutputDirectories] not to bother searching them.
+     */
+    val nestedContentRoots = subprojects.map { it.projectDir }.toSet() + rootProject.file("buildSrc")
+
+    the<IdeaModel>().module.excludeDirs.addAll(
+        GeneratedOutputDirectories(projectDir, nestedContentRoots).locate()
+    )
+
+    if (this == rootProject) {
+        /**
+         * The JDKs `jvmWrapper` installs are generated too, but sit at a path fixed by convention
+         *  rather than in a directory [GeneratedOutputDirectories] would recognize by name
+         */
+        the<IdeaModel>().module.excludeDirs.add(file("gradle/jdk"))
+    }
 }
 
 fun applyDetekt(project: Project) = with(project) {
