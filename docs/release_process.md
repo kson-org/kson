@@ -104,7 +104,7 @@ The KSON JavaScript/TypeScript library is published to npm as `@kson_org/kson` w
 
 2. Build the universal JavaScript package:
    ```bash
-   ./gradlew buildUniversalJsPackage
+   ./gradlew buildUniversalJsPackage -Prelease=true
    ```
 
    This builds a package for both the browser and Node.js and bundles it into `kson-lib/build/js-package`
