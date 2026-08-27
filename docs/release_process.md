@@ -196,10 +196,10 @@ Note: it is possible to automate this process us some Gradle tasks provided by t
 2. Build the plugin distribution:
 
     ```bash
-    ./gradlew :tooling:jetbrains:buildPlugin
+    ./gradlew :tooling:jetbrains:buildPlugin -Prelease=true
     ```
 
-   This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/KSON-[version].zip`
+   This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/jetbrains-[version].zip`
 
 3. Manually upload to JetBrains Marketplace:
   - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
