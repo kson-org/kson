@@ -187,6 +187,52 @@ The KSON language support includes VSCode extensions published to both the Visua
 5. Verify the extensions are available at:
    - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=kson.kson
    - Open VSX: https://open-vsx.org/extension/kson/kson
+#### [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco) Publishing Process
+
+The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
+
+##### Prerequisites
+
+- You will need a npm account at https://www.npmjs.com/
+- You will need publish access to the `@kson_org` organization
+
+##### Publishing Steps
+
+1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+
+2. Build the package:
+   ```bash
+   ./gradlew :tooling:lsp-clients:npm_run_buildMonaco
+   ```
+
+   This builds `tooling/lsp-clients/monaco/dist`. The build inlines `@kson/lsp-shared` and
+   `kson-language-server` into the bundle, which is why they are `devDependencies`: the published
+   package resolves nothing at install time beyond its `monaco-editor` and `react` peers.
+
+3. Check what would be published:
+   ```bash
+   cd tooling/lsp-clients/monaco
+   npm pack --dry-run
+   ```
+
+   `dist/` must be present, and the manifest must declare no `dependencies`. A `file:` dependency
+   here is a path that exists only on the machine that published it, so it installs as a dangling
+   link and breaks `npm ls` for everyone downstream.
+
+4. Publish to npm:
+   ```bash
+   npm login
+   npm publish --access=public
+   ```
+
+5. Verify the package:
+   ```bash
+   npm view @kson_org/monaco-editor dist-tags
+   ```
+
+   `latest` should now be the released version. Development builds are published under the `dev`
+   tag, so `latest` otherwise keeps pointing at whichever prerelease was published without a tag.
+
 #### [tooling/jetbrains](../tooling/jetbrains) Publishing Process
 
 Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
