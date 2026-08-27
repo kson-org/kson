@@ -57,6 +57,40 @@ When `main` is ready to have a release cut from it:
 
 - TODO flesh out this documentation
 
+### Release artifacts built by CircleCI
+
+Everything a release ships that has to be built *on* the platform it runs on is built by CircleCI and
+stored as job artifacts. The six jobs below each store into `release-artifacts/<platform>` on
+their **Artifacts** tab, so they are all found the same way:
+
+| CircleCI job | Artifact destination | Contents |
+| --- | --- | --- |
+| `build-linux-amd64` | `release-artifacts/linux-amd64` | `kson-lib-shared-amd64-linux.tar.gz`, `kson-cli-amd64-linux.tar.gz`, `SHA256SUMS` |
+| `build-macos-arm64` | `release-artifacts/macos-arm64` | `kson-lib-shared-arm64-macos.tar.gz`, `kson-cli-arm64-macos.tar.gz`, `SHA256SUMS` |
+| `build-windows-amd64` | `release-artifacts/windows-amd64` | `kson-lib-shared-amd64-windows.tar.gz`, `kson-cli-amd64-windows.tar.gz`, `SHA256SUMS` |
+| `test-python-sdist-linux-amd64` | `release-artifacts/python-linux-amd64` | `kson_lang-*.whl` |
+| `test-python-sdist-macos` | `release-artifacts/python-macos-arm64` | `kson_lang-*.whl` |
+| `test-python-sdist-windows` | `release-artifacts/python-windows-amd64` | `kson_lang-*.whl` |
+
+(The wheels come from jobs named for a test because `test-python-sdist-*` builds its platform's
+wheel once the sdist install passes. `build-python-sdist` also stores the sdist it tests, under
+`python-sdist`, but no release ships that copy — the
+[lib-python process](#lib-python-publishing-process) builds the sdist locally.)
+
+Archives are named `<artifact>-<arch>-<os>.tar.gz` throughout, with `arch` one of `amd64`/`arm64` and
+`os` one of `linux`/`macos`/`windows`. Download them as they are: the `kson-lib` names in particular
+are a URL that [lib-rust](#lib-rust-publishing-process) fetches, so renaming one breaks it. Check a
+download against the `SHA256SUMS` stored beside it — one per job, covering that job's own archives —
+with `shasum -a 256 -c SHA256SUMS`.
+
+The `build-*` jobs stage their archives with `./gradlew packageReleaseArtifacts`, which you can run
+locally to get the same files for the platform you are on, in `build/release-artifacts`. (Building
+them needs GraalVM, which the task pulls in via pixi.)
+
+Only `build-linux-amd64` runs on every branch; the other five above are gated to `release.*X.Y.Z`
+branches. A release's artifacts therefore come from the CI run of its `release/X.Y.Z` branch — the
+same run that has to be green before the `vX.Y.Z` tag is cut.
+
 #### [kson-lib](../kson-lib) Publishing Process
 
 The project uses the [Vanniktech Maven Publish plugin](https://github.com/vanniktech/gradle-maven-publish-plugin) to publish to Maven Central Portal. This process publishes both:
@@ -119,21 +153,25 @@ https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_V
   `kson-rs` and `kson-sys`
 - Write access to https://github.com/kson-org/kson-binaries
 - The [`gh` CLI](https://cli.github.com/), authenticated
-- A green `build-python-and-test` workflow on the release branch
+- A green `build-all` workflow on the release branch — that is the workflow whose jobs build
+  these libraries
 
 ##### Step 1: Cut the `kson-binaries` release
 
-The native libraries are built by the release CI run and ship inside the Python wheels.
-Download those wheels and repackage their native payload.
+CI builds these archives under the names the download URL needs, so there is nothing to
+repackage. Take them as they are from the three `build-*` jobs of this release's CI run, under
+`release-artifacts/<platform>` on each job's **Artifacts** tab (see
+[Release artifacts built by CircleCI](#release-artifacts-built-by-circleci) for everything those
+jobs store):
 
-| CircleCI job | Artifact | Wheel platform tag | Release asset | Library |
-| --- | --- | --- | --- | --- |
-| `test-python-sdist-linux-amd64` | `python-linux-amd64` | `manylinux_2_34_x86_64` | `kson-lib-shared-amd64-linux.tar.gz` | `libkson.so` |
-| `test-python-sdist-macos` | `python-macos` | `macosx_11_0_arm64` | `kson-lib-shared-arm64-macos.tar.gz` | `libkson.dylib` |
-| `test-python-sdist-windows` | `python-windows` | `win_amd64` | `kson-lib-shared-amd64-windows.tar.gz` | `kson.dll` |
+| CircleCI job | Release asset |
+| --- | --- |
+| `build-linux-amd64` | `kson-lib-shared-amd64-linux.tar.gz` |
+| `build-macos-arm64` | `kson-lib-shared-arm64-macos.tar.gz` |
+| `build-windows-amd64` | `kson-lib-shared-amd64-windows.tar.gz` |
 
-> Job names have changed between releases; the artifact destinations have not. Confirm
-> against the release branch's `.circleci/config.kson`.
+> Job names and artifact destinations have changed between releases. Confirm both against the
+> release branch's `.circleci/config.kson`.
 
 Only `shared` assets are needed. `build.rs` derives the asset name from the Rust target triple
 (`aarch64` → `arm64`, `x86_64` → `amd64`; OS is `linux`, `macos`, or `windows`). Consumers on a
@@ -142,43 +180,37 @@ combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN
 1. Confirm `KSON_LIB_VERSION` in [build.rs](../lib-rust/kson-sys/build.rs) matches the tag you
    are about to create. **If they disagree, every downstream `cargo build` 404s.**
 
-2. Download the three wheels from each job's **Artifacts** tab in the CircleCI UI. CircleCI
-   serves them as zips, so they save with a `.zip` extension:
+2. Download one archive from each job's **Artifacts** tab, keeping the name CI gave it — that
+   name is the download URL above:
 
    ```bash
    mkdir -p /tmp/kson-binaries && cd /tmp/kson-binaries
-   # save the three wheels here, e.g.
-   #   kson_lang-X.Y.Z-cp310-abi3-manylinux_2_34_x86_64.zip
-   #   kson_lang-X.Y.Z-cp310-abi3-macosx_11_0_arm64.zip
-   #   kson_lang-X.Y.Z-cp310-abi3-win_amd64.zip
+   # save the three archives here:
+   #   kson-lib-shared-amd64-linux.tar.gz
+   #   kson-lib-shared-arm64-macos.tar.gz
+   #   kson-lib-shared-amd64-windows.tar.gz
    ```
 
-   No rename is needed here — the script below accepts `.zip` or `.whl`. (Publishing to PyPI
-   *does* require renaming them back to `.whl`; see the lib-python process above.)
-
-3. Repackage each wheel's native payload. A wheel is a zip, so this needs no Python:
+   Each job stores a `SHA256SUMS` beside its archives, and all three are named `SHA256SUMS`, so
+   check each download against the manifest from the *same* job before fetching the next:
 
    ```bash
-   cd /tmp/kson-binaries
-   for f in $(find . -maxdepth 1 -type f \( -name '*.whl' -o -name '*.zip' \) | sort); do
-     case "$f" in
-       *manylinux*x86_64*) asset=kson-lib-shared-amd64-linux;   lib=libkson.so ;;
-       *macosx*arm64*)     asset=kson-lib-shared-arm64-macos;   lib=libkson.dylib ;;
-       *win_amd64*)        asset=kson-lib-shared-amd64-windows; lib=kson.dll ;;
-       *) echo "skipping unrecognized artifact: $f"; continue ;;
-     esac
-     mkdir -p "stage/$asset"
-     unzip -j -q -o "$f" "kson/jni_simplified.h" "kson/$lib" -d "stage/$asset"
-     tar -czf "$asset.tar.gz" -C "stage/$asset" .
-     echo "$asset.tar.gz: $(tar tzf "$asset.tar.gz" | tr '\n' ' ')"
-   done
+   shasum -a 256 -c --ignore-missing SHA256SUMS
    ```
 
-   Each archive is flat, rooted at `./`, and contains exactly two files: `jni_simplified.h` and
-   the platform's shared library. `jni_simplified.h` is **platform-specific** — take each one
-   from its own wheel.
+   `--ignore-missing` because that manifest also covers the job's `kson-cli-*` archive, which
+   this release does not need.
 
-4. Sanity-check a tarball on your own platform before uploading:
+   Each archive is the GraalVM native-image output directory verbatim, flat at the archive root:
+   unpacking one leaves exactly what a local `:kson-lib:buildWithGraalVmNativeImage` leaves on
+   disk, which is what makes it a drop-in for `KSON_PREBUILT_BIN_DIR`. On macOS that is four
+   files — `graal_isolate.h`, `graal_isolate_dynamic.h`, `jni_simplified.h` and `libkson.dylib`;
+   Linux and Windows carry their own library (`libkson.so`, `kson.dll`) and whatever else
+   `native-image` emitted beside it. `build.rs` reads `jni_simplified.h` and links the shared
+   library and ignores the rest, but every file in an archive is **platform-specific** — never
+   mix files between archives.
+
+3. Sanity-check a tarball on your own platform before uploading:
 
    ```bash
    mkdir -p /tmp/kson-verify
@@ -187,7 +219,7 @@ combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN
        cargo build --manifest-path lib-rust/kson/Cargo.toml
    ```
 
-5. Create the release and upload all three assets:
+4. Create the release and upload all three assets:
 
    ```bash
    cd /tmp/kson-binaries
@@ -294,8 +326,10 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
    ./gradlew createDist
    ```
 
-3. Download the pre-built wheels from the CircleCI build for this tag:
-   - Download the wheel artifacts from CircleCI (they will download as `.zip` files)
+3. Download the pre-built wheels from the CircleCI `test-python-sdist-*` jobs for this tag:
+   - Take them from each job's `release-artifacts/python-*` destination (see
+     [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci)); they will
+     download as `.zip` files
    - Copy all wheels into the `lib-python/dist/` directory
    - Change the file extensions from `.zip` to `.whl`
 
@@ -308,7 +342,15 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
 
 5. Verify the package is available at: https://pypi.org/project/kson-lang/
 #### [tooling/cli](../tooling/cli) Publishing Process
-* todo doc process
+
+##### Collecting the CLI binaries
+
+There is nothing to build by hand: the three `build-*` CircleCI jobs each build the `kson` native
+binary for their platform and store it as `kson-cli-<arch>-<os>.tar.gz` (holding `kson`, or
+`kson.exe` on Windows). Download all three from this release's CI run — see
+[Release artifacts built by CircleCI](#release-artifacts-built-by-circleci).
+
+* todo doc where these binaries get published — no distribution channel has been chosen yet
 #### [tooling/lsp-clients](../tooling/lsp-clients) Publishing Process
 
 The KSON language support includes VSCode extensions published to both the Visual Studio Code Marketplace and Open VSX Registry.

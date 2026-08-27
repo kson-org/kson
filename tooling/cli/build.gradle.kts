@@ -1,4 +1,7 @@
+import org.gradle.internal.os.OperatingSystem
+import org.kson.BinaryArtifactPaths
 import org.kson.GraalVmHelper
+import org.kson.releaseArtifactsDir
 
 plugins {
     application
@@ -86,8 +89,12 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
     description = "Builds native executable using GraalVM from JDK toolchain"
 
     val outputDir = layout.buildDirectory.dir("native/nativeCompile").get().asFile
-    val outputFile = file("$outputDir/$cliName")
-    outputs.file(outputFile)
+    // what we ask native-image to call the image, and what it actually writes: on Windows it
+    // appends the `.exe` the OS demands, so declaring `-o`'s argument as the output would declare
+    // a file that never appears and leave this task perpetually out of date there
+    val imageName = file("$outputDir/$cliName")
+    val executable = file("$outputDir/${OperatingSystem.current().getExecutableName(cliName)}")
+    outputs.file(executable)
 
     inputs.files(tasks.jar.map { it.archiveFile })
     inputs.files(configurations.runtimeClasspath)
@@ -109,7 +116,7 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
             "-cp", "${jarFile.absolutePath}${File.pathSeparator}$classpath",
             "-H:+ReportExceptionStackTraces",
             "--no-fallback",
-            "-o", outputFile.absolutePath,
+            "-o", imageName.absolutePath,
             "org.kson.tooling.cli.CommandLineInterfaceKt"
         )
     })
@@ -119,17 +126,34 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
         outputDir.mkdirs()
 
         println("Building native image with GraalVM using pixi")
-        println("Creating executable: $outputFile")
+        println("Creating executable: $executable")
     }
 
     doLast {
-        if (outputFile.exists()) {
+        if (executable.exists()) {
             println("\n✅ Native image built successfully!")
-            println("   Executable: $outputFile")
-            println("   Size: ${outputFile.length() / 1024 / 1024} MB")
-            println("\nRun it with: $outputFile --help")
+            println("   Executable: $executable")
+            println("   Size: ${executable.length() / 1024 / 1024} MB")
+            println("\nRun it with: $executable --help")
         }
     }
+}
+
+/**
+ * Archives the CLI binary for release, under the same `<artifact>-<arch>-<os>.tar.gz` convention as
+ * every other release artifact (see [BinaryArtifactPaths.releaseArchiveName]).
+ */
+val packageReleaseArchive by tasks.registering(Tar::class) {
+    group = "distribution"
+    description = "Archives the native $cliName binary for release into the root project's release-artifacts directory"
+
+    from(buildNativeImage)
+    // tar would default this to 0644, and a CLI nobody can run is not a CLI
+    filePermissions { unix("0755") }
+
+    compression = Compression.GZIP
+    archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("$cliName-cli"))
+    destinationDirectory.set(releaseArtifactsDir)
 }
 
 tasks{

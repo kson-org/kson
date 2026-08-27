@@ -2,6 +2,7 @@ import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.kson.BinaryArtifactPaths
 import org.gradle.internal.os.OperatingSystem
 import org.kson.GraalVmHelper
+import org.kson.releaseArtifactsDir
 
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -267,6 +268,13 @@ mavenPublishing {
     }
 }
 
+/**
+ * Where the GraalVM native build lands the shared library, its headers, and (on Windows) its import
+ * library. Everything downstream of the native build reads this directory whole: `lib-rust` points
+ * `KSON_PREBUILT_BIN_DIR` at it, and `packageReleaseArchive` below archives it verbatim.
+ */
+val nativeImageOutputDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage")
+
 // Build native image using GraalVM JDK from the Gradle wrapper
 tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     group = "build"
@@ -277,7 +285,6 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     val ksonCoreJarTask = project.rootProject.tasks.named<Jar>("jvmJar")
     dependsOn(ksonLibJarTask, ksonCoreJarTask, "generateJniBindingsJvm")
 
-    val nativeImageOutputDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage")
     val jniConfig = project.projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
 
     // ksonLibJarTask is this project's own JAR (not in its own runtime classpath).
@@ -341,4 +348,29 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
             add("-o"); add(buildArtifactPath)
         }
     })
+}
+
+/**
+ * Archives the native library for release, contents-at-the-root so that unpacking the archive is
+ * the same thing as having built it here: `lib-rust/kson-sys/build.rs` unpacks it straight into its
+ * `OUT_DIR` and then reads `jni_simplified.h` and the library out of that directory, exactly as its
+ * build-from-source path does after copying [nativeImageOutputDir] there.
+ */
+tasks.register<Tar>("packageReleaseArchive") {
+    group = "distribution"
+    description = "Archives the native kson-lib for release into the root project's release-artifacts directory"
+
+    // depend on the task but take the whole directory: `buildWithGraalVmNativeImage` deliberately
+    // declares only the library as its output, and the archive needs the headers beside it too
+    dependsOn("buildWithGraalVmNativeImage")
+    from(nativeImageOutputDir) {
+        // `build.rs`'s from-source path copies this directory with `fs::copy`, which carries the
+        // library's mode across; say so here rather than shipping the 0644 tar would otherwise
+        // default to, so that unpacking and building from source leave the same thing on disk
+        filesMatching(BinaryArtifactPaths.binaryFileName()) { permissions { unix("0755") } }
+    }
+
+    compression = Compression.GZIP
+    archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("kson-lib-shared"))
+    destinationDirectory.set(releaseArtifactsDir)
 }

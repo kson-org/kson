@@ -28,21 +28,33 @@ commands:
           command: './gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage'
 
       - run:
+          name: 'Package release artifacts'
+          command: './gradlew --no-daemon packageReleaseArtifacts'
+
+      - run:
           name: 'Verify clean checkout'
           command: './gradlew --no-daemon verifyCleanCheckout'
           .
         .
     .
-  'store-native-artifacts':
-    description: 'Store build artifacts in a consistent way'
+  # Every job that produces something a release needs stores it through here, so that a release
+  # manager finds all of them the same way: under `release-artifacts/<platform>` in the Artifacts tab.
+  'store-release-artifacts':
+    description: 'Store the artifacts a job built under the shared per-platform destination'
+    parameters:
+      path:
+        type: string
+        description: 'Directory holding the artifacts this job produced'
+        .
+      platform:
+        type: string
+        description: 'Platform identifier for the artifact destination'
+        .
+      .
     steps:
       - store_artifacts:
-          path: 'kson-lib/build/bin/nativeKson/releaseShared'
-          destination: 'kson-lib-shared'
-
-      - store_artifacts:
-          path: 'kson-lib/build/bin/nativeKson/releaseStatic'
-          destination: 'kson-lib-static'
+          path: '<< parameters.path >>'
+          destination: 'release-artifacts/<< parameters.platform >>'
           .
         .
     .
@@ -299,7 +311,9 @@ jobs:
           platform: 'win-amd64'
       # Cross-platform Gradle tasks
       - 'gradle-core-tasks'
-      - 'store-native-artifacts'
+      - 'store-release-artifacts':
+          path: 'build/release-artifacts'
+          platform: 'windows-amd64'
       - 'save-gradle-caches':
           platform: 'win-amd64'
           .
@@ -337,7 +351,9 @@ jobs:
           shell: bash
       # Cross-platform Gradle tasks
       - 'gradle-core-tasks'
-      - 'store-native-artifacts'
+      - 'store-release-artifacts':
+          path: 'build/release-artifacts'
+          platform: 'linux-amd64'
       - 'save-gradle-build-cache'
       - 'save-gradle-caches':
           platform: 'linux-amd64'
@@ -366,7 +382,9 @@ jobs:
           platform: 'macos-arm64'
       # Cross-platform Gradle tasks
       - 'gradle-core-tasks'
-      - 'store-native-artifacts'
+      - 'store-release-artifacts':
+          path: 'build/release-artifacts'
+          platform: 'macos-arm64'
       - 'save-gradle-caches':
           platform: 'macos-arm64'
           .
@@ -419,9 +437,9 @@ jobs:
       - 'run-python-tests-unix'
       - 'save-build-caches':
           platform: 'linux-amd64'
-      - store_artifacts:
+      - 'store-release-artifacts':
           path: 'lib-python/dist'
-          destination: 'python-linux-amd64'
+          platform: 'python-linux-amd64'
           .
         .
     .
@@ -438,9 +456,9 @@ jobs:
       - 'run-python-tests-unix'
       - 'save-build-caches':
           platform: 'macos-python'
-      - store_artifacts:
+      - 'store-release-artifacts':
           path: 'lib-python/dist'
-          destination: 'python-macos'
+          platform: 'python-macos-arm64'
           .
         .
     .
@@ -478,9 +496,9 @@ jobs:
 
       - 'save-build-caches':
           platform: 'windows-python'
-      - store_artifacts:
+      - 'store-release-artifacts':
           path: 'lib-python/dist'
-          destination: 'python-windows'
+          platform: 'python-windows-amd64'
           .
         .
     .

@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonVersion
+import org.kson.releaseArtifactsDir
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -128,6 +129,26 @@ tasks {
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
+}
+
+/**
+ * Collects this platform's whole share of a release -- the native `kson-lib`, the CLI binary, and a
+ * `SHA256SUMS` to check them against -- into [releaseArtifactsDir]. CI runs this on every build job
+ * and stores the result (see `.circleci/config.kson`); a release manager downloads it from there
+ * (see `docs/release_process.md`).
+ *
+ * The Python wheels are collected the same way but staged by their own build: a wheel already
+ * carries its platform in its name, so `:lib-python:buildWheel` needs no repackaging here.
+ */
+val packageReleaseArtifacts by tasks.registering(Sha256SumsTask::class) {
+    group = "distribution"
+    description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
+
+    dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
+    // checksum whatever is staged rather than a list restated from those tasks, so that the day we
+    // release a fourth thing, staging it is the only thing anyone has to remember
+    artifacts.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
+    sumsFile.set(releaseArtifactsDir.map { it.file("SHA256SUMS") })
 }
 
 group = "org.kson"
