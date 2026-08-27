@@ -147,9 +147,8 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
    step 3.
 
 3. Download the pre-built wheels from the CircleCI `build-python-wheel-*` jobs for this tag:
-   - Download the wheel artifacts from CircleCI (they will download as `.zip` files)
+   - Download the wheel artifacts from CircleCI
    - Copy all wheels into the `lib-python/dist/` directory
-   - Change the file extensions from `.zip` to `.whl`
 
 4. Upload to PyPI using `twine`:
    ```bash
