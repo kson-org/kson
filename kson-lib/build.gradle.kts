@@ -2,6 +2,7 @@ import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.kson.BinaryArtifactPaths
 import org.gradle.internal.os.OperatingSystem
 import org.kson.GraalVmHelper
+import org.kson.UniversalJsPackage
 
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -165,50 +166,7 @@ tasks.register("buildUniversalJsPackage") {
         // Ensure directory exists
         jsPackageDir.mkdirs()
 
-
-        // Copy TypeScript definitions (from browser, they should be the same)
-        copy {
-            from(jsPackageDir.resolve("browser"))
-            include("*.d.ts")
-            into(jsPackageDir)
-        }
-
-        // Write universal package.json
-        val packageJson = """
-        {
-          "name": "@kson_org/kson",
-          "version": $version,
-          "description": "KSON - Extended JSON format with comments and more",
-          "author": {
-            "name": "KSON Team",
-            "email": "kson@kson.org"
-          },
-          "repository": {
-            "type": "git",
-            "url": "https://github.com/kson-org/kson"
-          },
-          "license": "Apache-2.0",
-          "keywords": ["json", "kson", "yaml", "configuration"],
-          "exports": {
-            ".": {
-              "browser": "./browser/kson-kson-lib.mjs",
-              "node": "./node/kson-kson-lib.mjs",
-              "types": "./kson-kson-lib.d.ts"
-            }
-          },
-          "main": "./node/kson-kson-lib.mjs",
-          "browser": "./browser/kson-kson-lib.mjs",
-          "types": "./kson-kson-lib.d.ts",
-          "files": [
-            "browser/",
-            "node/",
-            "*.d.ts",
-            "README.md"
-          ]
-        }
-        """.trimIndent()
-
-        jsPackageDir.resolve("package.json").writeText(packageJson)
+        UniversalJsPackage.writePackageJson(jsPackageDir, version.toString())
 
         // Copy README if it exists
         val readmeFile = projectDir.resolve("README-npm.md")
