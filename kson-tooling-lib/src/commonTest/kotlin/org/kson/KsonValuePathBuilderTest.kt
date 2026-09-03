@@ -102,6 +102,63 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
+    fun testBuildJsonPointerToPosition_freshDashListItem() {
+        // a dash with no value yet opens the list's next item, so the caret targets that index
+        assertPathAtCaret(
+            """
+            tags:
+              - kotlin
+              - <caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("tags", "1")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_keyBeingTypedInPlainObject() {
+        // the colon-less key lands in trailing content, so the path comes from `John` instead
+        assertPathAtCaret(
+            """
+            person:
+              name: John
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("person")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_keyBeingTypedAfterList() {
+        // a key can only belong to an object, so the path walks back out of the list above it
+        assertPathAtCaret(
+            """
+            person:
+              hobbies:
+                - reading
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("person")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_definitionAtKeyBeingTyped() {
+        // only completion knows the caret is mid-keystroke: a definition lookup on content the
+        // parser dropped resolves nothing rather than guessing from a token elsewhere
+        assertPathAtCaret(
+            """
+            person:
+              name: John
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.ROOT
+        )
+    }
+
+    @Test
     fun testBuildJsonPointerToPosition_nestedArrayItem() {
         assertPathAtCaret(
             """
@@ -382,10 +439,13 @@ class KsonValuePathBuilderTest {
      * false), so that is the mode asserted here.
      *
      * [expectedPlaceholderText], when non-null, is the exact source substring the placeholder must
-     * span; it must occur exactly once in the document so its location is unambiguous. Pass null to
-     * assert the caret contributes no placeholder.
+     * span; a placeholder is the value the caret is authoring, so the occurrence looked for is the
+     * one nearest before the caret. Pass null to assert the caret contributes no placeholder.
      */
-    private fun assertPlaceholderAtCaret(documentWithCaret: String, expectedPlaceholderText: String?) {
+    private fun assertPlaceholderAtCaret(
+        documentWithCaret: String,
+        expectedPlaceholderText: String?
+    ) {
         val caretMarker = "<caret>"
         val caretIndex = documentWithCaret.indexOf(caretMarker)
         require(caretIndex >= 0) { "Document must contain $caretMarker marker" }
@@ -403,9 +463,8 @@ class KsonValuePathBuilderTest {
         val placeholder = caretPath?.placeholderLocation
 
         val expected = expectedPlaceholderText?.let { text ->
-            val start = document.indexOf(text)
-            require(start >= 0) { "Expected placeholder text not found in document: \"$text\"" }
-            require(document.indexOf(text, start + 1) < 0) { "Expected placeholder text is ambiguous: \"$text\"" }
+            val start = document.lastIndexOf(text, caretIndex)
+            require(start >= 0) { "Expected placeholder text not found before the caret: \"$text\"" }
             locationOf(document, start, start + text.length)
         }
 
@@ -446,27 +505,24 @@ class KsonValuePathBuilderTest {
 
     @Test
     fun testBuildCaretPath_placeholder_freshDashListItem() {
-        // A fresh dash-list item's placeholder is the enclosing property (key through dash), so its
-        // incomplete item can't disqualify sibling-discriminated branches.
         assertPlaceholderAtCaret(
             """
             items:
               - <caret>
             """.trimIndent(),
-            expectedPlaceholderText = "items:\n  -"
+            expectedPlaceholderText = "- "
         )
     }
 
     @Test
     fun testBuildCaretPath_placeholder_freshDashListItemAfterCommittedItem() {
-        // The excluded span is the whole property, reaching past an already-committed sibling item.
         assertPlaceholderAtCaret(
             """
             items:
               - one
               - <caret>
             """.trimIndent(),
-            expectedPlaceholderText = "items:\n  - one\n  -"
+            expectedPlaceholderText = "- "
         )
     }
 

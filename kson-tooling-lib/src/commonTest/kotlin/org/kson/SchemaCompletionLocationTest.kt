@@ -30,6 +30,13 @@ class SchemaCompletionLocationTest {
         return KsonTooling.getCompletionsAtLocation(KsonTooling.parse(document), KsonTooling.parse(schema), line, column)
     }
 
+    /**
+     * Helper to assert the set of labels offered at the <caret> position in the document
+     */
+    private fun assertCompletionLabels(schema: String, documentWithCaret: String, expected: Set<String>) {
+        assertEquals(expected, getCompletionsAtCaret(schema, documentWithCaret).map { it.label }.toSet())
+    }
+
     @Test
     fun testConstValueCompletions() {
         val schema = """
@@ -1762,6 +1769,111 @@ class SchemaCompletionLocationTest {
         assertTrue("and" in labels, "Should include 'and' from AndExpression, got: $labels")
     }
 
+    /** Nested object plus root-level siblings, so a leaking scope is unmistakable */
+    private val nestedPersonSchema = """
+        {
+            "type": "object",
+            "properties": {
+                "person": {
+                    "type": "object",
+                    "properties": {
+                        "name": { "type": "string" },
+                        "age": { "type": "number" }
+                    }
+                },
+                "hobby": { "type": "string" },
+                "other": { "type": "string" }
+            }
+        }
+    """
+
+    /**
+     * A key with no `:` yet is not a keyword, so the object ends before it and it lands in trailing
+     * content: completion reads its scope off `John`, the last token the parser placed.
+     */
+    @Test
+    fun testHalfTypedKeyCompletesEnclosingEndDottedObject() {
+        assertCompletionLabels(nestedPersonSchema, """
+            person:
+              name: John
+              a<caret>
+              .
+            hobby: reading
+        """.trimIndent(), setOf("age"))
+    }
+
+    @Test
+    fun testHalfTypedKeyCompletesEnclosingIndentedObject() {
+        assertCompletionLabels(nestedPersonSchema, """
+            hobby: reading
+            person:
+              name: John
+              a<caret>
+        """.trimIndent(), setOf("age"))
+    }
+
+    /** `name` is offered too: the error sits inside the `{}`, leaving no committed value to filter against */
+    @Test
+    fun testHalfTypedKeyCompletesEnclosingDelimitedObject() {
+        assertCompletionLabels(nestedPersonSchema, """
+            person: {
+              name: John
+              a<caret>
+            }
+            hobby: reading
+        """.trimIndent(), setOf("age", "name"))
+    }
+
+    @Test
+    fun testHalfTypedKeyAtRootCompletesRoot() {
+        assertCompletionLabels(nestedPersonSchema, """
+            hobby: reading
+            o<caret>
+        """.trimIndent(), setOf("other", "person"))
+    }
+
+    /** Same, with lists to walk back out of */
+    private val personWithListsSchema = """
+        {
+            "type": "object",
+            "properties": {
+                "tags": { "type": "array", "items": { "type": "string" } },
+                "person": {
+                    "type": "object",
+                    "properties": {
+                        "name": { "type": "string" },
+                        "age": { "type": "number" },
+                        "hobbies": { "type": "array", "items": { "type": "string" } }
+                    }
+                },
+                "other": { "type": "string" }
+            }
+        }
+    """
+
+    /**
+     * A key can only belong to an object, so a key typed under a list belongs to the object owning
+     * that list—`tags:\n  - red\nother: x` reads `other` as a root property.
+     */
+    @Test
+    fun testHalfTypedKeyAfterListCompletesObjectOwningIt() {
+        assertCompletionLabels(personWithListsSchema, """
+            tags:
+              - red
+            o<caret>
+        """.trimIndent(), setOf("other", "person"))
+    }
+
+    @Test
+    fun testHalfTypedKeyAfterNestedListCompletesEnclosingObject() {
+        assertCompletionLabels(personWithListsSchema, """
+            person:
+              hobbies:
+                - reading
+              a<caret>
+        """.trimIndent(), setOf("age", "name"))
+    }
+
     @Test
     fun testCompletionsInsideDashListWithRefToAnyOf() {
         val schema = searchExpressionSchema
@@ -1826,6 +1938,31 @@ class SchemaCompletionLocationTest {
             labels,
             "Empty recursive-anyOf array item offers the union of both branches, got: $labels"
         )
+    }
+
+    /** A dash with nothing after it yet is the list's next item, so the caret completes that item */
+    @Test
+    fun testCompletionsAtFreshDashItemOfferItemValues() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "colors": {
+                        "type": "array",
+                        "items": { "enum": ["red", "green", "blue"] }
+                    },
+                    "other": { "type": "string" }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, """
+            colors:
+              - red
+              - <caret>
+              =
+            other: x
+        """.trimIndent(), setOf("blue", "green", "red"))
     }
 
     @Test
