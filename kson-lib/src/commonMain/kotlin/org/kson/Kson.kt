@@ -84,12 +84,17 @@ object Kson {
      * Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
      * tokenized version of the source.  Useful for tooling/editor support.
      * @param kson The Kson source to analyze
-     * @param filepath Filepath of the document being analyzed
+     * @param filepath (Optional) Filepath of the document being analyzed
+     * @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
+     *          able to be validated against a schema
      */
-    fun analyze(kson: String, filepath: String? = null) : Analysis {
+    fun analyze(kson: String, filepath: String? = null, schemaValidator: SchemaValidator? = null) : Analysis {
         val parseResult = KsonCore.parseToAst(
             kson,
-            CoreCompileConfig(sourceContext = SourceContext(filepath))
+            CoreCompileConfig(
+                schemaJson = schemaValidator?.schema,
+                sourceContext = SourceContext(filepath)
+            )
         )
         val tokens = convertTokens(parseResult.lexedTokens)
         val messages = publishMessages(parseResult.messages)
@@ -166,29 +171,31 @@ sealed class SchemaResult {
 /**
  * A validator that can check if Kson source conforms to a schema.
  */
-class SchemaValidator internal constructor(private val schema: JsonSchema) {
+class SchemaValidator internal constructor(internal val schema: JsonSchema) {
     /**
-     * Validates the given Kson source against this validator's schema.
-     * @param kson The Kson source to validate
-     * @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
+     * Validates the given KSON source against this validator's schema.
      *
-     * @return A list of validation error messages, or empty list if valid
+     * NOTE: this must parse [kson] in order to validate it, but does not report that parse's own messages: a
+     * document may satisfy a schema and still carry warnings of its own.  Pass this validator to [Kson.analyze]
+     * to see both.  The exception is [kson] which fails to parse at all: it _cannot_ be validated against this
+     * [schema], and so those parse errors are returned instead.
+     *
+     * @param kson The KSON source to validate
+     * @param filepath (Optional) filepath of the document being validated, used by validators to determine
+     *                 which rules to apply
+     *
+     * @return A list of schema validation [Message]s, or empty list if [kson] is valid under this [schema]
      */
     fun validate(kson: String, filepath: String? = null): List<Message> {
         val astParseResult = KsonCore.parseToAst(
             kson,
             CoreCompileConfig(sourceContext = SourceContext(filepath))
         )
-        if (astParseResult.hasErrors()) {
-            return publishMessages(astParseResult.messages)
-        }
+        val ksonValue = astParseResult.ksonValue
+            ?: return publishMessages(astParseResult.messages)
 
         val messageSink = MessageSink()
-        val ksonValue = astParseResult.ksonValue
-        if (ksonValue != null) {
-            schema.validate(ksonValue, messageSink, SourceContext(filepath))
-        }
-
+        schema.validate(ksonValue, messageSink, SourceContext(filepath))
         return publishMessages(messageSink.loggedMessages())
     }
 }
