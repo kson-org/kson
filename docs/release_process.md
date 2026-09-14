@@ -89,8 +89,6 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
    ./gradlew publishAllPublicationsToMavenCentralRepository -Prelease=true
    ```
 
-   Note that without `-Prelease=true` both artifacts will be have snapshot coordinates (`X.Y.Z-{gitSha}-SNAPSHOT`) instead of the release version.
-
 3. Verify the publications are valid and ready to be published: https://central.sonatype.com/publishing/deployments
 
 4. Manually release: we have `automaticRelease = false` as a final gate/protection, so once everything looks good at https://central.sonatype.com/publishing/deployments for this release, click Publish
