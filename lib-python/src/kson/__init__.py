@@ -1015,11 +1015,18 @@ class SchemaValidator(KotlinObjectBase):
         filepath: Optional[str],
 
     ) -> List[Message]:
-        """Validates the given Kson source against this validator's schema.
-        @param kson The Kson source to validate
-        @param filepath Optional filepath of the document being validated, used by validators to determine which rules to apply
+        """Validates the given KSON source against this validator's schema.
 
-        @return A list of validation error messages, or empty list if valid
+        NOTE: this must parse [kson] in order to validate it, but does not report that parse's own messages: a
+        document may satisfy a schema and still carry warnings of its own.  Pass this validator to [Kson.analyze]
+        to see both.  The exception is [kson] which fails to parse at all: it _cannot_ be validated against this
+        [schema], and so those parse errors are returned instead.
+
+        @param kson The KSON source to validate
+        @param filepath (Optional) filepath of the document being validated, used by validators to determine
+                        which rules to apply
+
+        @return A list of schema validation [Message]s, or empty list if [kson] is valid under this [schema]
         """
 
         if kson is None:
@@ -1554,12 +1561,15 @@ class Kson(KotlinObjectBase):
     def analyze(
         kson: str,
         filepath: Optional[str],
+        schema_validator: Optional[SchemaValidator],
 
     ) -> Analysis:
         """Statically analyze the given Kson and return an [Analysis] object containing any messages generated along with a
         tokenized version of the source.  Useful for tooling/editor support.
         @param kson The Kson source to analyze
-        @param filepath Filepath of the document being analyzed
+        @param filepath (Optional) Filepath of the document being analyzed
+        @param schemaValidator (Optional) A schema to validate [kson] against, provided [kson] is error-free and hence
+                 able to be validated against a schema
         """
 
         if kson is None:
@@ -1569,12 +1579,13 @@ class Kson(KotlinObjectBase):
             b"org/kson/Kson",
             jni_ref,
             b"analyze",
-            b"(Ljava/lang/String;Ljava/lang/String;)Lorg/kson/Analysis;",
+            b"(Ljava/lang/String;Ljava/lang/String;Lorg/kson/SchemaValidator;)Lorg/kson/Analysis;",
             "ObjectMethod",
             [
 
                 _python_str_to_java_string(kson),
                 _python_str_to_java_string(filepath) if filepath is not None else ffi.NULL,
+                schema_validator._jni_ref if schema_validator is not None else ffi.NULL,
             ]
         )
 

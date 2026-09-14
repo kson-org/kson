@@ -6,6 +6,21 @@ build:
 # See https://detekt.dev/docs/rules/overview for all available rules.
 
 complexity:
+  LargeClass:
+    active: true
+    excludes:
+      # Exclude test classes from this lint since tests are a collection of individual little "apps" that
+      # verify the class the test is linked to by name, so a large test class never implies an incoherent
+      # or sprawling class interface, rather it means good coverage for some other hopefully coherent class
+      - '**/test/**'
+      - '**/androidTest/**'
+      - '**/commonTest/**'
+      - '**/jvmTest/**'
+      - '**/androidUnitTest/**'
+      - '**/androidInstrumentedTest/**'
+      - '**/jsTest/**'
+      - '**/iosTest/**'
+    .
   LongMethod:
     active: true
     threshold: 80
@@ -59,5 +74,3 @@ naming:
 exceptions:
   TooGenericExceptionCaught:
     active: false
-    .
-  .

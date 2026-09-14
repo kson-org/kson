@@ -135,6 +135,28 @@ describe('FileSystemSchemaProvider', () => {
             assert.ok(logs.some(msg => msg.includes('Schema file not found')));
         });
 
+        /**
+         * Regression test for a bug where we would silently drop broken schemas, leaving the editor communicating
+         * to the user that everything is fine rather than letting them know the schema they asked to validate
+         * against is _impossible_ to validate against.
+         */
+        it('should return a schema that does not parse', () => {
+            const workspace = createWorkspace();
+            // multiple unclosed objects defined gives broken KSON
+            const brokenSchema = '{ type: object properties: {{{';
+
+            writeConfig(workspace, {
+                schemas: [{fileMatch: ['*.kson'], schema: 'schemas/broken.kson'}]
+            });
+            writeSchema(workspace, 'schemas/broken.kson', brokenSchema);
+
+            const provider = new FileSystemSchemaProvider(workspace, logger);
+            const schema = provider.getSchemaForDocument(path.join(workspace.fsPath, 'test.kson'));
+
+            assert.ok(schema, 'a schema with a parse error must still be handed over');
+            assert.strictEqual(schema!.getText(), brokenSchema);
+        });
+
         it('should support glob patterns', () => {
             const workspace = createWorkspace();
             const schemaContent = JSON.stringify({type: 'object'});

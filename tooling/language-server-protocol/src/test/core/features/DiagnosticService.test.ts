@@ -140,12 +140,17 @@ describe('KSON Diagnostics', () => {
             }
         });
 
-        it('should return no errors for valid document when schema fails to parse', () => {
+        it('should report the unusable schema for a valid document', () => {
             const invalidSchema = '{ broken schema {{{{';
             const diagnostics = getDiagnostics('key: "value"', invalidSchema);
-            // Valid document + broken schema: should get 0 diagnostics since
-            // document is valid and schema parse failure returns no schema messages
-            assert.strictEqual(diagnostics.length, 0);
+            // The document is valid, but it was never validated against the schema: saying nothing
+            // here would report the document as fully checked
+            assert.strictEqual(diagnostics.length, 1);
+            assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Warning);
+            assert.deepStrictEqual(diagnostics[0].range, {
+                start: {line: 0, character: 0},
+                end: {line: 0, character: 0}
+            });
         });
     });
 

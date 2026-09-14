@@ -9,40 +9,6 @@
     <ID>CyclomaticComplexMethod:Lexer.kt$Lexer$private fun scan()</ID>
     <ID>CyclomaticComplexMethod:TreeNavigation.kt$TreeNavigator$private fun processSingleToken( currentNodes: List&lt;N>, token: PointerParser.Tokens ): List&lt;N></ID>
     <ID>CyclomaticComplexMethod:TypeValidator.kt$TypeValidator$fun validate(ksonValue: KsonValue, messageSink: MessageSink): Boolean</ID>
-    <ID>LargeClass:FormatterTest.kt$FormatterTest</ID>
-    <ID>LargeClass:JsonSchemaTestBundledRemotes.kt$JsonSchemaTestBundledRemotes : JsonSchemaTest</ID>
-    <ID>LargeClass:JsonSuiteTest.kt$JsonSuiteTest</ID>
-    <ID>LargeClass:KsonCoreTestComment.kt$KsonCoreTestComment : KsonCoreTest</ID>
-    <ID>LargeClass:KsonCoreTestEmbedBlock.kt$KsonCoreTestEmbedBlock : KsonCoreTest</ID>
-    <ID>LargeClass:LexerTest.kt$LexerTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_allOf.kt$SchemaDraft2020_12SuiteTest_allOf : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_const.kt$SchemaDraft2020_12SuiteTest_const : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_dynamicRef.kt$SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_enum.kt$SchemaDraft2020_12SuiteTest_enum : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_format.kt$SchemaDraft2020_12SuiteTest_format : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_items.kt$SchemaDraft2020_12SuiteTest_items : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_not.kt$SchemaDraft2020_12SuiteTest_not : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_oneOf.kt$SchemaDraft2020_12SuiteTest_oneOf : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_properties.kt$SchemaDraft2020_12SuiteTest_properties : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_ref.kt$SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_refRemote.kt$SchemaDraft2020_12SuiteTest_refRemote : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_type.kt$SchemaDraft2020_12SuiteTest_type : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_unevaluatedItems.kt$SchemaDraft2020_12SuiteTest_unevaluatedItems : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_unevaluatedProperties.kt$SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft2020_12SuiteTest_uniqueItems.kt$SchemaDraft2020_12SuiteTest_uniqueItems : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_allOf.kt$SchemaDraft7SuiteTest_allOf : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_const.kt$SchemaDraft7SuiteTest_const : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_dependencies.kt$SchemaDraft7SuiteTest_dependencies : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_enum.kt$SchemaDraft7SuiteTest_enum : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_format.kt$SchemaDraft7SuiteTest_format : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_items.kt$SchemaDraft7SuiteTest_items : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_not.kt$SchemaDraft7SuiteTest_not : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_oneOf.kt$SchemaDraft7SuiteTest_oneOf : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_properties.kt$SchemaDraft7SuiteTest_properties : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_ref.kt$SchemaDraft7SuiteTest_ref : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_type.kt$SchemaDraft7SuiteTest_type : JsonSchemaTest</ID>
-    <ID>LargeClass:SchemaDraft7SuiteTest_uniqueItems.kt$SchemaDraft7SuiteTest_uniqueItems : JsonSchemaTest</ID>
-    <ID>LargeClass:TreeNavigationTest.kt$TreeNavigationTest</ID>
     <ID>LongMethod:Formatter.kt$IndentFormatter$@Deprecated( "This formatter is no long a good general purpose formatter. " + "See the TODO in this class's doc for details" ) @Suppress("NestedBlockDepth") private fun indent(source: String, snippetNestingLevel: Int? = null): String</ID>
     <ID>LongMethod:FormatterTest.kt$FormatterTest$@Test fun testCompactFormattingStyleNestedStructures()</ID>
     <ID>LongMethod:FormatterTest.kt$FormatterTest$@Test fun testMultipleTrailingContent()</ID>

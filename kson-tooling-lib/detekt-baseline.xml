@@ -4,8 +4,6 @@
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:SchemaInformation.kt$fun InternalKsonValue.extractSchemaInfo(): String?</ID>
     <ID>CyclomaticComplexMethod:SemanticTokenBuilder.kt$SemanticTokenBuilder$private fun collectKeyTokens(node: AstNode, keyTokens: MutableSet&lt;Token>)</ID>
-    <ID>LargeClass:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest</ID>
-    <ID>LargeClass:SchemaNavigationTest.kt$SchemaNavigationTest</ID>
     <ID>LongMethod:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest$@Test fun testCompletionsAtValuePositionWithRefToAnyOfWithDescription()</ID>
     <ID>LongMethod:SchemaCompletionLocationTest.kt$SchemaCompletionLocationTest$@Test fun testOneOfCompletionsFilteredByExistingProperties()</ID>
     <ID>LoopWithTooManyJumpStatements:SchemaDefinitionLocationTest.kt$SchemaDefinitionLocationTest$while</ID>
