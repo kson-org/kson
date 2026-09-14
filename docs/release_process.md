@@ -86,7 +86,7 @@ signing.secretKeyRingFile=<path-to-secring.gpg>
 
 2. Publish to Maven Central:
    ```bash
-   ./gradlew publishAllPublicationsToMavenCentralRepository
+   ./gradlew publishAllPublicationsToMavenCentralRepository -Prelease=true
    ```
 
 3. Verify the publications are valid and ready to be published: https://central.sonatype.com/publishing/deployments
