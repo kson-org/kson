@@ -11,7 +11,7 @@ plugins {
 
 group = properties("pluginGroup")
 val isRelease = project.findProperty("release") == "true"
-version = org.kson.KsonVersion.getVersion(isRelease = isRelease)
+version = org.kson.KsonVersion.getVersion(baseVersion = "0.3.0.1", isRelease = isRelease)
 
 repositories {
     mavenCentral()
