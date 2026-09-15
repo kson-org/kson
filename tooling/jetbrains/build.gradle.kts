@@ -43,8 +43,8 @@ dependencies {
 }
 
 intellijPlatform {
+    projectName = properties("pluginProjectName") // dictates both the directory and the archive name
     pluginConfiguration {
-        name = properties("pluginName")
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
         }
