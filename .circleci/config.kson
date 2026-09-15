@@ -376,6 +376,7 @@ jobs:
     docker:
       - image: 'cimg/python:3.11'
         .
+    resource_class: large
     working_directory: '~/repo'
     steps:
       - checkout
@@ -427,8 +428,9 @@ jobs:
     .
   'test-python-sdist-macos':
     macos:
-      xcode: '14.2.0'
+      xcode: '16.4.0'
       .
+    resource_class: 'm4pro.medium'
     working_directory: '~/repo'
     steps:
       - 'setup-python-test':
