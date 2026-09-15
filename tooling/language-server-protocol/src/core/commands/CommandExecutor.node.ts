@@ -3,6 +3,7 @@ import {CommandParameters} from './CommandParameters.js';
 import {CommandType} from './CommandType.js';
 import {AssociateSchemaCommand} from './AssociateSchemaCommand.js';
 import {RemoveSchemaCommand} from './RemoveSchemaCommand.js';
+import {notifySchemaChange} from '../schema/notifySchemaChange.js';
 
 /**
  * Node.js implementation of CommandExecutor with file system support
@@ -19,6 +20,7 @@ export class CommandExecutor extends CommandExecutorBase {
         });
 
         if (result.success) {
+            this.applySchemaConfigurationChange();
             this.connection.window.showInformationMessage(result.message);
         } else {
             this.connection.window.showErrorMessage(result.message);
@@ -37,11 +39,20 @@ export class CommandExecutor extends CommandExecutorBase {
         });
 
         if (result.success) {
+            this.applySchemaConfigurationChange();
             this.connection.window.showInformationMessage(result.message);
         } else {
             this.connection.window.showErrorMessage(result.message);
         }
 
         return result;
+    }
+
+    /**
+     * Ensure latest schema configuration change is reloaded.
+     */
+    private applySchemaConfigurationChange(): void {
+        this.documentManager.reloadSchemaConfiguration();
+        notifySchemaChange(this.connection, this.documentManager);
     }
 }

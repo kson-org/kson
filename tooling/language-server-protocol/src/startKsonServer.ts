@@ -17,6 +17,7 @@ import {SchemaProvider} from './core/schema/SchemaProvider.js';
 import {BundledSchemaProvider, BundledSchemaConfig, BundledMetaSchemaConfig} from './core/schema/BundledSchemaProvider.js';
 import {CompositeSchemaProvider} from './core/schema/CompositeSchemaProvider.js';
 import {SCHEMA_CONFIG_FILENAME} from "./core/schema/SchemaConfig";
+import {notifySchemaChange} from "./core/schema/notifySchemaChange.js";
 import {CommandExecutorFactory} from "./core/commands/CommandExecutorFactory";
 
 /**
@@ -256,16 +257,6 @@ export function startKsonServer(
         }
     });
 
-    /**
-     * Refresh all documents with updated schemas, notify the client,
-     * and trigger diagnostic refresh.
-     */
-    function notifySchemaChange(): void {
-        documentManager.refreshDocumentSchemas();
-        connection.sendNotification('kson/schemaConfigurationChanged');
-        connection.sendRequest('workspace/diagnostic/refresh');
-    }
-
     // Handle changes to watched files
     connection.onDidChangeWatchedFiles((params) => {
         const schemaProvider = documentManager.getSchemaProvider();
@@ -284,7 +275,7 @@ export function startKsonServer(
         }
 
         if (schemaChanged) {
-            notifySchemaChange();
+            notifySchemaChange(connection, documentManager);
         }
     });
 
@@ -302,7 +293,7 @@ export function startKsonServer(
 
         if (bundledSchemaProvider && scoped?.enableBundledSchemas !== undefined) {
             bundledSchemaProvider.setEnabled(scoped.enableBundledSchemas);
-            notifySchemaChange();
+            notifySchemaChange(connection, documentManager);
         }
 
         connection.console.info('Configuration updated');
