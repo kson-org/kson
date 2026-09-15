@@ -158,6 +158,18 @@ class AstNodeWalkerTest {
     }
 
     @Test
+    fun testErrorElementKeepsItsIndex() {
+        // `- ` with no value yet is still an element of the list, addressable at index 1
+        val node = parseAst("- one\n- \n=")
+        assertNotNull(node)
+        val children = walker.getChildren(node)
+        assertIs<NodeChildren.Array<AstNode>>(children)
+        assertEquals(2, children.elements.size)
+        assertEquals("one", (children.elements[0] as StringNodeImpl).processedStringContent)
+        assertIs<AstNodeError>(children.elements[1])
+    }
+
+    @Test
     fun testCompletelyUnparseableDocumentReturnsNull() {
         // Some inputs produce KsonRootError — parseAst returns null
         val node = parseAst("")
