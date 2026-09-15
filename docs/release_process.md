@@ -139,13 +139,16 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
 
 2. Create the source distribution:
    ```bash
-   ./gradlew createDist
+   ./gradlew :lib-python:buildSdist
    ```
 
-3. Download the pre-built wheels from the CircleCI build for this tag:
-   - Download the wheel artifacts from CircleCI (they will download as `.zip` files)
+   This archive is source only: it carries no native library and cannot build one, so nobody
+   installs from it. It puts the source on PyPI; every installable artifact is a wheel from
+   step 3.
+
+3. Download the pre-built wheels from the CircleCI `build-python-wheel-*` jobs for this tag:
+   - Download the wheel artifacts from CircleCI
    - Copy all wheels into the `lib-python/dist/` directory
-   - Change the file extensions from `.zip` to `.whl`
 
 4. Upload to PyPI using `twine`:
    ```bash

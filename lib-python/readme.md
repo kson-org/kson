@@ -2,7 +2,7 @@
 
 Python bindings for [KSON](https://kson.org), a next-gen configuration language. Convert KSON to JSON/YAML, format and validate documents, and parse KSON into structured values.
 
-Available on Linux, macOS, and Windows. Requires Python 3.10+.
+Requires Python 3.11+. Prebuilt wheels are published for Linux x86_64 (glibc 2.34+), macOS arm64 and Windows x86_64.
 
 ## Installation
 
@@ -10,6 +10,10 @@ Available on Linux, macOS, and Windows. Requires Python 3.10+.
 ```bash
 pip install kson-lang
 ```
+
+Installing needs one of those wheels: kson-lang wraps a native library and the source
+distribution cannot build one, so anywhere else pip falls back to the sdist and fails with a
+pointer to [Build from source](#build-from-source).
 
 ## Quick start
 
