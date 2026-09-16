@@ -15,7 +15,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
     id("com.vanniktech.maven.publish") version "0.30.0"
-    id("org.jetbrains.dokka") version "2.0.0"
+    id("org.jetbrains.dokka") version "2.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 
     // configured by `jvmWrapper` block below
