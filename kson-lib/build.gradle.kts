@@ -9,7 +9,7 @@ import kotlin.io.path.pathString
 
 plugins {
     kotlin("multiplatform")
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("nl.ochagavia.krossover") version "1.0.8"
 }
@@ -234,7 +234,7 @@ tasks.register("buildUniversalJsPackage") {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    publishToMavenCentral(automaticRelease = false)
     signAllPublications()
 
     coordinates("org.kson", "kson", org.kson.KsonVersion.getPublishVersion(rootProject.projectDir, isRelease = isRelease))

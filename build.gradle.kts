@@ -14,7 +14,7 @@ val sharedProps = Properties().apply {
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
 
@@ -187,7 +187,7 @@ kotlin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    publishToMavenCentral(automaticRelease = false)
     signAllPublications()
 
     coordinates("org.kson", "kson-internals", KsonVersion.getPublishVersion(projectDir, internalBaseVersion, isRelease))
