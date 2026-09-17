@@ -46,6 +46,7 @@ When `main` is ready to have a release cut from it:
     - [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json)
     - [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json)
     - [tooling/language-server-protocol](../tooling/language-server-protocol/package.json)
+  * [tooling/jetbrains plugin.xml](../tooling/jetbrains/src/main/resources/META-INF/plugin.xml): update `<change-notes>` section with very simple release notes (a link to the blog is enough)
 - Commit and push the `release-X.Y.Z-prep` branch
 - Run CircleCI across ALL supported platforms on the `release-X.Y.Z-prep` branch (only linux builds are run on every pull request)
   * Fix any platform specific issues found (hopefully this is rare... if it is common and painful, we may need to reconsider running cross-platform CI more often)
