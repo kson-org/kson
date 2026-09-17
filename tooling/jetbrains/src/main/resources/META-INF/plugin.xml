@@ -16,6 +16,13 @@
         </p>
     ]]></description>
 
+    <change-notes><![CDATA[
+        <p>
+            Please see list of updates to KSON v0.3.0 including syntax and interface changes, schema validation improvements, better error reporting and diagnostics, formatting and transpiling fixes and features, and lots of enhancements to editors, IDE and build support. See the full list here:
+            <a href="https://kson.org/docs/blog/2026/09/01/kson-v030-release-notes/">https://kson.org/docs/blog/2026/09/01/kson-v030-release-notes/</a>
+        </p>
+    ]]></change-notes>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="KSON"
                   implementationClass="org.kson.jetbrains.file.KsonFileType"
