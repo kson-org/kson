@@ -5,11 +5,11 @@ package org.kson.parser.behavior
  * escape/unescape [quoteChar] in [String]s
  *
  * Escaping rules: as a superset of Json, Kson's String escaping rules for delimiters work
- *   the same as JSON's rules for escaping slashes and double-quotes in a string, with the wrinkle that
- *   Kson supports single-quoted  strings, in which case the escaping rules are identical but with
+ *   the same as JSON's rules for escaping backslashes and double-quotes in a string, with the wrinkle that
+ *   Kson supports single-quoted strings, in which case the escaping rules are identical but with
  *   respect to single-quote `'` rather than double-quote `"`
  */
-sealed class StringQuote(private val quoteChar: Char) {
+sealed class StringQuote(val quoteChar: Char) {
 
     private val delimiterString = quoteChar.toString()
     private val escapedDelimiterString = "\\" + quoteChar
@@ -30,11 +30,31 @@ sealed class StringQuote(private val quoteChar: Char) {
     /**
      * Perform any needed [quoteChar] escapes on this string [rawContent]
      *
-     * @param rawContent a "raw" string that has NO escaped delimiters (other escapes are ignored)
-     * @return a copy of [rawContent] with all [quoteChar]s escaped
+     * @param rawContent a "raw" string that has [quoteChar] delimiters that may be unescaped (other escapes are
+     *     ignored)
+     * @return a copy of [rawContent] with every bare [quoteChar] escaped; existing escape sequences (including
+     *     already-escaped quotes) are copied through unchanged
      */
     fun escapeQuotes(rawContent: String): String {
-        return rawContent.replace(delimiterString, escapedDelimiterString)
+        val sb = StringBuilder(rawContent.length)
+
+        var i = 0
+        while (i < rawContent.length) {
+            val char = rawContent[i]
+            if (char == '\\' && i + 1 < rawContent.length) {
+                // an existing escape sequence: copy it through as a unit
+                sb.append(char).append(rawContent[i + 1])
+                i += 2
+            } else {
+                if (char == quoteChar) {
+                    sb.append('\\')
+                }
+                sb.append(char)
+                i++
+            }
+        }
+
+        return sb.toString()
     }
 
     /**

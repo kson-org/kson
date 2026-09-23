@@ -2,6 +2,8 @@ package org.kson.parser.behavior.quotedstring
 
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
+import org.kson.parser.behavior.StringQuote.DoubleQuote
+import org.kson.parser.behavior.StringQuote.SingleQuote
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -19,7 +21,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         // Verify no transformation occurred
@@ -48,7 +51,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -76,7 +80,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -103,7 +108,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -130,7 +136,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -157,7 +164,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -184,7 +192,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -210,7 +219,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         // No transformation for raw whitespace
@@ -237,7 +247,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -265,7 +276,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -292,7 +304,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -319,7 +332,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -350,7 +364,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -377,7 +392,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -391,9 +407,9 @@ class QuotedStringContentTransformerTest {
     }
 
     @Test
-    fun testAllCommonEscapes() {
-        val rawQuotedContent = """\\\/\b\f\n\r\t\"""" + """\'"""
-        val processed = "\\/\b\u000C\n\r\t\"'"
+    fun testOnlyDelimitingQuoteEscapeIsProcessed() {
+        // In single-quoted content `\'` is an escape, while `\"` is an invalid escape kept verbatim
+        val rawQuotedContent = """\"a\'b"""
         val baseLocation = Location(
             Coordinates(0, 0),
             Coordinates(0, rawQuotedContent.length),
@@ -403,7 +419,34 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = SingleQuote
+        )
+
+        assertEquals("\\\"a'b", transformer.processedContent)
+
+        // Map "b" (processed offsets 4-5) back past both the kept and the processed escape
+        val result = transformer.mapToOriginal(4, 5)
+
+        assertEquals(Coordinates(0, 5), result.start)
+        assertEquals(Coordinates(0, 6), result.end)
+    }
+
+    @Test
+    fun testAllCommonEscapes() {
+        val rawQuotedContent = """\\\/\b\f\n\r\t\""""
+        val processed = "\\/\b\u000C\n\r\t\""
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(0, rawQuotedContent.length),
+            0,
+            rawQuotedContent.length
+        )
+
+        val transformer = QuotedStringContentTransformer(
+            rawContent = rawQuotedContent,
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -428,7 +471,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -456,7 +500,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)
@@ -485,7 +530,8 @@ class QuotedStringContentTransformerTest {
 
         val transformer = QuotedStringContentTransformer(
             rawContent = rawQuotedContent,
-            rawLocation = baseLocation
+            rawLocation = baseLocation,
+            stringQuote = DoubleQuote
         )
 
         assertEquals(processed, transformer.processedContent)

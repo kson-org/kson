@@ -42,6 +42,25 @@ class KsonCoreTestEmbedBlockError : KsonCoreTestError {
     }
 
     @Test
+    fun testEmbedTagBadQuoteEscape() {
+        // An embed tag is not delimited by quotes, so it may not escape either quote
+        assertParserRejectsSource(
+            """
+                %my\'tag
+                content%%
+            """.trimIndent(),
+            listOf(STRING_BAD_QUOTE_ESCAPE)
+        )
+        assertParserRejectsSource(
+            """
+                %my\"tag
+                content%%
+            """.trimIndent(),
+            listOf(STRING_BAD_QUOTE_ESCAPE)
+        )
+    }
+
+    @Test
     fun testEmbedTagBadUnicodeEscape() {
         assertParserRejectsSource(
             """

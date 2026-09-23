@@ -697,11 +697,11 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
 class QuotedStringNode(
     sourceTokens: List<Token>,
     // TODO this should not be nullable
-    private val stringQuote: StringQuote?,
+    val stringQuote: StringQuote?,
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
-        QuotedStringContentTransformer(rawStringContent, location)
+        QuotedStringContentTransformer(rawStringContent, location, stringQuote)
     }
 
     override val processedStringContent: String by lazy {

@@ -249,6 +249,17 @@ enum class MessageType(
             return "Invalid string escape: $badStringEscape"
         }
     },
+    STRING_BAD_QUOTE_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Escaped Quote")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val escapedQuote = parsedArgs.getArg("Escaped Quote")
+            return "Invalid string escape: \\$escapedQuote.  A string may only escape the quote that delimits it, " +
+                    "so the backslash before this $escapedQuote is illegal"
+        }
+    },
     INVALID_DIGITS {
         override fun expectedArgs(): List<String> {
             return listOf("Unexpected Character")

@@ -2,6 +2,7 @@ package org.kson.parser.behavior.quotedstring
 
 import org.kson.parser.Location
 import org.kson.parser.behavior.KsonContentTransformer
+import org.kson.parser.behavior.StringQuote
 
 /**
  * A [KsonContentTransformer] for quoted KSON Strings, handling the processing from raw KSON source to actual String
@@ -9,10 +10,13 @@ import org.kson.parser.behavior.KsonContentTransformer
  *
  * @param rawContent The raw quoted string content from the original KSON document (without surrounding quotes)
  * @param rawLocation Where rawContent exists in the original KSON document
+ * @param stringQuote The quote delimiting [rawContent], which is the only quote [rawContent] may escape, or null for
+ *   content not delimited by quotes (i.e. an embed tag), which may escape neither quote
  */
 class QuotedStringContentTransformer(
     rawContent: String,
-    rawLocation: Location
+    rawLocation: Location,
+    stringQuote: StringQuote?
 ) : KsonContentTransformer(rawContent, rawLocation) {
     // The processed content after all transformations
     override val processedContent: String
@@ -24,7 +28,7 @@ class QuotedStringContentTransformer(
     private val escapeInfoList: List<EscapeInfo>
 
     init {
-        val (unescapedContent, escapes) = unescapeAndTrackEscapes(rawContent)
+        val (unescapedContent, escapes) = unescapeAndTrackEscapes(rawContent, stringQuote)
         processedContent = unescapedContent
         escapeInfoList = escapes
     }
@@ -75,16 +79,18 @@ private data class EscapeInfo(
  * NOTE: this is unlikely to be called directly outside of tests. [QuotedStringContentTransformer] performs this
  * unescaping into its [QuotedStringContentTransformer.processedContent] property, maintaining a [Location] source map
  * between the unescaped string and original escaped source
+ *
+ * @param stringQuote the quote delimiting the given [content] (see [QuotedStringContentTransformer])
  */
-internal fun unescapeStringContent(content: String): String {
-    return unescapeAndTrackEscapes(content).first
+internal fun unescapeStringContent(content: String, stringQuote: StringQuote?): String {
+    return unescapeAndTrackEscapes(content, stringQuote).first
 }
 
 /**
  * Unescapes the content and tracks all escape sequences for source mapping.
  * Returns a pair of (unescaped content, list of escape info).
  */
-private fun unescapeAndTrackEscapes(content: String): Pair<String, List<EscapeInfo>> {
+private fun unescapeAndTrackEscapes(content: String, stringQuote: StringQuote?): Pair<String, List<EscapeInfo>> {
     val sb = StringBuilder(content.length)
     val escapes = mutableListOf<EscapeInfo>()
 
@@ -100,7 +106,9 @@ private fun unescapeAndTrackEscapes(content: String): Pair<String, List<EscapeIn
 
         val rawStart = i
         when (val escaped = content[i + 1]) {
-            '"', '\\', '/', '\'' -> {
+            // a string may only escape the quote that delimits it, so an escape of any other quote
+            // falls through to the unknown escape handling below
+            stringQuote?.quoteChar, '\\', '/' -> {
                 sb.append(escaped)
                 escapes.add(EscapeInfo(rawStart, 2, 1))
                 i += 2

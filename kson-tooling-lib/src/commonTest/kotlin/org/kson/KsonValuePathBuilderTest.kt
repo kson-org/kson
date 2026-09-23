@@ -376,6 +376,36 @@ class KsonValuePathBuilderTest {
         )
     }
 
+    @Test
+    fun testBuildJsonPointerToPosition_classic_quoteEscapedPropertyKey_afterColon() {
+        // A key may only escape the quote that delimits it, so `\'` is processed in the single-quoted
+        // key but kept as an invalid escape in the double-quoted one
+        assertPathAtCaret(
+            """
+            {
+              'it\'s': {
+                "it\'s": <caret>
+              }
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("it's", "it\\'s"))
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_classic_quoteEscapedPropertyKey_onKey() {
+        // Cursor on a double-quoted key with an invalid `\'` escape does not process the invalid escape
+        assertPathAtCaret(
+            """
+            {
+              "it<caret>\'s": "value"
+            }
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("it\\'s")),
+            includePropertyKeys = true
+        )
+    }
+
     /**
      * Helper to test the completion placeholder span ([CaretPath.placeholderLocation]) at the
      * <caret> position. The placeholder is only populated for completion (includePropertyKeys =
