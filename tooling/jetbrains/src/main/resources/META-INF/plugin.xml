@@ -16,6 +16,12 @@
         </p>
     ]]></description>
 
+    <change-notes><![CDATA[
+        <p>
+            <!-- [[kson-version-num]] - replace these release notes when cutting a release -->
+        </p>
+    ]]></change-notes>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="KSON"
                   implementationClass="org.kson.jetbrains.file.KsonFileType"
