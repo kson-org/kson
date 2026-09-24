@@ -1041,4 +1041,70 @@ class KsonCoreTestEmbedBlock : KsonCoreTest {
             """.trimIndent()
         )
     }
+
+    @Test
+    fun testEmbedBlockBlankLinesDoNotDefineMinIndent() {
+        // this markdown paragraph break is an empty line: it should not make the min indent zero
+        assertParsesTo(
+            "%markdown\n  # Heading\n\n  some text\n  %%",
+            "%markdown\n# Heading\n\nsome text\n%%",
+            "|\n  # Heading\n  \n  some text",
+            """
+                "# Heading\n\nsome text"
+            """.trimIndent()
+        )
+
+        // a blank line holding fewer spaces than the minimum is treated the same as an empty one
+        assertParsesTo(
+            "%markdown\n    # Heading\n  \n    some text\n    %%",
+            "%markdown\n# Heading\n\nsome text\n%%",
+            "|\n  # Heading\n  \n  some text",
+            """
+                "# Heading\n\nsome text"
+            """.trimIndent()
+        )
+
+        // a blank line holding more spaces than the minimum keeps the extra spaces: they are part of the content
+        assertParsesTo(
+            "%markdown\n  # Heading\n     \n  some text\n  %%",
+            "%markdown\n# Heading\n   \nsome text\n%%",
+            "|\n  # Heading\n     \n  some text",
+            """
+                "# Heading\n   \nsome text"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockCloseDelimDefinesMinIndentDespiteBlankLines() {
+        // the closing delimiter's line still sets the minimum when blank lines are present
+        assertParsesTo(
+            "%\n      hello\n\n  %%",
+            "%\n    hello\n\n%%",
+            "|2\n      hello\n  ",
+            """
+                "    hello\n"
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testEmbedBlockBlankLineTrimmedByEditorKeepsValue() {
+        // Editors routinely trim trailing whitespace, turning an indented blank line into an empty
+        // one.  From an embed block's perspective as embedded content, blanking the whole line should
+        // be equivalent to blanking the line inside the embed block's content (that's what the editor
+        // has been configured to do: trim excess whitespace in content)
+        val expectedKson = "block: %\n  first\n  \n  second\n  %%"
+        val expectedYaml = "block: |\n    first\n    \n    second"
+        val expectedJson = """
+            {
+              "block": "first\n\nsecond"
+            }
+        """.trimIndent()
+
+        // blank line indented to the minimum, as the formatter writes it before an editor trims it
+        assertParsesTo("block: %\n  first\n  \n  second\n  %%", expectedKson, expectedYaml, expectedJson)
+        // the same document after an editor trims the blank line should yield the same value when parsed
+        assertParsesTo("block: %\n  first\n\n  second\n  %%", expectedKson, expectedYaml, expectedJson)
+    }
 }

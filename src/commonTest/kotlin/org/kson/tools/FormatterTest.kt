@@ -586,6 +586,16 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedBlockBlankLineFormatsSameWhetherIndentedOrEmpty() {
+        val expected = "doc: %markdown\n  # Heading\n  \n  some text\n  %%"
+
+        // a blank line indented to the block's minimum
+        assertFormatting("doc: %markdown\n    # Heading\n    \n    some text\n    %%", expected)
+        // the same block with that blank line totally empty should still format to the same value
+        assertFormatting("doc: %markdown\n    # Heading\n\n    some text\n    %%", expected)
+    }
+
+    @Test
     fun testEmbedBlockWithNoIndentation() {
         assertFormatting(
             """

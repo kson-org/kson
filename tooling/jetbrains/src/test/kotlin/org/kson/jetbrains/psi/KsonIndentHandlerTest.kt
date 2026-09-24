@@ -57,6 +57,33 @@ class KsonIndentHandlerTest : BasePlatformTestCase() {
         )
     }
 
+    fun testTrimIndentWithEmptyLine() {
+        // an empty line does not lower the minimum indent, and keeps its newline so that the
+        // injected text keeps the blank line
+        doTrimTest(
+            "    1\n\n    5\n    ",
+            listOf(
+                TextRange(4, 6),    // "1\n"
+                TextRange(6, 7),    // "\n"
+                TextRange(11, 13),  // "5\n"
+                TextRange(17, 17)   // ""
+            )
+        )
+    }
+
+    fun testTrimIndentWithBlankLineShorterThanIndent() {
+        // a blank line shorter than the minimum indent loses only its own whitespace
+        doTrimTest(
+            "    1\n  \n    5\n    ",
+            listOf(
+                TextRange(4, 6),    // "1\n"
+                TextRange(8, 9),    // "\n"
+                TextRange(13, 15),  // "5\n"
+                TextRange(19, 19)   // ""
+            )
+        )
+    }
+
     fun testTrimIndentAllBlankLines() {
         doTrimTest(
             """
