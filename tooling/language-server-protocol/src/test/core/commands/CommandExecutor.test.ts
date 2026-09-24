@@ -80,7 +80,7 @@ function createTestSetup(
     schemaProvider?: SchemaProvider
 ) {
     const documentsManager = new KsonDocumentsManager(schemaProvider);
-    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, workspaceRoot, TEST_DISTRIBUTION_ID);
+    const service = new KsonTextDocumentService(documentsManager, createCommandExecutor, workspaceRoot, TEST_DISTRIBUTION_ID, {});
     
     documentsManager.listen(connection);
     service.connect(connection);
