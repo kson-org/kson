@@ -7,7 +7,9 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
 import org.kson.parser.TokenType
+import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.quotedstring.QuotedStringContentTransformer
+import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
@@ -179,9 +181,6 @@ class KsonValuePathBuilder(
      *
      * Walks backwards from the colon to find the nearest UNQUOTED_STRING or
      * STRING_CONTENT token, which contains the property key text.
-     *
-     * For STRING_CONTENT tokens (quoted keys), escape sequences are processed
-     * to produce the logical property name.
      */
     private fun findPropertyNameBeforeColon(colonToken: Token, meaningfulTokens: List<Token>): String? {
         val colonIndex = meaningfulTokens.indexOf(colonToken)
@@ -189,15 +188,26 @@ class KsonValuePathBuilder(
         // Walk backwards to find the key token (skip STRING_CLOSE_QUOTE if present)
         for (i in (colonIndex - 1) downTo 0) {
             val token = meaningfulTokens[i]
-            when (token.tokenType) {
-                TokenType.UNQUOTED_STRING -> return token.lexeme.text
-                TokenType.STRING_CONTENT -> return QuotedStringContentTransformer(
-                    token.lexeme.text,
-                    token.lexeme.location
-                ).processedContent
+            return when (token.tokenType) {
+                TokenType.UNQUOTED_STRING -> token.lexeme.text
+                TokenType.STRING_CONTENT -> {
+                    if (i - 1 < 0
+                        || meaningfulTokens[i - 1].tokenType != TokenType.STRING_OPEN_QUOTE) {
+                        throw ShouldNotHappenException("String content must be preceded by a quote")
+                    }
 
-                TokenType.STRING_CLOSE_QUOTE -> continue // skip quote, look for content
-                else -> return null
+                    val stringQuote = StringQuote.fromChar(meaningfulTokens[i - 1].lexeme.text.single())
+
+                    // process the raw string to get the rendered key name
+                    QuotedStringContentTransformer(
+                        token.lexeme.text,
+                        token.lexeme.location,
+                        stringQuote
+                    ).processedContent
+                }
+                // skip quote, look for content
+                TokenType.STRING_CLOSE_QUOTE -> continue
+                else -> null
             }
         }
         return null
@@ -241,8 +251,9 @@ class KsonValuePathBuilder(
         // Cases are tried in priority order; each helper returns null when its case does not apply,
         // and the final leaf/as-is case always produces a result.
         afterColonCaretPath(pointer, colonToken, colonPropertyName, targetNode)?.let { return it }
-        propertyKeyCaretPath(pointer, lastToken, isLocationInsideToken, targetNode, includePropertyKeys)
-            ?.let { return it }
+        propertyKeyCaretPath(
+            pointer, lastToken, isLocationInsideToken, targetNode, includePropertyKeys, meaningfulTokens
+        )?.let { return it }
         parentCaretPath(pointer, lastToken, isLocationInsideToken, includePropertyKeys, targetNode, rootNode)
             ?.let { return it }
         return leafOrAsIsCaretPath(pointer, lastToken, targetNode, includePropertyKeys)
@@ -273,7 +284,7 @@ class KsonValuePathBuilder(
 
     /**
      * Location on a property key (UNQUOTED_STRING, STRING_OPEN_QUOTE, or STRING_CONTENT token) at the
-     * parent object — e.g. mid-name in `user<caret>name` — while keeping property keys (definition
+     * parent object, e.g. mid-name in `user<caret>name`, while keeping property keys (definition
      * lookups): add the property name to the path.  Returns null when the caret is not on a key.
      */
     private fun propertyKeyCaretPath(
@@ -281,7 +292,8 @@ class KsonValuePathBuilder(
         lastToken: Token?,
         isLocationInsideToken: Boolean,
         targetNode: AstNode,
-        includePropertyKeys: Boolean
+        includePropertyKeys: Boolean,
+        meaningfulTokens: List<Token>
     ): CaretPath? {
         val onPropertyKey = isLocationInsideToken &&
                 (lastToken?.tokenType == TokenType.UNQUOTED_STRING ||
@@ -290,11 +302,23 @@ class KsonValuePathBuilder(
                 AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                 includePropertyKeys
         if (!onPropertyKey) return null
-        // lastToken is non-null here: onPropertyKey can only be true when a key token matched.
+
         // Extract the property name from the token, processing escapes for quoted keys
-        val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT)
-            QuotedStringContentTransformer(lastToken.lexeme.text, lastToken.lexeme.location).processedContent
-        else
+        val propertyName = if (lastToken.tokenType == TokenType.STRING_CONTENT) {
+            val openQuoteTokenIndex = meaningfulTokens.indexOf(lastToken) - 1
+            if (openQuoteTokenIndex < 0
+                || meaningfulTokens[openQuoteTokenIndex].tokenType != TokenType.STRING_OPEN_QUOTE) {
+                throw ShouldNotHappenException("String content must be preceded by a quote")
+            }
+
+            val stringQuoteToken = meaningfulTokens[openQuoteTokenIndex]
+            val stringQuote = StringQuote.fromChar(stringQuoteToken.lexeme.text.single())
+            QuotedStringContentTransformer(
+                lastToken.lexeme.text,
+                lastToken.lexeme.location,
+                stringQuote
+            ).processedContent
+        } else
             lastToken.lexeme.text
         return CaretPath(JsonPointer.fromTokens(pointer.tokens + propertyName), placeholderLocation = null)
     }

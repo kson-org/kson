@@ -4,6 +4,7 @@ import org.kson.CompileTarget
 import org.kson.CompileTarget.*
 import org.kson.Json
 import org.kson.ast.AstNode.Indent
+import org.kson.ast.EmbedBlockRenderer.selectOptimalDelimiter
 import org.kson.parser.Location
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.NumberParser
@@ -698,11 +699,11 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
 class QuotedStringNode(
     sourceTokens: List<Token>,
     // TODO this should not be nullable
-    private val stringQuote: StringQuote?,
+    val stringQuote: StringQuote?,
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
-        QuotedStringContentTransformer(rawStringContent, location)
+        QuotedStringContentTransformer(rawStringContent, location, stringQuote)
     }
 
     override val processedStringContent: String by lazy {
@@ -938,7 +939,7 @@ class EmbedBlockNode(
      * @return The rendered KSON source string
      */
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
-        val (delimiter, content) = selectOptimalDelimiter()
+        val (delimiter, content) = selectOptimalDelimiter(embedContent)
 
         return when (compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED -> {
@@ -953,26 +954,6 @@ class EmbedBlockNode(
             }
             CLASSIC -> {
                 renderJsonFormat(indent, compileTarget as? Json ?: Json())
-            }
-        }
-    }
-
-    /**
-     * Selects the optimal delimiter for the embed block content, preferring delimiters that don't appear in the content
-     * to avoid escaping. Returns a pair of the chosen delimiter and the content (escaped if necessary).
-     *
-     * @return A pair of the chosen [EmbedDelim] and the content string (escaped if the delimiter appears in content)
-     */
-    private fun selectOptimalDelimiter(): Pair<EmbedDelim, String> {
-        val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
-        val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
-
-        return when {
-            percentCount == 0 -> EmbedDelim.Percent to embedContent
-            dollarCount == 0 -> EmbedDelim.Dollar to embedContent
-            else -> {
-                val delimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
-                delimiter to delimiter.escapeEmbedContent(embedContent)
             }
         }
     }
