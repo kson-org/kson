@@ -28,8 +28,8 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
 /**
  * Validates that all strings for a given [KsonRoot] contain only valid KSON strings, i.e. strings which exactly follow
  * the JSON String rules specified in [Section 7. Strings of RFC8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7),
- * with a KSON-specific allowance for raw whitespace characters, and with single-quoted strings behaving perfectly
- * symmetrically to double-quoted strings, escaping `'` in place of `"` (see [StringQuote])
+ * with a KSON-specific allowance for raw whitespace characters, and with single-quoted strings behaving symmetrically
+ * to double-quoted strings, escaping `'` in place of `"` (see [StringQuote])
  *
  * [KsonStringValidator] walks the AST rooted to find [org.kson.ast.QuotedStringNode] instances ([UnquotedStringNode]s
  * need no validation since due to their character restrictions, they cannot be lexed in error) and validates their
@@ -279,7 +279,7 @@ class KsonStringValidator {
 }
 
 /**
- * Enumerate the set of Kson string escapes valid in every string for easy validation.  A string may also escape
+ * Enumerate the set of Kson string escapes valid in every quoted string for easy validation.  A string may also escape
  * the quote that delimits it (see [StringQuote]), and `\u` is also supported, but is validated separately against
  * [validHexChars]. Note that these are exactly the escapes allowed by [Section 7. Strings of RFC8259](https://datatracker.ietf.org/doc/html/rfc8259#section-7), minus the `"` escape
  */
