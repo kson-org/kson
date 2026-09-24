@@ -1,4 +1,4 @@
-import {CompletionItem, CompletionItemKind, CompletionList, Position, MarkupKind} from 'vscode-languageserver';
+import {CompletionItem, CompletionItemKind, CompletionList, InsertTextFormat, Position, MarkupKind} from 'vscode-languageserver';
 import {KsonDocument} from '../document/KsonDocument.js';
 import {isKsonSchemaDocument} from '../document/KsonSchemaDocument.js';
 import {KsonTooling, CompletionItem as KsonCompletionItem, CompletionKind as KsonCompletionKind} from 'kson-tooling';
@@ -7,6 +7,13 @@ import {KsonTooling, CompletionItem as KsonCompletionItem, CompletionKind as Kso
  * Service for providing code completions based on JSON Schema.
  */
 export class CompletionService {
+
+    /**
+     * @param snippetSupport Whether the client declared snippet support for completion items.  Only then
+     *   do completions carry the tooling's snippet edits; every other client gets plain completions.
+     */
+    constructor(private readonly snippetSupport: boolean = false) {
+    }
 
     /**
      * Get completion suggestions for a position in a document.
@@ -32,7 +39,7 @@ export class CompletionService {
         );
 
         // Convert Kotlin completion items to LSP CompletionItem format
-        const items = ksonCompletions?.asJsReadonlyArrayView()?.map(this.toLspCompletionItem);
+        const items = ksonCompletions?.asJsReadonlyArrayView()?.map(item => this.toLspCompletionItem(item));
 
         if (!items || items.length === 0) {
             return null;
@@ -51,7 +58,7 @@ export class CompletionService {
      * @returns LSP completion item
      */
     private toLspCompletionItem(ksonItem: KsonCompletionItem): CompletionItem {
-        return {
+        const item: CompletionItem = {
             label: ksonItem.label,
             kind: mapCompletionKind(ksonItem.kind),
             detail: ksonItem.detail || undefined,
@@ -60,6 +67,20 @@ export class CompletionService {
                 value: ksonItem.documentation
             } : undefined
         };
+
+        const snippet = this.snippetSupport ? ksonItem.snippetEdit : null;
+        if (snippet) {
+            const {range} = snippet;
+            item.insertTextFormat = InsertTextFormat.Snippet;
+            item.textEdit = {
+                range: {
+                    start: {line: range.startLine, character: range.startColumn},
+                    end: {line: range.endLine, character: range.endColumn}
+                },
+                newText: snippet.newText
+            };
+        }
+        return item;
     }
 }
 

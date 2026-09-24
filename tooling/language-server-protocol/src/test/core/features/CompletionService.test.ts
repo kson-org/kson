@@ -1,6 +1,6 @@
 import {describe, it} from 'mocha';
 import assert from 'assert';
-import {CompletionList, Position} from 'vscode-languageserver';
+import {CompletionItem, CompletionList, InsertTextFormat, Position} from 'vscode-languageserver';
 import {CompletionService} from '../../../core/features/CompletionService.js';
 import {createKsonDocument, pos} from '../../TestHelpers.js';
 
@@ -124,5 +124,68 @@ describe('CompletionService', () => {
     it('should return null for document without schema even with valid content', () => {
         const labels = getCompletionLabels('{ name: "test", age: 30, active: true }', pos(0, 5));
         assert.strictEqual(labels, null);
+    });
+
+    describe('property snippets', () => {
+        const SNIPPET_SCHEMA = `{
+            type: object
+            properties: {
+                name: {
+                    type: string
+                }
+                count: {
+                    type: integer
+                }
+                status: {
+                    type: string
+                    enum: ["active", "inactive"]
+                }
+            }
+        }`;
+
+        // `na|`: a typed key the snippet replaces
+        const typedKey = () => createKsonDocument('na', SNIPPET_SCHEMA);
+
+        function item(items: CompletionItem[] | undefined, label: string): CompletionItem {
+            const found = items?.find(candidate => candidate.label === label);
+            assert.ok(found, `expected a '${label}' completion`);
+            return found;
+        }
+
+        it('should give clients with snippet support an edit that opens the value', () => {
+            const items = new CompletionService(true).getCompletions(typedKey(), pos(0, 2))?.items;
+
+            const name = item(items, 'name');
+            assert.strictEqual(name.insertTextFormat, InsertTextFormat.Snippet);
+            assert.deepStrictEqual(name.textEdit, {range: {start: pos(0, 0), end: pos(0, 2)}, newText: "name: '$0'"});
+        });
+
+        it('should keep a property plain when the tooling offers no snippet for it', () => {
+            const items = new CompletionService(true).getCompletions(typedKey(), pos(0, 2))?.items;
+
+            const count = item(items, 'count');
+            assert.strictEqual(count.textEdit, undefined);
+            assert.strictEqual(count.insertTextFormat, undefined);
+        });
+
+        it('should give clients without snippet support the same items with no snippets', () => {
+            const withSnippets = new CompletionService(true).getCompletions(typedKey(), pos(0, 2))?.items ?? [];
+            const plain = new CompletionService(false).getCompletions(typedKey(), pos(0, 2))?.items;
+
+            assert.ok(withSnippets.some(candidate => candidate.textEdit), 'expected at least one snippet to strip');
+            const withoutSnippet = ({textEdit, insertTextFormat, ...rest}: CompletionItem) => rest;
+            assert.deepStrictEqual(plain, withSnippets.map(withoutSnippet));
+        });
+
+        it('should keep value completions plain for clients with snippet support', () => {
+            const items = new CompletionService(true)
+                .getCompletions(createKsonDocument('status: ', SNIPPET_SCHEMA), pos(0, 8))?.items;
+
+            assert.deepStrictEqual(items?.map(candidate => candidate.label), ['active', 'inactive']);
+            for (const value of items ?? []) {
+                assert.strictEqual(value.textEdit, undefined);
+                assert.strictEqual(value.insertTextFormat, undefined);
+            }
+        });
     });
 });

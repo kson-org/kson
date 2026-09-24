@@ -1,4 +1,5 @@
 import {
+    ClientCapabilities,
     Connection,
     SemanticTokens,
     TextEdit,
@@ -66,11 +67,16 @@ export class KsonTextDocumentService {
     private commandExecutor!: CommandExecutorBase;
     private configuration: Required<KsonSettings>;
 
+    /**
+     * @param clientCapabilities What the client declared on initialize; a capability it leaves out
+     *   counts as unsupported.
+     */
     constructor(
         private documentManager: KsonDocumentsManager,
         private createCommandExecutor: CommandExecutorFactory,
         private workspaceRoot: string | null = null,
-        private distributionId: string
+        private distributionId: string,
+        clientCapabilities: ClientCapabilities = {}
     ) {
         this.formattingService = new FormattingService();
         this.diagnosticService = new DiagnosticService(distributionId);
@@ -79,7 +85,9 @@ export class KsonTextDocumentService {
         this.documentHighlightService = new DocumentHighlightService();
         this.documentSymbolService = new DocumentSymbolService();
         this.hoverService = new HoverService();
-        this.completionService = new CompletionService();
+        this.completionService = new CompletionService(
+            clientCapabilities.textDocument?.completion?.completionItem?.snippetSupport ?? false
+        );
         this.definitionService = new DefinitionService();
         this.foldingRangeService = new FoldingRangeService();
         this.selectionRangeService = new SelectionRangeService();
