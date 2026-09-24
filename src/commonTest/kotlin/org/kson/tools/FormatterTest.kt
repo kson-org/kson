@@ -2300,18 +2300,27 @@ class FormatterTest {
 
     @Test
     fun testClassicFormatStyleIgnoresEmbedRules() {
-        assertFormatting(
-            """
+        // escapes in the source must render identically whether or not an embed rule matches
+        val source = """
             scripts:
-              build: "make all"
-            """.trimIndent(),
-            """
+              build: 'printf "%s\\n" \'done\' caf\u00e9'
+            """.trimIndent()
+        val expected = """
             {
               "scripts": {
-                "build": "make all"
+                "build": "printf \"%s\\n\" 'done' caf\u00e9"
               }
             }
-            """.trimIndent(),
+            """.trimIndent()
+
+        assertFormatting(
+            source,
+            expected,
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+        assertFormatting(
+            source,
+            expected,
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
             formattingStyle = FormattingStyle.CLASSIC,
             roundTrip = false
