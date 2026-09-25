@@ -4,7 +4,6 @@ import org.kson.CompileTarget
 import org.kson.CompileTarget.*
 import org.kson.Json
 import org.kson.ast.AstNode.Indent
-import org.kson.ast.EmbedBlockRenderer.selectOptimalDelimiter
 import org.kson.parser.Location
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.NumberParser
@@ -939,22 +938,11 @@ class EmbedBlockNode(
      * @return The rendered KSON source string
      */
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
-        val (delimiter, content) = selectOptimalDelimiter(embedContent)
-
-        return when (compileTarget.formatConfig.formattingStyle) {
-            PLAIN, DELIMITED -> {
-                val indentedContent = content.lines().joinToString("\n${indent.bodyLinesIndent()}")
-                "${indent.firstLineIndent()}${delimiter.openDelimiter}$rawEmbedTag\n" +
-                        "${indent.bodyLinesIndent()}$indentedContent\n" +
-                        "${indent.bodyLinesIndent()}${delimiter.closeDelimiter}"
-            }
-            COMPACT -> {
-                val compactContent = content.lines().joinToString("\n")
-                "${delimiter.openDelimiter}$rawEmbedTag\n$compactContent\n${delimiter.closeDelimiter}"
-            }
-            CLASSIC -> {
-                renderJsonFormat(indent, compileTarget as? Json ?: Json())
-            }
+        return when (val formattingStyle = compileTarget.formatConfig.formattingStyle) {
+            PLAIN, DELIMITED, COMPACT -> EmbedBlockRenderer.renderKsonEmbedBlock(
+                embedContent, rawEmbedTag, indent, formattingStyle
+            )
+            CLASSIC -> renderJsonFormat(indent, compileTarget as? Json ?: Json())
         }
     }
 

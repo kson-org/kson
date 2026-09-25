@@ -301,7 +301,7 @@ Explicitly closing a plain object or list is always legal, even when not require
 
 The KSON Embed Block is designed for ergonomically embedding complex content such as code blocks. See [Embed Block JSON Compatibility](#embed-block-json-compatibility) for details on how the KSON/JSON equivalence is handled for Embed Blocks
 
-An embed block opens with `%`, optionally followed on the same line by an [Embed Tag](#embed-tags). The block's content starts on the next line, runs all the way up to the **first** `%%`, and always strips its minimum indent. When `%%` is on its own line, the newline preceding it is not part of the content&mdash;this is a formatting choice that keeps the closing delimiter visually distinct without affecting the value:
+An embed block opens with `%`, optionally followed on the same line by an [Embed Tag](#embed-tags). The block's content starts on the next line, runs all the way up to the **first** `%%`, and always strips its minimum indent. Blank lines do not count toward that minimum, so a paragraph break never changes how much indent is stripped (a blank line indented deeper than the minimum keeps its extra whitespace, since that is content). When `%%` is on its own line, the newline preceding it is not part of the content&mdash;this is a formatting choice that keeps the closing delimiter visually distinct without affecting the value:
 
 ```kson
 embed_block: %
@@ -309,6 +309,14 @@ embed_block: %
   multi-line,
   indent-stripped
   embedded text block!
+  %%
+```
+
+The line holding `%%` does count toward the minimum indent, which is how a block keeps indentation that belongs to its content: place `%%` to the left of the content, and everything to the right of the `%%` column stays in the value. Here the value is `"    indented"`:
+
+```kson
+embed_block: %
+      indented
   %%
 ```
 
