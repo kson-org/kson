@@ -17,6 +17,8 @@ import org.kson.validation.SourceContext
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
+import org.kson.value.toKsonValueOrNull
+import org.kson.walker.AstNodeWalker
 import org.kson.walker.KsonValueWalker
 import org.kson.walker.navigateWithJsonPointer
 import kotlin.js.ExperimentalJsExport
@@ -112,15 +114,17 @@ object KsonTooling {
         column: Int
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
+        val schemaAst = schema.rootAstNode ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
         if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
 
-        // Navigate to the value at the cursor position
-        val valueAtPosition = KsonValueWalker.navigateWithJsonPointer(parsedSchema, documentPointer) ?: return emptyList()
+        // Navigate to the node at the cursor position on the AST, the tree the pointer was built on:
+        // parsedSchema drops list elements in error, which renumbers the elements after them
+        val nodeAtPosition = AstNodeWalker.navigateWithJsonPointer(schemaAst, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
-        val refString = (valueAtPosition as? KsonString)?.value ?: return emptyList()
+        val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
         // Determine the base URI for the schema root
         val baseUri = (parsedSchema as? KsonObject)
@@ -314,8 +318,9 @@ object KsonTooling {
      * narrows them doc-aware at every level (see [SchemaNavigator.navigate]),
      * so no separate filtering pass is needed.
      *
-     * Uses [ToolingDocument.partialKsonValue] so narrowing can see successfully-parsed
-     * sibling values even when the document has parse errors at the cursor.
+     * Navigates [ToolingDocument.rootAstNode], the tree [documentPointer] was built on, so narrowing
+     * reads the value the pointer names even past a list element in error, and still sees
+     * successfully-parsed sibling values when the document has parse errors at the cursor.
      *
      * [placeholderLocation] is the span of the value the caret is authoring; it is passed to the
      * navigator, which forgives validation errors raised inside it so the half-typed value can't
@@ -330,7 +335,7 @@ object KsonTooling {
     ): List<NavigatedSchema> {
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
         return SchemaNavigator(schemaIdLookup, placeholderLocation)
-            .navigate(documentPointer, document.partialKsonValue)
+            .navigate(documentPointer, document.rootAstNode)
     }
 }
 

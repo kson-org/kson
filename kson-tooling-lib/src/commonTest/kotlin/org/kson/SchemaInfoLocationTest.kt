@@ -566,13 +566,49 @@ class SchemaInfoLocationTest {
         """
 
         // The document has a parse error (missing value after "other":)
-        // so ksonValue is null, but partialKsonValue recovers "kind": "a"
-        // for if/then evaluation.
+        // so ksonValue is null, but narrowing converts the AST error-tolerantly
+        // and recovers "kind": "a" for if/then evaluation.
         val hoverInfo = getInfoAtCaret(schema, """
             { "kind": "a", "other": , "<caret>config": {} }
         """.trimIndent())
         assertNotNull(hoverInfo, "Hover should work in broken documents via partial AST")
         assertTrue(hoverInfo.contains("Config A"), "Should show matching branch, got: $hoverInfo")
         assertFalse(hoverInfo.contains("Config B"), "Should NOT show non-matching branch, got: $hoverInfo")
+    }
+
+    @Test
+    fun testGetSchemaInfoAtLocation_itemAfterListElementInErrorNarrowsByItself() {
+        val schema = """
+            {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                { "type": "object", "properties": { "kind": { "const": "a" }, "alpha": { "type": "string", "description": "Alpha setting" } } },
+                                { "type": "object", "properties": { "kind": { "const": "b" }, "beta": { "type": "string", "description": "Beta setting" } } }
+                            ]
+                        }
+                    }
+                }
+            }
+        """
+
+        // The element in error keeps its index in the caret's pointer, so the caret's item narrows by
+        // its own `kind: b`, not by the `kind: c` item that dropping the broken element would shift there
+        val hoverInfo = getInfoAtCaret(schema, """
+            {
+              "items": [
+                { "kind": "a" },
+                ,
+                { "kind": "b", "<caret>beta": "x" },
+                { "kind": "c" }
+              ]
+            }
+        """.trimIndent())
+
+        assertNotNull(hoverInfo)
+        assertTrue(hoverInfo.contains("Beta setting"), "Should show beta's description, got: $hoverInfo")
     }
 }

@@ -61,9 +61,8 @@ class ToolingDocument internal constructor(val content: String, internal val sou
      *
      * Falls back to [ksonValue] when available (no errors), otherwise builds a
      * partial tree from the AST by silently dropping properties/elements that
-     * contain parse errors. This allows IDE features like completion narrowing
-     * to see successfully-parsed sibling values even when the cursor position
-     * has an incomplete value (e.g. `key:` with no value yet).
+     * contain parse errors. Schemas are read through this, so a localized parse
+     * error in a schema doesn't disable the tooling it drives.
      */
     internal val partialKsonValue: KsonValue? by lazy {
         ksonValue ?: rootAstNode?.toKsonValueOrNull()

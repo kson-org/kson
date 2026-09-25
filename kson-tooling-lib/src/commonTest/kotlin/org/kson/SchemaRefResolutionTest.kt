@@ -327,4 +327,25 @@ class SchemaRefResolutionTest {
                 .</target>
         """.trimIndent())
     }
+
+    @Test
+    fun testResolveRef_afterListElementInError() {
+        // The element in error keeps its index in the cursor's pointer, so the cursor's ref resolves
+        // to `y`, not to the `z` that dropping the broken element would shift into its place
+        assertRefResolution($$"""
+            anyOf: [
+              { '$ref': '#/$defs/x' },
+              ,
+              { '$ref': '#/$defs/y<cursor>' },
+              { '$ref': '#/$defs/z' }
+            ]
+            '$defs': {
+              x: { type: string },
+              y: <target>{
+                type: number
+              }</target>,
+              z: { type: boolean }
+            }
+        """.trimIndent())
+    }
 }
