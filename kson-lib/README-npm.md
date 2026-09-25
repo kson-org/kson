@@ -36,7 +36,7 @@ Running this should print the following:
 This package includes TypeScript definitions out of the box:
 
 ```typescript
-import { Kson, Result, FormatOptions, IndentType, FormattingStyle } from 'kson';
+import { Kson, Result, FormatOptions, IndentType, FormattingStyle } from '@kson_org/kson';
 
 const kson = Kson.getInstance();
 
@@ -53,7 +53,9 @@ if (jsonResult instanceof Result.Success) {
   const data = JSON.parse(jsonResult.output);
   console.log(data);
 } else if (jsonResult instanceof Result.Failure) {
-  console.error('Errors:', jsonResult.errors);
+  for (const error of jsonResult.errors.asJsReadonlyArrayView()) {
+    console.error(`${error.severity} at ${error.start.line}: ${error.message}`);
+  }
 }
 
 // Format KSON (returns string directly)
@@ -82,7 +84,7 @@ if (yamlResult instanceof Result.Success) {
 - **`toJson(kson: string, retainEmbedTags?: boolean): Result`**
   Converts KSON to formatted JSON. Returns a `Result` which can be either:
   - `Result.Success` with an `output` property containing the JSON string
-  - `Result.Failure` with an `errors` property containing a list of error messages
+  - `Result.Failure` with an `errors` property containing the errors (see [Reading errors](#reading-errors))
 
 - **`toYaml(kson: string, retainEmbedTags?: boolean): Result`**
   Converts KSON to YAML format. Returns a `Result` with Success/Failure variants.
@@ -106,11 +108,36 @@ if (yamlResult instanceof Result.Success) {
 
 - **`Result`**: Success/Failure union type for operations that can fail
   - `Result.Success`: Contains `output` property with the result string
-  - `Result.Failure`: Contains `errors` property with error messages
+  - `Result.Failure`: Contains `errors` property with the errors
 
 - **`SchemaResult`**: Success/Failure for schema parsing
   - `SchemaResult.Success`: Contains `schemaValidator` for validating documents
-  - `SchemaResult.Failure`: Contains error messages
+  - `SchemaResult.Failure`: Contains `errors` property with the errors
+
+- **`Message`**: A single error or warning
+  - `message`: the text of the error
+  - `severity`: a `MessageSeverity`
+  - `start` / `end`: `Position`s marking the span the error covers
+
+### Reading errors
+
+`errors` is a `KtList`, not a JavaScript array, because these bindings are
+compiled from Kotlin. Indexing it or reading `.length` yields `undefined`. Call
+`asJsReadonlyArrayView()` to get a real array first:
+
+```javascript
+if (result instanceof Result.Failure) {
+  const errors = result.errors.asJsReadonlyArrayView();
+  console.log(errors.length);
+  console.log(errors[0].message);
+}
+```
+
+Printing the list directly still works, since it renders itself:
+
+```javascript
+console.error(String(result.errors)); // [[ERROR] Unclosed list at 1:6]
+```
 
 ## KSON Syntax Highlights
 
