@@ -301,6 +301,21 @@ class FormatterTest {
     }
 
     @Test
+    fun testFormattingKeepsQuoteEscapesWhenChangingDelimiter() {
+        // When formatting changes quotes to minimize escaping, it only ever touches escaping related to the quote
+        // it is introducing, so as not to corrupt any data (for instance if there is an invalid backslash before
+        // an instance of the other quote)
+        assertFormatting(
+            """
+            '\"q\" it\'s a\'s b\'s'
+            """.trimIndent(),
+            """
+            "\"q\" it's a's b's"
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testEmbedBlockWithInlineEndDelimiter() {
         assertFormatting(
             """
@@ -2300,18 +2315,27 @@ class FormatterTest {
 
     @Test
     fun testClassicFormatStyleIgnoresEmbedRules() {
-        assertFormatting(
-            """
+        // escapes in the source must render identically whether or not an embed rule matches
+        val source = """
             scripts:
-              build: "make all"
-            """.trimIndent(),
-            """
+              build: 'printf "%s\\n" \'done\' caf\u00e9'
+            """.trimIndent()
+        val expected = """
             {
               "scripts": {
-                "build": "make all"
+                "build": "printf \"%s\\n\" 'done' caf\u00e9"
               }
             }
-            """.trimIndent(),
+            """.trimIndent()
+
+        assertFormatting(
+            source,
+            expected,
+            formattingStyle = FormattingStyle.CLASSIC
+        )
+        assertFormatting(
+            source,
+            expected,
             embedBlockRules = listOf(embedRule("/scripts/build", "bash")),
             formattingStyle = FormattingStyle.CLASSIC,
             roundTrip = false

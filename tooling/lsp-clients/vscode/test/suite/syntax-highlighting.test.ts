@@ -120,4 +120,156 @@ after: %python
                 'the block after `%jsonnet` should be unaffected');
         }).timeout(10000);
     });
+
+    describe('Embed block termination', () => {
+        const endsAtFirstDelimiter = 'An embed block ends at its first end-delimiter wherever that sits on the line, and an '
+            + 'injected grammar must not hold the block open past it. TextMate only tests the `end` of '
+            + 'the rule on top of its stack, so the generated `end` must stay unanchored and the injected '
+            + 'grammar must sit under a `while` that fails on any line holding the end-delimiter '
+            + '(generate-tm-embed-block.ts).';
+
+        const onlyLiteralDelimiterEnds = 'Only a literal doubled delimiter ends an embed block: an escaped one has a slash between '
+            + 'its two characters, and the other delimiter is ordinary content (docs/readme.md, "Embed Blocks").';
+
+        /**
+         * Asserts where the embed block in `content` ends. `content` is a KSON document whose tag
+         * line is line 0 and whose content lines are indented four spaces.
+         *
+         * The first character of each `injectedOn` line must carry `injectedScope`, a token scope
+         * only the injected grammar produces. Without this, a block that fell through to the
+         * generic rule (which injects nothing) would pass `pastBlock` trivially, since nothing
+         * could hold it open. `pastBlock` lines must be outside any embed block.
+         *
+         * `invariant` is appended to every failure to say what the grammar must uphold.
+         */
+        async function assertTermination(
+            {content, injectedScope, injectedOn, pastBlock}: {
+                content: string,
+                injectedScope: string,
+                injectedOn: number[],
+                pastBlock: number[]
+            },
+            invariant: string
+        ) {
+            const [uri, document] = await createTestFile(content);
+            testFileUri = uri;
+
+            for (const line of injectedOn) {
+                const scopes = await getTokenScopesAtPosition(document, line, 4);
+                assert.ok(scopes.includes(injectedScope),
+                    `line ${line} is not highlighted by ${injectedScope}; got ${JSON.stringify(scopes)}. ${invariant}`);
+            }
+            for (const line of pastBlock) {
+                const scopes = await getTokenScopesAtPosition(document, line, 0);
+                assert.ok(!scopes.some(scope => scope.startsWith('meta.embedded.block.')),
+                    `line ${line} is still inside the embed block; got ${JSON.stringify(scopes)}. ${invariant}`);
+            }
+        }
+
+        it('Should end the block at a same-line end-delimiter', async () => {
+            await assertTermination({
+                content:
+`key: %python
+    # a comment
+    print("hi")%%
+after: plain value`,
+                injectedScope: 'comment.line.number-sign.python',
+                injectedOn: [1],
+                pastBlock: [3]
+            }, endsAtFirstDelimiter);
+        }).timeout(10000);
+
+        it('Should end the block at an end-delimiter while the injected grammar has a comment open', async () => {
+            await assertTermination({
+                content:
+`key: %javascript
+    /* never closed
+    %%
+after: plain value`,
+                injectedScope: 'comment.block.js',
+                injectedOn: [1],
+                pastBlock: [3]
+            }, endsAtFirstDelimiter);
+        }).timeout(10000);
+
+        it('Should end the block at a same-line `$$` while the injected grammar has a template literal open', async () => {
+            await assertTermination({
+                content:
+`key: $javascript
+    \`a template literal spans lines,
+    so it is still open here$$
+after: plain value`,
+                injectedScope: 'string.template.js',
+                injectedOn: [1],
+                pastBlock: [3]
+            }, endsAtFirstDelimiter);
+        }).timeout(10000);
+
+        it('Should end the block at an end-delimiter inside Markdown, whose indented-code rule spans lines', async () => {
+            await assertTermination({
+                content:
+`key: %markdown
+    some prose
+    %%
+after: plain value`,
+                injectedScope: 'markup.raw.block.markdown',
+                injectedOn: [1],
+                pastBlock: [3]
+            }, endsAtFirstDelimiter);
+        }).timeout(10000);
+
+        it('Should end the block at the `%%` directly following an escaped end-delimiter', async () => {
+            await assertTermination({
+                content:
+`key: %javascript
+    a
+    b%\\%%
+after: plain value`,
+                injectedScope: 'variable.other.readwrite.js',
+                injectedOn: [1],
+                pastBlock: [3]
+            }, endsAtFirstDelimiter);
+        }).timeout(10000);
+
+        it('Should not end the block at an escaped end-delimiter', async () => {
+            await assertTermination({
+                content:
+`key: %javascript
+    "%\\%"
+    "still"
+    %%
+after: plain value`,
+                injectedScope: 'string.quoted.double.js',
+                injectedOn: [1, 2],
+                pastBlock: [4]
+            }, onlyLiteralDelimiterEnds);
+        }).timeout(10000);
+
+        it('Should not end the block at the other delimiter doubled', async () => {
+            await assertTermination({
+                content: `key: $javascript
+    "%%"
+    "still"
+    $$
+after: plain value`,
+                injectedScope: 'string.quoted.double.js',
+                injectedOn: [1, 2],
+                pastBlock: [4]
+            }, onlyLiteralDelimiterEnds);
+        }).timeout(10000);
+
+        it('Should hand the rest of the line back to KSON after a same-line end-delimiter', async () => {
+            const [uri, document] = await createTestFile(`key: %python
+    print("hi")%% after: plain value`);
+            testFileUri = uri;
+
+            const delimiterScopes = await getTokenScopesAtPosition(document, 1, 15);
+            assert.ok(delimiterScopes.includes('punctuation.section.embedded.end.kson'),
+                `the end-delimiter should be scoped as such; got ${JSON.stringify(delimiterScopes)}`);
+
+            const colonScopes = await getTokenScopesAtPosition(document, 1, 23);
+            assert.ok(colonScopes.includes('punctuation.separator.kson') && !colonScopes.some(scope => scope.startsWith('meta.embedded')),
+                `KSON after the end-delimiter should be tokenized as KSON again; got ${JSON.stringify(colonScopes)}`);
+        }).timeout(10000);
+    });
 });

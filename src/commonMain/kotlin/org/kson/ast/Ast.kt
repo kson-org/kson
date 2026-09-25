@@ -4,6 +4,7 @@ import org.kson.CompileTarget
 import org.kson.CompileTarget.*
 import org.kson.Json
 import org.kson.ast.AstNode.Indent
+import org.kson.ast.EmbedBlockRenderer.selectOptimalDelimiter
 import org.kson.parser.Location
 import org.kson.parser.behavior.embedblock.EmbedDelim
 import org.kson.parser.NumberParser
@@ -675,18 +676,20 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
         return EmbedBlockRenderer.renderKsonEmbedBlock(
             content, preamble, indent, compileTarget.formatConfig.formattingStyle,
             nestedContentIndent = false
-        ) ?: run {
-            // CLASSIC format doesn't use embed blocks, render as JSON string
-            indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(content))}\""
-        }
+        )
     }
 
     /**
-     * Attempts to render this string as an embed block if it matches an embed rule.
+     * Attempts to render this string as an embed block if it matches an embed rule.  Embed blocks are never
+     * rendered in [FormattingStyle.CLASSIC], so this is not supported for that style
      *
-     * @return The rendered embed block string, or null if this node is not an embed block
+     * @return The rendered embed block string, or null if this string does not match an embed rule
      */
     internal fun tryRenderAsEmbedBlock(indent: Indent, compileTarget: Kson): String? {
+        if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
+            throw UnsupportedOperationException("KSON embed blocks cannot be rendered in JSON")
+        }
+
         val matchingRule = compileTarget.getEmbedRule(this)
             ?: return null
         return renderAsEmbedBlock(indent, compileTarget, matchingRule.tag)
@@ -696,11 +699,11 @@ abstract class StringNodeImpl(sourceTokens: List<Token>) : StringNode, KsonValue
 class QuotedStringNode(
     sourceTokens: List<Token>,
     // TODO this should not be nullable
-    private val stringQuote: StringQuote?,
+    val stringQuote: StringQuote?,
 ) : StringNodeImpl(sourceTokens) {
 
     override val contentTransformer: QuotedStringContentTransformer by lazy {
-        QuotedStringContentTransformer(rawStringContent, location)
+        QuotedStringContentTransformer(rawStringContent, location, stringQuote)
     }
 
     override val processedStringContent: String by lazy {
@@ -740,23 +743,10 @@ class QuotedStringNode(
 
         return when (compileTarget) {
             is Kson -> {
-                tryRenderAsEmbedBlock(indent, compileTarget)?.let { return it }
-
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    return indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(delimiterUnescapedRawContent))}\""
+                    indent.firstLineIndent() + "\"${escapeRawWhitespace(DoubleQuote.escapeQuotes(delimiterUnescapedRawContent))}\""
                 } else {
-                    val singleQuoteCount = SingleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
-                    val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
-
-                    // prefer single-quotes unless double-quotes would require less escaping
-                    val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
-                        DoubleQuote
-                    } else {
-                        SingleQuote
-                    }
-
-                    val escapedContent = chosenDelimiter.escapeQuotes(delimiterUnescapedRawContent)
-                    indent.firstLineIndent() + "${chosenDelimiter}$escapedContent${chosenDelimiter}"
+                    tryRenderAsEmbedBlock(indent, compileTarget) ?: renderWithPreferredQuote(indent)
                 }
             }
 
@@ -766,6 +756,24 @@ class QuotedStringNode(
                     unescapeForwardSlashes(delimiterUnescapedRawContent))}\""
             }
         }
+    }
+
+    /**
+     * Renders this string as a quoted Kson string, preferring single-quotes unless double-quotes would
+     * require less escaping
+     */
+    private fun renderWithPreferredQuote(indent: Indent): String {
+        val singleQuoteCount = SingleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
+        val doubleQuoteCount = DoubleQuote.countDelimiterOccurrences(delimiterUnescapedRawContent)
+
+        val chosenDelimiter = if (doubleQuoteCount < singleQuoteCount) {
+            DoubleQuote
+        } else {
+            SingleQuote
+        }
+
+        val escapedContent = chosenDelimiter.escapeQuotes(delimiterUnescapedRawContent)
+        return indent.firstLineIndent() + "${chosenDelimiter}$escapedContent${chosenDelimiter}"
     }
 }
 
@@ -815,12 +823,10 @@ private fun StringNodeImpl.renderUnquotableKsonString(
 ): String {
     return when (compileTarget) {
         is Kson -> {
-            tryRenderAsEmbedBlock(indent, compileTarget)?.let { return it }
-
             if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                return indent.firstLineIndent() + "\"${unquotedKsonString}\""
+                indent.firstLineIndent() + "\"${unquotedKsonString}\""
             } else {
-                indent.firstLineIndent() + unquotedKsonString
+                tryRenderAsEmbedBlock(indent, compileTarget) ?: (indent.firstLineIndent() + unquotedKsonString)
             }
         }
 
@@ -933,7 +939,7 @@ class EmbedBlockNode(
      * @return The rendered KSON source string
      */
     private fun renderKsonFormat(indent: Indent, compileTarget: Kson): String {
-        val (delimiter, content) = selectOptimalDelimiter()
+        val (delimiter, content) = selectOptimalDelimiter(embedContent)
 
         return when (compileTarget.formatConfig.formattingStyle) {
             PLAIN, DELIMITED -> {
@@ -948,26 +954,6 @@ class EmbedBlockNode(
             }
             CLASSIC -> {
                 renderJsonFormat(indent, compileTarget as? Json ?: Json())
-            }
-        }
-    }
-
-    /**
-     * Selects the optimal delimiter for the embed block content, preferring delimiters that don't appear in the content
-     * to avoid escaping. Returns a pair of the chosen delimiter and the content (escaped if necessary).
-     *
-     * @return A pair of the chosen [EmbedDelim] and the content string (escaped if the delimiter appears in content)
-     */
-    private fun selectOptimalDelimiter(): Pair<EmbedDelim, String> {
-        val percentCount = EmbedDelim.Percent.countDelimiterOccurrences(embedContent)
-        val dollarCount = EmbedDelim.Dollar.countDelimiterOccurrences(embedContent)
-
-        return when {
-            percentCount == 0 -> EmbedDelim.Percent to embedContent
-            dollarCount == 0 -> EmbedDelim.Dollar to embedContent
-            else -> {
-                val delimiter = if (dollarCount < percentCount) EmbedDelim.Dollar else EmbedDelim.Percent
-                delimiter to delimiter.escapeEmbedContent(embedContent)
             }
         }
     }
@@ -1141,10 +1127,11 @@ internal object EmbedBlockRenderer {
      * @param content The string content to render
      * @param preamble The embed block preamble (tag and optional metadata)
      * @param indent The indentation to apply
-     * @param formattingStyle The formatting style to use
+     * @param formattingStyle The formatting style to use (NOTE: [FormattingStyle.CLASSIC] is unsupported because
+     *   embed blocks are not rendered in [FormattingStyle.CLASSIC])
      * @param nestedContentIndent If true, content is indented one level deeper than the delimiter.
      *                            If false, content uses the same indentation level.
-     * @return The rendered embed block string, or null if CLASSIC style (caller should handle)
+     * @return The rendered embed block string
      */
     fun renderKsonEmbedBlock(
         content: String,
@@ -1152,7 +1139,7 @@ internal object EmbedBlockRenderer {
         indent: Indent,
         formattingStyle: FormattingStyle,
         nestedContentIndent: Boolean = false
-    ): String? {
+    ): String {
         val (delimiter, escapedContent) = selectOptimalDelimiter(content)
 
         return when (formattingStyle) {
@@ -1168,7 +1155,7 @@ internal object EmbedBlockRenderer {
             COMPACT -> {
                 "${delimiter.openDelimiter}$preamble\n$escapedContent\n${delimiter.closeDelimiter}"
             }
-            CLASSIC -> null // Caller handles CLASSIC format
+            CLASSIC -> throw ShouldNotHappenException("Embed blocks are not rendered in CLASSIC format, which is JSON")
         }
     }
 }

@@ -10,7 +10,7 @@ import { minimatch } from 'minimatch';
 
 /**
  * Node.js-specific schema provider that reads from the file system.
- * This provider loads .kson-schema.json from the workspace root and resolves schemas for documents.
+ * This provider loads .kson-schema.kson from the workspace root and resolves schemas for documents.
  */
 export class FileSystemSchemaProvider implements SchemaProvider {
     private config: SchemaConfig | null = null;
@@ -36,7 +36,7 @@ export class FileSystemSchemaProvider implements SchemaProvider {
 
     /**
      * Reload the schema configuration from disk.
-     * Should be called when .kson-schema.json changes.
+     * Should be called when .kson-schema.kson changes.
      */
     reload(): void {
         this.loadConfiguration();
@@ -152,10 +152,9 @@ export class FileSystemSchemaProvider implements SchemaProvider {
 
     /**
      * Load a schema file from a workspace-relative path.
-     * If the schema file is in KSON format (.kson), it will be converted to JSON.
      *
      * @param schemaPath Workspace-relative path to the schema file
-     * @returns TextDocument containing the schema in JSON format, or undefined if file not found
+     * @returns TextDocument containing the schema, or undefined if file not found
      */
     private loadSchemaFile(schemaPath: string): TextDocument | undefined {
         if (!this.workspaceRoot) {
@@ -171,15 +170,6 @@ export class FileSystemSchemaProvider implements SchemaProvider {
 
         try {
             const schemaContent = fs.readFileSync(absolutePath, 'utf-8');
-
-            // Check whether the schema is a valid KSON file
-            let ksonSchema = Kson.getInstance().analyze(schemaContent)
-            let schemaErrors = ksonSchema.errors.asJsReadonlyArrayView()
-            if (schemaErrors.length != 0) {
-                this.logger?.error(`Failed to convert KSON schema to JSON: ${schemaErrors.join(', ')}`);
-                return undefined;
-            }
-
             const schemaUri = URI.file(absolutePath).toString();
             return TextDocument.create(schemaUri, 'kson', 1, schemaContent);
         } catch (error) {

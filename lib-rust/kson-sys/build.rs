@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 // [[kson-version-num]]
-static KSON_LIB_VERSION: &str = "0.3.0-dev";
+static KSON_LIB_VERSION: &str = "0.4.0-dev";
 
 fn get_kson_artifacts(
     out_dir: &Path,

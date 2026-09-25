@@ -2,6 +2,8 @@ package org.kson.parser
 
 import org.kson.ast.renderForJsonString
 import org.kson.ast.unescapeForwardSlashes
+import org.kson.parser.behavior.StringQuote.DoubleQuote
+import org.kson.parser.behavior.StringQuote.SingleQuote
 import org.kson.parser.behavior.quotedstring.unescapeStringContent
 import org.kson.testSupport.validateJson
 import kotlin.test.Test
@@ -115,61 +117,84 @@ class EscapingTest {
 
     @Test
     fun testUnescapeBasicEscapes() {
-        assertEquals("\"", unescapeStringContent("\\\""))
-        assertEquals("\\", unescapeStringContent("\\\\"))
-        assertEquals("/", unescapeStringContent("\\/"))
-        assertEquals("\b", unescapeStringContent("\\b"))
-        assertEquals("\u000C", unescapeStringContent("\\f"))
-        assertEquals("\n", unescapeStringContent("\\n"))
-        assertEquals("\r", unescapeStringContent("\\r"))
-        assertEquals("\t", unescapeStringContent("\\t"))
+        assertEquals("\"", unescapeStringContent("\\\"", DoubleQuote))
+        assertEquals("\\", unescapeStringContent("\\\\", DoubleQuote))
+        assertEquals("/", unescapeStringContent("\\/", DoubleQuote))
+        assertEquals("\b", unescapeStringContent("\\b", DoubleQuote))
+        assertEquals("\u000C", unescapeStringContent("\\f", DoubleQuote))
+        assertEquals("\n", unescapeStringContent("\\n", DoubleQuote))
+        assertEquals("\r", unescapeStringContent("\\r", DoubleQuote))
+        assertEquals("\t", unescapeStringContent("\\t", DoubleQuote))
     }
 
     @Test
     fun testUnescapeUnicodeEscapes() {
-        assertEquals("A", unescapeStringContent("\\u0041"))
-        assertEquals("€", unescapeStringContent("\\u20AC"))
-        assertEquals("\u2028", unescapeStringContent("\\u2028"))
-        assertEquals("\u2029", unescapeStringContent("\\u2029"))
-        assertEquals("\u0000", unescapeStringContent("\\u0000"))
-        assertEquals("\u001F", unescapeStringContent("\\u001F"))
+        assertEquals("A", unescapeStringContent("\\u0041", DoubleQuote))
+        assertEquals("€", unescapeStringContent("\\u20AC", DoubleQuote))
+        assertEquals("\u2028", unescapeStringContent("\\u2028", DoubleQuote))
+        assertEquals("\u2029", unescapeStringContent("\\u2029", DoubleQuote))
+        assertEquals("\u0000", unescapeStringContent("\\u0000", DoubleQuote))
+        assertEquals("\u001F", unescapeStringContent("\\u001F", DoubleQuote))
     }
 
     @Test
     fun testUnescapeSurrogatePairs() {
         // Musical G-clef (U+1D11E)
-        assertEquals("𝄞", unescapeStringContent("\\uD834\\uDD1E"))
+        assertEquals("𝄞", unescapeStringContent("\\uD834\\uDD1E", DoubleQuote))
         // Emoji: 🌍 (U+1F30D)
-        assertEquals("🌍", unescapeStringContent("\\uD83C\\uDF0D"))
+        assertEquals("🌍", unescapeStringContent("\\uD83C\\uDF0D", DoubleQuote))
         // Mathematical bold capital A (U+1D400)
-        assertEquals("𝐀", unescapeStringContent("\\uD835\\uDC00"))
+        assertEquals("𝐀", unescapeStringContent("\\uD835\\uDC00", DoubleQuote))
     }
 
     @Test
     fun testUnescapeMixedContent() {
-        assertEquals("Hello \"World\"!", unescapeStringContent("Hello \\\"World\\\"!"))
-        assertEquals("Line 1\nLine 2\tTabbed", unescapeStringContent("Line 1\\nLine 2\\tTabbed"))
-        assertEquals("Path: C:\\Users\\John", unescapeStringContent("Path: C:\\\\Users\\\\John"))
-        assertEquals("\"Hello\n世界\t!", unescapeStringContent("\\\"Hello\\n世界\\t!"))
+        assertEquals("Hello \"World\"!", unescapeStringContent("Hello \\\"World\\\"!", DoubleQuote))
+        assertEquals("Line 1\nLine 2\tTabbed", unescapeStringContent("Line 1\\nLine 2\\tTabbed", DoubleQuote))
+        assertEquals("Path: C:\\Users\\John", unescapeStringContent("Path: C:\\\\Users\\\\John", DoubleQuote))
+        assertEquals("\"Hello\n世界\t!", unescapeStringContent("\\\"Hello\\n世界\\t!", DoubleQuote))
     }
 
     @Test
     fun testUnescapeNoEscapes() {
-        assertEquals("Hello World", unescapeStringContent("Hello World"))
-        assertEquals("123.456", unescapeStringContent("123.456"))
-        assertEquals("こんにちは", unescapeStringContent("こんにちは"))
+        assertEquals("Hello World", unescapeStringContent("Hello World", DoubleQuote))
+        assertEquals("123.456", unescapeStringContent("123.456", DoubleQuote))
+        assertEquals("こんにちは", unescapeStringContent("こんにちは", DoubleQuote))
     }
 
     @Test
     fun testUnescapeInvalidEscapes() {
         // Invalid escape sequences should be preserved
-        assertEquals("\\x", unescapeStringContent("\\x"))
-        assertEquals("\\", unescapeStringContent("\\"))
-        
+        assertEquals("\\x", unescapeStringContent("\\x", DoubleQuote))
+        assertEquals("\\", unescapeStringContent("\\", DoubleQuote))
+
         // Invalid unicode (not enough digits)
-        assertEquals("\\u12", unescapeStringContent("\\u12"))
-        assertEquals("\\u", unescapeStringContent("\\u"))
-        assertEquals("\\uXYZ", unescapeStringContent("\\uXYZ"))
+        assertEquals("\\u12", unescapeStringContent("\\u12", DoubleQuote))
+        assertEquals("\\u", unescapeStringContent("\\u", DoubleQuote))
+        assertEquals("\\uXYZ", unescapeStringContent("\\uXYZ", DoubleQuote))
+    }
+
+    @Test
+    fun testUnescapeQuoteEscapes() {
+        // Only an escape of the delimiting quote is processed; an escape of the other quote is invalid
+        // and left untouched
+        assertEquals("'\\\"", unescapeStringContent("\\'\\\"", SingleQuote))
+        assertEquals("\\'\"", unescapeStringContent("\\'\\\"", DoubleQuote))
+
+        // Content not delimited by quotes may not escape either quote
+        assertEquals("\\'\\\"", unescapeStringContent("\\'\\\"", null))
+    }
+
+    @Test
+    fun testEscapeQuotes() {
+        assertEquals("it\\'s \"q\"", SingleQuote.escapeQuotes("it's \"q\""))
+        assertEquals("it's \\\"q\\\"", DoubleQuote.escapeQuotes("it's \"q\""))
+
+        // escaped backslashes are preserved when escaping quotes
+        assertEquals("\\\\\\\"", DoubleQuote.escapeQuotes("\\\\\""))
+
+        // Existing escapes are not re-escaped
+        assertEquals("\\\"q\\\" it's", DoubleQuote.escapeQuotes("\\\"q\\\" it's"))
     }
 
     @Test
@@ -211,7 +236,7 @@ class EscapingTest {
         
         for (original in testStrings) {
             val escaped = renderForJsonString(original)
-            val unescaped = unescapeStringContent(escaped)
+            val unescaped = unescapeStringContent(escaped, DoubleQuote)
             assertEquals(original, unescaped, "Failed to round-trip: $original")
         }
     }

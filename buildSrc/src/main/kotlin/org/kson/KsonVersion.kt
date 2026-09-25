@@ -7,20 +7,21 @@ import java.io.File
  * Centralized version management for KSON projects.
  *
  * Two version strings are provided:
- * - [getVersion]: stable version for `project.version` (e.g., `0.3.0-SNAPSHOT`).
+ * - [getVersion]: stable version for `project.version` (e.g., `0.4.0-SNAPSHOT`).
  *   This avoids build-output churn (like package-lock.json) on every commit.
  * - [getPublishVersion]: SHA-qualified version for Maven coordinates
- *   (e.g., `0.3.0-abc1234-SNAPSHOT`). This prevents stale dependency caching
+ *   (e.g., `0.4.0-abc1234-SNAPSHOT`). This prevents stale dependency caching
  *   in shared Maven repositories.
  *
- * Release builds produce the same version from both methods (e.g., `0.3.0`).
+ * Release builds produce the same version from both methods (e.g., `0.4.0`).
  */
 object KsonVersion {
     /**
      * Base version number without snapshot suffix.
      * Update this when preparing a new release.
      */
-    const val BASE_VERSION = "0.3.0"
+    // [[kson-version-num]] - This version defines the property globally.
+    const val BASE_VERSION = "0.4.0"
 
     /**
      * Returns the short git commit SHA (8 characters) using JGit.

@@ -67,6 +67,7 @@ We welcome you to dive in this project to explore, experiment, or contribute. A 
   * Open the root [`build.gradle.kts`](build.gradle.kts) file directly and select "Open as Project" when prompted
   * In Settings, under `Build, Execution, Deployment -> Build Tools -> Gradle`, for `Gradle JVM`:
     * choose "Add JDK..." and select the `Contents/Home` folder of the JDK under `gradle/jdk` (this JDK is installed the first time you run `./gradlew check` from the command line)
+  * Note that no manual configuration should be needed to exclude our generated directories (build output, `node_modules`, Cargo `target/`, etc.) from the IDE's index: they are wired into [the Gradle build](build.gradle.kts) from [GeneratedOutputDirectories](buildSrc/src/main/kotlin/GeneratedOutputDirectories.kt) and IntelliJ applies them automatically
 
 #### Project structure
 
@@ -132,6 +133,7 @@ git diff '**/detekt-baseline.xml'
 
 - See the [Tags](https://github.com/kson-org/kson/tags) page for the list of released KSON versions.
 - See the [Release Process Documentation](docs/release_process.md) for details on performing releases.
+- See the [Regular Dependency Maintenance Documentation](docs/dependency_maintenance.md) for the pass that keeps our pinned external versions deliberate, run at the opening of each development cycle.
 
 ### Kson Editors and Tooling
 KSON can be used in VS Code or IntelliJ with a simple gradle command.

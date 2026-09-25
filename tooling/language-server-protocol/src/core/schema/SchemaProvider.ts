@@ -10,7 +10,7 @@ export interface SchemaProvider {
      * Get the schema document for a given KSON document URI.
      *
      * @param documentUri The URI of the KSON document
-     * @returns TextDocument containing the schema, or undefined if no schema is available
+     * @returns TextDocument containing the schema, or undefined if this provider has none for it
      */
     getSchemaForDocument(documentUri: DocumentUri): TextDocument | undefined;
 

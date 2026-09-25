@@ -349,8 +349,10 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
         return testFiles.map {
             JsonTestData(
                 it.nameWithoutExtension,
-                // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding
-                it.readText(Charsets.UTF_8),
+                // explicitly note UTF-8 here since the JSON spec specifies that as the proper json encoding.
+                // Normalize CRLF: the checkout test suite has no `.gitattributes`, so `core.autocrlf` on Windows
+                // would otherwise leak CRLFs into the generated file
+                it.readText(Charsets.UTF_8).replace("\r\n", "\n"),
                 it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
                 JsonTestSuiteEditList.get(it.name)
             )

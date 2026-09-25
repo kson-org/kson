@@ -249,6 +249,17 @@ enum class MessageType(
             return "Invalid string escape: $badStringEscape"
         }
     },
+    STRING_BAD_QUOTE_ESCAPE {
+        override fun expectedArgs(): List<String> {
+            return listOf("Escaped Quote")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val escapedQuote = parsedArgs.getArg("Escaped Quote")
+            return "Invalid string escape: \\$escapedQuote.  A string may only escape the quote that delimits it, " +
+                    "so the backslash before this $escapedQuote is illegal"
+        }
+    },
     INVALID_DIGITS {
         override fun expectedArgs(): List<String> {
             return listOf("Unexpected Character")
@@ -585,6 +596,18 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "Schema \"type\" must be a string or array of strings"
+        }
+    },
+    SCHEMA_UNUSABLE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Schema Problem Location", "Schema Problem")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val schemaProblemLocation = parsedArgs.getArg("Schema Problem Location")
+            val schemaProblem = parsedArgs.getArg("Schema Problem")
+            return "This document was not validated because its schema has problems.  " +
+                    "First problem in the schema, at $schemaProblemLocation: $schemaProblem"
         }
     },
     SCHEMA_VALUE_MUST_BE_MULTIPLE_OF(MessageSeverity.WARNING) {

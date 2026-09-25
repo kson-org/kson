@@ -19,7 +19,6 @@ repositories {
 }
 
 group = "org.kson"
-// [[kson-version-num]] - base version defined in buildSrc/src/main/kotlin/org/kson/KsonVersion.kt
 val isRelease = project.findProperty("release") == "true"
 version = org.kson.KsonVersion.getVersion(isRelease = isRelease)
 
@@ -330,6 +329,10 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
 
         buildList {
             add(nativeImageExe.absolutePath)
+            // Restrict the resources `native-image` tries to reserve so that it doesn't accidentally  ask for too
+            // much and blow up the build
+            add("-J-Xmx2560m")
+            add("--parallelism=2")
             add("--shared")
             add("-cp"); add(classPath)
             add("-H:+UnlockExperimentalVMOptions") // Necessary to use JNIConfigurationFiles option below

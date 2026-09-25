@@ -115,7 +115,7 @@ Use `Kson.analyze()` to parse KSON into tokens and a structured value tree:
 ```python
 from kson import Kson, KsonValue
 
-analysis = Kson.analyze("name: Alice\nscores: [95, 87, 92]", None)
+analysis = Kson.analyze("name: Alice\nscores: [95, 87, 92]", None, None)
 
 # Check for parse errors
 for error in analysis.errors():
@@ -159,7 +159,7 @@ Every value also has `.start()` and `.end()` returning a `Position` with `.line(
 ```python
 from kson import Kson
 
-analysis = Kson.analyze("key: value", None)
+analysis = Kson.analyze("key: value", None, None)
 for token in analysis.tokens():
     print(f"{token.token_type().name}: {repr(token.text())}")
 ```
@@ -199,7 +199,7 @@ KSON supports [embed blocks](https://github.com/kson-org/kson) for embedding raw
 ```python
 from kson import Kson, KsonValue
 
-analysis = Kson.analyze("query: $sql\nSELECT * FROM users\n$$", None)
+analysis = Kson.analyze("query: $sql\nSELECT * FROM users\n$$", None, None)
 value = analysis.kson_value()
 
 if isinstance(value, KsonValue.KsonObject):
