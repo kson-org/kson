@@ -371,6 +371,21 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testNoValueCompletionsAfterCommittedScalarInBrokenDocument() {
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: "committed"<caret>
+                other: ,
+            }
+        """.trimIndent())
+
+        assertTrue(
+            completions.none { it.kind == CompletionKind.VALUE },
+            "Caret after a committed value should offer no value completions, got: ${completions.map { it.label }}"
+        )
+    }
+
+    @Test
     fun testValueCompletionsOfferedForEmptySlot() {
         // An empty value slot (no committed value) still offers the null-branch suggestion.
         val completions = getCompletionsAtCaret(nullableValueSchema, """
@@ -1812,7 +1827,7 @@ class SchemaCompletionLocationTest {
         """.trimIndent(), setOf("age"))
     }
 
-    /** `name` is offered too: the error sits inside the `{}`, leaving no committed value to filter against */
+    /** Same with the half-typed key an error inside the `{}` */
     @Test
     fun testHalfTypedKeyCompletesEnclosingDelimitedObject() {
         assertCompletionLabels(nestedPersonSchema, """
@@ -1821,7 +1836,7 @@ class SchemaCompletionLocationTest {
               a<caret>
             }
             hobby: reading
-        """.trimIndent(), setOf("age", "name"))
+        """.trimIndent(), setOf("age"))
     }
 
     @Test
@@ -1872,6 +1887,135 @@ class SchemaCompletionLocationTest {
                 - reading
               a<caret>
         """.trimIndent(), setOf("age", "name"))
+    }
+
+    /** Objects for a `}` or `.` to end at each depth, and as list items, plus root-level siblings */
+    private val closedObjectsSchema = """
+        {
+            "type": "object",
+            "properties": {
+                "settings": {
+                    "type": "object",
+                    "properties": {
+                        "theme": { "type": "string" },
+                        "size": { "type": "integer" }
+                    }
+                },
+                "outer": {
+                    "type": "object",
+                    "properties": {
+                        "inner": {
+                            "type": "object",
+                            "properties": {
+                                "x": { "type": "string" },
+                                "mode": { "type": "string" }
+                            }
+                        },
+                        "depth": { "type": "integer" }
+                    }
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": { "type": "string" },
+                            "label": { "type": "string" }
+                        }
+                    }
+                },
+                "other": { "type": "string" }
+            }
+        }
+    """
+
+    /**
+     * The `}` ends `settings`, so once its colon is typed the key is a root property, whatever
+     * kind of value sits against the `}`.
+     */
+    @Test
+    fun testHalfTypedKeyAfterDelimitedObjectCompletesItsParent() {
+        assertCompletionLabels(closedObjectsSchema, """
+            settings: {theme: dark}
+            o<caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+        assertCompletionLabels(closedObjectsSchema, """
+            settings: {size: 3}
+            o<caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+        assertCompletionLabels(closedObjectsSchema, """
+            settings: {x: true}
+            o<caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+        assertCompletionLabels(closedObjectsSchema, """
+            settings: {theme: {a: b}}
+            o<caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+    }
+
+    @Test
+    fun testHalfTypedKeyAfterEndDottedObjectCompletesItsParent() {
+        assertCompletionLabels(closedObjectsSchema, """
+            settings:
+              theme: dark.
+            o<caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+    }
+
+    @Test
+    fun testHalfTypedKeyAfterDelimitedListItemCompletesObjectOwningList() {
+        assertCompletionLabels(closedObjectsSchema, """
+            items:
+              - {id: x}
+            o<caret>
+        """.trimIndent(), setOf("other", "outer", "settings"))
+    }
+
+    @Test
+    fun testHalfTypedKeyAfterNestedDelimitedObjectCompletesEnclosingObject() {
+        assertCompletionLabels(closedObjectsSchema, """
+            outer:
+              inner: {x: y}
+              d<caret>
+        """.trimIndent(), setOf("depth"))
+    }
+
+    /** A close quote ends only its string, so `settings` is still open for the key */
+    @Test
+    fun testHalfTypedKeyAfterQuotedValueCompletesEnclosingObject() {
+        assertCompletionLabels(closedObjectsSchema, """
+            settings:
+              theme: 'dark'
+              s<caret>
+        """.trimIndent(), setOf("size"))
+    }
+
+    /** Indentation ends nothing: with no `.` to end `settings`, the key still joins it */
+    @Test
+    fun testHalfTypedKeyAtLesserIndentCompletesUnendedObject() {
+        assertCompletionLabels(closedObjectsSchema, """
+            settings:
+              theme: dark
+            s<caret>
+        """.trimIndent(), setOf("size"))
+    }
+
+    /** Before the key's first letter is typed, completion offers the same scope as after */
+    @Test
+    fun testEmptyLineAfterDelimitedObjectCompletesItsParent() {
+        assertCompletionLabels(closedObjectsSchema, """
+            settings: {theme: dark}
+            <caret>
+        """.trimIndent(), setOf("items", "other", "outer"))
+    }
+
+    @Test
+    fun testEmptyLineAfterNestedDelimitedObjectCompletesEnclosingObject() {
+        assertCompletionLabels(closedObjectsSchema, """
+            outer:
+              inner: {x: y}
+              <caret>
+        """.trimIndent(), setOf("depth"))
     }
 
     @Test
@@ -1989,7 +2133,6 @@ class SchemaCompletionLocationTest {
      */
     @Test
     fun testItemAfterListElementInErrorNarrowsByItself() {
-        // `kind` is still offered: the filled-property filter reads the strict ksonValue, null for a broken document
         assertCompletionLabels(kindedItemsSchema, """
             {
               "items": [
@@ -2002,7 +2145,7 @@ class SchemaCompletionLocationTest {
                 { "kind": "c" }
               ]
             }
-        """.trimIndent(), setOf("kind", "beta"))
+        """.trimIndent(), setOf("beta"))
     }
 
     /** A list element in error has no value to narrow by, so it must not borrow the next item's */
