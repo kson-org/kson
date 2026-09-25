@@ -16,9 +16,6 @@ import org.kson.parser.Location
  * listed among its siblings to keep their indices as written.  A property in error
  * is dropped instead—it is addressed by name, and a broken property has none.
  *
- * Note [org.kson.value.toKsonValueOrNull] drops elements in error and so renumbers the
- * ones after them: an index built by walking here addresses this tree, not that one.
- *
  * This makes the walker suitable for IDE features (path building,
  * completions, hover) that need to work on partially-typed documents
  * where [org.kson.value.KsonValue] conversion would fail.

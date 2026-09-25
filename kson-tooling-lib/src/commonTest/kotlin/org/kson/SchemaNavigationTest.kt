@@ -1,6 +1,7 @@
 package org.kson
 
 import org.kson.schema.SchemaIdLookup
+import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
 import org.kson.tooling.navigation.SchemaResolutionType
@@ -475,9 +476,9 @@ class SchemaNavigationTest {
             }
         """
         val document = """{ "config": { "mode": "a" } }"""
-        val documentValue = KsonCore.parseToAst(document).ksonValue
+        val documentAst = KsonTooling.parse(document).rootAstNode
         val results = KsonCore.parseToAst(schema).ksonValue!!.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(JsonPointer.fromTokens(listOf("config")), documentValue)
+            SchemaNavigator(SchemaIdLookup(it)).navigate(JsonPointer.fromTokens(listOf("config")), documentAst)
         }
 
         // [configParent, InnerA] — InnerB is dropped because mode: "a" contradicts its const.

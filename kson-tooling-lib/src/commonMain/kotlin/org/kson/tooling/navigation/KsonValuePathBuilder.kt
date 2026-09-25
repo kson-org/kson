@@ -98,8 +98,7 @@ class KsonValuePathBuilder(
      * false`); definition/hover lookups leave it null and treat the committed value as authoritative.
      *
      * A caret can also fall outside the tree entirely: a key with no `:` yet is not a keyword, so an
-     * undelimited object ends at it and everything from there on is trailing content.  For completion
-     * we resolve such a caret from the last token that is in the tree — see [caretOutsideTreePath].
+     * undelimited object ends at it and everything from there on is trailing content.
      *
      * @return The resolved [CaretPath], or null if the document is completely unparseable
      */
@@ -134,10 +133,6 @@ class KsonValuePathBuilder(
      * content, or before its start.  Resolves from the last token at or before the caret that IS in
      * the tree, as if the caret sat in the whitespace just after that token, so a key being typed
      * into an undelimited object—which ends that object—still completes against it.
-     *
-     * Only completion asks for this.  A definition or hover lookup has no reason to believe the
-     * caret is mid-keystroke, and reading a target off a token that may be pages away would answer
-     * a question nobody asked, so those keep resolving to the root.
      */
     private fun caretOutsideTreePath(rootNode: AstNode, includePropertyKeys: Boolean): CaretPath {
         if (includePropertyKeys) return CaretPath(JsonPointer.ROOT, null)

@@ -1965,6 +1965,56 @@ class SchemaCompletionLocationTest {
         """.trimIndent(), setOf("blue", "green", "red"))
     }
 
+    /** List items that pick an `anyOf` branch by their `kind` */
+    private val kindedItemsSchema = """
+        {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            { "type": "object", "properties": { "kind": { "const": "a" }, "alpha": { "type": "string" } } },
+                            { "type": "object", "properties": { "kind": { "const": "b" }, "beta": { "type": "string" } } }
+                        ]
+                    }
+                }
+            }
+        }
+    """
+
+    /**
+     * A list element in error keeps its index in the caret's pointer, so the caret's item narrows by
+     * its own `kind: b`, not by the `kind: c` item that dropping the broken element would shift there.
+     */
+    @Test
+    fun testItemAfterListElementInErrorNarrowsByItself() {
+        // `kind` is still offered: the filled-property filter reads the strict ksonValue, null for a broken document
+        assertCompletionLabels(kindedItemsSchema, """
+            {
+              "items": [
+                { "kind": "a" },
+                ,
+                {
+                  "kind": "b"
+                  <caret>
+                },
+                { "kind": "c" }
+              ]
+            }
+        """.trimIndent(), setOf("kind", "beta"))
+    }
+
+    /** A list element in error has no value to narrow by, so it must not borrow the next item's */
+    @Test
+    fun testListElementInErrorOffersEveryBranch() {
+        assertCompletionLabels(kindedItemsSchema, """
+            items:
+              - }<caret>
+              - kind: b
+        """.trimIndent(), setOf("kind", "alpha", "beta"))
+    }
+
     @Test
     fun testNoCompletionsInsideDelimitedListWhenSchemaExpectsObject() {
         val schema = searchExpressionSchema

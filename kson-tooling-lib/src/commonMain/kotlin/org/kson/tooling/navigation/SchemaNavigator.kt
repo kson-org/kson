@@ -1,5 +1,6 @@
 package org.kson.tooling.navigation
 
+import org.kson.ast.AstNode
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
@@ -13,7 +14,8 @@ import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.walker.KsonValueWalker
+import org.kson.value.toKsonValueOrNull
+import org.kson.walker.AstNodeWalker
 import org.kson.walker.navigateWithJsonPointer
 
 /**
@@ -113,18 +115,28 @@ internal class SchemaNavigator(
      * val schemaRefs = SchemaNavigator(idLookup).navigate(JsonPointer.fromTokens(listOf("users", "0", "name")))
      * ```
      *
-     * Narrowing treats [documentValue] as authoritative: a branch is dropped where the document
+     * Narrowing treats the document as authoritative: a branch is dropped where the document
      * contradicts it at that level.  A caller editing a value in place (e.g. completion) passes the
      * span of that half-authored value as [incompleteRegion]; validation errors located inside it are
      * forgiven, so an incomplete value never disqualifies a branch.
      *
-     * @param documentPointer Pointer through the document (from [org.kson.walker.navigateToLocationWithPointer])
-     * @param documentValue The document being navigated against (drives branch narrowing)
+     * The document is walked on its AST, the tree [KsonValuePathBuilder] builds pointers on: a list
+     * element in error keeps its index there, while [toKsonValueOrNull] drops it and renumbers the
+     * elements after it.  The node reached at each level is converted with [toKsonValueOrNull] to
+     * narrow by, so whatever did parse in a broken document still narrows.
+     *
+     * TODO a [JsonPointer] does not record which tree it was built on, so pairing it with the
+     *  right tree is a convention this signature can only hint at: a pointer built on the AST
+     *  resolved against a [KsonValue] tree could silently addresses the wrong list element we need
+     *  to find a way where it's harder to re-introduce this bug
+     *
+     * @param documentPointer Pointer through the document's AST (e.g. from [KsonValuePathBuilder])
+     * @param documentAst Root of the document's AST, walked along [documentPointer] (drives branch narrowing)
      * @return List of [NavigatedSchema] containing all sub-schemas at that location (empty if not found)
      */
     fun navigate(
         documentPointer: JsonPointer,
-        documentValue: KsonValue? = null
+        documentAst: AstNode? = null
     ): List<NavigatedSchema> {
         val rootBaseUri = idLookup.rootBaseUri
         val rootResolved = idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri)
@@ -135,14 +147,15 @@ internal class SchemaNavigator(
         )
 
         val tokens = documentPointer.tokens
-        var current = flatten(rootRef, documentValue)
-        var currentDocValue = documentValue
+        var currentDocNode = documentAst
+        var current = flatten(rootRef, currentDocNode?.toKsonValueOrNull())
 
         for (token in tokens) {
             val stepped = current.flatMap { stepInto(it, token) }
-            currentDocValue = currentDocValue?.let { docVal ->
-                KsonValueWalker.navigateWithJsonPointer(docVal, JsonPointer.fromTokens(listOf(token)))
+            currentDocNode = currentDocNode?.let { docNode ->
+                AstNodeWalker.navigateWithJsonPointer(docNode, JsonPointer.fromTokens(listOf(token)))
             }
+            val currentDocValue = currentDocNode?.toKsonValueOrNull()
             current = stepped.flatMap { flatten(it, currentDocValue) }
             if (current.isEmpty()) break
         }
