@@ -40,7 +40,7 @@ class KsonValuePathBuilderTest {
         val actualPath = KsonValuePathBuilder(parse(document), Coordinates(line, column))
             .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
-        assertEquals(expectedPath, actualPath, "Path does not match expected value")
+        assertEquals(expectedPath, actualPath?.pointer, "Path does not match expected value")
     }
 
     @Test

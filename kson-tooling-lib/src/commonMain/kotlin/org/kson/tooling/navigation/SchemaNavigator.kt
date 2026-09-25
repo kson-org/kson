@@ -13,10 +13,10 @@ import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
-import org.kson.walker.navigateWithJsonPointer
+import org.kson.walker.TreePointer
+import org.kson.walker.nodesAlong
 
 /**
  * Describes how a schema was reached during navigation, recording the combinator or
@@ -68,7 +68,7 @@ data class NavigatedSchema(
 )
 
 /**
- * Navigates a [JsonPointer] through a schema, returning all sub-schemas at the
+ * Navigates a document's [TreePointer] through a schema, returning all sub-schemas at the
  * target location fully flattened (combinators exploded, conditionals narrowed by
  * strict isValid against the document).
  *
@@ -81,7 +81,7 @@ data class NavigatedSchema(
  * so no post-navigation expansion pass is needed.
  *
  * Mirrors the shape of `TreeNavigator` in the walker package (see
- * [org.kson.walker.navigateWithJsonPointer]) — one entry point, small internal
+ * [org.kson.walker.navigate]) — one entry point, small internal
  * helpers — so the pattern is recognizable.
  */
 internal class SchemaNavigator(
@@ -112,7 +112,7 @@ internal class SchemaNavigator(
      * // Document path: ["users", "0", "name"]
      * // Schema navigation: properties/users → items → properties/name
      * val idLookup = SchemaIdLookup(schemaRoot)
-     * val schemaRefs = SchemaNavigator(idLookup).navigate(JsonPointer.fromTokens(listOf("users", "0", "name")))
+     * val schemaRefs = SchemaNavigator(idLookup).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
      * ```
      *
      * Narrowing treats the document as authoritative: a branch is dropped where the document
@@ -120,22 +120,16 @@ internal class SchemaNavigator(
      * span of that half-authored value as [incompleteRegion]; validation errors located inside it are
      * forgiven, so an incomplete value never disqualifies a branch.
      *
-     * The document is walked on its AST, the tree [KsonValuePathBuilder] builds pointers on: a list
-     * element in error keeps its index there, while [toKsonValueOrNull] drops it and renumbers the
-     * elements after it.  The node reached at each level is converted with [toKsonValueOrNull] to
-     * narrow by, so whatever did parse in a broken document still narrows.
-     *
-     * TODO a [JsonPointer] does not record which tree it was built on, so pairing it with the
-     *  right tree is a convention this signature can only hint at: a pointer built on the AST
-     *  resolved against a [KsonValue] tree could silently addresses the wrong list element we need
-     *  to find a way where it's harder to re-introduce this bug
+     * The document is walked on its AST, the tree [documentPointer] was built on (see [TreePointer]),
+     * and the node reached at each level is converted with [toKsonValueOrNull] to narrow by, so
+     * whatever did parse in a broken document still narrows.
      *
      * @param documentPointer Pointer through the document's AST (e.g. from [KsonValuePathBuilder])
      * @param documentAst Root of the document's AST, walked along [documentPointer] (drives branch narrowing)
      * @return List of [NavigatedSchema] containing all sub-schemas at that location (empty if not found)
      */
     fun navigate(
-        documentPointer: JsonPointer,
+        documentPointer: TreePointer<AstNode>,
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
         val rootBaseUri = idLookup.rootBaseUri
@@ -146,17 +140,15 @@ internal class SchemaNavigator(
             SchemaResolutionType.ROOT
         )
 
-        val tokens = documentPointer.tokens
-        var currentDocNode = documentAst
-        var current = flatten(rootRef, currentDocNode?.toKsonValueOrNull())
+        // the bare tokens step the schema by name; the document is walked along the tagged pointer
+        val tokens = documentPointer.pointer.tokens
+        val docNodes = documentAst?.let { AstNodeWalker.nodesAlong(it, documentPointer) }.orEmpty()
+        var current = flatten(rootRef, documentAst?.toKsonValueOrNull())
 
-        for (token in tokens) {
+        for ((index, token) in tokens.withIndex()) {
             val stepped = current.flatMap { stepInto(it, token) }
-            currentDocNode = currentDocNode?.let { docNode ->
-                AstNodeWalker.navigateWithJsonPointer(docNode, JsonPointer.fromTokens(listOf(token)))
-            }
-            val currentDocValue = currentDocNode?.toKsonValueOrNull()
-            current = stepped.flatMap { flatten(it, currentDocValue) }
+            val docValue = docNodes.getOrNull(index)?.toKsonValueOrNull()
+            current = stepped.flatMap { flatten(it, docValue) }
             if (current.isEmpty()) break
         }
 

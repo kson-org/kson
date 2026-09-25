@@ -12,34 +12,43 @@ import org.kson.value.navigation.json_pointer.PointerParser
  * Result of navigating to a location in a tree.
  *
  * @param value The most specific node at the target location
- * @param pointerFromRoot [JsonPointer] from root to target
+ * @param pointerFromRoot [TreePointer] from root to target, on the tree navigated
  */
 data class TreeNavigationResult<N>(
     val value: N,
-    val pointerFromRoot: JsonPointer
+    val pointerFromRoot: TreePointer<N>
 )
 
 /**
- * Navigate a tree using a JSON Pointer.
+ * Navigate a tree of the kind [pointer] addresses.
  *
  * Follows each token in the pointer through the tree:
  * - For object nodes: matches token against property names
  * - For array nodes: matches token as an integer index
  *
- * @return The node at the end of the path, or null if navigation fails
+ * @return The node [pointer] names under [root], or null if navigation fails
  */
-fun <N> KsonTreeWalker<N>.navigateWithJsonPointer(
-    root: N,
-    pointer: JsonPointer
-): N? {
+fun <N> KsonTreeWalker<N>.navigate(root: N, pointer: TreePointer<N>): N? {
     // JSON Pointer always has only Literal tokens, so we expect exactly 0 or 1 result
-    return TreeNavigator(this).navigateByParsedTokens(listOf(root), pointer.rawTokens).firstOrNull()
+    return TreeNavigator(this).navigateByParsedTokens(listOf(root), pointer.pointer.rawTokens).firstOrNull()
+}
+
+/** The node each token of [pointer] steps to from [root], stopping at the first that has none */
+fun <N> KsonTreeWalker<N>.nodesAlong(root: N, pointer: TreePointer<N>): List<N> {
+    val navigator = TreeNavigator(this)
+    val nodes = mutableListOf<N>()
+    var current = root
+    for (token in pointer.pointer.rawTokens) {
+        current = navigator.navigateByParsedTokens(listOf(current), listOf(token)).firstOrNull() ?: break
+        nodes.add(current)
+    }
+    return nodes
 }
 
 /**
  * Navigate a tree using a [JsonPointerGlob].
  *
- * Unlike [navigateWithJsonPointer], this returns ALL matching nodes, since wildcards
+ * Unlike [navigate], this returns ALL matching nodes, since wildcards
  * and patterns can match multiple keys/indices at each level.
  *
  * @return List of all nodes matching the pointer (empty list if no matches)
@@ -53,7 +62,7 @@ fun <N> KsonTreeWalker<N>.navigateWithJsonPointerGlob(
 }
 
 /**
- * Find the most specific node at a location and build the JSON Pointer path to it.
+ * Find the most specific node at a location and build the [TreePointer] path to it.
  *
  * Recursively descends the tree, checking if the target location falls within
  * each node's bounds. Returns the deepest (most specific) node that contains
@@ -66,7 +75,7 @@ fun <N> KsonTreeWalker<N>.navigateToLocationWithPointer(
     root: N,
     targetLocation: Coordinates
 ): TreeNavigationResult<N>? {
-    return TreeNavigator(this).navigateToLocation(root, targetLocation, JsonPointer.ROOT)
+    return TreeNavigator(this).navigateToLocation(root, targetLocation, TreePointer(JsonPointer.ROOT))
 }
 
 /**
@@ -80,7 +89,7 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
     fun navigateToLocation(
         root: N,
         targetLocation: Coordinates,
-        currentPointer: JsonPointer
+        currentPointer: TreePointer<N>
     ): TreeNavigationResult<N>? {
         if (!Location.containsCoordinates(walker.getLocation(root), targetLocation)) {
             return null
@@ -91,7 +100,7 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
                 for (prop in children.properties) {
                     val childResult = navigateToLocation(
                         prop.value, targetLocation,
-                        JsonPointer.fromTokens(currentPointer.tokens + prop.name)
+                        currentPointer.child(prop.name)
                     )
                     if (childResult != null) return childResult
                 }
@@ -100,7 +109,7 @@ private class TreeNavigator<N>(private val walker: KsonTreeWalker<N>) {
                 for ((index, child) in children.elements.withIndex()) {
                     val childResult = navigateToLocation(
                         child, targetLocation,
-                        JsonPointer.fromTokens(currentPointer.tokens + index.toString())
+                        currentPointer.child(index.toString())
                     )
                     if (childResult != null) return childResult
                 }

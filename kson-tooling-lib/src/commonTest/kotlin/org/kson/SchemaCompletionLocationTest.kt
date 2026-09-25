@@ -371,6 +371,21 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testNoValueCompletionsAfterCommittedScalarInBrokenDocument() {
+        val completions = getCompletionsAtCaret(nullableValueSchema, """
+            {
+                value: "committed"<caret>
+                other: ,
+            }
+        """.trimIndent())
+
+        assertTrue(
+            completions.none { it.kind == CompletionKind.VALUE },
+            "Caret after a committed value should offer no value completions, got: ${completions.map { it.label }}"
+        )
+    }
+
+    @Test
     fun testValueCompletionsOfferedForEmptySlot() {
         // An empty value slot (no committed value) still offers the null-branch suggestion.
         val completions = getCompletionsAtCaret(nullableValueSchema, """
@@ -1812,7 +1827,7 @@ class SchemaCompletionLocationTest {
         """.trimIndent(), setOf("age"))
     }
 
-    /** `name` is offered too: the error sits inside the `{}`, leaving no committed value to filter against */
+    /** Same with the half-typed key an error inside the `{}` */
     @Test
     fun testHalfTypedKeyCompletesEnclosingDelimitedObject() {
         assertCompletionLabels(nestedPersonSchema, """
@@ -1821,7 +1836,7 @@ class SchemaCompletionLocationTest {
               a<caret>
             }
             hobby: reading
-        """.trimIndent(), setOf("age", "name"))
+        """.trimIndent(), setOf("age"))
     }
 
     @Test
@@ -1989,7 +2004,6 @@ class SchemaCompletionLocationTest {
      */
     @Test
     fun testItemAfterListElementInErrorNarrowsByItself() {
-        // `kind` is still offered: the filled-property filter reads the strict ksonValue, null for a broken document
         assertCompletionLabels(kindedItemsSchema, """
             {
               "items": [
@@ -2002,7 +2016,7 @@ class SchemaCompletionLocationTest {
                 { "kind": "c" }
               ]
             }
-        """.trimIndent(), setOf("kind", "beta"))
+        """.trimIndent(), setOf("beta"))
     }
 
     /** A list element in error has no value to narrow by, so it must not borrow the next item's */

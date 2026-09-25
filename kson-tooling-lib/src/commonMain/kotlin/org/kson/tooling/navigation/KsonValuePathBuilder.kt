@@ -11,8 +11,9 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
+import org.kson.walker.TreePointer
+import org.kson.walker.navigate
 import org.kson.walker.navigateToLocationWithPointer
-import org.kson.walker.navigateWithJsonPointer
 import org.kson.tooling.ToolingDocument
 
 /**
@@ -27,8 +28,8 @@ private data class TokenContext(
 )
 
 /**
- * The result of resolving a caret position: the [JsonPointer] from the document root to the
- * target value, plus the span of the value the caret is currently authoring (the "placeholder").
+ * The result of resolving a caret position: the pointer through the document's AST from its root to
+ * the target value, plus the span of the value the caret is currently authoring (the "placeholder").
  *
  * [placeholderLocation] is only populated for completion (where the half-typed value must not
  * disqualify the schema branches it selects among); it is null for definition/hover lookups,
@@ -44,7 +45,7 @@ private data class TokenContext(
  * never sets this flag.
  */
 data class CaretPath(
-    val pointer: JsonPointer,
+    val pointer: TreePointer<AstNode>,
     val placeholderLocation: Location?,
     val caretPastValueToken: Boolean = false
 )
@@ -82,14 +83,14 @@ class KsonValuePathBuilder(
      * @param includePropertyKeys If true, keeps the path to the current property even when
      *   the cursor is outside a token. This is useful for "jump to definition" where we
      *   want the property's schema definition, not its parent. Default is true.
-     * @return A [JsonPointer] representing the path from root to target,
+     * @return A [TreePointer] through the document's AST from root to target,
      *         or null if the document is completely unparseable
      */
-    fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): JsonPointer? =
+    fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): TreePointer<AstNode>? =
         buildCaretPath(includePropertyKeys)?.pointer
 
     /**
-     * Resolves the caret position into a [CaretPath]: the [JsonPointer] to the target value plus
+     * Resolves the caret position into a [CaretPath]: the pointer to the target value plus
      * the placeholder span of the value the caret is authoring.
      *
      * The placeholder is derived from the same token context that drives path adjustment, so it is
@@ -104,7 +105,7 @@ class KsonValuePathBuilder(
      */
     fun buildCaretPath(includePropertyKeys: Boolean = true): CaretPath? {
         val rootNode = document.rootAstNode
-            ?: return if (document.content.isBlank()) CaretPath(JsonPointer.ROOT, null) else null
+            ?: return if (document.content.isBlank()) CaretPath(TreePointer(JsonPointer.ROOT), null) else null
 
         // Analyze token context using meaningful (non-whitespace) tokens
         val tokenContext = analyzeTokenContext(location)
@@ -135,12 +136,12 @@ class KsonValuePathBuilder(
      * into an undelimited object—which ends that object—still completes against it.
      */
     private fun caretOutsideTreePath(rootNode: AstNode, includePropertyKeys: Boolean): CaretPath {
-        if (includePropertyKeys) return CaretPath(JsonPointer.ROOT, null)
+        if (includePropertyKeys) return CaretPath(TreePointer(JsonPointer.ROOT), null)
 
         val (anchor, navResult) = meaningfulTokensUpTo(location).asReversed().firstNotNullOfOrNull { token ->
             AstNodeWalker.navigateToLocationWithPointer(rootNode, token.lexeme.location.start)
                 ?.let { token to it }
-        } ?: return CaretPath(JsonPointer.ROOT, null)
+        } ?: return CaretPath(TreePointer(JsonPointer.ROOT), null)
 
         val caretPath = adjustPathForLocationContext(
             pointer = navResult.pointerFromRoot,
@@ -158,17 +159,17 @@ class KsonValuePathBuilder(
      * under a list belongs to the object that owns the list: `tags:\n  - red\nother: x` reads `other`
      * as a property of the object holding `tags`, not as part of the list.
      */
-    private fun enclosingObjectPointer(rootNode: AstNode, pointer: JsonPointer): JsonPointer {
+    private fun enclosingObjectPointer(rootNode: AstNode, pointer: TreePointer<AstNode>): TreePointer<AstNode> {
         var enclosing = pointer
-        while (enclosing.tokens.isNotEmpty() && namesAList(rootNode, enclosing)) {
-            enclosing = JsonPointer.fromTokens(enclosing.tokens.dropLast(1))
+        while (namesAList(rootNode, enclosing)) {
+            enclosing = enclosing.parent() ?: break
         }
         return enclosing
     }
 
     /** True when [pointer] names a list in the tree rooted at [rootNode]. */
-    private fun namesAList(rootNode: AstNode, pointer: JsonPointer): Boolean {
-        val node = AstNodeWalker.navigateWithJsonPointer(rootNode, pointer) ?: return false
+    private fun namesAList(rootNode: AstNode, pointer: TreePointer<AstNode>): Boolean {
+        val node = AstNodeWalker.navigate(rootNode, pointer) ?: return false
         return AstNodeWalker.getChildren(node) is NodeChildren.Array
     }
 
@@ -271,7 +272,7 @@ class KsonValuePathBuilder(
      *    (unless includePropertyKeys is true, in which case keep the path to the property)
      */
     private fun adjustPathForLocationContext(
-        pointer: JsonPointer,
+        pointer: TreePointer<AstNode>,
         lastToken: Token?,
         targetNode: AstNode,
         isLocationInsideToken: Boolean,
@@ -302,7 +303,7 @@ class KsonValuePathBuilder(
      * Returns null when the caret is not in this position.
      */
     private fun afterColonCaretPath(
-        pointer: JsonPointer,
+        pointer: TreePointer<AstNode>,
         colonToken: Token?,
         colonPropertyName: String?,
         targetNode: AstNode
@@ -311,7 +312,7 @@ class KsonValuePathBuilder(
         val atParentObject = AstNodeWalker.getChildren(targetNode) is NodeChildren.Object &&
                 Location.containsCoordinates(AstNodeWalker.getLocation(targetNode), colonToken.lexeme.location.start)
         if (!atParentObject) return null
-        return CaretPath(JsonPointer.fromTokens(pointer.tokens + colonPropertyName), placeholderLocation = null)
+        return CaretPath(pointer.child(colonPropertyName), placeholderLocation = null)
     }
 
     /**
@@ -320,7 +321,7 @@ class KsonValuePathBuilder(
      * lookups): add the property name to the path.  Returns null when the caret is not on a key.
      */
     private fun propertyKeyCaretPath(
-        pointer: JsonPointer,
+        pointer: TreePointer<AstNode>,
         lastToken: Token?,
         isLocationInsideToken: Boolean,
         targetNode: AstNode,
@@ -352,7 +353,7 @@ class KsonValuePathBuilder(
             ).processedContent
         } else
             lastToken.lexeme.text
-        return CaretPath(JsonPointer.fromTokens(pointer.tokens + propertyName), placeholderLocation = null)
+        return CaretPath(pointer.child(propertyName), placeholderLocation = null)
     }
 
     /**
@@ -363,7 +364,7 @@ class KsonValuePathBuilder(
      * Returns null when the caret is not in this position.
      */
     private fun parentCaretPath(
-        pointer: JsonPointer,
+        pointer: TreePointer<AstNode>,
         lastToken: Token?,
         isLocationInsideToken: Boolean,
         includePropertyKeys: Boolean
@@ -374,7 +375,7 @@ class KsonValuePathBuilder(
                 lastToken?.tokenType != TokenType.ANGLE_BRACKET_L &&
                 lastToken?.tokenType != TokenType.LIST_DASH
         if (!targetsParent) return null
-        return CaretPath(JsonPointer.fromTokens(pointer.tokens.dropLast(1)), placeholderLocation = null)
+        return CaretPath(pointer.parent() ?: pointer, placeholderLocation = null)
     }
 
     /**
@@ -384,7 +385,7 @@ class KsonValuePathBuilder(
      * set once the caret reaches the end of a committed string value's close-quote token.
      */
     private fun leafOrAsIsCaretPath(
-        pointer: JsonPointer,
+        pointer: TreePointer<AstNode>,
         lastToken: Token?,
         targetNode: AstNode,
         includePropertyKeys: Boolean
