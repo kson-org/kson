@@ -6,7 +6,8 @@ import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.walker.KsonValueWalker
-import org.kson.walker.navigateWithJsonPointer
+import org.kson.walker.TreePointer
+import org.kson.walker.nodesAlong
 
 /**
  * Manages the mapping of `$id` values to their corresponding schema nodes for `$ref` resolution.
@@ -267,16 +268,22 @@ private fun decodeUriEncoding(encoded: String): String {
 }
 
 /**
- * Resolves a JSON Pointer path within a [KsonValue] structure.
+ * Resolves a JSON Pointer path within a [KsonValue] structure, applying the `$id` of every node
+ * along the way to [currentBaseUri].
  *
- * @param pointer The JSON Pointer string (e.g., "/definitions/address")
+ * @param pointer The JSON Pointer to follow (e.g., "/definitions/address")
  * @param ksonValue The [KsonValue] to traverse
- * @return The [KsonValue] at the pointer location, or null if not found
+ * @return The [KsonValue] at the pointer location with its base URI, or null if not found
  */
 private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
-    val resolvedValue = KsonValueWalker.navigateWithJsonPointer(ksonValue, pointer)
-    val resolvedBaseUri = updateBaseUriAlongPath(ksonValue, pointer, currentBaseUri)
-    return resolvedValue?.let { ResolvedRef(it, resolvedBaseUri) }
+    // a $ref fragment addresses the schema's value tree
+    val nodes = KsonValueWalker.nodesAlong(ksonValue, TreePointer<KsonValue>(pointer))
+    if (nodes.size < pointer.tokens.size) return null
+    val baseUri = (listOf(ksonValue) + nodes.dropLast(1)).fold(currentBaseUri) { uri, node ->
+        val id = (node as? KsonObject)?.propertyLookup["\$id"] as? KsonString
+        if (id == null) uri else SchemaIdLookup.resolveUri(id.value, uri).toString()
+    }
+    return ResolvedRef(nodes.lastOrNull() ?: ksonValue, baseUri)
 }
 
 /**
@@ -289,29 +296,3 @@ data class ResolvedRef(
     val resolvedValue: KsonValue,
     val resolvedValueBaseUri: String
 )
-
-/**
- * Updates the base URI while following a path of JSON Pointer tokens.
- *
- * @param current The current [KsonValue] node to start from
- * @param pointer The [JsonPointer] to follow
- * @param currentBaseUri The starting base URI
- * @return The updated base URI after following the token path
- */
-private fun updateBaseUriAlongPath(current: KsonValue, pointer: JsonPointer, currentBaseUri: String): String {
-    var node = current
-    var updatedBaseUri = currentBaseUri
-
-    for (token in pointer.tokens) {
-        // Update base URI if current node has a $id property
-        val idValue = (node as? KsonObject)?.propertyLookup["\$id"]
-        if (idValue is KsonString) {
-            updatedBaseUri = SchemaIdLookup.resolveUri(idValue.value, updatedBaseUri).toString()
-        }
-
-        // Navigate to next node
-        node = KsonValueWalker.navigateWithJsonPointer(node, JsonPointer.fromTokens(listOf(token))) ?: break
-    }
-
-    return updatedBaseUri
-}

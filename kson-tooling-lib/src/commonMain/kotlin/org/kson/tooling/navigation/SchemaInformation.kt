@@ -1,10 +1,12 @@
 package org.kson.tooling.navigation
 
+import org.kson.ast.AstNode
 import org.kson.tooling.CompletionItem
 import org.kson.tooling.CompletionKind
-import org.kson.value.navigation.json_pointer.JsonPointer
-import org.kson.walker.KsonValueWalker
-import org.kson.walker.navigateWithJsonPointer
+import org.kson.value.toKsonValueOrNull
+import org.kson.walker.AstNodeWalker
+import org.kson.walker.TreePointer
+import org.kson.walker.navigate
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
 import org.kson.value.KsonList as InternalKsonList
@@ -22,23 +24,23 @@ internal object SchemaInformation{
      * When multiple schemas match (e.g., property defined in multiple combinator branches),
      * merges completions from all matching schemas.
      *
-     * @param documentPointer The [JsonPointer] to the [org.kson.value.KsonValue] in the document
+     * @param documentPointer The pointer through the document's AST to the value being completed
      * @param validSchemas Pre-filtered list of valid schemas at the path
-     * @param documentValue The current document value, or null; when present, filters out already-filled properties
+     * @param documentAst Root of the document's AST, or null; when present, filters out already-filled properties
      * @return List of completion items
      */
     fun getCompletions(
-        documentPointer: JsonPointer,
+        documentPointer: TreePointer<AstNode>,
         validSchemas: List<NavigatedSchema>,
-        documentValue: InternalKsonValue?
+        documentAst: AstNode?
     ): List<CompletionItem> {
         val allCompletions = extractCompletionsWithNarrowing(validSchemas)
 
         // Only filter if:
-        // 1. Document value is provided
+        // 1. Document AST is provided
         // 2. We have PROPERTY completions (not just VALUE completions)
         // 3. We can successfully navigate to an object at the document path
-        if (documentValue == null) {
+        if (documentAst == null) {
             return allCompletions
         }
 
@@ -50,7 +52,7 @@ internal object SchemaInformation{
         // Get the current object at the completion location
         // If we can't find an object, it means the caret is before the object literal,
         // so we shouldn't filter (e.g., "user: <caret>{" - object exists but path doesn't reach it yet)
-        val currentObject = KsonValueWalker.navigateWithJsonPointer(documentValue, documentPointer) as? InternalKsonObject
+        val currentObject = AstNodeWalker.navigate(documentAst, documentPointer)?.toKsonValueOrNull() as? InternalKsonObject
             ?: return allCompletions
 
         // Get the set of already-filled property names

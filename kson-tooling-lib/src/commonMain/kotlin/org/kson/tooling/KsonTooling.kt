@@ -9,9 +9,9 @@ import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaInformation
 import org.kson.tooling.navigation.SchemaNavigator
 import org.kson.tooling.navigation.extractSchemaInfo
+import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.schema.SchemaIdLookup
 import org.kson.validation.SourceContext
 import org.kson.value.KsonObject
@@ -19,8 +19,8 @@ import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
-import org.kson.walker.KsonValueWalker
-import org.kson.walker.navigateWithJsonPointer
+import org.kson.walker.TreePointer
+import org.kson.walker.navigate
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -118,11 +118,10 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
-        if( documentPointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
+        if( documentPointer.pointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }
 
-        // Navigate to the node at the cursor position on the AST, the tree the pointer was built on:
-        // parsedSchema drops list elements in error, which renumbers the elements after them
-        val nodeAtPosition = AstNodeWalker.navigateWithJsonPointer(schemaAst, documentPointer) ?: return emptyList()
+        // Navigate to the node at the cursor position
+        val nodeAtPosition = AstNodeWalker.navigate(schemaAst, documentPointer) ?: return emptyList()
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
         val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
@@ -168,7 +167,7 @@ object KsonTooling {
         val caretPath = KsonValuePathBuilder(document, Coordinates(line, column)).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
         val validSchemas = resolveSchemas(parsedSchema, document, caretPath.pointer, caretPath.placeholderLocation)
 
-        val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.ksonValue)
+        val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.rootAstNode)
 
         // A caret resting past the end of a complete, committed value (e.g. `key: 'value'|`) is done
         // choosing a value, so further value suggestions there are noise.  Property suggestions
@@ -191,8 +190,8 @@ object KsonTooling {
      */
     private fun caretIsPastCommittedValue(document: ToolingDocument, caretPath: CaretPath): Boolean {
         if (!caretPath.caretPastValueToken) return false
-        val committedDocument = document.ksonValue ?: return false
-        return KsonValueWalker.navigateWithJsonPointer(committedDocument, caretPath.pointer) != null
+        val documentAst = document.rootAstNode ?: return false
+        return AstNodeWalker.navigate(documentAst, caretPath.pointer)?.toKsonValueOrNull() != null
     }
 
     /**
@@ -330,7 +329,7 @@ object KsonTooling {
     private fun resolveSchemas(
         parsedSchema: KsonValue,
         document: ToolingDocument,
-        documentPointer: JsonPointer,
+        documentPointer: TreePointer<AstNode>,
         placeholderLocation: Location? = null
     ): List<NavigatedSchema> {
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
