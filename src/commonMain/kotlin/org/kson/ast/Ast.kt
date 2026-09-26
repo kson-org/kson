@@ -234,6 +234,23 @@ class KsonRootImpl(
 }
 
 /**
+ * Write the [entries] of an undelimited object or list one per line.  Only the first entry may hang
+ * (see [Indent.hangingIndent]), so the rest are written at [indent]'s body position
+ */
+private fun formatUndelimitedEntries(
+    entries: List<AstNode>,
+    indent: Indent,
+    nextNode: AstNode?,
+    compileTarget: CompileTarget
+): String {
+    return entries.withIndex().joinToString("\n") { (index, entry) ->
+        val nodeAfterThisEntry = entries.getOrNull(index + 1) ?: nextNode
+        val entryIndent = if (index == 0) indent else indent.clone(false)
+        entry.toSourceWithNext(entryIndent, nodeAfterThisEntry, compileTarget)
+    }
+}
+
+/**
  *  This check is used to determine if the document contains trailing content.
  *  This is the case if the node after an [ObjectNode] or [ListNode] is a [KsonValueNode] (not an element
  *  adding to an object or list).
@@ -323,15 +340,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
     }
 
     private fun formatUndelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val outputObject = properties.withIndex().joinToString("\n") { (index, property) ->
-            val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-            if (index == 0) {
-                property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
-            } else {
-                // ensure subsequent properties do not think they are hanging
-                property.toSourceWithNext(indent.clone(false), nodeAfterThisChild, compileTarget)
-            }
-        }
+        val outputObject = formatUndelimitedEntries(properties, indent, nextNode, compileTarget)
 
         return if (compileTarget is Kson && needsEndDot(nextNode)) {
             "$outputObject\n${indent.bodyLinesIndent()}."
@@ -571,10 +580,7 @@ class ListNode(
     }
 
     private fun formatUndelimitedList(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return elements.withIndex().joinToString("\n") { (index, element) ->
-            val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
-            element.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
-        }
+        return formatUndelimitedEntries(elements, indent, nextNode, compileTarget)
     }
 
     /**
@@ -598,10 +604,8 @@ class ListElementNodeImpl(val value: KsonValueNode,
         return when (compileTarget) {
             is Kson -> {
                 when (compileTarget.formatConfig.formattingStyle) {
-                    PLAIN -> formatWithDash(indent, nextNode, compileTarget)
-                    DELIMITED -> formatWithDash(indent, nextNode, compileTarget, isDelimited = true)
-                    COMPACT -> value.toSourceWithNext(indent, nextNode, compileTarget)
-                    CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
+                    PLAIN, DELIMITED -> formatWithDash(indent, nextNode, compileTarget)
+                    COMPACT, CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
                 }
             }
 
@@ -609,28 +613,8 @@ class ListElementNodeImpl(val value: KsonValueNode,
         }
     }
 
-    private fun formatWithDash(
-        indent: Indent,
-        nextNode: AstNode?,
-        compileTarget: CompileTarget,
-        isDelimited: Boolean = false
-    ): String {
-        val isNonEmptyList = (value is ListNode && value.elements.isNotEmpty()) && !isDelimited
-
-        return if (isNonEmptyList) {
-            // For nested lists, use "- \n" (with trailing space for existing behavior)
-            indent.bodyLinesIndent() + "- \n" + value.toSourceWithNext(
-                indent.next(false),
-                nextNode,
-                compileTarget
-            )
-        } else {
-            indent.bodyLinesIndent() + "- " + value.toSourceWithNext(
-                indent.next(true),
-                nextNode,
-                compileTarget
-            )
-        }
+    private fun formatWithDash(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+        return indent.firstLineIndent() + "- " + value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
     }
 }
 

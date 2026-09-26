@@ -109,8 +109,7 @@ Plain dash lists may be nested like so:
 
 ```kson
 - outer_element
--
-  - nested_element_1
+- - nested_element_1
   - nested_element_2
 ```
 
@@ -118,8 +117,7 @@ Important: unlike YAML, **whitespace is not significant in KSON**, so to add mor
 
 ```kson
 - outer_element
--
-  - nested_element_1
+- - nested_element_1
   - nested_element_2
   =
 - outer_element_2
@@ -131,8 +129,7 @@ The end-dash `=` explicitly declares the end of a [Plain Dash List](#plain-dash-
 
 ```kson
 - outer_element_1
--
-  - nested_element_1
+- - nested_element_1
   - nested_element_2
   =
 # note that without the end-dash, `outer_element_2` would belong to the nested list
@@ -437,8 +434,7 @@ person:
       author: Aristotle
       .
   favorite_numbers:
-    - 
-      - 0
+    - - 0
       - 1
       - 1
       - 2

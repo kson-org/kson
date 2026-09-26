@@ -175,9 +175,7 @@ class FormatterTest {
                   ]]]
             """.trimIndent(),
             """
-            - 
-              - 
-                - 3
+            - - - 3
             """.trimIndent()
         )
 
@@ -192,9 +190,7 @@ class FormatterTest {
                      >
             """.trimIndent(),
             """
-            - 
-              - 
-                - 3
+            - - - 3
                 =
               - 2
               =
@@ -717,13 +713,11 @@ class FormatterTest {
             """.trimIndent(),
             """
             - outer1
-            - 
-              - inner1
+            - - inner1
               - inner2
               =
             - outer2
-            - 
-              - inner3
+            - - inner3
               - inner4
             """.trimIndent()
         )
@@ -745,14 +739,10 @@ class FormatterTest {
             >
             """.trimIndent(),
             """
-            - 
-              - key:
+            - - key:
                   - 1
                   - 2
-                  - 
-                    - 
-                      - 
-                        - x
+                  - - - - x
                         =
                       =
                     =
@@ -775,13 +765,11 @@ class FormatterTest {
             """.trimIndent(),
             """
               mixed:
-                - 
-                  - 1
+                - - 1
                   - 2
                   =
                 - x: y
-                - 
-                  - nested
+                - - nested
             """.trimIndent()
         )
 
@@ -807,20 +795,17 @@ class FormatterTest {
             """.trimIndent(),
             """
             arrays:
-              - 
-                - first
+              - - first
                 - second
             angles:
               - third
               - fourth
             mixed:
-              - 
-                - 1
+              - - 1
                 - 2
                 =
               - x: y
-              - 
-                - nested
+              - - nested
             """.trimIndent()
         )
     }
@@ -857,8 +842,7 @@ class FormatterTest {
             ]
             """.trimIndent(),
             """
-            - 
-              - inner_key: x
+            - - inner_key: x
               =
             - outer_list_elem
             """.trimIndent()
@@ -1011,8 +995,7 @@ class FormatterTest {
             list:
             ${"\t"}- item1
             ${"\t"}- nested: value
-            ${"\t"}- 
-            ${"\t"}${"\t"}- 1
+            ${"\t"}- - 1
             ${"\t"}${"\t"}- 2
             """.trimIndent(),
             IndentType.Tab()
@@ -1356,8 +1339,7 @@ class FormatterTest {
                 - "outer list elem 1"
             """.trimIndent(),
             """
-              - 
-                - 'sub-list elem 1'
+              - - 'sub-list elem 1'
                 - 'sub-list elem 2'
                 =
               - 'outer list elem 1'
@@ -2107,9 +2089,7 @@ class FormatterTest {
                 key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =
@@ -2117,9 +2097,7 @@ class FormatterTest {
                 key: value
                 
                 
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =
@@ -2142,9 +2120,7 @@ class FormatterTest {
                 key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =
