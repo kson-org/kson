@@ -1,8 +1,10 @@
 package org.kson.tools
 
+import org.kson.KsonCore
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FormatterTest {
     private fun assertFormatting(
@@ -19,6 +21,20 @@ class FormatterTest {
             expected,
             formattedKson
         )
+
+        // Formatting valid source may resolve messages but must never add any: for every kind of message, the
+        // formatted output may carry no more than its source did
+        val sourceParse = KsonCore.parseToAst(source)
+        if (!sourceParse.hasErrors()) {
+            val sourceMessageCounts = sourceParse.messages.groupingBy { it.message.type }.eachCount()
+            val formattedMessages = KsonCore.parseToAst(formattedKson).messages
+            val addedMessageTypes = formattedMessages.groupingBy { it.message.type }.eachCount()
+                .filter { (type, count) -> count > (sourceMessageCounts[type] ?: 0) }.keys
+            assertTrue(
+                addedMessageTypes.isEmpty(),
+                "Formatting added messages: ${formattedMessages.filter { it.message.type in addedMessageTypes }}"
+            )
+        }
 
         // Roundtrip: each format should preserve the semantics of a kson document
         /**
@@ -917,6 +933,118 @@ class FormatterTest {
     }
 
     /**
+     * The value of a dash list element is always "indented" exactly two spaces (dash+space for the first line),
+     * regardless of the configured [IndentType], so that a value's continuation lines always align under where the
+     * value began
+     */
+    @Test
+    fun testDashListValueAlignmentWithWideIndent() {
+        assertFormatting(
+            """
+            {
+            list: [
+            { one: val, two: val, three: { deep: val } },
+            [ a, b, [ c ] ],
+            plain
+            ],
+            key: value
+            }
+            """.trimIndent(),
+            """
+            list:
+                - one: val
+                  two: val
+                  three:
+                      deep: val
+
+                - - a
+                  - b
+                  - - c
+                    =
+                  =
+                - plain
+            key: value
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+
+        assertFormatting(
+            """
+            [
+            [ { one: val, two: val }, { one: val } ],
+            [ [ a ], b ],
+            last
+            ]
+            """.trimIndent(),
+            """
+            - - one: val
+                two: val
+
+              - one: val
+              =
+            - - - a
+                =
+              - b
+              =
+            - last
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+    }
+
+    /**
+     * See [testDashListValueAlignmentWithWideIndent]: embed content is part of the value, so it aligns the same way
+     */
+    @Test
+    fun testEmbedBlockAlignmentUnderDashWithWideIndent() {
+        assertFormatting(
+            """
+            list: [
+            %
+            echo first
+            %%,
+            plain
+            ]
+            """.trimIndent(),
+            """
+            list:
+                - %
+                  echo first
+                  %%
+                - plain
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+    }
+
+    /**
+     * See [testDashListValueAlignmentWithWideIndent]: delimited values hang off their dash the same way
+     */
+    @Test
+    fun testDelimitedDashListValueAlignmentWithWideIndent() {
+        assertFormatting(
+            """
+            [ { one: val, two: val }, [ a, b ], plain ]
+            """.trimIndent(),
+            """
+            <
+                - {
+                      one: val
+                      two: val
+                  }
+                - <
+                      - a
+                      - b
+                  >
+                - plain
+            >
+            """.trimIndent(),
+            IndentType.Space(4),
+            FormattingStyle.DELIMITED
+        )
+    }
+
+    /**
      * Sanity check tab indents: the code paths are all shared with space indents, so we don't need to over-test
      * the tab case
      */
@@ -996,7 +1124,7 @@ class FormatterTest {
             ${"\t"}- item1
             ${"\t"}- nested: value
             ${"\t"}- - 1
-            ${"\t"}${"\t"}- 2
+            ${"\t"}  - 2
             """.trimIndent(),
             IndentType.Tab()
         )

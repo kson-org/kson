@@ -59,9 +59,9 @@ interface AstNode {
          */
         private val indentType: IndentType,
         /**
-         * How deep to make this indent
+         * The whitespace this indent writes before the lines it indents (see [hangingIndent] for the exception)
          */
-        private val indentLevel: Int = 0,
+        private val bodyIndent: String = "",
         /**
          * Whether or not this indent "hangs", i.e. only starts after the first newline of the text being indented
          */
@@ -70,34 +70,41 @@ interface AstNode {
         /**
          * Constructs an initial/default indent
          */
-        constructor() : this(IndentType.Space(2), 0, false)
-
-        private val indentString = indentType.indentString
+        constructor() : this(IndentType.Space(2))
 
         fun firstLineIndent(): String {
             return if (hangingIndent) {
                 ""
             } else {
-                return bodyLinesIndent()
+                bodyLinesIndent()
             }
         }
 
         fun bodyLinesIndent(): String {
-            return indentString.repeat(indentLevel)
+            return bodyIndent
         }
 
         /**
-         * Produce a copy of this indent with the given [hanging] value for its [hanging]
+         * Produce a copy of this indent with the given [hanging] value for its [hangingIndent]
          */
         fun clone(hanging: Boolean): Indent {
-            return Indent(indentType, indentLevel, hanging)
+            return Indent(indentType, bodyIndent, hanging)
         }
 
         /**
-         * Produce the "next" indent in from this one, with the given [hanging] value for its [hanging]
+         * Produce the "next" indent in from this one, with the given [hanging] value for its [hangingIndent]
          */
         fun next(hanging: Boolean): Indent {
-            return Indent(indentType, indentLevel + 1, hanging)
+            return Indent(indentType, bodyIndent + indentType.indentString, hanging)
+        }
+
+        /**
+         * Produce the "next" indent in from this one by the width of [prefix] rather than by an [indentType] step,
+         * for text that continues the current line after a [prefix] written at this indent.  Since that text
+         * starts on the current line, the result always hangs (see [hangingIndent])
+         */
+        fun nextAlignedAfter(prefix: String): Indent {
+            return Indent(indentType, bodyIndent + " ".repeat(prefix.length), hangingIndent = true)
         }
     }
 }
@@ -614,7 +621,8 @@ class ListElementNodeImpl(val value: KsonValueNode,
     }
 
     private fun formatWithDash(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        return indent.firstLineIndent() + "- " + value.toSourceWithNext(indent.next(true), nextNode, compileTarget)
+        val dash = "- "
+        return indent.firstLineIndent() + dash + value.toSourceWithNext(indent.nextAlignedAfter(dash), nextNode, compileTarget)
     }
 }
 
