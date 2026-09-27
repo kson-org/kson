@@ -71,24 +71,28 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
 
     /**
-     * Resolves a `$ref` in a schema value if present.
-     *
-     * Public to support downstream `$ref` resolution within schema branches, e.g.,
-     * when checking property constraints inside oneOf/anyOf branches.
+     * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema the validator
+     * applies.  Like [SchemaParser], it ignores the keywords beside a `$ref`, `$id` included.  A `$ref`
+     * that doesn't resolve, or leads back into the chain, ends it at the schema holding it.
      *
      * @param value The schema value that might contain a `$ref`
-     * @param currentBaseUri The current base URI for resolving the reference
-     * @return A [ResolvedRef] with the resolved value and base URI
+     * @param currentBaseUri The base URI [value] is read under
+     * @return The schema at the end of the chain, and the base URI it is read under
      */
     fun resolveRefIfPresent(value: KsonValue, currentBaseUri: String): ResolvedRef {
-        if (value is KsonObject) {
-            val refValue = value.propertyLookup["\$ref"] as? KsonString
-            if (refValue != null) {
-                return resolveRef(refValue.value, currentBaseUri) ?: ResolvedRef(value, currentBaseUri)
+        val followed = mutableListOf<ResolvedRef>()
+        var current = ResolvedRef(value, currentBaseUri)
+        while (true) {
+            val refValue = (current.resolvedValue as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
+                ?: return current
+            followed.add(current)
+            val target = resolveRef(refValue.value, current.resolvedValueBaseUri) ?: return current
+            val leadsBack = followed.any {
+                it.resolvedValue === target.resolvedValue && it.resolvedValueBaseUri == target.resolvedValueBaseUri
             }
+            if (leadsBack) return current
+            current = target
         }
-
-        return ResolvedRef(value, currentBaseUri)
     }
 
     companion object {
