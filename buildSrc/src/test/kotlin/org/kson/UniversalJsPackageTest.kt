@@ -16,7 +16,9 @@ import kotlin.test.assertTrue
 
 class UniversalJsPackageTest {
 
-    private val packageJson = Json.parseToJsonElement(UniversalJsPackage.packageJson("1.2.3")).jsonObject
+    private val version = "1.2.3"
+
+    private val packageJson = Json.parseToJsonElement(UniversalJsPackage.packageJson(version)).jsonObject
 
     /** The `exports` conditions, in the order npm and TypeScript consider them. */
     private val exportConditions: Map<String, JsonObject>
@@ -44,7 +46,7 @@ class UniversalJsPackageTest {
 
     @Test
     fun versionIsRenderedAsAJsonString() {
-        assertEquals("1.2.3", packageJson["version"]!!.jsonPrimitive.content)
+        assertEquals(version, packageJson["version"]!!.jsonPrimitive.content)
         assertTrue(
             packageJson["version"]!!.jsonPrimitive.isString,
             "npm requires a string version"
@@ -108,10 +110,10 @@ class UniversalJsPackageTest {
     fun writesTheManifestForACompletePackage() {
         val packageDir = createPackageDir()
 
-        UniversalJsPackage.writePackageJson(packageDir, "1.2.3")
+        UniversalJsPackage.writePackageJson(packageDir, version)
 
         assertEquals(
-            UniversalJsPackage.packageJson("1.2.3"),
+            UniversalJsPackage.packageJson(version),
             File(packageDir, "package.json").readText()
         )
     }
@@ -123,7 +125,7 @@ class UniversalJsPackageTest {
         packageDir.walkTopDown().filter { it.name.endsWith(".d.mts") }.forEach { it.delete() }
 
         val exception = assertFailsWith<GradleException> {
-            UniversalJsPackage.writePackageJson(packageDir, "1.2.3")
+            UniversalJsPackage.writePackageJson(packageDir, version)
         }
 
         assertContains(exception.message!!, "browser/kson-kson-lib.d.mts")
