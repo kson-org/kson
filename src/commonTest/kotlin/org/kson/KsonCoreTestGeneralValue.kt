@@ -151,14 +151,12 @@ class KsonCoreTestGeneralValue : KsonCoreTest {
             - outer_list_elem
             """.trimIndent(),
             """
-            - 
-              - inner_key: x
+            - - inner_key: x
               =
             - outer_list_elem
             """.trimIndent(),
             """
-            - 
-              - inner_key: x
+            - - inner_key: x
             - outer_list_elem
             """.trimIndent(),
             """

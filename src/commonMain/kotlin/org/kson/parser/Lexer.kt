@@ -578,9 +578,23 @@ class Lexer(source: String, gapFree: Boolean = false) {
         // reset our collection of seen comments to prepare to collect comments for the next token
         currentCommentLines = ArrayList()
 
-        // these tokens open comment free constructs, so they cannot have trailing comments
+        /**
+         * True for the [TokenType]s that can be documented with trailing comments.
+         *
+         * [STRING_OPEN_QUOTE] and [EMBED_OPEN_DELIM] open comment free constructs, so they cannot have
+         * trailing comments.  Neither can a [LIST_DASH]: its value is written on the dash's line, so a
+         * comment there is read as preceding that value.  This lets the value's first entry own the
+         * comment when it is able to (i.e. when the value is an undelimited object or list), and so
+         * keeps the comment in place when the document is formatted:
+         *
+         * ```
+         * - # documents key
+         *   key: value
+         * ```
+         */
         val acceptsTrailingComments = currentTokenType != STRING_OPEN_QUOTE
                 && currentTokenType != EMBED_OPEN_DELIM
+                && currentTokenType != LIST_DASH
 
         // when appropriate, we lex ahead a bit looking for any trailing comments
         val trailingCommentTokens = ArrayList<Token>()

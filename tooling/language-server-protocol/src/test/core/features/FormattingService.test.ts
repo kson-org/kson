@@ -100,9 +100,7 @@ describe('KSON Formatter', () => {
         const content = '[ [], [ [ {} ], "a" ]  ]';
         const expected = [
             '- <>',
-            '- ',
-            '  - ',
-            '    - {}',
+            '- - - {}',
             '    =',
             '  - a'
         ].join('\n');
