@@ -43,8 +43,8 @@
     "react": { "optional": true }
   },
   "devDependencies": {
-    "@kson/lsp-shared": "file:../shared",
-    "kson-language-server": "file:../../language-server-protocol",
+    "@kson/lsp-shared": "link:../shared",
+    "kson-language-server": "link:../../language-server-protocol",
     "@types/react": "^18.3.0",
     "happy-dom": "^20.8.4",
     "monaco-editor": "^0.52.0",
