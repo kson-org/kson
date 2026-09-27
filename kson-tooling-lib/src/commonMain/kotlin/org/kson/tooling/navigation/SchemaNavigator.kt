@@ -179,14 +179,7 @@ internal class SchemaNavigator(
      */
     private fun stepInto(ref: NavigatedSchema, token: String): List<NavigatedSchema> {
         val schemaObj = ref.resolvedValue as? KsonObject ?: return emptyList()
-
-        // Apply $id on the current node to the base URI before any lookup from this node.
-        var updatedBaseUri = ref.resolvedValueBaseUri
-        schemaObj.propertyLookup[$$"$id"]?.let { idValue ->
-            if (idValue is KsonString) {
-                updatedBaseUri = resolveUri(idValue.value, updatedBaseUri).toString()
-            }
-        }
+        val updatedBaseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
 
         val stepped = mutableListOf<Pair<KsonValue, SchemaResolutionType>>()
         val isArrayIndex = token.toIntOrNull() != null
@@ -223,6 +216,15 @@ internal class SchemaNavigator(
                 inheritedType ?: stepType
             )
         }
+    }
+
+    /**
+     * The base URI inside [schema], which is read under [baseUri]: [baseUri] updated by [schema]'s own
+     * `$id`.  The `$ref`s in [schema]'s keywords resolve against it, as the validator resolves them.
+     */
+    private fun baseUriWithin(schema: KsonObject, baseUri: String): String {
+        val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
+        return resolveUri(id.value, baseUri).toString()
     }
 
     /**
@@ -263,7 +265,8 @@ internal class SchemaNavigator(
      *     emits both branches.
      *
      * Recurses into each branch so nested combinators/conditionals are fully flattened,
-     * each narrowed against the same [docVal].
+     * each narrowed against the same [docVal].  Like [stepInto], it reads [ref]'s keywords under the
+     * base URI [ref]'s own `$id` gives (see [baseUriWithin]).
      *
      * The parent [ref] is preserved at the head of the result so its title, description,
      * and constraints remain available.
@@ -285,11 +288,12 @@ internal class SchemaNavigator(
         }
         inProgress.add(ref.resolvedValueBaseUri to schemaObj)
 
+        val baseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
         val results = mutableListOf<NavigatedSchema>()
         var addedBranches = false
 
         fun addBranch(branch: KsonValue, resolutionType: SchemaResolutionType) {
-            val resolved = idLookup.resolveRefIfPresent(branch, ref.resolvedValueBaseUri)
+            val resolved = idLookup.resolveRefIfPresent(branch, baseUri)
             val branchRef = NavigatedSchema(
                 resolved.resolvedValue,
                 resolved.resolvedValueBaseUri,
@@ -304,7 +308,7 @@ internal class SchemaNavigator(
         // sibling property).  This is the single, doc-aware narrowing point — no
         // post-navigation sibling/leaf filtering pass is needed.
         fun addNarrowedBranch(branch: KsonValue, resolutionType: SchemaResolutionType) {
-            val resolved = idLookup.resolveRefIfPresent(branch, ref.resolvedValueBaseUri)
+            val resolved = idLookup.resolveRefIfPresent(branch, baseUri)
             if (docVal != null && !isCompatibleWithDocument(resolved, docVal)) {
                 // narrowing still happened even if every branch was dropped
                 addedBranches = true
@@ -331,7 +335,7 @@ internal class SchemaNavigator(
             addBranch(branch, SchemaResolutionType.ALL_OF)
         }
 
-        conditionalBranches(schemaObj, ref.resolvedValueBaseUri, docVal).forEach { (branch, resolutionType) ->
+        conditionalBranches(schemaObj, baseUri, docVal).forEach { (branch, resolutionType) ->
             addBranch(branch, resolutionType)
         }
 

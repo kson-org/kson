@@ -283,7 +283,8 @@ private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, curre
  * A schema node resolved during navigation, carrying the context of how it was found.
  *
  * @param resolvedValue The schema value at this location
- * @param resolvedValueBaseUri The base URI for resolving `$ref` within this schema
+ * @param resolvedValueBaseUri The base URI [resolvedValue] is read under.  Its own `$id`, if it has one, is
+ *   not applied yet: whatever reads its keywords applies it first, as [SchemaParser] does.
  */
 data class ResolvedRef(
     val resolvedValue: KsonValue,
