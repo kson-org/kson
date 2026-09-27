@@ -69,11 +69,10 @@ def test_refuses_when_the_jni_header_is_missing(src_kson):
 
 
 def test_refusal_says_what_the_reader_needs(src_kson):
-    """This message is the whole user-facing contract of the source distribution, and its wording
-    is load-bearing twice over: `test-python-sdist` greps CI's copy of it, and missing artifacts
-    mean either that no wheel matched or that Gradle has not run in this checkout - only the
-    reader can tell which, so naming one cause sends the other kind of reader after the wrong
-    problem."""
+    """Installing the sdist only ever produces the `_ensure_native_artifacts` error, so check it
+    covers what a reader needs: the phrase CI greps for, both ways of ending up here (the backend
+    can't tell a failed wheel match from an unbuilt checkout, so it names both), and the commands
+    that build the artifacts."""
     refusal = _refusal_message()
 
     # what CI greps for, and which machine it is talking about

@@ -22,7 +22,10 @@ commands:
 
       - run:
           name: "Verify buildSrc project"
-          command: "cd buildSrc\n./gradlew --no-daemon check\n"
+          command: |
+              cd buildSrc
+              ./gradlew --no-daemon check
+              
 
       - run:
           name: "Verify Kson project"
@@ -190,7 +193,9 @@ commands:
           steps:
             - run:
                 name: "Clean git config"
-                command: "Remove-Item -Path \"$env:USERPROFILE\\.gitconfig\" -Force -ErrorAction SilentlyContinue\n"
+                command: |
+                    Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
+                    
                 shell: "powershell.exe"
 
 
@@ -300,11 +305,25 @@ jobs:
 
       - run:
           name: "Verify the sdist is source only"
-          command: "ls -la lib-python/dist/\ntest -f lib-python/dist/kson_lang-*.tar.gz\n# The sdist builds nothing, so it must carry none of the Gradle output that\n# `[tool.setuptools.package-data]` offers it. tests/test_manifest.py pins MANIFEST.in\n# against that list; this is the only place anyone opens the archive itself.\ntar tzf lib-python/dist/kson_lang-*.tar.gz | tee /tmp/sdist-contents.txt\n! grep -E \"[.](so|dylib|dll|pyd|h)$\" /tmp/sdist-contents.txt\n"
+          command: |
+              ls -la lib-python/dist/
+              test -f lib-python/dist/kson_lang-*.tar.gz
+              # The sdist builds nothing, so it must carry none of the Gradle output that
+              # `[tool.setuptools.package-data]` offers it. tests/test_manifest.py pins MANIFEST.in
+              # against that list; this is the only place anyone opens the archive itself.
+              tar tzf lib-python/dist/kson_lang-*.tar.gz | tee /tmp/sdist-contents.txt
+              ! grep -E "[.](so|dylib|dll|pyd|h)$" /tmp/sdist-contents.txt
+              
 
       - run:
           name: "Verify installing the sdist fails with a useful message"
-          command: "# Refusing to build is the whole contract of the sdist, so hold it to the\n# message build_backend.py means to give: a bare install failure reads like a broken release.\n! python3 -m pip install --no-cache-dir lib-python/dist/kson_lang-*.tar.gz > /tmp/sdist-install.log 2>&1\ncat /tmp/sdist-install.log\ngrep -q \"Cannot build kson-lang\" /tmp/sdist-install.log\n"
+          command: |
+              # Refusing to build is the whole contract of the sdist, so hold it to the
+              # message build_backend.py means to give: a bare install failure reads like a broken release.
+              ! python3 -m pip install --no-cache-dir lib-python/dist/kson_lang-*.tar.gz > /tmp/sdist-install.log 2>&1
+              cat /tmp/sdist-install.log
+              grep -q "Cannot build kson-lang" /tmp/sdist-install.log
+              
 
       - "save-build-caches":
           platform: "linux-amd64"
@@ -366,7 +385,9 @@ jobs:
           platform: "windows-python"
       - run:
           name: "Build platform-specific wheel"
-          command: ".\\gradlew.bat :lib-python:buildWheel --no-daemon\n"
+          command: |
+              .\gradlew.bat :lib-python:buildWheel --no-daemon
+              
 
       - "save-build-caches":
           platform: "windows-python"
