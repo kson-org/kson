@@ -41,6 +41,7 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **npm dependencies**
   - pinned in: the `package.json` files under [`tooling/lsp-clients`](../tooling/lsp-clients) and [`tooling/language-server-protocol`](../tooling/language-server-protocol)
   - check with: `pnpm outdated -r` from each workspace root
+  - after editing any of them: run `./gradlew tooling:lsp-clients:check` to regenerate all `pnpm-lock.yaml` files. Commit the pnpm-lock.yaml files.
 - **Cargo dependencies**
   - pinned in: [`lib-rust/kson/Cargo.toml`](../lib-rust/kson/Cargo.toml) and [`lib-rust/kson-sys/Cargo.toml`](../lib-rust/kson-sys/Cargo.toml)
   - check with: `cargo update --dry-run` in each

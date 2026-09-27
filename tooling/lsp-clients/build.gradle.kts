@@ -3,13 +3,15 @@ plugins {
 }
 
 tasks {
-    val npmInstall = register<PixiExecTask>("npmInstall") {
-        // `--frozen-lockfile` gives reproducible installs from pnpm-lock.yaml;
-        // hoisted keeps a flat node_modules (npm-identical layout) while still
-        // hardlinking from pnpm's shared global store.
-        command=listOf("pnpm", "install", "--frozen-lockfile", "--config.node-linker=hoisted")
+    val npmInstall = register<PixiExecTask>("npm_install") {
+        // updates pnpm-lock.yaml files whenever package.json changes
+        command=listOf("pnpm", "install", "--no-frozen-lockfile")
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(":tooling:language-server-protocol:npm_run_test")
+    }
+
+    register("npmInstall") { // deprecated alias to npm_install
+        dependsOn(npmInstall)
     }
 
     val playwrightInstall = register<PixiExecTask>("playwrightInstall") {
@@ -80,8 +82,9 @@ tasks {
 
     // `--ignore-workspace` keeps each demo a standalone install so it consumes the
     // PACKED @kson/monaco-editor (file:), not a workspace symlink to source.
+    // It also skips pnpm-workspace.yaml, so the hoisted layout is repeated as a flag.
     val installDemoVanilla = register<PixiExecTask>("npm_install_demoVanilla") {
-        command=listOf("pnpm", "install", "--frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoVanillaDir)
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(buildMonaco)
@@ -94,7 +97,7 @@ tasks {
     }
 
     val installDemoIframe = register<PixiExecTask>("npm_install_demoIframe") {
-        command=listOf("pnpm", "install", "--frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoIframeDir)
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(buildMonaco)
@@ -108,7 +111,7 @@ tasks {
     }
 
     val installDemoReact = register<PixiExecTask>("npm_install_demoReact") {
-        command=listOf("pnpm", "install", "--frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoReactDir)
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(buildMonaco)
@@ -124,7 +127,7 @@ tasks {
     val demosDir = layout.projectDirectory.dir("demos")
 
     val installTestDemos = register<PixiExecTask>("npm_install_testDemos") {
-        command=listOf("pnpm", "install", "--frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demosDir)
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(buildMonaco)
