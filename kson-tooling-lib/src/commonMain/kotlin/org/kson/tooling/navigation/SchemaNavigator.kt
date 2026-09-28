@@ -89,7 +89,15 @@ data class BranchStep(
     val baseUri: String,
     val depth: Int,
     val branch: Branch
-)
+) {
+    /** The branches [alternative] offers, whichever navigation took: its indices, or an `if`'s `then` and `else`. */
+    val branches: List<Branch>
+        get() = (alternative as? KsonList)?.elements?.indices?.map { Branch.Index(it) } ?: listOf(Branch.Then, Branch.Else)
+
+    /** Equal alternatives, not only identical ones, are one choice: a value takes the same branch of each. */
+    fun isSameChoice(other: BranchStep): Boolean =
+        alternative == other.alternative && baseUri == other.baseUri && depth == other.depth
+}
 
 sealed interface Branch {
     data class Index(val index: Int) : Branch

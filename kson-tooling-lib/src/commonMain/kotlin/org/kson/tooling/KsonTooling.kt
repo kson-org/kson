@@ -54,7 +54,7 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.partialKsonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
-        val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
+        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
 
         val schemaInfos = validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
@@ -84,7 +84,7 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
-        val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
+        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
 
         return validSchemas.map {
             Range(
@@ -164,8 +164,10 @@ object KsonTooling {
         column: Int
     ): List<CompletionItem> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
-        val caretPath = KsonValuePathBuilder(document, Coordinates(line, column)).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
-        val validSchemas = resolveSchemas(parsedSchema, document, caretPath.pointer, caretPath.placeholderLocation)
+        val caret = Coordinates(line, column)
+        val caretPath = KsonValuePathBuilder(document, caret).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
+        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val validSchemas = resolveSchemas(schemaIdLookup, document, caretPath.pointer, caretPath.placeholderLocation)
 
         val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.rootAstNode)
 
@@ -173,11 +175,17 @@ object KsonTooling {
         // choosing a value, so further value suggestions there are noise.  Property suggestions
         // (filling out an object) and value suggestions for an empty or still-being-edited slot
         // (including the caret between a string's quotes) are left untouched.
-        return if (caretIsPastCommittedValue(document, caretPath)) {
+        val offered = if (caretIsPastCommittedValue(document, caretPath)) {
             completions.filterNot { it.kind == CompletionKind.VALUE }
         } else {
             completions
         }
+        val navigateToNewProperty = { pointer: TreePointer<AstNode> ->
+            SchemaNavigator(schemaIdLookup, toNewProperty = true).navigate(pointer, document.rootAstNode)
+        }
+        return PropertySnippetBuilder.addSnippetEdits(
+            offered, document, caret, caretPath.pointer, navigateToNewProperty
+        )
     }
 
     /**
@@ -312,7 +320,6 @@ object KsonTooling {
     /**
      * Navigate to the schemas governing a document path.
      *
-     * Creates a [SchemaIdLookup] and navigates to the candidate schemas at the pointer.
      * Navigation flattens combinators and conditionals into individual branches and
      * narrows them doc-aware at every level (see [SchemaNavigator.navigate]),
      * so no separate filtering pass is needed.
@@ -327,12 +334,11 @@ object KsonTooling {
      * null so the committed leaf narrows.
      */
     private fun resolveSchemas(
-        parsedSchema: KsonValue,
+        schemaIdLookup: SchemaIdLookup,
         document: ToolingDocument,
         documentPointer: TreePointer<AstNode>,
         placeholderLocation: Location? = null
     ): List<NavigatedSchema> {
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
         return SchemaNavigator(schemaIdLookup, placeholderLocation)
             .navigate(documentPointer, document.rootAstNode)
     }
@@ -345,8 +351,12 @@ class CompletionItem(
     val label: String,              // The text to insert
     val detail: String?,            // Short description (e.g., "string")
     val documentation: String?,     // Full markdown documentation
-    val kind: CompletionKind        // Type of completion
+    val kind: CompletionKind,       // Type of completion
+    val snippetEdit: SnippetEdit? = null // Inserted instead of the label, by clients that support snippets
 )
+
+/** Replaces [range] with [newText], written in LSP snippet syntax. */
+data class SnippetEdit(val range: Range, val newText: String)
 
 /**
  * The type of completion item.

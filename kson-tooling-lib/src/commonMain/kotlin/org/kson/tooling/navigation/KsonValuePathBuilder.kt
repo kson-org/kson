@@ -17,6 +17,10 @@ import org.kson.walker.navigate
 import org.kson.walker.navigateToLocationWithPointer
 import org.kson.tooling.ToolingDocument
 
+/** True when this position is at or beyond [other] in document (line, then column) order. */
+internal fun Coordinates.isAtOrAfter(other: Coordinates): Boolean =
+    line > other.line || (line == other.line && column >= other.column)
+
 /**
  * Context information about a token at a specific location.
  *
@@ -217,7 +221,7 @@ class KsonValuePathBuilder(
     private fun meaningfulTokensUpTo(location: Coordinates): List<Token> {
         return document.meaningfulTokens
             .dropLast(1)  // Exclude EOF token
-            .filter { isAtOrAfter(location, it.lexeme.location.start) }
+            .filter { location.isAtOrAfter(it.lexeme.location.start) }
     }
 
     /**
@@ -231,10 +235,6 @@ class KsonValuePathBuilder(
             Location.containsCoordinates(it, position)
         } ?: false
     }
-
-    /** True when [caret] is at or beyond [boundary] in document (line, then column) order. */
-    private fun isAtOrAfter(caret: Coordinates, boundary: Coordinates): Boolean =
-        caret.line > boundary.line || (caret.line == boundary.line && caret.column >= boundary.column)
 
     /**
      * Finds the property name from the token stream that precedes a COLON token.
@@ -419,7 +419,7 @@ class KsonValuePathBuilder(
         val placeholder = if (isLeafValue) AstNodeWalker.getLocation(targetNode) else null
         val caretPastValueToken = isLeafValue && lastToken != null &&
                 lastToken.tokenType == TokenType.STRING_CLOSE_QUOTE &&
-                isAtOrAfter(location, lastToken.lexeme.location.end)
+                location.isAtOrAfter(lastToken.lexeme.location.end)
         return CaretPath(pointer, placeholder, caretPastValueToken)
     }
 }
