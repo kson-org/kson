@@ -20,30 +20,42 @@ class EmbedContentTransformer(
     override val processedContent: String
 
     /**
-     * [sortedEscapeOffsets] and [minIndent] are all the state needed to perform source mapping
-     * from [processedContent] back to [rawContent]
+     * [trimmedIndentPerLine], [trimmedEmbedContent] and [sortedEscapeOffsets] are all the state needed to
+     * perform source mapping from [processedContent] back to [rawContent]
      */
-    private val sortedEscapeOffsets: List<Int> = embedDelim.findEscapePositions(rawContent).toList()
-    private val minIndent: Int
+    private val trimmedIndentPerLine: List<Int>
+
+    /**
+     * [rawContent] with its indent trimmed and the closing delimiter's newline stripped, but with its
+     * escapes still in place: the content [processedContent] is unescaped from
+     */
+    private val trimmedEmbedContent: String
+
+    /**
+     * The offsets in [trimmedEmbedContent] of the escape backslashes that unescaping removes, ascending
+     */
+    private val sortedEscapeOffsets: List<Int>
 
     init {
         /**
          * Transformation pipeline:
-         * 1. Unescape the content
-         * 2. Trim the minimum indent
-         * 3. If %% was on its own line, strip the trailing \n (and residual whitespace)
+         * 1. Trim the minimum indent
+         * 2. If %% was on its own line, strip the trailing \n (and residual whitespace)
+         * 3. Unescape the content
          */
-        val unescapedContent = embedDelim.unescapeEmbedContent(rawContent)
-        val indentTrimmer = EmbedBlockIndent(unescapedContent)
-        minIndent = indentTrimmer.computeMinimumIndent()
-        val indentTrimmed = indentTrimmer.trimMinimumIndent()
+        val indentTrimmer = EmbedBlockIndent(rawContent)
+        trimmedIndentPerLine = indentTrimmer.trimmedIndentPerLine
+        val indentTrimmed = indentTrimmer.trimmedContent
 
-        processedContent = if (isCloseDelimOnOwnLine(rawContent)) {
+        trimmedEmbedContent = if (isCloseDelimOnOwnLine(rawContent)) {
             val lastNewline = indentTrimmed.lastIndexOf('\n')
-            if (lastNewline >= 0) indentTrimmed.substring(0, lastNewline) else indentTrimmed
+            if (lastNewline >= 0) indentTrimmed.take(lastNewline) else indentTrimmed
         } else {
             indentTrimmed
         }
+
+        sortedEscapeOffsets = embedDelim.findEscapePositions(trimmedEmbedContent).toList()
+        processedContent = embedDelim.unescapeEmbedContent(trimmedEmbedContent)
     }
 
     /**
@@ -58,44 +70,45 @@ class EmbedContentTransformer(
     }
 
     /**
-     * Maps a single offset in processed content to an offset in raw content.
-     *
-     * Reverse transformation pipeline:
-     * 1. Add back trimmed indentation (per line)
-     * 2. Add back removed escape backslashes
+     * Maps a single offset in processed content to an offset in raw content by running the
+     * transformation pipeline backwards:
+     * 1. Add back removed escape backslashes
+     * 2. Add back trimmed indentation (per line)
      */
     override fun mapProcessedOffsetToRawOffset(processedOffset: Int): Int {
-        // Step 1: Map processed → unescaped (add back trimmed indent)
-        val processedUpToOffset = processedContent.take(processedOffset)
-        val lineBreaks = processedUpToOffset.count { it == '\n' }
-        // Each line (including the first) had minIndent characters removed
-        val indentAdjustment = (lineBreaks + 1) * minIndent
-        val unescapedOffset = processedOffset + indentAdjustment
+        // Step 1: Map processed → trimmed (add back escape backslashes)
+        val trimmedOffset = mapProcessedOffsetToTrimmedOffset(processedOffset)
 
-        // Step 2: Map unescaped → raw (add back escape backslashes)
-        val rawOffset = mapUnescapedOffsetToRawOffset(unescapedOffset)
+        // Step 2: Map trimmed → raw (add back trimmed indent)
+        val trimmedUpToOffset = trimmedEmbedContent.take(trimmedOffset)
+        val lineIndex = trimmedUpToOffset.count { it == '\n' }
+        // Every line up to and including the offset's own line had its indent trimmed, so we add back
+        // the sum of all the trimmed characters (we go line by line to make sure our count is
+        // accurate since a blank line shorter than the minimum indent loses fewer characters than the rest)
+        val indentAdjustment = trimmedIndentPerLine.take(lineIndex + 1).sum()
+        val rawOffset = trimmedOffset + indentAdjustment
 
         return rawOffset
     }
 
     /**
-     * Maps an offset in unescaped content to an offset in raw content.
+     * Maps an offset in [processedContent] to an offset in [trimmedEmbedContent].
      *
      * For each escape backslash that was removed:
-     * - Determine where it would have appeared in unescaped content
+     * - Determine where it would have appeared in processed content
      * - If before our target position, add 1 to the offset
      */
-    private fun mapUnescapedOffsetToRawOffset(unescapedOffset: Int): Int {
+    private fun mapProcessedOffsetToTrimmedOffset(processedOffset: Int): Int {
         var shift = 0
-        for (rawEscapePos in sortedEscapeOffsets) {
+        for (trimmedEscapePos in sortedEscapeOffsets) {
             // Where does this escape appear after removing previous escapes?
-            val unescapedEscapePos = rawEscapePos - shift
-            if (unescapedEscapePos < unescapedOffset) {
+            val processedEscapePos = trimmedEscapePos - shift
+            if (processedEscapePos < processedOffset) {
                 shift++
             } else {
                 break
             }
         }
-        return unescapedOffset + shift
+        return processedOffset + shift
     }
 }

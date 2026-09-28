@@ -569,4 +569,109 @@ class EmbedContentTransformerTest {
         assertEquals(10, result.startOffset)
         assertEquals(15, result.endOffset)
     }
+
+    @Test
+    fun testSourceMappingAcrossEmptyLine() {
+        // An empty line loses nothing to indent trimming, so lines after it are offset by less
+        // than the lines before it
+        val rawEmbedContent = "    hello\n\n    world\n    "
+        val processed = "hello\n\nworld"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(3, 4),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // Map "world" in processed (offsets 7-12, on the third line)
+        val result = transformer.mapToOriginal(7, 12)
+
+        // In rawEmbedContent: "    world" starts at offset 15 (after "    hello\n\n    ")
+        assertEquals(Coordinates(2, 4), result.start)
+        assertEquals(Coordinates(2, 9), result.end)
+        assertEquals(15, result.startOffset)
+        assertEquals(20, result.endOffset)
+    }
+
+    @Test
+    fun testSourceMappingAcrossBlankLineShorterThanIndent() {
+        // A two-space blank line inside a four-space block loses only its two spaces
+        val rawEmbedContent = "    hello\n  \n    world\n    "
+        val processed = "hello\n\nworld"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(3, 4),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // Map "world" in processed (offsets 7-12, on the third line)
+        val result = transformer.mapToOriginal(7, 12)
+
+        // In rawEmbedContent: "    world" starts at offset 17 (after "    hello\n  \n    ")
+        assertEquals(Coordinates(2, 4), result.start)
+        assertEquals(Coordinates(2, 9), result.end)
+        assertEquals(17, result.startOffset)
+        assertEquals(22, result.endOffset)
+    }
+
+    @Test
+    fun testSourceMappingOnBlankLineAndAtEndOfContent() {
+        val rawEmbedContent = "    hello\n  \n    world\n    "
+        val processed = "hello\n\nworld"
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = Location(Coordinates(0, 0), Coordinates(3, 4), 0, rawEmbedContent.length)
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // The empty blank line in processed (offset 6) maps to the raw blank line after its two trimmed spaces
+        val blankLine = transformer.mapToOriginal(6, 6)
+        assertEquals(Coordinates(1, 2), blankLine.start)
+        assertEquals(12, blankLine.startOffset)
+
+        // The end of processed content maps to the end of "world" in raw
+        val end = transformer.mapToOriginal(processed.length, processed.length)
+        assertEquals(Coordinates(2, 9), end.start)
+        assertEquals(22, end.startOffset)
+    }
+
+    @Test
+    fun testSourceMappingWithEscapeBeforeEmptyLine() {
+        // "  a%\%" then an empty line, then "  b": indent trimming and escape removal compose
+        val rawEmbedContent = "  a%\\%\n\n  b\n  "
+        val processed = "a%%\n\nb"
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = Location(Coordinates(0, 0), Coordinates(3, 2), 0, rawEmbedContent.length)
+        )
+
+        assertEquals(processed, transformer.processedContent)
+
+        // Map "b" in processed (offset 5): raw "  b" starts at offset 8, so "b" is at 10
+        val result = transformer.mapToOriginal(5, 6)
+        assertEquals(Coordinates(2, 2), result.start)
+        assertEquals(Coordinates(2, 3), result.end)
+        assertEquals(10, result.startOffset)
+        assertEquals(11, result.endOffset)
+    }
 }

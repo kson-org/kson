@@ -152,7 +152,7 @@ class IndentFormatter(
                         // write out anything we've read before this embed block
                         result.append(prefixWithIndent(lineContent.joinToString(""), nesting.size))
                         // write out the lines of the embed content, indenting the whole block appropriately
-                        val trimmedEmbedContent = EmbedBlockIndent(token.lexeme.text).trimMinimumIndent()
+                        val trimmedEmbedContent = EmbedBlockIndent(token.lexeme.text).trimmedContent
                         result.append(prefixWithIndent(trimmedEmbedContent, embedContentIndent, true))
                         tokenIndex++
                         // write the rest of the trailing content from this line
