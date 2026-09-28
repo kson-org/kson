@@ -38,3 +38,6 @@ and `./browser` directory for the client and server. The Monaco client only uses
 the [textmate grammar](./shared/extension/config/kson.tmLanguage.json)
 , [language configuration](./shared/extension/config/language-configuration.json), and the code
 to [start a server](./shared/src/connection/browserConnection.ts) for the browser runtime.
+
+Dependencies are managed with pnpm supplied by this project's pixi environment (`./pixiw run pnpm`). After editing any
+`package.json` here, regenerate (and commit) `pnpm-lock.yaml` files by running `./gradlew tooling:lsp-clients:check`.

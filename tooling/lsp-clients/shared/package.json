@@ -31,7 +31,7 @@
     "shared"
   ],
   "dependencies": {
-    "kson-language-server": "file:../../language-server-protocol",
+    "kson-language-server": "link:../../language-server-protocol",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1"
   },

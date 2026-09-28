@@ -134,8 +134,8 @@
     "test": "pnpm run testDesktop && pnpm run testBrowser"
   },
   "dependencies": {
-    "@kson/lsp-shared": "file:../shared",
-    "kson-language-server": "file:../../language-server-protocol",
+    "@kson/lsp-shared": "link:../shared",
+    "kson-language-server": "link:../../language-server-protocol",
     "vscode-languageclient": "^9.0.1",
     "vscode-languageserver": "^9.0.1"
   },

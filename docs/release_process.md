@@ -372,12 +372,10 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 3. Check what would be published:
    ```bash
    cd tooling/lsp-clients/monaco
-   npm pack --dry-run
+   npm pack --dry-run # should show the dist/ directory
+   npm pkg get dependencies # should show no dependencies ("{}")
+   npm pkg get devDependencies # should show links to two other kson projects (among other dev dependencies)
    ```
-
-   `dist/` must be present, and the manifest must declare no `dependencies`. A `file:` dependency
-   here is a path that exists only on the machine that published it, so it installs as a dangling
-   link and breaks `npm ls` for everyone downstream.
 
 4. Publish to npm:
    ```bash

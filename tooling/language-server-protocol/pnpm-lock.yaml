@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       kson:
-        specifier: file:../../kson-lib/build/dist/js/productionLibrary
-        version: kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary
+        specifier: link:../../kson-lib/build/dist/js/productionLibrary
+        version: link:../../kson-lib/build/dist/js/productionLibrary
       kson-tooling:
-        specifier: file:../../kson-tooling-lib/build/dist/js/productionLibrary
-        version: kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary
+        specifier: link:../../kson-tooling-lib/build/dist/js/productionLibrary
+        version: link:../../kson-tooling-lib/build/dist/js/productionLibrary
       vscode-languageserver:
         specifier: ^9.0.1
         version: 9.0.1
@@ -362,14 +362,6 @@ packages:
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
-
-  kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary:
-    resolution: {directory: ../../kson-lib/build/dist/js/productionLibrary, type: directory}
-    bundledDependencies: []
-
-  kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary:
-    resolution: {directory: ../../kson-tooling-lib/build/dist/js/productionLibrary, type: directory}
-    bundledDependencies: []
 
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
@@ -798,10 +790,6 @@ snapshots:
   js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
-
-  kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary: {}
-
-  kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary: {}
 
   locate-path@6.0.0:
     dependencies:
