@@ -17,6 +17,13 @@
       "action": {
         "indent": "indent"
       }
+    },
+    {
+      "description": "Outdent after an end-dot or end-dash, alone or trailing a value; lines containing # are skipped",
+      "beforeText": "^[^#]*[.=]\\s*$",
+      "action": {
+        "indent": "outdent"
+      }
     }
   ],
   "brackets": [
