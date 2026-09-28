@@ -389,7 +389,9 @@ internal class SchemaNavigator(
      * "compatible" unless the document ACTIVELY contradicts it (a present value violates a value
      * constraint).  Mere incompleteness — a missing required property, a not-yet-reached minimum —
      * never disqualifies a branch, because the schema layer itself skips those constraints in
-     * partial mode.
+     * partial mode.  Narrowing assumes partial validation accepts whatever full validation accepts: then
+     * a branch the document satisfies is never dropped, and a schema that fails partial validation fails
+     * full validation too.
      *
      * Errors located inside [incompleteRegion] — the span of the value the caller is still authoring —
      * are forgiven, so a half-typed value raises no disqualifying error: a branch is compatible when

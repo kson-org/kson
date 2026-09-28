@@ -8,7 +8,7 @@ package org.kson.validation
  * considered a viable match for a schema branch as long as nothing it has committed so far violates a
  * value constraint.  Incompleteness alone (a missing required property, an array/string/object that
  * hasn't reached its declared minimum) never fails in [PARTIAL] mode; a present value of the wrong
- * type/const/enum/pattern still does.
+ * type/const/enum/pattern still does.  So [PARTIAL] accepts whatever [FULL] accepts.
  */
 enum class ValidationMode { FULL, PARTIAL }
 
