@@ -1,6 +1,7 @@
 package org.kson.tooling.navigation
 
 import org.kson.ast.AstNode
+import org.kson.ast.ListNode
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
@@ -9,6 +10,7 @@ import org.kson.schema.SchemaIdLookup.Companion.resolveUri
 import org.kson.schema.SchemaParser
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
+import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
@@ -95,6 +97,9 @@ sealed interface Branch {
     data object Else : Branch
 }
 
+internal val KsonValue.isFalseSchema: Boolean
+    get() = this is KsonBoolean && !value
+
 /**
  * Navigates a document's [TreePointer] through a schema, returning all sub-schemas at the
  * target location fully flattened (combinators exploded, conditionals narrowed by
@@ -111,10 +116,14 @@ sealed interface Branch {
  * Mirrors the shape of `TreeNavigator` in the walker package (see
  * [org.kson.walker.navigate]) — one entry point, small internal
  * helpers — so the pattern is recognizable.
+ *
+ * With [toNewProperty], the pointer's last token is a property the document doesn't have yet.  Adding it may sway
+ * any branch or `if`, so the document narrows none: it is read only to tell list indices from numeric names.
  */
 internal class SchemaNavigator(
     private val idLookup: SchemaIdLookup,
-    private val incompleteRegion: Location? = null
+    private val incompleteRegion: Location? = null,
+    private val toNewProperty: Boolean = false
 ) {
 
     /**
@@ -171,17 +180,30 @@ internal class SchemaNavigator(
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens
         val docNodes = documentAst?.let { AstNodeWalker.nodesAlong(it, documentPointer) }.orEmpty()
-        var current = flatten(rootRef, documentAst?.toKsonValueOrNull(), depth = 0)
+        if (toNewProperty && !numbersAreIndices(tokens, listOfNotNull(documentAst) + docNodes)) return emptyList()
+        var current = flatten(rootRef, narrowingValue(documentAst), depth = 0)
+        if (reachesUnresolvedRef(current)) return emptyList()
 
         for ((index, token) in tokens.withIndex()) {
             val stepped = current.flatMap { stepInto(it, token) }
-            val docValue = docNodes.getOrNull(index)?.toKsonValueOrNull()
+            val docValue = narrowingValue(docNodes.getOrNull(index))
             current = stepped.flatMap { flatten(it, docValue, depth = index + 1) }
+            if (reachesUnresolvedRef(current)) return emptyList()
             if (current.isEmpty()) break
         }
 
         return current
     }
+
+    private fun narrowingValue(docNode: AstNode?): KsonValue? = if (toNewProperty) null else docNode?.toKsonValueOrNull()
+
+    // An unresolved `$ref` isn't read as `false`: that would let an `anyOf`'s other branches pin a
+    // type validation doesn't.
+    private fun reachesUnresolvedRef(level: List<NavigatedSchema>): Boolean =
+        toNewProperty && level.any { (it.resolvedValue as? KsonObject)?.propertyLookup?.get($$"$ref") is KsonString }
+
+    private fun numbersAreIndices(tokens: List<String>, containerOfEachToken: List<AstNode>): Boolean =
+        tokens.withIndex().all { (index, token) -> token.toIntOrNull() == null || containerOfEachToken.getOrNull(index) is ListNode }
 
     /**
      * Structural step by one pointer token.  Looks at properties / patternProperties /
@@ -198,13 +220,18 @@ internal class SchemaNavigator(
      * (DIRECT_PROPERTY / PATTERN_PROPERTY / ADDITIONAL_PROPERTY / ARRAY_ITEMS).
      */
     private fun stepInto(ref: NavigatedSchema, token: String): List<NavigatedSchema> {
+        if (toNewProperty && ref.resolvedValue.isFalseSchema) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return emptyList()
         val updatedBaseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
 
         val stepped = mutableListOf<Pair<KsonValue, SchemaResolutionType>>()
-        val isArrayIndex = token.toIntOrNull() != null
+        val arrayIndex = token.toIntOrNull()
 
-        if (isArrayIndex) {
+        if (arrayIndex != null && toNewProperty) {
+            itemSchema(schemaObj, arrayIndex)?.let {
+                stepped.add(it to SchemaResolutionType.ARRAY_ITEMS)
+            }
+        } else if (arrayIndex != null) {
             schemaObj.propertyLookup["items"]?.let {
                 stepped.add(it to SchemaResolutionType.ARRAY_ITEMS)
             }
@@ -237,6 +264,13 @@ internal class SchemaNavigator(
                 ref.branchTrail
             )
         }
+    }
+
+    // Mirrors the draft-7 item keywords SchemaParser validates, and must grow with it, as it would for prefixItems
+    private fun itemSchema(arraySchema: KsonObject, index: Int): KsonValue? {
+        val items = arraySchema.propertyLookup["items"]
+        val tuple = items as? KsonList ?: return items
+        return tuple.elements.getOrNull(index) ?: arraySchema.propertyLookup["additionalItems"]
     }
 
     /**
