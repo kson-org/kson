@@ -62,11 +62,27 @@ enum class SchemaResolutionType {
 }
 
 /** A schema node found by navigation, annotated with how it was reached. */
-data class NavigatedSchema(
+internal data class NavigatedSchema(
     val resolvedValue: KsonValue,
     val resolvedValueBaseUri: String,
-    val resolutionType: SchemaResolutionType
+    val resolutionType: SchemaResolutionType,
+    val branchTrail: List<BranchStep> = emptyList()
 )
+
+/** Navigation took [branch] of [choice]. */
+internal data class BranchStep(val choice: Choice, val branch: Branch)
+
+/**
+ * A `oneOf`, `anyOf` or `if` that navigation met [depth] pointer tokens down, read under [baseUri]: [node] is the
+ * `oneOf`/`anyOf` list or the `if` condition.
+ */
+internal data class Choice(val node: KsonValue, val baseUri: String, val depth: Int)
+
+internal sealed interface Branch {
+    data class Index(val index: Int) : Branch
+    data object Then : Branch
+    data object Else : Branch
+}
 
 /**
  * Navigates a document's [TreePointer] through a schema, returning all sub-schemas at the
@@ -148,13 +164,13 @@ internal class SchemaNavigator(
         val docNodes = documentAst?.let { AstNodeWalker.nodesAlong(it, documentPointer) }.orEmpty()
         // the node each token is read in: the root, then the node the token before it stepped to
         val containers = listOfNotNull(documentAst) + docNodes
-        var current = flatten(rootRef, documentAst?.toKsonValueOrNull())
+        var current = flatten(rootRef, documentAst?.toKsonValueOrNull(), depth = 0)
 
         for ((index, token) in tokens.withIndex()) {
             val arrayIndex = arrayIndex(token, containers.getOrNull(index))
             val stepped = current.flatMap { stepInto(it, token, arrayIndex) }
             val docValue = docNodes.getOrNull(index)?.toKsonValueOrNull()
-            current = stepped.flatMap { flatten(it, docValue) }
+            current = stepped.flatMap { flatten(it, docValue, depth = index + 1) }
             if (current.isEmpty()) break
         }
 
@@ -216,7 +232,8 @@ internal class SchemaNavigator(
             NavigatedSchema(
                 resolved.resolvedValue,
                 resolved.resolvedValueBaseUri,
-                inheritedType ?: stepType
+                inheritedType ?: stepType,
+                ref.branchTrail
             )
         }
     }
@@ -287,6 +304,7 @@ internal class SchemaNavigator(
     private fun flatten(
         ref: NavigatedSchema,
         docVal: KsonValue?,
+        depth: Int,
         inProgress: MutableList<Pair<String, KsonValue>> = mutableListOf()
     ): List<NavigatedSchema> {
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
@@ -305,51 +323,33 @@ internal class SchemaNavigator(
         val results = mutableListOf<NavigatedSchema>()
         var addedBranches = false
 
-        fun addBranch(branch: KsonValue, resolutionType: SchemaResolutionType) {
-            val resolved = idLookup.resolveRefIfPresent(branch, baseUri)
+        fun addBranch(resolved: ResolvedRef, resolutionType: SchemaResolutionType, step: BranchStep?) {
             val branchRef = NavigatedSchema(
                 resolved.resolvedValue,
                 resolved.resolvedValueBaseUri,
-                resolutionType
+                resolutionType,
+                ref.branchTrail + listOfNotNull(step)
             )
-            results.addAll(flatten(branchRef, docVal, inProgress))
+            results.addAll(flatten(branchRef, docVal, depth, inProgress))
             addedBranches = true
         }
 
-        // oneOf/anyOf alternatives are narrowed against the document at this level: a
-        // branch is dropped when it contradicts the document (e.g. a discriminating
-        // sibling property).  This is the single, doc-aware narrowing point — no
-        // post-navigation sibling/leaf filtering pass is needed.
-        fun addNarrowedBranch(branch: KsonValue, resolutionType: SchemaResolutionType) {
-            val resolved = idLookup.resolveRefIfPresent(branch, baseUri)
-            if (docVal != null && !isCompatibleWithDocument(resolved, docVal)) {
-                // narrowing still happened even if every branch was dropped
-                addedBranches = true
-                return
+        val alternativeKeywords = listOf("oneOf" to SchemaResolutionType.ONE_OF, "anyOf" to SchemaResolutionType.ANY_OF)
+        for ((keyword, resolutionType) in alternativeKeywords) {
+            val alternatives = schemaObj.propertyLookup[keyword] as? KsonList ?: continue
+            narrowedBranches(alternatives, baseUri, docVal, depth).forEach { (branch, step) ->
+                addBranch(branch, resolutionType, step)
             }
-            val branchRef = NavigatedSchema(
-                resolved.resolvedValue,
-                resolved.resolvedValueBaseUri,
-                resolutionType
-            )
-            results.addAll(flatten(branchRef, docVal, inProgress))
-            addedBranches = true
-        }
-
-        (schemaObj.propertyLookup["oneOf"] as? KsonList)?.elements?.forEach { branch ->
-            addNarrowedBranch(branch, SchemaResolutionType.ONE_OF)
-        }
-
-        (schemaObj.propertyLookup["anyOf"] as? KsonList)?.elements?.forEach { branch ->
-            addNarrowedBranch(branch, SchemaResolutionType.ANY_OF)
+            // narrowing still happened even if every branch was dropped
+            if (alternatives.elements.isNotEmpty()) addedBranches = true
         }
 
         (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
-            addBranch(branch, SchemaResolutionType.ALL_OF)
+            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), SchemaResolutionType.ALL_OF, step = null)
         }
 
-        conditionalBranches(schemaObj, baseUri, docVal).forEach { (branch, resolutionType) ->
-            addBranch(branch, resolutionType)
+        conditionalBranches(schemaObj, baseUri, docVal, depth).forEach { (branch, resolutionType, step) ->
+            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), resolutionType, step)
         }
 
         if (addedBranches) {
@@ -363,6 +363,24 @@ internal class SchemaNavigator(
     }
 
     /**
+     * The branches of [alternatives], a `oneOf` or `anyOf` list, each with the step taking it, narrowed against the
+     * document at this level: a branch is dropped when it contradicts [docVal] (e.g. a discriminating sibling
+     * property).
+     */
+    private fun narrowedBranches(
+        alternatives: KsonList,
+        baseUri: String,
+        docVal: KsonValue?,
+        depth: Int
+    ): List<Pair<ResolvedRef, BranchStep>> {
+        val branches = alternatives.elements.map { idLookup.resolveRefIfPresent(it, baseUri) }
+        val choice = Choice(alternatives, baseUri, depth)
+        return branches.indices
+            .filter { docVal == null || isCompatibleWithDocument(branches[it], docVal) }
+            .map { branches[it] to BranchStep(choice, Branch.Index(it)) }
+    }
+
+    /**
      * The `then`/`else` branches an `if` conditional contributes, per [evaluateIf] against [docVal]:
      * a matching `if` yields `then`; a contradicted `if` yields `else`; an undecidable `if` yields both.
      * Empty when there is no `if`.  Ordering (`then` before `else`) matches the flattened result order.
@@ -370,18 +388,19 @@ internal class SchemaNavigator(
     private fun conditionalBranches(
         schemaObj: KsonObject,
         baseUri: String,
-        docVal: KsonValue?
-    ): List<Pair<KsonValue, SchemaResolutionType>> {
+        docVal: KsonValue?,
+        depth: Int
+    ): List<Triple<KsonValue, SchemaResolutionType, BranchStep>> {
         val ifCondition = schemaObj.propertyLookup["if"] ?: return emptyList()
+        val choice = Choice(ifCondition, baseUri, depth)
         val thenBranch = schemaObj.propertyLookup["then"]
+            ?.let { Triple(it, SchemaResolutionType.IF_THEN, BranchStep(choice, Branch.Then)) }
         val elseBranch = schemaObj.propertyLookup["else"]
+            ?.let { Triple(it, SchemaResolutionType.IF_ELSE, BranchStep(choice, Branch.Else)) }
         return when (evaluateIf(ifCondition, baseUri, docVal)) {
-            IfState.MATCH -> listOfNotNull(thenBranch?.let { it to SchemaResolutionType.IF_THEN })
-            IfState.NO_MATCH -> listOfNotNull(elseBranch?.let { it to SchemaResolutionType.IF_ELSE })
-            IfState.UNDETERMINED -> listOfNotNull(
-                thenBranch?.let { it to SchemaResolutionType.IF_THEN },
-                elseBranch?.let { it to SchemaResolutionType.IF_ELSE }
-            )
+            IfState.MATCH -> listOfNotNull(thenBranch)
+            IfState.NO_MATCH -> listOfNotNull(elseBranch)
+            IfState.UNDETERMINED -> listOfNotNull(thenBranch, elseBranch)
         }
     }
 
