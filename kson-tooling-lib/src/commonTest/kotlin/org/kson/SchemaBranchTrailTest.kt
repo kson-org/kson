@@ -6,6 +6,7 @@ import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.BranchStep
 import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
+import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
@@ -18,17 +19,27 @@ import kotlin.test.fail
 
 class SchemaBranchTrailTest {
 
-    private fun navigate(schemaValue: KsonValue, path: List<String>, document: String?): List<NavigatedSchema> =
-        SchemaNavigator(SchemaIdLookup(schemaValue)).navigate(
-            TreePointer(JsonPointer.fromTokens(path)),
-            document?.let { KsonTooling.parse(it).rootAstNode }
-        )
+    private fun navigate(
+        schemaValue: KsonValue,
+        path: List<String>,
+        document: String?,
+        carryDeadEnds: Boolean = false
+    ): List<NavigatedSchema> =
+        SchemaNavigator(SchemaIdLookup(schemaValue), carryDeadEnds = carryDeadEnds)
+            .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { KsonTooling.parse(it).rootAstNode })
 
-    private fun trails(schema: String, path: List<String>, document: String? = null): List<String> {
+    private fun trails(
+        schema: String,
+        path: List<String>,
+        document: String? = null,
+        carryDeadEnds: Boolean = false
+    ): List<String> {
         val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        return navigate(schemaValue, path, document).map { schemaTrail ->
-            val type = ((schemaTrail.resolvedValue as? KsonObject)?.propertyLookup?.get("type") as? KsonString)?.value
-            val label = type ?: "untyped"
+        return navigate(schemaValue, path, document, carryDeadEnds).map { schemaTrail ->
+            val value = schemaTrail.resolvedValue
+            val type = ((value as? KsonObject)?.propertyLookup?.get("type") as? KsonString)?.value
+            val typeLabel = if (value is KsonBoolean) value.value.toString() else type ?: "untyped"
+            val label = if (schemaTrail.endsAtUnresolvedRef) "$typeLabel at an unresolved \$ref" else typeLabel
             val steps = schemaTrail.branchTrail.map { describe(it, schemaValue) }
             if (steps.isEmpty()) label else "$label via ${steps.joinToString(", then ")}"
         }
@@ -190,5 +201,47 @@ class SchemaBranchTrailTest {
             ),
             trails(schema, listOf("child"))
         )
+    }
+
+    @Test
+    fun branchForbiddingThePathIsCarriedAsADeadEnd() {
+        val schema = """
+            {
+                "anyOf": [
+                    { "properties": { "a": { "properties": { "b": { "type": "string" } } } } },
+                    { "additionalProperties": false }
+                ]
+            }
+        """
+        assertEquals(listOf("string via /anyOf took 0 at depth 0"), trails(schema, listOf("a", "b")))
+        assertEquals(
+            listOf("string via /anyOf took 0 at depth 0", "false via /anyOf took 1 at depth 0"),
+            trails(schema, listOf("a", "b"), carryDeadEnds = true)
+        )
+    }
+
+    @Test
+    fun refThatNeverResolvesIsCarriedAsADeadEnd() {
+        val schema = """
+            {
+                "properties": { "p": { "${'$'}ref": "#/${'$'}defs/loop" } },
+                "${'$'}defs": {
+                    "loop": {
+                        "${'$'}ref": "#/${'$'}defs/loop",
+                        "type": "object",
+                        "properties": { "x": { "type": "string" } },
+                        "anyOf": [ { "type": "array" } ]
+                    }
+                }
+            }
+        """
+        assertEquals(
+            listOf("object at an unresolved \$ref", "array via /\$defs/loop/anyOf took 0 at depth 1"),
+            trails(schema, listOf("p")),
+            "default navigation reads keywords beside an unresolved \$ref"
+        )
+        assertEquals(listOf("string"), trails(schema, listOf("p", "x")), "default navigation reads keywords beside an unresolved \$ref")
+        assertEquals(listOf("object at an unresolved \$ref"), trails(schema, listOf("p"), carryDeadEnds = true))
+        assertEquals(listOf("object at an unresolved \$ref"), trails(schema, listOf("p", "x"), carryDeadEnds = true))
     }
 }

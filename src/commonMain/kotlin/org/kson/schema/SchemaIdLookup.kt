@@ -74,7 +74,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     /**
      * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema it ultimately
      * refers to.  Keywords beside a `$ref`, `$id` included, are ignored.  A `$ref` that doesn't resolve,
-     * or leads back into the chain, ends it at the schema holding it.
+     * or leads back into the chain, ends it at the schema holding it, marked
+     * [endsAtUnresolvedRef][ResolvedRef.endsAtUnresolvedRef].
      *
      * @param value The schema value that might contain a `$ref`
      * @param currentBaseUri The base URI [value] is read under
@@ -87,11 +88,12 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             val refValue = (current.resolvedValue as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
                 ?: return current
             followed.add(current)
-            val target = resolveRef(refValue.value, current.resolvedValueBaseUri) ?: return current
+            val target = resolveRef(refValue.value, current.resolvedValueBaseUri)
+                ?: return current.copy(endsAtUnresolvedRef = true)
             val leadsBack = followed.any {
                 it.resolvedValue === target.resolvedValue && it.resolvedValueBaseUri == target.resolvedValueBaseUri
             }
-            if (leadsBack) return current
+            if (leadsBack) return current.copy(endsAtUnresolvedRef = true)
             current = target
         }
     }
@@ -296,8 +298,11 @@ private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, curre
  * @param resolvedValue The schema value at this location
  * @param resolvedValueBaseUri The base URI [resolvedValue] is read under.  Its own `$id`, if it has one, is
  *   not applied yet: whatever reads its keywords applies it first, as [SchemaParser] does.
+ * @param endsAtUnresolvedRef True when [resolvedValue] holds a `$ref` that couldn't be followed, as its target is
+ *   missing or leads back into the chain (see [SchemaIdLookup.resolveRefIfPresent])
  */
 data class ResolvedRef(
     val resolvedValue: KsonValue,
-    val resolvedValueBaseUri: String
+    val resolvedValueBaseUri: String,
+    val endsAtUnresolvedRef: Boolean = false
 )

@@ -795,6 +795,24 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testEnumCompletionsBelowARefThatNeverResolves() {
+        // The keywords beside a `$ref` that loops are still read, so `x` offers its own values
+        val schema = $$"""
+            {
+                type: object
+                properties: { p: { "$ref": "#/$defs/loop" } }
+                "$defs": {
+                    loop: { "$ref": "#/$defs/loop", properties: { x: { enum: ["a", "b"] } } }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, "p:\n  x: <caret>")
+        assertEquals(listOf("a", "b"), completions.map { it.label })
+        assertTrue(completions.all { it.kind == CompletionKind.VALUE }, "All should be VALUE completions")
+    }
+
+    @Test
     fun testNumericEnumCompletions() {
         val schema = """
             {

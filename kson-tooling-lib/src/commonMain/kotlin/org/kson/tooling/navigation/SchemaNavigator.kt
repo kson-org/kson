@@ -20,12 +20,19 @@ import org.kson.walker.NodeChildren
 import org.kson.walker.TreePointer
 import org.kson.walker.nodesAlong
 
-/** A schema node found by navigation, with the branches taken to reach it. */
+/**
+ * A schema node found by navigation, with the branches taken to reach it.  [endsAtUnresolvedRef] as in
+ * [ResolvedRef.endsAtUnresolvedRef].
+ */
 internal data class NavigatedSchema(
     val resolvedValue: KsonValue,
     val resolvedValueBaseUri: String,
-    val branchTrail: List<BranchStep> = emptyList()
-)
+    val branchTrail: List<BranchStep> = emptyList(),
+    val endsAtUnresolvedRef: Boolean = false
+) {
+    constructor(resolved: ResolvedRef, branchTrail: List<BranchStep>) :
+        this(resolved.resolvedValue, resolved.resolvedValueBaseUri, branchTrail, resolved.endsAtUnresolvedRef)
+}
 
 /** Navigation took [branch] of [choice]. */
 internal data class BranchStep(val choice: Choice, val branch: Branch)
@@ -64,10 +71,16 @@ internal val KsonValue.isFalseSchema: Boolean
  * Mirrors the shape of `TreeNavigator` in the walker package (see
  * [org.kson.walker.navigate]) — one entry point, small internal
  * helpers — so the pattern is recognizable.
+ *
+ * With [carryDeadEnds], navigation carries a dead end to the result as itself: a `false` schema, which allows nothing
+ * below it, or a schema [ending at an unresolved `$ref`][NavigatedSchema.endsAtUnresolvedRef], whose keywords it
+ * leaves unread.  Without it, nothing is found below a `false` schema, and the keywords beside an unresolved `$ref`
+ * are read, as hover and completions expect.
  */
 internal class SchemaNavigator(
     private val idLookup: SchemaIdLookup,
-    private val incompleteRegion: Location? = null
+    private val incompleteRegion: Location? = null,
+    private val carryDeadEnds: Boolean = false
 ) {
 
     /**
@@ -116,11 +129,7 @@ internal class SchemaNavigator(
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
         val rootBaseUri = idLookup.rootBaseUri
-        val rootResolved = idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri)
-        val rootRef = NavigatedSchema(
-            rootResolved.resolvedValue,
-            rootResolved.resolvedValueBaseUri
-        )
+        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri), emptyList())
 
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens
@@ -158,6 +167,7 @@ internal class SchemaNavigator(
      * on the stepped-into schema.
      */
     private fun stepInto(ref: NavigatedSchema, token: String, arrayIndex: Int?): List<NavigatedSchema> {
+        if (carryDeadEnds && (ref.resolvedValue.isFalseSchema || ref.endsAtUnresolvedRef)) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return emptyList()
         val updatedBaseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
 
@@ -183,14 +193,7 @@ internal class SchemaNavigator(
             }
         }
 
-        return stepped.map { value ->
-            val resolved = idLookup.resolveRefIfPresent(value, updatedBaseUri)
-            NavigatedSchema(
-                resolved.resolvedValue,
-                resolved.resolvedValueBaseUri,
-                ref.branchTrail
-            )
-        }
+        return stepped.map { NavigatedSchema(idLookup.resolveRefIfPresent(it, updatedBaseUri), ref.branchTrail) }
     }
 
     /**
@@ -262,6 +265,7 @@ internal class SchemaNavigator(
         depth: Int,
         inProgress: MutableList<Pair<String, KsonValue>> = mutableListOf()
     ): List<NavigatedSchema> {
+        if (carryDeadEnds && ref.endsAtUnresolvedRef) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
 
         // Cycle guard: a oneOf/anyOf/allOf branch can be a `$ref` back to a node already
@@ -279,11 +283,7 @@ internal class SchemaNavigator(
         var addedBranches = false
 
         fun addBranch(resolved: ResolvedRef, step: BranchStep?) {
-            val branchRef = NavigatedSchema(
-                resolved.resolvedValue,
-                resolved.resolvedValueBaseUri,
-                ref.branchTrail + listOfNotNull(step)
-            )
+            val branchRef = NavigatedSchema(resolved, ref.branchTrail + listOfNotNull(step))
             results.addAll(flatten(branchRef, docVal, depth, inProgress))
             addedBranches = true
         }

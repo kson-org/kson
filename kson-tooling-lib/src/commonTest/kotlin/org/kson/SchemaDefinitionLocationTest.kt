@@ -676,4 +676,41 @@ class SchemaDefinitionLocationTest {
         )
     }
 
+    @Test
+    fun testJumpToDefinition_belowARefThatNeverResolves() {
+        // The keywords beside a `$ref` that loops are still read, so `x` resolves to its own schema
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                {
+                  "type": "object",
+                  "properties": { "p": { "$ref": "#/$defs/loop" } },
+                  "$defs": {
+                    "loop": { "$ref": "#/$defs/loop", "properties": { "x": <caret>{ "type": "string" }<caret> } }
+                  }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                p:
+                  <caret>x: hello
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testJumpToDefinition_belowAFalseSchemaFindsNothing() {
+        // `a` allows no value, and the `false` saying so isn't offered as the definition of what's below it
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "type": "object",
+                  "properties": { "a": false }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                a:
+                  <caret>b: 1
+            """.trimIndent()
+        )
+    }
+
 }
