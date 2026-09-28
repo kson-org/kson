@@ -21,6 +21,7 @@ import {
     Hover,
     HoverParams,
     CompletionParams,
+    CompletionContext,
     CompletionList, DefinitionParams,
     FoldingRange,
     FoldingRangeParams,
@@ -215,9 +216,9 @@ export class ConnectionStub extends BoilerplateConnectionStub {
         );
     }
 
-    async requestCompletion(uri: string, position: Position) {
+    async requestCompletion(uri: string, position: Position, context?: CompletionContext) {
         return this.completionHandler(
-            {textDocument: {uri}, position},
+            {textDocument: {uri}, position, context},
             {} as any, {} as any, undefined
         );
     }
@@ -258,7 +259,7 @@ export class ConnectionStub extends BoilerplateConnectionStub {
     }
 }
 
-const NOOP_DISPOSABLE: Disposable = {
+export const NOOP_DISPOSABLE: Disposable = {
     dispose: () => {
     }
 };
