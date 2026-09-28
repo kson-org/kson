@@ -76,11 +76,15 @@ internal val KsonValue.isFalseSchema: Boolean
  * below it, or a schema [ending at an unresolved `$ref`][NavigatedSchema.endsAtUnresolvedRef], whose keywords it
  * leaves unread.  Without it, nothing is found below a `false` schema, and the keywords beside an unresolved `$ref`
  * are read, as hover and completions expect.
+ *
+ * With [narrow], branches the document contradicts are dropped: a `oneOf` or `anyOf` branch it doesn't fit, and
+ * the `then` or `else` its `if` rules out.  Without it, every branch is kept, as for an empty document.
  */
 internal class SchemaNavigator(
     private val idLookup: SchemaIdLookup,
     private val incompleteRegion: Location? = null,
-    private val carryDeadEnds: Boolean = false
+    private val carryDeadEnds: Boolean = false,
+    private val narrow: Boolean = true
 ) {
 
     /**
@@ -121,7 +125,7 @@ internal class SchemaNavigator(
      *
      * @param documentPointer Pointer through the document's AST (e.g. from [KsonValuePathBuilder])
      * @param documentAst Root of the document's AST, walked along [documentPointer]; without it, a number is
-     *   taken as an index and no branch is ruled out
+     *   taken as an index and no branch is ruled out, as with [narrow] off
      * @return List of [NavigatedSchema] containing all sub-schemas at that location (empty if not found)
      */
     fun navigate(
@@ -136,12 +140,12 @@ internal class SchemaNavigator(
         val docNodes = documentAst?.let { AstNodeWalker.nodesAlong(it, documentPointer) }.orEmpty()
         // the node each token is read in: the root, then the node the token before it stepped to
         val containers = listOfNotNull(documentAst) + docNodes
-        var current = flatten(rootRef, documentAst?.toKsonValueOrNull(), depth = 0)
+        var current = flatten(rootRef, documentAst?.takeIf { narrow }?.toKsonValueOrNull(), depth = 0)
 
         for ((index, token) in tokens.withIndex()) {
             val arrayIndex = arrayIndex(token, containers.getOrNull(index))
             val stepped = current.flatMap { stepInto(it, token, arrayIndex) }
-            val docValue = docNodes.getOrNull(index)?.toKsonValueOrNull()
+            val docValue = docNodes.getOrNull(index)?.takeIf { narrow }?.toKsonValueOrNull()
             current = stepped.flatMap { flatten(it, docValue, depth = index + 1) }
             if (current.isEmpty()) break
         }

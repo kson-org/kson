@@ -2,10 +2,13 @@ package org.kson
 
 import org.kson.tooling.navigation.CaretPath
 import org.kson.tooling.navigation.KsonValuePathBuilder
+import org.kson.tooling.navigation.NewKeySite
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.tooling.KsonTooling.parse
+import org.kson.tooling.Range
+import org.kson.walker.TreePointer
 import kotlin.test.*
 
 /**
@@ -716,5 +719,37 @@ class KsonValuePathBuilderTest {
             """.trimIndent(),
             expectedPlaceholderText = null
         )
+    }
+
+    /** The [NewKeySite] at the <caret> position in [documentWithCaret]. */
+    private fun newKeySiteAtCaret(documentWithCaret: String): NewKeySite? {
+        val caretIndex = documentWithCaret.indexOf("<caret>")
+        require(caretIndex >= 0) { "Document must contain <caret> marker" }
+        val beforeCaret = documentWithCaret.take(caretIndex)
+        val caret = Coordinates(beforeCaret.count { it == '\n' }, caretIndex - (beforeCaret.lastIndexOf('\n') + 1))
+        return KsonValuePathBuilder(parse(documentWithCaret.replace("<caret>", "")), caret).newKeySite()
+    }
+
+    @Test
+    fun testNewKeySite_replacesTheKeyTypedSoFar() {
+        assertEquals(
+            NewKeySite(TreePointer(JsonPointer.ROOT), Range(1, 0, 1, 2)),
+            newKeySiteAtCaret("tags: []\nna<caret>")
+        )
+    }
+
+    @Test
+    fun testNewKeySite_caretInsideWhitespace() {
+        // The caret falls inside the whitespace from `dark` to `size`, at no token's edge
+        assertEquals(
+            NewKeySite(TreePointer(JsonPointer.fromTokens(listOf("settings"))), Range(2, 2, 2, 2)),
+            newKeySiteAtCaret("settings:\n  theme: dark\n  <caret>\n  size: 3")
+        )
+    }
+
+    @Test
+    fun testNewKeySite_nullWhereTheKeyWouldJoinAnotherObject() {
+        // Completions here are for the root, but a key typed here would start the list item
+        assertNull(newKeySiteAtCaret("{\n  items:\n    - <caret>\n}"))
     }
 }

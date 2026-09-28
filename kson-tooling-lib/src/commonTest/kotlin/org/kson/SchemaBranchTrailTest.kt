@@ -23,19 +23,21 @@ class SchemaBranchTrailTest {
         schemaValue: KsonValue,
         path: List<String>,
         document: String?,
-        carryDeadEnds: Boolean = false
+        carryDeadEnds: Boolean = false,
+        narrow: Boolean = true
     ): List<NavigatedSchema> =
-        SchemaNavigator(SchemaIdLookup(schemaValue), carryDeadEnds = carryDeadEnds)
+        SchemaNavigator(SchemaIdLookup(schemaValue), carryDeadEnds = carryDeadEnds, narrow = narrow)
             .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { KsonTooling.parse(it).rootAstNode })
 
     private fun trails(
         schema: String,
         path: List<String>,
         document: String? = null,
-        carryDeadEnds: Boolean = false
+        carryDeadEnds: Boolean = false,
+        narrow: Boolean = true
     ): List<String> {
         val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        return navigate(schemaValue, path, document, carryDeadEnds).map { schemaTrail ->
+        return navigate(schemaValue, path, document, carryDeadEnds, narrow).map { schemaTrail ->
             val value = schemaTrail.resolvedValue
             val type = ((value as? KsonObject)?.propertyLookup?.get("type") as? KsonString)?.value
             val typeLabel = if (value is KsonBoolean) value.value.toString() else type ?: "untyped"
@@ -221,6 +223,19 @@ class SchemaBranchTrailTest {
     }
 
     @Test
+    fun itemStepsToItsOwnSchemaWithoutTheDocument() {
+        val schema = """
+            {
+                "items": [ { "properties": { "a": { "type": "string" } } } ],
+                "additionalItems": { "properties": { "a": { "type": "object" } } }
+            }
+        """
+        assertEquals(listOf("string"), trails(schema, listOf("0", "a"), "[{}]"))
+        assertEquals(listOf("string"), trails(schema, listOf("0", "a")))
+        assertEquals(listOf("object"), trails(schema, listOf("1", "a")))
+    }
+
+    @Test
     fun refThatNeverResolvesIsCarriedAsADeadEnd() {
         val schema = """
             {
@@ -243,5 +258,59 @@ class SchemaBranchTrailTest {
         assertEquals(listOf("string"), trails(schema, listOf("p", "x")), "default navigation reads keywords beside an unresolved \$ref")
         assertEquals(listOf("object at an unresolved \$ref"), trails(schema, listOf("p"), carryDeadEnds = true))
         assertEquals(listOf("object at an unresolved \$ref"), trails(schema, listOf("p", "x"), carryDeadEnds = true))
+    }
+
+    @Test
+    fun unnarrowedNavigationRulesOutNoBranch() {
+        val schema = """
+            {
+                "oneOf": [
+                    { "properties": { "kind": { "const": "a" }, "p": { "type": "string" } } },
+                    { "properties": { "kind": { "const": "b" }, "p": { "type": "object" } } }
+                ]
+            }
+        """
+        assertEquals(listOf("object via /oneOf took 1 at depth 0"), trails(schema, listOf("p"), "kind: b"))
+        assertEquals(
+            listOf("string via /oneOf took 0 at depth 0", "object via /oneOf took 1 at depth 0"),
+            trails(schema, listOf("p"), "kind: b", narrow = false)
+        )
+    }
+
+    @Test
+    fun unnarrowedNavigationDecidesNoIf() {
+        val schema = """
+            {
+                "properties": {
+                    "settings": {
+                        "if": { "properties": { "kind": { "const": "a" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "type": "string" } } },
+                        "else": { "properties": { "p": { "type": "object" } } }
+                    }
+                }
+            }
+        """
+        assertEquals(
+            listOf("string via /properties/settings/if took then at depth 1"),
+            trails(schema, listOf("settings", "p"), "settings: {kind: a}")
+        )
+        assertEquals(
+            listOf(
+                "string via /properties/settings/if took then at depth 1",
+                "object via /properties/settings/if took else at depth 1"
+            ),
+            trails(schema, listOf("settings", "p"), "settings: {kind: a}", narrow = false)
+        )
+    }
+
+    @Test
+    fun unnarrowedNavigationStillTellsIndicesFromNames() {
+        val schema = """
+            {
+                "properties": { "0": { "type": "object" } },
+                "items": { "type": "string" }
+            }
+        """
+        assertEquals(listOf("object"), trails(schema, listOf("0"), "'0': {}", narrow = false))
     }
 }
