@@ -40,7 +40,7 @@ class KsonValuePathBuilderTest {
         val actualPath = KsonValuePathBuilder(parse(document), Coordinates(line, column))
             .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
 
-        assertEquals(expectedPath, actualPath, "Path does not match expected value")
+        assertEquals(expectedPath, actualPath?.pointer, "Path does not match expected value")
     }
 
     @Test
@@ -141,6 +141,123 @@ class KsonValuePathBuilderTest {
             """.trimIndent(),
             expectedPath = JsonPointer.fromTokens(listOf("person")),
             includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_keyBeingTypedAfterDelimitedObject() {
+        // the `}` ends `inner`, so the key belongs to the object around it, even though the last
+        // value in `inner` ends right where the `}` begins
+        assertPathAtCaret(
+            """
+            outer:
+              inner: {x: y}
+              a<caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("outer")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_afterDelimitedListItem() {
+        // a closed item leaves the caret in the list, just as `- y` would
+        assertPathAtCaret(
+            """
+            items:
+              - {x: y}
+            <caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.fromTokens(listOf("items")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_afterBracketList() {
+        // the `]` ends `a`, so the caret is back in the root object, even though `2` ends right
+        // where the `]` begins
+        assertPathAtCaret(
+            """
+            a: [1, 2]
+            <caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_afterDelimitedDashList() {
+        // likewise the `>` ends `a`, even though `y` ends right where the `>` begins
+        assertPathAtCaret(
+            """
+            a: <- x - y>
+            <caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_afterEndDashedList() {
+        // likewise the end-dash ends `a`, even though `y` ends right where the `=` begins
+        assertPathAtCaret(
+            """
+            a:
+              - x
+              - y=
+            <caret>
+            """.trimIndent(),
+            expectedPath = JsonPointer.ROOT,
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_afterIgnoredEndDot() {
+        // an end-dot inside `{}` is ignored, so it ends nothing and the caret is still in `settings`
+        assertPathAtCaret(
+            "settings: {theme: dark. <caret> }",
+            expectedPath = JsonPointer.fromTokens(listOf("settings")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_betweenValueAndCloser_forCompletion() {
+        // the caret is at the `}`, not past it, so it is still on `act`
+        assertPathAtCaret(
+            "{status: act<caret>}",
+            expectedPath = JsonPointer.fromTokens(listOf("status")),
+            includePropertyKeys = false
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_betweenValueAndCloser_forDefinition() {
+        assertPathAtCaret(
+            "{status: act<caret>}",
+            expectedPath = JsonPointer.fromTokens(listOf("status")),
+            includePropertyKeys = true
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_definitionAfterDelimitedObject() {
+        // whitespace past the `}` is on the object it closed, not on `dark`, the last value inside it
+        assertPathAtCaret(
+            "settings: {theme: dark} <caret>",
+            expectedPath = JsonPointer.fromTokens(listOf("settings"))
+        )
+    }
+
+    @Test
+    fun testBuildJsonPointerToPosition_definitionAfterBracketList() {
+        assertPathAtCaret(
+            "a: [1, 2] <caret>",
+            expectedPath = JsonPointer.fromTokens(listOf("a"))
         )
     }
 
@@ -530,6 +647,15 @@ class KsonValuePathBuilderTest {
             name: "Jo<caret>hn"
             """.trimIndent(),
             expectedPlaceholderText = "John"
+        )
+    }
+
+    @Test
+    fun testBuildCaretPath_placeholder_scalarCaretAtCloser() {
+        // A caret at the `}` that ends a scalar, not past it, is still authoring that scalar.
+        assertPlaceholderAtCaret(
+            "{status: act<caret>}",
+            expectedPlaceholderText = "act"
         )
     }
 

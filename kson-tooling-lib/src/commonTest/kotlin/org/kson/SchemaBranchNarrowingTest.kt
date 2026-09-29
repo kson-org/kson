@@ -8,6 +8,7 @@ import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.walker.TreePointer
 import kotlin.test.*
 
 /**
@@ -32,7 +33,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         val parsedDocument = KsonTooling.parse(document)
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        return SchemaNavigator(schemaIdLookup).navigate(documentPointer, parsedDocument.rootAstNode)
+        return SchemaNavigator(schemaIdLookup).navigate(TreePointer(documentPointer), parsedDocument.rootAstNode)
             .map { it.resolvedValue }
     }
 

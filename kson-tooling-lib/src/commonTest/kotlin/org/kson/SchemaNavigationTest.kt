@@ -6,6 +6,7 @@ import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
 import org.kson.tooling.navigation.SchemaResolutionType
 import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.walker.TreePointer
 import org.kson.value.KsonValue as InternalKsonValue
 import org.kson.value.KsonObject as InternalKsonObject
 import org.kson.value.KsonString as InternalKsonString
@@ -29,7 +30,7 @@ class SchemaNavigationTest {
      */
     private fun navigateSchemaFull(schema: String, path: List<String>): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(JsonPointer.fromTokens(path))
+            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(path)))
         } ?: emptyList()
     }
 
@@ -338,6 +339,60 @@ class SchemaNavigationTest {
     }
 
     @Test
+    fun testNavigateRefToAnIdResolvesTheTargetsRefsUnderThatId() {
+        val schema = $$"""
+            {
+                type: "object"
+                properties: { p: { '$ref': "http://example.com/a.json" } }
+                '$defs': {
+                    a: {
+                        '$id': "http://example.com/a.json"
+                        anyOf: [ { '$ref': "#/$defs/x" } ]
+                        '$defs': { x: { title: "x under a.json" } }
+                    }
+                    x: { title: "x under the root" }
+                }
+            }
+        """
+
+        // The target, then its anyOf branch: its own `x`, not the root's
+        val results = navigateSchema(schema, listOf("p"))
+        assertEquals(
+            listOf(null, "x under a.json"),
+            results.map { ((it as InternalKsonObject).propertyLookup["title"] as? InternalKsonString)?.value }
+        )
+    }
+
+    @Test
+    fun testNavigateBranchWithAnIdResolvesItsRefsUnderThatId() {
+        val schema = $$"""
+            {
+                type: "object"
+                properties: {
+                    p: {
+                        anyOf: [
+                            {
+                                '$id': "http://example.com/b.json"
+                                allOf: [ { '$ref': "#/$defs/x" } ]
+                                '$defs': { x: { title: "x under b.json" } }
+                            }
+                        ]
+                    }
+                }
+                '$defs': { x: { title: "x under the root" } }
+            }
+        """
+
+        // `p`, its anyOf branch, then the branch's allOf member: though no `$ref` leads to the branch, its
+        // `$id` gives it its own `x`, not the root's
+        val results = navigateSchema(schema, listOf("p"))
+        assertEquals(
+            listOf(null, null, "x under b.json"),
+            results.map { ((it as InternalKsonObject).propertyLookup["title"] as? InternalKsonString)?.value }
+        )
+    }
+
+    @Test
     fun testNavigateSchemaWithNoProperties() {
         val schema = """
             {
@@ -478,7 +533,7 @@ class SchemaNavigationTest {
         val document = """{ "config": { "mode": "a" } }"""
         val documentAst = KsonTooling.parse(document).rootAstNode
         val results = KsonCore.parseToAst(schema).ksonValue!!.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(JsonPointer.fromTokens(listOf("config")), documentAst)
+            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(listOf("config"))), documentAst)
         }
 
         // [configParent, InnerA] — InnerB is dropped because mode: "a" contradicts its const.
