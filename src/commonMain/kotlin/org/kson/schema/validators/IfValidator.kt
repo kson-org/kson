@@ -10,18 +10,31 @@ import org.kson.validation.ValidationMode
 class IfValidator(private val ifSchema: JsonSchema, private val thenSchema: JsonSchema?, private val elseSchema: JsonSchema?) :
     JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
-        when {
-            !ifSchema.isValid(ksonValue, MessageSink(), sourceContext) ->
-                elseSchema?.validate(ksonValue, messageSink, sourceContext)
-
-            // Partial validation skips `required`, `minProperties` and the like, so the condition can hold here
-            // where full validation fails it and takes the `else`.  Partial validation must accept whatever full
-            // validation accepts (see [ValidationMode]), so the value passes when that `else` accepts it or is missing.
-            sourceContext.mode == ValidationMode.PARTIAL &&
-                !ifSchema.isValid(ksonValue, MessageSink(), sourceContext.copy(mode = ValidationMode.FULL)) &&
-                elseSchema?.isValid(ksonValue, MessageSink(), sourceContext) != false -> Unit
-
-            else -> thenSchema?.validate(ksonValue, messageSink, sourceContext)
-        }
+        branchToApply(ksonValue, sourceContext)?.validate(ksonValue, messageSink, sourceContext)
     }
+
+    private fun branchToApply(ksonValue: KsonValue, sourceContext: SourceContext): JsonSchema? =
+        when (sourceContext.mode) {
+            ValidationMode.FULL -> fullValidationBranch(ksonValue, sourceContext)
+            ValidationMode.PARTIAL -> partialValidationBranch(ksonValue, sourceContext)
+        }
+
+    /** The `then` if [ksonValue] satisfies the `if`, otherwise the `else`. */
+    private fun fullValidationBranch(ksonValue: KsonValue, sourceContext: SourceContext): JsonSchema? =
+        if (ifHolds(ksonValue, sourceContext)) thenSchema else elseSchema
+
+    /**
+     * As [fullValidationBranch], except where the `if` holds only because partial validation skips constraints
+     * such as `required` (`if: {required: [kind]}` holds for a value without `kind`).  Such a value gets the
+     * `else`, as under full validation, provided the `else` accepts it or is missing.
+     */
+    private fun partialValidationBranch(ksonValue: KsonValue, sourceContext: SourceContext): JsonSchema? = when {
+        !ifHolds(ksonValue, sourceContext) -> elseSchema
+        ifHolds(ksonValue, sourceContext.copy(mode = ValidationMode.FULL)) -> thenSchema
+        elseSchema?.isValid(ksonValue, MessageSink(), sourceContext) != false -> elseSchema
+        else -> thenSchema
+    }
+
+    private fun ifHolds(ksonValue: KsonValue, sourceContext: SourceContext): Boolean =
+        ifSchema.isValid(ksonValue, MessageSink(), sourceContext)
 }
