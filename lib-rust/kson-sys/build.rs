@@ -146,7 +146,7 @@ fn alias_libclang_for_clang_sys() -> anyhow::Result<()> {
 
     if !alias.exists() {
         // 13 is libclang's C API soversion, not an LLVM version: it has been 13 since LLVM 13, and
-        // pixi pins libclang to 20.*. If it ever changes, this copy fails naming the file it wanted.
+        // pixi pins libclang to 23.*. If it ever changes, this copy fails naming the file it wanted.
         let versioned = dir.join("libclang-13.dll");
         fs::copy(&versioned, &alias).with_context(|| {
             format!(
