@@ -15,7 +15,7 @@ version = "0.4.0-dev"
 [tasks]
 
 [dependencies]
-rust = "1.89.0.*"
+rust = "1.98.1.*"
 
 [target.win-64.dependencies]
 vs2022_win-64 = ">=19.44.35207,<20"
