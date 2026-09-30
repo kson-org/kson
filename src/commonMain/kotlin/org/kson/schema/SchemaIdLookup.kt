@@ -268,11 +268,11 @@ private fun decodeUriEncoding(encoded: String): String {
 }
 
 /**
- * Resolves a JSON Pointer path within a [KsonValue] structure, applying the `$id` of every node
- * along the way to [currentBaseUri].
+ * Resolves a JSON Pointer path within a [KsonValue] structure.
  *
  * @param pointer The JSON Pointer to follow (e.g., "/definitions/address")
  * @param ksonValue The [KsonValue] to traverse
+ * @param currentBaseUri The base URI in effect at [ksonValue]
  * @return The [KsonValue] at the pointer location with its base URI, or null if not found
  */
 private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {

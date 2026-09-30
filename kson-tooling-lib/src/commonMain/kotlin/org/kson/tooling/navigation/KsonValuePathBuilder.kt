@@ -86,7 +86,7 @@ class KsonValuePathBuilder(
      * @return A [TreePointer] through the document's AST from root to target,
      *         or null if the document is completely unparseable
      */
-    fun buildJsonPointerToPosition(includePropertyKeys: Boolean = true): TreePointer<AstNode>? =
+    fun buildTreePointerToPosition(includePropertyKeys: Boolean = true): TreePointer<AstNode>? =
         buildCaretPath(includePropertyKeys)?.pointer
 
     /**
