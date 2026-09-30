@@ -19,4 +19,4 @@ python = "3.14.*"
 pnpm = "11.24.*"
 
 [target.win-64.dependencies]
-vc14_runtime = "14.44.*"
+vc14_runtime = "14.51.*"
