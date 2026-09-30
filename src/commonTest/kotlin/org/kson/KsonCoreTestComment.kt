@@ -417,49 +417,39 @@ class KsonCoreTestComment : KsonCoreTest {
             """,
             """
               # a list of lists
-              - 
-                # trailing comment on constant element
+              - # trailing comment on constant element
                 - 1.2
                 # a nested list element
                 - 2.2
                 - 3.2
                 =
-              - 
-                # a nested dash-delimited list
-                - 
-                  - 10.2
+              - # a nested dash-delimited list
+                - - 10.2
                   =
                 # a further nested braced list
                 # trailing comment on nested list
-                - 
-                  - 4.2
+                - - 4.2
                   # a further nested braced list element
                   - 5.2
                   =
-                - 
-                  - 9.2
+                - - 9.2
                   - 8.2
             """.trimIndent(),
             """
             # a list of lists
-            - 
-              # trailing comment on constant element
+            - # trailing comment on constant element
               - 1.2
               # a nested list element
               - 2.2
               - 3.2
-            - 
-              # a nested dash-delimited list
-              - 
-                - 10.2
+            - # a nested dash-delimited list
+              - - 10.2
               # a further nested braced list
               # trailing comment on nested list
-              - 
-                - 4.2
+              - - 4.2
                 # a further nested braced list element
                 - 5.2
-              - 
-                - 9.2
+              - - 9.2
                 - 8.2
             """.trimIndent(),
             """
@@ -485,6 +475,75 @@ class KsonCoreTestComment : KsonCoreTest {
                 ]
             """.trimIndent(),
             "should preserve comments in nested lists"
+        )
+    }
+
+    @Test
+    fun testCommentsOnDashLine() {
+        assertParsesTo(
+            """
+                # comment above the dash documents the element
+                - # comment on the dash line documents the first property
+                  key: value
+                -
+                  # comment on the line after the dash also documents the first property
+                  key: value
+                - # comment on the dash line of a scalar has nothing else to document but the element
+                  scalar
+                - # comment on the dash line of a delimited value also documents the element
+                  {key: value}
+                - # comment on the dash line of a nested list documents its first element
+                  - # and so on down through nested dash lines
+                    - nested
+            """.trimIndent(),
+            """
+                # comment above the dash documents the element
+                - # comment on the dash line documents the first property
+                  key: value
+                - # comment on the line after the dash also documents the first property
+                  key: value
+                # comment on the dash line of a scalar has nothing else to document but the element
+                - scalar
+                # comment on the dash line of a delimited value also documents the element
+                - key: value
+                - # comment on the dash line of a nested list documents its first element
+                  - # and so on down through nested dash lines
+                    - nested
+            """.trimIndent(),
+            """
+                # comment above the dash documents the element
+                - # comment on the dash line documents the first property
+                  key: value
+                - # comment on the line after the dash also documents the first property
+                  key: value
+                # comment on the dash line of a scalar has nothing else to document but the element
+                - scalar
+                # comment on the dash line of a delimited value also documents the element
+                - key: value
+                - # comment on the dash line of a nested list documents its first element
+                  - # and so on down through nested dash lines
+                    - nested
+            """.trimIndent(),
+            """
+                [
+                  {
+                    "key": "value"
+                  },
+                  {
+                    "key": "value"
+                  },
+                  "scalar",
+                  {
+                    "key": "value"
+                  },
+                  [
+                    [
+                      "nested"
+                    ]
+                  ]
+                ]
+            """.trimIndent(),
+            "a comment on a dash's line belongs to what follows the dash, not the dash itself"
         )
     }
 

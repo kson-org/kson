@@ -1,8 +1,10 @@
 package org.kson.tools
 
+import org.kson.KsonCore
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FormatterTest {
     private fun assertFormatting(
@@ -19,6 +21,20 @@ class FormatterTest {
             expected,
             formattedKson
         )
+
+        // Formatting valid source may resolve messages but must never add any: for every kind of message, the
+        // formatted output may carry no more than its source did
+        val sourceParse = KsonCore.parseToAst(source)
+        if (!sourceParse.hasErrors()) {
+            val sourceMessageCounts = sourceParse.messages.groupingBy { it.message.type }.eachCount()
+            val formattedMessages = KsonCore.parseToAst(formattedKson).messages
+            val addedMessageTypes = formattedMessages.groupingBy { it.message.type }.eachCount()
+                .filter { (type, count) -> count > (sourceMessageCounts[type] ?: 0) }.keys
+            assertTrue(
+                addedMessageTypes.isEmpty(),
+                "Formatting added messages: ${formattedMessages.filter { it.message.type in addedMessageTypes }}"
+            )
+        }
 
         // Roundtrip: each format should preserve the semantics of a kson document
         /**
@@ -175,9 +191,7 @@ class FormatterTest {
                   ]]]
             """.trimIndent(),
             """
-            - 
-              - 
-                - 3
+            - - - 3
             """.trimIndent()
         )
 
@@ -192,9 +206,7 @@ class FormatterTest {
                      >
             """.trimIndent(),
             """
-            - 
-              - 
-                - 3
+            - - - 3
                 =
               - 2
               =
@@ -586,6 +598,16 @@ class FormatterTest {
     }
 
     @Test
+    fun testEmbedBlockBlankLineFormatsSameWhetherIndentedOrEmpty() {
+        val expected = "doc: %markdown\n  # Heading\n  \n  some text\n  %%"
+
+        // a blank line indented to the block's minimum
+        assertFormatting("doc: %markdown\n    # Heading\n    \n    some text\n    %%", expected)
+        // the same block with that blank line totally empty should still format to the same value
+        assertFormatting("doc: %markdown\n    # Heading\n\n    some text\n    %%", expected)
+    }
+
+    @Test
     fun testEmbedBlockWithNoIndentation() {
         assertFormatting(
             """
@@ -707,13 +729,11 @@ class FormatterTest {
             """.trimIndent(),
             """
             - outer1
-            - 
-              - inner1
+            - - inner1
               - inner2
               =
             - outer2
-            - 
-              - inner3
+            - - inner3
               - inner4
             """.trimIndent()
         )
@@ -735,14 +755,10 @@ class FormatterTest {
             >
             """.trimIndent(),
             """
-            - 
-              - key:
+            - - key:
                   - 1
                   - 2
-                  - 
-                    - 
-                      - 
-                        - x
+                  - - - - x
                         =
                       =
                     =
@@ -765,13 +781,11 @@ class FormatterTest {
             """.trimIndent(),
             """
               mixed:
-                - 
-                  - 1
+                - - 1
                   - 2
                   =
                 - x: y
-                - 
-                  - nested
+                - - nested
             """.trimIndent()
         )
 
@@ -797,20 +811,17 @@ class FormatterTest {
             """.trimIndent(),
             """
             arrays:
-              - 
-                - first
+              - - first
                 - second
             angles:
               - third
               - fourth
             mixed:
-              - 
-                - 1
+              - - 1
                 - 2
                 =
               - x: y
-              - 
-                - nested
+              - - nested
             """.trimIndent()
         )
     }
@@ -847,8 +858,7 @@ class FormatterTest {
             ]
             """.trimIndent(),
             """
-            - 
-              - inner_key: x
+            - - inner_key: x
               =
             - outer_list_elem
             """.trimIndent()
@@ -919,6 +929,118 @@ class FormatterTest {
                 - value3_2
             """.trimIndent(),
             IndentType.Space(4)
+        )
+    }
+
+    /**
+     * The value of a dash list element is always "indented" exactly two spaces (dash+space for the first line),
+     * regardless of the configured [IndentType], so that a value's continuation lines always align under where the
+     * value began
+     */
+    @Test
+    fun testDashListValueAlignmentWithWideIndent() {
+        assertFormatting(
+            """
+            {
+            list: [
+            { one: val, two: val, three: { deep: val } },
+            [ a, b, [ c ] ],
+            plain
+            ],
+            key: value
+            }
+            """.trimIndent(),
+            """
+            list:
+                - one: val
+                  two: val
+                  three:
+                      deep: val
+
+                - - a
+                  - b
+                  - - c
+                    =
+                  =
+                - plain
+            key: value
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+
+        assertFormatting(
+            """
+            [
+            [ { one: val, two: val }, { one: val } ],
+            [ [ a ], b ],
+            last
+            ]
+            """.trimIndent(),
+            """
+            - - one: val
+                two: val
+
+              - one: val
+              =
+            - - - a
+                =
+              - b
+              =
+            - last
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+    }
+
+    /**
+     * See [testDashListValueAlignmentWithWideIndent]: embed content is part of the value, so it aligns the same way
+     */
+    @Test
+    fun testEmbedBlockAlignmentUnderDashWithWideIndent() {
+        assertFormatting(
+            """
+            list: [
+            %
+            echo first
+            %%,
+            plain
+            ]
+            """.trimIndent(),
+            """
+            list:
+                - %
+                  echo first
+                  %%
+                - plain
+            """.trimIndent(),
+            IndentType.Space(4)
+        )
+    }
+
+    /**
+     * See [testDashListValueAlignmentWithWideIndent]: delimited values hang off their dash the same way
+     */
+    @Test
+    fun testDelimitedDashListValueAlignmentWithWideIndent() {
+        assertFormatting(
+            """
+            [ { one: val, two: val }, [ a, b ], plain ]
+            """.trimIndent(),
+            """
+            <
+                - {
+                      one: val
+                      two: val
+                  }
+                - <
+                      - a
+                      - b
+                  >
+                - plain
+            >
+            """.trimIndent(),
+            IndentType.Space(4),
+            FormattingStyle.DELIMITED
         )
     }
 
@@ -1001,9 +1123,8 @@ class FormatterTest {
             list:
             ${"\t"}- item1
             ${"\t"}- nested: value
-            ${"\t"}- 
-            ${"\t"}${"\t"}- 1
-            ${"\t"}${"\t"}- 2
+            ${"\t"}- - 1
+            ${"\t"}  - 2
             """.trimIndent(),
             IndentType.Tab()
         )
@@ -1346,8 +1467,7 @@ class FormatterTest {
                 - "outer list elem 1"
             """.trimIndent(),
             """
-              - 
-                - 'sub-list elem 1'
+              - - 'sub-list elem 1'
                 - 'sub-list elem 2'
                 =
               - 'outer list elem 1'
@@ -2097,9 +2217,7 @@ class FormatterTest {
                 key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =
@@ -2107,9 +2225,7 @@ class FormatterTest {
                 key: value
                 
                 
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =
@@ -2132,9 +2248,7 @@ class FormatterTest {
                 key: value
             """.trimIndent(),
             """
-                - 
-                  - 
-                    - list
+                - - - list
                     =
                   =
                 =

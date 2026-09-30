@@ -14,25 +14,24 @@ each editor and ensures that features are implemented in one place, improving pe
 * **Document Formatting:** Automatically formats Kson files.
 * **Semantic Highlighting:** Provides rich, context-aware syntax highlighting.
 
-## Getting Started
+## Local development
 
-### Prerequisites
-
-* Node.js (v20.0.0 or higher)
-* pnpm (provided by the project's pixi environment)
-
-### Installation
-
-```bash
-pnpm install
-```
+Use gradlew (from the repository root) to build and test this LSP implementation. Gradle uses pixi-managed Node.js 24
+and pnpm. To run pnpm directly, use `./pixiw run pnpm` in this directory.
 
 ### Build
 
-To compile the TypeScript source code, run:
+Run `npm_install` any time package.json is updated to regenerate the lock files.
 
 ```bash
-pnpm run compile
+./gradlew tooling:language-server-protocol:npm_install
+```
+
+Note: this also builds the `kson` and `kson-tooling` Kotlin/JS libraries that the project depends on.
+
+To compile the TypeScript source code, run:
+```bash
+./gradlew tooling:language-server-protocol:npm_run_compile
 ```
 
 ### Testing
@@ -40,7 +39,7 @@ pnpm run compile
 To run the test suite:
 
 ```bash
-pnpm test
+./gradlew tooling:language-server-protocol:npm_run_test
 ```
 
 [1] Visual Studio Code. (2025). *Language Server Extension Guide*. Retrieved

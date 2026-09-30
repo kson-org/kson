@@ -18,8 +18,8 @@ Some useful Gradle commands for this subproject:
 ./gradlew :tooling:jetbrains:test
 
 # Verify plugin compatibility
-# (https://plugins.jetbrains.com/docs/intellij/api-changes-list.html#verifying-compatibility)
-./gradlew :tooling:jetbrains:runPluginVerifier
+# (https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html)
+./gradlew :tooling:jetbrains:verifyPlugin
 ```
 
 ### Intellij Platform Upgrades and Maintenance

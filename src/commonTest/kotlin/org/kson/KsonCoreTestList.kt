@@ -88,16 +88,14 @@ class KsonCoreTestList : KsonCoreTest {
             """
                 - true
                 - false
-                - 
-                  - 1.2
+                - - 1.2
                   - 3.4
                   - 5.6
             """.trimIndent(),
             """
                 - true
                 - false
-                - 
-                  - 1.2
+                - - 1.2
                   - 3.4
                   - 5.6
             """.trimIndent(),
@@ -225,12 +223,10 @@ class KsonCoreTestList : KsonCoreTest {
             [- []]
         """.trimIndent(),
             """
-               - 
-                 - <>
+               - - <>
             """.trimIndent(),
             """
-               - 
-                 - []
+               - - []
             """.trimIndent(),
             """
                [
@@ -292,22 +288,18 @@ class KsonCoreTestList : KsonCoreTest {
               >
         """.trimIndent(),
             """
-                - 
-                  - a
+                - - a
                   - b
-                  - 
-                    - a1
+                  - - a1
                     - b1
                     - c1
                     =
                   - c
             """.trimIndent(),
             """
-                - 
-                  - a
+                - - a
                   - b
-                  - 
-                    - a1
+                  - - a1
                     - b1
                     - c1
                   - c
@@ -341,20 +333,16 @@ class KsonCoreTestList : KsonCoreTest {
             """
             - null
             - true
-            - 
-              - sublist
+            - - sublist
               =
-            - 
-              - another
+            - - another
               - sublist
         """.trimIndent(),
             """
             - null
             - true
-            - 
-              - sublist
-            - 
-              - another
+            - - sublist
+            - - another
               - sublist
         """.trimIndent(),
             """
@@ -384,15 +372,13 @@ class KsonCoreTestList : KsonCoreTest {
                 - "outer list elem 1"
             """.trimIndent(),
             """
-                - 
-                  - 'sub-list elem 1'
+                - - 'sub-list elem 1'
                   - 'sub-list elem 2'
                   =
                 - 'outer list elem 1'
             """.trimIndent(),
             """
-                - 
-                  - "sub-list elem 1"
+                - - "sub-list elem 1"
                   - "sub-list elem 2"
                 - "outer list elem 1"
             """.trimIndent(),

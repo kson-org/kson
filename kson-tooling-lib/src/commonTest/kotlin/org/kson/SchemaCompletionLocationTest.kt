@@ -1827,7 +1827,6 @@ class SchemaCompletionLocationTest {
         """.trimIndent(), setOf("age"))
     }
 
-    /** Same with the half-typed key an error inside the `{}` */
     @Test
     fun testHalfTypedKeyCompletesEnclosingDelimitedObject() {
         assertCompletionLabels(nestedPersonSchema, """

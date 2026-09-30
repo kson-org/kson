@@ -38,13 +38,13 @@ class KsonValuePathBuilderTest {
         val document = documentWithCaret.replace(caretMarker, "")
 
         val actualPath = KsonValuePathBuilder(parse(document), Coordinates(line, column))
-            .buildJsonPointerToPosition(includePropertyKeys = includePropertyKeys)
+            .buildTreePointerToPosition(includePropertyKeys = includePropertyKeys)
 
         assertEquals(expectedPath, actualPath?.pointer, "Path does not match expected value")
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_simpleProperty() {
+    fun testBuildTreePointerToPosition_simpleProperty() {
         assertPathAtCaret(
             """
             name: <caret>John
@@ -55,7 +55,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_secondProperty() {
+    fun testBuildTreePointerToPosition_secondProperty() {
         assertPathAtCaret(
             """
             name: John
@@ -66,7 +66,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_nestedProperty() {
+    fun testBuildTreePointerToPosition_nestedProperty() {
         assertPathAtCaret(
             """
             person:
@@ -78,7 +78,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_deeplyNestedProperty() {
+    fun testBuildTreePointerToPosition_deeplyNestedProperty() {
         assertPathAtCaret(
             """
             company:
@@ -90,7 +90,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_arrayItem() {
+    fun testBuildTreePointerToPosition_arrayItem() {
         assertPathAtCaret(
             """
             tags:
@@ -102,7 +102,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_freshDashListItem() {
+    fun testBuildTreePointerToPosition_freshDashListItem() {
         // a dash with no value yet opens the list's next item, so the caret targets that index
         assertPathAtCaret(
             """
@@ -116,7 +116,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_keyBeingTypedInPlainObject() {
+    fun testBuildTreePointerToPosition_keyBeingTypedInPlainObject() {
         // the colon-less key lands in trailing content, so the path comes from `John` instead
         assertPathAtCaret(
             """
@@ -130,7 +130,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_keyBeingTypedAfterList() {
+    fun testBuildTreePointerToPosition_keyBeingTypedAfterList() {
         // a key can only belong to an object, so the path walks back out of the list above it
         assertPathAtCaret(
             """
@@ -145,7 +145,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_keyBeingTypedAfterDelimitedObject() {
+    fun testBuildTreePointerToPosition_keyBeingTypedAfterDelimitedObject() {
         // the `}` ends `inner`, so the key belongs to the object around it, even though the last
         // value in `inner` ends right where the `}` begins
         assertPathAtCaret(
@@ -160,7 +160,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterDelimitedListItem() {
+    fun testBuildTreePointerToPosition_afterDelimitedListItem() {
         // a closed item leaves the caret in the list, just as `- y` would
         assertPathAtCaret(
             """
@@ -174,7 +174,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterBracketList() {
+    fun testBuildTreePointerToPosition_afterBracketList() {
         // the `]` ends `a`, so the caret is back in the root object, even though `2` ends right
         // where the `]` begins
         assertPathAtCaret(
@@ -188,7 +188,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterDelimitedDashList() {
+    fun testBuildTreePointerToPosition_afterDelimitedDashList() {
         // likewise the `>` ends `a`, even though `y` ends right where the `>` begins
         assertPathAtCaret(
             """
@@ -201,7 +201,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterEndDashedList() {
+    fun testBuildTreePointerToPosition_afterEndDashedList() {
         // likewise the end-dash ends `a`, even though `y` ends right where the `=` begins
         assertPathAtCaret(
             """
@@ -216,7 +216,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterIgnoredEndDot() {
+    fun testBuildTreePointerToPosition_afterIgnoredEndDot() {
         // an end-dot inside `{}` is ignored, so it ends nothing and the caret is still in `settings`
         assertPathAtCaret(
             "settings: {theme: dark. <caret> }",
@@ -226,7 +226,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_betweenValueAndCloser_forCompletion() {
+    fun testBuildTreePointerToPosition_betweenValueAndCloser_forCompletion() {
         // the caret is at the `}`, not past it, so it is still on `act`
         assertPathAtCaret(
             "{status: act<caret>}",
@@ -236,7 +236,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_betweenValueAndCloser_forDefinition() {
+    fun testBuildTreePointerToPosition_betweenValueAndCloser_forDefinition() {
         assertPathAtCaret(
             "{status: act<caret>}",
             expectedPath = JsonPointer.fromTokens(listOf("status")),
@@ -245,7 +245,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_definitionAfterDelimitedObject() {
+    fun testBuildTreePointerToPosition_definitionAfterDelimitedObject() {
         // whitespace past the `}` is on the object it closed, not on `dark`, the last value inside it
         assertPathAtCaret(
             "settings: {theme: dark} <caret>",
@@ -254,7 +254,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_definitionAfterBracketList() {
+    fun testBuildTreePointerToPosition_definitionAfterBracketList() {
         assertPathAtCaret(
             "a: [1, 2] <caret>",
             expectedPath = JsonPointer.fromTokens(listOf("a"))
@@ -262,7 +262,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_definitionAtKeyBeingTyped() {
+    fun testBuildTreePointerToPosition_definitionAtKeyBeingTyped() {
         // only completion knows the caret is mid-keystroke: a definition lookup on content the
         // parser dropped resolves nothing rather than guessing from a token elsewhere
         assertPathAtCaret(
@@ -276,7 +276,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_nestedArrayItem() {
+    fun testBuildTreePointerToPosition_nestedArrayItem() {
         assertPathAtCaret(
             """
             users:
@@ -290,7 +290,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_afterColon() {
+    fun testBuildTreePointerToPosition_afterColon() {
         assertPathAtCaret(
             """
             name: <caret>
@@ -301,7 +301,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_emptyDocument() {
+    fun testBuildTreePointerToPosition_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
             expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
@@ -309,7 +309,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_rootLevel() {
+    fun testBuildTreePointerToPosition_rootLevel() {
         // When caret is at the start of a line with a property, it returns that property's path
         assertPathAtCaret(
             """
@@ -321,7 +321,7 @@ class KsonValuePathBuilderTest {
 
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_simpleProperty() {
+    fun testBuildTreePointerToPosition_classic_simpleProperty() {
         assertPathAtCaret(
             """
             {
@@ -334,7 +334,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_secondProperty() {
+    fun testBuildTreePointerToPosition_classic_secondProperty() {
         assertPathAtCaret(
             """
             {
@@ -347,7 +347,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_nestedProperty() {
+    fun testBuildTreePointerToPosition_classic_nestedProperty() {
         assertPathAtCaret(
             """
             {
@@ -362,7 +362,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_deeplyNestedProperty() {
+    fun testBuildTreePointerToPosition_classic_deeplyNestedProperty() {
         assertPathAtCaret(
             """
             {
@@ -378,7 +378,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_arrayItem() {
+    fun testBuildTreePointerToPosition_classic_arrayItem() {
         assertPathAtCaret(
             """
             {
@@ -393,7 +393,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_nestedArrayItem() {
+    fun testBuildTreePointerToPosition_classic_nestedArrayItem() {
         assertPathAtCaret(
             """
             {
@@ -414,7 +414,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_afterColon() {
+    fun testBuildTreePointerToPosition_classic_afterColon() {
         assertPathAtCaret(
             """
             {
@@ -427,7 +427,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_emptyDocument() {
+    fun testBuildTreePointerToPosition_classic_emptyDocument() {
         assertPathAtCaret(
             "<caret>",
             expectedPath = JsonPointer.ROOT // Empty document returns root pointer for schema completions
@@ -435,7 +435,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_rootLevel() {
+    fun testBuildTreePointerToPosition_classic_rootLevel() {
         assertPathAtCaret(
             """
             {<caret>
@@ -447,7 +447,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_multiLevelNesting() {
+    fun testBuildTreePointerToPosition_classic_multiLevelNesting() {
         assertPathAtCaret(
             """
             {
@@ -465,7 +465,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_fixInvalidDocumentWithoutKey() {
+    fun testBuildTreePointerToPosition_classic_fixInvalidDocumentWithoutKey() {
         assertPathAtCaret(
             """
             {
@@ -477,7 +477,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_onPropertyKey_forCompletion() {
+    fun testBuildTreePointerToPosition_classic_onPropertyKey_forCompletion() {
         // When cursor is on property key, for completion, path should drop last element (go to parent)
         assertPathAtCaret(
             """
@@ -491,7 +491,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_onPropertyKey_forDefinition() {
+    fun testBuildTreePointerToPosition_classic_onPropertyKey_forDefinition() {
         // When cursor is on property key, for definition, path should keep the property
         assertPathAtCaret(
             """
@@ -505,7 +505,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_repeatedPropertyName_afterColon() {
+    fun testBuildTreePointerToPosition_classic_repeatedPropertyName_afterColon() {
         // When a property name appears at multiple nesting levels, the path builder
         // should still correctly add the inner property name after its colon.
         // Regression test: previously the string comparison guard against duplicate
@@ -523,7 +523,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_afterColon() {
+    fun testBuildTreePointerToPosition_classic_escapedPropertyKey_afterColon() {
         // Property key with escape sequences — the path should use the processed
         // (unescaped) key, matching what the AST walker produces.
         assertPathAtCaret(
@@ -537,7 +537,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_escapedPropertyKey_onKey() {
+    fun testBuildTreePointerToPosition_classic_escapedPropertyKey_onKey() {
         // Cursor on a quoted key with escapes — definition lookup should use processed name
         assertPathAtCaret(
             """
@@ -551,7 +551,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_quoteEscapedPropertyKey_afterColon() {
+    fun testBuildTreePointerToPosition_classic_quoteEscapedPropertyKey_afterColon() {
         // A key may only escape the quote that delimits it, so `\'` is processed in the single-quoted
         // key but kept as an invalid escape in the double-quoted one
         assertPathAtCaret(
@@ -567,7 +567,7 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
-    fun testBuildJsonPointerToPosition_classic_quoteEscapedPropertyKey_onKey() {
+    fun testBuildTreePointerToPosition_classic_quoteEscapedPropertyKey_onKey() {
         // Cursor on a double-quoted key with an invalid `\'` escape does not process the invalid escape
         assertPathAtCaret(
             """

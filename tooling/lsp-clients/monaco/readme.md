@@ -1,4 +1,4 @@
-# @kson/monaco-editor
+# @kson_org/monaco-editor
 
 A Monaco editor with full KSON language support — completions, diagnostics,
 hover, go-to-definition, formatting, and semantic highlighting — powered by
@@ -10,7 +10,7 @@ Monaco and a bundler.
 ## Install
 
 ```
-npm install @kson/monaco-editor monaco-editor
+npm install @kson_org/monaco-editor monaco-editor
 ```
 
 ## API
@@ -84,23 +84,23 @@ automatically; the worker is torn down when the last editor is disposed.
 
 #### Additional exports
 
-| Export                  | Sub-path                          | Description                                          |
-|-------------------------|-----------------------------------|------------------------------------------------------|
-| `attachKsonLsp`         | `@kson/monaco-editor`             | Attach the LSP to an editor you already created (e.g. via `@monaco-editor/react`).  See [the React demo](https://github.com/kson-org/kson/tree/main/tooling/lsp-clients/demos/react) for a worked example. |
-| `useKsonLsp`            | `@kson/monaco-editor/react`       | React hook over `attachKsonLsp` — handles the StrictMode-safe attach/detach lifecycle for you. |
-| `registerKsonLanguage`  | `@kson/monaco-editor`             | Register the KSON language with Monaco (called automatically by `createKsonEditor`). |
-| `KSON_LANGUAGE_ID`      | `@kson/monaco-editor`             | The language identifier string (`'kson'`).           |
-| `KsonLspBridge`         | `@kson/monaco-editor`             | The LSP bridge class, for advanced use.              |
-| `TabBar`                | `@kson/monaco-editor`             | The tab bar component used for multi-document navigation. |
+| Export                 | Sub-path                        | Description                                                                                                                                                                                                |
+|------------------------|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `attachKsonLsp`        | `@kson_org/monaco-editor`       | Attach the LSP to an editor you already created (e.g. via `@monaco-editor/react`).  See [the React demo](https://github.com/kson-org/kson/tree/main/tooling/lsp-clients/demos/react) for a worked example. |
+| `useKsonLsp`           | `@kson_org/monaco-editor/react` | React hook over `attachKsonLsp` — handles the StrictMode-safe attach/detach lifecycle for you.                                                                                                             |
+| `registerKsonLanguage` | `@kson_org/monaco-editor`       | Register the KSON language with Monaco (called automatically by `createKsonEditor`).                                                                                                                       |
+| `KSON_LANGUAGE_ID`     | `@kson_org/monaco-editor`       | The language identifier string (`'kson'`).                                                                                                                                                                 |
+| `KsonLspBridge`        | `@kson_org/monaco-editor`       | The LSP bridge class, for advanced use.                                                                                                                                                                    |
+| `TabBar`               | `@kson_org/monaco-editor`       | The tab bar component used for multi-document navigation.                                                                                                                                                  |
 
 ### React (`@monaco-editor/react`)
 
 For apps that already render Monaco via `@monaco-editor/react`, the
-`useKsonLsp` hook from `@kson/monaco-editor/react` is a one-hook
+`useKsonLsp` hook from `@kson_org/monaco-editor/react` is a one-hook
 integration.
 
 ```
-npm install @kson/monaco-editor @monaco-editor/react monaco-editor react react-dom
+npm install @kson_org/monaco-editor @monaco-editor/react monaco-editor react react-dom
 ```
 
 Three pieces are required:
@@ -109,7 +109,7 @@ Three pieces are required:
 import { useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Editor, loader } from '@monaco-editor/react';
-import { useKsonLsp } from '@kson/monaco-editor/react';
+import { useKsonLsp } from '@kson_org/monaco-editor/react';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 // 1. Reuse the bundled monaco — otherwise @monaco-editor/react fetches a

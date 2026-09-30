@@ -13,20 +13,19 @@ importers:
         version: 5.9.3
 
   monaco:
-    dependencies:
-      '@kson/lsp-shared':
-        specifier: file:../shared
-        version: link:../shared
-      kson-language-server:
-        specifier: file:../../language-server-protocol
-        version: file:../language-server-protocol
     devDependencies:
+      '@kson/lsp-shared':
+        specifier: link:../shared
+        version: link:../shared
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.28
       happy-dom:
         specifier: ^20.8.4
         version: 20.9.0
+      kson-language-server:
+        specifier: link:../../language-server-protocol
+        version: link:../../language-server-protocol
       monaco-editor:
         specifier: ^0.52.0
         version: 0.52.2
@@ -49,8 +48,8 @@ importers:
   shared:
     dependencies:
       kson-language-server:
-        specifier: file:../../language-server-protocol
-        version: file:../language-server-protocol
+        specifier: link:../../language-server-protocol
+        version: link:../../language-server-protocol
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
@@ -71,11 +70,11 @@ importers:
   vscode:
     dependencies:
       '@kson/lsp-shared':
-        specifier: file:../shared
+        specifier: link:../shared
         version: link:../shared
       kson-language-server:
-        specifier: file:../../language-server-protocol
-        version: file:../language-server-protocol
+        specifier: link:../../language-server-protocol
+        version: link:../../language-server-protocol
       vscode-languageclient:
         specifier: ^9.0.1
         version: 9.0.1
@@ -100,7 +99,7 @@ importers:
         version: 3.1.0(supports-color@8.1.1)
       '@vscode/test-web':
         specifier: ^0.0.81
-        version: 0.0.81
+        version: 0.0.81(supports-color@8.1.1)
       '@vscode/vsce':
         specifier: ^3.6.0
         version: 3.9.1(supports-color@8.1.1)
@@ -1751,18 +1750,6 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
-  kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary:
-    resolution: {directory: ../../kson-lib/build/dist/js/productionLibrary, type: directory}
-    bundledDependencies: []
-
-  kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary:
-    resolution: {directory: ../../kson-tooling-lib/build/dist/js/productionLibrary, type: directory}
-    bundledDependencies: []
-
-  kson-language-server@file:../language-server-protocol:
-    resolution: {directory: ../language-server-protocol, type: directory}
-    engines: {node: 24.x}
-
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
@@ -2790,9 +2777,6 @@ packages:
   vscode-languageserver-protocol@3.17.5:
     resolution: {integrity: sha512-mb1bvRJN8SVznADSGWM9u/b07H7Ecg0I3OgXDuLdn307rl/J3A9YD6/eYOssqhecL27hK1IPZAsaqh00i/Jljg==}
 
-  vscode-languageserver-textdocument@1.0.12:
-    resolution: {integrity: sha512-cxWNPesCnQCcMPeenjKKsOCKQZ/L6Tv19DTRIGuLWe32lyzWhihGVJ/rcckZXJxfdKCFvRLS3fpBIsV/ZGX4zA==}
-
   vscode-languageserver-types@3.17.5:
     resolution: {integrity: sha512-Ld1VelNuX9pdF39h2Hgaeb5hEZM2Z3jUrrMgWQAu82jMtZp7p3vJT3BzToKtZI7NgQssZje5o0zryOrhQvzQAg==}
 
@@ -3215,7 +3199,7 @@ snapshots:
     dependencies:
       vary: 1.1.2
 
-  '@koa/router@15.7.0(koa@3.2.1)':
+  '@koa/router@15.7.0(koa@3.2.1)(supports-color@8.1.1)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 2.0.1
@@ -3533,18 +3517,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vscode/test-web@0.0.81':
+  '@vscode/test-web@0.0.81(supports-color@8.1.1)':
     dependencies:
       '@koa/cors': 5.0.0
-      '@koa/router': 15.7.0(koa@3.2.1)
+      '@koa/router': 15.7.0(koa@3.2.1)(supports-color@8.1.1)
       '@playwright/browser-chromium': 1.62.1
       gunzip-maybe: 1.4.2
-      http-proxy-agent: 9.1.0
-      https-proxy-agent: 9.1.0
+      http-proxy-agent: 9.1.0(supports-color@8.1.1)
+      https-proxy-agent: 9.1.0(supports-color@8.1.1)
       koa: 3.2.1
       koa-morgan: 1.0.1
-      koa-mount: 4.2.0
-      koa-static: 5.0.0
+      koa-mount: 4.2.0(supports-color@8.1.1)
+      koa-static: 5.0.0(supports-color@8.1.1)
       minimist: 1.2.8
       playwright: 1.62.1
       tar-fs: 3.1.2
@@ -4329,7 +4313,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-agent@9.1.0:
+  http-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -4345,7 +4329,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@9.1.0:
+  https-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -4497,14 +4481,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  koa-mount@4.2.0:
+  koa-mount@4.2.0(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       koa-compose: 4.1.0
     transitivePeerDependencies:
       - supports-color
 
-  koa-send@5.0.1:
+  koa-send@5.0.1(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 1.8.1
@@ -4512,10 +4496,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  koa-static@5.0.0:
+  koa-static@5.0.0(supports-color@8.1.1):
     dependencies:
       debug: 3.2.7
-      koa-send: 5.0.1
+      koa-send: 5.0.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -4541,18 +4525,6 @@ snapshots:
       vary: 1.1.2
 
   kolorist@1.8.0: {}
-
-  kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary: {}
-
-  kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary: {}
-
-  kson-language-server@file:../language-server-protocol:
-    dependencies:
-      kson: kson-kson-lib@file:../../kson-lib/build/dist/js/productionLibrary
-      kson-tooling: kson-kson-tooling-lib@file:../../kson-tooling-lib/build/dist/js/productionLibrary
-      vscode-languageserver: 9.0.1
-      vscode-languageserver-textdocument: 1.0.12
-      vscode-uri: 3.1.0
 
   leven@3.1.0: {}
 
@@ -5564,8 +5536,6 @@ snapshots:
     dependencies:
       vscode-jsonrpc: 8.2.0
       vscode-languageserver-types: 3.17.5
-
-  vscode-languageserver-textdocument@1.0.12: {}
 
   vscode-languageserver-types@3.17.5: {}
 

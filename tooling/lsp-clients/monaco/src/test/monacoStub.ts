@@ -73,4 +73,5 @@ export const languages = {
         Operator: 24, TypeParameter: 25,
     },
     DocumentHighlightKind: { Text: 0, Read: 1, Write: 2 },
+    IndentAction: { None: 0, Indent: 1, IndentOutdent: 2, Outdent: 3 },
 };

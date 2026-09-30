@@ -53,7 +53,7 @@ object KsonTooling {
         column: Int
     ): String? {
         val parsedSchema = schema.partialKsonValue ?: return null
-        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return null
+        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return null
         val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
         val schemaInfos = validSchemas.mapNotNull { ref ->
@@ -83,7 +83,7 @@ object KsonTooling {
         column: Int
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
         val validSchemas = resolveSchemas(parsedSchema, document, documentPointer)
 
         return validSchemas.map {
@@ -115,7 +115,7 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val schemaAst = schema.rootAstNode ?: return emptyList()
-        val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildJsonPointerToPosition() ?: return emptyList()
+        val documentPointer = KsonValuePathBuilder(schema, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
 
         // Return early if we are not in a $ref string
         if( documentPointer.pointer.tokens.lastOrNull() != $$"$ref") { return emptyList() }

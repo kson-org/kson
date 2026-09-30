@@ -2,6 +2,7 @@ import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.kson.BinaryArtifactPaths
 import org.gradle.internal.os.OperatingSystem
 import org.kson.GraalVmHelper
+import org.kson.UniversalJsPackage
 
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -9,8 +10,8 @@ import kotlin.io.path.pathString
 
 plugins {
     kotlin("multiplatform")
-    id("com.vanniktech.maven.publish") version "0.30.0"
-    id("org.jetbrains.dokka") version "2.0.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
+    id("org.jetbrains.dokka") version "2.2.0"
     id("nl.ochagavia.krossover") version "1.0.8"
 }
 
@@ -165,50 +166,7 @@ tasks.register("buildUniversalJsPackage") {
         // Ensure directory exists
         jsPackageDir.mkdirs()
 
-
-        // Copy TypeScript definitions (from browser, they should be the same)
-        copy {
-            from(jsPackageDir.resolve("browser"))
-            include("*.d.ts")
-            into(jsPackageDir)
-        }
-
-        // Write universal package.json
-        val packageJson = """
-        {
-          "name": "@kson_org/kson",
-          "version": $version,
-          "description": "KSON - Extended JSON format with comments and more",
-          "author": {
-            "name": "KSON Team",
-            "email": "kson@kson.org"
-          },
-          "repository": {
-            "type": "git",
-            "url": "https://github.com/kson-org/kson"
-          },
-          "license": "Apache-2.0",
-          "keywords": ["json", "kson", "yaml", "configuration"],
-          "exports": {
-            ".": {
-              "browser": "./browser/kson-kson-lib.mjs",
-              "node": "./node/kson-kson-lib.mjs",
-              "types": "./kson-kson-lib.d.ts"
-            }
-          },
-          "main": "./node/kson-kson-lib.mjs",
-          "browser": "./browser/kson-kson-lib.mjs",
-          "types": "./kson-kson-lib.d.ts",
-          "files": [
-            "browser/",
-            "node/",
-            "*.d.ts",
-            "README.md"
-          ]
-        }
-        """.trimIndent()
-
-        jsPackageDir.resolve("package.json").writeText(packageJson)
+        UniversalJsPackage.writePackageJson(jsPackageDir, version.toString())
 
         // Copy README if it exists
         val readmeFile = projectDir.resolve("README-npm.md")
@@ -234,7 +192,7 @@ tasks.register("buildUniversalJsPackage") {
 }
 
 mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL, automaticRelease = false)
+    publishToMavenCentral(automaticRelease = false)
     signAllPublications()
 
     coordinates("org.kson", "kson", org.kson.KsonVersion.getPublishVersion(rootProject.projectDir, isRelease = isRelease))

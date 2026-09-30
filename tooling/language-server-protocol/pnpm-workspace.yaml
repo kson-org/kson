@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+
+# Flat node_modules (npm's layout), while still hardlinking from pnpm's shared global store.
+nodeLinker: hoisted

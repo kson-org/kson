@@ -1,6 +1,6 @@
 /**
  * Registers the KSON language with Monaco: language ID, Monarch tokenizer,
- * and bracket/comment configuration.
+ * and bracket/comment/Enter-key configuration.
  *
  * The Monarch tokenizer provides instant basic colorization.  Richer coloring
  * comes from the LSP's semantic tokens provider (registered by KsonLspBridge).
@@ -25,6 +25,13 @@ export function registerKsonLanguage(): void {
 
     monaco.languages.setLanguageConfiguration(KSON_LANGUAGE_ID, {
         comments: { lineComment: '#' },
+        // Kept identical to the outdent rule in the VS Code language-configuration.json
+        onEnterRules: [
+            {
+                beforeText: /^[^#]*[.=]\s*$/,
+                action: { indentAction: monaco.languages.IndentAction.Outdent },
+            },
+        ],
         brackets: [
             ['{', '}'],
             ['[', ']'],
