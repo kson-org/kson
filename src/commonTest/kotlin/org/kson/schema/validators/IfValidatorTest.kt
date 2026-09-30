@@ -7,11 +7,6 @@ import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import kotlin.test.Test
 
-/**
- * Partial validation skips `required`, so an `if` requiring a property the value lacks holds under it,
- * while full validation fails it and takes the `else`.  Whatever full validation accepts, partial
- * validation must accept too.
- */
 class IfValidatorTest : JsonSchemaTest {
     private val partial = SourceContext(mode = ValidationMode.PARTIAL)
 
