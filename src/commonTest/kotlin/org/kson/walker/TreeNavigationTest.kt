@@ -37,7 +37,7 @@ class TreeNavigationTest {
         val document = documentWithMatch.replace(matchMarker, "").replace(endMatchMarker, "")
 
         val ksonValue = parse(document)
-        val result = walker.navigateWithJsonPointer(ksonValue, pointer)
+        val result = walker.navigate(ksonValue, TreePointer(pointer))
 
         // Build actual document with markers at the result's location
         val actualDocumentWithMarkers = if (result != null) {
@@ -54,7 +54,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer navigates to nested object property`() {
+    fun `navigate navigates to nested object property`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 name: 'John Doe'
@@ -73,7 +73,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer navigates through array by index`() {
+    fun `navigate navigates through array by index`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 hobbies:
@@ -86,7 +86,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer navigates through nested arrays`() {
+    fun `navigate navigates through nested arrays`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 address:
@@ -101,7 +101,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer returns null for invalid property`() {
+    fun `navigate returns null for invalid property`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 name: 'John Doe'
@@ -112,7 +112,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer returns null for out of bounds array index`() {
+    fun `navigate returns null for out of bounds array index`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 hobbies:
@@ -125,7 +125,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer returns null for negative array index`() {
+    fun `navigate returns null for negative array index`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 hobbies:
@@ -137,7 +137,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer returns null for non-numeric array index`() {
+    fun `navigate returns null for non-numeric array index`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 hobbies:
@@ -149,7 +149,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer with empty path returns root`() {
+    fun `navigate with empty path returns root`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 <match>name: 'John Doe'
@@ -160,7 +160,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer cannot navigate into primitive values`() {
+    fun `navigate cannot navigate into primitive values`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 name: 'John Doe'
@@ -171,7 +171,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer handles escaped characters`() {
+    fun `navigate handles escaped characters`() {
         assertJsonPointerNavigation(
             documentWithMatch = """
                 'a/b': '<match>slash value</match>'
@@ -190,7 +190,7 @@ class TreeNavigationTest {
     }
 
     @Test
-    fun `navigateWithJsonPointer handles complex nested structure`() {
+    fun `navigate handles complex nested structure`() {
         val complexKson = parse("""
             users:
               - name: 'Alice'
@@ -205,9 +205,9 @@ class TreeNavigationTest {
             .
         """.trimIndent())
 
-        val result = walker.navigateWithJsonPointer(
+        val result = walker.navigate(
             complexKson,
-            JsonPointer("/users/0/roles/1")
+            TreePointer(JsonPointer("/users/0/roles/1"))
         )
 
         assertNotNull(result)
@@ -229,7 +229,7 @@ class TreeNavigationTest {
         assertNotNull(result)
         assertIs<KsonString>(result.value)
         assertEquals("Alice", result.value.value)
-        assertEquals(JsonPointer.fromTokens(listOf("person", "name")), result.pointerFromRoot)
+        assertEquals(JsonPointer.fromTokens(listOf("person", "name")), result.pointerFromRoot.pointer)
     }
 
     @Test
@@ -244,7 +244,7 @@ class TreeNavigationTest {
             root, Coordinates(1, 4)
         )
         assertNotNull(result)
-        assertEquals(JsonPointer.fromTokens(listOf("tags", "0")), result.pointerFromRoot)
+        assertEquals(JsonPointer.fromTokens(listOf("tags", "0")), result.pointerFromRoot.pointer)
     }
 
     @Test
@@ -269,7 +269,7 @@ class TreeNavigationTest {
             root, Coordinates(0, 0)
         )
         assertNotNull(result)
-        assertEquals(JsonPointer.ROOT, result.pointerFromRoot)
+        assertEquals(JsonPointer.ROOT, result.pointerFromRoot.pointer)
     }
 
     @Test
@@ -286,8 +286,35 @@ class TreeNavigationTest {
         assertNotNull(result)
         assertEquals(
             JsonPointer.fromTokens(listOf("company", "address", "city")),
-            result.pointerFromRoot
+            result.pointerFromRoot.pointer
         )
+    }
+
+    @Test
+    fun `nodesAlong returns the node each token steps to`() {
+        val root = parse("""
+            company:
+              address:
+                city: Boston
+        """.trimIndent())
+
+        val nodes = walker.nodesAlong(root, TreePointer(JsonPointer("/company/address/city")))
+
+        val expected = listOf("/company", "/company/address", "/company/address/city")
+            .map { walker.navigate(root, TreePointer(JsonPointer(it))) }
+        assertEquals(expected, nodes)
+    }
+
+    @Test
+    fun `nodesAlong ends at the first token the tree has no node for`() {
+        val root = parse("""
+            company:
+              name: Acme
+        """.trimIndent())
+
+        val nodes = walker.nodesAlong(root, TreePointer(JsonPointer("/company/address/city")))
+
+        assertEquals(listOf(walker.navigate(root, TreePointer(JsonPointer("/company")))), nodes)
     }
 
     /**

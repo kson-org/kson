@@ -3,6 +3,8 @@ package org.kson.walker
 import org.kson.CoreCompileConfig
 import org.kson.KsonCore
 import org.kson.ast.*
+import org.kson.parser.Coordinates
+import org.kson.value.navigation.json_pointer.JsonPointer
 import kotlin.test.*
 
 /**
