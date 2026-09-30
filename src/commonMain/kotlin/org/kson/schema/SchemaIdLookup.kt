@@ -71,9 +71,9 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
 
     /**
-     * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema the validator
-     * applies.  Like [SchemaParser], it ignores the keywords beside a `$ref`, `$id` included.  A `$ref`
-     * that doesn't resolve, or leads back into the chain, ends it at the schema holding it.
+     * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema it ultimately
+     * refers to.  Keywords beside a `$ref`, `$id` included, are ignored.  A `$ref` that doesn't resolve,
+     * or leads back into the chain, ends it at the schema holding it.
      *
      * @param value The schema value that might contain a `$ref`
      * @param currentBaseUri The base URI [value] is read under

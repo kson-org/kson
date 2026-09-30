@@ -218,10 +218,7 @@ internal class SchemaNavigator(
         }
     }
 
-    /**
-     * The base URI inside [schema], which is read under [baseUri]: [baseUri] updated by [schema]'s own
-     * `$id`.  The `$ref`s in [schema]'s keywords resolve against it, as the validator resolves them.
-     */
+    /** The base URI that `$ref`s in [schema] resolve against. */
     private fun baseUriWithin(schema: KsonObject, baseUri: String): String {
         val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
         return resolveUri(id.value, baseUri).toString()

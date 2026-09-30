@@ -11,61 +11,65 @@ import kotlin.test.assertEquals
  */
 class SchemaIdLookupTest {
 
-    /** Resolves [schema]'s property `p`, returning its `title` and base URI. */
-    private fun resolveP(schema: String): Pair<String?, String> {
+    /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
+    private fun resolveField(schema: String): Pair<String?, String> {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
-        val p = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("p")
-        val resolved = SchemaIdLookup(root).resolveRefIfPresent(p, "")
+        val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
+        val resolved = SchemaIdLookup(root).resolveRefIfPresent(field, "")
         val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
         return title?.value to resolved.resolvedValueBaseUri
     }
 
     @Test
     fun followsAChainOfRefs() {
-        // The validator ignores `a`'s title beside its `$ref`
+        // `first`'s title is ignored because it sits beside a `$ref`
         val schema = $$"""
             {
-              "properties": { "p": { "$ref": "#/$defs/a" } },
-              "$defs": { "a": { "$ref": "#/$defs/b", "title": "a" }, "b": { "title": "b" } }
+              "properties": { "field": { "$ref": "#/$defs/first" } },
+              "$defs": {
+                "first": { "$ref": "#/$defs/second", "title": "first" },
+                "second": { "title": "second" }
+              }
             }
         """
-        assertEquals("b" to "", resolveP(schema))
+        assertEquals("second" to "", resolveField(schema))
     }
 
     @Test
     fun resolvesEachRefUnderTheBaseUriItsSchemaIsReadUnder() {
-        // `a` is read under `outer`'s `$id`, while its own is ignored beside its `$ref`: the result is
-        // `outer`'s `b`, read under outer.json rather than a.json
+        // `first` is read under `outer`'s `$id`, while its own is ignored beside its `$ref`: the result is
+        // `outer`'s `second`, read under outer.json rather than first.json
         val schema = $$"""
             {
-              "properties": { "p": { "$ref": "#/$defs/outer/$defs/a" } },
+              "properties": { "field": { "$ref": "#/$defs/outer/$defs/first" } },
               "$defs": {
                 "outer": {
                   "$id": "http://example.com/outer.json",
                   "$defs": {
-                    "a": { "$id": "http://example.com/a.json", "$ref": "#/$defs/b" },
-                    "b": { "title": "outer b" }
+                    "first": { "$id": "http://example.com/first.json", "$ref": "#/$defs/second" },
+                    "second": { "title": "outer second" }
                   }
                 },
-                "b": { "title": "root b" }
+                "second": { "title": "root second" }
               }
             }
         """
-        assertEquals("outer b" to "http://example.com/outer.json", resolveP(schema))
+        assertEquals("outer second" to "http://example.com/outer.json", resolveField(schema))
     }
 
     @Test
     fun stopsAtARefLeadingBackIntoTheChain() {
-        // `b`'s `$ref` leads back to `a`, which the chain already holds, so the chain ends at `b`
+        // `second`'s `$ref` leads back to `first`, which the chain already holds, so the chain ends
+        // at `second`
         val schema = $$"""
             {
-              "properties": { "p": { "$ref": "#/$defs/a" } },
+              "properties": { "field": { "$ref": "#/$defs/first" } },
               "$defs": {
-                "a": { "$ref": "#/$defs/b", "title": "a" },
-                "b": { "$ref": "#/$defs/a", "title": "b" }
+                "first": { "$ref": "#/$defs/second", "title": "first" },
+                "second": { "$ref": "#/$defs/first", "title": "second" }
               }
             }
         """
-        assertEquals("b" to "", resolveP(schema))
+        assertEquals("second" to "", resolveField(schema))
     }
 }
