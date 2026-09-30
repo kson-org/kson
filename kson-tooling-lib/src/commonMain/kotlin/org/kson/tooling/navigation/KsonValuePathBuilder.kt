@@ -11,6 +11,7 @@ import org.kson.stdlibx.exceptions.ShouldNotHappenException
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.AstNodeWalker
 import org.kson.walker.NodeChildren
+import org.kson.walker.TreeNavigationResult
 import org.kson.walker.TreePointer
 import org.kson.walker.navigate
 import org.kson.walker.navigateToLocationWithPointer
@@ -25,6 +26,15 @@ import org.kson.tooling.ToolingDocument
 private data class TokenContext(
     val lastToken: Token?,
     val isInsideToken: Boolean
+)
+
+/** The tokens that end a container: its closing delimiter, or the end-dot or end-dash of an undelimited one */
+private val CONTAINER_CLOSERS = setOf(
+    TokenType.CURLY_BRACE_R,
+    TokenType.SQUARE_BRACKET_R,
+    TokenType.ANGLE_BRACKET_R,
+    TokenType.DOT,
+    TokenType.END_DASH
 )
 
 /**
@@ -110,13 +120,10 @@ class KsonValuePathBuilder(
         // Analyze token context using meaningful (non-whitespace) tokens
         val tokenContext = analyzeTokenContext(location)
 
-        // Determine the search position: use token start if available, otherwise location
-        val searchPosition = tokenContext.lastToken?.lexeme?.location?.start ?: location
-
-        // Navigate to the target node and build the path via the AST walker
-        val navResult = AstNodeWalker.navigateToLocationWithPointer(
-            rootNode, searchPosition
-        ) ?: return caretOutsideTreePath(rootNode, includePropertyKeys)
+        // Navigate to the target node and build the path via the AST walker.  A caret with no token at
+        // or before it sits before the tree, which starts at its first meaningful token.
+        val navResult = tokenContext.lastToken?.let { navigateFromToken(rootNode, it, tokenContext.isInsideToken) }
+            ?: return caretOutsideTreePath(rootNode, includePropertyKeys)
 
         // Adjust the path based on token context (colon handling, boundary checks)
         return adjustPathForLocationContext(
@@ -139,8 +146,7 @@ class KsonValuePathBuilder(
         if (includePropertyKeys) return CaretPath(TreePointer(JsonPointer.ROOT), null)
 
         val (anchor, navResult) = meaningfulTokensUpTo(location).asReversed().firstNotNullOfOrNull { token ->
-            AstNodeWalker.navigateToLocationWithPointer(rootNode, token.lexeme.location.start)
-                ?.let { token to it }
+            navigateFromToken(rootNode, token, isInsideToken = false)?.let { token to it }
         } ?: return CaretPath(TreePointer(JsonPointer.ROOT), null)
 
         val caretPath = adjustPathForLocationContext(
@@ -183,6 +189,25 @@ class KsonValuePathBuilder(
         val lastToken = meaningfulTokensUpTo(location).lastOrNull()
         val isInsideToken = isPositionInsideToken(lastToken, location)
         return TokenContext(lastToken, isInsideToken)
+    }
+
+    /**
+     * Navigates to the node holding [token]'s start.  A span includes its end, so past a closer
+     * separated from the caret by whitespace that node is the container's last value (`b` in
+     * `{a: b}`); the closer's end is used instead to find the container itself, unless the parser
+     * ignored the closer (an end-dot inside `{}`) and the container carries on.
+     */
+    private fun navigateFromToken(
+        rootNode: AstNode,
+        token: Token,
+        isInsideToken: Boolean
+    ): TreeNavigationResult<AstNode>? {
+        val tokenLocation = token.lexeme.location
+        if (!isInsideToken && token.tokenType in CONTAINER_CLOSERS) {
+            val closed = AstNodeWalker.navigateToLocationWithPointer(rootNode, tokenLocation.end)
+            if (closed != null && AstNodeWalker.getLocation(closed.value).end == tokenLocation.end) return closed
+        }
+        return AstNodeWalker.navigateToLocationWithPointer(rootNode, tokenLocation.start)
     }
 
     /**
