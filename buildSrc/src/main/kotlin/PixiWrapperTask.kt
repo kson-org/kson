@@ -117,6 +117,6 @@ rem Execute Pixi with all arguments
 
     companion object {
         // Version of Pixi the generated wrappers pin their auto-install to, exactly as `pixi --version` reports it
-        internal const val PINNED_PIXI_VERSION = "0.73.0"
+        internal const val PINNED_PIXI_VERSION = "0.81.0"
     }
 }
