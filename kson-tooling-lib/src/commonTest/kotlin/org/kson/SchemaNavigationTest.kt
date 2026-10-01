@@ -339,6 +339,60 @@ class SchemaNavigationTest {
     }
 
     @Test
+    fun testNavigateRefToAnIdResolvesTheTargetsRefsUnderThatId() {
+        val schema = $$"""
+            {
+                type: "object"
+                properties: { p: { '$ref': "http://example.com/a.json" } }
+                '$defs': {
+                    a: {
+                        '$id': "http://example.com/a.json"
+                        anyOf: [ { '$ref': "#/$defs/x" } ]
+                        '$defs': { x: { title: "x under a.json" } }
+                    }
+                    x: { title: "x under the root" }
+                }
+            }
+        """
+
+        // The target, then its anyOf branch: its own `x`, not the root's
+        val results = navigateSchema(schema, listOf("p"))
+        assertEquals(
+            listOf(null, "x under a.json"),
+            results.map { ((it as InternalKsonObject).propertyLookup["title"] as? InternalKsonString)?.value }
+        )
+    }
+
+    @Test
+    fun testNavigateBranchWithAnIdResolvesItsRefsUnderThatId() {
+        val schema = $$"""
+            {
+                type: "object"
+                properties: {
+                    p: {
+                        anyOf: [
+                            {
+                                '$id': "http://example.com/b.json"
+                                allOf: [ { '$ref': "#/$defs/x" } ]
+                                '$defs': { x: { title: "x under b.json" } }
+                            }
+                        ]
+                    }
+                }
+                '$defs': { x: { title: "x under the root" } }
+            }
+        """
+
+        // `p`, its anyOf branch, then the branch's allOf member: though no `$ref` leads to the branch, its
+        // `$id` gives it its own `x`, not the root's
+        val results = navigateSchema(schema, listOf("p"))
+        assertEquals(
+            listOf(null, null, "x under b.json"),
+            results.map { ((it as InternalKsonObject).propertyLookup["title"] as? InternalKsonString)?.value }
+        )
+    }
+
+    @Test
     fun testNavigateSchemaWithNoProperties() {
         val schema = """
             {
