@@ -18,8 +18,8 @@ importers:
         specifier: link:../shared
         version: link:../shared
       '@types/react':
-        specifier: ^18.3.0
-        version: 18.3.28
+        specifier: ^19.3.0
+        version: 19.3.0
       happy-dom:
         specifier: ^20.14.5
         version: 20.14.5
@@ -30,17 +30,17 @@ importers:
         specifier: ^0.52.0
         version: 0.52.2
       react:
-        specifier: ^18.3.0
-        version: 18.3.1
+        specifier: ^19.3.0
+        version: 19.3.0
       react-dom:
-        specifier: ^18.3.0
-        version: 18.3.1(react@18.3.1)
+        specifier: ^19.3.0
+        version: 19.3.0(react@19.3.0)
       vite:
         specifier: ^8.3.1
         version: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
       vite-plugin-dts:
         specifier: ^5.1.1
-        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
       vitest:
         specifier: ^4.1.0
         version: 4.1.5(@types/node@24.12.3)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
@@ -96,13 +96,13 @@ importers:
         version: 1.99.0
       '@vscode/test-electron':
         specifier: ^3.1.0
-        version: 3.1.0
+        version: 3.1.0(supports-color@8.1.1)
       '@vscode/test-web':
         specifier: ^0.0.81
-        version: 0.0.81
+        version: 0.0.81(supports-color@8.1.1)
       '@vscode/vsce':
         specifier: ^3.6.0
-        version: 3.9.1
+        version: 3.9.1(supports-color@8.1.1)
       esbuild:
         specifier: ^0.25.5
         version: 0.25.12
@@ -756,11 +756,8 @@ packages:
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
-  '@types/prop-types@15.7.15':
-    resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
-
-  '@types/react@18.3.28':
-    resolution: {integrity: sha512-z9VXpC7MWrhfWipitjNdgCauoMLRdIILQsAEV+ZesIzBq/oUlxk0m3ApZuMFCXdnS4U7KrI+l3WRUEGQ8K1QKw==}
+  '@types/react@19.3.0':
+    resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
 
   '@types/sarif@2.1.7':
     resolution: {integrity: sha512-kRz0VEkJqWLf1LLVN4pT1cg1Z9wAuvI6L97V3m2f5B76Tg8d413ddvLBPTEHAZJlnn4XSvu0FkZtViCQGVyrXQ==}
@@ -1864,10 +1861,6 @@ packages:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
     engines: {node: '>=18'}
 
-  loose-envify@1.4.0:
-    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
-    hasBin: true
-
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
@@ -2224,13 +2217,13 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+  react-dom@19.3.0:
+    resolution: {integrity: sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q==}
     peerDependencies:
-      react: ^18.3.1
+      react: ^19.3.0
 
-  react@18.3.1:
-    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+  react@19.3.0:
+    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
 
   read-pkg@9.0.1:
@@ -2302,8 +2295,8 @@ packages:
     resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
 
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+  scheduler@0.28.0:
+    resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
 
   secretlint@10.2.2:
     resolution: {integrity: sha512-xVpkeHV/aoWe4vP4TansF622nBEImzCY73y/0042DuJ29iKIaqgoJ8fGxre3rVSHHbxar4FdJobmTnLp9AU0eg==}
@@ -3171,7 +3164,7 @@ snapshots:
     dependencies:
       vary: 1.1.2
 
-  '@koa/router@15.7.0(koa@3.2.1)':
+  '@koa/router@15.7.0(koa@3.2.1)(supports-color@8.1.1)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 2.0.1
@@ -3383,11 +3376,8 @@ snapshots:
 
   '@types/normalize-package-data@2.4.4': {}
 
-  '@types/prop-types@15.7.15': {}
-
-  '@types/react@18.3.28':
+  '@types/react@19.3.0':
     dependencies:
-      '@types/prop-types': 15.7.15
       csstype: 3.2.3
 
   '@types/sarif@2.1.7': {}
@@ -3404,8 +3394,8 @@ snapshots:
 
   '@typespec/ts-http-runtime@0.3.5':
     dependencies:
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -3463,28 +3453,28 @@ snapshots:
       path-browserify: 1.0.1
       vscode-uri: 3.1.0
 
-  '@vscode/test-electron@3.1.0':
+  '@vscode/test-electron@3.1.0(supports-color@8.1.1)':
     dependencies:
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       jszip: 3.10.1
       ora: 8.2.0
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
 
-  '@vscode/test-web@0.0.81':
+  '@vscode/test-web@0.0.81(supports-color@8.1.1)':
     dependencies:
       '@koa/cors': 5.0.0
-      '@koa/router': 15.7.0(koa@3.2.1)
+      '@koa/router': 15.7.0(koa@3.2.1)(supports-color@8.1.1)
       '@playwright/browser-chromium': 1.62.1
       gunzip-maybe: 1.4.2
-      http-proxy-agent: 9.1.0
-      https-proxy-agent: 9.1.0
+      http-proxy-agent: 9.1.0(supports-color@8.1.1)
+      https-proxy-agent: 9.1.0(supports-color@8.1.1)
       koa: 3.2.1
       koa-morgan: 1.0.1
-      koa-mount: 4.2.0
-      koa-static: 5.0.0
+      koa-mount: 4.2.0(supports-color@8.1.1)
+      koa-static: 5.0.0(supports-color@8.1.1)
       minimist: 1.2.8
       playwright: 1.62.1
       tar-fs: 3.1.2
@@ -3536,7 +3526,7 @@ snapshots:
       '@vscode/vsce-sign-win32-arm64': 2.0.6
       '@vscode/vsce-sign-win32-x64': 2.0.6
 
-  '@vscode/vsce@3.9.1':
+  '@vscode/vsce@3.9.1(supports-color@8.1.1)':
     dependencies:
       '@azure/identity': 4.13.1
       '@secretlint/node': 10.2.2
@@ -3559,7 +3549,7 @@ snapshots:
       minimatch: 3.1.5
       parse-semver: 1.1.1
       read: 1.0.7
-      secretlint: 10.2.2
+      secretlint: 10.2.2(supports-color@8.1.1)
       semver: 7.7.4
       tmp: 0.2.5
       typed-rest-client: 1.8.11
@@ -4265,14 +4255,14 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  http-proxy-agent@7.0.2:
+  http-proxy-agent@7.0.2(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-agent@9.1.0:
+  http-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -4281,14 +4271,14 @@ snapshots:
       - kerberos
       - supports-color
 
-  https-proxy-agent@7.0.6:
+  https-proxy-agent@7.0.6(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@9.1.0:
+  https-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -4440,14 +4430,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  koa-mount@4.2.0:
+  koa-mount@4.2.0(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       koa-compose: 4.1.0
     transitivePeerDependencies:
       - supports-color
 
-  koa-send@5.0.1:
+  koa-send@5.0.1(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 1.8.1
@@ -4455,10 +4445,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  koa-static@5.0.0:
+  koa-static@5.0.0(supports-color@8.1.1):
     dependencies:
       debug: 3.2.7
-      koa-send: 5.0.1
+      koa-send: 5.0.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -4581,10 +4571,6 @@ snapshots:
     dependencies:
       chalk: 5.6.2
       is-unicode-supported: 1.3.0
-
-  loose-envify@1.4.0:
-    dependencies:
-      js-tokens: 4.0.0
 
   lru-cache@10.4.3: {}
 
@@ -4962,15 +4948,12 @@ snapshots:
       strip-json-comments: 2.0.1
     optional: true
 
-  react-dom@18.3.1(react@18.3.1):
+  react-dom@19.3.0(react@19.3.0):
     dependencies:
-      loose-envify: 1.4.0
-      react: 18.3.1
-      scheduler: 0.23.2
+      react: 19.3.0
+      scheduler: 0.28.0
 
-  react@18.3.1:
-    dependencies:
-      loose-envify: 1.4.0
+  react@19.3.0: {}
 
   read-pkg@9.0.1:
     dependencies:
@@ -5059,11 +5042,9 @@ snapshots:
 
   sax@1.6.0: {}
 
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
+  scheduler@0.28.0: {}
 
-  secretlint@10.2.2:
+  secretlint@10.2.2(supports-color@8.1.1):
     dependencies:
       '@secretlint/config-creator': 10.2.2
       '@secretlint/formatter': 10.2.2
@@ -5388,7 +5369,7 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
+  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
       '@rollup/pluginutils': 5.3.0
       '@volar/typescript': 2.4.28
@@ -5429,9 +5410,9 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
+  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
-      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
     optionalDependencies:
       vite: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
     transitivePeerDependencies:
