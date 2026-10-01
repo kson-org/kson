@@ -58,6 +58,19 @@ enum class SchemaResolutionType {
             DIRECT_PROPERTY, PATTERN_PROPERTY, ADDITIONAL_PROPERTY,
             ARRAY_ITEMS, ROOT -> false
         }
+
+    /**
+     * True for a schema that only applies when the document takes its branch: a oneOf/anyOf
+     * branch or an if/then/else outcome.
+     *
+     * Exhaustive by design, like [isBranchMarker].
+     */
+    val isAlternative: Boolean
+        get() = when (this) {
+            ONE_OF, ANY_OF, IF_THEN, IF_ELSE -> true
+            ALL_OF, DIRECT_PROPERTY, PATTERN_PROPERTY, ADDITIONAL_PROPERTY,
+            ARRAY_ITEMS, ROOT -> false
+        }
 }
 
 /** A schema node found by navigation, annotated with how it was reached. */
@@ -247,7 +260,13 @@ internal class SchemaNavigator(
      *     other than the one being navigated to) are visible and contradicted branches are
      *     dropped right here, with full ancestor context.  When [docVal] is null, all
      *     branches are emitted (nothing to narrow against).
-     *   - allOf: unconditional expansion, every branch emitted (all must hold).
+     *   - allOf: unconditional expansion, every branch emitted (all must hold).  Inside an
+     *     alternative, the members keep the alternative's mark instead of ALL_OF: they hold
+     *     only when that alternative does (see [SchemaResolutionType.isAlternative]).
+     *     Accepted trade-off: consumers then union the members' enums with the alternative's
+     *     instead of intersecting them, so a value only one member allows can be offered.
+     *     Marking them ALL_OF instead would intersect them against every other alternative
+     *     and hide values those allow, which is worse.
      *   - if / then / else: see [evaluateIf].  A matching `if` emits `then`; a
      *     contradicted `if` emits `else`; an undecidable `if` (no document, unparseable
      *     condition, or failing only because a required discriminator isn't present yet)
@@ -320,8 +339,9 @@ internal class SchemaNavigator(
             addNarrowedBranch(branch, SchemaResolutionType.ANY_OF)
         }
 
+        val allOfMemberType = ref.resolutionType.takeIf { it.isAlternative } ?: SchemaResolutionType.ALL_OF
         (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
-            addBranch(branch, SchemaResolutionType.ALL_OF)
+            addBranch(branch, allOfMemberType)
         }
 
         conditionalBranches(schemaObj, baseUri, docVal).forEach { (branch, resolutionType) ->

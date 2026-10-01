@@ -1300,6 +1300,83 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testAnyOfEnumsUnionThroughNestedAllOf() {
+        // The allOf only constrains its own anyOf branch, so its enum is one alternative
+        // among the branches rather than a constraint every value must meet.
+        val schema = """
+            {
+                "properties": {
+                    "p": { "anyOf": [ { "allOf": [ { "enum": ["a", "b"] } ] }, { "enum": ["c"] } ] }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, "p: <caret>")
+
+        assertEquals(setOf("a", "b", "c"), completions.map { it.label }.toSet())
+    }
+
+    @Test
+    fun testAllOfMembersInsideAnAlternativeAreUnioned() {
+        // Pins the allOf-inside-alternative trade-off documented on SchemaNavigator.flatten.
+        // Strictly only b satisfies both members.
+        val schema = """
+            {
+                "properties": {
+                    "p": { "anyOf": [ { "allOf": [ { "enum": ["a", "b"] }, { "enum": ["b", "c"] } ] } ] }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, "p: <caret>")
+
+        assertEquals(setOf("a", "b", "c"), completions.map { it.label }.toSet())
+    }
+
+    @Test
+    fun testAlternativeEnumIsUnionedWithItsAllOfMembers() {
+        // Pins the allOf-inside-alternative trade-off documented on SchemaNavigator.flatten.
+        // Strictly b (from the first branch) and d (from the second).
+        val schema = """
+            {
+                "properties": {
+                    "p": {
+                        "anyOf": [
+                            { "enum": ["a", "b"], "allOf": [ { "enum": ["b", "c"] } ] },
+                            { "enum": ["d"] }
+                        ]
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, "p: <caret>")
+
+        assertEquals(setOf("a", "b", "c", "d"), completions.map { it.label }.toSet())
+    }
+
+    @Test
+    fun testAllOfMembersUnderAMatchingIfAreUnioned() {
+        // Pins the allOf-inside-alternative trade-off documented on SchemaNavigator.flatten.
+        // The `if` matches, so only `then` applies, yet strictly only y satisfies both members.
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" } },
+                "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                "then": {
+                    "properties": {
+                        "p": { "allOf": [ { "enum": ["x", "y"] }, { "enum": ["y", "z"] } ] }
+                    }
+                }
+            }
+        """
+
+        val completions = getCompletionsAtCaret(schema, "kind: on\np: <caret>")
+
+        assertEquals(setOf("x", "y", "z"), completions.map { it.label }.toSet())
+    }
+
+    @Test
     fun testAnyOfWithRefsFiltersBasedOnExistingProperties() {
         val schema = $$"""
             anyOf:
