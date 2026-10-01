@@ -361,15 +361,9 @@ internal class SchemaNavigator(
     }
 
     /**
-     * Soft-validates [ref]'s schema against [docVal] using [ValidationMode.PARTIAL]: a branch is
-     * "compatible" unless the document ACTIVELY contradicts it (a present value violates a value
-     * constraint).  Mere incompleteness — a missing required property, a not-yet-reached minimum —
-     * never disqualifies a branch, because the schema layer itself skips those constraints in
-     * partial mode.
-     *
-     * Errors located inside [incompleteRegion] — the span of the value the caller is still authoring —
-     * are forgiven, so a half-typed value raises no disqualifying error: a branch is compatible when
-     * every partial-validation error it logs falls within that region.
+     * Whether [docVal] does not contradict [ref]'s schema: it either satisfies the schema already or
+     * could be made to satisfy it through additive edits, such as adding a missing required property
+     * or finishing the value still being typed.
      */
     private fun isCompatibleWithDocument(
         ref: ResolvedRef,

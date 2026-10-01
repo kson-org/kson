@@ -14,14 +14,19 @@ import kotlin.test.assertTrue
  * Interface to tie together our Json Schema tests and give a home to our custom assertions for these tests
  */
 interface JsonSchemaTest {
+    /**
+     * Pass a [sourceContext] carrying [org.kson.validation.ValidationMode.PARTIAL] to exercise
+     * draft-mode validation; it defaults to a full validation.
+     */
     fun assertKsonEnforcesSchema(ksonSource: String,
                                  schemaJson: String,
                                  shouldAcceptAsValid: Boolean,
-                                 message: String? = null) {
+                                 message: String? = null,
+                                 sourceContext: SourceContext = SourceContext()) {
         val jsonSchema = assertValidSchema(schemaJson, message)
         val parseResult = KsonCore.parseToAst(
             ksonSource.trimIndent(),
-            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema)
+            coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema, sourceContext = sourceContext)
         )
         // accepted as valid if and only if we parsed without error
         val acceptedAsValid = parseResult.messages.isEmpty()
