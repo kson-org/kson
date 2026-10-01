@@ -37,13 +37,13 @@ importers:
         version: 19.3.0(react@19.3.0)
       vite:
         specifier: ^8.3.1
-        version: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
+        version: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
       vite-plugin-dts:
         specifier: ^5.1.1
-        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
       vitest:
         specifier: ^5.0.2
-        version: 5.0.3(@types/node@24.12.3)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+        version: 5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
 
   shared:
     dependencies:
@@ -58,8 +58,8 @@ importers:
         version: 9.0.1
     devDependencies:
       '@types/node':
-        specifier: ^24.0.0
-        version: 24.12.3
+        specifier: 24.19.0
+        version: 24.19.0
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
@@ -86,8 +86,8 @@ importers:
         specifier: ^10.0.10
         version: 10.0.10
       '@types/node':
-        specifier: 24.0.0
-        version: 24.0.0
+        specifier: 24.19.0
+        version: 24.19.0
       '@types/uuid':
         specifier: ^9.0.8
         version: 9.0.8
@@ -747,11 +747,8 @@ packages:
   '@types/mocha@10.0.10':
     resolution: {integrity: sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==}
 
-  '@types/node@24.0.0':
-    resolution: {integrity: sha512-yZQa2zm87aRVcqDyH5+4Hv9KYgSdgwX1rFnGvpbzMaC7YAljmhBET93TPiTd3ObwTL+gSpIzPKg5BqVxdCvxKg==}
-
-  '@types/node@24.12.3':
-    resolution: {integrity: sha512-8oljBDGun9cIsZRJR6fkihn0TSXJI0UDOOhncYaERq6M0JMDoPLxyscwruJcb4GKS6dvK/d8xebYBg27h/duaQ==}
+  '@types/node@24.19.0':
+    resolution: {integrity: sha512-zY+5tKxXdhGh1PYI0ac+7juvEu4OI6vWtVVoj5i2m42jxAY1U+zHGt6QCyOFwykdP62sM3MJ9stoYYUw5aCWew==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2544,11 +2541,8 @@ packages:
   underscore@1.13.8:
     resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
-  undici-types@7.16.0:
-    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
-
-  undici-types@7.8.0:
-    resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
 
   undici@7.25.0:
     resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
@@ -3339,13 +3333,9 @@ snapshots:
 
   '@types/mocha@10.0.10': {}
 
-  '@types/node@24.0.0':
+  '@types/node@24.19.0':
     dependencies:
-      undici-types: 7.8.0
-
-  '@types/node@24.12.3':
-    dependencies:
-      undici-types: 7.16.0
+      undici-types: 7.24.6
 
   '@types/normalize-package-data@2.4.4': {}
 
@@ -3363,7 +3353,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.0.0
+      '@types/node': 24.19.0
 
   '@typespec/ts-http-runtime@0.3.5':
     dependencies:
@@ -3373,14 +3363,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/mocker@5.0.3(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@vitest/mocker@5.0.3(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.3
       estree-walker: 3.0.3
       magic-string: 1.4.2
     optionalDependencies:
-      vite: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
 
   '@vitest/spy@5.0.3': {}
 
@@ -3641,7 +3631,7 @@ snapshots:
 
   buffer-image-size@0.6.4:
     dependencies:
-      '@types/node': 24.0.0
+      '@types/node': 24.19.0
 
   buffer@5.7.1:
     dependencies:
@@ -4128,7 +4118,7 @@ snapshots:
 
   happy-dom@20.14.5:
     dependencies:
-      '@types/node': 24.0.0
+      '@types/node': 24.19.0
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       buffer-image-size: 0.6.4
@@ -5291,9 +5281,7 @@ snapshots:
 
   underscore@1.13.8: {}
 
-  undici-types@7.16.0: {}
-
-  undici-types@7.8.0: {}
+  undici-types@7.24.6: {}
 
   undici@7.25.0: {}
 
@@ -5303,7 +5291,7 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
+  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
       '@rollup/pluginutils': 5.3.0
       '@volar/typescript': 2.4.28
@@ -5318,7 +5306,7 @@ snapshots:
     optionalDependencies:
       esbuild: 0.28.2
       rolldown: 1.2.12
-      vite: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
     transitivePeerDependencies:
       - supports-color
 
@@ -5344,11 +5332,11 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
+  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
-      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
     optionalDependencies:
-      vite: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@vue/language-core'
@@ -5358,7 +5346,7 @@ snapshots:
       - typescript
       - webpack
 
-  vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15):
+  vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -5366,15 +5354,15 @@ snapshots:
       rolldown: 1.2.12
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 24.12.3
+      '@types/node': 24.19.0
       esbuild: 0.28.2
       fsevents: 2.3.3
       tsx: 4.23.15
 
-  vitest@5.0.3(@types/node@24.12.3)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)):
+  vitest@5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.3(vite@8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15))
+      '@vitest/mocker': 5.0.3(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -5385,10 +5373,10 @@ snapshots:
       tinybench: 6.2.0
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
-      vite: 8.3.1(@types/node@24.12.3)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
       why-is-node-running: 3.2.1
     optionalDependencies:
-      '@types/node': 24.12.3
+      '@types/node': 24.19.0
       happy-dom: 20.14.5
     transitivePeerDependencies:
       - msw
