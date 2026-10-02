@@ -637,6 +637,65 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testArrayItemCompletionsIgnoreAdditionalItemsBesideAnItemsSchema() {
+        // A single items schema covers every item, so additionalItems applies to none
+        val schema = """
+            {
+                type: object
+                properties: {
+                    colors: {
+                        type: array
+                        items: { enum: ["red", "green"] }
+                        additionalItems: false
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "colors:\n  - red\n  - <caret>", setOf("green", "red"))
+    }
+
+    @Test
+    fun testArrayItemCompletionsIgnoreAdditionalItemsWithoutItems() {
+        // With no items of its own, the array schema has no tuple for additionalItems to follow
+        val schema = """
+            {
+                type: object
+                properties: {
+                    list: {
+                        type: array
+                        additionalItems: false
+                        allOf: [ { items: { enum: ["a", "b"] } } ]
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "list:\n  - <caret>", setOf("a", "b"))
+    }
+
+    @Test
+    fun testArrayItemCompletionsFollowTheTupleByIndex() {
+        // The first item takes the tuple's own schema, not additionalItems.  Were the tuple missed, the
+        // allOf's wider enum would offer blue.
+        val schema = """
+            {
+                type: object
+                properties: {
+                    colors: {
+                        type: array
+                        items: [ { enum: ["red", "green"] } ]
+                        additionalItems: false
+                        allOf: [ { items: { enum: ["red", "green", "blue"] } } ]
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "colors:\n  - <caret>", setOf("green", "red"))
+    }
+
+    @Test
     fun testEnumCompletionsForPropertyWithinArrayItems() {
         // Create a schema with an array of objects containing enum properties
         // Similar to the todos array in the hardcoded schema

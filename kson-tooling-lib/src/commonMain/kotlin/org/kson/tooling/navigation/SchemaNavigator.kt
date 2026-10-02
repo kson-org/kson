@@ -95,7 +95,7 @@ internal class SchemaNavigator(
      *
      * This function translates document paths to schema paths by inserting schema-specific wrappers:
      * - For object properties: navigates through "properties" wrapper
-     * - For array indices: navigates to "items" schema (all array elements share the same schema)
+     * - For array indices: navigates to the item schema validation applies at that index (see [itemSchema])
      * - Falls back to "additionalProperties" or "patternProperties" when specific property not found
      * - Resolves `$ref` references to their target schemas
      * - Handles combinators (allOf, anyOf, oneOf) and conditionals (if/then/else), flattening
@@ -171,8 +171,9 @@ internal class SchemaNavigator(
 
     /**
      * Structural step by one pointer token.  Looks at properties / patternProperties /
-     * additionalProperties (for names) or items / additionalItems where the token is the list
-     * index [arrayIndex].  No combinator / conditional logic — [flatten] handles branching.
+     * additionalProperties (for names) or at the item schema validation applies at the list
+     * index [arrayIndex] (see [itemSchema]).  No combinator / conditional logic — [flatten]
+     * handles branching.
      *
      * Applies `$id` on [ref] to the base URI before property lookup, and resolves `$ref`
      * on the stepped-into schema.
@@ -190,10 +191,7 @@ internal class SchemaNavigator(
         val stepped = mutableListOf<Pair<KsonValue, SchemaResolutionType>>()
 
         if (arrayIndex != null) {
-            schemaObj.propertyLookup["items"]?.let {
-                stepped.add(it to SchemaResolutionType.ARRAY_ITEMS)
-            }
-            schemaObj.propertyLookup["additionalItems"]?.let {
+            itemSchema(schemaObj, arrayIndex)?.let {
                 stepped.add(it to SchemaResolutionType.ARRAY_ITEMS)
             }
         } else {
@@ -221,6 +219,19 @@ internal class SchemaNavigator(
                 inheritedType ?: stepType
             )
         }
+    }
+
+    /**
+     * The schema validation applies to the item at [index] of an array [arraySchema] describes: the tuple's own
+     * schema for an index the tuple covers, `additionalItems` past it, or a single `items` schema at any index.  Null
+     * when none applies, as without `items`.
+     *
+     * Validation applies the same rule in [org.kson.schema.validators.ItemsValidator].
+     */
+    private fun itemSchema(arraySchema: KsonObject, index: Int): KsonValue? {
+        val items = arraySchema.propertyLookup["items"]
+        val tuple = items as? KsonList ?: return items
+        return tuple.elements.getOrNull(index) ?: arraySchema.propertyLookup["additionalItems"]
     }
 
     /** The base URI that `$ref`s in [schema] resolve against. */
