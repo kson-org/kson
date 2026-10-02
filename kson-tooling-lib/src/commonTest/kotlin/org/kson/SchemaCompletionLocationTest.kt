@@ -1372,6 +1372,219 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testAnyOfEnumsUnionThroughNestedAllOf() {
+        // The allOf only constrains its own anyOf branch, so its enum is one alternative
+        // among the branches rather than a constraint every value must meet.
+        val schema = """
+            {
+                "properties": {
+                    "p": { "anyOf": [ { "allOf": [ { "enum": ["a", "b"] } ] }, { "enum": ["c"] } ] }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("a", "b", "c"))
+    }
+
+    @Test
+    fun testAllOfMembersInsideAnAlternativeAreIntersected() {
+        val schema = """
+            {
+                "properties": {
+                    "p": { "anyOf": [ { "allOf": [ { "enum": ["a", "b"] }, { "enum": ["b", "c"] } ] } ] }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("b"))
+    }
+
+    @Test
+    fun testAlternativeEnumIsIntersectedWithItsAllOfMembers() {
+        val schema = """
+            {
+                "properties": {
+                    "p": {
+                        "anyOf": [
+                            { "enum": ["a", "b"], "allOf": [ { "enum": ["b", "c"] } ] },
+                            { "enum": ["d"] }
+                        ]
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("b", "d"))
+    }
+
+    @Test
+    fun testAllOfMembersUnderAMatchingIfAreIntersected() {
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" } },
+                "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                "then": {
+                    "properties": {
+                        "p": { "allOf": [ { "enum": ["x", "y"] }, { "enum": ["y", "z"] } ] }
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "kind: on\np: <caret>", setOf("y"))
+    }
+
+    @Test
+    fun testWrappingInOneBranchAnyOfKeepsAllOfIntersection() {
+        val schema = """{ "properties": { "p": { "enum": ["a", "b"], "allOf": [ { "enum": ["b", "c"] } ] } } }"""
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("b"))
+        assertCompletionLabels("""{ "anyOf": [ $schema ] }""", "p: <caret>", setOf("b"))
+    }
+
+    @Test
+    fun testAnyOfBranchLeavingValueFreeKeepsBaseEnum() {
+        // b is valid through the string branch, though only the other branch lists values
+        val schema = """
+            {
+                "properties": {
+                    "p": { "enum": ["a", "b"], "anyOf": [ { "enum": ["a"] }, { "type": "string" } ] }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("a", "b"))
+    }
+
+    @Test
+    fun testEliminatedBranchIsSkippedWhileSilentBranchLeavesValueFree() {
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" }, "p": { "enum": ["x", "y", "z"] } },
+                "oneOf": [
+                    { "properties": { "kind": { "const": "a" }, "p": { "enum": ["x"] } } },
+                    { "properties": { "kind": { "const": "b" } } }
+                ]
+            }
+        """
+
+        // kind: a rules out the second branch, so the first one's enum applies
+        assertCompletionLabels(schema, "kind: a\np: <caret>", setOf("x"))
+        // Without kind, the second branch may hold, and it says nothing about p
+        assertCompletionLabels(schema, "p: <caret>", setOf("x", "y", "z"))
+    }
+
+    @Test
+    fun testBranchForbiddingThePropertyAllowsNoValue() {
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" }, "p": { "enum": ["x", "y"] } },
+                "oneOf": [
+                    { "properties": { "kind": { "const": "a" }, "p": { "enum": ["x"] } } },
+                    { "properties": { "kind": { "const": "b" }, "p": false } }
+                ]
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("x"))
+    }
+
+    @Test
+    fun testBranchClosedToThePropertyAllowsNoValue() {
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" }, "p": { "enum": ["x", "y"] } },
+                "oneOf": [
+                    { "properties": { "kind": { "const": "a" }, "p": { "enum": ["x"] } } },
+                    { "properties": { "kind": { "const": "b" } }, "additionalProperties": false }
+                ]
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("x"))
+    }
+
+    @Test
+    fun testThensOfIndependentIfsAreIntersected() {
+        val schema = """
+            {
+                "properties": {
+                    "kind": { "type": "string" },
+                    "mode": { "type": "string" },
+                    "p": { "enum": ["a", "b", "c"] }
+                },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "enum": ["a", "b"] } } }
+                    },
+                    {
+                        "if": { "properties": { "mode": { "const": "on" } }, "required": ["mode"] },
+                        "then": { "properties": { "p": { "enum": ["b", "c"] } } }
+                    }
+                ]
+            }
+        """
+
+        // An undecided if may still take its absent else, which leaves p free
+        assertCompletionLabels(schema, "p: <caret>", setOf("a", "b", "c"))
+        assertCompletionLabels(schema, "kind: on\np: <caret>", setOf("a", "b"))
+        assertCompletionLabels(schema, "kind: on\nmode: on\np: <caret>", setOf("b"))
+    }
+
+    @Test
+    fun testEqualIfConditionsAreOneChoice() {
+        // The conditions decide alike, so both thens hold, sharing only x, or both elses, sharing only y
+        val schema = """
+            {
+                "properties": { "kind": { "type": "string" } },
+                "allOf": [
+                    {
+                        "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "enum": ["a", "x"] } } },
+                        "else": { "properties": { "p": { "enum": ["b", "y"] } } }
+                    },
+                    {
+                        "if": { "properties": { "kind": { "const": "on" } }, "required": ["kind"] },
+                        "then": { "properties": { "p": { "enum": ["b", "x"] } } },
+                        "else": { "properties": { "p": { "enum": ["a", "y"] } } }
+                    }
+                ]
+            }
+        """
+
+        assertCompletionLabels(schema, "p: <caret>", setOf("x", "y"))
+    }
+
+    @Test
+    fun testAlternativeReachedAgainFurtherDownChoosesAgain() {
+        // Both nodes choose from the same oneOf, separately: the outer's kind a allows its child's p
+        // to be x or y, and the child's own kind b allows y or z
+        val schema = $$"""
+            {
+                "$defs": {
+                    "node": {
+                        "properties": { "kind": { "type": "string" }, "p": { "enum": ["x", "y", "z"] } },
+                        "oneOf": [
+                            {
+                                "properties": {
+                                    "kind": { "const": "a" },
+                                    "child": { "properties": { "p": { "enum": ["x", "y"] } } }
+                                }
+                            },
+                            { "properties": { "kind": { "const": "b" }, "p": { "enum": ["y", "z"] } } }
+                        ],
+                        "allOf": [ { "properties": { "child": { "$ref": "#/$defs/node" } } } ]
+                    }
+                },
+                "$ref": "#/$defs/node"
+            }
+        """
+
+        assertCompletionLabels(schema, "kind: a\nchild:\n  kind: b\n  p: <caret>", setOf("y"))
+    }
+
+    @Test
     fun testAnyOfWithRefsFiltersBasedOnExistingProperties() {
         val schema = $$"""
             anyOf:

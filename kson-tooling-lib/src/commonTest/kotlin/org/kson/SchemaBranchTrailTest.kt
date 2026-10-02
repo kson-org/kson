@@ -4,6 +4,7 @@ import org.kson.schema.SchemaIdLookup
 import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.BranchStep
+import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
@@ -17,17 +18,29 @@ import kotlin.test.fail
 
 class SchemaBranchTrailTest {
 
-    private fun trails(schema: String, path: List<String>, document: String? = null): List<String> {
-        val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
-        val navigated = SchemaNavigator(SchemaIdLookup(schemaValue)).navigate(
+    private fun navigate(schemaValue: KsonValue, path: List<String>, document: String?): List<NavigatedSchema> =
+        SchemaNavigator(SchemaIdLookup(schemaValue)).navigate(
             TreePointer(JsonPointer.fromTokens(path)),
             document?.let { KsonTooling.parse(it).rootAstNode }
         )
-        return navigated.map { schemaTrail ->
+
+    private fun trails(schema: String, path: List<String>, document: String? = null): List<String> {
+        val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
+        return navigate(schemaValue, path, document).map { schemaTrail ->
             val type = ((schemaTrail.resolvedValue as? KsonObject)?.propertyLookup?.get("type") as? KsonString)?.value
             val label = type ?: "untyped"
             val steps = schemaTrail.branchTrail.map { describe(it, schemaValue) }
             if (steps.isEmpty()) label else "$label via ${steps.joinToString(", then ")}"
+        }
+    }
+
+    /** Per schema navigated to [path], each step's branch taken and the branches the document left open. */
+    private fun openBranches(schema: String, path: List<String>, document: String? = null): List<String> {
+        val schemaValue = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
+        return navigate(schemaValue, path, document).map { navigated ->
+            navigated.branchTrail.joinToString(", then ") { step ->
+                "${describe(step.branch)} of ${step.choice.openBranches.map { describe(it) }}"
+            }
         }
     }
 
@@ -109,6 +122,46 @@ class SchemaBranchTrailTest {
             listOf("string via /if took then at depth 0", "object via /if took else at depth 0"),
             trails(schema, listOf("p"))
         )
+    }
+
+    @Test
+    fun stepListsTheBranchesTheDocumentLeavesOpen() {
+        val schema = """
+            {
+                "anyOf": [
+                    { "properties": { "kind": { "const": "a" }, "p": { "type": "string" } } },
+                    { "properties": { "kind": { "const": "b" }, "p": { "type": "object" } } },
+                    { "properties": { "kind": { "const": "a" } } }
+                ]
+            }
+        """
+        assertEquals(listOf("0 of [0, 2]"), openBranches(schema, listOf("p"), "kind: a"), "the third branch has no p, yet is open")
+        assertEquals(listOf("0 of [0, 1, 2]", "1 of [0, 1, 2]"), openBranches(schema, listOf("p")))
+    }
+
+    @Test
+    fun ifStepListsTheOutcomesTheDocumentLeavesOpen() {
+        val schema = """
+            {
+                "if": { "properties": { "kind": { "const": "a" } }, "required": ["kind"] },
+                "then": { "properties": { "p": { "type": "string" } } },
+                "else": { "properties": { "p": { "type": "object" } } }
+            }
+        """
+        assertEquals(listOf("then of [then]"), openBranches(schema, listOf("p"), "kind: a"))
+        assertEquals(listOf("else of [else]"), openBranches(schema, listOf("p"), "kind: b"))
+        assertEquals(listOf("then of [then, else]", "else of [then, else]"), openBranches(schema, listOf("p")))
+    }
+
+    @Test
+    fun ifOutcomeTheSchemaLeavesOutIsStillOpen() {
+        val schema = """
+            {
+                "if": { "properties": { "kind": { "const": "a" } }, "required": ["kind"] },
+                "then": { "properties": { "p": { "type": "string" } } }
+            }
+        """
+        assertEquals(listOf("then of [then, else]"), openBranches(schema, listOf("p")))
     }
 
     @Test

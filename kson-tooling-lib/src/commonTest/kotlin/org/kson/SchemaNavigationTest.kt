@@ -2,9 +2,9 @@ package org.kson
 
 import org.kson.schema.SchemaIdLookup
 import org.kson.tooling.KsonTooling
+import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
-import org.kson.tooling.navigation.SchemaResolutionType
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.walker.TreePointer
 import org.kson.value.KsonValue as InternalKsonValue
@@ -26,7 +26,7 @@ class SchemaNavigationTest {
     }
 
     /**
-     * Helper to navigate schema and get full [NavigatedSchema] results (including resolution type)
+     * Helper to navigate schema and get full [NavigatedSchema] results (including branch trails)
      */
     private fun navigateSchemaFull(schema: String, path: List<String>, document: String? = null): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
@@ -854,15 +854,15 @@ class SchemaNavigationTest {
             }
         """
 
-        // Both then and else branches should be navigable, with correct resolution types
+        // Both then and else branches should be navigable, each recording the branch it took
         val barkResults = navigateSchemaFull(schema, listOf("bark"))
         assertEquals(1, barkResults.size, "Expected to find 'bark' through then branch")
-        assertEquals(SchemaResolutionType.IF_THEN, barkResults.single().resolutionType)
+        assertEquals(Branch.Then, barkResults.single().branchTrail.single().branch)
         assertEquals("boolean", ((barkResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
 
         val meowResults = navigateSchemaFull(schema, listOf("meow"))
         assertEquals(1, meowResults.size, "Expected to find 'meow' through else branch")
-        assertEquals(SchemaResolutionType.IF_ELSE, meowResults.single().resolutionType)
+        assertEquals(Branch.Else, meowResults.single().branchTrail.single().branch)
         assertEquals("boolean", ((meowResults.single().resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
