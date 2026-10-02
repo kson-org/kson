@@ -197,7 +197,13 @@ export function startKsonServer(
             },
 
             completionProvider: {
-                triggerCharacters: ['"', "'", ':', ',', '{', '[', '\n'],
+                /**
+                 * Not ':', ',', '{' or '[': after `key:` the next keystroke is
+                 * often Enter, which must insert a newline, not accept a
+                 * suggestion. Newline and space are answered only at an
+                 * empty slot instead; see {@link shouldOfferCompletions}.
+                 */
+                triggerCharacters: ['"', "'", '\n', ' '],
                 resolveProvider: false
             }
         };

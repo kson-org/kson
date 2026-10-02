@@ -1,5 +1,7 @@
 import {TextDocument} from "vscode-languageserver-textdocument";
 import {
+    CompletionList,
+    CompletionTriggerKind,
     DiagnosticSeverity,
     DidOpenTextDocumentParams,
     TextEdit,
@@ -12,18 +14,20 @@ import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentSe
 import {FullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 import {ksonSettingsWithDefaults} from "../../../core/KsonSettings.js";
-import {pos} from "../../TestHelpers";
+import {pos, SCHEMA_URI, SchemaProviderTestStub, triggeredBy} from "../../TestHelpers";
 
 describe('KsonTextDocumentService', () => {
     const TEST_DISTRIBUTION_ID = 'test-ns';
     let connection: ConnectionStub;
     let service: KsonTextDocumentService;
+    let schemaProvider: SchemaProviderTestStub;
     let documentsManager: KsonDocumentsManager;
     const TEST_URI = 'test://test.kson';
 
     beforeEach(() => {
         connection = new ConnectionStub();
-        documentsManager = new KsonDocumentsManager();
+        schemaProvider = new SchemaProviderTestStub();
+        documentsManager = new KsonDocumentsManager(schemaProvider);
         service = new KsonTextDocumentService(documentsManager, createCommandExecutor, null, TEST_DISTRIBUTION_ID);
 
         documentsManager.listen(connection);
@@ -177,6 +181,34 @@ describe('KsonTextDocumentService', () => {
             openDocument('key: value');
             const result = await connection.requestCompletion(TEST_URI, pos(0, 0));
             assert.strictEqual(result, null);
+        });
+
+        it('should pass how completion was triggered on to the completion service', async () => {
+            schemaProvider.addSchema(TEST_URI, TextDocument.create(SCHEMA_URI, 'kson', 1, `{
+                type: object
+                properties: {
+                    server: {
+                        type: object
+                        properties: {
+                            host: { type: string }
+                        }
+                    }
+                }
+            }`));
+            openDocument('server: ');
+
+            // Invoking completion after the colon offers the nested property...
+            const invoked = await connection.requestCompletion(
+                TEST_URI, pos(0, 8), {triggerKind: CompletionTriggerKind.Invoked}
+            ) as CompletionList;
+            assert.deepStrictEqual(invoked.items.map(item => item.label), ['host']);
+
+            // ...and so does a space typed there, while one typed mid-word does not
+            const typed = await connection.requestCompletion(TEST_URI, pos(0, 8), triggeredBy(' ')) as CompletionList;
+            assert.deepStrictEqual(typed.items.map(item => item.label), ['host']);
+            openDocument('server: x');
+            const midWord = await connection.requestCompletion(TEST_URI, pos(0, 8), triggeredBy(' '));
+            assert.strictEqual(midWord, null);
         });
     });
 
