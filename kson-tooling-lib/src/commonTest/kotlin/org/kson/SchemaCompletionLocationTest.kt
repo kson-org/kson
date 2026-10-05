@@ -624,6 +624,19 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testEnumCompletionsForAPropertyNamedByANumber() {
+        // `0` names a property here, not a list's first item, so its own values are offered
+        val schema = """
+            {
+                properties: { '0': { enum: ["a", "b"] } }
+                items: { enum: ["x", "y"] }
+            }
+        """
+
+        assertCompletionLabels(schema, "'0': <caret>", setOf("a", "b"))
+    }
+
+    @Test
     fun testEnumCompletionsForPropertyWithinArrayItems() {
         // Create a schema with an array of objects containing enum properties
         // Similar to the todos array in the hardcoded schema

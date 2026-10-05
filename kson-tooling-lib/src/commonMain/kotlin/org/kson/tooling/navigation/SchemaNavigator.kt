@@ -15,6 +15,7 @@ import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
+import org.kson.walker.NodeChildren
 import org.kson.walker.TreePointer
 import org.kson.walker.nodesAlong
 
@@ -120,12 +121,14 @@ internal class SchemaNavigator(
      * span of that half-authored value as [incompleteRegion]; validation errors located inside it are
      * forgiven, so an incomplete value never disqualifies a branch.
      *
-     * The document is walked on its AST, the tree [documentPointer] was built on (see [TreePointer]),
-     * and the node reached at each level is converted with [toKsonValueOrNull] to narrow by, so
-     * whatever did parse in a broken document still narrows.
+     * The document is walked on its AST, the tree [documentPointer] was built on (see [TreePointer]).
+     * A token reads the same for a list index and a property named by a number, so the node it is
+     * read in tells which it is (see [arrayIndex]).  The node reached at each level is converted with
+     * [toKsonValueOrNull] to narrow by, so whatever did parse in a broken document still narrows.
      *
      * @param documentPointer Pointer through the document's AST (e.g. from [KsonValuePathBuilder])
-     * @param documentAst Root of the document's AST, walked along [documentPointer] (drives branch narrowing)
+     * @param documentAst Root of the document's AST, walked along [documentPointer]; without it, a number is
+     *   taken as an index and no branch is ruled out
      * @return List of [NavigatedSchema] containing all sub-schemas at that location (empty if not found)
      */
     fun navigate(
@@ -143,10 +146,13 @@ internal class SchemaNavigator(
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens
         val docNodes = documentAst?.let { AstNodeWalker.nodesAlong(it, documentPointer) }.orEmpty()
+        // the node each token is read in: the root, then the node the token before it stepped to
+        val containers = listOfNotNull(documentAst) + docNodes
         var current = flatten(rootRef, documentAst?.toKsonValueOrNull())
 
         for ((index, token) in tokens.withIndex()) {
-            val stepped = current.flatMap { stepInto(it, token) }
+            val arrayIndex = arrayIndex(token, containers.getOrNull(index))
+            val stepped = current.flatMap { stepInto(it, token, arrayIndex) }
             val docValue = docNodes.getOrNull(index)?.toKsonValueOrNull()
             current = stepped.flatMap { flatten(it, docValue) }
             if (current.isEmpty()) break
@@ -156,9 +162,17 @@ internal class SchemaNavigator(
     }
 
     /**
+     * The list index [token] stands for, or null where it names a property.  In an object [container], a token names
+     * a property even when it is a number.  Anywhere else a number is an index, including where the document has no
+     * node to read the token in, as past what it holds.
+     */
+    private fun arrayIndex(token: String, container: AstNode?): Int? =
+        if (container?.let(AstNodeWalker::getChildren) is NodeChildren.Object) null else token.toIntOrNull()
+
+    /**
      * Structural step by one pointer token.  Looks at properties / patternProperties /
-     * additionalProperties (for names) or items / additionalItems (for integer indices).
-     * No combinator / conditional logic — [flatten] handles branching.
+     * additionalProperties (for names) or items / additionalItems where the token is the list
+     * index [arrayIndex].  No combinator / conditional logic — [flatten] handles branching.
      *
      * Applies `$id` on [ref] to the base URI before property lookup, and resolves `$ref`
      * on the stepped-into schema.
@@ -169,14 +183,13 @@ internal class SchemaNavigator(
      * stepped result's resolutionType reflects how the step resolved the token
      * (DIRECT_PROPERTY / PATTERN_PROPERTY / ADDITIONAL_PROPERTY / ARRAY_ITEMS).
      */
-    private fun stepInto(ref: NavigatedSchema, token: String): List<NavigatedSchema> {
+    private fun stepInto(ref: NavigatedSchema, token: String, arrayIndex: Int?): List<NavigatedSchema> {
         val schemaObj = ref.resolvedValue as? KsonObject ?: return emptyList()
         val updatedBaseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
 
         val stepped = mutableListOf<Pair<KsonValue, SchemaResolutionType>>()
-        val isArrayIndex = token.toIntOrNull() != null
 
-        if (isArrayIndex) {
+        if (arrayIndex != null) {
             schemaObj.propertyLookup["items"]?.let {
                 stepped.add(it to SchemaResolutionType.ARRAY_ITEMS)
             }

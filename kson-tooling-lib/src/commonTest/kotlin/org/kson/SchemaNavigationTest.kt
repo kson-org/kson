@@ -28,9 +28,10 @@ class SchemaNavigationTest {
     /**
      * Helper to navigate schema and get full [NavigatedSchema] results (including resolution type)
      */
-    private fun navigateSchemaFull(schema: String, path: List<String>): List<NavigatedSchema> {
+    private fun navigateSchemaFull(schema: String, path: List<String>, document: String? = null): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(path)))
+            SchemaNavigator(SchemaIdLookup(it))
+                .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { doc -> KsonTooling.parse(doc).rootAstNode })
         } ?: emptyList()
     }
 
@@ -427,6 +428,24 @@ class SchemaNavigationTest {
         val results = navigateSchema(schema, listOf("tuple", "0"))
         assertEquals(1, results.size)
         assertEquals("boolean", ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigatePropertyNamedByANumber() {
+        // A pointer token reads the same for a property named 0 and a list's first item, so the document tells
+        // them apart
+        val schema = """
+            {
+                properties: { "0": { properties: { a: { type: "object" } } } }
+                items: { properties: { a: { type: "string" } } }
+            }
+        """
+        fun typeAt(document: String?) = navigateSchemaFull(schema, listOf("0", "a"), document)
+            .map { ((it.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+
+        assertEquals(listOf("object"), typeAt("'0': {}"))
+        assertEquals(listOf("string"), typeAt("[{}]"))
+        assertEquals(listOf("string"), typeAt(null), "without the document, a number is taken as an index")
     }
 
     @Test
