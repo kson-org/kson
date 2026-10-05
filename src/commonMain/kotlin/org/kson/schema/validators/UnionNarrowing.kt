@@ -79,11 +79,8 @@ private fun selectDiscriminatedBranch(
     when {
         selectedBranch != null -> selectedBranch.validate(ksonValue, messageSink, sourceContext)
 
-        discriminator.allBranchesPinned -> {
-            val allowedValues = discriminator.branchByValue.keys
-                .joinToString(", ") { it.toDisplayString() }
-            messageSink.error(discriminatorValue.location, SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowedValues))
-        }
+        discriminator.allBranchesPinned ->
+            reportEnumValueNotAllowed(discriminatorValue, messageSink, discriminator.branchByValue.keys)
 
         // a wildcard/negative branch might legitimately accept this value
         else -> return false
