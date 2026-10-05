@@ -11,10 +11,14 @@ class EnumValidator(private val enum: KsonList) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val enumValues = enum.elements
         if (!enumValues.contains(ksonValue)) {
-            val allowedValues = enumValues.joinToString(", ") { it.toDisplayString() }
-            messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowedValues))
+            reportEnumValueNotAllowed(ksonValue, messageSink, enumValues)
         }
     }
 
     override fun pinnedValues(): Set<KsonValue> = enum.elements.toSet()
+}
+
+internal fun reportEnumValueNotAllowed(ksonValue: KsonValue, messageSink: MessageSink, allowedValues: Iterable<KsonValue>) {
+    val allowed = allowedValues.joinToString(", ") { it.toDisplayString() }
+    messageSink.error(ksonValue.location, MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED.create(allowed))
 }
