@@ -1,24 +1,21 @@
 package org.kson.schema.validators
 
+import org.kson.parser.Coordinates
+import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * *Elimination*: a branch that pins a property to a value set the document contradicts is
- * provably dead and drops out of the reported errors — with none of the ≥2-branch or disjointness
- * gating discriminator selection requires.  Elimination composes with presence narrowing as
- * `S ∩ M` (else the survivors `S`), so these cases also pin down that composition: a single
- * contradicted pin narrows the dump, all-eliminated unions still fall back to the full dump, and
- * presence can never resurrect a branch elimination has already ruled out.
+ * Elimination: a branch whose pin the document's value falls outside of drops out while another
+ * survives.  Pin selection and presence only narrow among the survivors.
  */
 class OneOfEliminationTest : JsonSchemaTest {
     /**
-     * A union whose branches share `kind` — pinned to a `const` by some, repeated across others — with
-     * each branch requiring its own `params` property.  `kind` can't discriminate (`A` repeats) but a
-     * mismatch still eliminates, so it exercises the composition without ever forming a discriminator.
+     * `kind` A repeats, so a value can match several branches' pins.
      */
     private val duplicateConstUnion = """
         {
@@ -48,11 +45,33 @@ class OneOfEliminationTest : JsonSchemaTest {
         }
     """.trimIndent()
 
+    private val unionWithEliminatedDuplicatePin = """
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "kind": { "const": "A" },
+                "version": { "const": 1 }
+              },
+              "required": ["kind", "version"]
+            },
+            {
+              "properties": { "kind": { "const": "A" } },
+              "required": ["kind", "alpha"]
+            },
+            {
+              "properties": {
+                "kind": { "type": "string" },
+                "beta": { "type": "string" }
+              },
+              "required": ["kind", "gamma"]
+            }
+          ]
+        }
+    """.trimIndent()
+
     /**
-     * A single pinned branch is too few to form a value discriminator (that needs ≥2), but a contradicted
-     * pin still eliminates: only branch A pins `kind`, and `kind: "B"` is outside its `["A"]`, so branch A
-     * is dropped and the union narrows to the lone unpinned branch — surfacing its missing `value` alone
-     * rather than dumping both branches.
+     * One pinned branch is enough to eliminate.
      */
     @Test
     fun testOneOfSinglePinnedBranchMismatchEliminates() {
@@ -87,11 +106,6 @@ class OneOfEliminationTest : JsonSchemaTest {
         assertFalse(errors[0].message.toString().contains("extra_a"))
     }
 
-    /**
-     * Non-disjoint pins (`kind`: A, A, B) can't discriminate, but a mismatch eliminates every branch that
-     * pins `kind` away from the document's value: `kind: "B"` drops both `A` branches, narrowing to the
-     * lone `B` branch and surfacing its deeper `p3` requirement as a bare message.
-     */
     @Test
     fun testOneOfNonDisjointPinsEliminateContradictedBranches() {
         val errors = assertKsonSchemaErrors(
@@ -112,29 +126,227 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * When the document's value contradicts *every* branch's pin (`kind: "Z"` is outside {A} and {B}), the
-     * survivor set is empty — elimination can't narrow to nothing — so we fall back to the full per-branch
-     * dump rather than inventing a "must be one of" error from the non-disjoint pins.
+     * `version: 2` eliminates the first branch, making `kind: "A"` unique among the surviving pins.
      */
     @Test
-    fun testOneOfAllBranchesEliminatedKeepsFullDump() {
+    fun testOneOfEliminatedDuplicatePinDoesNotPreventSelection() {
         val errors = assertKsonSchemaErrors(
+            """
+                kind: "A"
+                version: 2
+            """.trimIndent(),
+            unionWithEliminatedDuplicatePin,
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+        )
+
+        assertEquals("Missing required properties: alpha", errors[0].message.toString())
+    }
+
+    /**
+     * The surviving unique pin selects before presence of `beta` can favor the unpinned branch.
+     */
+    @Test
+    fun testOneOfSelectionAfterEliminationTakesPrecedenceOverPresence() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "A"
+                version: 2
+                beta: "present"
+            """.trimIndent(),
+            unionWithEliminatedDuplicatePin,
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+        )
+
+        assertEquals("Missing required properties: alpha", errors[0].message.toString())
+    }
+
+    /**
+     * Each pinned value is listed once, though `A` is pinned twice.
+     */
+    @Test
+    fun testOneOfValueNoBranchAdmitsReportsAllowedValues() {
+        val errors = assertKsonSchemaErrorAtLocation(
             """
                 kind: "Z"
                 params: {}
             """.trimIndent(),
             duplicateConstUnion,
             listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            // the enum error hangs off the `kind` value `Z`
+            listOf(
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
+            )
+        )
+
+        assertEquals("Value must be one of: \"A\", \"B\"", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfEachValueNoBranchAdmitsIsReported() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                kind: "Z"
+                mode: "sync"
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": { "kind": { "const": "A" }, "mode": { "const": "read" } },
+                      "required": ["kind", "mode"]
+                    },
+                    {
+                      "properties": { "kind": { "const": "B" }, "mode": { "const": "write" } },
+                      "required": ["kind", "mode"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            listOf(
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8),
+                Location(Coordinates(1, 7), Coordinates(1, 11), 17, 21)
+            )
+        )
+
+        assertEquals("Value must be one of: \"A\", \"B\"", errors[0].message.toString())
+        assertEquals("Value must be one of: \"read\", \"write\"", errors[1].message.toString())
+    }
+
+    /**
+     * `kind: "A"` is admitted by branch A alone, but `version: 2` rules branch A out with every other,
+     * so the shared value is blamed alone; branch A's missing `alpha` waits until `version` is fixed.
+     */
+    @Test
+    fun testOneOfSharedPinRejectionIsReportedAlone() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                version: 2
+                kind: "A"
+                params: {}
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "version": { "const": 1 },
+                        "kind": { "const": "A" },
+                        "params": { "type": "object", "required": ["alpha"] }
+                      },
+                      "required": ["version", "kind"]
+                    },
+                    {
+                      "properties": {
+                        "version": { "const": 1 },
+                        "kind": { "const": "B" },
+                        "params": { "type": "object", "required": ["beta"] }
+                      },
+                      "required": ["version", "kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            // at the `version` value `2`
+            listOf(
+                Location(Coordinates(0, 9), Coordinates(0, 10), 9, 10)
+            )
+        )
+
+        assertEquals("Value must be one of: 1", errors[0].message.toString())
+    }
+
+    /**
+     * A lone branch keeps its own errors, which say more than the enum error would.
+     */
+    @Test
+    fun testOneOfSingleBranchKeepsItsOwnErrors() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "B"
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": { "kind": { "const": "A" }, "name": { "type": "string" } },
+                      "required": ["kind", "name"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_VALUE_NOT_EQUAL_TO_CONST,
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            )
+        )
+
+        assertContains(errors[1].message.toString(), "name")
+    }
+
+    /**
+     * No survivor, yet no value every branch rejects: nothing narrows.
+     */
+    @Test
+    fun testOneOfBranchesEliminatedOnDifferentPropertiesReportEveryBranch() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "X"
+                mode: "N"
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "title": "BranchA",
+                      "properties": { "kind": { "const": "A" }, "need_a": { "type": "string" } },
+                      "required": ["need_a"]
+                    },
+                    {
+                      "title": "BranchB",
+                      "properties": { "mode": { "const": "M" }, "need_b": { "type": "string" } },
+                      "required": ["need_b"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
                 SCHEMA_SUB_SCHEMA_ERRORS
             )
         )
 
-        // every branch is eliminated, so none is narrowed away: the dump still lists all three
-        val dump = errors[1].message.toString()
-        assertContains(dump, "p1")
-        assertContains(dump, "p2")
-        assertContains(dump, "p3")
+        val report = errors[1].message.toString()
+        assertContains(report, "BranchA")
+        assertContains(report, "BranchB")
+    }
+
+    /**
+     * Every branch of `oneOf: []` vacuously rejects every value; that must not become enum errors
+     * listing nothing.
+     */
+    @Test
+    fun testOneOfWithNoBranchesBlamesNoValue() {
+        assertKsonSchemaErrors(
+            """
+                kind: "A"
+            """.trimIndent(),
+            """
+                { "oneOf": [] }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
     }
 
     /**
@@ -176,10 +388,7 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * The composition prefers `S ∩ M`: elimination drops branch A (`kind: "X"` ∉ `["A"]`), leaving two
-     * survivors, and presence then refines those to the single branch whose distinguishing property the
-     * document carries.  With `kind: "X"` alone, `need_b`'s branch is the one both signals agree on, so its
-     * missing `need_b` surfaces — neither the eliminated branch A's `need_a` nor the unmatched branch C.
+     * Survivors {B, C} are refined by presence of `kind`, which B knows and C doesn't.
      */
     @Test
     fun testOneOfEliminationRefinesPresenceMatch() {
@@ -220,10 +429,8 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * Presence must not resurrect an eliminated branch.  `kind: "X"` eliminates branch A, yet `kind` is
-     * also the only property branch A *knows*, so presence alone would match A — the exact branch just
-     * proven dead.  Intersecting with the survivors drops A from the presence match, leaving `S ∩ M` empty,
-     * so the report falls back to the survivors {B, C} and never mentions A's requirements.
+     * `kind` is known only by branch A, so presence alone would match the branch `kind: "X"`
+     * just eliminated.
      */
     @Test
     fun testOneOfPresenceCannotResurrectEliminatedBranch() {
@@ -259,10 +466,10 @@ class OneOfEliminationTest : JsonSchemaTest {
         )
 
         // branch A is eliminated despite presence matching it, so the dump narrows to the survivors, not A
-        val dump = errors[1].message.toString()
-        assertContains(dump, "BranchB")
-        assertContains(dump, "BranchC")
-        assertFalse(dump.contains("BranchA"))
+        val report = errors[1].message.toString()
+        assertContains(report, "BranchB")
+        assertContains(report, "BranchC")
+        assertFalse(report.contains("BranchA"))
     }
 
     /**

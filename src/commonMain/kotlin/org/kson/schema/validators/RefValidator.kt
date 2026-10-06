@@ -44,14 +44,7 @@ class RefValidator(
      */
     fun refShortName(): String? = targetTitle() ?: pointerTail(refString)
 
-    /**
-     * The schema this `$ref` resolves to, or `null` if the target failed to parse.  Reads through the
-     * shared lazy [refParseResult] so callers reuse [SchemaParser]'s single parse of the target rather
-     * than re-parsing it.
-     *
-     * Used by [JsonObjectSchema.pinnedProperties] to see through a combinator branch written as a lone
-     * `$ref` (e.g. `oneOf: [{ $ref: … }]`) to the target's discriminator pins.
-     */
+    /** The schema this `$ref` resolves to, or `null` if the target failed to parse. */
     internal fun resolvedSchema(): JsonSchema? = refParseResult.first
 
     /**

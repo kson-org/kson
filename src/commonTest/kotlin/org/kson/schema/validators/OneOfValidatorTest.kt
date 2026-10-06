@@ -122,7 +122,7 @@ class OneOfValidatorTest : JsonSchemaTest {
      * keep the existing full dump of every branch's errors.
      */
     @Test
-    fun testOneOfWithoutDiscriminatorDumpsSubSchemaErrors() {
+    fun testOneOfWithoutDiscriminatorReportsSubSchemaErrors() {
         assertKsonSchemaErrors(
             """
                 value: "hello"

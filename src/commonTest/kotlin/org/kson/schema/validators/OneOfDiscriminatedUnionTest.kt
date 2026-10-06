@@ -8,14 +8,13 @@ import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Value-based discriminated unions: a shared property pinned to pairwise-disjoint `const`/`enum`
- * values (inline, through a lone `$ref`, or a mix) selects the branch the document's discriminator
- * picks, so only that branch's deeper failure is reported.  Also covers the cases where no
- * discriminator forms (duplicate / overlapping / empty pins) — where discriminator detection declines and
- * elimination drops the branches the document's value contradicts — and the closed-union enum error.
+ * Narrowing on pinned values, whether inline, through a lone `$ref`, or mixed.  A value admitted by
+ * one pin alone selects that branch; a value no pin admits is an enum error; a value outside a
+ * branch's pin eliminates that branch.  Pins needn't be disjoint.
  */
 class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     /**
@@ -64,10 +63,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     """.trimIndent()
 
     /**
-     * A discriminated union whose branches are written as `$ref`s into `$defs` — the dominant
-     * real-world shape.  Each branch pins `kind` to a distinct `const` and requires a different
-     * `params` property, so it discriminates exactly like the inline unions above, but only once
-     * detection resolves through the refs to the targets' properties.
+     * Branches written as `$ref`s into `$defs`, the dominant real-world shape.
      */
     private val refDiscriminatedUnion = """
         {
@@ -143,10 +139,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * The motivating real-world discriminator shape is `{ type: string, const: X }` — a `const` with a
-     * sibling `type` — not the bare `{ const: X }` the other tests use.  The sibling `type` parses into
-     * a separate type-validator, so the property's `schemaValidators` is still just `[ConstValidator]`
-     * and discriminator detection selects the matching branch exactly as it does for a bare `const`.
+     * The real-world shape is `{ type: string, const: X }`; the sibling `type` parses into a separate
+     * validator, so the property still pins.
      */
     @Test
     fun testOneOfDiscriminatorWithSiblingTypeSelectsMatchingBranch() {
@@ -190,52 +184,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * When the discriminator value matches no branch's `const`, collapse to one enum error at the
-     * discriminator value rather than dumping every branch.
-     */
-    @Test
-    fun testOneOfDiscriminatorMatchesNoBranch() {
-        val errors = assertKsonSchemaErrorAtLocation(
-            """
-                kind: "Z"
-                params: {}
-            """.trimIndent(),
-            """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "const": "B" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
-            """.trimIndent(),
-            listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
-            ),
-            // the enum error hangs off the `kind` value `Z` (the discriminator the user must fix)
-            listOf(
-                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
-            )
-        )
-
-        assertContains(errors[0].message.toString(), "Value must be one of: \"A\", \"B\"")
-    }
-
-    /**
-     * Mirrors the real `allOf[ base, oneOf[ branches ] ]` shape: the discriminator-aware reporting
-     * still applies through the `allOf` wrapper, and branches keyed by dual consts (`kind` +
-     * `kind_job`) discriminate on the first const property in declaration order.
+     * Narrowing applies through the `allOf[ base, oneOf[ branches ] ]` wrapper.
      */
     @Test
     fun testOneOfDiscriminatorThroughAllOfWrapper() {
@@ -281,19 +230,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             )
         )
 
-        // selected branch A via `kind` (the first const property), so its `alpha` requirement surfaces
         assertContains(errors[0].message.toString(), "alpha")
     }
 
     /**
-     * Real-schema reduction: `kind` consts repeat (A, A, B) so it can't discriminate, but `kind_job`
-     * consts are distinct (J1, J2, J3) and a trailing wildcard branch pins neither.  Detection must
-     * tolerate the duplicate-const property and the wildcard, choose `kind_job`, and report only the
-     * branch the document's `kind_job` selects — here the J1 branch's `params` requirement.
-     *
-     * The document's `kind` is `A`, shared by the J1 and J2 branches, so `J1` and `kind: A` point at
-     * different branches: selecting J1's branch (requires `p1`) — not the `kind`-ambiguous J2 branch
-     * (requires `p2`) — proves `kind_job`, not `kind`, drove the choice.
+     * `kind_job: J1` is admitted by the J1 branch alone, which selects it over the `kind`-matching J2
+     * branch and the wildcard.
      */
     @Test
     fun testOneOfDiscriminatorToleratesDuplicateConstsAndWildcard() {
@@ -313,11 +255,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * With a wildcard branch present, a `kind_job` value that matches no pinned branch must NOT collapse
-     * to a closed-union enum error — the wildcard might legitimately accept it — so discriminator selection declines.  But
-     * each of the three pinned branches pins `kind_job` to a value the document contradicts (`J9` is
-     * outside {J1}, {J2}, {J3}), so elimination drops all three and narrows to the lone surviving wildcard
-     * branch, surfacing its deeper `p4` requirement instead of dumping every branch.
+     * No enum error: the wildcard pins no `kind_job`, so it might accept `J9`.  The three contradicted
+     * branches drop out instead, leaving the wildcard alone.
      */
     @Test
     fun testOneOfDiscriminatorWildcardNoMatchNarrowsToWildcardBranch() {
@@ -338,14 +277,84 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * When the only shared const property repeats consts across branches (`kind`: A, A, B), it can't
-     * *discriminate* — no single branch a value selects — so discriminator selection declines rather than arbitrarily
-     * picking one of the `A` branches.  A mismatch still *eliminates*, though: `kind: "A"` is outside the
-     * `B` branch's pin, dropping it, so the dump narrows to just the two `A` branches (each missing its
-     * own `params` property) and omits the `B` branch's `p3` entirely.
+     * Selection never resurrects a contradicted branch: `kind_job: "J1"` is admitted by the J1 branch
+     * alone and `kind: "B"` by the J3 branch alone, but each contradicts the other's pin, so the
+     * surviving wildcard is reported instead.
      */
     @Test
-    fun testOneOfDuplicateConstPropertyDoesNotDiscriminate() {
+    fun testOneOfSelectionNeverResurrectsContradictedBranch() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "B"
+                kind_job: "J1"
+                params: {}
+            """.trimIndent(),
+            duplicateConstUnionWithWildcard,
+            listOf(
+                SCHEMA_NOT_VALIDATION_FAILED,
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            )
+        )
+
+        assertEquals("Missing required properties: p4", errors[1].message.toString())
+    }
+
+    /**
+     * No pin outranks another: `kind` selects branch A and `version` branch W.  The unpinned branch
+     * survives elimination and matches by presence, but neither pin selects it.
+     */
+    @Test
+    fun testOneOfEverySelectingPinCounts() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "A"
+                version: 2
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "title": "BranchA",
+                      "properties": { "kind": { "const": "A" }, "needs_a": { "type": "string" } },
+                      "required": ["kind", "needs_a"]
+                    },
+                    {
+                      "title": "BranchB",
+                      "properties": { "kind": { "const": "B" }, "needs_b": { "type": "string" } },
+                      "required": ["kind", "needs_b"]
+                    },
+                    {
+                      "title": "BranchW",
+                      "properties": { "version": { "const": 2 }, "needs_w": { "type": "string" } },
+                      "required": ["version", "needs_w"]
+                    },
+                    {
+                      "title": "UnpinnedBranch",
+                      "properties": { "kind": { "type": "string" }, "version": { "type": "number" } },
+                      "required": ["needs_unpinned"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- BranchA:\n    - Missing required properties: needs_a (1:1)\n" +
+                "- BranchW:\n    - Missing required properties: needs_w (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
+    /**
+     * `kind: "A"` matches two branches, so nothing picks one; it still eliminates the `B` branch.
+     */
+    @Test
+    fun testOneOfDuplicateConstPropertyDoesNotSelect() {
         val errors = assertKsonSchemaErrors(
             """
                 kind: "A"
@@ -385,10 +394,10 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         )
 
         // `kind: "A"` eliminates the `B` branch; the dump keeps only the two `A` branches (p1, p2), not p3
-        val dump = errors[1].message.toString()
-        assertContains(dump, "p1")
-        assertContains(dump, "p2")
-        assertFalse(dump.contains("p3"))
+        val report = errors[1].message.toString()
+        assertContains(report, "p1")
+        assertContains(report, "p2")
+        assertFalse(report.contains("p3"))
     }
 
     /**
@@ -438,10 +447,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * A multi-value `enum` pins a property to a *set* of values; as long as the branches' sets are
-     * disjoint they still discriminate.  Branch A pins `kind` to `["A", "B"]` and branch B to `["C"]`,
-     * so the document's `kind: "B"` selects branch A — surfacing its `alpha` requirement, not branch
-     * B's `gamma` — proving the whole value set, not just the first element, maps to the branch.
+     * `kind: "B"` is the second value of branch A's set: the whole set admits, not just its first value.
      */
     @Test
     fun testOneOfMultiValueEnumDiscriminatorSelectsMatchingBranch() {
@@ -483,11 +489,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * Overlapping `enum` sets can't *discriminate*: branch A pins `kind` to `["A", "B"]` and branch B to
-     * `["B", "C"]`, so `"B"` would select both — the disjointness rule disqualifies `kind` as a discriminator.
-     * A mismatch still *eliminates*, though: `kind: "A"` is outside branch B's `["B", "C"]`, so branch B
-     * is provably dead and drops out, narrowing to branch A alone and surfacing its `alpha` requirement
-     * rather than dumping both branches.
+     * Though the sets overlap, only branch A admits `kind: "A"`; branch B is eliminated and A is selected.
      */
     @Test
     fun testOneOfOverlappingEnumSetsEliminateContradictedBranch() {
@@ -527,16 +529,11 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     /**
-     * An empty `enum: []` pins a property to no values.  It can't form a *discriminator*: with no
-     * selectable value it's excluded from detection, leaving branch A's lone `kind` pin — too few — so
-     * discriminator selection declines.  Elimination reads empty pins too, and `kind: "Z"` is outside branch A's `["A"]`
-     * *and* outside branch B's `[]` (which admits nothing), so both branches are eliminated, the survivor
-     * set is empty, and we keep the full per-branch dump rather than narrowing to the unsatisfiable
-     * `enum: []` branch.
+     * `enum: []` rejects every value but adds nothing to the allowed list, so just `"A"` is listed.
      */
     @Test
-    fun testOneOfEmptyEnumSetDoesNotDiscriminate() {
-        assertKsonSchemaErrors(
+    fun testOneOfEmptyEnumPinAddsNoAllowedValue() {
+        val errors = assertKsonSchemaErrorAtLocation(
             """
                 kind: "Z"
                 params: {}
@@ -562,10 +559,14 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 }
             """.trimIndent(),
             listOf(
-                SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            listOf(
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
             )
         )
+
+        assertEquals("Value must be one of: \"A\"", errors[0].message.toString())
     }
 
     /**
@@ -594,10 +595,6 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         assertContains(errors[0].message.toString(), "alpha")
     }
 
-    /**
-     * A closed `$ref` union whose discriminator matches no branch collapses to one enum error at the
-     * discriminator value, just as the inline closed union does — detection reads the pins through the refs.
-     */
     @Test
     fun testOneOfRefBranchDiscriminatorMatchesNoBranch() {
         val errors = assertKsonSchemaErrorAtLocation(
@@ -624,7 +621,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
      * surfaces only its `beta` requirement — proving the ref branch's pin drove discrimination.
      */
     @Test
-    fun testOneOfMixedInlineAndRefBranchesDiscriminate() {
+    fun testOneOfMixedInlineAndRefPinsSelect() {
         val errors = assertKsonSchemaErrorAtLocation(
             """
                 kind: "B"

@@ -68,7 +68,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
      * branch, so only that branch's deeper failure is reported.
      */
     @Test
-    fun testOneOfDiscriminatorDetectedThroughAllOfComposedBranch() {
+    fun testOneOfPinSelectsThroughAllOfComposedBranch() {
         val errors = assertKsonSchemaErrors(
             """kind: "a"""",
             dualBranchAllOfUnion,
@@ -84,7 +84,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
      * claims is reported as one out-of-range value rather than as a dump of both branches.
      */
     @Test
-    fun testOneOfClosedUnionThroughAllOfReportsAllowedDiscriminatorValues() {
+    fun testOneOfClosedUnionThroughAllOfReportsAllowedPinnedValues() {
         val errors = assertKsonSchemaErrors(
             """kind: "c"""",
             dualBranchAllOfUnion,
