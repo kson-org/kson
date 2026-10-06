@@ -8,6 +8,7 @@ import org.kson.parser.messages.MessageType.SCHEMA_ENUM_VALUE_NOT_ALLOWED
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
 import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 
 /**
  * Reporting for a document that matched no branch of a `oneOf` / `anyOf` union: narrow the reported
@@ -31,6 +32,9 @@ import org.kson.validation.SourceContext
  *  2. [narrowByShape] — drop branches the document contradicts, keep those it looks like.
  *  3. [reportNoSubSchemaMatchErrors] — nothing narrowed; dump every branch.
  *
+ * In [ValidationMode.PARTIAL] mode only the dump runs: a half-typed document shouldn't get
+ * narrowing's hard errors (e.g. [SCHEMA_ENUM_VALUE_NOT_ALLOWED] on a closed union).
+ *
  * Always emits at least one error: every strategy emits ≥1 message and the final dump is
  * unconditional.  Returns [Unit] rather than a handled flag so callers can't skip that dump.
  */
@@ -42,8 +46,10 @@ internal fun reportUnionMatchFailure(
     noMatchMessage: Message,
     sourceContext: SourceContext
 ) {
-    if (!selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) &&
-        !narrowByShape(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
+    val narrowed = sourceContext.mode == ValidationMode.FULL &&
+        (selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) ||
+            narrowByShape(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage))
+    if (!narrowed) {
         reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
     }
 }

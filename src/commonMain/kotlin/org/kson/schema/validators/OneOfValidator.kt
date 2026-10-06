@@ -25,19 +25,6 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             }
         }
 
-        /**
-         * Exactly-one cardinality is itself incompleteness-sensitive: a half-typed document can
-         * match several branches before the disambiguating value is typed.  In [ValidationMode.PARTIAL] mode the
-         * branch set is viable as long as at least one branch is not contradicted; only an
-         * all-branches-contradicted document fails.
-         */
-        if (sourceContext.mode == ValidationMode.PARTIAL) {
-            if (matchedSchemas.isEmpty()) {
-                reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ONE_OF_VALIDATION_FAILED.create())
-            }
-            return
-        }
-
         when {
             matchedSchemas.size == 1 -> { /* success */ }
 
@@ -47,6 +34,9 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
                     SCHEMA_ONE_OF_VALIDATION_FAILED.create(), sourceContext
                 )
             }
+
+            // a half-typed document may match several branches until the disambiguating value is typed
+            sourceContext.mode == ValidationMode.PARTIAL -> { /* viable */ }
 
             else -> {
                 val matchedDescriptions = matchedSchemas.joinToString(", ") { it.descriptionWithDefault() }
