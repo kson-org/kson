@@ -13,15 +13,15 @@ import org.kson.schema.JsonSchema
  * declares or requires.  Both are read through `$ref` and `allOf` by [JsonObjectSchema.pinnedProperties]
  * and [JsonObjectSchema.knownProperties].
  *
- * For an object document, a branch one of whose pins rejects a document value is dropped.  Then:
- *  1. if no branch survives, a property every branch pins and none admits gets one enum error listing
- *     the pinned values (a lone branch keeps its own errors, which say more); else every branch;
- *  2. else a value only one surviving branch's pin admits selects that branch;
- *  3. else the survivors, preferring those that know a property the document carries and not every
- *     branch knows.
+ * For an object document, a branch with a pin the document contradicts is dropped.  Then:
+ *  1. If no branch survives, each property that every branch pins and rejects gets one enum error
+ *     listing the pinned values.  With no such property, or only one branch, every branch is reported.
+ *  2. Otherwise, survivors with a pin admitting a document value no other survivor's pin admits are
+ *     reported.
+ *  3. If there are none, the survivors reported are those that know a property the document has and
+ *     not every branch knows, or all of them if none do.
  *
- * A non-object document reports every branch.  At least one error is always emitted: the union
- * validators emit nothing of their own on failure.
+ * A non-object document reports every branch.  At least one error is always emitted.
  */
 internal fun reportUnionMatchFailure(
     branches: List<JsonSchema>,
@@ -69,7 +69,6 @@ internal fun reportUnionMatchFailure(
     report(presenceMatchedBranches(known, document.keys).filter { it in survivors }.ifEmpty { survivors })
 }
 
-/** The survivors with a pin admitting a document value that no other survivor's pin admits. */
 private fun selectedBranches(
     pins: List<Map<String, Set<KsonValue>>>,
     document: Map<String, KsonValue>,
@@ -83,7 +82,6 @@ private fun selectedBranches(
         }
     }
 
-/** The branches that know a present property not every branch knows. */
 private fun presenceMatchedBranches(known: List<Set<String>>, present: Set<String>): List<Int> {
     val distinguishing = known.flatten()
         .filterTo(mutableSetOf()) { property -> known.count { property in it } < known.size }

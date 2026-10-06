@@ -12,8 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Elimination: a branch whose pin the document's value falls outside of drops out while another
- * survives.  Pin selection and presence only narrow among the survivors.
+ * Elimination: a branch is dropped when the document's value falls outside its pin.  Pin selection
+ * and presence only narrow among the survivors.
  */
 class OneOfEliminationTest : JsonSchemaTest {
     /**
@@ -103,7 +103,6 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // branch A (pinned `kind: "A"`) is eliminated by `kind: "B"`; only the unpinned branch's `value` remains
         assertContains(errors[0].message.toString(), "value")
         assertFalse(errors[0].message.toString().contains("extra_a"))
     }
@@ -121,7 +120,6 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // both `A` branches are eliminated by `kind: "B"`; only the surviving `B` branch's `p3` remains
         assertContains(errors[0].message.toString(), "p3")
         assertFalse(errors[0].message.toString().contains("p1"))
         assertFalse(errors[0].message.toString().contains("p2"))
@@ -221,8 +219,7 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * `kind: "A"` is admitted by branch A alone, but `version: 2` rules branch A out with every other,
-     * so the shared value is blamed alone; branch A's missing `alpha` waits until `version` is fixed.
+     * `version: 2` rules out every branch, so only it is reported, not branch A's missing `alpha`.
      */
     @Test
     fun testOneOfSharedPinRejectionIsReportedAlone() {
@@ -351,11 +348,6 @@ class OneOfEliminationTest : JsonSchemaTest {
         )
     }
 
-    /**
-     * A multi-value `enum` pin eliminates just like a `const`: branch A pins `kind` to `["A", "B"]`, and
-     * `kind: "C"` is outside that whole set, so branch A is dropped and the union narrows to the unpinned
-     * branch — proving elimination tests membership in the full pinned set, not just its first value.
-     */
     @Test
     fun testOneOfMultiValueEnumPinEliminates() {
         val errors = assertKsonSchemaErrors(
@@ -384,7 +376,6 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // `kind: "C"` is outside `["A", "B"]`, eliminating branch A; only the unpinned branch's `baz` remains
         assertContains(errors[0].message.toString(), "baz")
         assertFalse(errors[0].message.toString().contains("foo"))
     }
@@ -424,15 +415,13 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // survivors {B, C} refined by presence of `kind` to just B; A eliminated, C unmatched
         assertContains(errors[0].message.toString(), "need_b")
         assertFalse(errors[0].message.toString().contains("need_a"))
         assertFalse(errors[0].message.toString().contains("need_c"))
     }
 
     /**
-     * `kind` is known only by branch A, so presence alone would match the branch `kind: "X"`
-     * just eliminated.
+     * Presence alone would pick branch A, which knows `kind`, but `kind: "X"` eliminates it.
      */
     @Test
     fun testOneOfPresenceCannotResurrectEliminatedBranch() {
@@ -467,7 +456,6 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // branch A is eliminated despite presence matching it, so the dump narrows to the survivors, not A
         val report = errors[1].message.toString()
         assertContains(report, "BranchB")
         assertContains(report, "BranchC")
@@ -475,9 +463,7 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * An empty `enum: []` admits no value, so it eliminates any branch once the document carries the
-     * pinned property: branch A pins `kind` to `[]`, and `kind: "anything"` is outside it, so branch A is
-     * dropped and the union narrows to the unpinned branch — surfacing its missing `bar` alone.
+     * `enum: []` admits nothing, so carrying the property at all eliminates the branch.
      */
     @Test
     fun testOneOfEmptyEnumPinEliminatesWhenPropertyPresent() {
@@ -507,7 +493,6 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        // the empty-pin branch is eliminated by the present `kind`; only the unpinned branch's `bar` remains
         assertContains(errors[0].message.toString(), "bar")
         assertFalse(errors[0].message.toString().contains("foo"))
     }
