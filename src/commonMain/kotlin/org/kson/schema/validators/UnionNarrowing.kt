@@ -42,8 +42,9 @@ internal fun reportUnionMatchFailure(
     noMatchMessage: Message,
     sourceContext: SourceContext
 ) {
-    if (!selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) &&
-        !narrowByShape(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)) {
+    val narrowed = selectDiscriminatedBranch(branches, ksonValue, messageSink, sourceContext) ||
+        narrowByShape(branches, ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
+    if (!narrowed) {
         reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, noMatchMessage)
     }
 }

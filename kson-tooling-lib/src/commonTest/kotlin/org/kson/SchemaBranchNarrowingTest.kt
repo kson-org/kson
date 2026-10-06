@@ -640,4 +640,33 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         assertTrue("fast" in labels, "then-branch value should be offered, got: $labels")
         assertTrue("slow" in labels && "medium" in labels, "else-branch values should be offered, got: $labels")
     }
+
+    @Test
+    fun testNestedUnionDiscriminatorMidTypingKeepsOuterBranch() {
+        val schema = """
+            {
+              oneOf: [
+                {
+                  type: "object"
+                  properties: {
+                    config: {
+                      oneOf: [
+                        { properties: { kind: { const: "alpha" }, a: { type: "string" } } }
+                        { properties: { kind: { const: "beta" }, b: { type: "string" } } }
+                      ]
+                    }
+                  }
+                }
+                {
+                  type: "object"
+                  properties: { other: { type: "string" } }
+                }
+              ]
+            }
+        """
+        val completions = getCompletionsAtCaret(schema, "config:\n  kind: \"a<caret>\"")
+        assertNotNull(completions)
+        val labels = completions.map { it.label }
+        assertTrue("alpha" in labels && "beta" in labels, "nested union values should be offered, got: $labels")
+    }
 }

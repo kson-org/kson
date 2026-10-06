@@ -2,6 +2,8 @@ package org.kson.schema.validators
 
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
+import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFalse
@@ -301,5 +303,40 @@ class OneOfEliminationTest : JsonSchemaTest {
         // the empty-pin branch is eliminated by the present `kind`; only the unpinned branch's `bar` remains
         assertContains(errors[0].message.toString(), "bar")
         assertFalse(errors[0].message.toString().contains("foo"))
+    }
+
+    @Test
+    fun testOneOfPartialModeEliminatesContradictedBranch() {
+        assertKsonSchemaErrors(
+            """
+                kind: "A"
+                params: { alpha: 5 }
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "const": "A" },
+                        "params": {
+                          "type": "object",
+                          "properties": { "alpha": { "type": "string" } },
+                          "required": ["alpha"]
+                        }
+                      },
+                      "required": ["kind"]
+                    },
+                    {
+                      "properties": { "kind": { "const": "B" } },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_VALUE_TYPE_MISMATCH
+            ),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
     }
 }

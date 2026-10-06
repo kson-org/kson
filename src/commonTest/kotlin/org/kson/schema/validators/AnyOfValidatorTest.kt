@@ -221,13 +221,10 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     /**
-     * The PARTIAL-mode guard: a *closed* discriminated `anyOf` whose discriminator matches no branch
-     * reports one hard [SCHEMA_ENUM_VALUE_NOT_ALLOWED] in FULL mode, but in [ValidationMode.PARTIAL] a
-     * half-typed discriminator shouldn't get that hard narrowing error — the guard skips union narrowing and
-     * falls back to the plain per-branch dump ([SCHEMA_ANY_OF_VALIDATION_FAILED] + sub-schema errors).
+     * A contradicted pin fails in [ValidationMode.PARTIAL] mode too, so PARTIAL narrows like FULL.
      */
     @Test
-    fun testAnyOfPartialModeSkipsHardEnumNarrowing() {
+    fun testAnyOfPartialModeNarrowsLikeFull() {
         val closedUnion = """
             {
               "anyOf": [
@@ -264,7 +261,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             document,
             closedUnion,
-            listOf(SCHEMA_ANY_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS),
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED),
             sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
     }

@@ -665,14 +665,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         assertContains(errors[0].message.toString(), "beta")
     }
 
-    /**
-     * PARTIAL-mode guard mirror for `oneOf`: the closed union that collapses to one hard
-     * [SCHEMA_ENUM_VALUE_NOT_ALLOWED] in FULL mode (see [testOneOfDiscriminatorMatchesNoBranch]) falls
-     * back to the plain per-branch dump in [ValidationMode.PARTIAL], where a half-typed discriminator
-     * shouldn't receive a hard narrowing error.
-     */
     @Test
-    fun testOneOfPartialModeSkipsHardEnumNarrowing() {
+    fun testOneOfPartialModeNarrowsLikeFull() {
         val closedUnion = """
             {
               "oneOf": [
@@ -709,7 +703,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             document,
             closedUnion,
-            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS),
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED),
             sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
     }
