@@ -14,8 +14,7 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
         val matchAttemptMessageSinks: MutableList<LabelledMessageSink> = mutableListOf()
         val matchedSchemas: MutableList<JsonSchema> = mutableListOf()
 
-        // Unlike anyOf (which can short-circuit on the first match), oneOf must evaluate all
-        // sub-schemas to detect the multiple-match case
+        // every branch is evaluated, since more than one matching is itself a failure
         oneOf.forEach {
             val oneOfMessageSink = MessageSink()
             it.validate(ksonValue, oneOfMessageSink, sourceContext)

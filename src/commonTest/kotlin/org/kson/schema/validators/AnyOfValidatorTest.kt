@@ -12,9 +12,8 @@ import kotlin.test.assertFalse
 
 class AnyOfValidatorTest : JsonSchemaTest {
     /**
-     * The document carries only the *shared* `description` property (known by both branches, so not
-     * distinguishing), so presence-based narrowing declines and the full-dump machinery runs — and since
-     * `description` is wrong for every branch, its error is extracted as the single precise message.
+     * `description` is known by both branches, so presence can't narrow; its error is common to both,
+     * so it is reported alone.
      */
     @Test
     fun testAnyOfCommonValidationErrors() {
@@ -40,7 +39,6 @@ class AnyOfValidatorTest : JsonSchemaTest {
                       - required_prop
             """.trimIndent(),
             listOf(
-                // note that since `description` is wrong for ALL the sub-schemas, we get a precise error for it.
                 SCHEMA_VALUE_TYPE_MISMATCH
             )
         )
@@ -174,9 +172,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     /**
-     * A multi-branch presence match under `anyOf` narrows the dump to the branches keyed by the present
-     * `shared` property (A and B), dropping branch C, and anchors it to the `anyOf`-specific no-match
-     * message — confirming the fallback threads the caller's own message through the shared helper.
+     * The narrowed report is anchored to the `anyOf` no-match message, not `oneOf`'s.
      */
     @Test
     fun testAnyOfPresenceReportsAllMatchingBranches() {
@@ -218,10 +214,8 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     /**
-     * The PARTIAL-mode guard: a *closed* discriminated `anyOf` whose discriminator matches no branch
-     * reports one hard [SCHEMA_ENUM_VALUE_NOT_ALLOWED] in FULL mode, but in [ValidationMode.PARTIAL] a
-     * half-typed discriminator shouldn't get that hard narrowing error — the guard skips union narrowing and
-     * falls back to the plain per-branch dump ([SCHEMA_ANY_OF_VALIDATION_FAILED] + sub-schema errors).
+     * In [ValidationMode.PARTIAL] mode a half-typed `kind` must not get the enum error; every branch
+     * is reported instead.
      */
     @Test
     fun testAnyOfPartialModeSkipsHardEnumNarrowing() {
@@ -250,14 +244,12 @@ class AnyOfValidatorTest : JsonSchemaTest {
             params: {}
         """.trimIndent()
 
-        // FULL mode: the closed union proves `kind: "Z"` out of range with one hard enum error
         assertKsonSchemaErrors(
             document,
             closedUnion,
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
         )
 
-        // PARTIAL mode: the guard skips union narrowing, so no hard enum error — just the plain per-branch dump
         assertKsonSchemaErrors(
             document,
             closedUnion,

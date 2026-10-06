@@ -62,7 +62,6 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // narrowed to the `node` branch via its declared `kind`: its missing `child` surfaces, not the other branch's `value`
         assertContains(errors[0].message.toString(), "child")
         assertFalse(errors[0].message.toString().contains("value"))
     }
@@ -82,15 +81,12 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // branch A selected by presence of `selector_a`: its `needs_a` requirement surfaces, not branch B's
         assertContains(errors[0].message.toString(), "needs_a")
         assertFalse(errors[0].message.toString().contains("needs_b"))
     }
 
     /**
-     * When a distinguishing required property is shared by two branches (`shared`, required by A and B
-     * but not by C), presence narrows to *both* — and only those — branches: the dump lists branch A
-     * and branch B (each missing its own `only_*` property) but omits branch C entirely.
+     * A property two branches know and the third doesn't narrows to both.
      */
     @Test
     fun testOneOfPresenceReportsAllMatchingBranches() {
@@ -125,18 +121,12 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // the dump narrows to the two branches keyed by the present `shared` property, dropping BranchC
         val report = errors[1].message.toString()
         assertContains(report, "BranchA")
         assertContains(report, "BranchB")
         assertFalse(report.contains("BranchC"))
     }
 
-    /**
-     * When the document carries none of the branches' distinguishing required properties, presence
-     * can't narrow anything, so we keep the full per-branch dump exactly as before — every branch's
-     * requirements are reported.
-     */
     @Test
     fun testOneOfPresenceNoMatchReportsAllBranches() {
         val errors = assertKsonSchemaErrors(
@@ -150,7 +140,6 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // no narrowing: both branches' requirements appear in the dump
         val report = errors[1].message.toString()
         assertContains(report, "selector_a")
         assertContains(report, "selector_b")
@@ -226,7 +215,6 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // branch A selected by presence of `needs_a` (read through its `$ref`): its `detail_a` surfaces
         assertContains(errors[0].message.toString(), "detail_a")
         assertFalse(errors[0].message.toString().contains("detail_b"))
     }
@@ -278,7 +266,6 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        // `region` is known to Kubernetes (optional) and Lambda (required): both reported, Static excluded
         val report = errors[1].message.toString()
         assertContains(report, "Kubernetes")
         assertContains(report, "Lambda")
