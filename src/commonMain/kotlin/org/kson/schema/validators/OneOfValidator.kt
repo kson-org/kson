@@ -31,7 +31,7 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             matchedSchemas.isEmpty() -> {
                 reportUnionMatchFailure(
                     oneOf, ksonValue, messageSink, matchAttemptMessageSinks,
-                    SCHEMA_ONE_OF_VALIDATION_FAILED.create(), sourceContext
+                    SCHEMA_ONE_OF_VALIDATION_FAILED.create()
                 )
             }
 

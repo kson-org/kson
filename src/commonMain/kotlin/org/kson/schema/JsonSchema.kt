@@ -134,20 +134,17 @@ class JsonObjectSchema(
   }
 
   /**
-   * This branch's *pins* (see the glossary in [org.kson.schema.validators.reportUnionMatchFailure]),
-   * read across every [compositionSources] schema.  Empty pins are dropped unless [includeEmptyPins]:
-   * they discriminate nothing, but they do eliminate, since they admit no value at all.
+   * The properties `const` or `enum` fixes to a value set, across every [compositionSources] schema.
+   * A property several of them pin is pinned to the intersection, which may be empty.
    */
-  internal fun pinnedProperties(includeEmptyPins: Boolean = false): Map<String, Set<KsonValue>> {
+  internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
     val pins = mutableMapOf<String, Set<KsonValue>>()
     compositionSources().forEach { source ->
       source.ownPinnedProperties().forEach { (property, values) ->
-        // all sources constrain the same document, so a property pinned by several of them is pinned
-        // to the intersection — which may be empty, hence the policy above is applied to the result
         pins[property] = pins[property]?.intersect(values) ?: values
       }
     }
-    return if (includeEmptyPins) pins else pins.filterValues { it.isNotEmpty() }
+    return pins
   }
 
   /**

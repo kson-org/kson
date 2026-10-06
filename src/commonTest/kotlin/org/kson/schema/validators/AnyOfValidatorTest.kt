@@ -133,10 +133,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     /**
-     * The discriminated-union reporting is shared with `oneOf`: an `anyOf` whose branches are keyed by
-     * distinct `const`s selects the branch the document's discriminator picks.  `kind: "A"` selects
-     * branch A, surfacing only its deeper `params` failure (missing `alpha`) — proving the shared
-     * [reportUnionMatchFailure] helper is wired into `anyOf`, not just `oneOf`.
+     * Pin selection narrows `anyOf` even when the unpinned branch also survives elimination.
      */
     @Test
     fun testAnyOfDiscriminatorSelectsMatchingBranch() {
@@ -157,7 +154,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
                     },
                     {
                       "properties": {
-                        "kind": { "const": "B" },
+                        "kind": { "type": "string" },
                         "params": { "type": "object", "required": ["beta"] }
                       },
                       "required": ["kind"]
@@ -214,10 +211,10 @@ class AnyOfValidatorTest : JsonSchemaTest {
             )
         )
 
-        val dump = errors[1].message.toString()
-        assertContains(dump, "BranchA")
-        assertContains(dump, "BranchB")
-        assertFalse(dump.contains("BranchC"))
+        val report = errors[1].message.toString()
+        assertContains(report, "BranchA")
+        assertContains(report, "BranchB")
+        assertFalse(report.contains("BranchC"))
     }
 
     /**
