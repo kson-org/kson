@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kson.KsonJvmTarget
 import org.kson.KsonVersion
 import java.util.*
 
@@ -74,7 +75,7 @@ tasks {
         dependsOn(generateJsonTestSuiteTask)
     }
 
-    val javaVersion = "11"
+    val javaVersion = KsonJvmTarget.VERSION
     withType<JavaCompile> {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
