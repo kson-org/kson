@@ -16,9 +16,9 @@
  */
 export const vscodeTestBuild = {
     /** The release version, e.g. '1.132.0', as consumed by `@vscode/test-electron` */
-    version: '1.132.0',
+    version: '1.140.0',
     /** The same build's commit sha, as consumed by `@vscode/test-web` */
-    commit: 'df53daabb18cd157bdb08c7f01c34df936cf12f4',
+    commit: '07f806f999227108933c2e30515b26eecc1fda74',
     /** The release channel of this build, as consumed by `@vscode/test-web` */
     quality: 'stable',
 } as const;
