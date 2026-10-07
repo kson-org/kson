@@ -84,6 +84,7 @@ tasks {
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+            freeCompilerArgs.add("-Xjdk-release=$javaVersion")
         }
     }
 

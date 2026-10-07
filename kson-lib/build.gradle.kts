@@ -66,6 +66,7 @@ tasks {
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(KsonJvmTarget.VERSION))
+            freeCompilerArgs.add("-Xjdk-release=${KsonJvmTarget.VERSION}")
         }
     }
 }
