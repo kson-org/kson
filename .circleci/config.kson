@@ -292,7 +292,7 @@ jobs:
     .
   'build-macos-arm64':
     macos:
-      xcode: '16.4.0'
+      xcode: '27.0'
       .
     resource_class: 'm4pro.medium'
     working_directory: '~/repo'
@@ -387,7 +387,7 @@ jobs:
     .
   'build-python-wheel-macos':
     macos:
-      xcode: '16.4.0'
+      xcode: '27.0'
       .
     resource_class: 'm4pro.medium'
     working_directory: '~/repo'
