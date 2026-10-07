@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
-  'browser-tools': 'circleci/browser-tools@1.1'
+  'browser-tools': 'circleci/browser-tools@2.4.2'
   # Windows support for testing Python on Windows
   windows: 'circleci/windows@5.0'
   .
@@ -264,7 +264,7 @@ jobs:
       .
     resource_class: large
     steps:
-      - 'browser-tools/install-chrome'
+      - 'browser-tools/install_chrome'
       - checkout
       - run:
           name: 'Verify Chrome installation'
