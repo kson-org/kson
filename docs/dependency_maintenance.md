@@ -44,7 +44,9 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
   - after editing any of them: run `./gradlew tooling:lsp-clients:check` to regenerate all `pnpm-lock.yaml` files. Commit the pnpm-lock.yaml files.
 - **Cargo dependencies**
   - pinned in: [`lib-rust/kson/Cargo.toml`](../lib-rust/kson/Cargo.toml) and [`lib-rust/kson-sys/Cargo.toml`](../lib-rust/kson-sys/Cargo.toml)
-  - check with: `cargo update --dry-run` in each
+  - check with: `cargo update --dry-run` in each for releases within the declared ranges
+  - check major version bumps with: `cargo info <crate>` for each direct dependency, and upgrade any whose `latest` shows a newer major version
+    - TODO this check can be done in bulk with `cargo update --breaking` once it leaves nightly (tracking: [cargo#12425](https://github.com/rust-lang/cargo/issues/12425))
 - **Python dependencies**
   - pinned in: [`lib-python/pyproject.toml`](../lib-python/pyproject.toml)
   - check with: `./uvw lock --upgrade --dry-run` from [`lib-python`](../lib-python)
