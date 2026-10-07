@@ -479,6 +479,27 @@ class SchemaInfoLocationTest {
     }
 
     @Test
+    fun testGetSchemaInfoAtLocation_belowARefThatNeverResolves() {
+        // The keywords beside a `$ref` that loops are still read, so `x` shows its own description, not the
+        // looping schema's
+        val schema = $$"""
+            {
+              "type": "object",
+              "properties": { "p": { "$ref": "#/$defs/loop" } },
+              "$defs": {
+                "loop": {
+                  "$ref": "#/$defs/loop",
+                  "description": "The looping schema",
+                  "properties": { "x": { "description": "The x property" } }
+                }
+              }
+            }
+        """.trimIndent()
+
+        assertEquals("The x property\n\n", getInfoAtCaret(schema, "p:\n  <caret>x: 1"))
+    }
+
+    @Test
     fun testGetSchemaInfoAtLocation_anyOf_combinedInfo() {
         // When multiple anyOf branches are valid, their info should be combined
         val schema = """

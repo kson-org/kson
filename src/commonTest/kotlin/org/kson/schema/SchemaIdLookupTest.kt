@@ -5,20 +5,29 @@ import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [SchemaIdLookup.resolveRefIfPresent].
  */
 class SchemaIdLookupTest {
 
-    /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
-    private fun resolveField(schema: String): Pair<String?, String> {
+    private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
-        val resolved = SchemaIdLookup(root).resolveRefIfPresent(field, "")
+        return SchemaIdLookup(root).resolveRefIfPresent(field, "")
+    }
+
+    /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
+    private fun resolveField(schema: String): Pair<String?, String> {
+        val resolved = resolve(schema)
         val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
         return title?.value to resolved.resolvedValueBaseUri
     }
+
+    /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
+    private fun endsAtUnresolvedRef(schema: String): Boolean = resolve(schema).endsAtUnresolvedRef
 
     @Test
     fun followsAChainOfRefs() {
@@ -33,6 +42,7 @@ class SchemaIdLookupTest {
             }
         """
         assertEquals("second" to "", resolveField(schema))
+        assertFalse(endsAtUnresolvedRef(schema))
     }
 
     @Test
@@ -71,5 +81,21 @@ class SchemaIdLookupTest {
             }
         """
         assertEquals("second" to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun stopsAtARefToNothing() {
+        // `first`'s `$ref` names no schema, so the chain ends at `first`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/$defs/first" } },
+              "$defs": {
+                "first": { "$ref": "#/$defs/missing", "title": "first" }
+              }
+            }
+        """
+        assertEquals("first" to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
     }
 }
