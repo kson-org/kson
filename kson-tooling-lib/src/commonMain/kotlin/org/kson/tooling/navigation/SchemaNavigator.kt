@@ -1,6 +1,7 @@
 package org.kson.tooling.navigation
 
 import org.kson.ast.AstNode
+import org.kson.ast.ObjectNode
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
@@ -15,7 +16,6 @@ import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
-import org.kson.walker.NodeChildren
 import org.kson.walker.TreePointer
 import org.kson.walker.nodesAlong
 
@@ -127,8 +127,7 @@ internal class SchemaNavigator(
      * [toKsonValueOrNull] to narrow by, so whatever did parse in a broken document still narrows.
      *
      * @param documentPointer Pointer through the document's AST (e.g. from [KsonValuePathBuilder])
-     * @param documentAst Root of the document's AST, walked along [documentPointer]; without it, a number is
-     *   taken as an index and no branch is ruled out
+     * @param documentAst Root of the document's AST, walked along [documentPointer]
      * @return List of [NavigatedSchema] containing all sub-schemas at that location (empty if not found)
      */
     fun navigate(
@@ -167,7 +166,7 @@ internal class SchemaNavigator(
      * node to read the token in, as past what it holds.
      */
     private fun arrayIndex(token: String, container: AstNode?): Int? =
-        if (container?.let(AstNodeWalker::getChildren) is NodeChildren.Object) null else token.toIntOrNull()
+        if (container is ObjectNode) null else token.toIntOrNull()
 
     /**
      * Structural step by one pointer token.  Looks at properties / patternProperties /

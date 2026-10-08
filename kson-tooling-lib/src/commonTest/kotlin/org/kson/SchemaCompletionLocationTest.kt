@@ -637,6 +637,23 @@ class SchemaCompletionLocationTest {
     }
 
     @Test
+    fun testEnumCompletionsForANestedPropertyNamedByANumber() {
+        // `0` names a property, not a list's first item
+        val schema = """
+            {
+                properties: {
+                    outer: {
+                        properties: { '0': { enum: ["a", "b"] } }
+                        items: { enum: ["x", "y"] }
+                    }
+                }
+            }
+        """
+
+        assertCompletionLabels(schema, "outer:\n  '0': <caret>", setOf("a", "b"))
+    }
+
+    @Test
     fun testArrayItemCompletionsIgnoreAdditionalItemsBesideAnItemsSchema() {
         // A single items schema covers every item, so additionalItems applies to none
         val schema = """
