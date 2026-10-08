@@ -47,14 +47,24 @@ internal object DocumentSymbolBuilder {
 
     private fun createPropertySymbol(keyString: KsonString, value: KsonValue): DocumentSymbol {
         val keyRange = keyString.toRange()
+        val name = chooseSymbolName(keyString)
         return DocumentSymbol(
-            name = keyString.value,
+            name = name,
             kind = DocumentSymbolKind.KEY,
             range = keyRange,
             selectionRange = keyRange,
             detail = "key",
-            children = listOf(createSymbol(keyString.value, value))
+            children = listOf(createSymbol(name, value))
         )
+    }
+
+    private fun chooseSymbolName(keyString: KsonString): String {
+        val name = keyString.value
+        // vscode doesn't like "falsy" symbols (including empty (zero-length) string) so just return `''`
+        // additionally, non-empty blank strings are confusingly rendered; these are wrapped in single quotes
+        return name.ifBlank {
+            "'$name'"
+        }
     }
 
     private fun createArraySymbol(array: KsonList, name: String, range: Range): DocumentSymbol {
