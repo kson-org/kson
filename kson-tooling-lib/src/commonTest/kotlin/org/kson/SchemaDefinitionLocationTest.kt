@@ -660,4 +660,20 @@ class SchemaDefinitionLocationTest {
         )
     }
 
+    @Test
+    fun testJumpToDefinition_propertyNamedByANumber() {
+        // `0` names a property here, not a list's first item, so it resolves to the property's own schema
+        assertDefinitionLocation(
+            schemaWithCaret = """
+                {
+                  "properties": { "0": <caret>{ "type": "string" }<caret> },
+                  "items": { "type": "number" }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                '0': <caret>hello
+            """.trimIndent()
+        )
+    }
+
 }
