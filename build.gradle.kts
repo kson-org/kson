@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonVersion
+import org.kson.releaseArtifactsDir
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -129,6 +130,31 @@ tasks {
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
+}
+
+/**
+ * Empties [releaseArtifactsDir] so each run stages a release from scratch.
+ */
+tasks.register<Delete>("cleanReleaseArtifacts") {
+    group = "distribution"
+    description = "Empties build/release-artifacts so each run stages a release from scratch"
+
+    delete(releaseArtifactsDir)
+}
+
+/**
+ * Collects this platform's share of a release into [releaseArtifactsDir]: the native `kson-lib`,
+ * the CLI binary, and a `SHA256SUMS` covering both. CI runs this on every build job and stores
+ * the result.
+ */
+val packageReleaseArtifacts = tasks.register<Sha256SumsTask>("packageReleaseArtifacts") {
+    group = "distribution"
+    description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
+
+    dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
+    // glob rather than a list restated from those tasks, so a fourth artifact only needs staging
+    artifacts.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
+    sumsFile.set(releaseArtifactsDir.map { it.file("SHA256SUMS") })
 }
 
 group = "org.kson"
