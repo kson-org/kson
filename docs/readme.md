@@ -546,7 +546,7 @@ Compact format is fully data-faithful: the format uses a mix of plain and delimi
 
 ```kson
 person:{
-name:'Leonardo Bonacci'nickname:Fibonacci favorite_books:[{title:Elements author:Euclid}title:Metaphysics author:Aristotle.]favorite_numbers:[[0 1 1 2 '...']'(1 + √5)/2' π]
+name:'Leonardo Bonacci'nickname:Fibonacci favorite_books:[{title:Elements author:Euclid}{title:Metaphysics author:Aristotle}]favorite_numbers:[[0 1 1 2 '...']'(1 + √5)/2' π]
 # A KSON "embed block" containing Kotlin code
 favorite_function:%kotlin
   /**

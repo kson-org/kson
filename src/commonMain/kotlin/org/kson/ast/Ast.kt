@@ -284,21 +284,21 @@ private fun hasCommentsToRender(node: AstNode?, compileTarget: CompileTarget): B
 }
 
 /**
- * The [FormattingStyle.COMPACT] source for [objectNode] which is a property/element of an object/list. These need
- * special handling to ensure they do not trip up [org.kson.validation.IndentValidator] errors in the case where
- * they get broken onto multiple lines due to comments.
+ * The [FormattingStyle.COMPACT] source for [objectNode] wrapped in the `{}` that make its bounds explicit, opening
+ * on a fresh line when comments break its properties across several so that they all start at the same column.
  */
-private fun compactNestedObject(
+private fun delimitedCompactObject(
     objectNode: ObjectNode,
     indent: Indent,
-    nextNode: AstNode?,
     compileTarget: CompileTarget
 ): String {
-    return if (hasCommentsToRender(objectNode.properties, compileTarget)) {
-        "{\n" + objectNode.toSourceWithNext(indent, null, compileTarget) + "}"
-    } else {
-        objectNode.toSourceWithNext(indent, nextNode, compileTarget)
+    if (objectNode.properties.isEmpty()) {
+        // an empty object writes its own `{}`
+        return objectNode.toSourceWithNext(indent, null, compileTarget)
     }
+
+    val opening = if (hasCommentsToRender(objectNode.properties, compileTarget)) "{\n" else "{"
+    return opening + objectNode.toSourceWithNext(indent, null, compileTarget) + "}"
 }
 
 /**
@@ -364,13 +364,16 @@ class ObjectNode(
 
     private fun formatCompactObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         val outputObject = properties.withIndex().joinToString("") { (index, property) ->
-            val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-            val result = property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+            val nextProperty = properties.getOrNull(index + 1)
+            val nodeAfterThisChild = nextProperty ?: nextNode
+            val propertyStartsLine = index > 0 && hasCommentsToRender(property, compileTarget)
+            val result = (if (propertyStartsLine) "\n" else "") +
+                    property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
 
             // Only add space after this property if not using a space could result in ambiguity with the next node
             val needsSpace = index < properties.size - 1 &&
                     property is ObjectPropertyNodeImpl &&
-                    result.last() != '\n' &&
+                    !hasCommentsToRender(nextProperty, compileTarget) &&
                     when (property.value) {
                         is QuotedStringNode -> {
                             StringUnquoted.isUnquotable(property.value.rawStringContent)
@@ -483,16 +486,12 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val valueSource = if (value is ObjectNode) {
-            compactNestedObject(value, indent, nextNode, compileTarget)
+        val valueSource = if (value is ObjectNode && hasCommentsToRender(value.properties, compileTarget)) {
+            delimitedCompactObject(value, indent, compileTarget)
         } else {
             value.toSourceWithNext(indent, nextNode, compileTarget)
         }
-        val propertySource = key.toSourceWithNext(indent, value, compileTarget) + valueSource
-
-        return propertySource +
-                // a comment spans the rest of its line, so the commented node after this property must start a fresh one
-                if (hasCommentsToRender(nextNode, compileTarget)) "\n" else ""
+        return key.toSourceWithNext(indent, value, compileTarget) + valueSource
     }
 }
 
@@ -614,22 +613,12 @@ class ListNode(
         compileTarget: CompileTarget
     ): String {
         val elementValue = (element as? ListElementNodeImpl)?.value ?: return elementSource
-        val nextValueIsObject = (nextElement as? ListElementNodeImpl)?.value is ObjectNode
+        val elementClosesItself = elementValue is ObjectNode || elementValue is ListNode
 
-        if (elementValue is ObjectNode && nextValueIsObject) {
-            return when {
-                // an empty object writes itself as `{}`, so it is delimited already and only wants a space
-                elementValue.properties.isEmpty() -> "$elementSource "
-                // an object spanning lines delimits itself too, and needs no space after its `}`
-                hasCommentsToRender(elementValue.properties, compileTarget) -> elementSource
-                else -> "{$elementSource}"
-            }
-        }
-
-        return if (elementValue !is ListNode && !hasCommentsToRender(nextElement, compileTarget)) {
-            "$elementSource "
-        } else {
+        return if (elementClosesItself || hasCommentsToRender(nextElement, compileTarget)) {
             elementSource
+        } else {
+            "$elementSource "
         }
     }
 
@@ -660,7 +649,7 @@ class ListElementNodeImpl(val value: KsonValueNode,
                 when (compileTarget.formatConfig.formattingStyle) {
                     PLAIN, DELIMITED -> formatWithDash(indent, nextNode, compileTarget)
                     COMPACT -> if (value is ObjectNode) {
-                        compactNestedObject(value, indent, nextNode, compileTarget)
+                        delimitedCompactObject(value, indent, compileTarget)
                     } else {
                         value.toSourceWithNext(indent, nextNode, compileTarget)
                     }
