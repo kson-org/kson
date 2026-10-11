@@ -270,6 +270,38 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
 }
 
 /**
+ * Whether any element of [nodes] has comments to render when transpiled
+ */
+private fun hasCommentsToRender(nodes: List<AstNode>, compileTarget: CompileTarget): Boolean {
+    return nodes.any { hasCommentsToRender(it, compileTarget) }
+}
+
+/**
+ * Whether [node] has comments to render when transpiled
+ */
+private fun hasCommentsToRender(node: AstNode?, compileTarget: CompileTarget): Boolean {
+    return compileTarget.preserveComments && node is Documented && node.comments.isNotEmpty()
+}
+
+/**
+ * The [FormattingStyle.COMPACT] source for [objectNode] which is a property/element of an object/list. These need
+ * special handling to ensure they do not trip up [org.kson.validation.IndentValidator] errors in the case where
+ * they get broken onto multiple lines due to comments.
+ */
+private fun compactNestedObject(
+    objectNode: ObjectNode,
+    indent: Indent,
+    nextNode: AstNode?,
+    compileTarget: CompileTarget
+): String {
+    return if (hasCommentsToRender(objectNode.properties, compileTarget)) {
+        "{\n" + objectNode.toSourceWithNext(indent, null, compileTarget) + "}"
+    } else {
+        objectNode.toSourceWithNext(indent, nextNode, compileTarget)
+    }
+}
+
+/**
  * The "style" of bounds used to denote an [ObjectNode] or [ListNode]: [PLAIN] for undelimited structures,
  * [DELIMITED] for delimited structures.
  *
@@ -451,27 +483,16 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        // A comment always needs to start on a new line. This can happen either when the first property or the next
-        // node is commented.
-        val firstPropertyHasComments = if (value !is ObjectNode) {
-            false
+        val valueSource = if (value is ObjectNode) {
+            compactNestedObject(value, indent, nextNode, compileTarget)
         } else {
-            when (val firstProperty = value.properties.firstOrNull()) {
-                is ObjectPropertyNodeImpl -> firstProperty.comments.isNotEmpty()
-                null -> false
-                else -> false
-            }
+            value.toSourceWithNext(indent, nextNode, compileTarget)
         }
-        val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
+        val propertySource = key.toSourceWithNext(indent, value, compileTarget) + valueSource
 
-        return key.toSourceWithNext(indent, value, compileTarget) +
-                if (firstPropertyHasComments) {
-                    "\n"
-                } else {
-                    ""
-                } +
-                value.toSourceWithNext(indent, nextNode, compileTarget) +
-                if (nextNodeHasComments) "\n" else ""
+        return propertySource +
+                // a comment spans the rest of its line, so the commented node after this property must start a fresh one
+                if (hasCommentsToRender(nextNode, compileTarget)) "\n" else ""
     }
 }
 
@@ -559,47 +580,56 @@ class ListNode(
         compileTarget: CompileTarget,
         listDelimiters: ListDelimiters
     ): String {
+        val listSpansLines = hasCommentsToRender(elements, compileTarget)
+        val listOpening = listDelimiters.open + if (listSpansLines) "\n" else ""
+
         return elements.withIndex().joinToString(
             "",
-            prefix = listDelimiters.open.toString(),
+            prefix = listOpening,
             postfix = listDelimiters.close.toString()
         ) { (index, element) ->
             val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
-            val elementString = if (element is Documented && element.comments.isNotEmpty()) {
-                "\n"
+            // a comment opens a line for the element it documents, unless the list's own opening break just did
+            val elementOpensALine = hasCommentsToRender(element, compileTarget)
+                    && !(index == 0 && listSpansLines)
+            val elementSource = (if (elementOpensALine) "\n" else "") +
+                    element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
+
+            if (index < elements.size - 1) {
+                separatedFromNextCompactElement(elementSource, element, nodeAfterThisChild, compileTarget)
             } else {
-                ""
-            } + element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
-
-
-            val isNotLastElement = index < elements.size - 1
-
-            // Extract current and next element values for type checking
-            val currentValue = (element as? ListElementNodeImpl)?.value
-            val currentIsObject = currentValue is ObjectNode
-            val nextIsObject = (nodeAfterThisChild as? ListElementNodeImpl)?.value is ObjectNode
-
-            // Determine formatting based on context
-            when {
-                // Both objects need a separator when both are non-empty
-                (isNotLastElement && currentIsObject && nextIsObject) -> {
-                    val currentIsEmptyObject = currentValue.properties.isEmpty()
-                    if (currentIsEmptyObject) {
-                        // Empty objects already have braces, don't wrap them
-                        "$elementString "
-                    } else {
-                        // Non-empty objects need to be wrapped to separate from the next object
-                        "{$elementString}"
-                    }
-                }
-
-                // Add space between elements in a list, except when the element is a list
-                isNotLastElement && element is ListElementNodeImpl && element.value !is ListNode -> {
-                    "$elementString "
-                }
-
-                else -> elementString
+                elementSource
             }
+        }
+    }
+
+    /**
+     * Get [elementSource] rendered so it can sit beside the element that follows it in [FormattingStyle.COMPACT]
+     * output, where nothing but the elements themselves marks where one ends and the next begins
+     */
+    private fun separatedFromNextCompactElement(
+        elementSource: String,
+        element: ListElementNode,
+        nextElement: AstNode?,
+        compileTarget: CompileTarget
+    ): String {
+        val elementValue = (element as? ListElementNodeImpl)?.value ?: return elementSource
+        val nextValueIsObject = (nextElement as? ListElementNodeImpl)?.value is ObjectNode
+
+        if (elementValue is ObjectNode && nextValueIsObject) {
+            return when {
+                // an empty object writes itself as `{}`, so it is delimited already and only wants a space
+                elementValue.properties.isEmpty() -> "$elementSource "
+                // an object spanning lines delimits itself too, and needs no space after its `}`
+                hasCommentsToRender(elementValue.properties, compileTarget) -> elementSource
+                else -> "{$elementSource}"
+            }
+        }
+
+        return if (elementValue !is ListNode && !hasCommentsToRender(nextElement, compileTarget)) {
+            "$elementSource "
+        } else {
+            elementSource
         }
     }
 
@@ -629,7 +659,12 @@ class ListElementNodeImpl(val value: KsonValueNode,
             is Kson -> {
                 when (compileTarget.formatConfig.formattingStyle) {
                     PLAIN, DELIMITED -> formatWithDash(indent, nextNode, compileTarget)
-                    COMPACT, CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
+                    COMPACT -> if (value is ObjectNode) {
+                        compactNestedObject(value, indent, nextNode, compileTarget)
+                    } else {
+                        value.toSourceWithNext(indent, nextNode, compileTarget)
+                    }
+                    CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
                 }
             }
 

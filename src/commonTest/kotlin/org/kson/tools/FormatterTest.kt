@@ -1,6 +1,8 @@
 package org.kson.tools
 
 import org.kson.KsonCore
+import org.kson.parser.LoggedMessage
+import org.kson.parser.messages.MessageType
 import org.kson.value.navigation.json_pointer.JsonPointerGlob
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,20 +23,7 @@ class FormatterTest {
             expected,
             formattedKson
         )
-
-        // Formatting valid source may resolve messages but must never add any: for every kind of message, the
-        // formatted output may carry no more than its source did
-        val sourceParse = KsonCore.parseToAst(source)
-        if (!sourceParse.hasErrors()) {
-            val sourceMessageCounts = sourceParse.messages.groupingBy { it.message.type }.eachCount()
-            val formattedMessages = KsonCore.parseToAst(formattedKson).messages
-            val addedMessageTypes = formattedMessages.groupingBy { it.message.type }.eachCount()
-                .filter { (type, count) -> count > (sourceMessageCounts[type] ?: 0) }.keys
-            assertTrue(
-                addedMessageTypes.isEmpty(),
-                "Formatting added messages: ${formattedMessages.filter { it.message.type in addedMessageTypes }}"
-            )
-        }
+        assertFormattingRaisesNoNewMessages(source, formattedKson, formattingStyle)
 
         // Roundtrip: each format should preserve the semantics of a kson document
         /**
@@ -45,6 +34,7 @@ class FormatterTest {
         if (roundTrip) {
             FormattingStyle.entries.filter { it != formattingStyle }.forEach { intermediateStyle ->
                 roundtripKson = format(roundtripKson, KsonFormatterConfig(indentType, intermediateStyle, embedBlockRules))
+                assertFormattingRaisesNoNewMessages(source, roundtripKson, intermediateStyle)
             }
         }
 
@@ -52,6 +42,37 @@ class FormatterTest {
             expected,
             format(roundtripKson, config),
             "Formatting with same style should be idempotent"
+        )
+    }
+
+    /**
+     * Formatting must never leave a user worse off than the document they handed us: every message
+     * re-parsing [formatted] reports must be one [source] already reported.  A clean document therefore
+     * stays clean in every [FormattingStyle], and every style stays a lossless way to move Kson around.
+     *
+     * The formatter is still free to _cure_ complaints, for instance laying out a document so its indentation stops
+     * misleading is one of its key jobs.
+     *
+     * Messages are counted and compared by [MessageType] since formatting moves content around by design,
+     * which makes their locations meaningless to compare.
+     */
+    private fun assertFormattingRaisesNoNewMessages(
+        source: String,
+        formatted: String,
+        formattingStyle: FormattingStyle
+    ) {
+        val sourceMessageCounts = KsonCore.parseToAst(source).messages.groupingBy { it.message.type }.eachCount()
+        val formattedMessages = KsonCore.parseToAst(formatted).messages
+        val formattedMessageCounts = formattedMessages.groupingBy { it.message.type }.eachCount()
+        val newMessages = formattedMessages.filter { loggedMessage ->
+            val messageType = loggedMessage.message.type
+            formattedMessageCounts.getValue(messageType) > (sourceMessageCounts[messageType] ?: 0)
+        }
+
+        assertTrue(
+            newMessages.isEmpty(),
+            "$formattingStyle formatting should not introduce messages, but raised:\n" +
+                    LoggedMessage.print(newMessages) + "\n\nin formatted output:\n$formatted"
         )
     }
 
@@ -1956,6 +1977,305 @@ class FormatterTest {
             """
                 list:[1 2 3]
                 # comment
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    /**
+     * A comment spans the rest of its line, so it is the one thing after which compact output resumes at
+     * column 0.  A nested object hence needs delimiters because with plain syntax, continuing at column 0
+     * violates the validations in [org.kson.validation.IndentValidator].
+     */
+    @Test
+    fun testCompactFormattingStyleDelimitsContainersBrokenByComments() {
+        assertFormatting(
+            """
+                person:
+                  name: Leonardo
+                  # a comment
+                  nickname: Fibonacci
+            """.trimIndent(),
+            """
+                person:{
+                name:Leonardo
+                # a comment
+                nickname:Fibonacci}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // a comment on the *first* property breaks the object just the same
+        assertFormatting(
+            """
+                person:
+                  # a comment
+                  name: Leonardo
+                  nickname: Fibonacci
+            """.trimIndent(),
+            """
+                person:{
+                # a comment
+                name:Leonardo nickname:Fibonacci}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                deployment:
+                  production:
+                    database:
+                      primary_host: db-1
+                      # failover only, do not point traffic here
+                      replica_host: db-2
+            """.trimIndent(),
+            """
+                deployment:production:database:{
+                primary_host:db-1
+                # failover only, do not point traffic here
+                replica_host:db-2}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // a broken object closes on its `}`, so it takes no end dot even though a property follows it
+        assertFormatting(
+            """
+                outer:
+                  first:
+                    inner:
+                      x: 1
+                      # c
+                      y: 2
+                      .
+                    .
+                  second: 2
+            """.trimIndent(),
+            """
+                outer:first:inner:{
+                x:1
+                # c
+                y:2}.second:2
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleGroupsPropertiesBetweenComments() {
+        assertFormatting(
+            """
+                person:
+                  a: 1
+                  b: 2
+                  # a comment
+                  c: 3
+                  d: 4
+            """.trimIndent(),
+            """
+                person:{
+                a:1 b:2
+                # a comment
+                c:3 d:4}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // several comments break the same object several times
+        assertFormatting(
+            """
+                person:
+                  a: 1
+                  # first comment
+                  b: 2
+                  c: 3
+                  # second comment
+                  d: 4
+            """.trimIndent(),
+            """
+                person:{
+                a:1
+                # first comment
+                b:2 c:3
+                # second comment
+                d:4}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // comments stacked on one property each take a line, and the property still lands at column 0
+        assertFormatting(
+            """
+                person:
+                  a: 1
+                  # one
+                  # two
+                  # three
+                  b: 2
+            """.trimIndent(),
+            """
+                person:{
+                a:1
+                # one
+                # two
+                # three
+                b:2}
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    /**
+     * A list always writes its own `[`, so unlike an object it never needs delimiting --- but its elements still
+     * have to come down to the column its breaks land on, which means opening on a line of its own
+     */
+    @Test
+    fun testCompactFormattingStyleListsBrokenByComments() {
+        assertFormatting(
+            """
+                list:
+                  - 1
+                  # a comment
+                  - 2
+            """.trimIndent(),
+            """
+                list:[
+                1
+                # a comment
+                2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // the first element already opens a line when it is the commented one
+        assertFormatting(
+            """
+                list:
+                  # a comment
+                  - 1
+                  - 2
+            """.trimIndent(),
+            """
+                list:[
+                # a comment
+                1 2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // an object element breaks like any other object, and needs no second pair of braces to separate it
+        assertFormatting(
+            """
+                - c: 3
+                - a: 1
+                  # c
+                  b: 2
+            """.trimIndent(),
+            """
+                [{c:3}{
+                a:1
+                # c
+                b:2}]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
+    fun testCompactFormattingStyleGroupsElementsBetweenComments() {
+        assertFormatting(
+            """
+                list:
+                  - 1
+                  - 2
+                  # a comment
+                  - 3
+                  - 4
+            """.trimIndent(),
+            """
+                list:[
+                1 2
+                # a comment
+                3 4]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // several comments break the same list several times
+        assertFormatting(
+            """
+                list:
+                  - 1
+                  # first
+                  - 2
+                  - 3
+                  # second
+                  - 4
+            """.trimIndent(),
+            """
+                list:[
+                1
+                # first
+                2 3
+                # second
+                4]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        // comments stacked on one element each take a line, and the element still lands at column 0
+        assertFormatting(
+            """
+                list:
+                  - 1
+                  # one
+                  # two
+                  - 2
+            """.trimIndent(),
+            """
+                list:[
+                1
+                # one
+                # two
+                2]
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    /**
+     * A root container opens at column 0 already, so a comment breaking it lands exactly where its entries
+     * sit and there is nothing to delimit.  Compact output should not pay for braces it does not need.
+     */
+    @Test
+    fun testCompactFormattingStyleLeavesRootObjectUndelimited() {
+        assertFormatting(
+            """
+                name: Leonardo
+                # a comment
+                nickname: Fibonacci
+            """.trimIndent(),
+            """
+                name:Leonardo
+                # a comment
+                nickname:Fibonacci
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.COMPACT
+        )
+
+        assertFormatting(
+            """
+                a: 1
+                b: 2
+                # a comment
+                c: 3
+                d: 4
+            """.trimIndent(),
+            """
+                a:1 b:2
+                # a comment
+                c:3 d:4
             """.trimIndent(),
             formattingStyle = FormattingStyle.COMPACT
         )
