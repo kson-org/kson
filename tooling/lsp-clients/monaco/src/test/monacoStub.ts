@@ -20,12 +20,13 @@ export const Uri = {
     parse: (uri: string) => ({ toString: () => uri, scheme: 'file', path: uri }),
 };
 
-// Test seams: the bridge registers server commands and resolves models by uri.
-// These registries let tests invoke a registered command and control the
-// indentation a model reports. The `__` helpers are not part of the real
-// monaco-editor API.
+// Test seams: the bridge registers server commands and a completion provider,
+// and resolves models by uri. These registries let tests invoke a registered
+// command or provider and control the indentation a model reports. The `__`
+// helpers are not part of the real monaco-editor API.
 const registeredCommands = new Map<string, (...args: unknown[]) => unknown>();
 const modelsByUri = new Map<string, unknown>();
+const completionProviders = new Map<string, { provideCompletionItems: (...args: unknown[]) => unknown }>();
 
 export const editor = {
     registerCommand: (id: string, handler: (...args: unknown[]) => unknown) => {
@@ -49,7 +50,15 @@ export const languages = {
     register: () => {},
     setLanguageConfiguration: () => {},
     setMonarchTokensProvider: () => {},
-    registerCompletionItemProvider: () => ({ dispose: () => {} }),
+    registerCompletionItemProvider: (
+        languageId: string,
+        provider: { provideCompletionItems: (...args: unknown[]) => unknown },
+    ) => {
+        completionProviders.set(languageId, provider);
+        return { dispose: () => completionProviders.delete(languageId) };
+    },
+    /** Test-only: retrieve a provider registered via registerCompletionItemProvider. */
+    __getCompletionProvider: (languageId: string) => completionProviders.get(languageId),
     registerHoverProvider: () => ({ dispose: () => {} }),
     registerDefinitionProvider: () => ({ dispose: () => {} }),
     registerDocumentSymbolProvider: () => ({ dispose: () => {} }),
@@ -64,6 +73,7 @@ export const languages = {
         Constant: 20, Struct: 21, Event: 22, Operator: 23, TypeParameter: 24,
     },
     CompletionItemInsertTextRule: { InsertAsSnippet: 4 },
+    CompletionTriggerKind: { Invoke: 0, TriggerCharacter: 1, TriggerForIncompleteCompletions: 2 },
     SymbolKind: {
         File: 0, Module: 1, Namespace: 2, Package: 3, Class: 4,
         Method: 5, Property: 6, Field: 7, Constructor: 8, Enum: 9,

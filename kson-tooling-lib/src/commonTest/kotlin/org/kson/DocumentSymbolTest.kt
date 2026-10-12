@@ -150,6 +150,20 @@ class DocumentSymbolTest {
     }
 
     @Test
+    fun testEmptyKeys() {
+        val doc = KsonTooling.parse("""
+            '': 15
+            '  ': 16
+            named: 17
+        """.trimIndent())
+        val root = KsonTooling.getDocumentSymbols(doc)[0]
+
+        // a key and its value share a name, and neither may be blank
+        assertEquals(listOf("''", "'  '", "named"), root.children.map { it.name })
+        assertEquals(listOf("''", "'  '", "named"), root.children.map { it.children.single().name })
+    }
+
+    @Test
     fun testRootArray() {
         val doc = KsonTooling.parse("""["item1", "item2", "item3"]""")
         val symbols = KsonTooling.getDocumentSymbols(doc)

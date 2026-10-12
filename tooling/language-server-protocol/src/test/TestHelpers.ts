@@ -1,5 +1,5 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {DocumentUri, Position} from 'vscode-languageserver';
+import {CompletionContext, CompletionTriggerKind, DocumentUri, Position} from 'vscode-languageserver';
 import {SchemaProvider} from '../core/schema/SchemaProvider.js';
 import {KsonDocument, parseTextDocument} from '../core/document/KsonDocument.js';
 import {KsonSchemaDocument} from '../core/document/KsonSchemaDocument.js';
@@ -36,6 +36,13 @@ export function createKsonSchemaDocument(content: string, metaSchemaContent?: st
  */
 export function pos(line: number, character: number): Position {
     return {line, character};
+}
+
+/**
+ * Shorthand for the {@link CompletionContext} of a completion request sent because `character` was typed.
+ */
+export function triggeredBy(character: string): CompletionContext {
+    return {triggerKind: CompletionTriggerKind.TriggerCharacter, triggerCharacter: character};
 }
 
 /**

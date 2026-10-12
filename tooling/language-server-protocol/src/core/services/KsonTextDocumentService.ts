@@ -273,7 +273,7 @@ export class KsonTextDocumentService {
             if (!document) {
                 return null;
             }
-            const result = this.completionService.getCompletions(document, params.position);
+            const result = this.completionService.getCompletions(document, params.position, params.context);
             return result;
         } catch (error) {
             this.connection.console.error(`Error providing completions: ${error}`);

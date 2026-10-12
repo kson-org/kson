@@ -39,6 +39,11 @@ export interface LspCompletionList {
     items: LspCompletionItem[];
 }
 
+export interface LspCompletionContext {
+    triggerKind: number;
+    triggerCharacter?: string;
+}
+
 export interface LspHover {
     contents: string | { kind: string; value: string } | Array<string | { language: string; value: string }>;
     range?: LspRange;
@@ -179,6 +184,21 @@ export function toMonacoCompletions(
     return {
         incomplete: Array.isArray(result) ? false : result.isIncomplete,
         suggestions: items.map((item) => toMonacoCompletionItem(item, range)),
+    };
+}
+
+// Monaco CompletionTriggerKind → LSP CompletionTriggerKind
+const COMPLETION_TRIGGER_KIND_MAP: Record<monaco.languages.CompletionTriggerKind, number> = {
+    [monaco.languages.CompletionTriggerKind.Invoke]: 1,
+    [monaco.languages.CompletionTriggerKind.TriggerCharacter]: 2,
+    [monaco.languages.CompletionTriggerKind.TriggerForIncompleteCompletions]: 3,
+};
+
+/** Monaco → LSP: how a completion request was triggered, e.g. by typing a trigger character. */
+export function toLspCompletionContext(context: monaco.languages.CompletionContext): LspCompletionContext {
+    return {
+        triggerKind: COMPLETION_TRIGGER_KIND_MAP[context.triggerKind],
+        triggerCharacter: context.triggerCharacter,
     };
 }
 
