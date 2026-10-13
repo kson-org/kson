@@ -117,6 +117,37 @@ describe('toMonacoCompletions', () => {
         );
         expect(result.suggestions[0].insertTextRules).toBe(4); // InsertAsSnippet
     });
+
+    it('inserts over the word range when there is no text edit', () => {
+        const result = toMonacoCompletions([{ label: 'hello' }], range);
+        expect(result.suggestions[0].range).toEqual(range);
+    });
+
+    it('applies a text edit over its own range, in place of insertText', () => {
+        const result = toMonacoCompletions([{
+            label: 'name',
+            insertText: 'name',
+            insertTextFormat: 2,
+            textEdit: {
+                range: { start: { line: 2, character: 4 }, end: { line: 2, character: 6 } },
+                newText: "name: '$0'",
+            },
+        }], range);
+        const suggestion = result.suggestions[0];
+        expect(suggestion.insertText).toBe("name: '$0'");
+        expect(suggestion.range).toEqual({ startLineNumber: 3, startColumn: 5, endLineNumber: 3, endColumn: 7 });
+        expect(suggestion.insertTextRules).toBe(4); // InsertAsSnippet
+    });
+
+    it('inserts over the word range when the text edit is an InsertReplaceEdit', () => {
+        const span = { start: { line: 2, character: 4 }, end: { line: 2, character: 6 } };
+        const result = toMonacoCompletions([{
+            label: 'name',
+            textEdit: { newText: 'other', insert: span, replace: span },
+        }], range);
+        expect(result.suggestions[0].insertText).toBe('name');
+        expect(result.suggestions[0].range).toEqual(range);
+    });
 });
 
 describe('toLspCompletionContext', () => {

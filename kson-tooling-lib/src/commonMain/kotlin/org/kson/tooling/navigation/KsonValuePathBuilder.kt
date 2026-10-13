@@ -1,6 +1,9 @@
 package org.kson.tooling.navigation
 
+import org.kson.CoreCompileConfig
+import org.kson.KsonCore
 import org.kson.ast.AstNode
+import org.kson.ast.KsonRootImpl
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.parser.Token
@@ -15,7 +18,12 @@ import org.kson.walker.TreeNavigationResult
 import org.kson.walker.TreePointer
 import org.kson.walker.navigate
 import org.kson.walker.navigateToLocationWithPointer
+import org.kson.tooling.Range
 import org.kson.tooling.ToolingDocument
+
+/** True when this position is at or beyond [other] in document (line, then column) order. */
+private fun Coordinates.isAtOrAfter(other: Coordinates): Boolean =
+    line > other.line || (line == other.line && column >= other.column)
 
 /**
  * Context information about a token at a specific location.
@@ -36,6 +44,15 @@ private val CONTAINER_CLOSERS = setOf(
     TokenType.DOT,
     TokenType.END_DASH
 )
+
+/** The tokens a new key may directly follow without running into them */
+private val KEY_CAN_FOLLOW = setOf(TokenType.WHITESPACE, TokenType.CURLY_BRACE_L, TokenType.COMMA)
+
+/** The tokens a new property may directly precede without running into them */
+private val PROPERTY_CAN_PRECEDE = setOf(TokenType.WHITESPACE, TokenType.EOF, TokenType.CURLY_BRACE_R, TokenType.COMMA)
+
+/** The key [KsonValuePathBuilder.newKeySite] splices in to see where a typed key would land */
+private const val PROBE_KEY = "probe"
 
 /**
  * The result of resolving a caret position: the pointer through the document's AST from its root to
@@ -61,11 +78,17 @@ data class CaretPath(
 )
 
 /**
+ * A key typed at the caret joins the object [objectPointer] names, replacing [replaceRange]: the key typed so far, or
+ * nothing.
+ */
+internal data class NewKeySite(val objectPointer: TreePointer<AstNode>, val replaceRange: Range)
+
+/**
  * Builds a JSON Pointer path from the document root to a specific cursor
  * location in a KSON document.
  *
- * Operates entirely on a pre-parsed [ToolingDocument]—no re-parsing is
- * performed. Token-context analysis uses the document's [ToolingDocument.meaningfulTokens]
+ * Operates on a pre-parsed [ToolingDocument]—only [newKeySite] re-parses it.
+ * Token-context analysis uses the document's [ToolingDocument.meaningfulTokens]
  * (WHITESPACE and COMMENT filtered out), and tree navigation uses the document's
  * raw AST via [AstNodeWalker] and its navigation extensions.
  *
@@ -78,6 +101,8 @@ data class CaretPath(
  * - **Position after colon**: adds the property name to target the value being entered
  * - **Position on a property key**: includes the property name in the path (for definition lookups)
  * - **Position outside token**: removes the last path element to target the parent (for completions)
+ *
+ * [newKeySite] answers a related question: where a key typed at the cursor would go.
  *
  * @param document The pre-parsed KSON document
  * @param location The cursor position (zero-based line and column)
@@ -217,7 +242,7 @@ class KsonValuePathBuilder(
     private fun meaningfulTokensUpTo(location: Coordinates): List<Token> {
         return document.meaningfulTokens
             .dropLast(1)  // Exclude EOF token
-            .filter { isAtOrAfter(location, it.lexeme.location.start) }
+            .filter { location.isAtOrAfter(it.lexeme.location.start) }
     }
 
     /**
@@ -231,10 +256,6 @@ class KsonValuePathBuilder(
             Location.containsCoordinates(it, position)
         } ?: false
     }
-
-    /** True when [caret] is at or beyond [boundary] in document (line, then column) order. */
-    private fun isAtOrAfter(caret: Coordinates, boundary: Coordinates): Boolean =
-        caret.line > boundary.line || (caret.line == boundary.line && caret.column >= boundary.column)
 
     /**
      * Finds the property name from the token stream that precedes a COLON token.
@@ -419,7 +440,72 @@ class KsonValuePathBuilder(
         val placeholder = if (isLeafValue) AstNodeWalker.getLocation(targetNode) else null
         val caretPastValueToken = isLeafValue && lastToken != null &&
                 lastToken.tokenType == TokenType.STRING_CLOSE_QUOTE &&
-                isAtOrAfter(location, lastToken.lexeme.location.end)
+                location.isAtOrAfter(lastToken.lexeme.location.end)
         return CaretPath(pointer, placeholder, caretPastValueToken)
+    }
+
+    /**
+     * Where a key typed at the caret goes: into the object completions there are offered for (see [buildCaretPath]),
+     * replacing the unquoted key typed so far, if any.  Null when a key here would run into the tokens around it, or
+     * would join another object, or the caret is past the end of its line.
+     */
+    internal fun newKeySite(): NewKeySite? {
+        val replaced = standaloneKeyLocation() ?: return null
+        val objectPointer = buildCaretPath(includePropertyKeys = false)?.pointer ?: return null
+        if (!keyLandsIn(objectPointer, replaced)) return null
+        val replaceRange = Range(replaced.start.line, replaced.start.column, replaced.end.line, replaced.end.column)
+        return NewKeySite(objectPointer, replaceRange)
+    }
+
+    /**
+     * Where a key typed here would stand: over the unquoted key typed so far, or at the caret.  Null when it would run
+     * into the tokens around it, or the caret is past the end of its line.
+     */
+    private fun standaloneKeyLocation(): Location? {
+        val typedKey = tokenBefore(location)
+            ?.takeIf { it.tokenType == TokenType.UNQUOTED_STRING }
+            ?.lexeme?.location
+        val start = typedKey?.start ?: location
+        val end = typedKey?.end ?: location
+
+        val startsAtBoundary = tokenBefore(start)?.let { it.tokenType in KEY_CAN_FOLLOW } ?: true
+        val endsAtBoundary = tokenAt(end).tokenType in PROPERTY_CAN_PRECEDE
+        if (!startsAtBoundary || !endsAtBoundary) return null
+        // a caret in whitespace can fall between token boundaries, so its offset is counted from the text
+        return typedKey ?: offsetOf(location)?.let { Location(location, location, it, it) }
+    }
+
+    private fun tokenBefore(position: Coordinates): Token? =
+        document.tokens.lastOrNull { !it.lexeme.location.start.isAtOrAfter(position) }
+
+    private fun tokenAt(position: Coordinates): Token =
+        document.tokens.firstOrNull { !position.isAtOrAfter(it.lexeme.location.end) } ?: document.tokens.last()
+
+    /** The offset of [position] in the text, or null when the text has no such position */
+    private fun offsetOf(position: Coordinates): Int? {
+        val lines = document.content.split('\n')
+        val line = lines.getOrNull(position.line)
+        if (line == null || position.column > line.length) return null
+        return lines.take(position.line).sumOf { it.length + 1 } + position.column
+    }
+
+    /**
+     * Whether a key typed at [replaced] joins the object [objectPointer] names.  Only the parser knows where an
+     * undelimited object ends, so this splices in a probe key and parses the result.  The parse is strict: where the
+     * document doesn't parse, its error-tolerant tree can't be trusted to place the key, so the answer is no.  This also
+     * rejects a key followed by a `:`, as the probe's value is a number, which the parser won't accept as a key.
+     */
+    private fun keyLandsIn(objectPointer: TreePointer<AstNode>, replaced: Location): Boolean {
+        val content = document.content
+        val probe = KsonCore.parseToAst(
+            content.substring(0, replaced.startOffset) + "$PROBE_KEY: 0" + content.substring(replaced.endOffset),
+            CoreCompileConfig(sourceContext = document.sourceContext)
+        )
+        if (probe.hasErrors()) return false
+        val probeRoot = (probe.ast as? KsonRootImpl)?.rootNode ?: return false
+        val probeValue = Coordinates(replaced.start.line, replaced.start.column + "$PROBE_KEY: ".length)
+        // The probe's tree keeps duplicate keys, so a key already named like the probe can't hide it
+        val landedAt = AstNodeWalker.navigateToLocationWithPointer(probeRoot, probeValue)?.pointerFromRoot
+        return landedAt == objectPointer.child(PROBE_KEY)
     }
 }

@@ -12,6 +12,7 @@ export interface LspPosition { line: number; character: number }
 export interface LspRange { start: LspPosition; end: LspPosition }
 export interface LspLocation { uri: string; range: LspRange }
 export interface LspTextEdit { range: LspRange; newText: string }
+export interface LspInsertReplaceEdit { newText: string; insert: LspRange; replace: LspRange }
 
 export interface LspDiagnostic {
     range: LspRange;
@@ -28,7 +29,7 @@ export interface LspCompletionItem {
     documentation?: string | { kind: string; value: string };
     insertText?: string;
     insertTextFormat?: number;
-    textEdit?: LspTextEdit & { insert?: LspRange; replace?: LspRange };
+    textEdit?: LspTextEdit | LspInsertReplaceEdit;
     filterText?: string;
     sortText?: string;
     additionalTextEdits?: LspTextEdit[];
@@ -161,16 +162,20 @@ function toMonacoCompletionItem(
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
     }
 
+    // A text edit names the range it replaces and, per LSP, takes precedence over insertText.
+    // Items without one are inserted over the word at the caret, and so is an InsertReplaceEdit,
+    // which this client doesn't declare support for.
+    const edit = item.textEdit && 'range' in item.textEdit ? item.textEdit : undefined;
     return {
         label: item.label,
         kind: COMPLETION_KIND_MAP[item.kind ?? 1] ?? monaco.languages.CompletionItemKind.Text,
         detail: item.detail,
         documentation,
-        insertText: item.insertText ?? item.label,
+        insertText: edit ? edit.newText : item.insertText ?? item.label,
         insertTextRules,
         filterText: item.filterText,
         sortText: item.sortText,
-        range,
+        range: edit ? toMonacoRange(edit.range) : range,
     };
 }
 

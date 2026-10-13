@@ -133,7 +133,8 @@ export function startKsonServer(
             documentManager,
             createCommandExecutor,
             workspaceRoot,
-            distributionId
+            distributionId,
+            params.capabilities
         );
 
         // Setup document handling and connect services
