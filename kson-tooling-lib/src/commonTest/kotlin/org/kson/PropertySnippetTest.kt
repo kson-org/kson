@@ -58,31 +58,31 @@ class PropertySnippetTest {
         }
     """
 
-    private val entrySchema = """
+    private val entrySchema = $$"""
         {
             "type": "object",
             "properties": {
                 "entries": {
                     "type": "object",
                     "additionalProperties": {
-                        "anyOf": [ { "${'$'}ref": "#/${'$'}defs/group" }, { "${'$'}ref": "#/${'$'}defs/item" } ]
+                        "anyOf": [ { "$ref": "#/$defs/group" }, { "$ref": "#/$defs/item" } ]
                     }
                 }
             },
-            "${'$'}defs": {
+            "$defs": {
                 "group": { "type": "object", "additionalProperties": false, "properties": { "members": { "type": "array" } } },
                 "itemBase": { "type": "object", "properties": { "name": { "type": "string" } } },
                 "item": {
                     "allOf": [
-                        { "${'$'}ref": "#/${'$'}defs/itemBase" },
+                        { "$ref": "#/$defs/itemBase" },
                         {
                             "oneOf": [
                                 {
-                                    "properties": { "kind": { "const": "a" }, "params": { "${'$'}ref": "#/${'$'}defs/aParams" } },
+                                    "properties": { "kind": { "const": "a" }, "params": { "$ref": "#/$defs/aParams" } },
                                     "required": ["kind", "params"]
                                 },
                                 {
-                                    "properties": { "kind": { "const": "b" }, "params": { "${'$'}ref": "#/${'$'}defs/bParams" } },
+                                    "properties": { "kind": { "const": "b" }, "params": { "$ref": "#/$defs/bParams" } },
                                     "required": ["kind", "params"]
                                 }
                             ]
@@ -124,7 +124,7 @@ class PropertySnippetTest {
         fun diagnosticsWithoutSchema(edited: String) =
             KsonTooling.validateDocument(KsonTooling.parse(edited)).map { it.message }
 
-        val edited = withEdit(edit.newText.replace("\$0", CARET))
+        val edited = withEdit(edit.newText.replace($$"$0", CARET))
         assertEquals(emptyList(), diagnostics(edited.replace(CARET, "")), "should parse and validate:\n$edited")
         val opened = edit.newText.substringAfter(": ")
         val valuesOfOtherKinds = VALUE_OF_EACH_KIND.filter { it.first() != opened.first() }
@@ -176,11 +176,11 @@ class PropertySnippetTest {
 
     @Test
     fun refToATypedSchemaOpensThatType() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "properties": { "p": { "${'$'}ref": "#/${'$'}defs/list" } },
-                "${'$'}defs": { "list": { "type": "array" } }
+                "properties": { "p": { "$ref": "#/$defs/list" } },
+                "$defs": { "list": { "type": "array" } }
             }
         """
         assertEquals("p: [<caret>]", accept(schema, "<caret>", "p"))
@@ -188,12 +188,12 @@ class PropertySnippetTest {
 
     @Test
     fun refChainOpensTheTypeAtItsEnd() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "properties": { "p": { "${'$'}ref": "#/${'$'}defs/a" } },
-                "${'$'}defs": {
-                    "a": { "${'$'}ref": "#/${'$'}defs/b", "type": "string" },
+                "properties": { "p": { "$ref": "#/$defs/a" } },
+                "$defs": {
+                    "a": { "$ref": "#/$defs/b", "type": "string" },
                     "b": { "type": "object" }
                 }
             }
@@ -204,22 +204,22 @@ class PropertySnippetTest {
     @Test
     fun refThatNeverResolvesStaysPlain() {
         for (p in listOf(
-            """{ "${'$'}ref": "#/${'$'}defs/loop" }""",
-            """{ "${'$'}ref": "#/${'$'}defs/a" }""",
-            """{ "${'$'}ref": "#/${'$'}defs/missing", "type": "string" }""",
-            """{ "${'$'}ref": "#/${'$'}defs/toMissing" }""",
-            """{ "${'$'}ref": "#/${'$'}defs/missing", "allOf": [ { "type": "string" } ] }""",
-            """{ "allOf": [ { "${'$'}ref": "#/${'$'}defs/missing" }, { "type": "string" } ] }"""
+            $$"""{ "$ref": "#/$defs/loop" }""",
+            $$"""{ "$ref": "#/$defs/a" }""",
+            $$"""{ "$ref": "#/$defs/missing", "type": "string" }""",
+            $$"""{ "$ref": "#/$defs/toMissing" }""",
+            $$"""{ "$ref": "#/$defs/missing", "allOf": [ { "type": "string" } ] }""",
+            $$"""{ "allOf": [ { "$ref": "#/$defs/missing" }, { "type": "string" } ] }"""
         )) {
-            val schema = """
+            val schema = $$"""
                 {
                     "type": "object",
-                    "properties": { "p": $p },
-                    "${'$'}defs": {
-                        "loop": { "${'$'}ref": "#/${'$'}defs/loop", "type": "object" },
-                        "a": { "${'$'}ref": "#/${'$'}defs/b", "type": "string" },
-                        "b": { "${'$'}ref": "#/${'$'}defs/a", "type": "object" },
-                        "toMissing": { "${'$'}ref": "#/${'$'}defs/missing", "type": "string" }
+                    "properties": { "p": $$p },
+                    "$defs": {
+                        "loop": { "$ref": "#/$defs/loop", "type": "object" },
+                        "a": { "$ref": "#/$defs/b", "type": "string" },
+                        "b": { "$ref": "#/$defs/a", "type": "object" },
+                        "toMissing": { "$ref": "#/$defs/missing", "type": "string" }
                     }
                 }
             """
@@ -230,24 +230,24 @@ class PropertySnippetTest {
     @Test
     fun propertyBelowARefThatNeverResolvesStaysPlain() {
         for (p in listOf(
-            """{ "${'$'}ref": "#/${'$'}defs/loop" }""",
-            """{ "${'$'}ref": "#/${'$'}defs/missing", "properties": { "x": { "type": "object" } } }""",
-            """{ "allOf": [ { "${'$'}ref": "#/${'$'}defs/loop" }, { "properties": { "x": { "type": "object" } } } ] }"""
+            $$"""{ "$ref": "#/$defs/loop" }""",
+            $$"""{ "$ref": "#/$defs/missing", "properties": { "x": { "type": "object" } } }""",
+            $$"""{ "allOf": [ { "$ref": "#/$defs/loop" }, { "properties": { "x": { "type": "object" } } } ] }"""
         )) {
-            val schema = """
+            val schema = $$"""
                 {
                     "type": "object",
-                    "properties": { "p": $p },
-                    "${'$'}defs": { "loop": { "${'$'}ref": "#/${'$'}defs/loop", "properties": { "x": { "type": "object" } } } }
+                    "properties": { "p": $$p },
+                    "$defs": { "loop": { "$ref": "#/$defs/loop", "properties": { "x": { "type": "object" } } } }
                 }
             """
             assertNull(completionFor(schema, "p: {<caret>}", "x").snippetEdit, p)
         }
-        val rootSchema = """
+        val rootSchema = $$"""
             {
                 "type": "object",
-                "allOf": [ { "${'$'}ref": "#/${'$'}defs/loop" }, { "properties": { "p": { "type": "object" } } } ],
-                "${'$'}defs": { "loop": { "${'$'}ref": "#/${'$'}defs/loop" } }
+                "allOf": [ { "$ref": "#/$defs/loop" }, { "properties": { "p": { "type": "object" } } } ],
+                "$defs": { "loop": { "$ref": "#/$defs/loop" } }
             }
         """
         assertPlain(rootSchema, "<caret>", "p")
@@ -255,11 +255,11 @@ class PropertySnippetTest {
 
     @Test
     fun refToAnAlternativeOpensTheTypeItsBranchesShare() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "properties": { "p": { "${'$'}ref": "#/${'$'}defs/either" } },
-                "${'$'}defs": { "either": { "oneOf": [ { "type": "array" }, { "type": "array", "minItems": 2 } ] } }
+                "properties": { "p": { "$ref": "#/$defs/either" } },
+                "$defs": { "either": { "oneOf": [ { "type": "array" }, { "type": "array", "minItems": 2 } ] } }
             }
         """
         assertEquals("p: [<caret>]", accept(schema, "<caret>", "p"))
@@ -267,15 +267,15 @@ class PropertySnippetTest {
 
     @Test
     fun refToAnIdResolvesTheTargetsAllOfUnderThatId() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "properties": { "p": { "${'$'}ref": "http://example.com/a.json" } },
-                "${'$'}defs": {
+                "properties": { "p": { "$ref": "http://example.com/a.json" } },
+                "$defs": {
                     "a": {
-                        "${'$'}id": "http://example.com/a.json",
-                        "allOf": [ { "${'$'}ref": "#/${'$'}defs/x" } ],
-                        "${'$'}defs": { "x": { "type": "object" } }
+                        "$id": "http://example.com/a.json",
+                        "allOf": [ { "$ref": "#/$defs/x" } ],
+                        "$defs": { "x": { "type": "object" } }
                     },
                     "x": { "type": "string" }
                 }
@@ -286,15 +286,15 @@ class PropertySnippetTest {
 
     @Test
     fun refToAnIdResolvesTheTargetsRefsUnderThatId() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "properties": { "p": { "${'$'}ref": "http://example.com/a.json" } },
-                "${'$'}defs": {
+                "properties": { "p": { "$ref": "http://example.com/a.json" } },
+                "$defs": {
                     "a": {
-                        "${'$'}id": "http://example.com/a.json",
-                        "anyOf": [ { "${'$'}ref": "#/${'$'}defs/x" } ],
-                        "${'$'}defs": { "x": { "type": "object" } }
+                        "$id": "http://example.com/a.json",
+                        "anyOf": [ { "$ref": "#/$defs/x" } ],
+                        "$defs": { "x": { "type": "object" } }
                     },
                     "x": { "type": "string" }
                 }
@@ -305,19 +305,19 @@ class PropertySnippetTest {
 
     @Test
     fun branchWithAnIdResolvesItsRefsUnderThatId() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
                 "properties": {
                     "p": {
                         "anyOf": [ {
-                            "${'$'}id": "http://example.com/b.json",
-                            "allOf": [ { "${'$'}ref": "#/${'$'}defs/x" } ],
-                            "${'$'}defs": { "x": { "type": "object" } }
+                            "$id": "http://example.com/b.json",
+                            "allOf": [ { "$ref": "#/$defs/x" } ],
+                            "$defs": { "x": { "type": "object" } }
                         } ]
                     }
                 },
-                "${'$'}defs": { "x": { "type": "string" } }
+                "$defs": { "x": { "type": "string" } }
             }
         """
         assertEquals("p: {<caret>}", accept(schema, "<caret>", "p"))
@@ -502,18 +502,18 @@ class PropertySnippetTest {
 
     @Test
     fun alternativeReachedAgainOneLevelDownIsAChoiceOfItsOwn() {
-        val schema = """
+        val schema = $$"""
             {
-                "${'$'}defs": {
+                "$defs": {
                     "node": {
                         "anyOf": [
                             { "type": ["object", "string"], "properties": { "child": { "type": "object" } } },
                             { "type": ["object", "array"], "properties": { "child": { "type": "string" } } }
                         ],
-                        "properties": { "child": { "${'$'}ref": "#/${'$'}defs/node" } }
+                        "properties": { "child": { "$ref": "#/$defs/node" } }
                     }
                 },
-                "${'$'}ref": "#/${'$'}defs/node"
+                "$ref": "#/$defs/node"
             }
         """
         assertPlain(schema, "<caret>", "child")
@@ -521,23 +521,23 @@ class PropertySnippetTest {
 
     @Test
     fun alternativeReadUnderAnotherBaseUriIsAChoiceOfItsOwn() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
-                "allOf": [ { "${'$'}ref": "#/${'$'}defs/a/${'$'}defs/shape" }, { "${'$'}ref": "#/${'$'}defs/b/${'$'}defs/shape" } ],
-                "${'$'}defs": {
+                "allOf": [ { "$ref": "#/$defs/a/$defs/shape" }, { "$ref": "#/$defs/b/$defs/shape" } ],
+                "$defs": {
                     "a": {
-                        "${'$'}id": "http://example.com/a.json",
-                        "${'$'}defs": {
-                            "shape": { "properties": { "p": { "anyOf": [ { "${'$'}ref": "#/${'$'}defs/first" }, { "${'$'}ref": "#/${'$'}defs/second" } ] } } },
+                        "$id": "http://example.com/a.json",
+                        "$defs": {
+                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/$defs/first" }, { "$ref": "#/$defs/second" } ] } } },
                             "first": { "type": ["string", "object"] },
                             "second": { "type": "array" }
                         }
                     },
                     "b": {
-                        "${'$'}id": "http://example.com/b.json",
-                        "${'$'}defs": {
-                            "shape": { "properties": { "p": { "anyOf": [ { "${'$'}ref": "#/${'$'}defs/first" }, { "${'$'}ref": "#/${'$'}defs/second" } ] } } },
+                        "$id": "http://example.com/b.json",
+                        "$defs": {
+                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/$defs/first" }, { "$ref": "#/$defs/second" } ] } } },
                             "first": { "type": "string" },
                             "second": { "type": "object" }
                         }
@@ -551,12 +551,12 @@ class PropertySnippetTest {
     @Test
     fun basePropertyOpensWhenTheOtherBranchForbidsIt() {
         // Not accepted, as an item doesn't validate before its `kind` and `params` are typed
-        assertEquals("name: '\$0'", completionFor(entrySchema, "entries:\n  first: {<caret>}", "name").snippetEdit?.newText)
+        assertEquals($$"name: '$0'", completionFor(entrySchema, "entries:\n  first: {<caret>}", "name").snippetEdit?.newText)
     }
 
     @Test
     fun propertyThatIsAnObjectInEveryVariantOpensBraces() {
-        assertEquals("params: {\$0}", completionFor(entrySchema, "entries:\n  first: {<caret>}", "params").snippetEdit?.newText)
+        assertEquals($$"params: {$0}", completionFor(entrySchema, "entries:\n  first: {<caret>}", "params").snippetEdit?.newText)
         assertEquals(
             "entries:\n  first: {kind: a, params: {<caret>}}",
             accept(entrySchema, "entries:\n  first: {kind: a, <caret>}", "params")
@@ -745,7 +745,7 @@ class PropertySnippetTest {
     fun duplicateKeyDoesNotMisleadTheCheck() {
         // A key named like the probe that places the new key would be a duplicate like these `tags`
         assertEquals(
-            SnippetEdit(Range(0, 0, 0, 0), "name: '\$0'"),
+            SnippetEdit(Range(0, 0, 0, 0), $$"name: '$0'"),
             completionFor(keySchema, "<caret>\ntags: []\ntags: []", "name").snippetEdit
         )
     }
@@ -844,17 +844,17 @@ class PropertySnippetTest {
 
     @Test
     fun namesWithSnippetMetacharactersStayPlain() {
-        val schema = """
+        val schema = $$"""
             {
                 "type": "object",
                 "properties": {
-                    "a${'$'}b": { "type": "string" },
+                    "a$b": { "type": "string" },
                     "a}b": { "type": "string" },
                     "a\\b": { "type": "string" }
                 }
             }
         """
-        for (name in listOf("a\$b", "a}b", "a\\b")) {
+        for (name in listOf($$"a$b", "a}b", "a\\b")) {
             assertPlain(schema, "<caret>", name)
         }
     }
