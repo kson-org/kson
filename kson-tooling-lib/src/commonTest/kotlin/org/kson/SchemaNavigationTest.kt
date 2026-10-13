@@ -28,9 +28,10 @@ class SchemaNavigationTest {
     /**
      * Helper to navigate schema and get full [NavigatedSchema] results (including resolution type)
      */
-    private fun navigateSchemaFull(schema: String, path: List<String>): List<NavigatedSchema> {
+    private fun navigateSchemaFull(schema: String, path: List<String>, document: String? = null): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(path)))
+            SchemaNavigator(SchemaIdLookup(it))
+                .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { doc -> KsonTooling.parse(doc).rootAstNode })
         } ?: emptyList()
     }
 
@@ -414,19 +415,62 @@ class SchemaNavigationTest {
                 properties: {
                     tuple: {
                         type: "array"
+                        items: [ { type: "string" } ]
                         additionalItems: {
                             type: "boolean"
                             description: "Extra items are booleans"
                         }
                     }
+                    untupled: {
+                        type: "array"
+                        additionalItems: { type: "boolean" }
+                    }
                 }
             }
         """
 
-        // Navigate to tuple array items - should use additionalItems
-        val results = navigateSchema(schema, listOf("tuple", "0"))
+        // An index the tuple covers takes the tuple's own schema, and one past it takes additionalItems
+        val inTuple = navigateSchema(schema, listOf("tuple", "0"))
+        assertEquals("string", ((inTuple.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        val pastTuple = navigateSchema(schema, listOf("tuple", "1"))
+        assertEquals("boolean", ((pastTuple.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+
+        // Without a tuple, validation never applies additionalItems
+        assertEquals(emptyList(), navigateSchema(schema, listOf("untupled", "0")))
+    }
+
+    @Test
+    fun testNavigateArrayItemsIgnoresAdditionalItemsBesideAnItemsSchema() {
+        val schema = """
+            {
+                type: "array"
+                items: { type: "string" }
+                additionalItems: { type: "boolean" }
+            }
+        """
+
+        // A single items schema covers every item, so validation never applies additionalItems
+        val results = navigateSchema(schema, listOf("1"))
         assertEquals(1, results.size)
-        assertEquals("boolean", ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+        assertEquals("string", ((results.single() as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value)
+    }
+
+    @Test
+    fun testNavigatePropertyNamedByANumber() {
+        // A pointer token reads the same for a property named 0 and a list's first item, so the document tells
+        // them apart
+        val schema = """
+            {
+                properties: { "0": { properties: { a: { type: "object" } } } }
+                items: { properties: { a: { type: "string" } } }
+            }
+        """
+        fun typeAt(document: String?) = navigateSchemaFull(schema, listOf("0", "a"), document)
+            .map { ((it.resolvedValue as InternalKsonObject).propertyLookup["type"] as? InternalKsonString)?.value }
+
+        assertEquals(listOf("object"), typeAt("'0': {}"))
+        assertEquals(listOf("string"), typeAt("[{}]"))
+        assertEquals(listOf("string"), typeAt(null), "without the document, a number is taken as an index")
     }
 
     @Test
