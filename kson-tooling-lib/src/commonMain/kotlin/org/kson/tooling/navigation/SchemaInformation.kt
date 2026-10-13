@@ -74,78 +74,31 @@ internal object SchemaInformation{
  * Extract completions from resolved schemas, applying JSON Schema narrowing semantics.
  *
  * Branches reach here already narrowed against the document by navigation; their
- * resolution type says how their completions combine:
+ * branch trails say how their completions combine:
  *
  * Property-name completions are always **unioned** — allOf/oneOf/anyOf branches each
  * contribute keys, and the valid set is their union.
  *
- * Value completions combine by group, and a value must satisfy every group that is
- * present (the groups are intersected):
- * - **base** (direct property, allOf, array items, root): the value must satisfy every
- *   such schema simultaneously, so their value-enums are intersected.
- * - **if/then & if/else**: mutually-exclusive alternatives — their value-enums are
- *   **unioned**, not intersected, so a value valid in only one branch isn't dropped.
- * - **oneOf/anyOf**: alternatives whose value-enums are unioned, but still bounded by
- *   the base — the union is intersected against the base enum, so a value the base
- *   forbids is never offered.
+ * Value completions offer the listed values the schemas allow together (see [allowedAlongTrails]):
+ * a value must satisfy every schema that holds together, such as a property's enum and its allOf
+ * members', and one open branch of each oneOf, anyOf or if.  When nothing restricts it, every
+ * value a schema lists is offered.
  *
- * @param resolvedSchemas The schemas found at the document path, with resolution type metadata
+ * @param resolvedSchemas The schemas found at the document path, with their branch trails
  * @return Deduplicated list of completion items respecting narrowing semantics
  */
 private fun extractCompletionsWithNarrowing(resolvedSchemas: List<NavigatedSchema>): List<CompletionItem> {
-    val perSchema = resolvedSchemas.map { it.resolutionType to it.resolvedValue.extractCompletions() }
-
-    val propertyCompletions = perSchema.flatMap { (_, completions) ->
-        completions.filter { it.kind == CompletionKind.PROPERTY }
-    }
-
-    // The non-empty per-schema VALUE-completion lists for branches matching [predicate].
-    fun valueSets(predicate: (SchemaResolutionType) -> Boolean): List<List<CompletionItem>> =
-        perSchema.filter { (type, _) -> predicate(type) }
-            .map { (_, completions) -> completions.filter { it.kind == CompletionKind.VALUE } }
-            .filter { it.isNotEmpty() }
-
-    val baseSets = valueSets { it.isReductive && it != SchemaResolutionType.IF_THEN && it != SchemaResolutionType.IF_ELSE }
-    val conditionalSets = valueSets { it == SchemaResolutionType.IF_THEN || it == SchemaResolutionType.IF_ELSE }
-    val additiveSets = valueSets { !it.isReductive }
-
-    // base schemas are intersected with each other; conditional and additive branches
-    // are each unioned within their group.  null means "this group imposes no value
-    // constraint" (no schema in it offered value completions).
-    val baseLabels = baseSets.takeIf { it.isNotEmpty() }
-        ?.map { set -> set.map { it.label }.toSet() }
-        ?.reduce { acc, set -> acc.intersect(set) }
-    val conditionalLabels = conditionalSets.flatten().map { it.label }.toSet().takeIf { conditionalSets.isNotEmpty() }
-    val additiveLabels = additiveSets.flatten().map { it.label }.toSet().takeIf { additiveSets.isNotEmpty() }
-
-    val constraintSets = listOfNotNull(baseLabels, conditionalLabels, additiveLabels)
-    val valueCompletions = if (constraintSets.isEmpty()) {
-        emptyList()
-    } else {
-        val allowedLabels = constraintSets.reduce { acc, set -> acc.intersect(set) }
-        (baseSets + conditionalSets + additiveSets).flatten().filter { it.label in allowedLabels }
-    }
-
-    return (propertyCompletions + valueCompletions).distinctBy { it.label }
+    val (propertyCompletions, valueCompletions) = resolvedSchemas
+        .flatMap { it.resolvedValue.extractCompletions() }
+        .partition { it.kind == CompletionKind.PROPERTY }
+    val allowedValues = resolvedSchemas.allowedAlongTrails(::valueLabels)
+    val offeredValues = valueCompletions.filter { allowedValues == null || it.label in allowedValues }
+    return (propertyCompletions + offeredValues).distinctBy { it.label }
 }
 
-/**
- * True if this branch contributes value completions that must be intersected with other
- * reductive branches — a value must satisfy all reductive schemas simultaneously (e.g., a
- * base property's enum intersected with an if/then's narrower enum).  Additive branches
- * (oneOf/anyOf) merge their completions as alternatives instead.
- *
- * Exhaustive by design: adding a new [SchemaResolutionType] forces a compile error here so
- * the reductive-vs-additive classification is an explicit decision, not a default.
- */
-private val SchemaResolutionType.isReductive: Boolean
-    get() = when (this) {
-        SchemaResolutionType.DIRECT_PROPERTY, SchemaResolutionType.PATTERN_PROPERTY,
-        SchemaResolutionType.ADDITIONAL_PROPERTY, SchemaResolutionType.ARRAY_ITEMS,
-        SchemaResolutionType.ALL_OF, SchemaResolutionType.IF_THEN,
-        SchemaResolutionType.IF_ELSE, SchemaResolutionType.ROOT -> true
-        SchemaResolutionType.ANY_OF, SchemaResolutionType.ONE_OF -> false
-    }
+/** The labels of the values [schema] offers, or null when it offers none and so isn't taken to restrict the value. */
+private fun valueLabels(schema: InternalKsonValue): Set<String>? =
+    schema.extractCompletions().filter { it.kind == CompletionKind.VALUE }.map { it.label }.toSet().ifEmpty { null }
 
 /**
  * Extract schema information from a schema node.
