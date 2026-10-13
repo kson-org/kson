@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { KsonLspBridge, type KsonLspBridgeOptions, type ServerCapabilities } from './KsonLspBridge.js';
-import { editor as monacoStubEditor } from '../test/monacoStub.js';
+import { editor as monacoStubEditor, languages as monacoStubLanguages } from '../test/monacoStub.js';
 
 /**
  * Stub worker that captures posted messages and lets tests respond to them.
@@ -205,6 +205,42 @@ describe('KsonLspBridge.registerLspCommands — format indentation injection', (
         expect(exec?.params).toEqual({
             command: 'kson.associateSchema',
             arguments: [{ documentUri: TARGET_URI, schemaPath: 'config' }],
+        });
+
+        bridge.dispose();
+    });
+});
+
+describe('KsonLspBridge.registerCompletionProvider — completion context', () => {
+    it('sends how completion was triggered, so the server can tell a typed character from invocation', async () => {
+        const worker = new WorkerStub();
+        const bridge = new KsonLspBridge(worker as unknown as Worker);
+        const model = {
+            uri: { toString: () => 'file:///doc.kson' },
+            getValue: () => 'server:\n  ',
+            onDidChangeContent: () => ({ dispose: () => {} }),
+            getWordAtPosition: () => null,
+        };
+        bridge.attachToEditor(
+            { getModel: () => model } as unknown as Parameters<KsonLspBridge['attachToEditor']>[0],
+            'kson',
+            { completionProvider: { triggerCharacters: ['\n'] } } as ServerCapabilities,
+        );
+
+        // Enter was pressed and auto-indent followed: Monaco reports the '\n' trigger character
+        const provider = monacoStubLanguages.__getCompletionProvider('kson');
+        expect(provider).toBeDefined();
+        const pending = provider!.provideCompletionItems(
+            model, { lineNumber: 2, column: 3 }, { triggerKind: 1, triggerCharacter: '\n' },
+        );
+        worker.respondTo('textDocument/completion');
+        await pending;
+
+        const request = worker.posted.find((m) => m.method === 'textDocument/completion');
+        expect(request?.params).toEqual({
+            textDocument: { uri: 'file:///doc.kson' },
+            position: { line: 1, character: 2 },
+            context: { triggerKind: 2, triggerCharacter: '\n' },
         });
 
         bridge.dispose();

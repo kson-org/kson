@@ -156,6 +156,27 @@ describe('DocumentSymbolService', () => {
         assert.strictEqual(emptyArraySymbol.children![0].children!.length, 0);
     });
 
+    it('should handle blank and empty keys', () => {
+        const content = `{
+            "": "chocolate",
+            "  ": "chili"
+        }`;
+        const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
+
+
+        const emptyKeySymbol = symbols[0].children![0];
+        assert.strictEqual(emptyKeySymbol.name, "''");
+        assert.strictEqual(emptyKeySymbol.kind, SymbolKind.Key);
+        assert.strictEqual(emptyKeySymbol.children![0].name, "''");
+        assert.strictEqual(emptyKeySymbol.children![0].detail, 'chocolate');
+
+        const blankKeySymbol = symbols[0].children![1];
+        assert.strictEqual(blankKeySymbol.name, "'  '");
+        assert.strictEqual(blankKeySymbol.kind, SymbolKind.Key);
+        assert.strictEqual(blankKeySymbol.children![0].name, "'  '");
+        assert.strictEqual(blankKeySymbol.children![0].detail, 'chili');
+    })
+
     it('should create symbols for root array', () => {
         const content = `["item1", "item2", "item3"]`;
         const symbols = documentSymbolService.getDocumentSymbols(KsonTooling.getInstance().parse(content));
