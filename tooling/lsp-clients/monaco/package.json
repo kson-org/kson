@@ -45,13 +45,13 @@
   "devDependencies": {
     "@kson/lsp-shared": "link:../shared",
     "kson-language-server": "link:../../language-server-protocol",
-    "@types/react": "^18.3.0",
-    "happy-dom": "^20.8.4",
+    "@types/react": "^19.3.0",
+    "happy-dom": "^20.14.5",
     "monaco-editor": "^0.52.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "vite": "^8.0.0",
-    "vite-plugin-dts": "^5.0.0",
-    "vitest": "^4.1.0"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "vite": "^8.3.1",
+    "vite-plugin-dts": "^5.1.1",
+    "vitest": "^5.0.2"
   }
 }

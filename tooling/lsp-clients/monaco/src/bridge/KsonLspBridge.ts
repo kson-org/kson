@@ -11,6 +11,7 @@ import { KSON_LANGUAGE_ID } from '../language/ksonLanguage.js';
 import { JsonRpcConnection } from './JsonRpcConnection.js';
 import {
     toLspPosition,
+    toLspCompletionContext,
     toMonacoRange,
     toMonacoMarkers,
     toMonacoCompletions,
@@ -328,12 +329,13 @@ export class KsonLspBridge {
         this.disposables.push(
             monaco.languages.registerCompletionItemProvider(languageId, {
                 triggerCharacters: config?.triggerCharacters,
-                provideCompletionItems: async (model, position) => {
+                provideCompletionItems: async (model, position, context) => {
                     const result = await this.connection.sendRequest<
                         LspCompletionList | LspCompletionItem[] | null
                     >('textDocument/completion', {
                         textDocument: { uri: model.uri.toString() },
                         position: toLspPosition(position),
+                        context: toLspCompletionContext(context),
                     });
                     const wordAtPos = model.getWordAtPosition(position);
                     const range = wordAtPos

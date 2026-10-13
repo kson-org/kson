@@ -12,7 +12,7 @@ import java.nio.file.Path
  *
  * These can be updated if/when we want to pull in newer tests from those projects.
  */
-const val jsonTestSuiteSHA = "984defc2deaa653cb73cd29f4144a720ec9efe7c"
+const val jsonTestSuiteSHA = "1ef36fa01286573e846ac449e8683f8833c5b26a"
 const val schemaTestSuiteSHA = "9fc880bfb6d8ccd093bc82431f17d13681ffae8e"
 
 /**

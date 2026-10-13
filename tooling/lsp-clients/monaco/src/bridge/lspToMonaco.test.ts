@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     toMonacoPosition,
     toLspPosition,
+    toLspCompletionContext,
     toMonacoRange,
     toMonacoMarkers,
     toMonacoCompletions,
@@ -115,6 +116,15 @@ describe('toMonacoCompletions', () => {
             range,
         );
         expect(result.suggestions[0].insertTextRules).toBe(4); // InsertAsSnippet
+    });
+});
+
+describe('toLspCompletionContext', () => {
+    it('maps each Monaco trigger kind (0-based) to its LSP counterpart (1-based)', () => {
+        expect(toLspCompletionContext({ triggerKind: 0 })).toEqual({ triggerKind: 1 });
+        expect(toLspCompletionContext({ triggerKind: 1, triggerCharacter: '\n' }))
+            .toEqual({ triggerKind: 2, triggerCharacter: '\n' });
+        expect(toLspCompletionContext({ triggerKind: 2 })).toEqual({ triggerKind: 3 });
     });
 });
 
