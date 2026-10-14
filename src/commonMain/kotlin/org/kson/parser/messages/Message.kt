@@ -193,7 +193,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This end-dot is ignored because this object is `{}`-delimited. " +
-                    "End-dots only effect non-delimited objects"
+                    "End-dots only affect non-delimited objects"
         }
     },
     IGNORED_DASH_LIST_END_DASH {
@@ -203,7 +203,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This end-dash is ignored because this list is `<>`-delimited. " +
-                    "End-dashes only effect non-delimited dashed lists"
+                    "End-dashes only affect non-delimited dashed lists"
         }
     },
     STRING_NO_CLOSE {
@@ -790,7 +790,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This property should be aligned with the other leading properties in this object." +
+            return "Deceptive indentation. This property should be aligned with the other leading properties in this object. " +
                     "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
         }
     },
@@ -800,7 +800,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This element should be aligned with the other leading elements in this list." +
+            return "Deceptive indentation. This element should be aligned with the other leading elements in this list. " +
                     "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
         }
     },
@@ -819,7 +819,7 @@ enum class MessageType(
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This value should nested deeper than the list that contains it."
+            return "Deceptive indentation. This value should be nested deeper than the list that contains it."
         }
     },
     OBJECT_DUPLICATE_KEY(MessageSeverity.WARNING) {
