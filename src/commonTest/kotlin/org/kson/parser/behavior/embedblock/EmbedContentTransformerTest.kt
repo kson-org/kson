@@ -511,6 +511,27 @@ class EmbedContentTransformerTest {
     }
 
     @Test
+    fun testCloseDelimOnOwnLineStripsTrailingCRLF() {
+        // A CRLF source ends the last content line with \r\n: the whole line ending must be stripped
+        val rawEmbedContent = "  hello\r\n  "
+        val processed = "hello"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 2),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
     fun testSourceMappingWithTrailingNewlineStripping() {
         // Verify source mapping still works when trailing newline is stripped
         val rawEmbedContent = "    hello\n    "

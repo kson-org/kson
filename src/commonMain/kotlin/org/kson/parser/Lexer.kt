@@ -476,7 +476,11 @@ class Lexer(source: String, gapFree: Boolean = false) {
             return
         } else {
             // we have an embed tag, let's scan it
-            while (!sourceScanner.eof() && sourceScanner.peek() != '\n') {
+            while (
+                !sourceScanner.eof()
+                && sourceScanner.peek() != '\n'
+                && !(sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n')
+            ) {
                 sourceScanner.advance()
             }
 
@@ -486,9 +490,13 @@ class Lexer(source: String, gapFree: Boolean = false) {
                 EMBED_TAG, embedTagLexeme
             )
 
-            // consume the newline from after this embed tag
+            // consume the newline (or CRLF) from after this embed tag
             if (sourceScanner.peek() == '\n') {
                 sourceScanner.advance()
+                addLiteralToken(EMBED_PREAMBLE_NEWLINE)
+            } else if (sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n') {
+                sourceScanner.advance() // take the \r
+                sourceScanner.advance() // take the \n
                 addLiteralToken(EMBED_PREAMBLE_NEWLINE)
             } else if (sourceScanner.eof()) {
                 return
