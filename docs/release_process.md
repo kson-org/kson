@@ -56,8 +56,6 @@ When `main` is ready to have a release cut from it:
 ## Publishing Process:
 - Prepare release notes based on the changes made in this release.  Sample Github comparison URL to see this release's changes: `https://github.com/kson-org/kson/compare/[tag of current version]...release/X.Y.Z`
 
-- TODO flesh out this documentation
-
 ### Release artifacts built by CircleCI
 
 The native library, the CLI binary and the Python wheels are built per platform by CI. Each job
@@ -72,10 +70,8 @@ stores them into `release-artifacts/<platform>` on its **Artifacts** tab:
 | `build-python-wheel-macos` | `release-artifacts/python-macos-arm64` | `kson_lang-*.whl` |
 | `build-python-wheel-windows` | `release-artifacts/python-windows-amd64` | `kson_lang-*.whl` |
 
-Do not rename the archives: the `kson-lib` names form the URL
-[lib-rust](#lib-rust-publishing-process) fetches. Each of the three
-`build-*` jobs stores its own `SHA256SUMS` covering its own archives; check a download with
-`shasum -a 256 -c SHA256SUMS`.
+Each of the three `build-*` jobs stores its own `SHA256SUMS` covering its own archives; check a
+download with `shasum -a 256 -c SHA256SUMS`.
 
 `./gradlew packageReleaseArtifacts` produces the same files locally for the platform you are on,
 in `build/release-artifacts`. It needs GraalVM, which the task pulls in via pixi.
@@ -171,8 +167,7 @@ combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN
 1. Confirm `KSON_LIB_VERSION` in [build.rs](../lib-rust/kson-sys/build.rs) matches the tag you
    are about to create. **If they disagree, every downstream `cargo build` 404s.**
 
-2. Download one archive from each job's **Artifacts** tab. Keep the names; they form the
-   download URL above:
+2. Download one archive from each job's **Artifacts** tab:
 
    ```bash
    mkdir -p /tmp/kson-binaries && cd /tmp/kson-binaries
