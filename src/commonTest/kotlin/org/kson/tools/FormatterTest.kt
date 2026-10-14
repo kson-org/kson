@@ -1578,7 +1578,6 @@ class FormatterTest {
                 .
                 
                 trailingContent
-          
                 
                 list:
                   - 1
@@ -1599,13 +1598,38 @@ class FormatterTest {
                 key: value
                 .
                 
-                extraValue 
+                extraValue
           
                 list:
                   - 1
                   - 2
                   - 3
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testErrorsAreWrittenWithoutTheWhitespaceAfterThem() {
+        assertFormatting(
+            """
+            - 1.
+            - 2
+            """.trimIndent(),
+            """
+            - 1.
+            - 2
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            "[1., 2]",
+            """
+            <
+              - 1.
+              - 2
+            >
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
         )
     }
 
@@ -2186,7 +2210,6 @@ class FormatterTest {
                 outer2: 8 # unexpected trailing content
                 .
                 
-                
                 outer:
                   nest1:
                     nest2: 4
@@ -2223,7 +2246,6 @@ class FormatterTest {
                 =
                 
                 key: value
-                
                 
                 - - - list
                     =

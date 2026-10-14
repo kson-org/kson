@@ -157,11 +157,13 @@ open class AstNodeError(sourceTokens: List<Token>) : AstNode, AstNodeImpl(source
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                val invalidSource = sourceTokens.joinToString("") { it.lexeme.text }
-                invalidSource.split("\n")
+                val writtenTokens = sourceTokens.dropLastWhile { it.tokenType == WHITESPACE }
+                val invalidSource = writtenTokens.joinToString("") { it.lexeme.text }
+                val writtenSource = invalidSource.split("\n")
                     .joinToString("\n") { line ->
                         indent.firstLineIndent() + line
                     }
+                if (writtenTokens.lastOrNull()?.tokenType == COMMENT) "$writtenSource\n" else writtenSource
             }
         }
     }
