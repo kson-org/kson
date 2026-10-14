@@ -63,15 +63,15 @@ stores them into `release-artifacts/<platform>` on its **Artifacts** tab:
 
 | CircleCI job | Artifact destination | Contents |
 | --- | --- | --- |
-| `build-linux-amd64` | `release-artifacts/linux-amd64` | `kson-lib-shared-amd64-linux.tar.gz`, `kson-cli-amd64-linux.tar.gz`, `SHA256SUMS` |
-| `build-macos-arm64` | `release-artifacts/macos-arm64` | `kson-lib-shared-arm64-macos.tar.gz`, `kson-cli-arm64-macos.tar.gz`, `SHA256SUMS` |
-| `build-windows-amd64` | `release-artifacts/windows-amd64` | `kson-lib-shared-amd64-windows.tar.gz`, `kson-cli-amd64-windows.tar.gz`, `SHA256SUMS` |
+| `build-linux-amd64` | `release-artifacts/linux-amd64` | `kson-lib-shared-amd64-linux.tar.gz`, `kson-cli-amd64-linux.tar.gz`, each with its `.sha256` |
+| `build-macos-arm64` | `release-artifacts/macos-arm64` | `kson-lib-shared-arm64-macos.tar.gz`, `kson-cli-arm64-macos.tar.gz`, each with its `.sha256` |
+| `build-windows-amd64` | `release-artifacts/windows-amd64` | `kson-lib-shared-amd64-windows.tar.gz`, `kson-cli-amd64-windows.tar.gz`, each with its `.sha256` |
 | `build-python-wheel-linux-amd64` | `release-artifacts/python-linux-amd64` | `kson_lang-*.whl` |
 | `build-python-wheel-macos` | `release-artifacts/python-macos-arm64` | `kson_lang-*.whl` |
 | `build-python-wheel-windows` | `release-artifacts/python-windows-amd64` | `kson_lang-*.whl` |
 
-Each of the three `build-*` jobs stores its own `SHA256SUMS` covering its own archives; check a
-download with `shasum -a 256 -c SHA256SUMS`.
+Every archive has its checksum beside it, as `<archive>.sha256`. Download both and check the
+archive with `shasum -a 256 -c <archive>.sha256` (or `sha256sum -c`).
 
 `./gradlew packageReleaseArtifacts` produces the same files locally for the platform you are on,
 in `build/release-artifacts`. It needs GraalVM, which the task pulls in via pixi.
@@ -167,25 +167,21 @@ combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN
 1. Confirm `KSON_LIB_VERSION` in [build.rs](../lib-rust/kson-sys/build.rs) matches the tag you
    are about to create. **If they disagree, every downstream `cargo build` 404s.**
 
-2. Download one archive from each job's **Artifacts** tab:
+2. Download one archive and its `.sha256` from each job's **Artifacts** tab:
 
    ```bash
    mkdir -p /tmp/kson-binaries && cd /tmp/kson-binaries
-   # save the three archives here:
+   # save the three archives here, each with its .sha256:
    #   kson-lib-shared-amd64-linux.tar.gz
    #   kson-lib-shared-arm64-macos.tar.gz
    #   kson-lib-shared-amd64-windows.tar.gz
    ```
 
-   Each job stores a `SHA256SUMS` beside its archives, and all three are named `SHA256SUMS`, so
-   check each download against the manifest from the *same* job before fetching the next:
+   Check all three against their checksums:
 
    ```bash
-   shasum -a 256 -c --ignore-missing SHA256SUMS
+   shasum -a 256 -c kson-lib-shared-*.tar.gz.sha256
    ```
-
-   `--ignore-missing` because the manifest also covers that job's `kson-cli-*` archive, which
-   this release does not need.
 
    Each archive holds its platform's native-image output, the shared library and its headers,
    flat at the archive root. Every file in it is platform-specific, so never mix files between

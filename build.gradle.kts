@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.crypto.checksum.Checksum
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -19,6 +20,8 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.37.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
+
+    id("org.gradle.crypto.checksum") version "1.4.0"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -143,18 +146,18 @@ tasks.register<Delete>("cleanReleaseArtifacts") {
 }
 
 /**
- * Collects this platform's share of a release into [releaseArtifactsDir]: the native `kson-lib`,
- * the CLI binary, and a `SHA256SUMS` covering both. CI runs this on every build job and stores
- * the result.
+ * Stages this platform's release archives, each with a `.sha256`, in [releaseArtifactsDir].
  */
-val packageReleaseArtifacts = tasks.register<Sha256SumsTask>("packageReleaseArtifacts") {
+val packageReleaseArtifacts = tasks.register<Checksum>("packageReleaseArtifacts") {
     group = "distribution"
     description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
 
     dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
-    // glob rather than a list restated from those tasks, so a fourth artifact only needs staging
-    artifacts.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
-    sumsFile.set(releaseArtifactsDir.map { it.file("SHA256SUMS") })
+    inputFiles.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
+    outputDirectory.set(releaseArtifactsDir)
+
+    checksumAlgorithm.set(Checksum.Algorithm.SHA256)
+    appendFileNameToChecksum.set(true)
 }
 
 group = "org.kson"
