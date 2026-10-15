@@ -76,8 +76,6 @@ Some of our dependencies are deliberately not current: they represent our backwa
   - declared in: `requires-python` in [`lib-python/pyproject.toml`](../lib-python/pyproject.toml), matched by the `cimg/python` image in [`.circleci/config.kson`](../.circleci/config.kson)
   - note: CI builds and tests the sdist on that floor on purpose. Move both together, or the guarantee stops being tested
 
-TODO One pin remains unclassified: `test-python-sdist-macos` runs on a much older `xcode` image than `build-macos-arm64` does. Work out whether that is a deliberate oldest-supported-macOS floor or an oversight, then move it into whichever list above it belongs in.
-
 ## 3. Sweep for new/missing unpinned dependencies
 
 Audit for new or missed unpinned/floating dependencies that are not yet captured in this doc, and add them where appropriate. We would ideally catch these before they get in, but historically this type of thing has a way of creeping into a project.
