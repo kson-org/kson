@@ -1995,6 +1995,15 @@ class FormatterTest {
     }
 
     @Test
+    fun testCompactEndDotIsSpacedOffFromAPropertyInError() {
+        assertFormatting(
+            "{ x: { 200: 1 }, z: 1 }",
+            "x:200: 1 .z:1",
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
     fun testPlainFormattingEmptyObject() {
         assertFormatting(
             """
