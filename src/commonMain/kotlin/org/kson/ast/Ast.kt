@@ -340,8 +340,10 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
             if (needsSpace) "$result " else result
         }
         return if (needsEndDot(nextNode)) {
-            // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
-            val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
+            // If the last property ends in a number we need to add whitespace before the '.' to prevent it becoming part
+            // of that number
+            val lastProperty = properties.last()
+            val needsSpace = lastProperty !is ObjectPropertyNodeImpl || lastProperty.value is NumberNode
             outputObject + if (needsSpace) " ." else "."
         } else outputObject
     }
