@@ -265,7 +265,9 @@ jobs:
 
   "build-linux-amd64":
     docker:
-      - image: "cimg/node:lts-browsers"
+      # Choose a `cimg/node` `-browsers` image so that we can install Chrome for testing. Note that we
+      # do not install a JDK image so that we are always exercising the project's built-in JDK (see jdk.properties for details)
+      - image: "cimg/node:24.22.1-browsers"
     working_directory: "~/repo"
     environment:
       JVM_OPTS: "-Xmx3200m"
