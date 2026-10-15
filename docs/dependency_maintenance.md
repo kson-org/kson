@@ -69,14 +69,12 @@ Some of our dependencies are deliberately not current: they represent our backwa
   - raising it: drops support for older IDEs
   - note: all three move together, since the platform version dictates the minimum JDK
 - **The oldest JVM that can consume `org.kson:kson`**
-  - declared in: `javaVersion` in [`build.gradle.kts`](../build.gradle.kts)
+  - declared in: `VERSION` in [`KsonJvmTarget.kt`](../buildSrc/src/main/kotlin/org/kson/KsonJvmTarget.kt)
   - raising it: breaks consumers
   - note: this is the bytecode target we publish, deliberately well below the JDK we build with
 - **The oldest Python that can install `kson-lang`**
   - declared in: `requires-python` in [`lib-python/pyproject.toml`](../lib-python/pyproject.toml), matched by the `cimg/python` image in [`.circleci/config.kson`](../.circleci/config.kson)
   - note: CI builds and tests the sdist on that floor on purpose. Move both together, or the guarantee stops being tested
-
-TODO One pin remains unclassified: `test-python-sdist-macos` runs on a much older `xcode` image than `build-macos-arm64` does. Work out whether that is a deliberate oldest-supported-macOS floor or an oversight, then move it into whichever list above it belongs in.
 
 ## 3. Sweep for new/missing unpinned dependencies
 

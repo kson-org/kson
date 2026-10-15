@@ -1,11 +1,14 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
+import org.gradle.crypto.checksum.Checksum
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kson.KsonJvmTarget
 import org.kson.KsonVersion
+import org.kson.releaseArtifactsDir
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -18,6 +21,8 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.37.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
+
+    id("org.gradle.crypto.checksum") version "1.4.0"
 
     // configured by `jvmWrapper` block below
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
@@ -74,7 +79,7 @@ tasks {
         dependsOn(generateJsonTestSuiteTask)
     }
 
-    val javaVersion = "11"
+    val javaVersion = KsonJvmTarget.VERSION
     withType<JavaCompile> {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -83,6 +88,7 @@ tasks {
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+            freeCompilerArgs.add("-Xjdk-release=$javaVersion")
         }
     }
 
@@ -129,6 +135,31 @@ tasks {
     withType<ProcessResources> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
+}
+
+/**
+ * Empties [releaseArtifactsDir] so each run stages a release from scratch.
+ */
+tasks.register<Delete>("cleanReleaseArtifacts") {
+    group = "distribution"
+    description = "Empties build/release-artifacts so each run stages a release from scratch"
+
+    delete(releaseArtifactsDir)
+}
+
+/**
+ * Stages this platform's release archives, each with a `.sha256`, in [releaseArtifactsDir].
+ */
+val packageReleaseArtifacts = tasks.register<Checksum>("packageReleaseArtifacts") {
+    group = "distribution"
+    description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
+
+    dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
+    inputFiles.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
+    outputDirectory.set(releaseArtifactsDir)
+
+    checksumAlgorithm.set(Checksum.Algorithm.SHA256)
+    appendFileNameToChecksum.set(true)
 }
 
 group = "org.kson"
