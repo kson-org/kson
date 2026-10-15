@@ -38,8 +38,14 @@ When `main` is ready to have a release cut from it:
       ./gradlew build -Prelease=true
       ```
   * [KSON Core internals](../build.gradle.kts) (**NOTE:** uses a different versioning scheme and will NOT be set to `X.Y.Z`.  See the comments there for details)
-  * lib-rust, lib-python, tooling/lsp-clients: These require manual version updates (no `-Prelease` flag support yet):
-    - [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs)
+  * rust libraries:
+      - [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs), [pixi.toml](../lib-rust/pixi.toml)
+      - Then update the [kson](../lib-rust/kson/Cargo.lock) and [kson-sys](../lib-rust/kson-sys/Cargo.lock) `Cargo.lock` files:
+        ```bash
+        cargo update --workspace --manifest-path lib-rust/kson-sys/Cargo.toml
+        cargo update --workspace --manifest-path lib-rust/kson/Cargo.toml
+        ```
+  * lib-python, tooling/lsp-clients: These require manual version updates (no `-Prelease` flag support yet):
     - [lib-python](../lib-python/pyproject.toml)
     - [tooling/lsp-clients](../tooling/lsp-clients/package.json)
     - [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json)
@@ -47,9 +53,10 @@ When `main` is ready to have a release cut from it:
     - [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json)
     - [tooling/language-server-protocol](../tooling/language-server-protocol/package.json)
   * [tooling/jetbrains plugin.xml](../tooling/jetbrains/src/main/resources/META-INF/plugin.xml): update `<change-notes>` section with very simple release notes (a link to the blog is enough)
-- Commit and push the `release-X.Y.Z-prep` branch
-- Run CircleCI across ALL supported platforms on the `release-X.Y.Z-prep` branch (only linux builds are run on every pull request)
-  * Fix any platform specific issues found (hopefully this is rare... if it is common and painful, we may need to reconsider running cross-platform CI more often)
+- Commit and push the `release/X.Y.Z` branch
+- Run CircleCI across ALL supported platforms on the `release/X.Y.Z` branch (only linux builds are run on every pull request)
+  * CircleCI UI: Pipelines → Trigger Pipeline
+  * Fix any platform specific issues found
 - Create tag `vX.Y.Z` if/when CircleCI is green for all platforms
 - Publish the release according the Publishing process below
 
