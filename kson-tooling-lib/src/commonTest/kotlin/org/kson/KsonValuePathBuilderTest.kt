@@ -748,8 +748,17 @@ class KsonValuePathBuilderTest {
     }
 
     @Test
+    fun testNewKeySite_emptyDashItemBeforeAClosingBrace() {
+        // The brace closes the object rather than being the dash's value, so the key goes into the dash's item
+        assertEquals(
+            NewKeySite(TreePointer(JsonPointer.fromTokens(listOf("items", "0"))), Range(2, 6, 2, 6)),
+            newKeySiteAtCaret("{\n  items:\n    - <caret>\n}")
+        )
+    }
+
+    @Test
     fun testNewKeySite_nullWhereTheKeyWouldJoinAnotherObject() {
-        // Completions here are for the root, but a key typed here would start the list item
-        assertNull(newKeySiteAtCaret("{\n  items:\n    - <caret>\n}"))
+        // Completions here are for the list, but a key typed here would end it and join the root object
+        assertNull(newKeySiteAtCaret("tags:\n  - red\n<caret>"))
     }
 }

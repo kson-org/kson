@@ -22,6 +22,18 @@ class KsonCoreTestListError : KsonCoreTestError {
     }
 
     @Test
+    fun testDanglingListDashBeforeClosingDelimiter() {
+        // the closer of the innermost delimited list or object closes it, rather than being the dash's value
+        assertParserRejectsSource("< - >", listOf(DANGLING_LIST_DASH))
+        assertParserRejectsSource("[ - ]", listOf(DANGLING_LIST_DASH))
+        assertParserRejectsSource("{ x: - }", listOf(DANGLING_LIST_DASH))
+        // a closer only an outer object is waiting for is still the dash's value, as a stray closer, so neither closes
+        assertParserRejectsSource("{ x: < - }", listOf(OBJECT_NO_CLOSE, LIST_NO_CLOSE, OBJECT_NO_OPEN))
+        // as is a closer nothing is waiting for
+        assertParserRejectsSource("< - ] >", listOf(LIST_NO_OPEN))
+    }
+
+    @Test
     fun testUnclosedListError() {
         assertParserRejectsSourceWithLocation("[", listOf(LIST_NO_CLOSE), listOf(Location.create(0, 0, 0, 1, 0, 1)))
         assertParserRejectsSource("[1,2,", listOf(LIST_NO_CLOSE))
