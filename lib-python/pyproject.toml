@@ -58,7 +58,7 @@ pythonpath = ["."]
 build = "cp311-*"
 skip = "*-musllinux_*"
 archs = "native"
-test-requires = "pytest"
+test-requires = "pytest==9.1.1"
 test-command = "pytest -v {project}/tests --ignore={project}/tests/test_build_backend.py"
 
 [tool.cibuildwheel.linux]
