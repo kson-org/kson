@@ -69,7 +69,7 @@ Some of our dependencies are deliberately not current: they represent our backwa
   - raising it: drops support for older IDEs
   - note: all three move together, since the platform version dictates the minimum JDK
 - **The oldest JVM that can consume `org.kson:kson`**
-  - declared in: `javaVersion` in [`build.gradle.kts`](../build.gradle.kts)
+  - declared in: `VERSION` in [`KsonJvmTarget.kt`](../buildSrc/src/main/kotlin/org/kson/KsonJvmTarget.kt)
   - raising it: breaks consumers
   - note: this is the bytecode target we publish, deliberately well below the JDK we build with
 - **The oldest Python that can install `kson-lang`**

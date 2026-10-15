@@ -1,7 +1,10 @@
 import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.kson.BinaryArtifactPaths
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.GraalVmHelper
+import org.kson.KsonJvmTarget
 import org.kson.UniversalJsPackage
 import org.kson.releaseArtifactsDir
 
@@ -51,6 +54,20 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
             }
+        }
+    }
+}
+
+tasks {
+    withType<JavaCompile> {
+        sourceCompatibility = KsonJvmTarget.VERSION
+        targetCompatibility = KsonJvmTarget.VERSION
+    }
+
+    withType<KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.fromTarget(KsonJvmTarget.VERSION))
+            freeCompilerArgs.add("-Xjdk-release=${KsonJvmTarget.VERSION}")
         }
     }
 }
