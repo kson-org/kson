@@ -476,11 +476,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             return
         } else {
             // we have an embed tag, let's scan it
-            while (
-                !sourceScanner.eof()
-                && sourceScanner.peek() != '\n'
-                && !(sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n')
-            ) {
+            while (!scannerAtEndOfLine()) {
                 sourceScanner.advance()
             }
 
@@ -526,6 +522,15 @@ class Lexer(source: String, gapFree: Boolean = false) {
             sourceScanner.advance()
             addLiteralToken(EMBED_CLOSE_DELIM)
         }
+    }
+
+    /**
+     * The scanner is at the end of a line if we're at end of file, a newline, or CRLF.
+     */
+    private fun scannerAtEndOfLine(): Boolean {
+        return sourceScanner.eof()
+                || sourceScanner.peek() == '\n'
+                || (sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n')
     }
 
     private fun number() {
