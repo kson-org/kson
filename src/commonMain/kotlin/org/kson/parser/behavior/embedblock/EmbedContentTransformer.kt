@@ -40,7 +40,7 @@ class EmbedContentTransformer(
         /**
          * Transformation pipeline:
          * 1. Trim the minimum indent
-         * 2. If %% was on its own line, strip the trailing \n (and residual whitespace)
+         * 2. If %% was on its own line, strip the trailing \n or \r\n (and residual whitespace)
          * 3. Unescape the content
          */
         val indentTrimmer = EmbedBlockIndent(rawContent)
@@ -49,7 +49,7 @@ class EmbedContentTransformer(
 
         trimmedEmbedContent = if (isCloseDelimOnOwnLine(rawContent)) {
             val lastNewline = indentTrimmed.lastIndexOf('\n')
-            if (lastNewline >= 0) indentTrimmed.take(lastNewline) else indentTrimmed
+            if (lastNewline >= 0) indentTrimmed.take(lastNewline).removeSuffix("\r") else indentTrimmed
         } else {
             indentTrimmed
         }
