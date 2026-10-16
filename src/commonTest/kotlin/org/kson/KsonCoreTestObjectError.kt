@@ -26,6 +26,19 @@ class KsonCoreTestObjectError : KsonCoreTestError {
     }
 
     @Test
+    fun testKeywordWithoutValueBeforeClosingDelimiter() {
+        // the closer of the innermost delimited object or list closes it, rather than being the keyword's value
+        assertParserRejectsSource("{ x: a: }", listOf(OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("[ a: ]", listOf(OBJECT_KEY_NO_VALUE))
+        assertParserRejectsSource("< - a: >", listOf(OBJECT_KEY_NO_VALUE))
+        // a closer only an outer object or list is waiting for is still the keyword's value, as a stray closer
+        assertParserRejectsSource("{ a: [ b: } ] }", listOf(OBJECT_NO_OPEN))
+        assertParserRejectsSource("[ { a: ] }", listOf(LIST_NO_CLOSE, LIST_NO_OPEN))
+        // as is a closer nothing is waiting for
+        assertParserRejectsSource("[ a: } ]", listOf(OBJECT_NO_OPEN))
+    }
+
+    @Test
     fun testUnclosedObjectError() {
         assertParserRejectsSource("{", listOf(OBJECT_NO_CLOSE))
         assertParserRejectsSource("{ key: value   ", listOf(OBJECT_NO_CLOSE))
