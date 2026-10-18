@@ -15,7 +15,7 @@ import org.kson.parser.messages.MessageType.*
 class IndentValidator {
     fun validate(ast: KsonRoot, messageSink: MessageSink) {
         if (ast is KsonRootImpl) {
-            validateNodeAlignment(ast.rootNode, -1, messageSink)
+            validateNodeAlignment(ast.rootNode, messageSink)
             validateNodeNesting(ast.rootNode, 0,
                 // Note: this message type is unused for root (minNestingColumn: 0 means all nesting is legal)
                 OBJECT_PROPERTY_NESTING_ISSUE,
@@ -84,35 +84,13 @@ class IndentValidator {
         }
     }
     /**
-     * @param node the [KsonValueNode] to validate
-     * @param previousNodeLine the document line location of the previous [KsonValueNode] in this document
-     *   and objects are indented so as not to appear to be part of the containing list/object
+     * Validate that the leading entries of every object and list in the tree rooted at [node] line up with the
+     * first entry of the object or list they belong to
      */
-    private fun validateNodeAlignment(node: KsonValueNode, previousNodeLine: Int, messageSink: MessageSink) {
-        /**
-         * If an object or list does not start at the first element, it is delimited,
-         * so we must account for that in order to not consider something like the following as mis-aligned:
-         *
-         * ```
-         * {x:1
-         * y:2}
-         * ```
-         */
-        val previousLine = if (node is ObjectNode && node.properties.isNotEmpty()
-            && node.location.start.column != node.properties.first().location.start.column
-        ) {
-            node.location.start.line
-        } else if (node is ListNode && node.elements.isNotEmpty()
-            && node.location.start.column != node.elements.first().location.start.column
-        ) {
-            node.location.start.line
-        } else {
-            previousNodeLine
-        }
-
+    private fun validateNodeAlignment(node: KsonValueNode, messageSink: MessageSink) {
         when (node) {
-            is ObjectNode -> validateObjectAlignment(node, previousLine, messageSink)
-            is ListNode -> validateListAlignment(node, previousLine, messageSink)
+            is ObjectNode -> validateObjectAlignment(node, messageSink)
+            is ListNode -> validateListAlignment(node, messageSink)
             is EmbedBlockNode, is UnquotedStringNode, is QuotedStringNode,
             is NumberNode, is TrueNode, is FalseNode, is NullNode,
             is KsonValueNodeError -> {
@@ -121,57 +99,38 @@ class IndentValidator {
         }
     }
 
-    private fun validateObjectAlignment(objNode: ObjectNode, previousNodeLine: Int, messageSink: MessageSink) {
+    private fun validateObjectAlignment(objNode: ObjectNode, messageSink: MessageSink) {
         validateAlignment(
             items = objNode.properties,
-            previousNodeLine,
             misalignmentMessage = OBJECT_PROPERTIES_MISALIGNED,
             messageSink
-        ) { property, _ ->
+        ) { property ->
             if (property is ObjectPropertyNodeImpl) {
-                validateNodeAlignment(
-                    property.value,
-                    property.key.location.end.line,
-                    messageSink)
+                validateNodeAlignment(property.value, messageSink)
             }
         }
     }
 
-    private fun validateListAlignment(listNode: ListNode, previousNodeLine: Int, messageSink: MessageSink) {
+    private fun validateListAlignment(listNode: ListNode, messageSink: MessageSink) {
         validateAlignment(
             items = listNode.elements,
-            previousNodeLine,
             misalignmentMessage = DASH_LIST_ITEMS_MISALIGNED,
             messageSink
-        ) { element, lineBeforeElem ->
+        ) { element ->
             if (element is ListElementNodeImpl) {
-                val value = element.value
-                val prevLineNum = if (value is ObjectNode || value is ListNode) {
-                    element.location.start.line
-                } else {
-                    lineBeforeElem
-                }
-
-                validateNodeAlignment(value, prevLineNum, messageSink)
+                validateNodeAlignment(element.value, messageSink)
             }
         }
     }
 
     private fun <T : AstNode> validateAlignment(
         items: List<T>,
-        previousNodeLine: Int,
         misalignmentMessage: MessageType,
         messageSink: MessageSink,
-        validateChild: (T, Int) -> Unit
+        validateChild: (T) -> Unit
     ) {
-        var previousItem: AstNode? = null
-
         // Recursively validate all children
-        for (item in items) {
-            val previousItemLine = previousItem?.location?.end?.line ?: previousNodeLine
-            previousItem = item
-            validateChild(item, previousItemLine)
-        }
+        items.forEach(validateChild)
 
         if (items.size < 2) {
             // No alignment to check with 0 or 1 items
@@ -179,7 +138,7 @@ class IndentValidator {
         }
 
         var prevLine = items[0].location.end.line
-        var expectedColumn = items[0].location.start.column
+        val expectedColumn = items[0].location.start.column
 
         // Check alignment of the indentation of all other items
         for (item in items.subList(1, items.size)) {
