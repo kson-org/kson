@@ -505,7 +505,6 @@ class IndentValidatorTest {
                   # deceptive indent: nested under `key:`
                   - 9
                 # deceptive indent: must be aligned `key:`
-                # deceptive indent: nested under list with `key:`
                 deceptive_object:
                     key: x
                     list: - 
@@ -516,10 +515,9 @@ class IndentValidatorTest {
         val badResult = KsonCore.parseToAst(badSource)
         assertEquals(
             listOf(
-                PLAIN_OBJECT_PROPERTIES_MISALIGNED to 7,
-                PLAIN_LIST_ELEMENT_NESTING_ISSUE to 7,
+                PLAIN_OBJECT_PROPERTIES_MISALIGNED to 6,
                 PLAIN_OBJECT_PROPERTY_NESTING_ISSUE to 4,
-                PLAIN_LIST_ELEMENT_NESTING_ISSUE to 11
+                PLAIN_LIST_ELEMENT_NESTING_ISSUE to 10
             ),
             badResult.messages.map { it.message.type to it.location.start.line }
         )
@@ -536,6 +534,102 @@ class IndentValidatorTest {
             """.trimIndent()
         val goodResult = KsonCore.parseToAst(goodSource)
         assertEquals(0, goodResult.messages.size)
+    }
+
+    /**
+     * A plain container's position is established by its first entry, so we should only ever error once on that entry,
+     * no matter how many entries it has
+     */
+    @Test
+    fun testUnderNestedContainerIsReportedOnce() {
+        val result = KsonCore.parseToAst(
+            """
+                key:
+                - a
+                - b
+                - c
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(PLAIN_OBJECT_PROPERTY_NESTING_ISSUE to 1),
+            result.messages.map { it.message.type to it.location.start.line },
+            "should only report a nesting issue on the first element"
+        )
+    }
+
+    @Test
+    fun testEntriesTrailingOnALineAreNeverNestingChecked() {
+        val result = KsonCore.parseToAst(
+            """
+                    key:
+                      a: 1
+                b:1 c:2
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(PLAIN_OBJECT_PROPERTIES_MISALIGNED to 2),
+            result.messages.map { it.message.type to it.location.start.line },
+            "should only report a nesting issue for `b:1`, the element with an indent"
+        )
+    }
+
+    @Test
+    fun testEntryStrayingFromWellPlacedContainerIsMisalignmentAlone() {
+        val result = KsonCore.parseToAst(
+            """
+                key:
+                  a: 1
+                b: 2
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(PLAIN_OBJECT_PROPERTIES_MISALIGNED to 2),
+            result.messages.map { it.message.type to it.location.start.line },
+            "should give misalignment error relative to the first elem `a: 1`, not a nesting error for its poor indentation"
+        )
+    }
+
+    /**
+     * Verifies an example from `docs/readme.md` works as documented, having only the
+     * [PLAIN_LIST_ELEMENTS_MISALIGNED] error
+     */
+    @Test
+    fun testReadmeDeceptiveIndentationExample() {
+        val result = KsonCore.parseToAst(
+            """
+                teams:
+                  - name: 'Team A'
+                    members:
+                      - Alice
+                      - Bob
+                  - name: 'Team B'
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(PLAIN_LIST_ELEMENTS_MISALIGNED to 5),
+            result.messages.map { it.message.type to it.location.start.line }
+        )
+        assertTrue(result.hasErrors(), "the readme promises this document is rejected")
+    }
+
+    /**
+     * A container's position is defined by its first entry even when that entry trails its key: a trailing
+     * first entry sits past its key by construction, so this container cannot be under-nested.  The stray
+     * `- b` is one complaint: a misalignment with the container's first entry, not a nesting error
+     */
+    @Test
+    fun testTrailingFirstEntryStillDefinesContainerPosition() {
+        val result = KsonCore.parseToAst(
+            """
+                key: - a
+                - b
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(PLAIN_LIST_ELEMENTS_MISALIGNED to 1),
+            result.messages.map { it.message.type to it.location.start.line },
+            "should enforce that `- b` be aligned under `- a`"
+        )
     }
 
     @Test
