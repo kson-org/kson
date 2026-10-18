@@ -202,7 +202,11 @@ internal class KsonFoldingBuilder : CustomFoldingBuilder() {
      * @return The number of child keys found, or 0 if none are present or the element is not an object.
      */
     private fun countChildKeys(element: PsiElement): Int {
-        val childObject = element.children.find { it.elementType == elem(ParsedElementType.OBJECT) } ?: return 0
+        val objectElementTypes = setOf(
+            elem(ParsedElementType.PLAIN_OBJECT),
+            elem(ParsedElementType.DELIMITED_OBJECT)
+        )
+        val childObject = element.children.find { it.elementType in objectElementTypes } ?: return 0
         return childObject.children.count { it.elementType == elem(ParsedElementType.OBJECT_PROPERTY) }
     }
 
