@@ -90,7 +90,7 @@ class KsonValidationAnnotatorTest : BasePlatformTestCase() {
         val listDashWarning = highlights.filter {
             it.severity.myVal == com.intellij.lang.annotation.HighlightSeverity.WARNING.myVal
         }.find {
-            val listDashMessage = MessageType.DELIMITED_LIST_ELEMENTS_MISALIGNED.create().toString()
+            val listDashMessage = MessageType.DELIMITED_LIST_ELEMENT_OVER_INDENTED.create().toString()
             it.description == listDashMessage
         }
 

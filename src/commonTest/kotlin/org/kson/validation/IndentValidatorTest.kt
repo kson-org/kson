@@ -36,7 +36,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned property")
 
         val error = result.messages.first()
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -75,7 +75,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned list item")
 
         val error = result.messages.first()
-        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -108,7 +108,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for the misaligned first inner property")
 
         val error = result.messages.first()
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -126,7 +126,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned first inner list")
 
         val error = result.messages.first()
-        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -169,7 +169,7 @@ class IndentValidatorTest {
 
         val badResult = KsonCore.parseToAst(badSource)
         assertEquals(1, badResult.messages.size)
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, badResult.messages[0].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, badResult.messages[0].message.type)
     }
 
     @Test
@@ -208,7 +208,7 @@ class IndentValidatorTest {
         )
 
         val error = misalignedResult.messages.first()
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_UNDER_INDENTED, error.message.type)
     }
 
     @Test
@@ -238,7 +238,7 @@ class IndentValidatorTest {
         )
 
         val error = misalignedResult.messages.first()
-        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -273,9 +273,9 @@ class IndentValidatorTest {
         )
 
         val errors = misalignedResult.messages
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[1].message.type)
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[2].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, errors[0].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, errors[1].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, errors[2].message.type)
     }
 
     @Test
@@ -314,7 +314,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned property in delimited object")
 
         val error = result.messages.first()
-        assertEquals(DELIMITED_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(DELIMITED_OBJECT_PROPERTY_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -329,7 +329,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size)
 
         val error = result.messages.first()
-        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_OVER_INDENTED, error.message.type)
     }
 
     @Test
@@ -425,7 +425,7 @@ class IndentValidatorTest {
     }
 
     @Test
-    fun testNonLeadingMultilineStrutures() {
+    fun testNonLeadingMultilineStructures() {
         /**
          * Regression test for a bug in the validator where alignment tracking was incorrect in the case that
          * a non-leading item spanned multiple lines, like the `non_leading:` property in this test.  In this
@@ -515,7 +515,7 @@ class IndentValidatorTest {
         val badResult = KsonCore.parseToAst(badSource)
         assertEquals(
             listOf(
-                PLAIN_OBJECT_PROPERTIES_MISALIGNED to 6,
+                PLAIN_OBJECT_PROPERTY_UNDER_INDENTED to 6,
                 PLAIN_OBJECT_PROPERTY_NESTING_ISSUE to 4,
                 PLAIN_LIST_ELEMENT_NESTING_ISSUE to 10
             ),
@@ -567,7 +567,7 @@ class IndentValidatorTest {
             """.trimIndent()
         )
         assertEquals(
-            listOf(PLAIN_OBJECT_PROPERTIES_MISALIGNED to 2),
+            listOf(PLAIN_OBJECT_PROPERTY_UNDER_INDENTED to 2),
             result.messages.map { it.message.type to it.location.start.line },
             "should only report a nesting issue for `b:1`, the element with an indent"
         )
@@ -583,7 +583,7 @@ class IndentValidatorTest {
             """.trimIndent()
         )
         assertEquals(
-            listOf(PLAIN_OBJECT_PROPERTIES_MISALIGNED to 2),
+            listOf(PLAIN_OBJECT_PROPERTY_UNDER_INDENTED to 2),
             result.messages.map { it.message.type to it.location.start.line },
             "should give misalignment error relative to the first elem `a: 1`, not a nesting error for its poor indentation"
         )
@@ -591,7 +591,7 @@ class IndentValidatorTest {
 
     /**
      * Verifies an example from `docs/readme.md` works as documented, having only the
-     * [PLAIN_LIST_ELEMENTS_MISALIGNED] error
+     * [PLAIN_LIST_ELEMENT_UNDER_INDENTED] error
      */
     @Test
     fun testReadmeDeceptiveIndentationExample() {
@@ -606,7 +606,7 @@ class IndentValidatorTest {
             """.trimIndent()
         )
         assertEquals(
-            listOf(PLAIN_LIST_ELEMENTS_MISALIGNED to 5),
+            listOf(PLAIN_LIST_ELEMENT_UNDER_INDENTED to 5),
             result.messages.map { it.message.type to it.location.start.line }
         )
         assertTrue(result.hasErrors(), "the readme promises this document is rejected")
@@ -626,7 +626,7 @@ class IndentValidatorTest {
             """.trimIndent()
         )
         assertEquals(
-            listOf(PLAIN_LIST_ELEMENTS_MISALIGNED to 1),
+            listOf(PLAIN_LIST_ELEMENT_UNDER_INDENTED to 1),
             result.messages.map { it.message.type to it.location.start.line },
             "should enforce that `- b` be aligned under `- a`"
         )
@@ -656,7 +656,15 @@ class IndentValidatorTest {
                 key1: value1
                   key2: value2
             """.trimIndent(),
-            PLAIN_OBJECT_PROPERTIES_MISALIGNED
+            PLAIN_OBJECT_PROPERTY_OVER_INDENTED
+        )
+
+        assertDeceptiveIndentErrorInPlain(
+            """
+                  key1: value1
+                key2: value2
+            """.trimIndent(),
+            PLAIN_OBJECT_PROPERTY_UNDER_INDENTED
         )
 
         assertDeceptiveIndentWarningInDelimited(
@@ -664,7 +672,15 @@ class IndentValidatorTest {
                 {key1: value1
                    key2: value2}
             """.trimIndent(),
-            DELIMITED_OBJECT_PROPERTIES_MISALIGNED
+            DELIMITED_OBJECT_PROPERTY_OVER_INDENTED
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                {  key1: value1
+                key2: value2}
+            """.trimIndent(),
+            DELIMITED_OBJECT_PROPERTY_UNDER_INDENTED
         )
     }
 
@@ -675,7 +691,15 @@ class IndentValidatorTest {
                 - item1
                   - item2
             """.trimIndent(),
-            PLAIN_LIST_ELEMENTS_MISALIGNED
+            PLAIN_LIST_ELEMENT_OVER_INDENTED
+        )
+
+        assertDeceptiveIndentErrorInPlain(
+            """
+                  - item1
+                - item2
+            """.trimIndent(),
+            PLAIN_LIST_ELEMENT_UNDER_INDENTED
         )
 
         assertDeceptiveIndentWarningInDelimited(
@@ -683,7 +707,15 @@ class IndentValidatorTest {
                 [item1
                    item2]
             """.trimIndent(),
-            DELIMITED_LIST_ELEMENTS_MISALIGNED
+            DELIMITED_LIST_ELEMENT_OVER_INDENTED
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                [  item1
+                item2]
+            """.trimIndent(),
+            DELIMITED_LIST_ELEMENT_UNDER_INDENTED
         )
     }
 
