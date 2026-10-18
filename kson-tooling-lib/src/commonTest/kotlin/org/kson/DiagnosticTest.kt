@@ -67,7 +67,8 @@ class DiagnosticTest {
     fun testErrorsAndWarnings() {
         val content = """
             - {list_item: false false}
-                - deceptive_indent_list_item
+            - [deceptive_indent
+                 another_item]
         """.trimIndent()
         val diagnostics = validateDocument(content)
         assertEquals(2, diagnostics.size)

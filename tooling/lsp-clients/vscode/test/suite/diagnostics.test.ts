@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { assert } from './assert';
 import {createTestFile, cleanUp, waitForDiagnostics} from './common';
 import {DiagnosticSeverity} from "vscode";
@@ -20,7 +19,8 @@ describe('Diagnostic Tests', () => {
     it('Should report both errors and warnings', async () => {
         const errorContent = [
             '- {list_item: false false}',
-            '    - deceptive_indent_list_item'
+            '- [deceptive_indent',
+            '     another_item]'
         ].join('\n');
         const [testFileUri, document] = await createTestFile(errorContent);
 

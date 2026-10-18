@@ -1,9 +1,13 @@
 package org.kson.validation
 
+import org.kson.AstParseResult
 import org.kson.KsonCore
+import org.kson.parser.messages.MessageSeverity
+import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class IndentValidatorTest {
@@ -32,7 +36,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned property")
 
         val error = result.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -71,7 +75,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned list item")
 
         val error = result.messages.first()
-        assertEquals(DASH_LIST_ITEMS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -104,7 +108,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for the misaligned first inner property")
 
         val error = result.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -122,7 +126,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned first inner list")
 
         val error = result.messages.first()
-        assertEquals(DASH_LIST_ITEMS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -165,7 +169,7 @@ class IndentValidatorTest {
 
         val badResult = KsonCore.parseToAst(badSource)
         assertEquals(1, badResult.messages.size)
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, badResult.messages[0].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, badResult.messages[0].message.type)
     }
 
     @Test
@@ -204,7 +208,7 @@ class IndentValidatorTest {
         )
 
         val error = misalignedResult.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -234,7 +238,7 @@ class IndentValidatorTest {
         )
 
         val error = misalignedResult.messages.first()
-        assertEquals(DASH_LIST_ITEMS_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENTS_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -269,9 +273,9 @@ class IndentValidatorTest {
         )
 
         val errors = misalignedResult.messages
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[1].message.type)
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[2].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[1].message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, errors[2].message.type)
     }
 
     @Test
@@ -310,7 +314,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size, "Should have one error for misaligned property in delimited object")
 
         val error = result.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(DELIMITED_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -325,7 +329,7 @@ class IndentValidatorTest {
         assertEquals(1, result.messages.size)
 
         val error = result.messages.first()
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTIES_MISALIGNED, error.message.type)
     }
 
     @Test
@@ -339,7 +343,7 @@ class IndentValidatorTest {
         assertEquals(1, badResult.messages.size)
 
         val error = badResult.messages.first()
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_NESTING_ISSUE, error.message.type)
     }
 
     /**
@@ -452,7 +456,7 @@ class IndentValidatorTest {
         assertEquals(1, badResult.messages.size)
 
         val error = badResult.messages.first()
-        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, error.message.type)
+        assertEquals(PLAIN_OBJECT_PROPERTY_NESTING_ISSUE, error.message.type)
 
         val goodSource = """
                 key:
@@ -479,7 +483,7 @@ class IndentValidatorTest {
         assertEquals(1, badResult.messages.size)
 
         val error = badResult.messages.first()
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, error.message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_NESTING_ISSUE, error.message.type)
 
         val goodSource = """
                 ports:
@@ -510,13 +514,15 @@ class IndentValidatorTest {
             """.trimIndent()
 
         val badResult = KsonCore.parseToAst(badSource)
-        assertEquals(4, badResult.messages.size)
-
-        val errors = badResult.messages
-        assertEquals(OBJECT_PROPERTIES_MISALIGNED, errors[0].message.type)
-        assertEquals(OBJECT_PROPERTY_NESTING_ISSUE, errors[1].message.type)
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[2].message.type)
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[3].message.type)
+        assertEquals(
+            listOf(
+                PLAIN_OBJECT_PROPERTIES_MISALIGNED to 7,
+                PLAIN_LIST_ELEMENT_NESTING_ISSUE to 7,
+                PLAIN_OBJECT_PROPERTY_NESTING_ISSUE to 4,
+                PLAIN_LIST_ELEMENT_NESTING_ISSUE to 11
+            ),
+            badResult.messages.map { it.message.type to it.location.start.line }
+        )
 
         val goodSource = """
                 honest_list:
@@ -545,7 +551,190 @@ class IndentValidatorTest {
         assertEquals(2, badResult.messages.size)
 
         val errors = badResult.messages
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[0].message.type)
-        assertEquals(DASH_LIST_ITEMS_NESTING_ISSUE, errors[1].message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_NESTING_ISSUE, errors[0].message.type)
+        assertEquals(PLAIN_LIST_ELEMENT_NESTING_ISSUE, errors[1].message.type)
+    }
+
+    @Test
+    fun testMisalignedObjectPropertySeverity() {
+        assertDeceptiveIndentErrorInPlain(
+            """
+                key1: value1
+                  key2: value2
+            """.trimIndent(),
+            PLAIN_OBJECT_PROPERTIES_MISALIGNED
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                {key1: value1
+                   key2: value2}
+            """.trimIndent(),
+            DELIMITED_OBJECT_PROPERTIES_MISALIGNED
+        )
+    }
+
+    @Test
+    fun testMisalignedListElementSeverity() {
+        assertDeceptiveIndentErrorInPlain(
+            """
+                - item1
+                  - item2
+            """.trimIndent(),
+            PLAIN_LIST_ELEMENTS_MISALIGNED
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                [item1
+                   item2]
+            """.trimIndent(),
+            DELIMITED_LIST_ELEMENTS_MISALIGNED
+        )
+    }
+
+    @Test
+    fun testUnderNestedObjectPropertySeverity() {
+        assertDeceptiveIndentErrorInPlain(
+            """
+                key: nested:
+                value: 1
+            """.trimIndent(),
+            PLAIN_OBJECT_PROPERTY_NESTING_ISSUE
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                {key:
+                {value: 1}}
+            """.trimIndent(),
+            DELIMITED_OBJECT_PROPERTY_NESTING_ISSUE
+        )
+    }
+
+    @Test
+    fun testDelimitersMarkTheirContainerBounds() {
+        // though this skirts deceptive indentation by making `key:` and `value:` look like siblings, we let delimiters
+        // mark bounds (and hence own nesting) in delimited structures
+        assertTrue(
+            KsonCore.parseToAst(
+                """
+                    key: {
+                    value: 1}
+                """.trimIndent()
+            ).messages.isEmpty(),
+            "the `{` sits deeper than `key`, and so denotes acceptable nesting here"
+        )
+
+        assertDeceptiveIndentErrorInPlain(
+            """
+                key:
+                {value: 1}
+            """.trimIndent(),
+            PLAIN_OBJECT_PROPERTY_NESTING_ISSUE,
+            "the opening delimiter here must be nested deeper than the key that owns it"
+        )
+    }
+
+    @Test
+    fun testUnderNestedListElementSeverity() {
+        assertDeceptiveIndentErrorInPlain(
+            """
+                  -
+                value
+            """.trimIndent(),
+            PLAIN_LIST_ELEMENT_NESTING_ISSUE
+        )
+
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                <  -
+                value>
+            """.trimIndent(),
+            DELIMITED_LIST_ELEMENT_NESTING_ISSUE
+        )
+    }
+
+    @Test
+    fun testUnderNestedValueIsJudgedByTheContainerItHangsOff() {
+        assertDeceptiveIndentWarningInDelimited(
+            """
+                <-
+                x: 1>
+            """.trimIndent(),
+            DELIMITED_LIST_ELEMENT_NESTING_ISSUE,
+            "the `<>` delimiters show a reader where the list this plain object hangs off ends"
+        )
+
+        assertDeceptiveIndentErrorInPlain(
+            """
+                -
+                {
+                x: 1}
+            """.trimIndent(),
+            PLAIN_LIST_ELEMENT_NESTING_ISSUE,
+            "nothing marks where the dash list this delimited object hangs off ends"
+        )
+    }
+
+    @Test
+    fun testJsonIndentationIsNeverAnError() {
+        val result = KsonCore.parseToAst(
+            """
+                {
+                  "a": 1,
+                    "b": [2,
+                  3]
+                }
+            """.trimIndent()
+        )
+
+        assertTrue(
+            result.messages.isNotEmpty(),
+            "this JSON is untidily indented, and we should say so"
+        )
+        assertFalse(
+            result.hasErrors(),
+            "KSON accepts every JSON document, and JSON is free to be indented however it likes"
+        )
+    }
+
+    /**
+     * Assert [source] logs exactly the [expectedMessageType] deceptive indent, as an error
+     */
+    private fun assertDeceptiveIndentErrorInPlain(
+        source: String,
+        expectedMessageType: MessageType,
+        message: String? = null
+    ) {
+        val result = assertSingleDeceptiveIndent(source, expectedMessageType, message)
+        assertEquals(MessageSeverity.ERROR, expectedMessageType.severity)
+        assertTrue(result.hasErrors(), "a deceptive indent in plain syntax is an error")
+    }
+
+    /**
+     * Assert [source] logs exactly the [expectedMessageType] deceptive indent, as a warning
+     */
+    private fun assertDeceptiveIndentWarningInDelimited(
+        source: String,
+        expectedMessageType: MessageType,
+        message: String? = null
+    ) {
+        val result = assertSingleDeceptiveIndent(source, expectedMessageType, message)
+        assertEquals(MessageSeverity.WARNING, expectedMessageType.severity)
+        assertFalse(result.hasErrors(), "a deceptive indent inside delimiters only gets a warning")
+    }
+
+    private fun assertSingleDeceptiveIndent(
+        source: String,
+        expectedMessageType: MessageType,
+        message: String? = null
+    ): AstParseResult {
+        val result = KsonCore.parseToAst(source)
+        assertEquals(
+            listOf(expectedMessageType), result.messages.map { it.message.type },
+            (message?.let { "$it\n" } ?: "") + "expected exactly one deceptive indent message from:\n$source"
+        )
+        return result
     }
 }
