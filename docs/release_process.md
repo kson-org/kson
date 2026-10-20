@@ -83,8 +83,8 @@ archive with `shasum -a 256 -c <archive>.sha256` (or `sha256sum -c`).
 `./gradlew packageReleaseArtifacts` produces the same files locally for the platform you are on,
 in `build/release-artifacts`. It needs GraalVM, which the task pulls in via pixi.
 
-Only `build-linux-amd64` runs on every branch; the rest are gated to `release.*X.Y.Z`, so a
-release's artifacts come from its own CI run.
+Only `build-linux-amd64` runs on every branch; the rest are gated to `release.*X.Y.Z` (and a
+weekly scheduled run on `main`), so a release's artifacts come from its own CI run.
 
 #### [kson-lib](../kson-lib) Publishing Process
 
@@ -148,7 +148,7 @@ https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_V
   `kson-rs` and `kson-sys`
 - Write access to https://github.com/kson-org/kson-binaries
 - The [`gh` CLI](https://cli.github.com/), authenticated
-- A green `build-python-and-test` workflow on the release branch
+- Green `build-all` and `build-release-targets` workflows on the release branch
 
 ##### Step 1: Cut the `kson-binaries` release
 

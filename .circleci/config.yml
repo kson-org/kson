@@ -422,33 +422,16 @@ jobs:
 
 workflows:
   version: 2
-  # Main build workflow - runs on version tags
   "build-all":
     jobs:
       - "build-linux-amd64"
-      - "build-windows-amd64":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
-      - "build-macos-arm64":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
-  "build-python-and-test":
+  # Run on pushes to the release/vx.x.x branch and during the weekly schedule trigger on main (CircleCI project settings)
+  "build-release-targets":
+    when: "pipeline.git.branch matches /release.*\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\""
     jobs:
-      - "test-python-sdist":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
-      - "build-python-wheel-linux-amd64":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
-      - "build-python-wheel-macos":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
-      - "build-python-wheel-windows":
-          filters:
-            branches:
-              only: "/release.*\\d+\\.\\d+\\.\\d+$/"
+      - "build-windows-amd64"
+      - "build-macos-arm64"
+      - "test-python-sdist"
+      - "build-python-wheel-linux-amd64"
+      - "build-python-wheel-macos"
+      - "build-python-wheel-windows"
