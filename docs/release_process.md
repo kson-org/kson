@@ -84,7 +84,9 @@ archive with `shasum -a 256 -c <archive>.sha256` (or `sha256sum -c`).
 in `build/release-artifacts`. It needs GraalVM, which the task pulls in via pixi.
 
 Only `build-linux-amd64` runs on every branch; the rest are gated to `release.*X.Y.Z` (and a
-weekly scheduled run on `main`), so a release's artifacts come from its own CI run.
+weekly scheduled run on `main`), so a release's artifacts come from its own CI run. Any branch
+can run them on demand through the `run-*` pipeline parameters in
+[`.circleci/config.kson`](../.circleci/config.kson).
 
 #### [kson-lib](../kson-lib) Publishing Process
 
