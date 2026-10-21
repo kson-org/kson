@@ -29,7 +29,7 @@ function isFormatCommandId(command: string): boolean {
  * @param initializationOptions Optional initialization options including bundled schemas
  */
 export const createClientOptions = (
-    outputChannel: vscode.OutputChannel,
+    outputChannel: vscode.LogOutputChannel,
     initializationOptions?: KsonInitializationOptions
 ): LanguageClientOptions => {
     const { languageIds, fileExtensions } = getLanguageConfiguration();
