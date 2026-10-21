@@ -44,7 +44,7 @@
   "dependencies": {
     "kson": "link:../../kson-lib/build/dist/js/productionLibrary",
     "kson-tooling": "link:../../kson-tooling-lib/build/dist/js/productionLibrary",
-    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
     "vscode-uri": "^3.2.0"
   },
