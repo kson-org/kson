@@ -137,7 +137,7 @@
     "@kson/lsp-shared": "link:../shared",
     "kson-language-server": "link:../../language-server-protocol",
     "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1"
+    "vscode-languageserver": "^10.1.2"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

@@ -13,7 +13,7 @@ import {beforeEach, describe, it} from 'mocha';
 import {ConnectionStub} from "../../ConnectionStub";
 import {KsonDocumentsManager} from "../../../core/document/KsonDocumentsManager.js";
 import {KsonTextDocumentService} from "../../../core/services/KsonTextDocumentService.js";
-import {FullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
+import {FullDocumentDiagnosticReport} from "vscode-languageserver";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 import {ksonSettingsWithDefaults} from "../../../core/KsonSettings.js";
 import {pos, SCHEMA_URI, SchemaProviderTestStub, triggeredBy} from "../../TestHelpers";
