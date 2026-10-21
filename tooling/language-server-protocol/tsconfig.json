@@ -2,12 +2,15 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
     "outDir": "out",
     // Custom types
     "typeRoots": [
       "./node_modules/@types"
     ],
+    "types": ["node", "mocha"],
+    "strict": false,
     // Useful settings for debugging
     "declaration": true,
     "declarationMap": true,

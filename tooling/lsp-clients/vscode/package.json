@@ -152,7 +152,7 @@
     "process": "^0.11.10",
     "rimraf": "^6.1.3",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "uuid": "^14.0.2",
     "vscode-textmate-languageservice": "^4.0.0"
   },
