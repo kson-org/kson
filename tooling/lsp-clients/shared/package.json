@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "kson-language-server": "link:../../language-server-protocol",
-    "vscode-languageclient": "^9.0.1",
+    "vscode-languageclient": "^10.1.2",
     "vscode-languageserver": "^10.1.2"
   },
   "devDependencies": {
