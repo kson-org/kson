@@ -14,7 +14,7 @@ dependencies {
     // to native (along with the tests).
     implementation(project(":"))
 
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
