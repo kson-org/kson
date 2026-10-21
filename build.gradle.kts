@@ -199,7 +199,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
             }
         }
         val jvmMain by getting

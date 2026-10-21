@@ -104,7 +104,7 @@ dependencies {
     implementation(gradleApi())
     testImplementation(kotlin("test"))
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.8.0.202609011348-r")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
 
     // Add Kotlin Gradle Plugin for multiplatform configuration
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21")
