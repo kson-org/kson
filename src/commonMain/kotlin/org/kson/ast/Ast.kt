@@ -303,16 +303,12 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
             is Yaml -> throw UnsupportedOperationException("We never format YAML objects as delimited")
         }
 
-        return """
-            |${indent.firstLineIndent()}{
-            |${
-            properties.withIndex().joinToString(separator) { (index, property) ->
-                val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-                property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
-            }
-        }
-            |${indent.bodyLinesIndent()}}
-            """.trimMargin()
+        return indent.firstLineIndent() + "{\n" +
+                properties.withIndex().joinToString(separator) { (index, property) ->
+                    val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
+                    property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
+                } +
+                "\n" + indent.bodyLinesIndent() + "}"
 
     }
 
