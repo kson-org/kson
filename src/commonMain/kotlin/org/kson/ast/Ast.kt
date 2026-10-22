@@ -259,6 +259,12 @@ private fun formatUndelimitedEntries(
     }
 }
 
+private sealed class Delimiters(val open: Char, val close: Char) {
+    data object AngleBrackets : Delimiters('<', '>')
+    data object SquareBrackets : Delimiters('[', ']')
+    data object CurlyBraces : Delimiters('{', '}')
+}
+
 /**
  *  This check is used to determine if the document contains trailing content.
  *  This is the case if the node after an [ObjectNode] or [ListNode] is a [KsonValueNode] (not an element
@@ -274,7 +280,7 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
 class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (properties.isEmpty()) {
-            return "${indent.firstLineIndent()}{}"
+            return "${indent.firstLineIndent()}${Delimiters.CurlyBraces.open}${Delimiters.CurlyBraces.close}"
         }
 
         return when (compileTarget) {
@@ -463,21 +469,16 @@ class ListNode(
     val elements: List<ListElementNode>,
     sourceTokens: List<Token>
 ) : KsonValueNodeImpl(sourceTokens) {
-    private sealed class ListDelimiters(val open: Char, val close: Char) {
-        data object AngleBrackets : ListDelimiters('<', '>')
-        data object SquareBrackets : ListDelimiters('[', ']')
-    }
-
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         val listDelimiter = when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    ListDelimiters.SquareBrackets
+                    Delimiters.SquareBrackets
                 } else {
-                    ListDelimiters.AngleBrackets
+                    Delimiters.AngleBrackets
                 }
             }
-            is Yaml-> ListDelimiters.SquareBrackets
+            is Yaml-> Delimiters.SquareBrackets
         }
         if (elements.isEmpty()) {
             return "${indent.firstLineIndent()}${listDelimiter.open}${listDelimiter.close}"
@@ -500,7 +501,7 @@ class ListNode(
                         indent,
                         nextNode,
                         compileTarget,
-                        ListDelimiters.SquareBrackets
+                        Delimiters.SquareBrackets
                     )
                     CLASSIC -> formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
                 }
@@ -514,7 +515,7 @@ class ListNode(
         indent: Indent,
         nextNode: AstNode?,
         compileTarget: CompileTarget,
-        listDelimiters: ListDelimiters
+        listDelimiters: Delimiters
     ): String {
         val separator = when (compileTarget) {
             is Kson -> if(compileTarget.formatConfig.formattingStyle == CLASSIC) {
@@ -540,7 +541,7 @@ class ListNode(
         indent: Indent,
         nextNode: AstNode?,
         compileTarget: CompileTarget,
-        listDelimiters: ListDelimiters
+        listDelimiters: Delimiters
     ): String {
         return elements.withIndex().joinToString(
             "",
@@ -572,7 +573,7 @@ class ListNode(
                         "$elementString "
                     } else {
                         // Non-empty objects need to be wrapped to separate from the next object
-                        "{$elementString}"
+                        "${Delimiters.CurlyBraces.open}$elementString${Delimiters.CurlyBraces.close}"
                     }
                 }
 
