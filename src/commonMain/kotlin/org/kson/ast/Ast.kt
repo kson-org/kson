@@ -274,17 +274,12 @@ private fun formatDelimitedEntries(
     delimiters: Delimiters,
     indent: Indent,
     nextNode: AstNode?,
-    compileTarget: CompileTarget
+    compileTarget: Kson
 ): String {
-    val separator = when (compileTarget) {
-        is Kson -> {
-            if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                ",\n"
-            } else {
-                "\n"
-            }
-        }
-        is Yaml -> throw UnsupportedOperationException("We never format YAML objects or lists as delimited")
+    val separator = if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
+        ",\n"
+    } else {
+        "\n"
     }
 
     return indent.firstLineIndent() + delimiters.open + "\n" +
@@ -327,7 +322,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
         }
     }
 
-    private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
+    private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: Kson): String {
         return formatDelimitedEntries(properties, Delimiters.CurlyBraces, indent, nextNode, compileTarget)
     }
 
@@ -527,7 +522,7 @@ class ListNode(
     private fun formatDelimitedList(
         indent: Indent,
         nextNode: AstNode?,
-        compileTarget: CompileTarget,
+        compileTarget: Kson,
         listDelimiters: Delimiters
     ): String {
         return formatDelimitedEntries(
