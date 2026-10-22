@@ -266,6 +266,36 @@ private sealed class Delimiters(val open: Char, val close: Char) {
 }
 
 /**
+ * Write the [entries] of a non-empty delimited object or list inside [delimiters], indented
+ * one level deepr
+ */
+private fun formatDelimitedEntries(
+    entries: List<AstNode>,
+    delimiters: Delimiters,
+    indent: Indent,
+    nextNode: AstNode?,
+    compileTarget: CompileTarget
+): String {
+    val separator = when (compileTarget) {
+        is Kson -> {
+            if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
+                ",\n"
+            } else {
+                "\n"
+            }
+        }
+        is Yaml -> throw UnsupportedOperationException("We never format YAML objects or lists as delimited")
+    }
+
+    return indent.firstLineIndent() + delimiters.open + "\n" +
+            entries.withIndex().joinToString(separator) { (index, entry) ->
+                val nodeAfterThisEntry = entries.getOrNull(index + 1) ?: nextNode
+                entry.toSourceWithNext(indent.next(false), nodeAfterThisEntry, compileTarget)
+            } +
+            "\n" + indent.bodyLinesIndent() + delimiters.close
+}
+
+/**
  *  This check is used to determine if the document contains trailing content.
  *  This is the case if the node after an [ObjectNode] or [ListNode] is a [KsonValueNode] (not an element
  *  adding to an object or list).
@@ -298,24 +328,7 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
     }
 
     private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val separator = when (compileTarget) {
-            is Kson -> {
-                if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    ",\n"
-                } else {
-                    "\n"
-                }
-            }
-            is Yaml -> throw UnsupportedOperationException("We never format YAML objects as delimited")
-        }
-
-        return indent.firstLineIndent() + "{\n" +
-                properties.withIndex().joinToString(separator) { (index, property) ->
-                    val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-                    property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
-                } +
-                "\n" + indent.bodyLinesIndent() + "}"
-
+        return formatDelimitedEntries(properties, Delimiters.CurlyBraces, indent, nextNode, compileTarget)
     }
 
     private fun formatCompactObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -517,24 +530,13 @@ class ListNode(
         compileTarget: CompileTarget,
         listDelimiters: Delimiters
     ): String {
-        val separator = when (compileTarget) {
-            is Kson -> if(compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                ",\n"
-            }else{
-                "\n"
-            }
-            else -> throw UnsupportedOperationException("We never format YAML objects as delimited")
-        }
-
-        // We pad our list bracket with newlines if our list is non-empty
-        val bracketPadding = "\n"
-        return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
-                elements.withIndex().joinToString(separator) { (index, element) ->
-                    val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
-                    element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
-                } +
-                bracketPadding +
-                indent.bodyLinesIndent() + listDelimiters.close
+        return formatDelimitedEntries(
+            elements,
+            listDelimiters,
+            indent,
+            nextNode,
+            compileTarget
+        )
     }
 
     private fun formatCompactList(
