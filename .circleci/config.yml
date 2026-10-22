@@ -7,7 +7,7 @@ version: 2.1
 orbs:
   # Ensure access to browser tools so we can install Chrome below for JS Kotlin tests
   # See https://circleci.com/developer/orbs/orb/circleci/browser-tools for details
-  "browser-tools": "circleci/browser-tools@2.4.2"
+  browser-tools: "circleci/browser-tools@2.4.2"
   # Windows support for testing Python on Windows
   windows: "circleci/windows@5.1.1"
 
@@ -17,22 +17,22 @@ orbs:
 #   {"branch": "my-branch", "parameters": {"run-windows": true, "run-python": true}}
 # A pipeline that turns any of them on runs just those targets, leaving build-all and build-release-targets off.
 parameters:
-  "run-windows":
+  run-windows:
     type: boolean
     default: false
 
-  "run-macos":
+  run-macos:
     type: boolean
     default: false
 
-  "run-python":
+  run-python:
     type: boolean
     default: false
 
 
 # Reusable command definitions - only for truly cross-platform operations
 commands:
-  "gradle-core-tasks":
+  gradle-core-tasks:
     description: "Run core Gradle build and verification tasks"
     steps:
       - run:
@@ -44,7 +44,6 @@ commands:
           command: |
               cd buildSrc
               ./gradlew --no-daemon check
-              
 
       - run:
           name: "Verify Kson project"
@@ -65,7 +64,7 @@ commands:
 
   # Every job that produces something a release needs stores it through here, so all of the artifacts
   # can be found under `release-artifacts/<platform>`.
-  "store-release-artifacts":
+  store-release-artifacts:
     description: "Store the artifacts a job built under the shared per-platform destination"
     parameters:
       path:
@@ -83,7 +82,7 @@ commands:
           destination: "release-artifacts/<< parameters.platform >>"
 
 
-  "restore-build-caches":
+  restore-build-caches:
     description: "Restore Gradle dependency, rattler, and uv caches shared by build and Python jobs"
     parameters:
       platform:
@@ -104,7 +103,7 @@ commands:
             - "v1-<< parameters.platform >>-uv-{{ checksum \"lib-python/uv.lock\" }}"
             - "v1-<< parameters.platform >>-uv-"
 
-  "save-build-caches":
+  save-build-caches:
     description: "Save Gradle dependency, rattler, and uv caches shared by build and Python jobs"
     parameters:
       platform:
@@ -134,14 +133,14 @@ commands:
 
   # Gradle build cache, scoped to build-linux-amd64 only (keeps stale cached output out of release artifacts).
   # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
-  "restore-gradle-build-cache":
+  restore-gradle-build-cache:
     description: "Restore the Gradle build cache for build-linux-amd64"
     steps:
       - restore_cache:
           keys:
-            - "v1-linux-amd64-gradle-build-cache-"
+            - v1-linux-amd64-gradle-build-cache-
 
-  "save-gradle-build-cache":
+  save-gradle-build-cache:
     description: "Save the Gradle build cache for build-linux-amd64 (see runbook above)"
     steps:
       - save_cache:
@@ -150,7 +149,7 @@ commands:
           key: "v1-linux-amd64-gradle-build-cache-{{ .Revision }}"
 
 
-  "restore-gradle-caches":
+  restore-gradle-caches:
     description: "Restore all caches for the full cross-platform build jobs"
     parameters:
       platform:
@@ -158,7 +157,7 @@ commands:
         description: "Platform identifier for cache keys"
 
     steps:
-      - "restore-build-caches":
+      - restore-build-caches:
           platform: "<< parameters.platform >>"
       - restore_cache:
           keys:
@@ -168,7 +167,7 @@ commands:
             - "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
             - "v1-<< parameters.platform >>-pnpm-store-"
 
-  "save-gradle-caches":
+  save-gradle-caches:
     description: "Save all caches for the full cross-platform build jobs"
     parameters:
       platform:
@@ -176,7 +175,7 @@ commands:
         description: "Platform identifier for cache keys"
 
     steps:
-      - "save-build-caches":
+      - save-build-caches:
           platform: "<< parameters.platform >>"
       - save_cache:
           paths:
@@ -194,7 +193,7 @@ commands:
           key: "v1-<< parameters.platform >>-pnpm-store-{{ checksum \"tooling/lsp-clients/pnpm-lock.yaml\" }}-{{ checksum \"tooling/language-server-protocol/pnpm-lock.yaml\" }}"
 
 
-  "clean-git-config":
+  clean-git-config:
     description: "Remove erroneous git config across platforms"
     parameters:
       shell:
@@ -226,7 +225,6 @@ commands:
                 name: "Clean git config"
                 command: |
                     Remove-Item -Path "$env:USERPROFILE\.gitconfig" -Force -ErrorAction SilentlyContinue
-                    
                 shell: "powershell.exe"
 
 
@@ -234,7 +232,7 @@ commands:
 
 # Job definitions
 jobs:
-  "build-windows-amd64":
+  build-windows-amd64:
     resource_class: "windows.large"
     machine:
       image: "windows-server-2022-gui:2026.05.1"
@@ -244,7 +242,7 @@ jobs:
       JVM_OPTS: "-Xmx3200m"
     steps:
       - checkout
-      - "clean-git-config":
+      - clean-git-config:
           shell: powershell
       # Windows-specific installations
       # The `browser-tools` orb doesn't support windows, so we install Chrome manually
@@ -252,18 +250,18 @@ jobs:
           name: "Install Chrome"
           command: "choco install googlechrome --ignore-checksums"
 
-      - "restore-gradle-caches":
-          platform: "win-amd64"
+      - restore-gradle-caches:
+          platform: win-amd64
       # Cross-platform Gradle tasks
-      - "gradle-core-tasks"
-      - "store-release-artifacts":
+      - gradle-core-tasks
+      - store-release-artifacts:
           path: "build/release-artifacts"
-          platform: "windows-amd64"
+          platform: windows-amd64
 
-      - "save-gradle-caches":
-          platform: "win-amd64"
+      - save-gradle-caches:
+          platform: win-amd64
 
-  "build-linux-amd64":
+  build-linux-amd64:
     docker:
       # Choose a `cimg/node` `-browsers` image so that we can install Chrome for testing. Note that we
       # do not install a JDK image so that we are always exercising the project's built-in JDK (see jdk.properties for details)
@@ -288,22 +286,22 @@ jobs:
           command: "Xvfb :99 -screen 0 1280x1024x24 &"
           background: true
 
-      - "restore-gradle-caches":
-          platform: "linux-amd64"
-      - "restore-gradle-build-cache"
-      - "clean-git-config":
+      - restore-gradle-caches:
+          platform: linux-amd64
+      - restore-gradle-build-cache
+      - clean-git-config:
           shell: bash
       # Cross-platform Gradle tasks
-      - "gradle-core-tasks"
-      - "store-release-artifacts":
+      - gradle-core-tasks
+      - store-release-artifacts:
           path: "build/release-artifacts"
-          platform: "linux-amd64"
+          platform: linux-amd64
 
-      - "save-gradle-build-cache"
-      - "save-gradle-caches":
-          platform: "linux-amd64"
+      - save-gradle-build-cache
+      - save-gradle-caches:
+          platform: linux-amd64
 
-  "build-macos-arm64":
+  build-macos-arm64:
     macos:
       xcode: "27.0"
     resource_class: "m4pro.medium"
@@ -318,30 +316,30 @@ jobs:
           name: "Verify Chrome installation"
           command: "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --version"
 
-      - "clean-git-config":
+      - clean-git-config:
           shell: bash
-      - "restore-gradle-caches":
-          platform: "macos-arm64"
+      - restore-gradle-caches:
+          platform: macos-arm64
       # Cross-platform Gradle tasks
-      - "gradle-core-tasks"
-      - "store-release-artifacts":
+      - gradle-core-tasks
+      - store-release-artifacts:
           path: "build/release-artifacts"
-          platform: "macos-arm64"
+          platform: macos-arm64
 
-      - "save-gradle-caches":
-          platform: "macos-arm64"
+      - save-gradle-caches:
+          platform: macos-arm64
 
-  "test-python-sdist":
+  test-python-sdist:
     docker:
       - image: "cimg/python:3.11"
     resource_class: large
     working_directory: "~/repo"
     steps:
       - checkout
-      - "clean-git-config":
+      - clean-git-config:
           shell: bash
-      - "restore-build-caches":
-          platform: "linux-amd64"
+      - restore-build-caches:
+          platform: linux-amd64
       - run:
           name: "Build Python source distribution"
           command: "./gradlew :lib-python:buildSdist"
@@ -356,7 +354,6 @@ jobs:
               # against that list; this is the only place anyone opens the archive itself.
               tar tzf lib-python/dist/kson_lang-*.tar.gz | tee /tmp/sdist-contents.txt
               ! grep -E "[.](so|dylib|dll|pyd|h)$" /tmp/sdist-contents.txt
-              
 
       - run:
           name: "Verify installing the sdist fails with a useful message"
@@ -366,56 +363,55 @@ jobs:
               ! python3 -m pip install --no-cache-dir lib-python/dist/kson_lang-*.tar.gz > /tmp/sdist-install.log 2>&1
               cat /tmp/sdist-install.log
               grep -q "Cannot build kson-lang" /tmp/sdist-install.log
-              
 
-      - "save-build-caches":
-          platform: "linux-amd64"
+      - save-build-caches:
+          platform: linux-amd64
 
-  "build-python-wheel-linux-amd64":
+  build-python-wheel-linux-amd64:
     docker:
       - image: "cimg/python:3.11"
     working_directory: "~/repo"
     steps:
       - checkout
-      - "clean-git-config":
+      - clean-git-config:
           shell: bash
-      - "restore-build-caches":
-          platform: "linux-amd64"
+      - restore-build-caches:
+          platform: linux-amd64
       - setup_remote_docker
       - run:
           name: "Build platform-specific wheel"
           command: "./gradlew :lib-python:buildWheel"
 
-      - "save-build-caches":
-          platform: "linux-amd64"
-      - "store-release-artifacts":
+      - save-build-caches:
+          platform: linux-amd64
+      - store-release-artifacts:
           path: "lib-python/dist"
-          platform: "python-linux-amd64"
+          platform: python-linux-amd64
 
 
-  "build-python-wheel-macos":
+  build-python-wheel-macos:
     macos:
       xcode: "27.0"
     resource_class: "m4pro.medium"
     working_directory: "~/repo"
     steps:
       - checkout
-      - "clean-git-config":
+      - clean-git-config:
           shell: bash
-      - "restore-build-caches":
-          platform: "macos-python"
+      - restore-build-caches:
+          platform: macos-python
       - run:
           name: "Build platform-specific wheel"
           command: "./gradlew :lib-python:buildWheel"
 
-      - "save-build-caches":
-          platform: "macos-python"
-      - "store-release-artifacts":
+      - save-build-caches:
+          platform: macos-python
+      - store-release-artifacts:
           path: "lib-python/dist"
-          platform: "python-macos-arm64"
+          platform: python-macos-arm64
 
 
-  "build-python-wheel-windows":
+  build-python-wheel-windows:
     executor:
       name: "windows/default"
       size: medium
@@ -424,56 +420,55 @@ jobs:
     working_directory: "~/repo"
     steps:
       - checkout
-      - "clean-git-config":
+      - clean-git-config:
           shell: powershell
-      - "restore-build-caches":
-          platform: "windows-python"
+      - restore-build-caches:
+          platform: windows-python
       - run:
           name: "Build platform-specific wheel"
           command: |
               .\gradlew.bat :lib-python:buildWheel --no-daemon
-              
 
-      - "save-build-caches":
-          platform: "windows-python"
-      - "store-release-artifacts":
+      - save-build-caches:
+          platform: windows-python
+      - store-release-artifacts:
           path: "lib-python/dist"
-          platform: "python-windows-amd64"
+          platform: python-windows-amd64
 
 
 
 workflows:
   version: 2
-  "build-linux":
+  build-linux:
     when: "not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
     jobs:
-      - "build-linux-amd64"
+      - build-linux-amd64
 
   # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
-  "build-release-targets":
+  build-release-targets:
     when: "(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
     jobs:
-      - "build-windows-amd64"
-      - "build-macos-arm64"
-      - "test-python-sdist"
-      - "build-python-wheel-linux-amd64"
-      - "build-python-wheel-macos"
-      - "build-python-wheel-windows"
+      - build-windows-amd64
+      - build-macos-arm64
+      - test-python-sdist
+      - build-python-wheel-linux-amd64
+      - build-python-wheel-macos
+      - build-python-wheel-windows
 
-  "on-demand-windows":
+  on-demand-windows:
     when: "pipeline.parameters.run-windows"
     jobs:
-      - "build-windows-amd64"
+      - build-windows-amd64
 
-  "on-demand-macos":
+  on-demand-macos:
     when: "pipeline.parameters.run-macos"
     jobs:
-      - "build-macos-arm64"
+      - build-macos-arm64
 
-  "on-demand-python":
+  on-demand-python:
     when: "pipeline.parameters.run-python"
     jobs:
-      - "test-python-sdist"
-      - "build-python-wheel-linux-amd64"
-      - "build-python-wheel-macos"
-      - "build-python-wheel-windows"
+      - test-python-sdist
+      - build-python-wheel-linux-amd64
+      - build-python-wheel-macos
+      - build-python-wheel-windows
