@@ -40,6 +40,8 @@ graalvmNative {
     binaries {
         testSupport.set(true)
     }
+
+    toolchainDetection.set(true)
 }
 
 // We use a `Sync` task instead of directly adding a `srcDir` to `sourceSets`
