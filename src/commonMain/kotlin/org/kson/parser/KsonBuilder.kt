@@ -248,6 +248,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                         }
                         ListNode(
                             listElementNodes,
+                            if (marker.element == DASH_LIST) BoundaryStyle.PLAIN else BoundaryStyle.DELIMITED,
                             marker.getSourceTokens()
                         )
                     }
@@ -272,7 +273,7 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             comments,
                             marker.getSourceTokens())
                     }
-                    OBJECT -> {
+                    PLAIN_OBJECT, DELIMITED_OBJECT -> {
                         val propertyNodes = childMarkers.map { property ->
                             unsafeAstCreate<ObjectPropertyNode>(property) {
                                 ObjectPropertyNodeError(it)
@@ -285,7 +286,11 @@ class KsonBuilder(private val tokens: List<Token>, private val ignoreErrors: Boo
                             return embedBlockNode
                         }
 
-                        ObjectNode(propertyNodes, marker.getSourceTokens())
+                        ObjectNode(
+                            propertyNodes,
+                            if (marker.element == PLAIN_OBJECT) BoundaryStyle.PLAIN else BoundaryStyle.DELIMITED,
+                            marker.getSourceTokens()
+                        )
                     }
                     OBJECT_PROPERTY -> {
                         val comments = marker.getComments()
