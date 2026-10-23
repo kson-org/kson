@@ -6,7 +6,7 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.intellij.platform") version "2.13.1"
+    id("org.jetbrains.intellij.platform") version "2.19.0"
 }
 
 group = properties("pluginGroup")
@@ -65,12 +65,19 @@ intellijPlatform {
     }
 }
 
+java {
+    toolchain {
+        // The IntelliJ Platform Gradle Plugin defaults the toolchain to the target platform's JDK (17), which our
+        // build doesn't provision. Compile with the project JDK instead; `javaVersion` below sets the bytecode level.
+        languageVersion = JavaLanguageVersion.current()
+    }
+}
+
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
-            sourceCompatibility = it
-            targetCompatibility = it
+            options.release = it.toInt()
         }
 
         withType<KotlinCompile> {
