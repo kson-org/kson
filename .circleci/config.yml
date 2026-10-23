@@ -441,14 +441,14 @@ jobs:
 
 workflows:
   version: 2
-  "build-all":
+  "build-linux":
     when: "not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
     jobs:
       - "build-linux-amd64"
 
-  # Run on pushes to the release/vx.x.x branch and during the weekly schedule trigger on main (CircleCI project settings)
+  # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
   "build-release-targets":
-    when: "(pipeline.git.branch matches /release.*\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
+    when: "(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
     jobs:
       - "build-windows-amd64"
       - "build-macos-arm64"

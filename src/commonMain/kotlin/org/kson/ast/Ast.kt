@@ -157,11 +157,13 @@ open class AstNodeError(sourceTokens: List<Token>) : AstNode, AstNodeImpl(source
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                val invalidSource = sourceTokens.joinToString("") { it.lexeme.text }
-                invalidSource.split("\n")
+                val writtenTokens = sourceTokens.dropLastWhile { it.tokenType == WHITESPACE }
+                val invalidSource = writtenTokens.joinToString("") { it.lexeme.text }
+                val writtenSource = invalidSource.split("\n")
                     .joinToString("\n") { line ->
                         indent.firstLineIndent() + line
                     }
+                if (writtenTokens.lastOrNull()?.tokenType == COMMENT) "$writtenSource\n" else writtenSource
             }
         }
     }
@@ -340,8 +342,10 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
             if (needsSpace) "$result " else result
         }
         return if (needsEndDot(nextNode)) {
-            // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
-            val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
+            // If the last property ends in a number we need to add whitespace before the '.' to prevent it becoming part
+            // of that number
+            val lastProperty = properties.last()
+            val needsSpace = lastProperty !is ObjectPropertyNodeImpl || lastProperty.value is NumberNode
             outputObject + if (needsSpace) " ." else "."
         } else outputObject
     }
