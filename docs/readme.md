@@ -113,7 +113,7 @@ Plain dash lists may be nested like so:
   - nested_element_2
 ```
 
-Important: unlike YAML, **whitespace is not significant in KSON**, so to add more outer elements to the above list, we must explicitly end the nested list with `=`, the [end-dash](#the-end-dash-):
+Important: unlike YAML, **whitespace does not parse to structure in KSON**, so to add more outer elements to the above list, we must explicitly end the nested list with `=`, the [end-dash](#the-end-dash-):
 
 ```kson
 - outer_element
@@ -132,7 +132,8 @@ The end-dash `=` explicitly declares the end of a [Plain Dash List](#plain-dash-
 - - nested_element_1
   - nested_element_2
   =
-# note that without the end-dash, `outer_element_2` would belong to the nested list
+# note that without the end-dash, `outer_element_2` would parse as part of the
+# nested list and be flagged as "deceptively" indented
 - outer_element_2
 ```
 
@@ -210,7 +211,7 @@ outer_property:
   nested_property_2: 2
 ```
 
-Important: unlike YAML, **whitespace is not significant in KSON**, so to add more outer properties to the above object, we must explicitly end the nested object with `.`, the [end-dot](#the-end-dot-):
+Important: unlike YAML, **whitespace does not parse to structure in KSON**, so to add more outer properties to the above object, we must explicitly end the nested object with `.`, the [end-dot](#the-end-dot-):
 
 ```kson
 outer_property:
@@ -229,7 +230,8 @@ outer_property_1:
   nested_property_1: x
   nested_property_2: y
   .
-# note that without the end-dot, `outer_property_2` would belong to the nested object
+# note that without the end-dot, `outer_property_2` would parse as part of the
+# nested object and be flagged as "deceptively" indented
 outer_property_2: 'a value'
 ```
 
@@ -293,6 +295,40 @@ favorite_movie: 'The Rock'
 ```
 
 Explicitly closing a plain object or list is always legal, even when not required. The formatter cleans up unneeded end-dots and end-dashes.
+
+### Reader-Friendly Indentation
+
+In KSON, indentation never determines structure/value&mdash;as described [above](#how-plain-structures-end), the parse is fully decided by keys, dashes, delimiters and terminators. Regardless, indentation is valuable because readers mentally parse indentation as structure, and so rendered indentation is a key aspect of how a document of data effectively communicates its data. That's why pretty-printing JSON is such a common operation, and that's why YAML defines structure through manually maintained indentation.
+
+KSON promotes reader-friendly indentation with its built-in auto-formatter, including the plain format which functions as a "more-pretty"-print for JSON data, rendering it very similar to YAML without relying on manually maintained indentation.
+
+To make this holistically reader/user-friendly and robust/easy to maintain, **KSON ensures plain structures do not misrepresent the structure of their data** with deceptive indent validations. For example:
+
+```kson
+teams:
+  - name: 'Team A'
+    members:
+      - Alice
+      - Bob
+  - name: 'Team B'
+# ERROR: the "- name: 'Team B'" element is deceptively indented
+```
+
+This document visually reads as two teams, but KSON's greedy parse rules mean nothing ended the `members` list, so `- name: 'Team B'` is its third element. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to correct whichever half is lying&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
+
+```kson
+teams:
+  - name: 'Team A'
+    members:
+      - Alice
+      - Bob
+      =
+  - name: 'Team B'
+```
+
+In delimited KSON, the delimiters define the structure as in JSON, and KSON's equivalence to JSON means that any indentation in such structures must be accepted. Therefore, in delimited objects and lists the same misleading indentation is flagged as a warning to encourage readable data, which is always just an auto-format away.
+
+KSON's deceptive indent detection is comprehensive and aspires to catch all places where incorrect nesting is visually implied.  Note that it focuses on _disallowing_ deceptive indents rather than _enforcing_ a particular "blessed" format.  The validations look at values which actually have an indent, i.e. values starting a line. These are what create the visual nesting or unnesting that readers perceive as structure, and hence are actively deceptive rather than just messy or unclear.
 
 ## Embed Blocks
 

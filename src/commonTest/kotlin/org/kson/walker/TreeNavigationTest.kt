@@ -693,11 +693,10 @@ class TreeNavigationTest {
                     members:
                       - name: '<match>Alice</match>'
                       - name: '<match>Bob</match>'
-                      .
+                      =
                   - name: '<match>Team B</match>'
                     members:
                       - name: '<match>Charlie</match>'
-                .
             """.trimIndent(),
             pointer = JsonPointerGlob("/teams/**/name")
         )
@@ -817,12 +816,12 @@ class TreeNavigationTest {
                         list:
                           endpoint: '/api/v1/users/public/list'
                           .
+                        .
                       .
                     products:
                       admin:
                         list:
                           endpoint: '<match>/api/v1/products/admin/list</match>'
-                .
             """.trimIndent(),
             pointer = JsonPointerGlob("/api/**/admin/**/endpoint")
         )

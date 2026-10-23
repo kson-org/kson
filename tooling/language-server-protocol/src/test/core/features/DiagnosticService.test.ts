@@ -59,12 +59,22 @@ describe('KSON Diagnostics', () => {
         it('should report both errors and warnings', () => {
             const content = [
                 '- {list_item: false false}',
-                '    - deceptive_indent_list_item'
+                '- [deceptive_indent',
+                '     another_item]'
             ].join('\n');
             const diagnostics = getDiagnostics(content);
             assert.strictEqual(diagnostics.length, 2);
             assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error);
             assert.strictEqual(diagnostics[1].severity, DiagnosticSeverity.Warning);
+        });
+
+        it('should report a deceptive indent in plain syntax as an error', () => {
+            const content = [
+                '- list_item',
+                '    - deceptive_indent_list_item'
+            ].join('\n');
+            const diagnostics = assertDiagnosticCount(content, 1);
+            assert.strictEqual(diagnostics[0].severity, DiagnosticSeverity.Error);
         });
 
         it('should set source to the configured distribution id on all diagnostics', () => {

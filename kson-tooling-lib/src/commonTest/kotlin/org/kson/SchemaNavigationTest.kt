@@ -638,22 +638,30 @@ class SchemaNavigationTest {
 
     @Test
     fun testNavigateAnyOfWithRef() {
-        val schema = """
-            '${'$'}defs':
+        val schema = $$"""
+            '$defs':
               StringType:
                 type: string
                 minLength: 1
+                .
               NumberType:
                 type: number
                 minimum: 0
+                .
+              .
             anyOf:
-              - '${'$'}ref': '#/${'$'}defs/StringType'
-              - '${'$'}ref': '#/${'$'}defs/NumberType'
+              - '$ref': '#/$defs/StringType'
+              - '$ref': '#/$defs/NumberType'
         """
 
-        // This test verifies that navigation works when anyOf contains $ref
+        // Navigation flattens at every level, so the root anyOf expands to the root schema
+        // itself plus both of its `$ref`-ed branches, resolved
         val results = navigateSchema(schema, emptyList())
-        assertEquals(1, results.size, "Root schema should return single result")
+        assertEquals(3, results.size, "Expected root parent + both resolved anyOf branches")
+        val stringBranch = results[1] as InternalKsonObject
+        assertEquals("string", (stringBranch.propertyLookup["type"] as? InternalKsonString)?.value)
+        val numberBranch = results[2] as InternalKsonObject
+        assertEquals("number", (numberBranch.propertyLookup["type"] as? InternalKsonString)?.value)
     }
 
     @Test
