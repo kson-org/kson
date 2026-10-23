@@ -156,14 +156,6 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val keywordMark = builder.mark()
             if (keyword()) {
                 foundProperties = true
-
-                if (builder.getTokenType() == CURLY_BRACE_R) {
-                    // object got closed before giving this keyword a value
-                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
-                    propertyMark.done(OBJECT_PROPERTY)
-                    break
-                }
-
                 parseValueForKeyword(keywordMark)
                 val hasTrailingComma = builder.getTokenType() == COMMA
                 if (hasTrailingComma) {
@@ -293,6 +285,11 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *                 | embedBlock
      */
     private fun delimitedValue(): Boolean {
+        if (atAwaitedCloser()) {
+            // this closes the innermost delimited value we're parsing, so it isn't a stray closer
+            return false
+        }
+
         if (builder.getTokenType() == CURLY_BRACE_R) {
             val badCloseBrace = builder.mark()
             builder.advanceLexer()
@@ -354,29 +351,31 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             return true
         }
 
-        // parse our object internals
-        objectInternals()
-
-        // annotate anything unparsable within this object definition with an error
-        while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-            val malformedInternals = builder.mark()
-
-            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
-                builder.advanceLexer()
-                val keywordMark = builder.mark()
-                if (keyword()) {
-                    keywordMark.rollbackTo()
-                    break
-                } else {
-                    keywordMark.drop()
-                }
-            }
-
-            malformedInternals.error(OBJECT_BAD_INTERNALS.create())
-
-            // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
-            // on internals that are actually bad
+        awaitingCloser(CURLY_BRACE_R) {
+            // parse our object internals
             objectInternals()
+
+            // annotate anything unparsable within this object definition with an error
+            while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                val malformedInternals = builder.mark()
+
+                while (builder.getTokenType() != CURLY_BRACE_R && !builder.eof()) {
+                    builder.advanceLexer()
+                    val keywordMark = builder.mark()
+                    if (keyword()) {
+                        keywordMark.rollbackTo()
+                        break
+                    } else {
+                        keywordMark.drop()
+                    }
+                }
+
+                malformedInternals.error(OBJECT_BAD_INTERNALS.create())
+
+                // try to parse more valid object internals so we're only marking OBJECT_BAD_INTERNALS
+                // on internals that are actually bad
+                objectInternals()
+            }
         }
 
         if (builder.getTokenType() == CURLY_BRACE_R) {
@@ -403,7 +402,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // consume our ANGLE_BRACKET_L
         builder.advanceLexer()
 
-        dashList(true)
+        awaitingCloser(ANGLE_BRACKET_R) { dashList(true) }
 
         if (builder.getTokenType() == ANGLE_BRACKET_R) {
             builder.advanceLexer()
@@ -446,34 +445,36 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             }
         }
 
-        while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
-            val listElementMark = builder.mark()
+        awaitingCloser(SQUARE_BRACKET_R) {
+            while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
+                val listElementMark = builder.mark()
 
-            if (!ksonValue()) {
-                val invalidElementMark = builder.mark()
+                if (!ksonValue()) {
+                    val invalidElementMark = builder.mark()
 
-                var containsInvalidElement = false
-                while (builder.getTokenType() != SQUARE_BRACKET_R &&
-                    builder.getTokenType() != COMMA &&
-                    !builder.eof()
-                ) {
+                    var containsInvalidElement = false
+                    while (builder.getTokenType() != SQUARE_BRACKET_R &&
+                        builder.getTokenType() != COMMA &&
+                        !builder.eof()
+                    ) {
+                        builder.advanceLexer()
+                        containsInvalidElement = true
+                    }
+
+                    if (containsInvalidElement) {
+                        invalidElementMark.error(LIST_INVALID_ELEM.create())
+                    } else {
+                        invalidElementMark.drop()
+                    }
+                }
+                if (builder.getTokenType() == COMMA) {
                     builder.advanceLexer()
-                    containsInvalidElement = true
-                }
-
-                if (containsInvalidElement) {
-                    invalidElementMark.error(LIST_INVALID_ELEM.create())
+                    listElementMark.done(LIST_ELEMENT)
+                    consumeExtraCommas()
+                    continue
                 } else {
-                    invalidElementMark.drop()
+                    listElementMark.done(LIST_ELEMENT)
                 }
-            }
-            if (builder.getTokenType() == COMMA) {
-                builder.advanceLexer()
-                listElementMark.done(LIST_ELEMENT)
-                consumeExtraCommas()
-                continue
-            } else {
-                listElementMark.done(LIST_ELEMENT)
             }
         }
 
@@ -701,6 +702,27 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 }
             }
     }
+
+    /**
+     * The closer of the innermost delimited value whose contents we are parsing, or null outside any delimited value
+     */
+    private var awaitedCloser: TokenType? = null
+
+    /**
+     * Parses the contents of a delimited value with [parseContents], during which its [closer] is the [awaitedCloser]
+     * except inside any delimited value nested in them
+     */
+    private fun awaitingCloser(closer: TokenType, parseContents: () -> Unit) {
+        val enclosingAwaitedCloser = awaitedCloser
+        awaitedCloser = closer
+        parseContents()
+        awaitedCloser = enclosingAwaitedCloser
+    }
+
+    /**
+     * True if the next token is the [awaitedCloser]
+     */
+    private fun atAwaitedCloser(): Boolean = awaitedCloser != null && builder.getTokenType() == awaitedCloser
 
     private var nestingTracker = object {
         private var nestingLevel = 0
