@@ -50,6 +50,7 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **Python dependencies**
   - pinned in: [`lib-python/pyproject.toml`](../lib-python/pyproject.toml)
   - check with: `./uvw lock --upgrade --dry-run` from [`lib-python`](../lib-python)
+  - note: `[build-system] requires` and cibuildwheel's `test-requires` aren't in `uv.lock`, so the check above doesn't report them. Check those pins against PyPI by hand, and keep each one equal to the version `uv.lock` locks, where it locks one.
 - **The VS Code build our extension tests drive**
   - pinned in: [`vscodeTestBuild.ts`](../tooling/lsp-clients/vscode/test/vscodeTestBuild.ts)
   - check with: the `curl` documented in that file
