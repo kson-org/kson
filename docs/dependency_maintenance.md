@@ -84,13 +84,10 @@ Some of our dependencies are deliberately not current: they represent our backwa
 - **The oldest Python that can install `kson-lang`**
   - declared in: `requires-python` in [`lib-python/pyproject.toml`](../lib-python/pyproject.toml), matched by the `cimg/python` image in [`.circleci/config.kson`](../.circleci/config.kson)
   - note: CI builds and tests the sdist on that floor on purpose. Move both together, or the guarantee stops being tested
+  - note: the image pins only the minor version, on purpose: the floor is a Python minor version, not a patch release
 
 ## 3. Sweep for new/missing unpinned dependencies
 
 Audit for new or missed unpinned/floating dependencies that are not yet captured in this doc, and add them where appropriate. We would ideally catch these before they get in, but historically this type of thing has a way of creeping into a project.
 
-Known floats, not yet resolved:
-
-- `windows-server-2022-gui:current` and `cimg/node:lts-browsers` in [`.circleci/config.kson`](../.circleci/config.kson) both track a CircleCI tag that moves under us. The latter is the image `build-linux-amd64` runs on, so it is in the path of every pull request.
-- The orbs in that same file are declared to a partial version, `circleci/browser-tools@1.1` and `circleci/windows@5.0`. CircleCI resolves a partial version to the newest release matching it, so each build may run orb code no commit here selected.
-- `nodejs = ">=18"` in [`kson-lib/pixi.toml`](../kson-lib/pixi.toml) states a floor where the other Pixi manifests pin a series, so re-solving that lock can move Node without anyone deciding to.
+Known floats, not yet resolved: none at the moment.

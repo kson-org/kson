@@ -237,7 +237,7 @@ jobs:
   "build-windows-amd64":
     resource_class: "windows.large"
     machine:
-      image: "windows-server-2022-gui:current"
+      image: "windows-server-2022-gui:2026.05.1"
       shell: "powershell.exe -ExecutionPolicy Bypass"
 
     environment:
@@ -265,7 +265,9 @@ jobs:
 
   "build-linux-amd64":
     docker:
-      - image: "cimg/node:lts-browsers"
+      # Choose a `cimg/node` `-browsers` image so that we can install Chrome for testing. Note that we
+      # do not install a JDK image so that we are always exercising the project's built-in JDK (see jdk.properties for details)
+      - image: "cimg/node:24.22.1-browsers"
     working_directory: "~/repo"
     environment:
       JVM_OPTS: "-Xmx3200m"
@@ -417,6 +419,7 @@ jobs:
     executor:
       name: "windows/default"
       size: medium
+      version: "2026.05.1"
 
     working_directory: "~/repo"
     steps:
