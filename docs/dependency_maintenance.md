@@ -44,6 +44,11 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **npm dependencies**
   - pinned in: the `package.json` files under [`tooling/lsp-clients`](../tooling/lsp-clients) and [`tooling/language-server-protocol`](../tooling/language-server-protocol)
   - check with: `pnpm outdated -r` from each workspace root
+  - note: the four projects under [`tooling/lsp-clients/demos`](../tooling/lsp-clients/demos) sit outside the pnpm workspace on purpose, so `pnpm outdated -r` doesn't reach them. Bump them along with the rest. Check each with `pnpm outdated --ignore-workspace` from its own directory:
+    - `demos` (the Playwright tests for the three demos)
+    - `demos/iframe`
+    - `demos/react`: React deliberately left at 18 previously due to peer dependency of `@kson/monaco-editor`. Re-evaluate when monaco-editor gets bumped.
+    - `demos/vanilla`
   - after editing any of them: run `./gradlew tooling:lsp-clients:check` to regenerate all `pnpm-lock.yaml` files. Commit the pnpm-lock.yaml files.
 - **Cargo dependencies**
   - pinned in: [`lib-rust/kson/Cargo.toml`](../lib-rust/kson/Cargo.toml) and [`lib-rust/kson-sys/Cargo.toml`](../lib-rust/kson-sys/Cargo.toml)
