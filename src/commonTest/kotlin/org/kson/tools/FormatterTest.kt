@@ -1783,6 +1783,27 @@ class FormatterTest {
     }
 
     @Test
+    fun testDelimitedFormattingStyleKeepsPipesThatStartLines() {
+        assertFormatting(
+            """
+                table: %md
+                  | a | b |
+                  |---|---|
+                  %%
+            """.trimIndent(),
+            """
+                {
+                  table: %md
+                    | a | b |
+                    |---|---|
+                    %%
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
     fun testCompactFormattingStyleSimpleObject() {
         assertFormatting(
             """
