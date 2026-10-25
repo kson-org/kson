@@ -206,7 +206,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("org.yaml:snakeyaml:2.2")
+                implementation("org.yaml:snakeyaml:2.7")
             }
         }
         val jsMain by getting

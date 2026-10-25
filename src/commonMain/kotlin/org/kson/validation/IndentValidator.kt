@@ -22,7 +22,7 @@ import org.kson.parser.messages.MessageType.*
  *   #        but actually parses in KSON as a sibling of `- Alice` and `- Bob`.
  *```
  *
- * The use can fix the indent to properly encode their intent, such as terminating the nested list:
+ * The user can fix the indent to properly encode their intent, such as terminating the nested list:
  *
  * ```kson
  * teams:
@@ -142,9 +142,8 @@ class IndentValidator {
                 } else {
                     element.location.start.column
                 }
-                /**
-                 * Ensure this element's value is indented deeper than its list dash
-                 */
+
+                //Ensure this element's value is indented deeper than its list dash
                 validateNodeNesting(element.value, minListNestingColumn,
                     listElementNesting.messageFor(node.style), messageSink)
             }

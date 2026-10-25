@@ -36,14 +36,14 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
       vite:
-        specifier: ^8.3.1
-        version: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
+        specifier: ^8.3.3
+        version: 8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
       vite-plugin-dts:
         specifier: ^5.1.1
-        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
+        version: 5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
       vitest:
         specifier: ^5.0.2
-        version: 5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
+        version: 5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
 
   shared:
     dependencies:
@@ -93,13 +93,13 @@ importers:
         version: 1.99.0
       '@vscode/test-electron':
         specifier: ^3.1.0
-        version: 3.1.0
+        version: 3.1.0(supports-color@8.1.1)
       '@vscode/test-web':
         specifier: ^0.0.81
-        version: 0.0.81
+        version: 0.0.81(supports-color@8.1.1)
       '@vscode/vsce':
         specifier: ^4.0.0
-        version: 4.0.0
+        version: 4.0.0(supports-color@8.1.1)
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
@@ -2030,8 +2030,8 @@ packages:
       vite:
         optional: true
 
-  vite@8.3.1:
-    resolution: {integrity: sha512-/bvH9E9tmCXRGp2uXY3WbOldqpTwFkbha/8ANaEQ6VkxhH60KyqLwgZq6lG2y+4uT55x9+9eUHMpQ7uGnOCKjA==}
+  vite@8.3.3:
+    resolution: {integrity: sha512-cTAldKPImjg6c+gk48U19POPn3GCBzZwpdsN8ZMEEcbpes+6/wvfqUd0C2y3qYY4wsj8PwgFwrZ/1jBPVttMSg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -2240,36 +2240,36 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-auth@1.11.0':
+  '@azure/core-auth@1.11.0(supports-color@8.1.1)':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-util': 1.14.0
+      '@azure/core-util': 1.14.0(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/core-client@1.11.1':
+  '@azure/core-client@1.11.1(supports-color@8.1.1)':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0
-      '@azure/core-rest-pipeline': 1.25.0
+      '@azure/core-auth': 1.11.0(supports-color@8.1.1)
+      '@azure/core-rest-pipeline': 1.25.0(supports-color@8.1.1)
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0
-      '@azure/logger': 1.4.0
+      '@azure/core-util': 1.14.0(supports-color@8.1.1)
+      '@azure/logger': 1.4.0(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
   '@azure/core-process@1.0.0': {}
 
-  '@azure/core-rest-pipeline@1.25.0':
+  '@azure/core-rest-pipeline@1.25.0(supports-color@8.1.1)':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0
+      '@azure/core-auth': 1.11.0(supports-color@8.1.1)
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0
-      '@azure/logger': 1.4.0
-      '@typespec/ts-http-runtime': 0.3.9
+      '@azure/core-util': 1.14.0(supports-color@8.1.1)
+      '@azure/logger': 1.4.0(supports-color@8.1.1)
+      '@typespec/ts-http-runtime': 0.3.9(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2278,24 +2278,24 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/core-util@1.14.0':
+  '@azure/core-util@1.14.0(supports-color@8.1.1)':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@typespec/ts-http-runtime': 0.3.9
+      '@typespec/ts-http-runtime': 0.3.9(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/identity@4.13.3':
+  '@azure/identity@4.13.3(supports-color@8.1.1)':
     dependencies:
       '@azure/abort-controller': 2.2.0
-      '@azure/core-auth': 1.11.0
-      '@azure/core-client': 1.11.1
+      '@azure/core-auth': 1.11.0(supports-color@8.1.1)
+      '@azure/core-client': 1.11.1(supports-color@8.1.1)
       '@azure/core-process': 1.0.0
-      '@azure/core-rest-pipeline': 1.25.0
+      '@azure/core-rest-pipeline': 1.25.0(supports-color@8.1.1)
       '@azure/core-tracing': 1.4.0
-      '@azure/core-util': 1.14.0
-      '@azure/logger': 1.4.0
+      '@azure/core-util': 1.14.0(supports-color@8.1.1)
+      '@azure/logger': 1.4.0(supports-color@8.1.1)
       '@azure/msal-browser': 5.23.0
       '@azure/msal-node': 6.0.1
       open: 10.2.0
@@ -2303,9 +2303,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@azure/logger@1.4.0':
+  '@azure/logger@1.4.0(supports-color@8.1.1)':
     dependencies:
-      '@typespec/ts-http-runtime': 0.3.9
+      '@typespec/ts-http-runtime': 0.3.9(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
@@ -2431,7 +2431,7 @@ snapshots:
     dependencies:
       vary: 1.1.2
 
-  '@koa/router@15.7.0(koa@3.2.1)':
+  '@koa/router@15.7.0(koa@3.2.1)(supports-color@8.1.1)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 2.0.1
@@ -2554,7 +2554,7 @@ snapshots:
       estree-walker: 2.0.2
       picomatch: 4.0.7
 
-  '@secretlint/core@10.2.2':
+  '@secretlint/core@10.2.2(supports-color@8.1.1)':
     dependencies:
       '@secretlint/profiler': 10.2.2
       '@secretlint/types': 10.2.2
@@ -2605,22 +2605,22 @@ snapshots:
     dependencies:
       '@types/node': 24.19.0
 
-  '@typespec/ts-http-runtime@0.3.9':
+  '@typespec/ts-http-runtime@0.3.9(supports-color@8.1.1)':
     dependencies:
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/mocker@5.0.3(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@vitest/mocker@5.0.3(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.3
       estree-walker: 3.0.3
       magic-string: 1.4.2
     optionalDependencies:
-      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
 
   '@vitest/spy@5.0.3': {}
 
@@ -2636,28 +2636,28 @@ snapshots:
       path-browserify: 1.0.1
       vscode-uri: 3.2.0
 
-  '@vscode/test-electron@3.1.0':
+  '@vscode/test-electron@3.1.0(supports-color@8.1.1)':
     dependencies:
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@8.1.1)
+      https-proxy-agent: 7.0.6(supports-color@8.1.1)
       jszip: 3.10.2
       ora: 8.2.0
       semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
 
-  '@vscode/test-web@0.0.81':
+  '@vscode/test-web@0.0.81(supports-color@8.1.1)':
     dependencies:
       '@koa/cors': 5.0.0
-      '@koa/router': 15.7.0(koa@3.2.1)
+      '@koa/router': 15.7.0(koa@3.2.1)(supports-color@8.1.1)
       '@playwright/browser-chromium': 1.63.0
       gunzip-maybe: 1.4.2
-      http-proxy-agent: 9.1.0
-      https-proxy-agent: 9.1.0
+      http-proxy-agent: 9.1.0(supports-color@8.1.1)
+      https-proxy-agent: 9.1.0(supports-color@8.1.1)
       koa: 3.2.1
-      koa-morgan: 1.0.1
-      koa-mount: 4.2.0
-      koa-static: 5.0.0
+      koa-morgan: 1.0.1(supports-color@8.1.1)
+      koa-mount: 4.2.0(supports-color@8.1.1)
+      koa-static: 5.0.0(supports-color@8.1.1)
       minimist: 1.2.8
       playwright: 1.63.0
       tar-fs: 3.1.3
@@ -2709,11 +2709,11 @@ snapshots:
       '@vscode/vsce-sign-win32-arm64': 2.0.6
       '@vscode/vsce-sign-win32-x64': 2.0.6
 
-  '@vscode/vsce@4.0.0':
+  '@vscode/vsce@4.0.0(supports-color@8.1.1)':
     dependencies:
-      '@azure/identity': 4.13.3
+      '@azure/identity': 4.13.3(supports-color@8.1.1)
       '@napi-rs/keyring': 1.3.0
-      '@secretlint/core': 10.2.2
+      '@secretlint/core': 10.2.2(supports-color@8.1.1)
       '@secretlint/secretlint-rule-no-dotenv': 10.2.2
       '@secretlint/secretlint-rule-preset-recommend': 10.2.2
       '@secretlint/source-creator': 10.2.2
@@ -2917,13 +2917,17 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  debug@2.6.9:
+  debug@2.6.9(supports-color@8.1.1):
     dependencies:
       ms: 2.0.0
+    optionalDependencies:
+      supports-color: 8.1.1
 
-  debug@3.2.7:
+  debug@3.2.7(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 8.1.1
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:
@@ -3190,14 +3194,14 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  http-proxy-agent@7.0.2:
+  http-proxy-agent@7.0.2(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-agent@9.1.0:
+  http-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -3206,14 +3210,14 @@ snapshots:
       - kerberos
       - supports-color
 
-  https-proxy-agent@7.0.6:
+  https-proxy-agent@7.0.6(supports-color@8.1.1):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@9.1.0:
+  https-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
       agent-base: 9.0.0
       debug: 4.4.3(supports-color@8.1.1)
@@ -3315,20 +3319,20 @@ snapshots:
 
   koa-compose@4.1.0: {}
 
-  koa-morgan@1.0.1:
+  koa-morgan@1.0.1(supports-color@8.1.1):
     dependencies:
-      morgan: 1.12.1
+      morgan: 1.12.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
-  koa-mount@4.2.0:
+  koa-mount@4.2.0(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       koa-compose: 4.1.0
     transitivePeerDependencies:
       - supports-color
 
-  koa-send@5.0.1:
+  koa-send@5.0.1(supports-color@8.1.1):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       http-errors: 1.8.1
@@ -3336,10 +3340,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  koa-static@5.0.0:
+  koa-static@5.0.0(supports-color@8.1.1):
     dependencies:
-      debug: 3.2.7
-      koa-send: 5.0.1
+      debug: 3.2.7(supports-color@8.1.1)
+      koa-send: 5.0.1(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -3540,10 +3544,10 @@ snapshots:
 
   monaco-editor@0.52.2: {}
 
-  morgan@1.12.1:
+  morgan@1.12.1(supports-color@8.1.1):
     dependencies:
       basic-auth: 2.0.1
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       depd: 2.0.0
       on-finished: 2.4.1
       on-headers: 1.1.0
@@ -3992,7 +3996,7 @@ snapshots:
 
   undici-types@7.24.6: {}
 
-  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
+  unplugin-dts@1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
       '@rollup/pluginutils': 5.4.0
       '@volar/typescript': 2.4.28
@@ -4007,7 +4011,7 @@ snapshots:
     optionalDependencies:
       esbuild: 0.28.2
       rolldown: 1.2.12
-      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
     transitivePeerDependencies:
       - supports-color
 
@@ -4028,11 +4032,11 @@ snapshots:
 
   version-range@4.15.0: {}
 
-  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
+  vite-plugin-dts@5.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
-      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
+      unplugin-dts: 1.1.1(esbuild@0.28.2)(rolldown@1.2.12)(supports-color@8.1.1)(typescript@5.9.3)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
     optionalDependencies:
-      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
     transitivePeerDependencies:
       - '@rspack/core'
       - '@vue/language-core'
@@ -4042,7 +4046,7 @@ snapshots:
       - typescript
       - webpack
 
-  vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15):
+  vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -4055,10 +4059,10 @@ snapshots:
       fsevents: 2.3.3
       tsx: 4.23.15
 
-  vitest@5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
+  vitest@5.0.3(@types/node@24.19.0)(happy-dom@20.14.5)(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.3(vite@8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
+      '@vitest/mocker': 5.0.3(vite@8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -4069,7 +4073,7 @@ snapshots:
       tinybench: 6.2.0
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
-      vite: 8.3.1(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
+      vite: 8.3.3(@types/node@24.19.0)(esbuild@0.28.2)(tsx@4.23.15)
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 24.19.0

@@ -27,6 +27,9 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **Gradle plugins** (detekt, Dokka, Vanniktech publish, JVM wrapper)
   - pinned in: [`build.gradle.kts`](../build.gradle.kts) and [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts)
   - upstream: [Gradle Plugin Portal](https://plugins.gradle.org)
+- **Library dependencies declared in Gradle build files** (clikt, JGit, snakeyaml)
+  - pinned in: [`tooling/cli/build.gradle.kts`](../tooling/cli/build.gradle.kts) (clikt), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) (JGit) and [`build.gradle.kts`](../build.gradle.kts) (snakeyaml)
+  - upstream: [Maven Central](https://central.sonatype.com)
 - **The IntelliJ Platform Gradle Plugin**
   - pinned in: [`tooling/jetbrains/build.gradle.kts`](../tooling/jetbrains/build.gradle.kts)
   - upstream: [its Plugin Portal listing](https://plugins.gradle.org/plugin/org.jetbrains.intellij.platform)
@@ -41,6 +44,11 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **npm dependencies**
   - pinned in: the `package.json` files under [`tooling/lsp-clients`](../tooling/lsp-clients) and [`tooling/language-server-protocol`](../tooling/language-server-protocol)
   - check with: `pnpm outdated -r` from each workspace root
+  - note: the four projects under [`tooling/lsp-clients/demos`](../tooling/lsp-clients/demos) sit outside the pnpm workspace on purpose, so `pnpm outdated -r` doesn't reach them. Bump them along with the rest. Check each with `pnpm outdated --ignore-workspace` from its own directory:
+    - `demos` (the Playwright tests for the three demos)
+    - `demos/iframe`
+    - `demos/react`: React deliberately left at 18 previously due to peer dependency of `@kson/monaco-editor`. Re-evaluate when monaco-editor gets bumped.
+    - `demos/vanilla`
   - after editing any of them: run `./gradlew tooling:lsp-clients:check` to regenerate all `pnpm-lock.yaml` files. Commit the pnpm-lock.yaml files.
 - **Cargo dependencies**
   - pinned in: [`lib-rust/kson/Cargo.toml`](../lib-rust/kson/Cargo.toml) and [`lib-rust/kson-sys/Cargo.toml`](../lib-rust/kson-sys/Cargo.toml)
@@ -50,6 +58,7 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **Python dependencies**
   - pinned in: [`lib-python/pyproject.toml`](../lib-python/pyproject.toml)
   - check with: `./uvw lock --upgrade --dry-run` from [`lib-python`](../lib-python)
+  - note: `[build-system] requires` and cibuildwheel's `test-requires` aren't in `uv.lock`, so the check above doesn't report them. Check those pins against PyPI by hand, and keep each one equal to the version `uv.lock` locks, where it locks one.
 - **The VS Code build our extension tests drive**
   - pinned in: [`vscodeTestBuild.ts`](../tooling/lsp-clients/vscode/test/vscodeTestBuild.ts)
   - check with: the `curl` documented in that file
@@ -75,13 +84,10 @@ Some of our dependencies are deliberately not current: they represent our backwa
 - **The oldest Python that can install `kson-lang`**
   - declared in: `requires-python` in [`lib-python/pyproject.toml`](../lib-python/pyproject.toml), matched by the `cimg/python` image in [`.circleci/config.kson`](../.circleci/config.kson)
   - note: CI builds and tests the sdist on that floor on purpose. Move both together, or the guarantee stops being tested
+  - note: the image pins only the minor version, on purpose: the floor is a Python minor version, not a patch release
 
 ## 3. Sweep for new/missing unpinned dependencies
 
 Audit for new or missed unpinned/floating dependencies that are not yet captured in this doc, and add them where appropriate. We would ideally catch these before they get in, but historically this type of thing has a way of creeping into a project.
 
-Known floats, not yet resolved:
-
-- `windows-server-2022-gui:current` and `cimg/node:lts-browsers` in [`.circleci/config.kson`](../.circleci/config.kson) both track a CircleCI tag that moves under us. The latter is the image `build-linux-amd64` runs on, so it is in the path of every pull request.
-- The orbs in that same file are declared to a partial version, `circleci/browser-tools@1.1` and `circleci/windows@5.0`. CircleCI resolves a partial version to the newest release matching it, so each build may run orb code no commit here selected.
-- `nodejs = ">=18"` in [`kson-lib/pixi.toml`](../kson-lib/pixi.toml) states a floor where the other Pixi manifests pin a series, so re-solving that lock can move Node without anyone deciding to.
+Known floats, not yet resolved: none at the moment.

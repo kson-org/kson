@@ -6,6 +6,25 @@ orbs:
   # Windows support for testing Python on Windows
   windows: 'circleci/windows@5.1.1'
   .
+# Run any mix of these targets on any branch by triggering a pipeline through the CircleCI API, e.g.
+#   POST https://circleci.com/api/v2/project/gh/kson-org/kson/pipeline
+#   Circle-Token: <personal API token>
+#   {"branch": "my-branch", "parameters": {"run-windows": true, "run-python": true}}
+# A pipeline that turns any of them on runs just those targets, leaving build-all and build-release-targets off.
+parameters:
+  'run-windows':
+    type: boolean
+    default: false
+    .
+  'run-macos':
+    type: boolean
+    default: false
+    .
+  'run-python':
+    type: boolean
+    default: false
+    .
+  .
 # Reusable command definitions - only for truly cross-platform operations
 commands:
   'gradle-core-tasks':
@@ -237,7 +256,7 @@ jobs:
   'build-windows-amd64':
     resource_class: 'windows.large'
     machine:
-      image: 'windows-server-2022-gui:current'
+      image: 'windows-server-2022-gui:2026.05.1'
       shell: 'powershell.exe -ExecutionPolicy Bypass'
       .
     environment:
@@ -267,7 +286,9 @@ jobs:
     .
   'build-linux-amd64':
     docker:
-      - image: 'cimg/node:lts-browsers'
+      # Choose a `cimg/node` `-browsers` image so that we can install Chrome for testing. Note that we
+      # do not install a JDK image so that we are always exercising the project's built-in JDK (see jdk.properties for details)
+      - image: 'cimg/node:24.22.1-browsers'
         .
     working_directory: '~/repo'
     environment:
@@ -431,6 +452,7 @@ jobs:
     executor:
       name: 'windows/default'
       size: medium
+      version: '2026.05.1'
       .
     working_directory: '~/repo'
     steps:
@@ -456,40 +478,36 @@ jobs:
   .
 workflows:
   version: 2
-  # Main build workflow - runs on version tags
-  'build-all':
+  'build-linux':
+    when: 'not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)'
     jobs:
       - 'build-linux-amd64'
-      - 'build-windows-amd64':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-      - 'build-macos-arm64':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-              .
-            .
-          .
-        .
     .
-  'build-python-and-test':
+  # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
+  'build-release-targets':
+    when: '(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == "schedule") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)'
     jobs:
-      - 'test-python-sdist':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-      - 'build-python-wheel-linux-amd64':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-
-      - 'build-python-wheel-macos':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
-
-      - 'build-python-wheel-windows':
-          filters:
-            branches:
-              only: '/release.*\\d+\\.\\d+\\.\\d+$/'
+      - 'build-windows-amd64'
+      - 'build-macos-arm64'
+      - 'test-python-sdist'
+      - 'build-python-wheel-linux-amd64'
+      - 'build-python-wheel-macos'
+      - 'build-python-wheel-windows'
+    .
+  'on-demand-windows':
+    when: 'pipeline.parameters.run-windows'
+    jobs:
+      - 'build-windows-amd64'
+    .
+  'on-demand-macos':
+    when: 'pipeline.parameters.run-macos'
+    jobs:
+      - 'build-macos-arm64'
+    .
+  'on-demand-python':
+    when: 'pipeline.parameters.run-python'
+    jobs:
+      - 'test-python-sdist'
+      - 'build-python-wheel-linux-amd64'
+      - 'build-python-wheel-macos'
+      - 'build-python-wheel-windows'

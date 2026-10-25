@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("org.graalvm.buildtools.native") version "0.11.1"
+    id("org.graalvm.buildtools.native") version "0.11.5"
 }
 
 repositories {
@@ -40,6 +40,8 @@ graalvmNative {
     binaries {
         testSupport.set(true)
     }
+
+    toolchainDetection.set(true)
 }
 
 // We use a `Sync` task instead of directly adding a `srcDir` to `sourceSets`
