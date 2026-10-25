@@ -220,12 +220,14 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
                 properties:
                   type:
                     const: email
+                    .
                   recipient:
                     type: string
               - type: object
                 properties:
                   type:
                     const: sms
+                    .
                   phoneNumber:
                     type: string
         """.trimIndent()
@@ -253,12 +255,14 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
                 properties:
                   name:
                     type: string
+                    .
                   age:
                     type: number
               - type: object
                 properties:
                   name:
                     type: string
+                    .
                   role:
                     type: string
         """.trimIndent()
@@ -322,6 +326,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
             properties:
               name:
                 type: string
+                .
               age:
                 type: number
         """.trimIndent()
@@ -347,6 +352,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
                 properties:
                   name:
                     type: string
+                    .
                   email:
                     type: string
               - type: object
@@ -354,6 +360,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
                 properties:
                   name:
                     type: string
+                    .
                   phone:
                     type: string
         """.trimIndent()
@@ -479,8 +486,8 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
 
         assertEquals(1, validSchemas.size, "Only DogParams should survive filtering")
 
-        val schema0 = validSchemas.single() as org.kson.value.KsonObject
-        val propertyNames = (schema0.propertyLookup["properties"] as? org.kson.value.KsonObject)?.propertyLookup?.keys ?: emptySet()
+        val schema0 = validSchemas.single() as KsonObject
+        val propertyNames = (schema0.propertyLookup["properties"] as? KsonObject)?.propertyLookup?.keys ?: emptySet()
         assertTrue("treats" in propertyNames, "DogParams properties should be present, got: $propertyNames")
     }
 
@@ -526,11 +533,13 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
               - properties:
                   kind:
                     const: alpha
+                    .
                   payload:
                     type: string
               - properties:
                   kind:
                     const: beta
+                    .
                   payload:
                     type: number
         """.trimIndent()

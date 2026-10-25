@@ -271,7 +271,23 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
     return nextNode is KsonValueNode
 }
 
-class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
+/**
+ * The "style" of bounds used to denote an [ObjectNode] or [ListNode]: [PLAIN] for undelimited structures,
+ * [DELIMITED] for delimited structures.
+ *
+ * Note this only describes the original source we parsed, and in no way restricts how the parsed
+ * value may be used.
+ */
+enum class BoundaryStyle {
+    PLAIN,
+    DELIMITED
+}
+
+class ObjectNode(
+    val properties: List<ObjectPropertyNode>,
+    val style: BoundaryStyle,
+    sourceTokens: List<Token>
+) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (properties.isEmpty()) {
             return "${indent.firstLineIndent()}{}"
@@ -465,6 +481,7 @@ class ObjectPropertyNodeImpl(
 
 class ListNode(
     val elements: List<ListElementNode>,
+    val style: BoundaryStyle,
     sourceTokens: List<Token>
 ) : KsonValueNodeImpl(sourceTokens) {
     private sealed class ListDelimiters(val open: Char, val close: Char) {
