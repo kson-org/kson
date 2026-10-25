@@ -273,7 +273,7 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
  * The "style" of bounds used to denote an [ObjectNode] or [ListNode]: [PLAIN] for undelimited structures,
  * [DELIMITED] for delimited structures.
  *
- * Note this only describes the original source we parsed, and in no way retricts how the parsed
+ * Note this only describes the original source we parsed, and in no way restricts how the parsed
  * value may be used.
  */
 enum class BoundaryStyle {

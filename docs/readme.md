@@ -314,7 +314,7 @@ teams:
 # ERROR: the "- name: 'Team B'" element is deceptively indented
 ```
 
-This document visually reads as two teams, but KSON's greedy parse rules mean nothing ended the `members` list, so `- name: 'Team B'` is its third element. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to correct whichever half is lying&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
+This document may visually read as two teams, but KSON doesn't parse whitespace to structure: its greedy parsing parsing rule interprets `- name: 'Team B'` as the third element of the `members` list. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to make the skimmed meaning match the parsed meaning&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
 
 ```kson
 teams:
