@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.ajalt.clikt:clikt:5.0.1")
+    implementation("com.github.ajalt.clikt:clikt:5.1.0")
     implementation(project(":kson-lib"))
 
     testImplementation(kotlin("test"))

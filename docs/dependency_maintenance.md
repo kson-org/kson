@@ -27,6 +27,9 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **Gradle plugins** (detekt, Dokka, Vanniktech publish, JVM wrapper)
   - pinned in: [`build.gradle.kts`](../build.gradle.kts) and [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts)
   - upstream: [Gradle Plugin Portal](https://plugins.gradle.org)
+- **Library dependencies declared in Gradle build files** (clikt, JGit, snakeyaml)
+  - pinned in: [`tooling/cli/build.gradle.kts`](../tooling/cli/build.gradle.kts) (clikt), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) (JGit) and [`build.gradle.kts`](../build.gradle.kts) (snakeyaml)
+  - upstream: [Maven Central](https://central.sonatype.com)
 - **The IntelliJ Platform Gradle Plugin**
   - pinned in: [`tooling/jetbrains/build.gradle.kts`](../tooling/jetbrains/build.gradle.kts)
   - upstream: [its Plugin Portal listing](https://plugins.gradle.org/plugin/org.jetbrains.intellij.platform)
