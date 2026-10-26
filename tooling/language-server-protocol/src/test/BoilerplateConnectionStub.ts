@@ -40,6 +40,7 @@ import {
     DocumentLinkParams,
     DocumentOnTypeFormattingParams,
     DocumentRangeFormattingParams,
+    DocumentRangesFormattingParams,
     DocumentSymbol,
     DocumentSymbolParams,
     ExecuteCommandParams,
@@ -77,21 +78,6 @@ import {
     WorkspaceSymbol,
     WorkspaceSymbolParams
 } from 'vscode-languageserver';
-import {CallHierarchy} from 'vscode-languageserver/lib/common/callHierarchy.js';
-import {Configuration} from 'vscode-languageserver/lib/common/configuration.js';
-import {DiagnosticFeatureShape} from 'vscode-languageserver/lib/common/diagnostic.js';
-import {FileOperationsFeatureShape} from 'vscode-languageserver/lib/common/fileOperations.js';
-import {FoldingRangeFeatureShape} from 'vscode-languageserver/lib/common/foldingRange.js';
-import {InlayHintFeatureShape} from 'vscode-languageserver/lib/common/inlayHint.js';
-import {InlineValueFeatureShape} from 'vscode-languageserver/lib/common/inlineValue.js';
-import {LinkedEditingRangeFeatureShape} from 'vscode-languageserver/lib/common/linkedEditingRange.js';
-import {MonikerFeatureShape} from 'vscode-languageserver/lib/common/moniker.js';
-import {NotebookSyncFeatureShape} from 'vscode-languageserver/lib/common/notebook.js';
-import {WindowProgress} from 'vscode-languageserver/lib/common/progress.js';
-import {SemanticTokensFeatureShape} from 'vscode-languageserver/lib/common/semanticTokens.js';
-import {ShowDocumentFeatureShape} from 'vscode-languageserver/lib/common/showDocument.js';
-import {TypeHierarchyFeatureShape} from 'vscode-languageserver/lib/common/typeHierarchy.js';
-import {WorkspaceFolders} from 'vscode-languageserver/lib/common/workspaceFolder.js';
 import {ConnectionStub} from "./ConnectionStub";
 
 /**
@@ -149,10 +135,10 @@ export abstract class BoilerplateConnectionStub implements Connection {
     tracer: RemoteTracer & _;
     telemetry: Telemetry & _;
     client: RemoteClient & _;
-    window: _RemoteWindow & WindowProgress & ShowDocumentFeatureShape & _;
-    workspace: _RemoteWorkspace & Configuration & WorkspaceFolders & FileOperationsFeatureShape & _;
-    languages: _Languages & CallHierarchy & SemanticTokensFeatureShape & LinkedEditingRangeFeatureShape & TypeHierarchyFeatureShape & InlineValueFeatureShape & InlayHintFeatureShape & DiagnosticFeatureShape & MonikerFeatureShape & FoldingRangeFeatureShape & _;
-    notebooks: _Notebooks & NotebookSyncFeatureShape & _;
+    window: Connection['window'];
+    workspace: Connection['workspace'];
+    languages: Connection['languages'];
+    notebooks: Connection['notebooks'];
 
     onDidChangeConfiguration(_handler: NotificationHandler<DidChangeConfigurationParams>): Disposable {
         throw new Error(this.stubMustImplement);
@@ -263,6 +249,10 @@ export abstract class BoilerplateConnectionStub implements Connection {
     }
 
     onDocumentRangeFormatting(_handler: ServerRequestHandler<DocumentRangeFormattingParams, TextEdit[] | undefined | null, never, void>): Disposable {
+        throw new Error(this.stubMustImplement);
+    }
+
+    onDocumentRangesFormatting(_handler: ServerRequestHandler<DocumentRangesFormattingParams, TextEdit[] | undefined | null, never, void>): Disposable {
         throw new Error(this.stubMustImplement);
     }
 

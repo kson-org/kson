@@ -24,6 +24,10 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **Kotlin**
   - pinned in: [`settings.gradle.kts`](../settings.gradle.kts) and [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts), which both declare it and must agree
   - upstream: [Kotlin releases](https://kotlinlang.org/docs/releases.html)
+  - after bumping: run `./gradlew kotlinUpgradeYarnLock` to regenerate [`kotlin-js-store/yarn.lock`](../kotlin-js-store/yarn.lock), and commit it
+- **kotlinx-serialization-json**
+  - pinned in: [`build.gradle.kts`](../build.gradle.kts), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) and [`native-tests/build.gradle.kts`](../native-tests/build.gradle.kts), which should agree
+  - upstream: [Maven Central](https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json)
 - **Gradle plugins** (detekt, Dokka, Vanniktech publish, JVM wrapper)
   - pinned in: [`build.gradle.kts`](../build.gradle.kts) and [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts)
   - upstream: [Gradle Plugin Portal](https://plugins.gradle.org)

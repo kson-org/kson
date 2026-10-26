@@ -5,7 +5,7 @@ import {
 import {describe, it} from 'mocha';
 import assert from "assert";
 import {DiagnosticService} from "../../../core/features/DiagnosticService";
-import {RelatedFullDocumentDiagnosticReport} from "vscode-languageserver-protocol/lib/common/protocol.diagnostic";
+import {RelatedFullDocumentDiagnosticReport} from "vscode-languageserver";
 import {createKsonDocument} from '../../TestHelpers.js';
 
 
