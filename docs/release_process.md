@@ -280,23 +280,17 @@ The KSON JavaScript/TypeScript library is published to npm as `@kson_org/kson` w
 
 ##### Publishing Steps
 
-1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+1. Download `kson_org-kson-X.Y.Z.tgz` and its `.sha256` from `release-artifacts/portable` in the
+   `build-linux-amd64` job of this release's CI run, and check it (see
+   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
 
-2. Build the universal JavaScript package:
+2. Publish to npm:
    ```bash
-   ./gradlew buildUniversalJsPackage -Prelease=true
-   ```
-
-   This builds a package for both the browser and Node.js and bundles it into `kson-lib/build/js-package`
-
-3. Publish to npm:
-   ```bash
-   cd kson-lib/build/js-package
    npm login
-   npm publish --access=public
+   npm publish kson_org-kson-X.Y.Z.tgz --access=public
    ```
 
-4. Verify the package is available at: https://www.npmjs.com/package/@kson_org/kson
+3. Verify the package is available at: https://www.npmjs.com/package/@kson_org/kson
 #### [lib-python](../lib-python) Publishing Process
 
 The Python package is published to PyPI as `kson-lang` using platform-specific wheels built by CircleCI.
@@ -310,10 +304,10 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
 
 1. Ensure you've checked out **the tag to be released and that `git status` is clean**
 
-2. Create the source distribution:
-   ```bash
-   ./gradlew :lib-python:buildSdist
-   ```
+2. Download `kson_lang-X.Y.Z.tar.gz` and its `.sha256` from `release-artifacts/portable` in the
+   `build-linux-amd64` job of this release's CI run, and check it (see
+   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci)). Copy just the
+   `.tar.gz` into the `lib-python/dist/` directory
 
    This archive is source only: it carries no native library and cannot build one, so nobody
    installs from it. It puts the source on PyPI; every installable artifact is a wheel from
@@ -355,26 +349,21 @@ The KSON language support includes VSCode extensions published to both the Visua
 
 ##### Publishing Steps
 
-1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+1. Download `vscode-kson-plugin.vsix` and its `.sha256` from `release-artifacts/portable` in the
+   `build-linux-amd64` job of this release's CI run, and check it (see
+   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
 
-2. Build the VSCode extension package:
-   ```bash
-   ./gradlew clean && ./gradlew npm_run_buildVSCode
-   ```
-
-   This creates a VSIX package at `tooling/lsp-clients/vscode/dist/vscode-kson-plugin.vsix`
-
-3. Publish to VS Code Marketplace:
+2. Publish to VS Code Marketplace:
    - Login to https://marketplace.visualstudio.com with GitHub
    - Navigate to the KSON extension
    - Update/upload the extension with the built VSIX file
 
-4. Publish to Open VSX Registry:
+3. Publish to Open VSX Registry:
    - Login to https://open-vsx.org/user-settings/extensions with GitHub
    - Navigate to the KSON extension
    - Update/upload the extension with the built VSIX file
 
-5. Verify the extensions are available at:
+4. Verify the extensions are available at:
    - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=kson.kson
    - Open VSX: https://open-vsx.org/extension/kson/kson
 #### [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco) Publishing Process
@@ -388,32 +377,27 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 
 ##### Publishing Steps
 
-1. Ensure you've checked out **the tag to be released and that `git status` is clean**
+1. Download `kson_org-monaco-editor-X.Y.Z.tgz` and its `.sha256` from `release-artifacts/portable`
+   in the `build-linux-amd64` job of this release's CI run, and check it (see
+   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
 
-2. Build the package:
+2. Check what will be published:
    ```bash
-   ./gradlew :tooling:lsp-clients:npm_run_buildMonaco
+   tar tzf kson_org-monaco-editor-X.Y.Z.tgz # should list package/dist/ and package/dist-iframe/
+   tar xzOf kson_org-monaco-editor-X.Y.Z.tgz package/package.json # should have no "dependencies", and "devDependencies" linking two other kson projects
    ```
 
-   This builds `tooling/lsp-clients/monaco/dist`. The build inlines `@kson/lsp-shared` and
-   `kson-language-server` into the bundle, which is why they are `devDependencies`: the published
-   package resolves nothing at install time beyond its `monaco-editor` and `react` peers.
+   The bundle inlines `@kson/lsp-shared` and `kson-language-server`, which is why they are
+   `devDependencies`: the published package resolves nothing at install time beyond its
+   `monaco-editor` and `react` peers.
 
-3. Check what would be published:
-   ```bash
-   cd tooling/lsp-clients/monaco
-   npm pack --dry-run # should show the dist/ directory
-   npm pkg get dependencies # should show no dependencies ("{}")
-   npm pkg get devDependencies # should show links to two other kson projects (among other dev dependencies)
-   ```
-
-4. Publish to npm:
+3. Publish to npm:
    ```bash
    npm login
-   npm publish --access=public
+   npm publish kson_org-monaco-editor-X.Y.Z.tgz --access=public
    ```
 
-5. Verify the package:
+4. Verify the package:
    ```bash
    npm view @kson_org/monaco-editor dist-tags
    ```
@@ -425,16 +409,10 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 
 Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
 
-1. Ensure you have **the tag you wish to release checked out and that your Git status is clean**.
+1. Download `kson-language-X.Y.Z.zip` and its `.sha256` from `release-artifacts/portable` in the
+   `build-linux-amd64` job of this release's CI run, and check it (see
+   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
 
-2. Build the plugin distribution:
-
-    ```bash
-    ./gradlew :tooling:jetbrains:buildPlugin -Prelease=true
-    ```
-
-   This creates a ZIP archive ready for deployment in `tooling/jetbrains/build/distributions/kson-language-[version].zip`
-
-3. Manually upload to JetBrains Marketplace:
+2. Manually upload to JetBrains Marketplace:
   - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
-  - Upload the ZIP file from the distributions folder
+  - Upload the ZIP file
