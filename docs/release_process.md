@@ -231,13 +231,12 @@ changed.
 
 ##### Step 3: Publish to crates.io
 
-`kson-sys` must go first — `kson-rs` depends on it by version.
-
 1. Dry-run both crates:
 
    ```bash
    cargo publish --dry-run --manifest-path lib-rust/kson-sys/Cargo.toml
-   cargo publish --dry-run --manifest-path lib-rust/kson/Cargo.toml
+   cargo publish --dry-run --manifest-path lib-rust/kson/Cargo.toml \
+       --config 'patch.crates-io.kson-sys.path="lib-rust/kson-sys"'
    ```
 
 2. Publish `kson-sys`:
