@@ -120,7 +120,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         }
 
         if (foundProperties) {
-            objectMark.done(OBJECT)
+            objectMark.done(PLAIN_OBJECT)
             return@nest true
         } else {
             // plain objects must have at least one property
@@ -350,7 +350,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         if (builder.getTokenType() == CURLY_BRACE_R) {
             // looking at empty object, advance past our end brace and mark it
             builder.advanceLexer()
-            delimitedObjectMark.done(OBJECT)
+            delimitedObjectMark.done(DELIMITED_OBJECT)
             return true
         }
 
@@ -382,7 +382,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         if (builder.getTokenType() == CURLY_BRACE_R) {
             // advance past our CURLY_BRACE_R
             builder.advanceLexer()
-            delimitedObjectMark.done(OBJECT)
+            delimitedObjectMark.done(DELIMITED_OBJECT)
         } else {
             delimitedObjectMark.error(OBJECT_NO_CLOSE.create())
         }

@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kson.KsonJvmTarget
 import org.kson.KsonVersion
 import org.kson.releaseArtifactsDir
 import java.util.*
@@ -78,7 +79,7 @@ tasks {
         dependsOn(generateJsonTestSuiteTask)
     }
 
-    val javaVersion = "11"
+    val javaVersion = KsonJvmTarget.VERSION
     withType<JavaCompile> {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -87,6 +88,7 @@ tasks {
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(javaVersion))
+            freeCompilerArgs.add("-Xjdk-release=$javaVersion")
         }
     }
 
@@ -197,14 +199,14 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
             }
         }
         val jvmMain by getting
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("org.yaml:snakeyaml:2.2")
+                implementation("org.yaml:snakeyaml:2.7")
             }
         }
         val jsMain by getting

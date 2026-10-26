@@ -136,8 +136,8 @@
   "dependencies": {
     "@kson/lsp-shared": "link:../shared",
     "kson-language-server": "link:../../language-server-protocol",
-    "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1"
+    "vscode-languageclient": "^10.1.2",
+    "vscode-languageserver": "^10.1.2"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -152,7 +152,7 @@
     "process": "^0.11.10",
     "rimraf": "^6.1.3",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "uuid": "^14.0.2",
     "vscode-textmate-languageservice": "^4.0.0"
   },

@@ -193,7 +193,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This end-dot is ignored because this object is `{}`-delimited. " +
-                    "End-dots only effect non-delimited objects"
+                    "End-dots only affect non-delimited objects"
         }
     },
     IGNORED_DASH_LIST_END_DASH {
@@ -203,7 +203,7 @@ enum class MessageType(
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             return "This end-dash is ignored because this list is `<>`-delimited. " +
-                    "End-dashes only effect non-delimited dashed lists"
+                    "End-dashes only affect non-delimited dashed lists"
         }
     },
     STRING_NO_CLOSE {
@@ -223,7 +223,7 @@ enum class MessageType(
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val badControlCharArg = parsedArgs.getArg("Control Character")
             require(badControlCharArg?.length == 1) { "Expected arg to be a single control character" }
-            val badControlChar = badControlCharArg!![0]
+            val badControlChar = badControlCharArg[0]
 
             return "Non-whitespace control characters must not be embedded directly in strings. " +
                     "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
@@ -784,42 +784,134 @@ enum class MessageType(
             return "Error from '$requiredBy' dependency schema: '$schemaError'"
         }
     },
-    OBJECT_PROPERTIES_MISALIGNED(MessageSeverity.WARNING) {
+    PLAIN_OBJECT_PROPERTY_OVER_INDENTED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This property should be aligned with the other leading properties in this object." +
-                    "Reformat or fix nesting with end-dots `.` or delimiters `{}`"
+            return "Deceptive indentation. This property is indented deeper than the first property of its object, " +
+                    "making it appear nested. Align it, or edit to fix the structure"
         }
     },
-    DASH_LIST_ITEMS_MISALIGNED(MessageSeverity.WARNING) {
+    PLAIN_OBJECT_PROPERTY_UNDER_INDENTED(MessageSeverity.ERROR) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This element should be aligned with the other leading elements in this list." +
-                    "Reformat or fix nesting with end-dashes `=` or delimiters `<>`"
+            return "Deceptive indentation. This property is indented shallower than the first property of its " +
+                    "object, making it appear to be outside an object that has not ended. Align it, or make the " +
+                    "intended structure explicit with an end-dot `.` or delimiters `{}`"
         }
     },
-    OBJECT_PROPERTY_NESTING_ISSUE(MessageSeverity.WARNING) {
+    DELIMITED_OBJECT_PROPERTY_OVER_INDENTED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This value should be nested deeper than the object that contains it."
+            return "Misleading indentation. This property is indented deeper than the first property of this " +
+                    "delimited object, so the object structure may be misread in spite of the delimiters. " +
+                    "Consider aligning it so the shape matches the structure"
         }
     },
-    DASH_LIST_ITEMS_NESTING_ISSUE(MessageSeverity.WARNING) {
+    DELIMITED_OBJECT_PROPERTY_UNDER_INDENTED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return emptyList()
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            return "Deceptive indentation. This value should nested deeper than the list that contains it."
+            return "Misleading indentation. This property is indented shallower than the first property of this " +
+                    "delimited object, so the object structure may be misread in spite of the delimiters. " +
+                    "Consider aligning it so the shape matches the structure"
+        }
+    },
+    PLAIN_LIST_ELEMENT_OVER_INDENTED(MessageSeverity.ERROR) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This element is indented deeper than the first element of its list, " +
+                    "making it appear nested. Align it, or edit to fix the structure"
+        }
+    },
+    PLAIN_LIST_ELEMENT_UNDER_INDENTED(MessageSeverity.ERROR) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This element is indented shallower than the first element of its " +
+                    "list, making it appear to be outside a list that has not ended. Align it, or make the " +
+                    "intended structure explicit with an end-dash `=` or delimiters `<>`"
+        }
+    },
+    DELIMITED_LIST_ELEMENT_OVER_INDENTED(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Misleading indentation. This element is indented deeper than the first element of this " +
+                    "delimited list, so the list structure may be misread in spite of the delimiters. " +
+                    "Consider aligning it so the shape matches the structure"
+        }
+    },
+    DELIMITED_LIST_ELEMENT_UNDER_INDENTED(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Misleading indentation. This element is indented shallower than the first element of this " +
+                    "delimited list, so the list structure may be misread in spite of the delimiters. " +
+                    "Consider aligning it so the shape matches the structure"
+        }
+    },
+    PLAIN_OBJECT_PROPERTY_NESTING_ISSUE(MessageSeverity.ERROR) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This value is not indented deeper than its key, " +
+                    "making it appear to be a separate entity rather than part of this property. " +
+                    "Indent it to reflect this document's structure"
+        }
+    },
+    DELIMITED_OBJECT_PROPERTY_NESTING_ISSUE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Misleading indentation. This value is not indented deeper than its key, " +
+                    "so the object structure may be misread in spite of the delimiters. " +
+                    "Consider indenting it so the shape matches the structure"
+        }
+    },
+    PLAIN_LIST_ELEMENT_NESTING_ISSUE(MessageSeverity.ERROR) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Deceptive indentation. This value is not indented deeper than its dash, " +
+                    "making it appear to be a separate entity rather than part of this element. " +
+                    "Indent it to reflect this document's structure"
+        }
+    },
+    DELIMITED_LIST_ELEMENT_NESTING_ISSUE(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Misleading indentation. This value is not indented deeper than its dash, " +
+                    "so the list structure may be misread in spite of the delimiters. " +
+                    "Consider indenting it so the shape matches the structure"
         }
     },
     OBJECT_DUPLICATE_KEY(MessageSeverity.WARNING) {

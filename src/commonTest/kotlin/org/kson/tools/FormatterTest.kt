@@ -1593,7 +1593,6 @@ class FormatterTest {
                 .
                 
                 trailingContent
-          
                 
                 list:
                   - 1
@@ -1614,13 +1613,38 @@ class FormatterTest {
                 key: value
                 .
                 
-                extraValue 
+                extraValue
           
                 list:
                   - 1
                   - 2
                   - 3
             """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testErrorsAreWrittenWithoutTheWhitespaceAfterThem() {
+        assertFormatting(
+            """
+            - 1.
+            - 2
+            """.trimIndent(),
+            """
+            - 1.
+            - 2
+            """.trimIndent()
+        )
+
+        assertFormatting(
+            "[1., 2]",
+            """
+            <
+              - 1.
+              - 2
+            >
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
         )
     }
 
@@ -1745,6 +1769,27 @@ class FormatterTest {
                 {
                   embedBlock: %
                     content
+                    %%
+                }
+            """.trimIndent(),
+            formattingStyle = FormattingStyle.DELIMITED
+        )
+    }
+
+    @Test
+    fun testDelimitedFormattingStyleKeepsPipesThatStartLines() {
+        assertFormatting(
+            """
+                table: %md
+                  | a | b |
+                  |---|---|
+                  %%
+            """.trimIndent(),
+            """
+                {
+                  table: %md
+                    | a | b |
+                    |---|---|
                     %%
                 }
             """.trimIndent(),
@@ -2010,6 +2055,15 @@ class FormatterTest {
     }
 
     @Test
+    fun testCompactEndDotIsSpacedOffFromAPropertyInError() {
+        assertFormatting(
+            "{ x: { 200: 1 }, z: 1 }",
+            "x:200: 1 .z:1",
+            formattingStyle = FormattingStyle.COMPACT
+        )
+    }
+
+    @Test
     fun testPlainFormattingEmptyObject() {
         assertFormatting(
             """
@@ -2201,7 +2255,6 @@ class FormatterTest {
                 outer2: 8 # unexpected trailing content
                 .
                 
-                
                 outer:
                   nest1:
                     nest2: 4
@@ -2238,7 +2291,6 @@ class FormatterTest {
                 =
                 
                 key: value
-                
                 
                 - - - list
                     =

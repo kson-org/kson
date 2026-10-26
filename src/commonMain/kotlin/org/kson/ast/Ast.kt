@@ -157,11 +157,13 @@ open class AstNodeError(sourceTokens: List<Token>) : AstNode, AstNodeImpl(source
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         return when (compileTarget) {
             is Kson, is Yaml -> {
-                val invalidSource = sourceTokens.joinToString("") { it.lexeme.text }
-                invalidSource.split("\n")
+                val writtenTokens = sourceTokens.dropLastWhile { it.tokenType == WHITESPACE }
+                val invalidSource = writtenTokens.joinToString("") { it.lexeme.text }
+                val writtenSource = invalidSource.split("\n")
                     .joinToString("\n") { line ->
                         indent.firstLineIndent() + line
                     }
+                if (writtenTokens.lastOrNull()?.tokenType == COMMENT) "$writtenSource\n" else writtenSource
             }
         }
     }
@@ -257,6 +259,37 @@ private fun formatUndelimitedEntries(
     }
 }
 
+private sealed class Delimiters(val open: Char, val close: Char) {
+    data object AngleBrackets : Delimiters('<', '>')
+    data object SquareBrackets : Delimiters('[', ']')
+    data object CurlyBraces : Delimiters('{', '}')
+}
+
+/**
+ * Write the [entries] of a non-empty delimited object or list inside [delimiters], indented
+ * one level deepr
+ */
+private fun formatDelimitedEntries(
+    entries: List<AstNode>,
+    delimiters: Delimiters,
+    indent: Indent,
+    nextNode: AstNode?,
+    compileTarget: Kson
+): String {
+    val separator = if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
+        ",\n"
+    } else {
+        "\n"
+    }
+
+    return indent.firstLineIndent() + delimiters.open + "\n" +
+            entries.withIndex().joinToString(separator) { (index, entry) ->
+                val nodeAfterThisEntry = entries.getOrNull(index + 1) ?: nextNode
+                entry.toSourceWithNext(indent.next(false), nodeAfterThisEntry, compileTarget)
+            } +
+            "\n" + indent.bodyLinesIndent() + delimiters.close
+}
+
 /**
  *  This check is used to determine if the document contains trailing content.
  *  This is the case if the node after an [ObjectNode] or [ListNode] is a [KsonValueNode] (not an element
@@ -269,10 +302,26 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
     return nextNode is KsonValueNode
 }
 
-class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<Token>) : KsonValueNodeImpl(sourceTokens) {
+/**
+ * The "style" of bounds used to denote an [ObjectNode] or [ListNode]: [PLAIN] for undelimited structures,
+ * [DELIMITED] for delimited structures.
+ *
+ * Note this only describes the original source we parsed, and in no way restricts how the parsed
+ * value may be used.
+ */
+enum class BoundaryStyle {
+    PLAIN,
+    DELIMITED
+}
+
+class ObjectNode(
+    val properties: List<ObjectPropertyNode>,
+    val style: BoundaryStyle,
+    sourceTokens: List<Token>
+) : KsonValueNodeImpl(sourceTokens) {
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         if (properties.isEmpty()) {
-            return "${indent.firstLineIndent()}{}"
+            return "${indent.firstLineIndent()}${Delimiters.CurlyBraces.open}${Delimiters.CurlyBraces.close}"
         }
 
         return when (compileTarget) {
@@ -289,29 +338,8 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
         }
     }
 
-    private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        val separator = when (compileTarget) {
-            is Kson -> {
-                if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    ",\n"
-                } else {
-                    "\n"
-                }
-            }
-            is Yaml -> throw UnsupportedOperationException("We never format YAML objects as delimited")
-        }
-
-        return """
-            |${indent.firstLineIndent()}{
-            |${
-            properties.withIndex().joinToString(separator) { (index, property) ->
-                val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-                property.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
-            }
-        }
-            |${indent.bodyLinesIndent()}}
-            """.trimMargin()
-
+    private fun formatDelimitedObject(indent: Indent, nextNode: AstNode?, compileTarget: Kson): String {
+        return formatDelimitedEntries(properties, Delimiters.CurlyBraces, indent, nextNode, compileTarget)
     }
 
     private fun formatCompactObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
@@ -340,8 +368,10 @@ class ObjectNode(val properties: List<ObjectPropertyNode>, sourceTokens: List<To
             if (needsSpace) "$result " else result
         }
         return if (needsEndDot(nextNode)) {
-            // If the last property is a number we need to add whitespace before the '.' to prevent it becoming a number
-            val needsSpace = (properties.last() as ObjectPropertyNodeImpl).value is NumberNode
+            // If the last property ends in a number we need to add whitespace before the '.' to prevent it becoming part
+            // of that number
+            val lastProperty = properties.last()
+            val needsSpace = lastProperty !is ObjectPropertyNodeImpl || lastProperty.value is NumberNode
             outputObject + if (needsSpace) " ." else "."
         } else outputObject
     }
@@ -461,23 +491,19 @@ class ObjectPropertyNodeImpl(
 
 class ListNode(
     val elements: List<ListElementNode>,
+    val style: BoundaryStyle,
     sourceTokens: List<Token>
 ) : KsonValueNodeImpl(sourceTokens) {
-    private sealed class ListDelimiters(val open: Char, val close: Char) {
-        data object AngleBrackets : ListDelimiters('<', '>')
-        data object SquareBrackets : ListDelimiters('[', ']')
-    }
-
     override fun toSourceInternal(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         val listDelimiter = when (compileTarget) {
             is Kson -> {
                 if (compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                    ListDelimiters.SquareBrackets
+                    Delimiters.SquareBrackets
                 } else {
-                    ListDelimiters.AngleBrackets
+                    Delimiters.AngleBrackets
                 }
             }
-            is Yaml-> ListDelimiters.SquareBrackets
+            is Yaml-> Delimiters.SquareBrackets
         }
         if (elements.isEmpty()) {
             return "${indent.firstLineIndent()}${listDelimiter.open}${listDelimiter.close}"
@@ -500,7 +526,7 @@ class ListNode(
                         indent,
                         nextNode,
                         compileTarget,
-                        ListDelimiters.SquareBrackets
+                        Delimiters.SquareBrackets
                     )
                     CLASSIC -> formatDelimitedList(indent, nextNode, compileTarget, listDelimiter)
                 }
@@ -513,34 +539,23 @@ class ListNode(
     private fun formatDelimitedList(
         indent: Indent,
         nextNode: AstNode?,
-        compileTarget: CompileTarget,
-        listDelimiters: ListDelimiters
+        compileTarget: Kson,
+        listDelimiters: Delimiters
     ): String {
-        val separator = when (compileTarget) {
-            is Kson -> if(compileTarget.formatConfig.formattingStyle == CLASSIC) {
-                ",\n"
-            }else{
-                "\n"
-            }
-            else -> throw UnsupportedOperationException("We never format YAML objects as delimited")
-        }
-
-        // We pad our list bracket with newlines if our list is non-empty
-        val bracketPadding = "\n"
-        return indent.firstLineIndent() + listDelimiters.open + bracketPadding +
-                elements.withIndex().joinToString(separator) { (index, element) ->
-                    val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
-                    element.toSourceWithNext(indent.next(false), nodeAfterThisChild, compileTarget)
-                } +
-                bracketPadding +
-                indent.bodyLinesIndent() + listDelimiters.close
+        return formatDelimitedEntries(
+            elements,
+            listDelimiters,
+            indent,
+            nextNode,
+            compileTarget
+        )
     }
 
     private fun formatCompactList(
         indent: Indent,
         nextNode: AstNode?,
         compileTarget: CompileTarget,
-        listDelimiters: ListDelimiters
+        listDelimiters: Delimiters
     ): String {
         return elements.withIndex().joinToString(
             "",
@@ -572,7 +587,7 @@ class ListNode(
                         "$elementString "
                     } else {
                         // Non-empty objects need to be wrapped to separate from the next object
-                        "{$elementString}"
+                        "${Delimiters.CurlyBraces.open}$elementString${Delimiters.CurlyBraces.close}"
                     }
                 }
 
