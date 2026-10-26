@@ -29,6 +29,13 @@ parameters:
 commands:
   'gradle-core-tasks':
     description: 'Run core Gradle build and verification tasks'
+    parameters:
+      'package-tasks':
+        type: string
+        description: 'Gradle tasks staging the release artifacts the job stores'
+        default: packageNativeArtifacts
+        .
+      .
     steps:
       - run:
           name: 'Download dependencies'
@@ -49,9 +56,34 @@ commands:
           name: 'Build native kson-lib'
           command: './gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage'
 
-      - run:
-          name: 'Package release artifacts'
-          command: './gradlew --no-daemon packageNativeArtifacts'
+      # keep both patterns below in sync with the build-release-targets workflow's branch pattern
+      - when:
+          condition:
+            matches:
+              pattern: '^release/\\d+\\.\\d+\\.\\d+$'
+              value: '<< pipeline.git.branch >>'
+              .
+            .
+          steps:
+            - run:
+                name: 'Package release artifacts'
+                command: './gradlew --no-daemon << parameters.package-tasks >> -Prelease=true'
+
+            =
+
+      - unless:
+          condition:
+            matches:
+              pattern: '^release/\\d+\\.\\d+\\.\\d+$'
+              value: '<< pipeline.git.branch >>'
+              .
+            .
+          steps:
+            - run:
+                name: 'Package release artifacts'
+                command: './gradlew --no-daemon << parameters.package-tasks >>'
+
+            =
 
       - run:
           name: 'Verify clean checkout'
@@ -60,23 +92,23 @@ commands:
         .
     .
   # Every job that produces something a release needs stores it through here, so all of the artifacts
-  # can be found under `release-artifacts/<platform>`.
+  # can be found under `release-artifacts/<destination>`.
   'store-release-artifacts':
-    description: 'Store the artifacts a job built under the shared per-platform destination'
+    description: 'Store the artifacts a job built under the shared release-artifacts destination'
     parameters:
       path:
         type: string
         description: 'Directory holding the artifacts this job produced'
         .
-      platform:
+      destination:
         type: string
-        description: 'Platform identifier for the artifact destination'
+        description: 'Subdirectory of release-artifacts to store the artifacts in'
         .
       .
     steps:
       - store_artifacts:
           path: '<< parameters.path >>'
-          destination: 'release-artifacts/<< parameters.platform >>'
+          destination: 'release-artifacts/<< parameters.destination >>'
           .
         .
     .
@@ -136,7 +168,8 @@ commands:
           .
         .
     .
-  # Gradle build cache, scoped to build-linux-amd64 only (keeps stale cached output out of release artifacts).
+  # Gradle build cache, scoped to build-linux-amd64. The release packaging invocation (-Prelease=true)
+  # neither loads nor stores entries; the job's other Gradle steps use it on every branch.
   # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
   'restore-gradle-build-cache':
     description: 'Restore the Gradle build cache for build-linux-amd64'
@@ -278,7 +311,7 @@ jobs:
       - 'gradle-core-tasks'
       - 'store-release-artifacts':
           path: 'build/release-artifacts/native'
-          platform: 'windows-amd64'
+          destination: 'windows-amd64'
       - 'save-gradle-caches':
           platform: 'win-amd64'
           .
@@ -317,10 +350,14 @@ jobs:
       - 'clean-git-config':
           shell: bash
       # Cross-platform Gradle tasks
-      - 'gradle-core-tasks'
+      - 'gradle-core-tasks':
+          'package-tasks': 'packageNativeArtifacts packagePortableArtifacts'
       - 'store-release-artifacts':
           path: 'build/release-artifacts/native'
-          platform: 'linux-amd64'
+          destination: 'linux-amd64'
+      - 'store-release-artifacts':
+          path: 'build/release-artifacts/portable'
+          destination: 'portable'
       - 'save-gradle-build-cache'
       - 'save-gradle-caches':
           platform: 'linux-amd64'
@@ -351,7 +388,7 @@ jobs:
       - 'gradle-core-tasks'
       - 'store-release-artifacts':
           path: 'build/release-artifacts/native'
-          platform: 'macos-arm64'
+          destination: 'macos-arm64'
       - 'save-gradle-caches':
           platform: 'macos-arm64'
           .
@@ -420,7 +457,7 @@ jobs:
           platform: 'linux-amd64'
       - 'store-release-artifacts':
           path: 'lib-python/dist'
-          platform: 'python-linux-amd64'
+          destination: 'python-linux-amd64'
           .
         .
     .
@@ -444,7 +481,7 @@ jobs:
           platform: 'macos-python'
       - 'store-release-artifacts':
           path: 'lib-python/dist'
-          platform: 'python-macos-arm64'
+          destination: 'python-macos-arm64'
           .
         .
     .
@@ -471,7 +508,7 @@ jobs:
           platform: 'windows-python'
       - 'store-release-artifacts':
           path: 'lib-python/dist'
-          platform: 'python-windows-amd64'
+          destination: 'python-windows-amd64'
           .
         .
     .
@@ -484,6 +521,7 @@ workflows:
       - 'build-linux-amd64'
     .
   # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
+  # keep in sync with the release branch pattern in gradle-core-tasks
   'build-release-targets':
     when: '(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == "schedule") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)'
     jobs:

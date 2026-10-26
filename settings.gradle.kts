@@ -21,3 +21,10 @@ include("tooling:jetbrains")
 include("tooling:language-server-protocol")
 include("tooling:lsp-clients")
 include("tooling:cli")
+
+buildCache {
+    local {
+        // Release artifacts must not come out of the build cache; a release build neither loads nor stores entries
+        isEnabled = providers.gradleProperty("release").orNull != "true"
+    }
+}

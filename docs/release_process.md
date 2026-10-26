@@ -37,6 +37,7 @@ When `main` is ready to have a release cut from it:
       ```bash
       ./gradlew build -Prelease=true
       ```
+      A `-Prelease=true` build neither reads nor writes the build cache.
   * [KSON Core internals](../build.gradle.kts) (**NOTE:** uses a different versioning scheme and will NOT be set to `X.Y.Z`.  See the comments there for details)
   * rust libraries:
       - [kson Cargo.toml](../lib-rust/kson/Cargo.toml), [kson-sys Cargo.toml](../lib-rust/kson-sys/Cargo.toml), [kson-sys build script](../lib-rust/kson-sys/build.rs), [pixi.toml](../lib-rust/pixi.toml)
@@ -64,28 +65,31 @@ When `main` is ready to have a release cut from it:
 
 ### Release artifacts built by CircleCI
 
-The native library, the CLI binary and the Python wheels are built per platform by CI. Each job
-stores them into `release-artifacts/<platform>` on its **Artifacts** tab:
+Each of these CI jobs stores the release artifacts it builds into `release-artifacts/<destination>`
+on its **Artifacts** tab:
 
 | CircleCI job | Artifact destination | Contents |
 | --- | --- | --- |
 | `build-linux-amd64` | `release-artifacts/linux-amd64` | `kson-lib-shared-amd64-linux.tar.gz`, `kson-cli-amd64-linux.tar.gz`, each with its `.sha256` |
+| `build-linux-amd64` | `release-artifacts/portable` | `vscode-kson-plugin.vsix`, `kson-language-*.zip`, `kson_org-kson-*.tgz`, `kson_org-monaco-editor-*.tgz`, `kson_lang-*.tar.gz`, each with its `.sha256` |
 | `build-macos-arm64` | `release-artifacts/macos-arm64` | `kson-lib-shared-arm64-macos.tar.gz`, `kson-cli-arm64-macos.tar.gz`, each with its `.sha256` |
 | `build-windows-amd64` | `release-artifacts/windows-amd64` | `kson-lib-shared-amd64-windows.tar.gz`, `kson-cli-amd64-windows.tar.gz`, each with its `.sha256` |
 | `build-python-wheel-linux-amd64` | `release-artifacts/python-linux-amd64` | `kson_lang-*.whl` |
 | `build-python-wheel-macos` | `release-artifacts/python-macos-arm64` | `kson_lang-*.whl` |
 | `build-python-wheel-windows` | `release-artifacts/python-windows-amd64` | `kson_lang-*.whl` |
 
-Every archive has its checksum beside it, as `<archive>.sha256`. Download both and check the
-archive with `shasum -a 256 -c <archive>.sha256` (or `sha256sum -c`).
+A `<file>.sha256` beside an artifact holds its checksum. Download both and check the artifact with
+`shasum -a 256 -c <file>.sha256` (or `sha256sum -c`).
 
 `./gradlew packageNativeArtifacts` produces the same files locally for the platform you are on,
 in `build/release-artifacts/native`. It needs GraalVM, which the task pulls in via pixi.
+`./gradlew packagePortableArtifacts` produces the `portable` ones, in
+`build/release-artifacts/portable`.
 
 Only `build-linux-amd64` runs on every push; the rest run on pushes to a `release/X.Y.Z`
 branch and in a weekly scheduled run on `main`. Take a release's artifacts from the CI run on
-its own `release/X.Y.Z` branch. Any branch can run them on demand through the `run-*` pipeline
-parameters in [`.circleci/config.kson`](../.circleci/config.kson).
+its own `release/X.Y.Z` branch; other runs build development versions. Any branch can run them
+on demand through the `run-*` pipeline parameters in [`.circleci/config.kson`](../.circleci/config.kson).
 
 #### [kson-lib](../kson-lib) Publishing Process
 
