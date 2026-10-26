@@ -296,6 +296,15 @@ enum class MessageType(
         }
 
     },
+    LONE_CARRIAGE_RETURN(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "A carriage return (\\r) should be followed by a newline (\\n)."
+        }
+    },
     ILLEGAL_MINUS_SIGN {
         override fun expectedArgs(): List<String> {
             return emptyList()

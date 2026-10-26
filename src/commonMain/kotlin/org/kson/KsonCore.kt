@@ -14,6 +14,7 @@ import org.kson.tools.FormattingStyle
 import org.kson.tools.InternalEmbedRule
 import org.kson.validation.DuplicateKeyValidator
 import org.kson.validation.IndentValidator
+import org.kson.validation.LoneCarriageReturnValidator
 import org.kson.parser.behavior.quotedstring.KsonStringValidator
 import org.kson.tools.KsonFormatterConfig
 import org.kson.validation.SourceContext
@@ -78,6 +79,7 @@ object KsonCore {
             IndentValidator().validate(ast, messageSink)
             DuplicateKeyValidator().validate(ast, messageSink)
             KsonStringValidator().validate(ast, messageSink)
+            LoneCarriageReturnValidator().validate(source, messageSink)
         }
 
         if (!coreCompileConfig.ignoreErrors && !messageSink.hasErrors()) {
