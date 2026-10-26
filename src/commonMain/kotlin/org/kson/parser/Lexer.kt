@@ -4,7 +4,10 @@ import org.kson.stdlibx.collections.ImmutableList
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
+import org.kson.parser.behavior.Line
 import org.kson.parser.behavior.StringUnquoted
+import org.kson.parser.behavior.Whitespace.isInlineWhitespace
+import org.kson.parser.behavior.Whitespace.isWhitespace
 import org.kson.parser.behavior.embedblock.EmbedDelim.*
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
@@ -403,24 +406,10 @@ class Lexer(source: String, gapFree: Boolean = false) {
      */
     private fun extractCommentToken(): Token {
         // comments extend to end of the line
-        while (sourceScanner.peek() != '\n' && !sourceScanner.eof()) sourceScanner.advance()
+        while (!scannerAtEndOfLine()) sourceScanner.advance()
 
         val commentLexeme = sourceScanner.extractLexeme()
         return Token(COMMENT, commentLexeme, emptyList())
-    }
-
-    /**
-     * Returns true if the given [char] is whitespace
-     */
-    private fun isWhitespace(char: Char?): Boolean {
-        return isInlineWhitespace(char) || char == '\n'
-    }
-
-    /**
-     * Returns true if the given [char] is a non-newline whitespace
-     */
-    private fun isInlineWhitespace(char: Char?): Boolean {
-        return char == ' ' || char == '\r' || char == '\t'
     }
 
     private fun unquotedString() {
@@ -468,9 +457,8 @@ class Lexer(source: String, gapFree: Boolean = false) {
             addLiteralToken(WHITESPACE)
         }
 
-        if (sourceScanner.peek() == '\n') {
+        if (consumeLineEnding()) {
             // no embed tag on this block
-            sourceScanner.advance()
             addLiteralToken(EMBED_PREAMBLE_NEWLINE)
         } else if (sourceScanner.eof()) {
             return
@@ -487,12 +475,7 @@ class Lexer(source: String, gapFree: Boolean = false) {
             )
 
             // consume the newline (or CRLF) from after this embed tag
-            if (sourceScanner.peek() == '\n') {
-                sourceScanner.advance()
-                addLiteralToken(EMBED_PREAMBLE_NEWLINE)
-            } else if (sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n') {
-                sourceScanner.advance() // take the \r
-                sourceScanner.advance() // take the \n
+            if (consumeLineEnding()) {
                 addLiteralToken(EMBED_PREAMBLE_NEWLINE)
             } else if (sourceScanner.eof()) {
                 return
@@ -528,10 +511,22 @@ class Lexer(source: String, gapFree: Boolean = false) {
      * The scanner is at the end of a line if we're at end of file, a newline, or CRLF.
      */
     private fun scannerAtEndOfLine(): Boolean {
-        return sourceScanner.eof()
-                || sourceScanner.peek() == '\n'
-                || (sourceScanner.peek() == '\r' && sourceScanner.peekNext() == '\n')
+        return sourceScanner.eof() || lineEndingLength() > 0
     }
+
+    /**
+     * If the scanner is at a line ending advance past it and return true
+     */
+    private fun consumeLineEnding(): Boolean {
+        val length = lineEndingLength()
+        repeat(length) { sourceScanner.advance() }
+        return length > 0
+    }
+
+    /**
+     * If the scanner is at the end of the line, return 1 (newline) or 2 (CRLF). Otherwise, 0.
+     */
+    private fun lineEndingLength(): Int = Line.endingLength(sourceScanner.peek(), sourceScanner.peekNext())
 
     private fun number() {
         /**

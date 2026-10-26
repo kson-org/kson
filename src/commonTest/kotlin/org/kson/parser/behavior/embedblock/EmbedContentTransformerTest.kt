@@ -490,9 +490,9 @@ class EmbedContentTransformerTest {
     }
 
     @Test
-    fun testCloseDelimOnOwnLineWithTabsAndCR() {
-        // Close delim on own line with mixed whitespace (tabs, CR)
-        val rawEmbedContent = "  hello\n  \t\r"
+    fun testCloseDelimOnOwnLineWithTabs() {
+        // Close delim on own line with mixed whitespace (spaces, tabs)
+        val rawEmbedContent = "  hello\n  \t"
         val processed = "hello"
         val baseLocation = Location(
             Coordinates(0, 0),
@@ -529,6 +529,50 @@ class EmbedContentTransformerTest {
         )
 
         assertEquals(processed, transformer.processedContent)
+    }
+
+    @Test
+    fun testCrlfLinesKeepLineEndings() {
+        val rawEmbedContent = "  a\r\n\r\n  b\r\n  "
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(3, 2),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals("a\r\n\r\nb", transformer.processedContent)
+
+        // "b" is at offset 5 of the processed content and offset 9 of the raw content, on line 2
+        val result = transformer.mapToOriginal(5, 6)
+        assertEquals(Coordinates(2, 2), result.start)
+        assertEquals(9, result.startOffset)
+    }
+
+    @Test
+    fun testCloseDelimAfterLoneCarriageReturnIsNotOnOwnLine() {
+        // a lone \r is not a line ending, so it does not put the close delimiter on its own line
+        val rawEmbedContent = "  hello\n  \r"
+        val baseLocation = Location(
+            Coordinates(0, 0),
+            Coordinates(1, 3),
+            0,
+            rawEmbedContent.length
+        )
+
+        val transformer = EmbedContentTransformer(
+            rawContent = rawEmbedContent,
+            embedDelim = EmbedDelim.Percent,
+            rawLocation = baseLocation
+        )
+
+        assertEquals("hello\n\r", transformer.processedContent)
     }
 
     @Test

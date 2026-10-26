@@ -18,6 +18,7 @@ import org.kson.ast.TrueNode
 import org.kson.ast.UnquotedStringNode
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
+import org.kson.parser.behavior.Whitespace.isWhitespace
 import org.kson.parser.behavior.StringQuote
 import org.kson.parser.behavior.StringQuote.DoubleQuote
 import org.kson.parser.behavior.StringQuote.SingleQuote
@@ -200,10 +201,6 @@ class KsonStringValidator {
             messageSink.error(errorLocation, escapeError)
         }
         scanner.advance() // consume the escaped character
-    }
-
-    private fun isWhitespace(char: Char?): Boolean {
-        return char == ' ' || char == '\n' || char == '\r' || char == '\t'
     }
 
     /**

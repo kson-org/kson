@@ -2,6 +2,7 @@ package org.kson.parser.behavior.embedblock
 
 import org.kson.parser.Location
 import org.kson.parser.behavior.KsonContentTransformer
+import org.kson.parser.behavior.Line
 
 /**
  * A [KsonContentTransformer] for Embed Blocks, handling the processing from raw KSON source to actual String
@@ -40,7 +41,7 @@ class EmbedContentTransformer(
         /**
          * Transformation pipeline:
          * 1. Trim the minimum indent
-         * 2. If %% was on its own line, strip the trailing \n or \r\n (and residual whitespace)
+         * 2. If %% was on its own line, drop everything after the end of the prior line
          * 3. Unescape the content
          */
         val indentTrimmer = EmbedBlockIndent(rawContent)
@@ -48,8 +49,10 @@ class EmbedContentTransformer(
         val indentTrimmed = indentTrimmer.trimmedContent
 
         trimmedEmbedContent = if (isCloseDelimOnOwnLine(rawContent)) {
-            val lastNewline = indentTrimmed.lastIndexOf('\n')
-            if (lastNewline >= 0) indentTrimmed.take(lastNewline).removeSuffix("\r") else indentTrimmed
+            val lines = Line.splitToLines(indentTrimmed)
+            val lineBeforeCloseDelim = lines[lines.lastIndex - 1]
+            val closeDelimLine = lines.last()
+            indentTrimmed.removeSuffix(lineBeforeCloseDelim.ending + closeDelimLine.text)
         } else {
             indentTrimmed
         }
@@ -60,13 +63,11 @@ class EmbedContentTransformer(
 
     /**
      * Checks whether the close delimiter (%% or $$) is on its own line in the raw content.
-     * This is true when the last \n in the raw content is followed by only inline whitespace
-     * (spaces, tabs, or CR).
+     * This is true when the content has more than one line and its last line is only inline whitespace.
      */
     private fun isCloseDelimOnOwnLine(content: String): Boolean {
-        val lastNewline = content.lastIndexOf('\n')
-        if (lastNewline < 0) return false
-        return content.substring(lastNewline + 1).all { it == ' ' || it == '\t' || it == '\r' }
+        val lines = Line.splitToLines(content)
+        return lines.size > 1 && lines.last().isInlineWhitespaceOnly()
     }
 
     /**
@@ -81,7 +82,7 @@ class EmbedContentTransformer(
 
         // Step 2: Map trimmed → raw (add back trimmed indent)
         val trimmedUpToOffset = trimmedEmbedContent.take(trimmedOffset)
-        val lineIndex = trimmedUpToOffset.count { it == '\n' }
+        val lineIndex = Line.splitToLines(trimmedUpToOffset).lastIndex
         // Every line up to and including the offset's own line had its indent trimmed, so we add back
         // the sum of all the trimmed characters (we go line by line to make sure our count is
         // accurate since a blank line shorter than the minimum indent loses fewer characters than the rest)

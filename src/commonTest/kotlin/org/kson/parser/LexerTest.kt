@@ -909,6 +909,46 @@ class LexerTest {
     }
 
     @Test
+    fun testCrlfLineEndings() {
+        val commentTokens = assertTokenizesTo(
+            "# a comment\r\nkey: val # trailing\r\n",
+            listOf(COMMENT, WHITESPACE, UNQUOTED_STRING, COLON, WHITESPACE, UNQUOTED_STRING, WHITESPACE, COMMENT, WHITESPACE),
+            testGapFreeLexing = true
+        )
+        assertEquals("# a comment", commentTokens[0].lexeme.text, "the CRLF must not be part of the comment")
+        assertEquals("# trailing", commentTokens[7].lexeme.text, "the CRLF must not be part of the comment")
+
+        // an embed block's preamble ends with the whole CRLF, whether or not it has an embed tag
+        val untaggedTokens = assertTokenizesTo(
+            "%\r\n  content\r\n%%",
+            listOf(EMBED_OPEN_DELIM, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            testGapFreeLexing = true
+        )
+        assertEquals("\r\n", untaggedTokens[1].lexeme.text)
+
+        val taggedTokens = assertTokenizesTo(
+            "%sql\r\n  content\r\n%%",
+            listOf(EMBED_OPEN_DELIM, EMBED_TAG, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            testGapFreeLexing = true
+        )
+        assertEquals("sql", taggedTokens[1].lexeme.text)
+        assertEquals("\r\n", taggedTokens[2].lexeme.text)
+
+        assertTokenizesTo(
+            "% \r\n  content\r\n%%",
+            listOf(EMBED_OPEN_DELIM, WHITESPACE, EMBED_PREAMBLE_NEWLINE, EMBED_CONTENT, EMBED_CLOSE_DELIM),
+            testGapFreeLexing = true
+        )
+
+        // a lone `\r` is not a line ending, but it is still whitespace between tokens, as in JSON
+        assertTokenizesTo(
+            "[1,\r2]",
+            listOf(SQUARE_BRACKET_L, NUMBER, COMMA, WHITESPACE, NUMBER, SQUARE_BRACKET_R),
+            testGapFreeLexing = true
+        )
+    }
+
+    @Test
     fun testHashInEmbedTag() {
         assertTokenizesTo(
             "%%# should not be a comment",
