@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonJvmTarget
 import org.kson.KsonVersion
-import org.kson.releaseArtifactsDir
+import org.kson.ReleaseArtifactSet
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -137,29 +137,27 @@ tasks {
     }
 }
 
-/**
- * Empties [releaseArtifactsDir] so each run stages a release from scratch.
- */
-tasks.register<Delete>("cleanReleaseArtifacts") {
-    group = "distribution"
-    description = "Empties build/release-artifacts so each run stages a release from scratch"
+ReleaseArtifactSet.entries.forEach { artifactSet ->
+    val stagingDir = artifactSet.stagingDir(project)
 
-    delete(releaseArtifactsDir)
-}
+    tasks.register<Delete>(artifactSet.cleanTaskName) {
+        group = "distribution"
+        description = "Empties ${relativePath(stagingDir)} so each run stages its artifacts from scratch"
 
-/**
- * Stages this platform's release archives, each with a `.sha256`, in [releaseArtifactsDir].
- */
-val packageReleaseArtifacts = tasks.register<Checksum>("packageReleaseArtifacts") {
-    group = "distribution"
-    description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
+        delete(stagingDir)
+    }
 
-    dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
-    inputFiles.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
-    outputDirectory.set(releaseArtifactsDir)
+    tasks.register<Checksum>(artifactSet.packageTaskName) {
+        group = "distribution"
+        description = "Stage release artifacts, with checksums, in ${relativePath(stagingDir)}"
 
-    checksumAlgorithm.set(Checksum.Algorithm.SHA256)
-    appendFileNameToChecksum.set(true)
+        dependsOn(artifactSet.stagingTaskPaths)
+        inputFiles.from(stagingDir.map { it.asFileTree.matching { exclude("*.sha256") } })
+        outputDirectory.set(stagingDir)
+
+        checksumAlgorithm.set(Checksum.Algorithm.SHA256)
+        appendFileNameToChecksum.set(true)
+    }
 }
 
 group = "org.kson"

@@ -56,7 +56,7 @@ commands:
 
       - run:
           name: "Package release artifacts"
-          command: "./gradlew --no-daemon packageReleaseArtifacts"
+          command: "./gradlew --no-daemon packageNativeArtifacts"
 
       - run:
           name: "Verify clean checkout"
@@ -257,7 +257,7 @@ jobs:
       # Cross-platform Gradle tasks
       - "gradle-core-tasks"
       - "store-release-artifacts":
-          path: "build/release-artifacts"
+          path: "build/release-artifacts/native"
           platform: "windows-amd64"
 
       - "save-gradle-caches":
@@ -296,7 +296,7 @@ jobs:
       # Cross-platform Gradle tasks
       - "gradle-core-tasks"
       - "store-release-artifacts":
-          path: "build/release-artifacts"
+          path: "build/release-artifacts/native"
           platform: "linux-amd64"
 
       - "save-gradle-build-cache"
@@ -325,7 +325,7 @@ jobs:
       # Cross-platform Gradle tasks
       - "gradle-core-tasks"
       - "store-release-artifacts":
-          path: "build/release-artifacts"
+          path: "build/release-artifacts/native"
           platform: "macos-arm64"
 
       - "save-gradle-caches":

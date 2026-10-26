@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.GraalVmHelper
 import org.kson.KsonJvmTarget
+import org.kson.NpmPack
+import org.kson.ReleaseArtifactSet
 import org.kson.UniversalJsPackage
-import org.kson.releaseArtifactsDir
 
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -209,6 +210,16 @@ tasks.register("buildUniversalJsPackage") {
     }
 }
 
+tasks.register<PixiExecTask>("packageReleaseNpmTarball") {
+    group = "distribution"
+    description = "Packs the universal JS package for release into the root project's release-artifacts/portable directory"
+
+    dependsOn("buildUniversalJsPackage")
+    val jsPackageDir = layout.buildDirectory.dir("js-package").get().asFile
+    val tarballName = NpmPack.tarballName(UniversalJsPackage.NAME, version.toString())
+    NpmPack.packIntoReleaseArtifacts(this, ReleaseArtifactSet.PORTABLE, jsPackageDir, tarballName)
+}
+
 mavenPublishing {
     publishToMavenCentral(automaticRelease = false)
     signAllPublications()
@@ -335,7 +346,7 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
  */
 tasks.register<Tar>("packageReleaseArchive") {
     group = "distribution"
-    description = "Archives the native kson-lib for release into the root project's release-artifacts directory"
+    description = "Archives the native kson-lib for release into the root project's release-artifacts/native directory"
 
     // take the whole directory: `buildWithGraalVmNativeImage` declares only the library as its
     // output, and the archive needs the headers beside it
@@ -348,7 +359,5 @@ tasks.register<Tar>("packageReleaseArchive") {
 
     compression = Compression.GZIP
     archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("kson-lib-shared"))
-    // the shared directory is emptied before each run stages into it, so wait for that to happen
-    dependsOn(":cleanReleaseArtifacts")
-    destinationDirectory.set(releaseArtifactsDir)
+    destinationDirectory.set(ReleaseArtifactSet.NATIVE.stageInto(this))
 }

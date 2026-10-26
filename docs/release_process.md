@@ -79,8 +79,8 @@ stores them into `release-artifacts/<platform>` on its **Artifacts** tab:
 Every archive has its checksum beside it, as `<archive>.sha256`. Download both and check the
 archive with `shasum -a 256 -c <archive>.sha256` (or `sha256sum -c`).
 
-`./gradlew packageReleaseArtifacts` produces the same files locally for the platform you are on,
-in `build/release-artifacts`. It needs GraalVM, which the task pulls in via pixi.
+`./gradlew packageNativeArtifacts` produces the same files locally for the platform you are on,
+in `build/release-artifacts/native`. It needs GraalVM, which the task pulls in via pixi.
 
 Only `build-linux-amd64` runs on every push; the rest run on pushes to a `release/X.Y.Z`
 branch and in a weekly scheduled run on `main`. Take a release's artifacts from the CI run on
