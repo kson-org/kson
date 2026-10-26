@@ -303,6 +303,39 @@ private fun isTrailingContent(nextNode: AstNode?): Boolean {
 }
 
 /**
+ * Whether any element of [nodes] has comments to render when transpiled
+ */
+private fun hasCommentsToRender(nodes: List<AstNode>, compileTarget: CompileTarget): Boolean {
+    return nodes.any { hasCommentsToRender(it, compileTarget) }
+}
+
+/**
+ * Whether [node] has comments to render when transpiled
+ */
+private fun hasCommentsToRender(node: AstNode?, compileTarget: CompileTarget): Boolean {
+    return compileTarget.preserveComments && node is Documented && node.comments.isNotEmpty()
+}
+
+/**
+ * The [FormattingStyle.COMPACT] source for [objectNode] wrapped in the `{}` that make its bounds explicit, opening
+ * on a fresh line when comments break its properties across several so that they all start at the same column.
+ */
+private fun delimitedCompactObject(
+    objectNode: ObjectNode,
+    indent: Indent,
+    compileTarget: CompileTarget
+): String {
+    if (objectNode.properties.isEmpty()) {
+        // an empty object writes its own `{}`
+        return objectNode.toSourceWithNext(indent, null, compileTarget)
+    }
+
+    val opening = Delimiters.CurlyBraces.open +
+            if (hasCommentsToRender(objectNode.properties, compileTarget)) "\n" else ""
+    return opening + objectNode.toSourceWithNext(indent, null, compileTarget) + Delimiters.CurlyBraces.close
+}
+
+/**
  * The "style" of bounds used to denote an [ObjectNode] or [ListNode]: [PLAIN] for undelimited structures,
  * [DELIMITED] for delimited structures.
  *
@@ -344,13 +377,16 @@ class ObjectNode(
 
     private fun formatCompactObject(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
         val outputObject = properties.withIndex().joinToString("") { (index, property) ->
-            val nodeAfterThisChild = properties.getOrNull(index + 1) ?: nextNode
-            val result = property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
+            val nextProperty = properties.getOrNull(index + 1)
+            val nodeAfterThisChild = nextProperty ?: nextNode
+            val propertyStartsLine = index > 0 && hasCommentsToRender(property, compileTarget)
+            val result = (if (propertyStartsLine) "\n" else "") +
+                    property.toSourceWithNext(indent, nodeAfterThisChild, compileTarget)
 
             // Only add space after this property if not using a space could result in ambiguity with the next node
             val needsSpace = index < properties.size - 1 &&
                     property is ObjectPropertyNodeImpl &&
-                    result.last() != '\n' &&
+                    !hasCommentsToRender(nextProperty, compileTarget) &&
                     when (property.value) {
                         is QuotedStringNode -> {
                             StringUnquoted.isUnquotable(property.value.rawStringContent)
@@ -465,27 +501,12 @@ class ObjectPropertyNodeImpl(
     }
 
     private fun compactObjectProperty(indent: Indent, nextNode: AstNode?, compileTarget: CompileTarget): String {
-        // A comment always needs to start on a new line. This can happen either when the first property or the next
-        // node is commented.
-        val firstPropertyHasComments = if (value !is ObjectNode) {
-            false
+        val valueSource = if (value is ObjectNode && hasCommentsToRender(value.properties, compileTarget)) {
+            delimitedCompactObject(value, indent, compileTarget)
         } else {
-            when (val firstProperty = value.properties.firstOrNull()) {
-                is ObjectPropertyNodeImpl -> firstProperty.comments.isNotEmpty()
-                null -> false
-                else -> false
-            }
+            value.toSourceWithNext(indent, nextNode, compileTarget)
         }
-        val nextNodeHasComments = (nextNode is Documented && nextNode.comments.isNotEmpty())
-
-        return key.toSourceWithNext(indent, value, compileTarget) +
-                if (firstPropertyHasComments) {
-                    "\n"
-                } else {
-                    ""
-                } +
-                value.toSourceWithNext(indent, nextNode, compileTarget) +
-                if (nextNodeHasComments) "\n" else ""
+        return key.toSourceWithNext(indent, value, compileTarget) + valueSource
     }
 }
 
@@ -557,47 +578,46 @@ class ListNode(
         compileTarget: CompileTarget,
         listDelimiters: Delimiters
     ): String {
+        val listSpansLines = hasCommentsToRender(elements, compileTarget)
+        val listOpening = listDelimiters.open + if (listSpansLines) "\n" else ""
+
         return elements.withIndex().joinToString(
             "",
-            prefix = listDelimiters.open.toString(),
+            prefix = listOpening,
             postfix = listDelimiters.close.toString()
         ) { (index, element) ->
             val nodeAfterThisChild = elements.getOrNull(index + 1) ?: nextNode
-            val elementString = if (element is Documented && element.comments.isNotEmpty()) {
-                "\n"
+            // a comment opens a line for the element it documents, unless the list's own opening break just did
+            val elementOpensALine = hasCommentsToRender(element, compileTarget)
+                    && !(index == 0 && listSpansLines)
+            val elementSource = (if (elementOpensALine) "\n" else "") +
+                    element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
+
+            if (index < elements.size - 1) {
+                separatedFromNextCompactElement(elementSource, element, nodeAfterThisChild, compileTarget)
             } else {
-                ""
-            } + element.toSourceWithNext(indent.clone(hanging = true), nodeAfterThisChild, compileTarget)
-
-
-            val isNotLastElement = index < elements.size - 1
-
-            // Extract current and next element values for type checking
-            val currentValue = (element as? ListElementNodeImpl)?.value
-            val currentIsObject = currentValue is ObjectNode
-            val nextIsObject = (nodeAfterThisChild as? ListElementNodeImpl)?.value is ObjectNode
-
-            // Determine formatting based on context
-            when {
-                // Both objects need a separator when both are non-empty
-                (isNotLastElement && currentIsObject && nextIsObject) -> {
-                    val currentIsEmptyObject = currentValue.properties.isEmpty()
-                    if (currentIsEmptyObject) {
-                        // Empty objects already have braces, don't wrap them
-                        "$elementString "
-                    } else {
-                        // Non-empty objects need to be wrapped to separate from the next object
-                        "${Delimiters.CurlyBraces.open}$elementString${Delimiters.CurlyBraces.close}"
-                    }
-                }
-
-                // Add space between elements in a list, except when the element is a list
-                isNotLastElement && element is ListElementNodeImpl && element.value !is ListNode -> {
-                    "$elementString "
-                }
-
-                else -> elementString
+                elementSource
             }
+        }
+    }
+
+    /**
+     * Get [elementSource] rendered so it can sit beside the element that follows it in [FormattingStyle.COMPACT]
+     * output, where nothing but the elements themselves marks where one ends and the next begins
+     */
+    private fun separatedFromNextCompactElement(
+        elementSource: String,
+        element: ListElementNode,
+        nextElement: AstNode?,
+        compileTarget: CompileTarget
+    ): String {
+        val elementValue = (element as? ListElementNodeImpl)?.value ?: return elementSource
+        val elementClosesItself = elementValue is ObjectNode || elementValue is ListNode
+
+        return if (elementClosesItself || hasCommentsToRender(nextElement, compileTarget)) {
+            elementSource
+        } else {
+            "$elementSource "
         }
     }
 
@@ -627,7 +647,12 @@ class ListElementNodeImpl(val value: KsonValueNode,
             is Kson -> {
                 when (compileTarget.formatConfig.formattingStyle) {
                     PLAIN, DELIMITED -> formatWithDash(indent, nextNode, compileTarget)
-                    COMPACT, CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
+                    COMPACT -> if (value is ObjectNode) {
+                        delimitedCompactObject(value, indent, compileTarget)
+                    } else {
+                        value.toSourceWithNext(indent, nextNode, compileTarget)
+                    }
+                    CLASSIC -> value.toSourceWithNext(indent, nextNode, compileTarget)
                 }
             }
 
