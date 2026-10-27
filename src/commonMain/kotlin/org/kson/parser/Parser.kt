@@ -55,6 +55,15 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
     }
 
     /**
+     * The closing token of a delimited value
+     */
+    private enum class CloserToken(val tokenType: TokenType) {
+        CURLY_BRACE(CURLY_BRACE_R),
+        ANGLE_BRACKET(ANGLE_BRACKET_R),
+        SQUARE_BRACKET(SQUARE_BRACKET_R)
+    }
+
+    /**
      * root -> ksonValue <end-of-file>
      */
     fun parse() {
@@ -65,7 +74,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
 
         val rootMarker = builder.mark()
         try {
-            val containsKsonValue = ksonValue()
+            val containsKsonValue = ksonValue(closer = null)
             handleUnexpectedTrailingContent(containsKsonValue)
             if (!builder.eof()) {
                 /**
@@ -90,13 +99,16 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      * ksonValue -> plainObject
      *           | dashList
      *           | delimitedValue
+     *
+     * @param closer the [CloserToken] of the innermost delimited value being parsed or null outside any delimited value.
      */
-    private fun ksonValue(): Boolean = plainObject() || dashList() || delimitedValue()
+    private fun ksonValue(closer: CloserToken?): Boolean =
+        plainObject(closer) || dashList(closer) || delimitedValue(closer)
 
     /**
      * plainObject -> (keyword ksonValue)+ "."?
      */
-    private fun plainObject(): Boolean = nestingTracker.nest {
+    private fun plainObject(closer: CloserToken?): Boolean = nestingTracker.nest {
         val objectMark = builder.mark()
         var foundProperties = false
 
@@ -105,7 +117,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val keywordMark = builder.mark()
             if (keyword()) {
                 foundProperties = true
-                parseValueForKeyword(keywordMark)
+                parseValueForKeyword(keywordMark, closer)
                 propertyMark.done(OBJECT_PROPERTY)
             } else {
                 keywordMark.drop()
@@ -156,15 +168,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             val keywordMark = builder.mark()
             if (keyword()) {
                 foundProperties = true
-
-                if (builder.getTokenType() == CURLY_BRACE_R) {
-                    // object got closed before giving this keyword a value
-                    keywordMark.error(OBJECT_KEY_NO_VALUE.create())
-                    propertyMark.done(OBJECT_PROPERTY)
-                    break
-                }
-
-                parseValueForKeyword(keywordMark)
+                parseValueForKeyword(keywordMark, closer = CloserToken.CURLY_BRACE)
                 val hasTrailingComma = builder.getTokenType() == COMMA
                 if (hasTrailingComma) {
                     builder.advanceLexer()
@@ -194,10 +198,10 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *
      * NOTE: this method resolves the given [keywordMark] [AstMarker]
      */
-    private fun parseValueForKeyword(keywordMark: AstMarker) {
+    private fun parseValueForKeyword(keywordMark: AstMarker, closer: CloserToken?) {
         val valueMark = builder.mark()
 
-        if (!ksonValue()) {
+        if (!ksonValue(closer)) {
             // if we don't have a value, we're malformed
             valueMark.rollbackTo()
             keywordMark.error(OBJECT_KEY_NO_VALUE.create())
@@ -214,7 +218,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *
      * Note: we combine these two grammar rules here to minimize code duplication, disambiguating by [isDelimited]
      */
-    private fun dashList(isDelimited: Boolean = false): Boolean = nestingTracker.nest {
+    private fun dashList(closer: CloserToken?, isDelimited: Boolean = false): Boolean = nestingTracker.nest {
         if (builder.getTokenType() != LIST_DASH) {
             return@nest false
         }
@@ -227,7 +231,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
             // advance past the LIST_DASH
             builder.advanceLexer()
 
-            if (ksonValue()) {
+            if (ksonValue(closer)) {
                 // this LIST_DASH is not dangling
                 listElementMark.done(LIST_ELEMENT)
             } else {
@@ -292,7 +296,12 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
      *                 | literal
      *                 | embedBlock
      */
-    private fun delimitedValue(): Boolean {
+    private fun delimitedValue(closer: CloserToken?): Boolean {
+        if (closer != null && builder.getTokenType() == closer.tokenType) {
+            // this closes the innermost delimited value we're parsing, so it isn't a stray closer
+            return false
+        }
+
         if (builder.getTokenType() == CURLY_BRACE_R) {
             val badCloseBrace = builder.mark()
             builder.advanceLexer()
@@ -403,7 +412,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         // consume our ANGLE_BRACKET_L
         builder.advanceLexer()
 
-        dashList(true)
+        dashList(closer = CloserToken.ANGLE_BRACKET, isDelimited = true)
 
         if (builder.getTokenType() == ANGLE_BRACKET_R) {
             builder.advanceLexer()
@@ -449,7 +458,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
         while (builder.getTokenType() != SQUARE_BRACKET_R && !builder.eof()) {
             val listElementMark = builder.mark()
 
-            if (!ksonValue()) {
+            if (!ksonValue(closer = CloserToken.SQUARE_BRACKET)) {
                 val invalidElementMark = builder.mark()
 
                 var containsInvalidElement = false
@@ -687,7 +696,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 val unexpectedContentMark = builder.mark()
 
                 // try to parse a kson value, or consume a token if we can't
-                if (!ksonValue()) {
+                if (!ksonValue(closer = null)) {
                     builder.advanceLexer()
                 }
 
