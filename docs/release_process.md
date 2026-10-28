@@ -81,6 +81,15 @@ on its **Artifacts** tab:
 A `<file>.sha256` beside an artifact holds its checksum. Download both and check the artifact with
 `shasum -a 256 -c <file>.sha256` (or `sha256sum -c`).
 
+[`.circleci/download-release-artifacts.sh`](../.circleci/download-release-artifacts.sh) downloads
+every job's artifacts of one run into `release-artifacts/<destination>/` under the current
+directory and checks the checksums. It needs the CircleCI CLI (1.11 or newer), logged in with
+`circleci auth login`:
+
+```bash
+.circleci/download-release-artifacts.sh release/X.Y.Z
+```
+
 `./gradlew packageNativeArtifacts` produces the same files locally for the platform you are on,
 in `build/release-artifacts/native`. It needs GraalVM, which the task pulls in via pixi.
 `./gradlew packagePortableArtifacts` produces the `portable` ones, in
