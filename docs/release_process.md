@@ -78,27 +78,17 @@ on its **Artifacts** tab:
 | `build-python-wheel-macos` | `release-artifacts/python-macos-arm64` | `kson_lang-*.whl` |
 | `build-python-wheel-windows` | `release-artifacts/python-windows-amd64` | `kson_lang-*.whl` |
 
-A `<file>.sha256` beside an artifact holds its checksum. Download both and check the artifact with
-`shasum -a 256 -c <file>.sha256` (or `sha256sum -c`).
-
 [`.circleci/download-release-artifacts.sh`](../.circleci/download-release-artifacts.sh) downloads
-every job's artifacts of one run into `release-artifacts/<destination>/` under the current
-directory and checks the checksums. It needs the CircleCI CLI (1.11 or newer), logged in with
-`circleci auth login`:
+every job's artifacts of a branch's latest run into `release-artifacts/<destination>/` under the
+current directory and verifies each `.sha256`. It needs the CircleCI CLI (1.11 or newer), logged in
+with `circleci auth login`:
 
 ```bash
 .circleci/download-release-artifacts.sh release/X.Y.Z
 ```
 
-`./gradlew packageNativeArtifacts` produces the same files locally for the platform you are on,
-in `build/release-artifacts/native`. It needs GraalVM, which the task pulls in via pixi.
-`./gradlew packagePortableArtifacts` produces the `portable` ones, in
-`build/release-artifacts/portable`.
-
-Only `build-linux-amd64` runs on every push; the rest run on pushes to a `release/X.Y.Z`
-branch and in a weekly scheduled run on `main`. Take a release's artifacts from the CI run on
-its own `release/X.Y.Z` branch; other runs build development versions. Any branch can run them
-on demand through the `run-release-targets` pipeline parameter in [`.circleci/config.kson`](../.circleci/config.kson).
+Take a release's artifacts from the CI run on its own `release/X.Y.Z` branch; other runs build
+development versions.
 
 #### [kson-lib](../kson-lib) Publishing Process
 
@@ -167,10 +157,8 @@ https://github.com/kson-org/kson-binaries/releases/download/kson-lib-{KSON_LIB_V
 ##### Step 1: Cut the `kson-binaries` release
 
 CI builds these archives under the names the download URL needs, so they need no repackaging.
-The three `build-*` jobs of this release's CI run store them under
-`release-artifacts/<platform>` on each job's **Artifacts** tab (see
-[Release artifacts built by CircleCI](#release-artifacts-built-by-circleci) for everything those
-jobs store):
+The three `build-*` jobs of this release's CI run store them under `release-artifacts/<platform>`
+(see [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci) to download them):
 
 | CircleCI job | Release asset |
 | --- | --- |
@@ -188,45 +176,28 @@ combination we do not ship must set `KSON_ROOT_SOURCE_DIR` or `KSON_PREBUILT_BIN
 1. Confirm `KSON_LIB_VERSION` in [build.rs](../lib-rust/kson-sys/build.rs) matches the tag you
    are about to create. **If they disagree, every downstream `cargo build` 404s.**
 
-2. Download one archive and its `.sha256` from each job's **Artifacts** tab:
+2. Sanity-check a tarball on your own platform before uploading:
 
    ```bash
-   mkdir -p /tmp/kson-binaries && cd /tmp/kson-binaries
-   # save the three archives here, each with its .sha256:
-   #   kson-lib-shared-amd64-linux.tar.gz
-   #   kson-lib-shared-arm64-macos.tar.gz
-   #   kson-lib-shared-amd64-windows.tar.gz
-   ```
-
-   Check all three against their checksums:
-
-   ```bash
-   shasum -a 256 -c kson-lib-shared-*.tar.gz.sha256
+   mkdir -p /tmp/kson-verify
+   tar -xzf release-artifacts/macos-arm64/kson-lib-shared-arm64-macos.tar.gz -C /tmp/kson-verify
+   env -u KSON_ROOT_SOURCE_DIR KSON_PREBUILT_BIN_DIR=/tmp/kson-verify \
+       cargo build --manifest-path lib-rust/kson/Cargo.toml
    ```
 
    Each archive holds its platform's native-image output, the shared library and its headers,
    flat at the archive root. Every file in it is platform-specific, so never mix files between
    archives.
 
-3. Sanity-check a tarball on your own platform before uploading:
+3. Create the release and upload all three assets:
 
    ```bash
-   mkdir -p /tmp/kson-verify
-   tar -xzf /tmp/kson-binaries/kson-lib-shared-arm64-macos.tar.gz -C /tmp/kson-verify
-   env -u KSON_ROOT_SOURCE_DIR KSON_PREBUILT_BIN_DIR=/tmp/kson-verify \
-       cargo build --manifest-path lib-rust/kson/Cargo.toml
-   ```
-
-4. Create the release and upload all three assets:
-
-   ```bash
-   cd /tmp/kson-binaries
    gh release create kson-lib-X.Y.Z \
        --repo kson-org/kson-binaries \
        --title kson-lib-X.Y.Z \
-       kson-lib-shared-amd64-linux.tar.gz \
-       kson-lib-shared-amd64-windows.tar.gz \
-       kson-lib-shared-arm64-macos.tar.gz
+       release-artifacts/linux-amd64/kson-lib-shared-amd64-linux.tar.gz \
+       release-artifacts/windows-amd64/kson-lib-shared-amd64-windows.tar.gz \
+       release-artifacts/macos-arm64/kson-lib-shared-arm64-macos.tar.gz
    ```
 
 ##### Step 2: Verify the download path
@@ -289,14 +260,12 @@ The KSON JavaScript/TypeScript library is published to npm as `@kson_org/kson` w
 
 ##### Publishing Steps
 
-1. Download `kson_org-kson-X.Y.Z.tgz` and its `.sha256` from `release-artifacts/portable` in the
-   `build-linux-amd64` job of this release's CI run, and check it (see
-   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
+1. Take `kson_org-kson-X.Y.Z.tgz` from `release-artifacts/portable/`
 
 2. Publish to npm:
    ```bash
    npm login
-   npm publish kson_org-kson-X.Y.Z.tgz --access=public
+   npm publish release-artifacts/portable/kson_org-kson-X.Y.Z.tgz --access=public
    ```
 
 3. Verify the package is available at: https://www.npmjs.com/package/@kson_org/kson
@@ -313,20 +282,15 @@ The Python package is published to PyPI as `kson-lang` using platform-specific w
 
 1. Ensure you've checked out **the tag to be released and that `git status` is clean**
 
-2. Download `kson_lang-X.Y.Z.tar.gz` and its `.sha256` from `release-artifacts/portable` in the
-   `build-linux-amd64` job of this release's CI run, and check it (see
-   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci)). Copy just the
-   `.tar.gz` into the `lib-python/dist/` directory
+2. Copy `kson_lang-X.Y.Z.tar.gz` from `release-artifacts/portable/` into the `lib-python/dist/`
+   directory
 
    This archive is source only: it carries no native library and cannot build one, so nobody
    installs from it. It puts the source on PyPI; every installable artifact is a wheel from
    step 3.
 
-3. Download the pre-built wheels from the CircleCI `build-python-wheel-*` jobs for this tag:
-   - Take them from each job's `release-artifacts/python-*` destination (see
-     [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci)); they will
-     download as `.zip` files
-   - Copy all wheels into the `lib-python/dist/` directory
+3. Copy the pre-built wheels from `release-artifacts/python-*/` (one per `build-python-wheel-*`
+   job) into the `lib-python/dist/` directory
 
 4. Upload to PyPI using `twine`:
    ```bash
@@ -358,9 +322,7 @@ The KSON language support includes VSCode extensions published to both the Visua
 
 ##### Publishing Steps
 
-1. Download `vscode-kson-plugin.vsix` and its `.sha256` from `release-artifacts/portable` in the
-   `build-linux-amd64` job of this release's CI run, and check it (see
-   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
+1. Take `vscode-kson-plugin.vsix` from `release-artifacts/portable/`
 
 2. Publish to VS Code Marketplace:
    - Login to https://marketplace.visualstudio.com with GitHub
@@ -386,14 +348,12 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 
 ##### Publishing Steps
 
-1. Download `kson_org-monaco-editor-X.Y.Z.tgz` and its `.sha256` from `release-artifacts/portable`
-   in the `build-linux-amd64` job of this release's CI run, and check it (see
-   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
+1. Take `kson_org-monaco-editor-X.Y.Z.tgz` from `release-artifacts/portable/`
 
 2. Check what will be published:
    ```bash
-   tar tzf kson_org-monaco-editor-X.Y.Z.tgz # should list package/dist/ and package/dist-iframe/
-   tar xzOf kson_org-monaco-editor-X.Y.Z.tgz package/package.json # should have no "dependencies", and "devDependencies" linking two other kson projects
+   tar tzf release-artifacts/portable/kson_org-monaco-editor-X.Y.Z.tgz # should list package/dist/ and package/dist-iframe/
+   tar xzOf release-artifacts/portable/kson_org-monaco-editor-X.Y.Z.tgz package/package.json # should have no "dependencies", and "devDependencies" linking two other kson projects
    ```
 
    The bundle inlines `@kson/lsp-shared` and `kson-language-server`, which is why they are
@@ -403,7 +363,7 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 3. Publish to npm:
    ```bash
    npm login
-   npm publish kson_org-monaco-editor-X.Y.Z.tgz --access=public
+   npm publish release-artifacts/portable/kson_org-monaco-editor-X.Y.Z.tgz --access=public
    ```
 
 4. Verify the package:
@@ -418,9 +378,7 @@ The Monaco editor integration is published to npm as `@kson_org/monaco-editor`.
 
 Note: it is possible to automate this process us some Gradle tasks provided by the [IntelliJ Platform Gradle Plugin](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), if/when this manual process become onerous.
 
-1. Download `kson-language-X.Y.Z.zip` and its `.sha256` from `release-artifacts/portable` in the
-   `build-linux-amd64` job of this release's CI run, and check it (see
-   [Release artifacts built by CircleCI](#release-artifacts-built-by-circleci))
+1. Take `kson-language-X.Y.Z.zip` from `release-artifacts/portable/`
 
 2. Manually upload to JetBrains Marketplace:
   - Go to https://plugins.jetbrains.com/plugin/28510-kson-language and ensure you are logged in as a "Developer" of of the plugin.
