@@ -89,7 +89,7 @@ in `build/release-artifacts/native`. It needs GraalVM, which the task pulls in v
 Only `build-linux-amd64` runs on every push; the rest run on pushes to a `release/X.Y.Z`
 branch and in a weekly scheduled run on `main`. Take a release's artifacts from the CI run on
 its own `release/X.Y.Z` branch; other runs build development versions. Any branch can run them
-on demand through the `run-*` pipeline parameters in [`.circleci/config.kson`](../.circleci/config.kson).
+on demand through the `run-release-targets` pipeline parameter in [`.circleci/config.kson`](../.circleci/config.kson).
 
 #### [kson-lib](../kson-lib) Publishing Process
 

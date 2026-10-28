@@ -6,21 +6,12 @@ orbs:
   # Windows support for testing Python on Windows
   windows: 'circleci/windows@5.1.1'
   .
-# Run any mix of these targets on any branch by triggering a pipeline through the CircleCI API, e.g.
+# Run the build-release-targets workflow on any branch by triggering a pipeline through the CircleCI API, e.g.
 #   POST https://circleci.com/api/v2/project/gh/kson-org/kson/pipeline
 #   Circle-Token: <personal API token>
-#   {"branch": "my-branch", "parameters": {"run-windows": true, "run-python": true}}
-# A pipeline that turns any of them on runs just those targets, leaving build-all and build-release-targets off.
+#   {"branch": "my-branch", "parameters": {"run-release-targets": true}}
 parameters:
-  'run-windows':
-    type: boolean
-    default: false
-    .
-  'run-macos':
-    type: boolean
-    default: false
-    .
-  'run-python':
+  'run-release-targets':
     type: boolean
     default: false
     .
@@ -516,35 +507,17 @@ jobs:
 workflows:
   version: 2
   'build-linux':
-    when: 'not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)'
     jobs:
       - 'build-linux-amd64'
     .
-  # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
+  # Run on pushes to the release/X.Y.Z branch, during the weekly schedule trigger on main (CircleCI project settings),
+  # and on demand through the run-release-targets parameter
   # keep in sync with the release branch pattern in gradle-core-tasks
   'build-release-targets':
-    when: '(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == "schedule") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)'
+    when: 'pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == "schedule" or pipeline.parameters.run-release-targets'
     jobs:
       - 'build-windows-amd64'
       - 'build-macos-arm64'
-      - 'test-python-sdist'
-      - 'build-python-wheel-linux-amd64'
-      - 'build-python-wheel-macos'
-      - 'build-python-wheel-windows'
-    .
-  'on-demand-windows':
-    when: 'pipeline.parameters.run-windows'
-    jobs:
-      - 'build-windows-amd64'
-    .
-  'on-demand-macos':
-    when: 'pipeline.parameters.run-macos'
-    jobs:
-      - 'build-macos-arm64'
-    .
-  'on-demand-python':
-    when: 'pipeline.parameters.run-python'
-    jobs:
       - 'test-python-sdist'
       - 'build-python-wheel-linux-amd64'
       - 'build-python-wheel-macos'
