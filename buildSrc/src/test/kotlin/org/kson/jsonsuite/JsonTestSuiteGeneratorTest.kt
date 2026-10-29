@@ -1,10 +1,17 @@
 package org.kson.jsonsuite
 
 import jsonTestSuiteSHA
+import org.eclipse.jgit.api.Git
 import schemaTestSuiteSHA
+import java.nio.file.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class JsonTestSuiteGeneratorTest {
@@ -53,4 +60,120 @@ class JsonTestSuiteGeneratorTest {
             "generated test file should start with configured package declaration"
         )
     }
+
+    @Test
+    fun excludingADraft2020_12TestLeavesTheSameNamedDraft7TestEnabled() {
+        val generated = generateFromFixtureSuite(
+            exclusions = mapOf(SchemaDraft.DRAFT_2020_12 to setOf("shared::group::test"))
+        )
+
+        assertTrue(generated.draft2020_12.disablesItsTest(), "the excluded 2020-12 test should be disabled")
+        assertFalse(generated.draft7.disablesItsTest(), "the same-named draft 7 test should still run")
+    }
+
+    @Test
+    fun excludingADraft7TestLeavesTheSameNamed2020_12TestEnabled() {
+        val generated = generateFromFixtureSuite(
+            exclusions = mapOf(SchemaDraft.DRAFT_7 to setOf("shared::group::test"))
+        )
+
+        assertTrue(generated.draft7.disablesItsTest(), "the excluded draft 7 test should be disabled")
+        assertFalse(generated.draft2020_12.disablesItsTest(), "the same-named 2020-12 test should still run")
+    }
+
+    @Test
+    fun aMistypedExclusionFailsGeneration() {
+        val error = assertFailsWith<RuntimeException> {
+            generateFromFixtureSuite(
+                exclusions = mapOf(SchemaDraft.DRAFT_2020_12 to setOf("shared::group::test", "shared::group::tset"))
+            )
+        }
+
+        assertEquals(
+            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+                    "\"shared::group::tset\"",
+            error.message
+        )
+    }
+
+    @Test
+    fun excludingADraft7OnlyTestFrom2020_12FailsGeneration() {
+        val error = assertFailsWith<RuntimeException> {
+            generateFromFixtureSuite(
+                exclusions = mapOf(SchemaDraft.DRAFT_2020_12 to setOf("draft7Only::group::test"))
+            )
+        }
+
+        assertEquals(
+            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+                    "\"draft7Only::group::test\"",
+            error.message
+        )
+    }
+
+    private class SharedTestClasses(val draft7: String, val draft2020_12: String)
+
+    /**
+     * Generates tests from a suite in which both drafts have the test `shared::group::test` and only Draft 7 has
+     * `draft7Only::group::test`, applying only the given [exclusions] and returning the classes generated for
+     * `shared`.  The suites are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in
+     * place rather than cloning), so unlike [testGenerate] this needs no network.
+     */
+    private fun generateFromFixtureSuite(exclusions: Map<SchemaDraft, Set<String>>): SharedTestClasses {
+        val tempDirectory = createTempDirectory("JsonTestSuiteGeneratorTest")
+
+        // the generator insists that the JSONTestSuite has every file named in its edit list
+        val jsonSuiteSHA = commitFixtureRepo(
+            tempDirectory.resolve("JSONTestSuite"),
+            JsonTestSuiteEditList.all().associate { "test_parsing/$it" to "[]" }
+        )
+
+        val schemaTestFile = """
+            [
+                {
+                    "description": "group",
+                    "schema": { "type": "string" },
+                    "tests": [{ "description": "test", "data": "a string", "valid": true }]
+                }
+            ]
+        """.trimIndent()
+        val schemaSuiteSHA = commitFixtureRepo(
+            tempDirectory.resolve("JSON-Schema-Test-Suite"),
+            SchemaDraft.entries.associate { "tests/${it.folderName}/shared.json" to schemaTestFile } +
+                    ("tests/${SchemaDraft.DRAFT_7.folderName}/draft7Only.json" to schemaTestFile)
+        )
+
+        val generator = JsonTestSuiteGenerator(
+            JsonSuiteGitCheckout(jsonSuiteSHA, tempDirectory),
+            SchemaSuiteGitCheckout(schemaSuiteSHA, tempDirectory),
+            tempDirectory,
+            tempDirectory,
+            "org.json.parser.json.generated.TEST",
+            exclusions
+        )
+        generator.generate()
+
+        return SharedTestClasses(
+            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_7.testClassPrefix}_shared.kt").readText(),
+            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_2020_12.testClassPrefix}_shared.kt").readText()
+        )
+    }
+
+    /**
+     * Commits [files] (keyed by path relative to the repo) into a new git repo at [repoDir], returning the commit SHA
+     */
+    private fun commitFixtureRepo(repoDir: Path, files: Map<String, String>): String {
+        Git.init().setDirectory(repoDir.toFile()).call().use { git ->
+            files.forEach { (path, content) ->
+                repoDir.resolve(path).apply { parent.createDirectories() }.writeText(content)
+            }
+            git.add().addFilepattern(".").call()
+            return git.commit().setMessage("fixture").setSign(false).setNoVerify(true).call().name
+        }
+    }
+
+    /**
+     * An excluded test is generated with an early `return` ahead of its assertion
+     */
+    private fun String.disablesItsTest() = lines().any { it.trim() == "return" }
 }
