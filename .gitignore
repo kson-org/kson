@@ -45,3 +45,6 @@ pixiw.bat
 
 # auto-generated from detekt.kson by transpileDetektConfigTask
 detekt.yml
+
+# download-release-artifacts.sh output
+/release-artifacts/
