@@ -28,11 +28,11 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **kotlinx-serialization-json**
   - pinned in: [`build.gradle.kts`](../build.gradle.kts), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) and [`native-tests/build.gradle.kts`](../native-tests/build.gradle.kts), which should agree
   - upstream: [Maven Central](https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json)
-- **Gradle plugins** (detekt, Dokka, Vanniktech publish, JVM wrapper)
-  - pinned in: [`build.gradle.kts`](../build.gradle.kts) and [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts)
+- **Gradle plugins** (detekt, Dokka, Vanniktech publish, JVM wrapper, checksum, krossover, GraalVM native build tools)
+  - pinned in: [`build.gradle.kts`](../build.gradle.kts), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts), [`kson-lib/build.gradle.kts`](../kson-lib/build.gradle.kts) (krossover) and [`native-tests/build.gradle.kts`](../native-tests/build.gradle.kts) (GraalVM native build tools)
   - upstream: [Gradle Plugin Portal](https://plugins.gradle.org)
-- **Library dependencies declared in Gradle build files** (clikt, JGit, snakeyaml)
-  - pinned in: [`tooling/cli/build.gradle.kts`](../tooling/cli/build.gradle.kts) (clikt), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) (JGit) and [`build.gradle.kts`](../build.gradle.kts) (snakeyaml)
+- **Library dependencies declared in Gradle build files** (clikt, JGit, org.kson:kson, clean-git-checkout, snakeyaml, junit)
+  - pinned in: [`tooling/cli/build.gradle.kts`](../tooling/cli/build.gradle.kts) (clikt), [`buildSrc/build.gradle.kts`](../buildSrc/build.gradle.kts) (JGit, org.kson:kson, clean-git-checkout), [`build.gradle.kts`](../build.gradle.kts) (snakeyaml) and [`tooling/jetbrains/build.gradle.kts`](../tooling/jetbrains/build.gradle.kts) (junit)
   - upstream: [Maven Central](https://central.sonatype.com)
 - **The IntelliJ Platform Gradle Plugin**
   - pinned in: [`tooling/jetbrains/build.gradle.kts`](../tooling/jetbrains/build.gradle.kts)
@@ -69,9 +69,12 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
 - **The upstream conformance suites we generate tests from**
   - pinned in: `jsonTestSuiteSHA` and `schemaTestSuiteSHA` in [`GenerateJsonTestSuiteTask.kt`](../buildSrc/src/main/kotlin/GenerateJsonTestSuiteTask.kt)
   - check with: `git ls-remote <suite url> HEAD`, for the urls in [`TestSuiteGitCheckout.kt`](../buildSrc/src/main/kotlin/org/kson/jsonsuite/TestSuiteGitCheckout.kt)
-- **CircleCI orbs and macOS images**
+- **CircleCI orbs and images** (macOS Xcode, `cimg/node`, `windows-server-2022-gui`, `cimg/python`)
   - pinned in: [`.circleci/config.kson`](../.circleci/config.kson)
-  - upstream: [orb registry](https://circleci.com/developer/orbs) and [macOS image list](https://circleci.com/docs/using-macos/)
+  - upstream: [orb registry](https://circleci.com/developer/orbs), [macOS image list](https://circleci.com/docs/using-macos/) and [CircleCI images](https://circleci.com/developer/images)
+  - note: the Windows image is pinned twice, once as the `image` of `build-windows-amd64` and once as the `version` of the `windows/default` executor. Move both together
+  - note: keep `cimg/node` on the same Node version as `nodejs` in [`kson-lib/pixi.toml`](../kson-lib/pixi.toml). conda-forge doesn't build every Node release, so check it has the version before moving the image
+  - note: `cimg/python` is the Python floor from section 2, so it moves only with that floor
 
 ## 2. Leave the pins that are deliberately behind
 
@@ -87,7 +90,7 @@ Some of our dependencies are deliberately not current: they represent our backwa
   - note: this is the bytecode target we publish, deliberately well below the JDK we build with
 - **The oldest Python that can install `kson-lang`**
   - declared in: `requires-python` in [`lib-python/pyproject.toml`](../lib-python/pyproject.toml), matched by the `cimg/python` image in [`.circleci/config.kson`](../.circleci/config.kson)
-  - note: CI builds and tests the sdist on that floor on purpose. Move both together, or the guarantee stops being tested
+  - note: CI installs the sdist on that floor on purpose, in the `test-python-sdist` job. Move both together, or the guarantee stops being tested. The sdist itself is built with the Python in [`lib-python/.python-version`](../lib-python/.python-version), not the image's
   - note: the image pins only the minor version, on purpose: the floor is a Python minor version, not a patch release
 
 ## 3. Sweep for new/missing unpinned dependencies
