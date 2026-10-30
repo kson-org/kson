@@ -43,6 +43,42 @@ class KsonCoreTestGeneralError: KsonCoreTestError {
     }
 
     @Test
+    fun testLoneCarriageReturnWarning() {
+        fun assertRejectsLoneSlashR(text: String) {
+            assertParserRejectsSource(text, listOf(LONE_CARRIAGE_RETURN))
+        }
+
+        assertRejectsLoneSlashR("{\"a\": 1,\r\"b\": 2}") // between tokens
+        assertRejectsLoneSlashR("# a comment\rkey: value\nother: value") // in a comment
+        assertRejectsLoneSlashR("key: \"a\rb\"") // in a quoted string
+        assertRejectsLoneSlashR("key: %\n  a\rb\n  %%") // in embed content, on a later line
+        assertRejectsLoneSlashR("key: value\r") // at the end of the source
+
+        // the warning's location on a later line, after a `\n` and after a CRLF
+        assertParserRejectsSourceWithLocation(
+            "key: %\n  a\rb\n  %%",
+            listOf(LONE_CARRIAGE_RETURN),
+            listOf(Location.create(1, 3, 1, 4, 10, 11))
+        )
+        assertParserRejectsSourceWithLocation(
+            "a: 1\r\nb:\r2",
+            listOf(LONE_CARRIAGE_RETURN),
+            listOf(Location.create(1, 2, 1, 3, 8, 9))
+        )
+
+        // immediately before an actual CRLF: only the first `\r` is lone
+        assertParserRejectsSourceWithLocation(
+            "key: value\r\r\nother: value",
+            listOf(LONE_CARRIAGE_RETURN),
+            listOf(Location.create(0, 10, 0, 11, 10, 11))
+        )
+
+        // CRLF line endings are not lone carriage returns
+        val crlfSource = "# comment\r\nkey: %\r\n  a\r\n\r\n  b\r\n  %%\r\nother: \"x\r\ny\"\r\n"
+        assertEquals(emptyList(), KsonCore.parseToAst(crlfSource).messages)
+    }
+
+    @Test
     fun testIllegalMinusSignError() {
         assertParserRejectsSource(
             """

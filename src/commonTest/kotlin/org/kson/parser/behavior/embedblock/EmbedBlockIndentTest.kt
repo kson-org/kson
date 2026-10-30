@@ -139,6 +139,16 @@ class EmbedBlockIndentTest {
     }
 
     @Test
+    fun `test slash-r is not part of indent`() {
+        val input = "  first line\r\n\r\n   \r\n  fourth line\r\n  "
+        val embedBlockIndent = EmbedBlockIndent(input)
+
+        assertEquals(2, embedBlockIndent.minimumIndent)
+        assertEquals(listOf(2, 0, 2, 2, 2), embedBlockIndent.trimmedIndentPerLine)
+        assertEquals("first line\r\n\r\n \r\nfourth line\r\n", embedBlockIndent.trimmedContent)
+    }
+
+    @Test
     fun `test trimmedContent with single line`() {
         val input = "    single line"
         val embedBlockIndent = EmbedBlockIndent(input)

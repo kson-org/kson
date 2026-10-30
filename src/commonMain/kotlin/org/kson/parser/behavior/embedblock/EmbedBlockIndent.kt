@@ -1,5 +1,7 @@
 package org.kson.parser.behavior.embedblock
 
+import org.kson.parser.behavior.Line
+
 /**
  * The indentation behavior of embed block content: the value of an embed block is its source content
  * with the content's minimum indent trimmed away, see [trimmedContent].
@@ -8,7 +10,7 @@ package org.kson.parser.behavior.embedblock
  *   that ends the block's preamble, up to but not including the closing delimiter.
  */
 class EmbedBlockIndent(embedContentSource: String) {
-    private val lines: List<String> = embedContentSource.split("\n")
+    private val lines: List<Line> = Line.splitToLines(embedContentSource)
 
     /**
      * The minimum indent of the content, measured across every line that carries content plus
@@ -31,8 +33,8 @@ class EmbedBlockIndent(embedContentSource: String) {
      */
     val minimumIndent: Int by lazy {
         lines.withIndex()
-            .filter { (index, line) -> index == lines.lastIndex || !isInlineWhitespaceOnly(line) }
-            .minOfOrNull { (_, line) -> leadingInlineWhitespaceWidth(line) } ?: 0
+            .filter { (index, line) -> index == lines.lastIndex || !line.isInlineWhitespaceOnly() }
+            .minOfOrNull { (_, line) -> line.leadingInlineWhitespaceWidth() } ?: 0
     }
 
     /**
@@ -41,26 +43,14 @@ class EmbedBlockIndent(embedContentSource: String) {
      * line that carries content, and all of its whitespace for a blank line shorter than that.
      */
     val trimmedIndentPerLine: List<Int> by lazy {
-        lines.map { line -> minOf(minimumIndent, line.length) }
+        lines.map { line -> minOf(minimumIndent, line.text.length) }
     }
 
     /**
-     * The content with [minimumIndent] trimmed from the start of every line.  See [minimumIndent] for
-     * how the minimum is determined and [trimmedIndentPerLine] for what each line loses.
+     * The content with [minimumIndent] trimmed from the start of every line.
      */
     val trimmedContent: String by lazy {
         lines.zip(trimmedIndentPerLine)
-            .joinToString("\n") { (line, trimmedWidth) -> line.substring(trimmedWidth) }
-    }
-
-    private fun isInlineWhitespaceOnly(line: String): Boolean = leadingInlineWhitespaceWidth(line) == line.length
-
-    private fun leadingInlineWhitespaceWidth(line: String): Int = line.takeWhile { isInlineWhitespace(it) }.length
-
-    /**
-     * Returns true if the given [char] is a non-newline whitespace
-     */
-    private fun isInlineWhitespace(char: Char): Boolean {
-        return char == ' ' || char == '\r' || char == '\t'
+            .joinToString("") { (line, trimmedWidth) -> line.text.substring(trimmedWidth) + line.ending }
     }
 }
