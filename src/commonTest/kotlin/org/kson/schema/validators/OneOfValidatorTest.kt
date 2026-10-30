@@ -2,20 +2,19 @@ package org.kson.schema.validators
 
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
+import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertFalse
 
 /**
- * Generic `oneOf` behaviour with no discriminated union in play: shared-error extraction across
- * branches, the multiple-match case, the plain per-branch nested-bullet dump, and the presence
- * fallback's optional-declared basics.  The discriminated-union suites live in
- * [OneOfDiscriminatedUnionTest] and [OneOfPresenceUnionTest].
+ * Generic `oneOf` behaviour; narrowing has its own suites, [OneOfDiscriminatedUnionTest],
+ * [OneOfEliminationTest] and [OneOfPresenceUnionTest].
  */
 class OneOfValidatorTest : JsonSchemaTest {
     /**
-     * The document carries only the *shared* `description` property (known by both branches, so not
-     * distinguishing), so presence-based narrowing declines and the full-dump machinery runs — and since
-     * `description` is wrong for every branch, its error is extracted as the single precise message.
+     * `description` is known by both branches, so presence can't narrow; its error is common to both,
+     * so it is reported alone.
      */
     @Test
     fun testOneOfCommonValidationErrors() {
@@ -41,17 +40,13 @@ class OneOfValidatorTest : JsonSchemaTest {
                       - required_prop
             """.trimIndent(),
             listOf(
-                // since `description` is wrong for ALL the sub-schemas, we get a precise error for it
                 SCHEMA_VALUE_TYPE_MISMATCH
             )
         )
     }
 
     /**
-     * Presence matches on a branch's *known* properties — those it declares, even optionally — not only
-     * those it requires.  Branch one declares `think` optionally (it isn't in any `required` list); the
-     * document carries `think`, so it narrows to that branch alone and surfaces its `think` type error,
-     * excluding the `required_prop` branch that never mentions `think`.
+     * Presence matches on declared properties, not only required ones: `think` is optional in branch one.
      */
     @Test
     fun testOneOfPresenceNarrowsOnOptionalDeclaredProperty() {
@@ -82,38 +77,40 @@ class OneOfValidatorTest : JsonSchemaTest {
             )
         )
 
-        // narrowed to the branch that declares `think`; the other branch's `required_prop` is not reported
         assertFalse(errors[0].message.toString().contains("required_prop"))
     }
 
+    /**
+     * [ValidationMode.PARTIAL] mode withholds the multiple-match error: a half-typed document may
+     * still match several branches.
+     */
     @Test
     fun testOneOfMultipleMatches() {
-        assertKsonSchemaErrors(
-            """
-                description: "hello"
-            """.trimIndent(),
-            """
-                oneOf:
-                  - properties:
-                      description:
-                        type: string
+        val document = """
+            description: "hello"
+        """.trimIndent()
+        val schema = """
+            oneOf:
+              - properties:
+                  description:
+                    type: string
 
-                  - properties:
-                      description:
-                        type: string
-            """.trimIndent(),
-            listOf(
-                SCHEMA_ONE_OF_MULTIPLE_MATCHES
-            )
+              - properties:
+                  description:
+                    type: string
+        """.trimIndent()
+
+        assertKsonSchemaErrors(document, schema, listOf(SCHEMA_ONE_OF_MULTIPLE_MATCHES))
+        assertKsonEnforcesSchema(
+            document,
+            schema,
+            shouldAcceptAsValid = true,
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
     }
 
-    /**
-     * When branches don't share a single distinct-`const` property there's no discriminator, so we
-     * keep the existing full dump of every branch's errors.
-     */
     @Test
-    fun testOneOfWithoutDiscriminatorDumpsSubSchemaErrors() {
+    fun testOneOfWithoutDiscriminatorReportsSubSchemaErrors() {
         assertKsonSchemaErrors(
             """
                 value: "hello"

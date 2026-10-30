@@ -7,17 +7,13 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 
 /**
- * Union narrowing reads a branch's pins and known properties across everything the branch composes,
- * so a branch shaped `allOf: [{ $ref: Base }, { oneOf: [ … ] }]` — what code generators emit for "a
- * base type refined by variants" — narrows exactly like one declaring those properties inline.
- * Reading only a branch's own `properties` made such a branch look empty: nothing to eliminate it,
- * nothing to presence-match it, so every union containing one dumped all its branches' errors.
+ * Pins and known properties are read through `$ref` and `allOf`, so a branch shaped
+ * `allOf: [{ $ref: Base }, { oneOf: [ … ] }]` — what code generators emit for a base type refined by
+ * variants — narrows like one declaring those properties inline.
  */
 class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     /**
-     * Presence narrowing picks `Item`: the document carries `mode`, declared by `Base` an `allOf` hop
-     * down and unknown to `Group`, so the bad `mode` value surfaces alone rather than alongside
-     * `Group`'s complaints about a shape the document never claimed.
+     * `mode` is declared by `Base`, an `allOf` hop down, and unknown to `Group`, so presence narrows to `Item`.
      */
     @Test
     fun testAnyOfPresenceNarrowsThroughAllOfComposedBranch() {
@@ -58,17 +54,12 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
         )
 
-        // the surviving error is about `mode`, not about Group's unmet shape
         assertContains(errors[0].message.toString(), "read")
         assertFalse(errors[0].message.toString().contains("members"))
     }
 
-    /**
-     * A discriminator pinned inside an `allOf` member discriminates: the document's `kind` selects its
-     * branch, so only that branch's deeper failure is reported.
-     */
     @Test
-    fun testOneOfDiscriminatorDetectedThroughAllOfComposedBranch() {
+    fun testOneOfPinSelectsThroughAllOfComposedBranch() {
         val errors = assertKsonSchemaErrors(
             """kind: "a"""",
             dualBranchAllOfUnion,
@@ -79,12 +70,8 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
         assertFalse(errors[0].message.toString().contains("needs_b"))
     }
 
-    /**
-     * With every branch pinning `kind` through its `allOf`, the union is closed, so a `kind` no branch
-     * claims is reported as one out-of-range value rather than as a dump of both branches.
-     */
     @Test
-    fun testOneOfClosedUnionThroughAllOfReportsAllowedDiscriminatorValues() {
+    fun testOneOfClosedUnionThroughAllOfReportsAllowedPinnedValues() {
         val errors = assertKsonSchemaErrors(
             """kind: "c"""",
             dualBranchAllOfUnion,
@@ -120,11 +107,9 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     """.trimIndent()
 
     /**
-     * Composed sources all constrain the same document, so a property pinned by more than one is
-     * pinned to the *intersection* of their sets: the base admits `"A"` or `"B"`, the refining member
-     * only `"A"`, so `kind: "B"` contradicts the composed branch and eliminates it — where the wider
-     * of the two pins alone would have kept it alive.  Both branches know `kind` and `other` and
-     * neither `needs_*` is present, so this elimination is the only thing that can narrow here.
+     * A property several composed sources pin is pinned to the intersection: the base admits `"A"` or
+     * `"B"`, the refining member only `"A"`, so `kind: "B"` eliminates the branch the wider pin alone
+     * would keep.
      */
     @Test
     fun testEliminationIntersectsPinsAcrossComposedSources() {
