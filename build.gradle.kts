@@ -223,6 +223,7 @@ kotlin {
 // Pin mocha's serialize-javascript and diff to address their Dependabot advisories (see docs/dependency_maintenance.md).
 plugins.withType<YarnPlugin> {
     the<YarnRootExtension>().resolution("**/mocha/serialize-javascript", "^7.1.4")
+    the<YarnRootExtension>().resolution("**/mocha/diff", "^8.0.4")
 }
 
 mavenPublishing {

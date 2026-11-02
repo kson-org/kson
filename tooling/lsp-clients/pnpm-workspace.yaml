@@ -19,3 +19,4 @@ packages:
 # Scoped to mocha 11 to clear Dependabot advisories; remove once mocha moves to 12.
 overrides:
   mocha>serialize-javascript: ^7.1.4
+  mocha>diff: ^8.0.4
