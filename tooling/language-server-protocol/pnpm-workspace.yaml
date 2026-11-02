@@ -3,3 +3,7 @@ allowBuilds:
 
 # Flat node_modules (npm's layout), while still hardlinking from pnpm's shared global store.
 nodeLinker: hoisted
+
+# Scoped to mocha 11 to clear Dependabot advisories; remove once mocha moves to 12.
+overrides:
+  mocha>serialize-javascript: ^7.1.4
