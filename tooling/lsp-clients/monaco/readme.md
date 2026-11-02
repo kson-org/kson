@@ -23,7 +23,7 @@ auto-install one, so configure `MonacoEnvironment.getWorker` before creating
 any editor:
 
 ```ts
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import editorWorker from 'monaco-editor/editor/editor.worker?worker';
 
 self.MonacoEnvironment = {
     getWorker(_workerId: string, label: string): Worker {
@@ -38,7 +38,7 @@ tokenization; Monaco passes other labels (`'json'`, `'typescript'`, …) when
 the corresponding language services are used.
 
 The `?worker` import above is Vite syntax.  For webpack/Rspack, use
-`new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url))`.
+`new Worker(new URL('monaco-editor/editor/editor.worker.js', import.meta.url))`.
 For Next.js, load the editor with `dynamic(..., { ssr: false })` since
 Monaco is browser-only.
 
@@ -110,7 +110,7 @@ import { useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Editor, loader } from '@monaco-editor/react';
 import { useKsonLsp } from '@kson_org/monaco-editor/react';
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import editorWorker from 'monaco-editor/editor/editor.worker?worker';
 
 // 1. Reuse the bundled monaco — otherwise @monaco-editor/react fetches a
 // second copy from a CDN and our LSP providers register against the wrong module.
