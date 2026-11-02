@@ -54,6 +54,7 @@ These are the dependencies we will keep relatively current. We'd like to upgrade
     - `demos/react`: React deliberately left at 18 previously due to peer dependency of `@kson/monaco-editor`. Re-evaluate when monaco-editor gets bumped.
     - `demos/vanilla`
   - after editing any of them: run `./gradlew tooling:lsp-clients:check` to regenerate all `pnpm-lock.yaml` files. Commit the pnpm-lock.yaml files.
+  - note: mocha 11's `serialize-javascript` and `diff` are overridden to clear Dependabot advisories, in both `pnpm-workspace.yaml` files and as yarn resolutions in [`build.gradle.kts`](../build.gradle.kts). Move pnpm's mocha version together with the one Kotlin/JS tests use, and drop all the overrides once every mocha is on a version that doesn't need them. After editing the yarn resolutions, run `./gradlew kotlinUpgradeYarnLock --rerun-tasks`.
 - **Cargo dependencies**
   - pinned in: [`lib-rust/kson/Cargo.toml`](../lib-rust/kson/Cargo.toml) and [`lib-rust/kson-sys/Cargo.toml`](../lib-rust/kson-sys/Cargo.toml)
   - check with: `cargo update --dry-run` in each for releases within the declared ranges
