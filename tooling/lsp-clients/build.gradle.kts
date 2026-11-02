@@ -83,10 +83,14 @@ tasks {
     // `--ignore-workspace` keeps each demo a standalone install so it consumes the
     // PACKED @kson/monaco-editor (file:), not a workspace symlink to source.
     // It also skips pnpm-workspace.yaml, so the hoisted layout is repeated as a flag.
+    // If there are no changes to a demo's package.json or lockfile, pnpm won't update
+    // the packed copy even if the package has been rebuilt. To ensure demos are up to
+    // date, each install deletes any existing copy first.
     val installDemoVanilla = register<PixiExecTask>("npm_install_demoVanilla") {
         command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoVanillaDir)
         doNotTrackState("pnpm already tracks its own state")
+        doFirst { demoVanillaDir.dir("node_modules/@kson").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
     }
 
@@ -100,6 +104,7 @@ tasks {
         command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoIframeDir)
         doNotTrackState("pnpm already tracks its own state")
+        doFirst { demoIframeDir.dir("node_modules/@kson").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
         dependsOn(buildMonacoIframe)
     }
@@ -114,6 +119,7 @@ tasks {
         command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
         workingDirectory.set(demoReactDir)
         doNotTrackState("pnpm already tracks its own state")
+        doFirst { demoReactDir.dir("node_modules/@kson").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
     }
 
