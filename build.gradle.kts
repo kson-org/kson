@@ -4,6 +4,8 @@ import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonJvmTarget
@@ -216,6 +218,12 @@ kotlin {
             }
         }
     }
+}
+
+// Pin mocha's serialize-javascript and diff to address their Dependabot advisories (see docs/dependency_maintenance.md).
+plugins.withType<YarnPlugin> {
+    the<YarnRootExtension>().resolution("**/mocha/serialize-javascript", "^7.1.4")
+    the<YarnRootExtension>().resolution("**/mocha/diff", "^8.0.4")
 }
 
 mavenPublishing {
