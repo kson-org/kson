@@ -6,9 +6,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 
 /**
- * The release artifacts, in sets that each have their own directory, so staging one set leaves the others in place
- *
- * Tasks staging into a set must declare their outputs, or Gradle may delete them as stale on a fresh build.
+ * The release artifacts: build outputs stored as either `native` or `portable`.
  */
 enum class ReleaseArtifactSet(vararg stagingTaskPaths: String) {
     /** Built by GraalVM native-image, so each platform stages its own */
@@ -36,7 +34,10 @@ enum class ReleaseArtifactSet(vararg stagingTaskPaths: String) {
     fun stagingDir(project: Project): Provider<Directory> =
         project.rootProject.layout.buildDirectory.dir("release-artifacts/$dirName")
 
-    /** Makes [task] wait for the set to be emptied, and returns the directory it then stages into */
+    /**
+     * Makes [task] wait for the set to be emptied, and returns the directory it then stages into.
+     * [task] must declare its outputs, or Gradle may delete them as stale.
+     */
     fun stageInto(task: Task): Provider<Directory> {
         require(task.path in stagingTaskPaths) { "${task.path} must be listed in $name's stagingTaskPaths" }
         task.dependsOn(cleanTaskPath)

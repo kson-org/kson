@@ -137,6 +137,9 @@ tasks {
     }
 }
 
+/**
+ * Register tasks for packaging and cleaning release-artifacts in [ReleaseArtifactSet.NATIVE] and [ReleaseArtifactSet.PORTABLE]
+ */
 ReleaseArtifactSet.entries.forEach { artifactSet ->
     val stagingDir = artifactSet.stagingDir(project)
 

@@ -6,7 +6,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 
-/** Packs npm packages, naming each tarball up front so its task can declare it as an output. */
+/** Creates a tarball from an npm package. */
 object NpmPack {
     /** The name `npm pack` gives the tarball of [packageName] at [version] (see libnpmpack's `lib/index.js`). */
     fun tarballName(packageName: String, version: String): String =

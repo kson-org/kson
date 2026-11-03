@@ -2,7 +2,7 @@ package org.kson
 
 import java.io.File
 
-/** Names the sdist `uv build --sdist` writes up front, so its task can declare it as an output. */
+/** Determines the file name `uv build --sdist` gives an sdist */
 object PythonSdist {
     /**
      * The name setuptools gives the sdist of [projectName] at [version] (PEP 625).
