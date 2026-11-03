@@ -82,15 +82,16 @@ tasks {
 
     // `--ignore-workspace` keeps each demo a standalone install so it consumes the
     // PACKED @kson/monaco-editor (file:), not a workspace symlink to source.
-    // It also skips pnpm-workspace.yaml, so the hoisted layout is repeated as a flag.
-    // If there are no changes to a demo's package.json or lockfile, pnpm won't update
-    // the packed copy even if the package has been rebuilt. To ensure demos are up to
-    // date, each install deletes any existing copy first.
+    // Vite caches a pre-bundled version of @kson/monaco-editor in node_modules/.vite and
+    // only refreshes it when the lockfile or Vite config changes, which means after a
+    // rebuild these demos would serve old code. To ensure demos are up to date, each
+    // install deletes Vite's pre-bundle cache, except for the iframe demo, which serves
+    // `dist-iframe` as static files and isn't affected by this behavior.
     val installDemoVanilla = register<PixiExecTask>("npm_install_demoVanilla") {
-        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace")
         workingDirectory.set(demoVanillaDir)
         doNotTrackState("pnpm already tracks its own state")
-        doFirst { demoVanillaDir.dir("node_modules/@kson").asFile.deleteRecursively() }
+        doFirst { demoVanillaDir.dir("node_modules/.vite").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
     }
 
@@ -101,10 +102,9 @@ tasks {
     }
 
     val installDemoIframe = register<PixiExecTask>("npm_install_demoIframe") {
-        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace")
         workingDirectory.set(demoIframeDir)
         doNotTrackState("pnpm already tracks its own state")
-        doFirst { demoIframeDir.dir("node_modules/@kson").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
         dependsOn(buildMonacoIframe)
     }
@@ -116,10 +116,10 @@ tasks {
     }
 
     val installDemoReact = register<PixiExecTask>("npm_install_demoReact") {
-        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace")
         workingDirectory.set(demoReactDir)
         doNotTrackState("pnpm already tracks its own state")
-        doFirst { demoReactDir.dir("node_modules/@kson").asFile.deleteRecursively() }
+        doFirst { demoReactDir.dir("node_modules/.vite").asFile.deleteRecursively() }
         dependsOn(buildMonaco)
     }
 
@@ -133,7 +133,7 @@ tasks {
     val demosDir = layout.projectDirectory.dir("demos")
 
     val installTestDemos = register<PixiExecTask>("npm_install_testDemos") {
-        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace", "--config.node-linker=hoisted")
+        command=listOf("pnpm", "install", "--no-frozen-lockfile", "--ignore-workspace")
         workingDirectory.set(demosDir)
         doNotTrackState("pnpm already tracks its own state")
         dependsOn(buildMonaco)
