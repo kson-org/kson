@@ -47,7 +47,7 @@ class NpmPackTest {
 
     @Test
     fun packsIntoTheDirectoryOfTheDeclaredTarballOnceItIsEmptied() {
-        val project = emptyProject()
+        val project = ksonLibProject()
         val packageDir = File(project.projectDir, "js-package")
         val task = packTask(project, packageDir, "kson_org-kson-1.2.3.tgz")
 
@@ -62,7 +62,7 @@ class NpmPackTest {
 
     @Test
     fun failsWhenNpmWritesAnotherTarball() {
-        val project = emptyProject()
+        val project = ksonLibProject()
         val releaseArtifacts = ReleaseArtifactSet.PORTABLE.stagingDir(project).get().asFile
         releaseArtifacts.mkdirs()
         File(releaseArtifacts, "kson-1.2.3.tgz").createNewFile()
@@ -73,7 +73,7 @@ class NpmPackTest {
 
     @Test
     fun passesWhenNpmWritesTheDeclaredTarball() {
-        val project = emptyProject()
+        val project = ksonLibProject()
         val releaseArtifacts = ReleaseArtifactSet.PORTABLE.stagingDir(project).get().asFile
         releaseArtifacts.mkdirs()
         File(releaseArtifacts, "kson_org-kson-1.2.3.tgz").createNewFile()
@@ -81,9 +81,12 @@ class NpmPackTest {
         checkWhatNpmWrote(project, "kson_org-kson-1.2.3.tgz")
     }
 
-    private fun emptyProject(): Project = ProjectBuilder.builder()
-        .withProjectDir(createTempDirectory("NpmPackTest").toFile())
-        .build()
+    private fun ksonLibProject(): Project {
+        val rootProject = ProjectBuilder.builder()
+            .withProjectDir(createTempDirectory("NpmPackTest").toFile())
+            .build()
+        return ProjectBuilder.builder().withParent(rootProject).withName("kson-lib").build()
+    }
 
     private fun packTask(project: Project, packageDir: File, tarballName: String): PixiExecTask =
         project.tasks.register("packageReleaseNpmTarball", PixiExecTask::class.java) {

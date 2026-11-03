@@ -4,6 +4,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import java.nio.file.Files.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 /**
  * `.circleci/config.kson` runs these tasks and stores these directories by name.
@@ -27,8 +28,13 @@ class ReleaseArtifactSetTest {
 
     @Test
     fun aTaskStagingIntoASetWaitsForTheRootTaskThatEmptiesIt() {
-        val cleanTasksByStagingDir = ReleaseArtifactSet.entries.associate { artifactSet ->
-            val task = subproject.tasks.register("stageInto${artifactSet.name}").get()
+        val stagingTaskNames = mapOf(
+            ReleaseArtifactSet.NATIVE to "packageReleaseArchive",
+            ReleaseArtifactSet.PORTABLE to "packageReleaseNpmTarball",
+        )
+
+        val cleanTasksByStagingDir = stagingTaskNames.entries.associate { (artifactSet, taskName) ->
+            val task = subproject.tasks.register(taskName).get()
             artifactSet.stageInto(task).get().asFile to task.dependsOn
         }
 
@@ -39,5 +45,14 @@ class ReleaseArtifactSetTest {
             ),
             cleanTasksByStagingDir
         )
+    }
+
+    @Test
+    fun aTaskMissingFromTheSetsStagingTaskPathsCannotStageIntoIt() {
+        val unlistedTask = subproject.tasks.register("packageReleaseUnlisted").get()
+
+        val failure = assertFailsWith<IllegalArgumentException> { ReleaseArtifactSet.PORTABLE.stageInto(unlistedTask) }
+
+        assertEquals(":kson-lib:packageReleaseUnlisted must be listed in PORTABLE's stagingTaskPaths", failure.message)
     }
 }

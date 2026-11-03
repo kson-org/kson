@@ -38,6 +38,7 @@ enum class ReleaseArtifactSet(vararg stagingTaskPaths: String) {
 
     /** Makes [task] wait for the set to be emptied, and returns the directory it then stages into */
     fun stageInto(task: Task): Provider<Directory> {
+        require(task.path in stagingTaskPaths) { "${task.path} must be listed in $name's stagingTaskPaths" }
         task.dependsOn(cleanTaskPath)
         return stagingDir(task.project)
     }
