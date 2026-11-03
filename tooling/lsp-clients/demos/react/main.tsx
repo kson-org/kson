@@ -11,8 +11,8 @@ import { createRoot } from 'react-dom/client';
 import * as monaco from 'monaco-editor';
 import { Editor, loader } from '@monaco-editor/react';
 import { useKsonLsp } from '@kson/monaco-editor/react';
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import editorWorker from 'monaco-editor/editor/editor.worker?worker';
+import jsonWorker from 'monaco-editor/language/json/json.worker?worker';
 
 // Must run before any <Editor> renders — otherwise @monaco-editor/react
 // race-fetches a second monaco from CDN and our LSP providers register
@@ -126,7 +126,7 @@ useKsonLsp(editor, { lspOptions: {...} });
 };`}</code></pre>
                     <p>
                         The <code>?worker</code> import this demo uses is Vite syntax.
-                        For webpack, swap the import for <code>new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url))</code>;
+                        For webpack, swap the import for <code>new Worker(new URL('monaco-editor/editor/editor.worker.js', import.meta.url))</code>;
                         for Next.js, load the editor with <code>dynamic(..., {`{ ssr: false }`})</code> since
                         Monaco is browser-only.
                     </p>
