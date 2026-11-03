@@ -6,6 +6,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.kson.Kson
 import org.kson.Result
+import org.kson.TranspileOptions
 
 /**
  * Gradle task that transpiles KSON files to YAML format.
@@ -58,7 +59,7 @@ abstract class TranspileKsonToYaml : DefaultTask() {
 
         val ksonContent = ksonInput.readText()
 
-        when (val result = Kson.toYaml(ksonContent, retainEmbedTags = false)) {
+        when (val result = Kson.toYaml(ksonContent, TranspileOptions.Yaml(retainEmbedTags = false))) {
             is Result.Success -> {
                 yamlOutput.writeText(
                     """

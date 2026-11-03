@@ -6,6 +6,7 @@
     "moduleResolution": "bundler",
     "outDir": "out",
     // Custom types
+    "types": ["node"],
     "typeRoots": [
       "./node_modules/@types"
     ],

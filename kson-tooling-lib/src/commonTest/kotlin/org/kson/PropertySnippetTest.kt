@@ -730,10 +730,10 @@ class PropertySnippetTest {
     }
 
     @Test
-    fun emptyDashBeforeAClosingBracketStaysPlain() {
-        // The caret path falls back to the root, but a key typed here would start the list item
-        assertPlain(layoutSchema, "{\n  items:\n    - <caret>\n}", "tags")
-        assertPlain(layoutSchema, "items: <\n  - <caret>\n>", "tags")
+    fun emptyDashItemBeforeAClosingBracketOpensItsPropertyValue() {
+        // The bracket closes the list or object around the dash rather than being the dash's value
+        assertEquals("{\n  items:\n    - id: '<caret>'\n}", accept(layoutSchema, "{\n  items:\n    - <caret>\n}", "id"))
+        assertEquals("items: <\n  - id: '<caret>'\n>", accept(layoutSchema, "items: <\n  - <caret>\n>", "id"))
     }
 
     @Test

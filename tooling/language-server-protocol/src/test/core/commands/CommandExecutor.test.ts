@@ -15,7 +15,7 @@ import {
 import {CommandType, toWireCommandId} from "../../../core/commands/CommandType";
 import {FormattingStyle} from "kson";
 import {FormattingStyleId, formattingStyleId} from "../../../core/formattingStyle";
-import {RemoteWorkspace} from "vscode-languageserver/lib/common/server";
+import {RemoteWorkspace} from "vscode-languageserver";
 import {createCommandExecutor} from "../../../core/commands/createCommandExecutor.node.js";
 import {SchemaProvider} from "../../../core/schema/SchemaProvider";
 import {FileSystemSchemaProvider} from "../../../core/schema/FileSystemSchemaProvider";

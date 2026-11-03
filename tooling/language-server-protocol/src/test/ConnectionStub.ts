@@ -29,7 +29,7 @@ import {
     SelectionRangeParams
 } from "vscode-languageserver";
 import {BoilerplateConnectionStub} from "./BoilerplateConnectionStub";
-import {Languages} from "vscode-languageserver/lib/common/server";
+import {Languages} from "vscode-languageserver";
 import {Definition, DefinitionLink, Location} from "vscode-languageserver-protocol";
 import {Position} from "vscode-languageserver-types";
 

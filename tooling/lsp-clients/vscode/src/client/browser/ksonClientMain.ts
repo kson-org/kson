@@ -57,8 +57,8 @@ export async function activate(context: vscode.ExtensionContext) {
         const languageClient = new LanguageClient(
             `${name}-browser`,
             `${name} Language Server (Browser)`,
-            clientOptions,
-            worker
+            worker,
+            clientOptions
         );
 
         // Start the client and language server

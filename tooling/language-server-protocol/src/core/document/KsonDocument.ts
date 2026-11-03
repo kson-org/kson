@@ -58,6 +58,14 @@ export class KsonDocument implements TextDocument {
         return this.textDocument.offsetAt(position);
     }
 
+    getLineRange(line: number): Range {
+        return this.textDocument.getLineRange(line);
+    }
+
+    getEOLCharacters(line: number): string {
+        return this.textDocument.getEOLCharacters(line);
+    }
+
     /**
      * Returns the {@link ToolingDocument} for use with tooling operations.
      * Created eagerly during construction, so all tooling calls on the same
