@@ -16,8 +16,7 @@ import org.kson.schema.JsonSchema
  * For an object document, a branch with a pin the document contradicts is dropped.  Then:
  *  1. If no branch survives, each property that every branch pins and rejects gets one enum error
  *     listing the pinned values.  With no such property, or only one branch, every branch is reported.
- *  2. Otherwise, survivors with a pin admitting a document value no other survivor's pin admits are
- *     reported.
+ *  2. Otherwise, survivors that alone pin a property the document has are reported.
  *  3. If there are none, the survivors reported are those that know a property the document has and
  *     not every branch knows, or all of them if none do.
  *
@@ -59,7 +58,7 @@ internal fun reportUnionMatchFailure(
         return
     }
 
-    val selected = selectedBranches(pins, document, survivors)
+    val selected = selectedBranches(pins, document.keys, survivors)
     if (selected.isNotEmpty()) {
         report(selected)
         return
@@ -71,14 +70,12 @@ internal fun reportUnionMatchFailure(
 
 private fun selectedBranches(
     pins: List<Map<String, Set<KsonValue>>>,
-    document: Map<String, KsonValue>,
+    present: Set<String>,
     survivors: List<Int>
 ): List<Int> =
     survivors.filter { branchIndex ->
-        pins[branchIndex].any { (property, values) ->
-            val value = document[property]
-            value != null && value in values &&
-                survivors.count { value in pins[it][property].orEmpty() } == 1
+        pins[branchIndex].keys.any { property ->
+            property in present && survivors.count { property in pins[it] } == 1
         }
     }
 
