@@ -18,6 +18,45 @@ parameters:
   .
 # Reusable command definitions - only for truly cross-platform operations
 commands:
+  'gradle-build-steps':
+    description: 'Run the Gradle build and verification steps, each with the same flags'
+    parameters:
+      'gradle-flags':
+        type: string
+        description: 'Flags appended to every Gradle command'
+        default: ''
+        .
+      'package-tasks':
+        type: string
+        description: 'Gradle tasks staging the release artifacts the job stores'
+        .
+      .
+    steps:
+      - run:
+          name: 'Download dependencies'
+          command: './gradlew --no-daemon dependencies << parameters.gradle-flags >>'
+
+      - run:
+          name: 'Verify buildSrc project'
+          command: %bash
+            cd buildSrc
+            ./gradlew --no-daemon check << parameters.gradle-flags >>
+            %%
+
+      - run:
+          name: 'Verify Kson project'
+          command: './gradlew --no-daemon check << parameters.gradle-flags >>'
+
+      - run:
+          name: 'Build native kson-lib'
+          command: './gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage << parameters.gradle-flags >>'
+
+      - run:
+          name: 'Package release artifacts'
+          command: './gradlew --no-daemon << parameters.package-tasks >> << parameters.gradle-flags >>'
+          .
+        .
+    .
   'gradle-core-tasks':
     description: 'Run core Gradle build and verification tasks'
     parameters:
@@ -28,25 +67,6 @@ commands:
         .
       .
     steps:
-      - run:
-          name: 'Download dependencies'
-          command: './gradlew --no-daemon dependencies'
-
-      - run:
-          name: 'Verify buildSrc project'
-          command: %bash
-            cd buildSrc
-            ./gradlew --no-daemon check
-            %%
-
-      - run:
-          name: 'Verify Kson project'
-          command: './gradlew --no-daemon check'
-
-      - run:
-          name: 'Build native kson-lib'
-          command: './gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage'
-
       # keep both patterns below in sync with the build-release-targets workflow's branch pattern
       - when:
           condition:
@@ -56,10 +76,9 @@ commands:
               .
             .
           steps:
-            - run:
-                name: 'Package release artifacts'
-                command: './gradlew --no-daemon << parameters.package-tasks >> -Prelease=true'
-
+            - 'gradle-build-steps':
+                'gradle-flags': '-Prelease=true'
+                'package-tasks': '<< parameters.package-tasks >>'
             =
 
       - unless:
@@ -70,10 +89,8 @@ commands:
               .
             .
           steps:
-            - run:
-                name: 'Package release artifacts'
-                command: './gradlew --no-daemon << parameters.package-tasks >>'
-
+            - 'gradle-build-steps':
+                'package-tasks': '<< parameters.package-tasks >>'
             =
 
       - run:
@@ -159,8 +176,7 @@ commands:
           .
         .
     .
-  # Gradle build cache, scoped to build-linux-amd64. The release packaging invocation (-Prelease=true)
-  # neither loads nor stores entries; the job's other Gradle steps use it on every branch.
+  # Gradle build cache, scoped to build-linux-amd64. Release builds switch it off in settings.gradle.kts.
   # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
   'restore-gradle-build-cache':
     description: 'Restore the Gradle build cache for build-linux-amd64'
