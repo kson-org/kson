@@ -31,24 +31,6 @@ commands:
         default: packageNativeArtifacts
 
     steps:
-      - run:
-          name: "Download dependencies"
-          command: "./gradlew --no-daemon dependencies"
-
-      - run:
-          name: "Verify buildSrc project"
-          command: |
-              cd buildSrc
-              ./gradlew --no-daemon check
-
-      - run:
-          name: "Verify Kson project"
-          command: "./gradlew --no-daemon check"
-
-      - run:
-          name: "Build native kson-lib"
-          command: "./gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage"
-
       # keep both patterns below in sync with the build-release-targets workflow's branch pattern
       - when:
           condition:
@@ -57,6 +39,24 @@ commands:
               value: "<< pipeline.git.branch >>"
 
           steps:
+            - run:
+                name: "Download dependencies"
+                command: "./gradlew --no-daemon dependencies -Prelease=true"
+
+            - run:
+                name: "Verify buildSrc project"
+                command: |
+                    cd buildSrc
+                    ./gradlew --no-daemon check -Prelease=true
+
+            - run:
+                name: "Verify Kson project"
+                command: "./gradlew --no-daemon check -Prelease=true"
+
+            - run:
+                name: "Build native kson-lib"
+                command: "./gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage -Prelease=true"
+
             - run:
                 name: "Package release artifacts"
                 command: "./gradlew --no-daemon << parameters.package-tasks >> -Prelease=true"
@@ -69,6 +69,24 @@ commands:
               value: "<< pipeline.git.branch >>"
 
           steps:
+            - run:
+                name: "Download dependencies"
+                command: "./gradlew --no-daemon dependencies"
+
+            - run:
+                name: "Verify buildSrc project"
+                command: |
+                    cd buildSrc
+                    ./gradlew --no-daemon check
+
+            - run:
+                name: "Verify Kson project"
+                command: "./gradlew --no-daemon check"
+
+            - run:
+                name: "Build native kson-lib"
+                command: "./gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage"
+
             - run:
                 name: "Package release artifacts"
                 command: "./gradlew --no-daemon << parameters.package-tasks >>"
@@ -148,8 +166,8 @@ commands:
           key: "v1-<< parameters.platform >>-uv-{{ checksum \"lib-python/uv.lock\" }}"
 
 
-  # Gradle build cache, scoped to build-linux-amd64. The release packaging invocation (-Prelease=true)
-  # neither loads nor stores entries; the job's other Gradle steps use it on every branch.
+  # Gradle build cache, scoped to build-linux-amd64. On release branches the Gradle steps that build run with
+  # -Prelease=true, which neither loads nor stores entries; on every other branch they use the cache.
   # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
   restore-gradle-build-cache:
     description: "Restore the Gradle build cache for build-linux-amd64"
