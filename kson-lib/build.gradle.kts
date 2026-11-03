@@ -101,6 +101,8 @@ afterEvaluate {
     }
 }
 
+val jsPackageDir = layout.buildDirectory.dir("js-package")
+
 // Task to copy browser distribution after building
 tasks.register("copyBrowserDistribution") {
     description = "Copy browser JS distribution to js-package/browser"
@@ -109,7 +111,7 @@ tasks.register("copyBrowserDistribution") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val sourceDir = buildDir.resolve("dist/js/productionLibrary")
-        val targetDir = buildDir.resolve("js-package/browser")
+        val targetDir = jsPackageDir.get().dir("browser").asFile
 
         targetDir.mkdirs()
         copy {
@@ -128,7 +130,7 @@ tasks.register("copyNodeDistribution") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val sourceDir = buildDir.resolve("dist/js/productionLibrary")
-        val targetDir = buildDir.resolve("js-package/node")
+        val targetDir = jsPackageDir.get().dir("node").asFile
 
         targetDir.mkdirs()
         copy {
@@ -179,13 +181,7 @@ tasks.register("buildUniversalJsPackage") {
     dependsOn("copyNodeDistribution")
 
     doLast {
-        val buildDir = layout.buildDirectory.get().asFile
-        val jsPackageDir = buildDir.resolve("js-package")
-
-        // Ensure directory exists
-        jsPackageDir.mkdirs()
-
-        UniversalJsPackage.writePackageJson(jsPackageDir, version.toString())
+        UniversalJsPackage.writePackageJson(jsPackageDir.get().asFile, version.toString())
 
         // Copy README if it exists
         val readmeFile = projectDir.resolve("README-npm.md")
@@ -206,7 +202,7 @@ tasks.register("buildUniversalJsPackage") {
             }
         }
 
-        println("Universal JS package built successfully at: ${jsPackageDir.absolutePath}")
+        println("Universal JS package built successfully at: ${jsPackageDir.get().asFile.absolutePath}")
     }
 }
 
@@ -215,9 +211,8 @@ tasks.register<PixiExecTask>("packageReleaseNpmTarball") {
     description = "Packs the universal JS package for release into the root project's release-artifacts/portable directory"
 
     dependsOn("buildUniversalJsPackage")
-    val jsPackageDir = layout.buildDirectory.dir("js-package").get().asFile
     val tarballName = NpmPack.tarballName(UniversalJsPackage.NAME, version.toString())
-    NpmPack.packIntoReleaseArtifacts(this, ReleaseArtifactSet.PORTABLE, jsPackageDir, tarballName)
+    NpmPack.packIntoReleaseArtifacts(this, ReleaseArtifactSet.PORTABLE, jsPackageDir.get().asFile, tarballName)
 }
 
 mavenPublishing {
