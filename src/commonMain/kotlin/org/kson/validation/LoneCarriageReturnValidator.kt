@@ -9,7 +9,7 @@ import org.kson.parser.messages.MessageType.LONE_CARRIAGE_RETURN
  * Warns if there is a \r without accompanying \n. This is likely a mistake, and potentially rendered inconsistently
  * in some terminals/editors.
  *
- * JSON allows this, so it's merely a warning (and still a valid KSON document).
+ * This is merely a warning: the document is still valid KSON.
  */
 class LoneCarriageReturnValidator {
     fun validate(source: String, messageSink: MessageSink) {

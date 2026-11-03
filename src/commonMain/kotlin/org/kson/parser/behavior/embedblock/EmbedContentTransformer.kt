@@ -52,7 +52,7 @@ class EmbedContentTransformer(
             val lines = Line.splitToLines(indentTrimmed)
             val lineBeforeCloseDelim = lines[lines.lastIndex - 1]
             val closeDelimLine = lines.last()
-            indentTrimmed.removeSuffix(lineBeforeCloseDelim.ending + closeDelimLine.text)
+            indentTrimmed.removeSuffix(lineBeforeCloseDelim.ending.text + closeDelimLine.text)
         } else {
             indentTrimmed
         }

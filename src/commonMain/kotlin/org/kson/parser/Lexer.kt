@@ -4,7 +4,7 @@ import org.kson.stdlibx.collections.ImmutableList
 import org.kson.stdlibx.collections.toImmutableList
 import org.kson.stdlibx.collections.toImmutableMap
 import org.kson.parser.TokenType.*
-import org.kson.parser.behavior.Line
+import org.kson.parser.behavior.LineEnding
 import org.kson.parser.behavior.StringUnquoted
 import org.kson.parser.behavior.Whitespace.isInlineWhitespace
 import org.kson.parser.behavior.Whitespace.isWhitespace
@@ -511,22 +511,22 @@ class Lexer(source: String, gapFree: Boolean = false) {
      * The scanner is at the end of a line if we're at end of file, a newline, or CRLF.
      */
     private fun scannerAtEndOfLine(): Boolean {
-        return sourceScanner.eof() || lineEndingLength() > 0
+        return sourceScanner.eof() || lineEndingAtScanner().isEnding
     }
 
     /**
      * If the scanner is at a line ending advance past it and return true
      */
     private fun consumeLineEnding(): Boolean {
-        val length = lineEndingLength()
-        repeat(length) { sourceScanner.advance() }
-        return length > 0
+        val ending = lineEndingAtScanner()
+        repeat(ending.length) { sourceScanner.advance() }
+        return ending.isEnding
     }
 
     /**
-     * If the scanner is at the end of the line, return 1 (newline) or 2 (CRLF). Otherwise, 0.
+     * The [LineEnding] at the scanner's position, if any
      */
-    private fun lineEndingLength(): Int = Line.endingLength(sourceScanner.peek(), sourceScanner.peekNext())
+    private fun lineEndingAtScanner(): LineEnding = LineEnding.at(sourceScanner.peek(), sourceScanner.peekNext())
 
     private fun number() {
         /**

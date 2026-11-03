@@ -47,10 +47,11 @@ class EmbedBlockIndent(embedContentSource: String) {
     }
 
     /**
-     * The content with [minimumIndent] trimmed from the start of every line.
+     * The content with [minimumIndent] trimmed from the start of every line.  See [minimumIndent]
+     * and [trimmedIndentPerLine].
      */
     val trimmedContent: String by lazy {
         lines.zip(trimmedIndentPerLine)
-            .joinToString("") { (line, trimmedWidth) -> line.text.substring(trimmedWidth) + line.ending }
+            .joinToString("") { (line, trimmedWidth) -> line.text.substring(trimmedWidth) + line.ending.text }
     }
 }

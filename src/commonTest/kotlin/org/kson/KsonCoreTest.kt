@@ -91,6 +91,11 @@ interface KsonCoreTest {
             reParsedResult.kson,
             "Re-parsing our transpiled Kson must be idempotent"
         )
+        assertEquals(
+            expectedJson,
+            KsonCore.parseToJson(ksonParseResult.kson!!, compileSettings.jsonSettings).json,
+            "Our transpiled Kson must have the same value as its source"
+        )
 
         // now validate the Yaml produced for this source
         val yamlResult = KsonCore.parseToYaml(source, compileSettings.yamlSettings)
