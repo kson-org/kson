@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.GraalVmHelper
 import org.kson.KsonJvmTarget
+import org.kson.NpmPack
+import org.kson.ReleaseArtifactSet
 import org.kson.UniversalJsPackage
-import org.kson.releaseArtifactsDir
 
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -100,6 +101,8 @@ afterEvaluate {
     }
 }
 
+val jsPackageDir = layout.buildDirectory.dir("js-package")
+
 // Task to copy browser distribution after building
 tasks.register("copyBrowserDistribution") {
     description = "Copy browser JS distribution to js-package/browser"
@@ -108,7 +111,7 @@ tasks.register("copyBrowserDistribution") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val sourceDir = buildDir.resolve("dist/js/productionLibrary")
-        val targetDir = buildDir.resolve("js-package/browser")
+        val targetDir = jsPackageDir.get().dir("browser").asFile
 
         targetDir.mkdirs()
         copy {
@@ -127,7 +130,7 @@ tasks.register("copyNodeDistribution") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val sourceDir = buildDir.resolve("dist/js/productionLibrary")
-        val targetDir = buildDir.resolve("js-package/node")
+        val targetDir = jsPackageDir.get().dir("node").asFile
 
         targetDir.mkdirs()
         copy {
@@ -178,13 +181,7 @@ tasks.register("buildUniversalJsPackage") {
     dependsOn("copyNodeDistribution")
 
     doLast {
-        val buildDir = layout.buildDirectory.get().asFile
-        val jsPackageDir = buildDir.resolve("js-package")
-
-        // Ensure directory exists
-        jsPackageDir.mkdirs()
-
-        UniversalJsPackage.writePackageJson(jsPackageDir, version.toString())
+        UniversalJsPackage.writePackageJson(jsPackageDir.get().asFile, version.toString())
 
         // Copy README if it exists
         val readmeFile = projectDir.resolve("README-npm.md")
@@ -205,8 +202,17 @@ tasks.register("buildUniversalJsPackage") {
             }
         }
 
-        println("Universal JS package built successfully at: ${jsPackageDir.absolutePath}")
+        println("Universal JS package built successfully at: ${jsPackageDir.get().asFile.absolutePath}")
     }
+}
+
+tasks.register<PixiExecTask>("packageReleaseNpmTarball") {
+    group = "distribution"
+    description = "Packs the universal JS package for release into the root project's release-artifacts/portable directory"
+
+    dependsOn("buildUniversalJsPackage")
+    val tarballName = NpmPack.tarballName(UniversalJsPackage.NAME, version.toString())
+    NpmPack.packIntoReleaseArtifacts(this, ReleaseArtifactSet.PORTABLE, jsPackageDir.get().asFile, tarballName)
 }
 
 mavenPublishing {
@@ -335,7 +341,7 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
  */
 tasks.register<Tar>("packageReleaseArchive") {
     group = "distribution"
-    description = "Archives the native kson-lib for release into the root project's release-artifacts directory"
+    description = "Archives the native kson-lib for release into the root project's release-artifacts/native directory"
 
     // take the whole directory: `buildWithGraalVmNativeImage` declares only the library as its
     // output, and the archive needs the headers beside it
@@ -348,7 +354,5 @@ tasks.register<Tar>("packageReleaseArchive") {
 
     compression = Compression.GZIP
     archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("kson-lib-shared"))
-    // the shared directory is emptied before each run stages into it, so wait for that to happen
-    dependsOn(":cleanReleaseArtifacts")
-    destinationDirectory.set(releaseArtifactsDir)
+    destinationDirectory.set(ReleaseArtifactSet.NATIVE.stageInto(this))
 }

@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 import org.kson.BinaryArtifactPaths
 import org.kson.GraalVmHelper
-import org.kson.releaseArtifactsDir
+import org.kson.ReleaseArtifactSet
 
 plugins {
     application
@@ -141,11 +141,11 @@ val buildNativeImage by tasks.registering(PixiExecTask::class) {
 
 /**
  * Archives the CLI binary for release, under the same `<artifact>-<arch>-<os>.tar.gz` convention as
- * every other release artifact (see [BinaryArtifactPaths.releaseArchiveName]).
+ * the other native release archives (see [BinaryArtifactPaths.releaseArchiveName]).
  */
 tasks.register<Tar>("packageReleaseArchive") {
     group = "distribution"
-    description = "Archives the native $cliName binary for release into the root project's release-artifacts directory"
+    description = "Archives the native $cliName binary for release into the root project's release-artifacts/native directory"
 
     from(buildNativeImage)
     // tar would default this to 0644, leaving a binary nobody can run
@@ -153,9 +153,7 @@ tasks.register<Tar>("packageReleaseArchive") {
 
     compression = Compression.GZIP
     archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("$cliName-cli"))
-    // the shared directory is emptied before each run stages into it, so wait for that to happen
-    dependsOn(":cleanReleaseArtifacts")
-    destinationDirectory.set(releaseArtifactsDir)
+    destinationDirectory.set(ReleaseArtifactSet.NATIVE.stageInto(this))
 }
 
 tasks{

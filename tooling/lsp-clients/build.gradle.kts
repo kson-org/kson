@@ -1,3 +1,6 @@
+import org.kson.NpmPack
+import org.kson.ReleaseArtifactSet
+
 plugins {
     base
 }
@@ -35,6 +38,11 @@ tasks {
     val buildVsCode = register<PixiExecTask>("npm_run_buildVSCode") {
         command=listOf("pnpm", "run", "buildVSCode")
         dependsOn(npmInstall)
+        doNotTrackState("Gradle doesn't see the sources pnpm builds from")
+        val vsix = file("vscode/dist/vscode-kson-plugin.vsix")
+        outputs.file(vsix)
+        // vscode/package.json's packagePlugin names the VSIX
+        doLast { check(vsix.isFile) { "packagePlugin did not write $vsix" } }
     }
 
     val buildMonaco = register<PixiExecTask>("npm_run_buildMonaco") {
@@ -72,6 +80,25 @@ tasks {
                 println("=".repeat(60))
             }
         }
+    }
+
+    register<Copy>("packageReleaseVsix") {
+        group = "distribution"
+        description = "Copies the VSCode extension for release into the root project's release-artifacts/portable directory"
+
+        from(buildVsCode)
+        into(ReleaseArtifactSet.PORTABLE.stageInto(this))
+    }
+
+    register<PixiExecTask>("packageReleaseMonacoNpmTarball") {
+        group = "distribution"
+        description = "Packs @kson_org/monaco-editor for release into the root project's release-artifacts/portable directory"
+
+        // the package's `files` ships the iframe bundle beside the library
+        dependsOn(buildMonaco, buildMonacoIframe)
+        val monacoDir = file("monaco")
+        val tarballName = NpmPack.tarballName(monacoDir.resolve("package.json"))
+        NpmPack.packIntoReleaseArtifacts(this, ReleaseArtifactSet.PORTABLE, monacoDir, tarballName)
     }
 
     // External demos — each consumes @kson/monaco-editor as a third-party package
