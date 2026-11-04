@@ -280,7 +280,7 @@ allprojects {
  * This is implemented to run outside the critical path of ordinary and CI builds: nothing here runs unless an IDE
  * is building its project model.
  */
-fun keepGeneratedOutputOutOfTheIde(project: Project) = with(project) {
+fun keepGeneratedOutputOutOfTheIde(project: Project): Unit = with(project) {
     /**
      * IntelliJ only honours an exclusion on the module whose "content root" (the directory subtree a module
      * owns) contains it, and it makes a module of every Gradle project.  So we note any nested modules (and the
@@ -291,14 +291,6 @@ fun keepGeneratedOutputOutOfTheIde(project: Project) = with(project) {
     the<IdeaModel>().module.excludeDirs.addAll(
         GeneratedOutputDirectories(projectDir, nestedContentRoots).locate()
     )
-
-    if (this == rootProject) {
-        /**
-         * The JDKs `jvmWrapper` installs are generated too, but sit at a path fixed by convention
-         *  rather than in a directory [GeneratedOutputDirectories] would recognize by name
-         */
-        the<IdeaModel>().module.excludeDirs.add(file("gradle/jdk"))
-    }
 }
 
 fun applyDetekt(project: Project) = with(project) {

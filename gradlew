@@ -117,7 +117,7 @@ esac
 
 
 # GRADLE JVM WRAPPER START MARKER
-BUILD_DIR="$HOME/.gradle/jdks/graalvm-21.0.2"
+BUILD_DIR="${GRADLE_USER_HOME:-$HOME/.gradle}/jdks/graalvm-21.0.2"
 JVM_ARCH=$(uname -m)
 JVM_TEMP_FILE=$BUILD_DIR/gradle-jvm-temp.tar.gz
 if [ "$darwin" = "true" ]; then
