@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Elimination: a branch can't lead when the document's value falls outside its narrowing pin.  Pin
+ * Elimination: a branch can't lead when the document's value falls outside its deciding pin.  Pin
  * selection and presence only narrow among the survivors.
  */
 class OneOfEliminationTest : JsonSchemaTest {

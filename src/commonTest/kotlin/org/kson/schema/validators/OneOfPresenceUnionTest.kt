@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Presence narrowing: among the branches no narrowing pin rules out, those that know (declare or
+ * Presence narrowing: among the branches no deciding pin rules out, those that know (declare or
  * require) a property the document carries lead the report.  Pin elimination and selection take priority.
  */
 class OneOfPresenceUnionTest : JsonSchemaTest {

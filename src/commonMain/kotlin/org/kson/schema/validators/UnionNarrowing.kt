@@ -10,29 +10,26 @@ import org.kson.parser.messages.MessageType.SCHEMA_OTHER_SUB_SCHEMA_ERRORS
 import org.kson.parser.messages.MessageType.SCHEMA_SUB_SCHEMA_ERRORS
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
+import org.kson.schema.PinDecision
+import org.kson.schema.SchemaDecisions
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
 /**
  * Reports a document that matched no branch of a `oneOf` / `anyOf`, led by the branches that
- * matter.  A *pin* is a property a branch fixes by `const` or `enum`.  A *discriminator* is a pin at
- * least two branches share, or a lone pin its branch also requires.  A branch *knows* a property it
- * declares or requires.  All are read through `$ref` and `allOf` by [JsonObjectSchema.pinnedProperties],
- * [JsonObjectSchema.requiredProperties] and [JsonObjectSchema.knownProperties].
+ * matter by what the pins decide for an object document:
+ *  - [PinDecision.NoBranchFits]: each rejected property gets one enum error listing the pinned values,
+ *    and these lead instead of any branch.  With no such property, every branch leads.
+ *  - [PinDecision.Selected]: the chosen branches lead.
+ *  - [PinDecision.Open]: the survivors that lead are those that know a property the document has and
+ *    not every branch knows, or all of them if none do.  A branch *knows* a property it declares or
+ *    requires, read through `$ref` and `allOf` by [JsonObjectSchema.knownProperties].
  *
- * The *narrowing pins* are the discriminators in [ValidationMode.FULL], as a lone optional pin is more
- * likely a setting than a choice of branch.  That is a heuristic: a shared optional setting qualifies
- * too.  In [ValidationMode.PARTIAL] they are all pins, which can move the report from the object
- * holding a half-typed value onto the value itself.
- *
- * For an object document, a branch the document contradicts on a narrowing pin can't lead.  Then,
- * counting only narrowing pins:
- *  1. If no branch survives, each property that every branch pins and rejects gets one enum error
- *     listing the pinned values, and these lead instead of any branch.  With no such property, or
- *     only one branch, every branch leads.
- *  2. Otherwise, survivors pinning a property the document has that no other survivor pins lead.
- *  3. If there are none, the survivors that lead are those that know a property the document has and
- *     not every branch knows, or all of them if none do.
+ * Only discriminators decide in [ValidationMode.FULL] ([SchemaDecisions.narrowOnDiscriminators]), as a
+ * lone optional pin is more likely a setting than a choice of branch.  That is a heuristic: a shared
+ * optional setting qualifies too.  In [ValidationMode.PARTIAL] all pins decide
+ * ([SchemaDecisions.narrowBranches]), which can move the report from the object holding a half-typed
+ * value onto the value itself.
  *
  * Every branch leads for a non-object document.
  *
@@ -104,53 +101,25 @@ private fun leadingBranches(
         return branches.indices.toList()
     }
     val document = ksonValue.propertyLookup
-    val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties() ?: emptyMap() }
-    val narrowingPins = if (mode == ValidationMode.FULL) discriminators(branches, allPins) else allPins
-
-    val contradictedPropertiesByBranch = narrowingPins.map { branchPins ->
-        branchPins.filter { (property, values) -> document[property]?.let { it !in values } ?: false }.keys
+    val decision = if (mode == ValidationMode.FULL) {
+        SchemaDecisions.narrowOnDiscriminators(branches, ksonValue)
+    } else {
+        SchemaDecisions.narrowBranches(branches, ksonValue)
     }
-    val survivors = branches.indices.filter { contradictedPropertiesByBranch[it].isEmpty() }
-
-    if (survivors.isEmpty()) {
-        // `reduce` needs a branch, and a lone branch keeps its own errors, which say more
-        val rejectedEverywhere =
-            if (branches.size > 1) contradictedPropertiesByBranch.reduce { shared, next -> shared intersect next } else emptySet()
-        rejectedEverywhere.forEach { property ->
-            val allowedValues = narrowingPins.flatMapTo(LinkedHashSet()) { it.getValue(property) }
-            reportEnumValueNotAllowed(document.getValue(property), enumErrors, allowedValues)
+    return when (decision) {
+        is PinDecision.NoBranchFits -> {
+            decision.rejected.forEach { (property, allowedValues) ->
+                reportEnumValueNotAllowed(document.getValue(property), enumErrors, allowedValues)
+            }
+            if (decision.rejected.isEmpty()) branches.indices.toList() else emptyList()
         }
-        return if (rejectedEverywhere.isEmpty()) branches.indices.toList() else emptyList()
+        is PinDecision.Selected -> decision.chosen
+        is PinDecision.Open -> {
+            val known = branches.map { (it as? JsonObjectSchema)?.knownProperties() ?: emptySet() }
+            presenceMatchedBranches(known, document.keys).filter { it in decision.survivors }.ifEmpty { decision.survivors }
+        }
     }
-
-    val selected = selectedBranches(narrowingPins, document.keys, survivors)
-    if (selected.isNotEmpty()) {
-        return selected
-    }
-
-    val known = branches.map { (it as? JsonObjectSchema)?.knownProperties() ?: emptySet() }
-    return presenceMatchedBranches(known, document.keys).filter { it in survivors }.ifEmpty { survivors }
 }
-
-private fun discriminators(
-    branches: List<JsonSchema>,
-    pins: List<Map<String, Set<KsonValue>>>
-): List<Map<String, Set<KsonValue>>> =
-    branches.zip(pins) { branch, branchPins ->
-        val required = (branch as? JsonObjectSchema)?.requiredProperties() ?: emptySet()
-        branchPins.filterKeys { property -> property in required || pins.count { property in it } >= 2 }
-    }
-
-private fun selectedBranches(
-    narrowingPins: List<Map<String, Set<KsonValue>>>,
-    present: Set<String>,
-    survivors: List<Int>
-): List<Int> =
-    survivors.filter { branchIndex ->
-        narrowingPins[branchIndex].keys.any { property ->
-            property in present && survivors.count { property in narrowingPins[it] } == 1
-        }
-    }
 
 private fun presenceMatchedBranches(known: List<Set<String>>, present: Set<String>): List<Int> {
     val distinguishing = known.flatten()
