@@ -21,11 +21,17 @@ When `main` is ready to have a release cut from it:
   * [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json): `X.(Y+1).0-dev.0`
   * [tooling/lsp-clients/monaco](../tooling/lsp-clients/monaco/package.json): `X.(Y+1).0-dev.0`
   * [tooling/language-server-protocol](../tooling/language-server-protocol/package.json): `X.(Y+1).0-dev.0`
-- Run build and tests to ensure that `Cargo.lock` and `uv.lock` are updated and to ensure that tests pass:
+- Update the [kson](../lib-rust/kson/Cargo.lock) and [kson-sys](../lib-rust/kson-sys/Cargo.lock) `Cargo.lock` files:
+    ```bash
+    cargo update --workspace --manifest-path lib-rust/kson-sys/Cargo.toml
+    cargo update --workspace --manifest-path lib-rust/kson/Cargo.toml
+    ```
+- Run build and tests to ensure that [uv.lock](../lib-python/uv.lock) is updated and to ensure that tests pass:
     ```bash
     (cd buildSrc && ./gradlew check)
     ./gradlew build
     ```
+  In `uv.lock`, only the `kson-lang` version should change (delete `lib-python/.uv/` and rebuild if `revision` also changes).
 - Manufacture a commit and pull request with these changes.
 
 #### On the `release/X.Y.Z` branch:
@@ -48,6 +54,7 @@ When `main` is ready to have a release cut from it:
         ```
   * lib-python, tooling/lsp-clients: These require manual version updates (no `-Prelease` flag support yet):
     - [lib-python](../lib-python/pyproject.toml)
+    - [uv.lock](../lib-python/uv.lock): the `kson-lang` version should change
     - [tooling/lsp-clients](../tooling/lsp-clients/package.json)
     - [tooling/lsp-clients/vscode](../tooling/lsp-clients/vscode/package.json)
     - [tooling/lsp-clients/shared](../tooling/lsp-clients/shared/package.json)

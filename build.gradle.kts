@@ -172,7 +172,7 @@ group = "org.kson"
  *   versioning that this should not be depended on
  * [[kson-version-num]]
  */
-val internalBaseVersion = "x.5"
+val internalBaseVersion = "x.6"
 val isRelease = project.findProperty("release") == "true"
 version = KsonVersion.getVersion(internalBaseVersion, isRelease)
 
