@@ -754,6 +754,83 @@ class SchemaDecisionsTest {
     }
 
     @Test
+    fun aBranchThatIsARefCyclePinsNothing() {
+        val cycles = listOf(
+            $$"A: { '$ref': '#/$defs/B' }, B: { '$ref': '#/$defs/A' }",
+            $$"A: { '$ref': '#/$defs/A' }",
+            $$"A: { allOf: [{ '$ref': '#/$defs/A' }] }"
+        )
+        for (cycle in cycles) {
+            val branches = branchesOf(
+                $$"""
+                    oneOf:
+                      - '$ref': '#/$defs/A'
+                      - properties:
+                          kind:
+                            const: square
+                            .
+                          .
+                        .
+                    '$defs': { $$cycle }
+                """.trimIndent()
+            )
+
+            assertOpen(narrowBranches(branches, kson("kind: Z")), survivors = listOf(0))
+        }
+    }
+
+    @Test
+    fun aRefCycleKeepsThePinsItPasses() {
+        val branches = branchesOf(
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/A'
+                  - properties:
+                      kind:
+                        const: square
+                        .
+                      .
+                    .
+                '$defs':
+                  A:
+                    allOf:
+                      - '$ref': '#/$defs/A'
+                      - properties:
+                          kind:
+                            const: circle
+            """.trimIndent()
+        )
+
+        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
+    }
+
+    /** Each trip around this cycle applies the `$id` again, so it never returns under the same base URI. */
+    @Test
+    fun aRefCycleLengtheningItsBaseUriPinsNothing() {
+        val branches = branchesOf(
+            $$"""
+                '$id': 'http://x/root/'
+                oneOf:
+                  - '$ref': 'sub/'
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    .
+                '$defs':
+                  N:
+                    '$id': 'sub/'
+                    type: array
+                    allOf:
+                      - '$ref': 'http://x/root/sub/'
+            """.trimIndent()
+        )
+
+        assertOpen(narrowBranches(branches, kson("kind: Z")), survivors = listOf(0))
+    }
+
+    @Test
     fun aValueThatIsNotAnObjectRulesOutNoBranch() {
         val everyBranch = listOf(0, 1, 2)
 

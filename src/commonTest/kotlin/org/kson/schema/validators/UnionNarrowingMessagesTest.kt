@@ -116,4 +116,83 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
             """.trimIndent() to wholeDocument
         )
     }
+
+    /** `type` stops validation at the first `N`, but reading the branch's pins goes on around the `allOf` cycle. */
+    @Test
+    fun testRefCycleLengtheningItsBaseUriStillReports() {
+        assertReportedInFullAndPartial(
+            $$"""
+                '$id': 'http://x/root/'
+                oneOf:
+                  - '$ref': 'sub/'
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    required:
+                      - kind
+                    .
+                '$defs':
+                  N:
+                    '$id': 'sub/'
+                    type: array
+                    allOf:
+                      - '$ref': 'http://x/root/sub/'
+            """.trimIndent(),
+            "kind: Z",
+            "Expected one of: array, but got: object" to Location(Coordinates(0, 0), Coordinates(0, 7), 0, 7)
+        )
+    }
+
+    /** `shared` is reached twice, and under the second base URI its `$ref: k` leads to a different pin. */
+    @Test
+    fun testRefsToTheSameTargetEachContributeTheirPins() {
+        val schema = $$"""
+            '$id': 'http://x/root/'
+            oneOf:
+              - allOf:
+                  - '$ref': 'http://x/root/shared'
+                  - '$id': 'a/'
+                    allOf:
+                      - '$ref': 'http://x/root/shared'
+                      =
+                  =
+
+              - properties:
+                  kind:
+                    const: B
+                    .
+                  .
+                .
+            '$defs':
+              S:
+                '$id': shared
+                allOf:
+                  - '$ref': k
+                    .
+                .
+              K1:
+                '$id': k
+                properties:
+                  kind:
+                    const: A
+                    .
+                  .
+                .
+              K2:
+                '$id': 'a/k'
+                properties:
+                  kind:
+                    const: C
+        """.trimIndent()
+
+        for (kind in listOf("Z", "C", "A")) {
+            assertReportedInFullAndPartial(
+                schema,
+                "kind: $kind",
+                "Value must be one of: \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
+            )
+        }
+    }
 }

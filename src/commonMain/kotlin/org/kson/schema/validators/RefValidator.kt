@@ -41,6 +41,13 @@ internal class RefValidator(
     /** The schema this `$ref` resolves to, or `null` if the target failed to parse. */
     internal fun resolvedSchema(): JsonSchema? = refParseResult.first
 
+    /**
+     * Each `$ref` parses its own copy of its target, so only this can tell that two lead to the same schema.
+     * Base URIs don't count, as a directory-style `$id` lengthens them on every trip around a cycle.
+     */
+    internal fun hasSameTargetAs(other: RefValidator): Boolean =
+        resolvedRef.resolvedValue === other.resolvedRef.resolvedValue
+
     private fun targetTitle(): String? = (resolvedSchema() as? JsonObjectSchema)?.title
 
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
