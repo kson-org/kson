@@ -9,8 +9,7 @@ import kotlin.test.assertEquals
 class MultipleOfValidatorTest : JsonSchemaTest {
 
     /**
-     * Validates [value] against `{"multipleOf": [multipleOf]}`, printing the schema, the document
-     * and the resulting messages so the run log shows exactly what went in and what came out.
+     * Validates [value] against `{"multipleOf": [multipleOf]}`
      */
     private fun checkMultipleOf(value: String, multipleOf: String, shouldBeValid: Boolean) {
         val schema = """{"multipleOf": $multipleOf}"""
@@ -18,18 +17,15 @@ class MultipleOfValidatorTest : JsonSchemaTest {
         val result = KsonCore.parseToAst(value, coreCompileConfig = CoreCompileConfig(schemaJson = jsonSchema))
         val messages = result.messages.map { it.message.toString() }
 
-        println("schema: $schema | document: $value | expected valid: $shouldBeValid | messages: $messages")
         assertEquals(shouldBeValid, messages.isEmpty(), "$value with multipleOf $multipleOf; messages: $messages")
     }
 
-    // Negative multiples whose floating-point remainder lands near -multipleOf (bug #2)
     @Test
     fun negativeDecimalMultipleIsValid() = checkMultipleOf("-0.3", "0.1", true)
 
     @Test
     fun negativeCentsAmountIsValid() = checkMultipleOf("-19.99", "0.01", true)
 
-    // Controls: these already behave correctly and must keep doing so
     @Test
     fun positiveDecimalMultipleIsValid() = checkMultipleOf("0.3", "0.1", true)
 
