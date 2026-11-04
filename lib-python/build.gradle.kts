@@ -2,6 +2,10 @@ import org.gradle.internal.os.OperatingSystem
 import org.kson.PythonSdist
 import org.kson.ReleaseArtifactSet
 
+plugins {
+    base
+}
+
 tasks {
     val uvwPath = if (OperatingSystem.current().isWindows) {
        "cmd /c uvw.bat"
@@ -13,12 +17,12 @@ tasks {
         dependsOn(":kson-lib:buildWithGraalVmNativeImage")
     }
 
-    val build by register<Task>("build") {
+    assemble {
         dependsOn(copyNativeArtifacts)
     }
 
     val test by register<Exec>("test") {
-        dependsOn(build)
+        dependsOn(assemble)
 
         group = "verification"
         commandLine = "$uvwPath run pytest".split(" ")
@@ -28,7 +32,7 @@ tasks {
     }
 
     val validateReadme by register<Exec>("validateReadme") {
-        dependsOn(build)
+        dependsOn(assemble)
 
         group = "verification"
         description = "Validates Python code blocks in readme.md"
@@ -46,10 +50,15 @@ tasks {
         isIgnoreExitValue = false
     }
 
-    register<Task>("check") {
+    check {
         dependsOn(test)
         dependsOn(validateReadme)
         dependsOn(typeCheck)
+    }
+
+    clean {
+        delete(copyNativeArtifacts)
+        delete("dist")
     }
 
     val buildSdist = register<Exec>("buildSdist") {

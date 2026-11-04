@@ -262,7 +262,7 @@ match result:
 <!-- pytest.mark.skip -->
 ```bash
 git clone https://github.com/kson-org/kson.git
-cd kson && ./gradlew :lib-python:build
+cd kson && ./gradlew :lib-python:assemble
 pip install ./lib-python
 ```
 

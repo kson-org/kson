@@ -86,7 +86,7 @@ def test_refusal_says_what_the_reader_needs(src_kson):
 
     # where to go next
     assert "git clone https://github.com/kson-org/kson.git" in refusal
-    assert "./gradlew :lib-python:build" in refusal
+    assert "./gradlew :lib-python:assemble" in refusal
 
 
 def test_build_wheel_refuses_before_setuptools_gets_a_look(src_kson):

@@ -45,7 +45,7 @@ def _ensure_native_artifacts():
             f"distribution, or this is a checkout where the Gradle build has not run.\n"
             f"Either way, \"Build from source\" in the readme is the way to get them:\n"
             f"    git clone https://github.com/kson-org/kson.git\n"
-            f"    cd kson && ./gradlew :lib-python:build"
+            f"    cd kson && ./gradlew :lib-python:assemble"
         )
 
 
