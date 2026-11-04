@@ -291,6 +291,21 @@ class FormatterTest {
         )
     }
 
+    @Test
+    fun testEmbedBlockWithCRLFLineEndings() {
+        // The \r of each CRLF must not leak into the embed tag or content, where it would be rendered
+        // as a literal `\r` in the tag and an extra blank line in the content on every format
+        assertFormatting(
+            "code: %python\r\n  print(1)\r\n  print(2)\r\n  %%\r\n",
+            """
+            code: %python
+              print(1)
+              print(2)
+              %%
+            """.trimIndent()
+        )
+    }
+
     /**
      * Regression test for an issue where our formatter was re-inserted embed blocks with escapes
      * processed, resulting in illegal Kson
