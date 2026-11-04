@@ -7,8 +7,20 @@
  * `kson:change` (programmatic setValue flushes are not relayed).
  */
 
+import editorWorker from 'monaco-editor/editor/editor.worker?worker';
 import { createKsonEditor, type KsonEditor } from '../index.js';
 import type { ParentMessage, InitMessage } from './iframeMessages.js';
+
+/**
+ * Monaco runs some features (like completion) in a background worker, and
+ * expects the page to tell it how to start that worker. We do so here
+ * for the iframe page.
+ *
+ * See https://github.com/microsoft/monaco-editor/blob/main/docs/integrate-esm.md#using-vite
+ */
+self.MonacoEnvironment = {
+    getWorker: () => new editorWorker(),
+};
 
 let initializing = false;
 let editor: KsonEditor | null = null;

@@ -1,4 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
+import org.kson.PythonSdist
+import org.kson.ReleaseArtifactSet
 
 plugins {
     base
@@ -59,11 +61,24 @@ tasks {
         delete("dist")
     }
 
-    register<Exec>("buildSdist") {
+    val buildSdist = register<Exec>("buildSdist") {
         dependsOn("copyLicense")
         group = "build"
         description = "Build the source distribution, which carries no native library and so builds no wheel"
         commandLine = "$uvwPath build --sdist".split(" ")
+        doNotTrackState("Gradle doesn't see the sources uv builds from")
+        val sdist = file("dist/${PythonSdist.fileName(file("pyproject.toml"))}")
+        outputs.file(sdist)
+        // setuptools names the sdist
+        doLast { check(sdist.isFile) { "uv build did not write $sdist" } }
+    }
+
+    register<Copy>("packageReleaseSdist") {
+        group = "distribution"
+        description = "Copies the source distribution for release into the root project's release-artifacts/portable directory"
+
+        from(buildSdist)
+        into(ReleaseArtifactSet.PORTABLE.stageInto(this))
     }
 
     register<Copy>("copyLicense") {

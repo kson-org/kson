@@ -29,7 +29,6 @@ build
 dist
 # gradlew generated files
 .gradle
-gradle/jdk
 # intellij settings
 .idea
 # IntelliJ Platform Gradle Plugin v2 cache
@@ -45,3 +44,6 @@ pixiw.bat
 
 # auto-generated from detekt.kson by transpileDetektConfigTask
 detekt.yml
+
+# download-release-artifacts.sh output
+/release-artifacts/

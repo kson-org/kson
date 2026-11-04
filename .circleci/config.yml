@@ -11,51 +11,85 @@ orbs:
   # Windows support for testing Python on Windows
   windows: "circleci/windows@5.1.1"
 
-# Run any mix of these targets on any branch by triggering a pipeline through the CircleCI API, e.g.
+# Run the build-release-targets workflow on any branch by triggering a pipeline through the CircleCI API, e.g.
 #   POST https://circleci.com/api/v2/project/gh/kson-org/kson/pipeline
 #   Circle-Token: <personal API token>
-#   {"branch": "my-branch", "parameters": {"run-windows": true, "run-python": true}}
-# A pipeline that turns any of them on runs just those targets, leaving build-all and build-release-targets off.
+#   {"branch": "my-branch", "parameters": {"run-release-targets": true}}
 parameters:
-  run-windows:
+  run-release-targets:
     type: boolean
     default: false
-
-  run-macos:
-    type: boolean
-    default: false
-
-  run-python:
-    type: boolean
-    default: false
-
 
 # Reusable command definitions - only for truly cross-platform operations
 commands:
-  gradle-core-tasks:
-    description: "Run core Gradle build and verification tasks"
+  gradle-build-steps:
+    description: "Run the Gradle build and verification steps, each with the same flags"
+    parameters:
+      gradle-flags:
+        type: string
+        description: "Flags appended to every Gradle command"
+        default: ""
+
+      package-tasks:
+        type: string
+        description: "Gradle tasks staging the release artifacts the job stores"
+
+
     steps:
       - run:
           name: "Download dependencies"
-          command: "./gradlew --no-daemon dependencies"
+          command: "./gradlew --no-daemon dependencies << parameters.gradle-flags >>"
 
       - run:
           name: "Verify buildSrc project"
           command: |
               cd buildSrc
-              ./gradlew --no-daemon check
+              ./gradlew --no-daemon check << parameters.gradle-flags >>
 
       - run:
           name: "Verify Kson project"
-          command: "./gradlew --no-daemon check"
+          command: "./gradlew --no-daemon check << parameters.gradle-flags >>"
 
       - run:
           name: "Build native kson-lib"
-          command: "./gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage"
+          command: "./gradlew --no-daemon :kson-lib:buildWithGraalVmNativeImage << parameters.gradle-flags >>"
 
       - run:
           name: "Package release artifacts"
-          command: "./gradlew --no-daemon packageReleaseArtifacts"
+          command: "./gradlew --no-daemon << parameters.package-tasks >> << parameters.gradle-flags >>"
+
+
+  gradle-core-tasks:
+    description: "Run core Gradle build and verification tasks"
+    parameters:
+      package-tasks:
+        type: string
+        description: "Gradle tasks staging the release artifacts the job stores"
+        default: packageNativeArtifacts
+
+    steps:
+      # keep both patterns below in sync with the build-release-targets workflow's branch pattern
+      - when:
+          condition:
+            matches:
+              pattern: "^release/\\d+\\.\\d+\\.\\d+$"
+              value: "<< pipeline.git.branch >>"
+
+          steps:
+            - gradle-build-steps:
+                gradle-flags: "-Prelease=true"
+                package-tasks: "<< parameters.package-tasks >>"
+
+
+      - unless:
+          condition:
+            matches:
+              pattern: "^release/\\d+\\.\\d+\\.\\d+$"
+              value: "<< pipeline.git.branch >>"
+
+          steps:
+            - gradle-build-steps:
+                package-tasks: "<< parameters.package-tasks >>"
 
       - run:
           name: "Verify clean checkout"
@@ -63,23 +97,23 @@ commands:
 
 
   # Every job that produces something a release needs stores it through here, so all of the artifacts
-  # can be found under `release-artifacts/<platform>`.
+  # can be found under `release-artifacts/<destination>`.
   store-release-artifacts:
-    description: "Store the artifacts a job built under the shared per-platform destination"
+    description: "Store the artifacts a job built under the shared release-artifacts destination"
     parameters:
       path:
         type: string
         description: "Directory holding the artifacts this job produced"
 
-      platform:
+      destination:
         type: string
-        description: "Platform identifier for the artifact destination"
+        description: "Subdirectory of release-artifacts to store the artifacts in"
 
 
     steps:
       - store_artifacts:
           path: "<< parameters.path >>"
-          destination: "release-artifacts/<< parameters.platform >>"
+          destination: "release-artifacts/<< parameters.destination >>"
 
 
   restore-build-caches:
@@ -131,7 +165,7 @@ commands:
           key: "v1-<< parameters.platform >>-uv-{{ checksum \"lib-python/uv.lock\" }}"
 
 
-  # Gradle build cache, scoped to build-linux-amd64 only (keeps stale cached output out of release artifacts).
+  # Gradle build cache, scoped to build-linux-amd64. Release builds switch it off in settings.gradle.kts.
   # Escape hatch: if CI misbehaves inexplicably, bump the v1->v2 prefix on both keys below to bust the cache.
   restore-gradle-build-cache:
     description: "Restore the Gradle build cache for build-linux-amd64"
@@ -255,8 +289,8 @@ jobs:
       # Cross-platform Gradle tasks
       - gradle-core-tasks
       - store-release-artifacts:
-          path: "build/release-artifacts"
-          platform: windows-amd64
+          path: "build/release-artifacts/native"
+          destination: windows-amd64
 
       - save-gradle-caches:
           platform: win-amd64
@@ -292,10 +326,15 @@ jobs:
       - clean-git-config:
           shell: bash
       # Cross-platform Gradle tasks
-      - gradle-core-tasks
+      - gradle-core-tasks:
+          package-tasks: "packageNativeArtifacts packagePortableArtifacts"
       - store-release-artifacts:
-          path: "build/release-artifacts"
-          platform: linux-amd64
+          path: "build/release-artifacts/native"
+          destination: linux-amd64
+
+      - store-release-artifacts:
+          path: "build/release-artifacts/portable"
+          destination: portable
 
       - save-gradle-build-cache
       - save-gradle-caches:
@@ -323,8 +362,8 @@ jobs:
       # Cross-platform Gradle tasks
       - gradle-core-tasks
       - store-release-artifacts:
-          path: "build/release-artifacts"
-          platform: macos-arm64
+          path: "build/release-artifacts/native"
+          destination: macos-arm64
 
       - save-gradle-caches:
           platform: macos-arm64
@@ -386,7 +425,7 @@ jobs:
           platform: linux-amd64
       - store-release-artifacts:
           path: "lib-python/dist"
-          platform: python-linux-amd64
+          destination: python-linux-amd64
 
 
   build-python-wheel-macos:
@@ -408,7 +447,7 @@ jobs:
           platform: macos-python
       - store-release-artifacts:
           path: "lib-python/dist"
-          platform: python-macos-arm64
+          destination: python-macos-arm64
 
 
   build-python-wheel-windows:
@@ -433,41 +472,23 @@ jobs:
           platform: windows-python
       - store-release-artifacts:
           path: "lib-python/dist"
-          platform: python-windows-amd64
+          destination: python-windows-amd64
 
 
 
 workflows:
   version: 2
   build-linux:
-    when: "not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
     jobs:
       - build-linux-amd64
-
-  # Run on pushes to the release/X.Y.Z branch and during the weekly schedule trigger on main (CircleCI project settings)
+  # Run on pushes to the release/X.Y.Z branch, during the weekly schedule trigger on main (CircleCI project settings),
+  # and on demand through the run-release-targets parameter
+  # keep in sync with the release branch pattern in gradle-core-tasks
   build-release-targets:
-    when: "(pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\") and not (pipeline.parameters.run-windows or pipeline.parameters.run-macos or pipeline.parameters.run-python)"
+    when: "pipeline.git.branch matches /^release\\/\\d+\\.\\d+\\.\\d+$/ or pipeline.trigger.type == \"schedule\" or pipeline.parameters.run-release-targets"
     jobs:
       - build-windows-amd64
       - build-macos-arm64
-      - test-python-sdist
-      - build-python-wheel-linux-amd64
-      - build-python-wheel-macos
-      - build-python-wheel-windows
-
-  on-demand-windows:
-    when: "pipeline.parameters.run-windows"
-    jobs:
-      - build-windows-amd64
-
-  on-demand-macos:
-    when: "pipeline.parameters.run-macos"
-    jobs:
-      - build-macos-arm64
-
-  on-demand-python:
-    when: "pipeline.parameters.run-python"
-    jobs:
       - test-python-sdist
       - build-python-wheel-linux-amd64
       - build-python-wheel-macos

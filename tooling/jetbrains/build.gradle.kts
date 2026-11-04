@@ -1,6 +1,7 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.kson.ReleaseArtifactSet
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -86,4 +87,12 @@ tasks {
             }
         }
     }
+}
+
+tasks.register<Copy>("packageReleasePlugin") {
+    group = "distribution"
+    description = "Copies the plugin zip for release into the root project's release-artifacts/portable directory"
+
+    from(tasks.buildPlugin)
+    into(ReleaseArtifactSet.PORTABLE.stageInto(this))
 }

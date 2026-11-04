@@ -23,12 +23,14 @@ import java.io.File
  *   using `["types", "import"]` and so matches neither `browser` nor `node`.
  */
 object UniversalJsPackage {
+    const val NAME = "@kson_org/kson"
+
     /**
      * Generates the `package.json` contents for the package at [version].
      */
     fun packageJson(version: String): String = """
         {
-          "name": "@kson_org/kson",
+          "name": "$NAME",
           "version": "$version",
           "description": "KSON - Extended JSON format with comments and more",
           "author": {

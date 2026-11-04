@@ -4,11 +4,13 @@ import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.tooling.GradleConnector
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import org.jetbrains.kotlin.gradle.targets.jvm.tasks.KotlinJvmTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.kson.KsonJvmTarget
 import org.kson.KsonVersion
-import org.kson.releaseArtifactsDir
+import org.kson.ReleaseArtifactSet
 import java.util.*
 
 val sharedProps = Properties().apply {
@@ -138,28 +140,29 @@ tasks {
 }
 
 /**
- * Empties [releaseArtifactsDir] so each run stages a release from scratch.
+ * Register tasks for packaging and cleaning release-artifacts in [ReleaseArtifactSet.NATIVE] and [ReleaseArtifactSet.PORTABLE]
  */
-tasks.register<Delete>("cleanReleaseArtifacts") {
-    group = "distribution"
-    description = "Empties build/release-artifacts so each run stages a release from scratch"
+ReleaseArtifactSet.entries.forEach { artifactSet ->
+    val stagingDir = artifactSet.stagingDir(project)
 
-    delete(releaseArtifactsDir)
-}
+    tasks.register<Delete>(artifactSet.cleanTaskName) {
+        group = "distribution"
+        description = "Empties ${relativePath(stagingDir)} so each run stages its artifacts from scratch"
 
-/**
- * Stages this platform's release archives, each with a `.sha256`, in [releaseArtifactsDir].
- */
-val packageReleaseArtifacts = tasks.register<Checksum>("packageReleaseArtifacts") {
-    group = "distribution"
-    description = "Stage this platform's release artifacts, with checksums, in build/release-artifacts"
+        delete(stagingDir)
+    }
 
-    dependsOn(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive")
-    inputFiles.from(releaseArtifactsDir.map { it.asFileTree.matching { include("*.tar.gz") } })
-    outputDirectory.set(releaseArtifactsDir)
+    tasks.register<Checksum>(artifactSet.packageTaskName) {
+        group = "distribution"
+        description = "Stage release artifacts, with checksums, in ${relativePath(stagingDir)}"
 
-    checksumAlgorithm.set(Checksum.Algorithm.SHA256)
-    appendFileNameToChecksum.set(true)
+        dependsOn(artifactSet.stagingTaskPaths)
+        inputFiles.from(stagingDir.map { it.asFileTree.matching { exclude("*.sha256") } })
+        outputDirectory.set(stagingDir)
+
+        checksumAlgorithm.set(Checksum.Algorithm.SHA256)
+        appendFileNameToChecksum.set(true)
+    }
 }
 
 group = "org.kson"
@@ -218,6 +221,12 @@ kotlin {
     }
 }
 
+// Pin mocha's serialize-javascript and diff to address their Dependabot advisories (see docs/dependency_maintenance.md).
+plugins.withType<YarnPlugin> {
+    the<YarnRootExtension>().resolution("**/mocha/serialize-javascript", "^7.1.4")
+    the<YarnRootExtension>().resolution("**/mocha/diff", "^8.0.4")
+}
+
 mavenPublishing {
     publishToMavenCentral(automaticRelease = false)
     signAllPublications()
@@ -271,7 +280,7 @@ allprojects {
  * This is implemented to run outside the critical path of ordinary and CI builds: nothing here runs unless an IDE
  * is building its project model.
  */
-fun keepGeneratedOutputOutOfTheIde(project: Project) = with(project) {
+fun keepGeneratedOutputOutOfTheIde(project: Project): Unit = with(project) {
     /**
      * IntelliJ only honours an exclusion on the module whose "content root" (the directory subtree a module
      * owns) contains it, and it makes a module of every Gradle project.  So we note any nested modules (and the
@@ -282,14 +291,6 @@ fun keepGeneratedOutputOutOfTheIde(project: Project) = with(project) {
     the<IdeaModel>().module.excludeDirs.addAll(
         GeneratedOutputDirectories(projectDir, nestedContentRoots).locate()
     )
-
-    if (this == rootProject) {
-        /**
-         * The JDKs `jvmWrapper` installs are generated too, but sit at a path fixed by convention
-         *  rather than in a directory [GeneratedOutputDirectories] would recognize by name
-         */
-        the<IdeaModel>().module.excludeDirs.add(file("gradle/jdk"))
-    }
 }
 
 fun applyDetekt(project: Project) = with(project) {
