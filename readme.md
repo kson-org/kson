@@ -68,6 +68,8 @@ We welcome you to dive in this project to explore, experiment, or contribute. A 
   * In Settings, under `Build, Execution, Deployment -> Build Tools -> Gradle`, for `Gradle JVM`:
     * choose "Add JDK..." and select the home folder of the JDK (`Contents/Home` on macOS) under the `unixJvmInstallDir` (or `winJvmInstallDir` on Windows) configured in [`jdk.properties`](jdk.properties). This JDK is installed the first time you run `./gradlew check` from the command line
   * Note that no manual configuration should be needed to exclude our generated directories (build output, `node_modules`, Cargo `target/`, etc.) from the IDE's index: they are wired into [the Gradle build](build.gradle.kts) from [GeneratedOutputDirectories](buildSrc/src/main/kotlin/GeneratedOutputDirectories.kt) and IntelliJ applies them automatically
+  * **Troubleshooting**:
+    * if `./gradlew` builds cleanly but IntelliJ reports compiler errors, you likely need to update your IntelliJ to a version which supports the version of Kotlin we're using (see [`settings.gradle.kts`](settings.gradle.kts))
 
 #### Project structure
 
