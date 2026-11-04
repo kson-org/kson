@@ -18,7 +18,8 @@
 
     <change-notes><![CDATA[
         <p>
-            <!-- [[kson-version-num]] - replace these release notes when cutting a release -->
+            Please see the list of updates to KSON v0.4.0, including syntax changes, smarter schema-aware completion and navigation, formatting fixes, and packaging improvements here:
+            <a href="https://kson.org/docs/blog/2026/11/04/kson-v040-release-notes/">https://kson.org/docs/blog/2026/11/04/kson-v040-release-notes/</a>
         </p>
     ]]></change-notes>
 
