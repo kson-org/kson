@@ -83,7 +83,7 @@ class Parser(private val builder: AstBuilder, private val maxNestingLevel: Int =
                 throw FatalParseException("Bug: this parser must consume all tokens in all cases")
             }
             rootMarker.drop()
-        } catch (@Suppress("SwallowedException") _: ExcessiveNestingException) {
+        } catch (_: ExcessiveNestingException) {
             // the value described by this kson document is too deeply nested, so we
             // reset all parsing and mark the whole document with our nesting error
             rootMarker.rollbackTo()

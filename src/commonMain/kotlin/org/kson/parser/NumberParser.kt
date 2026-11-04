@@ -112,7 +112,7 @@ class NumberParser(private val numberCandidate: String) {
             val result = if (!hasDecimalPoint && !hasExponent) {
                 try {
                     ParsedNumber.Integer(numberCandidate)
-                } catch (@Suppress("SwallowedException") e: IntegerOverflowException) {
+                } catch (_: IntegerOverflowException) {
                     // The exception type already carries the semantic — we convert it to a parser-level message
                     return NumberParseResult(null,
                         MessageType.INTEGER_OVERFLOW.create(numberCandidate))
