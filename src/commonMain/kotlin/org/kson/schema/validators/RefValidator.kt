@@ -16,7 +16,7 @@ import org.kson.value.navigation.json_pointer.JsonPointer
  * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), kept to name the target
  *   when it declares no `title`
  */
-class RefValidator(
+internal class RefValidator(
     private val resolvedRef: ResolvedRef,
     private val idLookup: SchemaIdLookup,
     private val refString: String

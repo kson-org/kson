@@ -8,7 +8,7 @@ import org.kson.schema.JsonSchema
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
-class ContainsValidator(private val containsSchema: JsonSchema) : JsonArrayValidator() {
+internal class ContainsValidator(private val containsSchema: JsonSchema) : JsonArrayValidator() {
     override fun validateArray(node: KsonList, messageSink: MessageSink, sourceContext: SourceContext) {
         // a half-typed array may not contain the required element yet — incompleteness, not a contradiction
         if (sourceContext.mode == ValidationMode.PARTIAL) return

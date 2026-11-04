@@ -201,7 +201,7 @@ internal class SchemaNavigator(
      * schema for an index the tuple covers, `additionalItems` past it, or a single `items` schema at any index.  Null
      * when none applies, as without `items`.
      *
-     * Validation applies the same rule in [org.kson.schema.validators.ItemsValidator].
+     * Validation applies the same rule in core's `ItemsValidator`.
      */
     private fun itemSchema(arraySchema: KsonObject, index: Int): KsonValue? {
         val items = arraySchema.propertyLookup["items"]

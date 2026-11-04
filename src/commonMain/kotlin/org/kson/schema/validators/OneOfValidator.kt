@@ -9,7 +9,7 @@ import org.kson.schema.JsonSchemaValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
-class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator {
+internal class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val matchAttemptMessageSinks: MutableList<LabelledMessageSink> = mutableListOf()
         val matchedSchemas: MutableList<JsonSchema> = mutableListOf()

@@ -6,7 +6,7 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonStringValidator
 import org.kson.validation.SourceContext
 
-class MaxLengthValidator(private val maxLength: Long) : JsonStringValidator() {
+internal class MaxLengthValidator(private val maxLength: Long) : JsonStringValidator() {
     override fun validateString(node: KsonString, messageSink: MessageSink, sourceContext: SourceContext) {
         val str = node.value
         if (countCodePoints(str) > maxLength) {

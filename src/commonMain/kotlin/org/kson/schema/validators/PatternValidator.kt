@@ -6,7 +6,7 @@ import org.kson.parser.messages.MessageType
 import org.kson.schema.JsonStringValidator
 import org.kson.validation.SourceContext
 
-class PatternValidator(private val pattern: Regex) : JsonStringValidator() {
+internal class PatternValidator(private val pattern: Regex) : JsonStringValidator() {
     override fun validateString(node: KsonString, messageSink: MessageSink, sourceContext: SourceContext) {
         val str = node.value
         if (!pattern.containsMatchIn(str)) {

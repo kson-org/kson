@@ -43,7 +43,7 @@ internal fun JsonSchema.isValid(
 /**
  * The main [JsonSchema] object representation
  */
-class JsonObjectSchema(
+internal class JsonObjectSchema(
     val title: String?,
     val description: String?,
     val comment: String?,
@@ -161,7 +161,7 @@ class JsonObjectSchema(
 /**
  * The most basic valid JsonSchema: `true` accepts all Json, `false` accepts none.
  */
-class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
+internal class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
   override fun descriptionWithDefault() = if (valid) "This schema accepts all JSON as valid" else "This schema rejects all JSON as invalid"
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
     if (valid) {
@@ -173,7 +173,7 @@ class JsonBooleanSchema(val valid: Boolean) : JsonSchema {
 }
 
 /** The integer [ksonNumber] denotes, or `null`: JSON Schema counts a decimal like `1.0` as an integer. */
-fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
+internal fun asSchemaInteger(ksonNumber: KsonNumber): Long? {
   return when (ksonNumber.value) {
     is NumberParser.ParsedNumber.Integer -> ksonNumber.value.value
     is NumberParser.ParsedNumber.Decimal -> {
