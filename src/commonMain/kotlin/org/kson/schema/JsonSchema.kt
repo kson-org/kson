@@ -28,16 +28,16 @@ sealed interface JsonSchema: Validator {
    */
   fun descriptionWithDefault(): String
   override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
+}
 
-  fun isValid(
-    ksonValue: KsonValue,
-    messageSink: MessageSink,
-    sourceContext: SourceContext = SourceContext()
-  ): Boolean {
-    val numErrors = messageSink.loggedMessages().size
-    validate(ksonValue, messageSink, sourceContext)
-    return messageSink.loggedMessages().size == numErrors
-  }
+internal fun JsonSchema.isValid(
+  ksonValue: KsonValue,
+  messageSink: MessageSink,
+  sourceContext: SourceContext = SourceContext()
+): Boolean {
+  val numErrors = messageSink.loggedMessages().size
+  validate(ksonValue, messageSink, sourceContext)
+  return messageSink.loggedMessages().size == numErrors
 }
 
 /**
