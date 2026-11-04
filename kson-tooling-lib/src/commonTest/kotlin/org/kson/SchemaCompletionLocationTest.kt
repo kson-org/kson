@@ -2876,4 +2876,38 @@ class SchemaCompletionLocationTest {
             completions.map { it.label }.toSet()
         )
     }
+
+    /** Each trip around `N`'s `allOf` cycle lengthens the base URI, so only the node itself says it was met. */
+    @Test
+    fun testNewKeyBesideARefCycleLengtheningItsBaseUri() {
+        val schema = $$"""
+            '$id': 'http://x/root/'
+            oneOf:
+              - '$ref': 'sub/'
+              - properties:
+                  kind:
+                    const: B
+                    .
+                  note:
+                    description: N
+                    .
+                  .
+                .
+            '$defs':
+              N:
+                '$id': 'sub/'
+                type: array
+                allOf:
+                  - '$ref': 'http://x/root/sub/'
+        """.trimIndent()
+
+        assertCompletionLabels(
+            schema,
+            """
+                kind: B
+                <caret>
+            """.trimIndent(),
+            setOf("note")
+        )
+    }
 }
