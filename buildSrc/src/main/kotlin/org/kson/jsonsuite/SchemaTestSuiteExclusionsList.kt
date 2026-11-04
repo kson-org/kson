@@ -3,16 +3,23 @@ package org.kson.jsonsuite
 /**
  * This is the list of [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  * tests which should not be run as part of test suite.  See comments on specific exclusions for more details.
+ *
+ * Exclusions are listed per [SchemaDraft] as test ids of the form `file::group::test`.  The drafts share many test
+ * names, so an id excludes its test only from the drafts it is listed for.
  */
-fun schemaTestSuiteExclusions() = setOf(
+fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
+    SchemaDraft.DRAFT_7 to sharedRemoteFetchingTests + draft7OnlyRemoteFetchingTests,
+    SchemaDraft.DRAFT_2020_12 to sharedRemoteFetchingTests + draft2020_12OnlyRemoteFetchingTests + draft2020_12FailingTests
+)
 
-    /**
-     * These excludes are all tests which require fetching remote schemas.  We do not want to support fetching
-     * right now and so require that schemas be [bundled](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents)
-     * before they are passed to Kson.
-     *
-     * We test bundled versions of these test in [org.kson.schema.JsonSchemaTestBundledRemotes].
-     */
+/**
+ * These excludes are the tests both drafts have which require fetching remote schemas.  We do not want to support fetching
+ * right now and so require that schemas be [bundled](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents)
+ * before they are passed to Kson.
+ *
+ * We test bundled versions of these test in [org.kson.schema.JsonSchemaTestBundledRemotes].
+ */
+private val sharedRemoteFetchingTests = setOf(
     "refRemote::remote ref::remote ref valid",
     "refRemote::remote ref::remote ref invalid",
     "refRemote::fragment within remote ref::remote fragment valid",
@@ -28,20 +35,45 @@ fun schemaTestSuiteExclusions() = setOf(
     "refRemote::root ref in remote ref::string is valid",
     "refRemote::root ref in remote ref::null is valid",
     "refRemote::root ref in remote ref::object is invalid",
-    "refRemote::remote ref with ref to definitions::invalid",
-    "refRemote::remote ref with ref to definitions::valid",
     "refRemote::Location-independent identifier in remote ref::integer is valid",
     "refRemote::Location-independent identifier in remote ref::string is invalid",
     "refRemote::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid",
-    "refRemote::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid",
-    "refRemote::${'$'}ref to ${'$'}ref finds location-independent ${'$'}id::number is valid",
-    "refRemote::${'$'}ref to ${'$'}ref finds location-independent ${'$'}id::non-number is invalid",
-    
-    /**
-     * These excludes are for tests that are currently failing in the Schema 2020-12 test suite.
-     * These tests need further investigation and implementation work.
-     */
+    "refRemote::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid"
+)
 
+/**
+ * Like [sharedRemoteFetchingTests], these require fetching remote schemas, but only Draft 7 has them
+ */
+private val draft7OnlyRemoteFetchingTests = setOf(
+    "refRemote::remote ref with ref to definitions::invalid",
+    "refRemote::remote ref with ref to definitions::valid",
+    "refRemote::${'$'}ref to ${'$'}ref finds location-independent ${'$'}id::number is valid",
+    "refRemote::${'$'}ref to ${'$'}ref finds location-independent ${'$'}id::non-number is invalid"
+)
+
+/**
+ * Like [sharedRemoteFetchingTests], these require fetching remote schemas, but only 2020-12 has them
+ */
+private val draft2020_12OnlyRemoteFetchingTests = setOf(
+    "refRemote::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",
+    "refRemote::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid",
+    "refRemote::anchor within remote ref::remote anchor invalid",
+    "refRemote::anchor within remote ref::remote anchor valid",
+    "refRemote::remote HTTP ref with different ${'$'}id::number is invalid",
+    "refRemote::remote HTTP ref with different ${'$'}id::string is valid",
+    "refRemote::remote HTTP ref with different URN ${'$'}id::number is invalid",
+    "refRemote::remote HTTP ref with different URN ${'$'}id::string is valid",
+    "refRemote::remote HTTP ref with nested absolute ref::number is invalid",
+    "refRemote::remote HTTP ref with nested absolute ref::string is valid",
+    "refRemote::remote ref with ref to defs::invalid",
+    "refRemote::remote ref with ref to defs::valid"
+)
+
+/**
+ * These excludes are for tests that are currently failing in the Schema 2020-12 test suite.
+ * These tests need further investigation and implementation work.
+ */
+private val draft2020_12FailingTests = setOf(
     // anchor tests
     "anchor::Location-independent identifier with absolute URI::match",
     "anchor::Location-independent identifier with absolute URI::mismatch",
@@ -159,20 +191,6 @@ fun schemaTestSuiteExclusions() = setOf(
     "ref::URN base URI with URN and anchor ref::a string is valid",
     "ref::URN ref with nested pointer ref::a non-string is invalid",
     "ref::URN ref with nested pointer ref::a string is valid",
-
-    // refRemote tests (additional)
-    "refRemote::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",
-    "refRemote::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid",
-    "refRemote::anchor within remote ref::remote anchor invalid",
-    "refRemote::anchor within remote ref::remote anchor valid",
-    "refRemote::remote HTTP ref with different ${'$'}id::number is invalid",
-    "refRemote::remote HTTP ref with different ${'$'}id::string is valid",
-    "refRemote::remote HTTP ref with different URN ${'$'}id::number is invalid",
-    "refRemote::remote HTTP ref with different URN ${'$'}id::string is valid",
-    "refRemote::remote HTTP ref with nested absolute ref::number is invalid",
-    "refRemote::remote HTTP ref with nested absolute ref::string is valid",
-    "refRemote::remote ref with ref to defs::invalid",
-    "refRemote::remote ref with ref to defs::valid",
 
     // unevaluatedItems tests
     "unevaluatedItems::item is evaluated in an uncle schema to unevaluatedItems::uncle keyword evaluation is not significant",

@@ -495,12 +495,6 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_18() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "items::items and subitems::valid items" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -900,12 +894,6 @@ class SchemaDraft7SuiteTest_items : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_23() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "items::items and subitems::fewer items is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """

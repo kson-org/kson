@@ -24,20 +24,21 @@ import java.nio.file.Path
  * @param sourceRootDir The directory to consider the src root - [classPackage] will be used to determine which
  *   sub-folder relative to [sourceRootDir] to place generated tests into
  * @param classPackage The package to place the generated tests into
+ * @param schemaTestExclusions The ids of each draft's schema tests to generate as excluded from the running suite,
+ *   in the format described at [schemaTestSuiteExclusions]
  */
 class JsonTestSuiteGenerator(
     private val jsonSuiteGitCheckout: CleanGitCheckout,
     private val schemaSuiteGitCheckout: CleanGitCheckout,
     private val projectRoot: Path,
     private val sourceRootDir: Path,
-    private val classPackage: String
+    private val classPackage: String,
+    private val schemaTestExclusions: Map<SchemaDraft, Set<String>> = schemaTestSuiteExclusions()
 ) {
     val jsonTestSourceFilesDir: Path = jsonSuiteGitCheckout.checkoutDir.toPath().resolve("test_parsing")
     val testClassPackageDir = sourceRootDir.resolve(classPackage.replace('.', '/'))
     val generatedJsonSuiteTestPath: Path =
         testClassPackageDir.resolve("JsonSuiteTest.kt")
-    val draft7TestClassName = "SchemaDraft7SuiteTest"
-    val draft2020_12ClassName = "SchemaDraft2020_12SuiteTest"
 
     fun generate() {
         testClassPackageDir.toFile().mkdirs()
@@ -48,30 +49,34 @@ class JsonTestSuiteGenerator(
 
         val schemaTestSourceFilesDir: Path = schemaSuiteGitCheckout.checkoutDir.toPath().resolve("tests")
 
-        val schemaDraft7TestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, "draft7", projectRoot).loadTestData()
-        schemaDraft7TestDataList.forEach { schemaTestFileData ->
-            val testClassName = draft7TestClassName + "_" + schemaTestFileData.testFileName.replace("-", "_")
-            val testFileName = testClassPackageDir.resolve("$testClassName.kt")
-            testFileName.toFile().writeText(
-                generateSchemaSuiteTestClass(
-                    this.javaClass.name,
-                    classPackage,
-                    testClassName,
-                    schemaTestFileData))
-        }
-
-        val schemaDraft2020_12TestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, "draft2020-12", projectRoot).loadTestData()
-        schemaDraft2020_12TestDataList.forEach { schemaTestFileData ->
-            val testClassName = draft2020_12ClassName + "_" + schemaTestFileData.testFileName.replace("-", "_")
-            val testFileName = testClassPackageDir.resolve("$testClassName.kt")
-            testFileName.toFile().writeText(
-                generateSchemaSuiteTestClass(
-                    this.javaClass.name,
-                    classPackage,
-                    testClassName,
-                    schemaTestFileData))
+        for (draft in SchemaDraft.entries) {
+            val draftExclusions = schemaTestExclusions[draft].orEmpty()
+            val schemaTestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, draft, projectRoot).loadTestData()
+            ensureExclusionsMatchTests(draft, draftExclusions, schemaTestDataList)
+            schemaTestDataList.forEach { schemaTestFileData ->
+                val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.testFileName.replace("-", "_")
+                val testFileName = testClassPackageDir.resolve("$testClassName.kt")
+                testFileName.toFile().writeText(
+                    generateSchemaSuiteTestClass(
+                        this.javaClass.name,
+                        classPackage,
+                        testClassName,
+                        schemaTestFileData,
+                        draftExclusions))
+            }
         }
     }
+}
+
+/**
+ * The drafts of [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) we generate tests for
+ *
+ * @param folderName the name of the suite's folder holding this draft's tests
+ * @param testClassPrefix the name prefix of the test classes generated for this draft
+ */
+enum class SchemaDraft(val folderName: String, val testClassPrefix: String) {
+    DRAFT_7("draft7", "SchemaDraft7SuiteTest"),
+    DRAFT_2020_12("draft2020-12", "SchemaDraft2020_12SuiteTest"),
 }
 
 /**
@@ -141,7 +146,13 @@ private class SchemaTestData(
     val testFileName: String,
     val filePathFromProjectRoot: String,
     val schemaTestGroups: List<SchemaTestGroup>
-)
+) {
+    /**
+     * The id of [test] from [group] within its draft, in the format of [schemaTestSuiteExclusions]
+     */
+    fun idWithinDraft(group: SchemaTestGroup, test: SchemaTestSpec) =
+        "$testFileName::${group.description}::${test.description}"
+}
 
 private fun generateJsonSuiteTestClass(
     generatorClassName: String,
@@ -246,11 +257,28 @@ private fun assertParseResult(
 """
 }
 
+/**
+ * Ensures each of [draftExclusions] is the id of one of [draft]'s tests in [draftTestData], so that a mistyped
+ * exclusion fails generation rather than silently excluding nothing
+ */
+private fun ensureExclusionsMatchTests(draft: SchemaDraft, draftExclusions: Set<String>, draftTestData: List<SchemaTestData>) {
+    val draftTestIds = draftTestData.flatMap { testData ->
+        testData.schemaTestGroups.flatMap { group -> group.tests.map { test -> testData.idWithinDraft(group, test) } }
+    }.toSet()
+    val unmatchedExclusions = draftExclusions - draftTestIds
+    if (unmatchedExclusions.isNotEmpty()) {
+        throw RuntimeException(
+            "Invalid schema test exclusions for ${draft.name}: no ${draft.folderName} test has these ids:\n" +
+                    unmatchedExclusions.joinToString(",\n") { "\"$it\"" })
+    }
+}
+
 private fun generateSchemaSuiteTestClass(
     generatorClassName: String,
     testClassPackage: String,
     testClassName: String,
-    tests: SchemaTestData
+    tests: SchemaTestData,
+    draftExclusions: Set<String>
 ): String {
     var testNum = 1
     return """package $testClassPackage
@@ -274,7 +302,7 @@ ${    run {
             val schemaComment = if (schema.comment != null) "// " + schema.comment else ""
             for (test in schema.tests) {
                 // construct a unique ID for this test
-                val schemaTestId = "${tests.testFileName}::${schema.description}::${test.description}"
+                val schemaTestId = tests.idWithinDraft(schema, test)
                 val testCode = """
                     |    /**
                     |     * Test generated by [$generatorClassName] based on `${tests.filePathFromProjectRoot}`:
@@ -284,7 +312,7 @@ ${    run {
                     |     */
                     |    @Test
                     |    fun jsonSchemaSuiteTest_${testNum++}() {${
-                        if (schemaTestSuiteExclusions().contains(schemaTestId)) {
+                        if (draftExclusions.contains(schemaTestId)) {
                             """
                     |
                     |       /**
@@ -364,20 +392,20 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
  * This class manages loading and transforming the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
  *
- * NOTE: we currently only support Draft7 version of Json Schema. TODO expand support to other version.
- *
  * @param testDefinitionFilesDir the [Path] on disk to the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  *        test files
+ *
+ * @param draft the draft whose tests to load from [testDefinitionFilesDir]
  *
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
  *                      machine-independent file paths relative to the project root
  */
-private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, draftTestFolderName: String, private val projectRoot: Path) {
-    private val draftSevenTestSourceFiles = (testDefinitionFilesDir.resolve(draftTestFolderName).toFile().listFiles()
+private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, draft: SchemaDraft, private val projectRoot: Path) {
+    private val draftTestSourceFiles = (testDefinitionFilesDir.resolve(draft.folderName).toFile().listFiles()
         ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
 
     fun loadTestData(): List<SchemaTestData> {
-        return draftSevenTestSourceFiles
+        return draftTestSourceFiles
             .filter { !it.isDirectory }
             .map {
                 val contents = it.readText(Charsets.UTF_8)
