@@ -1,6 +1,5 @@
 package org.kson.parser
 
-import org.kson.parser.NumberParser.ParsedNumber
 import org.kson.parser.messages.Message
 import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
@@ -291,7 +290,7 @@ class NumberParser(private val numberCandidate: String) {
 private fun convertToLong(numberString: String): Long {
     try {
         return numberString.toLong()
-    } catch (e: NumberFormatException) {
+    } catch (_: NumberFormatException) {
         /**
          * Our number grammar should ensure this is an integer, though it won't catch massive numbers
          * that are our of range.  If this [NumberFormatException] is anything other than an out-of-range
