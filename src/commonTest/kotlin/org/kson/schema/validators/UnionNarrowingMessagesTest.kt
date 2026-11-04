@@ -32,6 +32,50 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
         }
     }
 
+    /** Asserts a pin written inline and through a `$ref` report the same, as given, in `oneOf` and `anyOf` alike. */
+    private fun assertPinSpellingsReport(document: String, full: List<String>, partial: List<String> = full) {
+        fun union(keyword: String, kindA: String, kindBOrC: String, definitions: String = "{}") = $$"""
+            $$keyword:
+              - properties:
+                  kind: $$kindA
+                  alpha:
+                    type: number
+                    .
+                  .
+                required:
+                  - kind
+                  - alpha
+                  =
+
+              - properties:
+                  kind: $$kindBOrC
+                  beta:
+                    type: number
+                    .
+                  .
+                required:
+                  - kind
+                  - beta
+                .
+            '$defs': $$definitions
+        """.trimIndent()
+
+        for (keyword in listOf("oneOf", "anyOf")) {
+            val inline = union(keyword, "{ const: A }", "{ enum: [B, C] }")
+            val ref = union(
+                keyword,
+                $$"{ '$ref': '#/$defs/KindA' }",
+                $$"{ '$ref': '#/$defs/KindBOrC' }",
+                "{ KindA: { const: A }, KindBOrC: { enum: [B, C] } }"
+            )
+            for ((mode, expected) in listOf(ValidationMode.FULL to full, ValidationMode.PARTIAL to partial)) {
+                val reportedForRef = reported(ref, document, mode)
+                assertLeadsWith(expected, reportedForRef.map { it.first }, mode, "$keyword in $mode")
+                assertEquals(reported(inline, document, mode), reportedForRef, "$keyword in $mode")
+            }
+        }
+    }
+
     @Test
     fun testEnumBesideAUnionRejectingTheSameValueReportsOnce() {
         assertReportedInFullAndPartial(
@@ -194,5 +238,86 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
                 "Value must be one of: \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
             )
         }
+    }
+
+    @Test
+    fun testValueEveryPinRejectsReportsTheSameThroughARef() {
+        assertPinSpellingsReport("kind: Z", full = listOf("Value must be one of: \"A\", \"B\", \"C\""))
+    }
+
+    @Test
+    fun testValueOnePinChoosesReportsTheSameThroughARef() {
+        assertPinSpellingsReport(
+            "kind: C",
+            full = listOf("Missing required properties: beta"),
+            partial = emptyList()
+        )
+        assertPinSpellingsReport(
+            """
+                kind: C
+                alpha: 1
+                beta: big
+            """.trimIndent(),
+            full = listOf("Property 'beta': Expected one of: number, but got: string")
+        )
+    }
+
+    @Test
+    fun testMalformedPropertyRefDoesNotThrowAndTheEnumErrorIsReported() {
+        assertReportedInFullAndPartial(
+            $$"""
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      extra:
+                        '$ref': '#/$defs/Bad'
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    .
+                '$defs':
+                  Bad:
+                    '$ref': '#/$defs/a~2b'
+            """.trimIndent(),
+            "kind: Z",
+            "Value must be one of: \"A\", \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
+        )
+    }
+
+    /** `type` stops validation short of `extra`, so a malformed pointer there may not surface through its pins. */
+    @Test
+    fun testMalformedRefBeyondAWrongTypePinsNothing() {
+        assertReportedInFullAndPartial(
+            $$"""
+                oneOf:
+                  - type: string
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      extra:
+                        '$ref': '#/$defs/Bad'
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    .
+                '$defs':
+                  Bad:
+                    '$ref': '#/$defs/a~2b'
+            """.trimIndent(),
+            """
+                kind: Z
+                extra: 1
+            """.trimIndent(),
+            "Value must be one of: \"A\", \"B\"" to Location(Coordinates(0, 6), Coordinates(0, 7), 6, 7)
+        )
     }
 }

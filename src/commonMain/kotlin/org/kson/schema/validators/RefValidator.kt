@@ -32,6 +32,27 @@ internal class RefValidator(
         schema to parseMessageSink.loggedMessages()
     }
 
+    // the whole chain is resolved at once: parsing it hop by hop would never notice a cycle
+    private val targetPins: Set<KsonValue>? by lazy {
+        val target = idLookup.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        if (target.endsAtUnresolvedRef) return@lazy null
+        val schema = SchemaParser.parseSchemaElement(
+            target.resolvedValue,
+            MessageSink(),
+            target.resolvedValueBaseUri,
+            idLookup)
+        (schema as? JsonObjectSchema)?.pinnedValues()
+    }
+
+    override fun pinnedValues(): Set<KsonValue>? =
+        try {
+            targetPins
+        } catch (_: IllegalArgumentException) {
+            // a wrong `type` can stop validation short of a property's malformed `$ref`,
+            // so reading that property's pin mustn't be what throws
+            null
+        }
+
     /**
      * A short name for the referenced schema: its `title`, else the last JSON Pointer token of
      * [refString] (`#/$defs/TaskModel` -> `TaskModel`), else `null`.

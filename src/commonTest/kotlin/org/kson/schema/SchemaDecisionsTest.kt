@@ -753,6 +753,125 @@ class SchemaDecisionsTest {
         assertOpen(narrowBranches(emptyList(), kson("kind: circle")), survivors = emptyList())
     }
 
+    /** A union whose first branch has `kind` as a lone `$ref` to the definition `A` in [definitions]. */
+    private fun unionWithKindRef(definitions: String) = branchesOf(
+        $$"""
+            oneOf:
+              - properties:
+                  kind:
+                    '$ref': '#/$defs/A'
+              - properties:
+                  kind:
+                    const: square
+                    .
+                  .
+                .
+            '$defs': { $$definitions }
+        """.trimIndent()
+    )
+
+    @Test
+    fun aPropertyThatIsARefToAConstOrEnumPins() {
+        val toConst = unionWithKindRef("A: { const: circle }")
+        assertSelected(narrowBranches(toConst, kson("kind: circle")), chosen = listOf(0))
+
+        val toEnum = unionWithKindRef("A: { enum: [circle, ellipse] }")
+        assertNoBranchFits(narrowBranches(toEnum, kson("kind: Z")), "kind" to listOf("circle", "ellipse", "square"))
+    }
+
+    @Test
+    fun aPinIsReadThroughARefChain() {
+        val branches = unionWithKindRef($$"A: { '$ref': '#/$defs/B' }, B: { const: circle }")
+
+        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
+    }
+
+    @Test
+    fun aRefTargetPinsByTheSameRuleAsAnInlineSchema() {
+        val typeIsNoValidator = unionWithKindRef("A: { type: string, const: circle }")
+        assertSelected(narrowBranches(typeIsNoValidator, kson("kind: circle")), chosen = listOf(0))
+
+        val twoValidators = unionWithKindRef("A: { enum: [circle], minLength: 1 }")
+        assertOpen(narrowBranches(twoValidators, kson("kind: circle")), survivors = listOf(0))
+    }
+
+    @Test
+    fun aPropertyThatIsARefCyclePinsNothing() {
+        val cycles = listOf(
+            $$"A: { '$ref': '#/$defs/B' }, B: { '$ref': '#/$defs/A' }",
+            $$"A: { '$ref': '#/$defs/A' }"
+        )
+        for (cycle in cycles) {
+            assertOpen(narrowBranches(unionWithKindRef(cycle), kson("kind: Z")), survivors = listOf(0))
+        }
+    }
+
+    @Test
+    fun aPropertyThatRefsItsOwnSchemaPinsNothing() {
+        val branches = branchesOf(
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/Node'
+                  - properties:
+                      child:
+                        const: leaf
+                        .
+                      .
+                    .
+                '$defs':
+                  Node:
+                    properties:
+                      child:
+                        '$ref': '#/$defs/Node'
+            """.trimIndent()
+        )
+
+        assertOpen(narrowBranches(branches, kson("child: Z")), survivors = listOf(0))
+    }
+
+    @Test
+    fun onlyPropertiesTheDocumentHasAreReadForPins() {
+        val branch = compiled(
+            """
+                properties:
+                  kind:
+                    const: A
+                    .
+                  mode:
+                    const: fast
+            """.trimIndent()
+        )
+
+        assertEquals(setOf("kind"), assertIs<JsonObjectSchema>(branch).pinnedProperties(setOf("kind", "other")).keys)
+    }
+
+    @Test
+    fun aMalformedPropertyRefDoesNotThrowAndPinsStillDecide() {
+        val branches = branchesOf(
+            $$"""
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      extra:
+                        '$ref': '#/$defs/Bad'
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    .
+                '$defs':
+                  Bad:
+                    '$ref': '#/$defs/a~2b'
+            """.trimIndent()
+        )
+
+        assertNoBranchFits(narrowBranches(branches, kson("kind: Z")), "kind" to listOf("A", "B"))
+    }
+
     @Test
     fun aBranchThatIsARefCyclePinsNothing() {
         val cycles = listOf(

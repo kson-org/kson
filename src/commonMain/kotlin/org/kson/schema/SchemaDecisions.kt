@@ -56,6 +56,9 @@ object SchemaDecisions {
     /**
      * What the pins of [branches] alone say about [value].  A branch that [compile] couldn't build (`null`) pins
      * nothing and stays open, and a [value] that isn't an object rules out no branch.
+     *
+     * @throws IllegalArgumentException when [value] is an object and a branch's own `$ref` or `allOf` reaches a
+     *   `$ref` whose JSON Pointer is malformed
      */
     internal fun narrowBranches(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
         narrow(branches, value, onlyDiscriminators = false)
@@ -72,11 +75,11 @@ object SchemaDecisions {
         if (document == null || branches.isEmpty()) {
             return PinDecision.Open(branches.indices.toList())
         }
-        val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties().orEmpty() }
+        val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties(document.keys).orEmpty() }
         val pins = if (onlyDiscriminators) discriminators(branches, allPins) else allPins
 
         val contradicted = pins.map { branchPins ->
-            branchPins.filter { (property, values) -> document[property]?.let { it !in values } ?: false }.keys
+            branchPins.filter { (property, values) -> document.getValue(property) !in values }.keys
         }
         val survivors = branches.indices.filter { contradicted[it].isEmpty() }
         if (survivors.isEmpty()) {
@@ -89,7 +92,7 @@ object SchemaDecisions {
         }
 
         val chosen = survivors.filter { branch ->
-            pins[branch].keys.any { property -> property in document && survivors.count { property in pins[it] } == 1 }
+            pins[branch].keys.any { property -> survivors.count { property in pins[it] } == 1 }
         }
         return if (chosen.isNotEmpty()) {
             PinDecision.Selected(chosen)

@@ -110,13 +110,14 @@ internal class JsonObjectSchema(
   }
 
   /**
-   * The properties `const` or `enum` fixes to a value set, across every [compositionSources] schema.
-   * A property several of them pin is pinned to the intersection, which may be empty.
+   * Those of the [present] properties that `const` or `enum` fixes to a value set, directly or through a lone
+   * `$ref`, across every [compositionSources] schema.  A property several of them pin is pinned to the
+   * intersection, which may be empty.
    */
-  internal fun pinnedProperties(): Map<String, Set<KsonValue>> {
+  internal fun pinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> {
     val pins = mutableMapOf<String, Set<KsonValue>>()
     compositionSources().forEach { source ->
-      source.ownPinnedProperties().forEach { (property, values) ->
+      source.ownPinnedProperties(present).forEach { (property, values) ->
         pins[property] = pins[property]?.intersect(values) ?: values
       }
     }
@@ -133,11 +134,13 @@ internal class JsonObjectSchema(
       source.ownRequiredProperties() + source.ownPropertySchemas().keys.map { it.value }
     }
 
-  private fun ownPinnedProperties(): Map<String, Set<KsonValue>> =
-    ownPropertySchemas().mapNotNull { (name, propertySchema) ->
-      val pinned = (propertySchema as? JsonObjectSchema)?.schemaValidators?.singleOrNull()?.pinnedValues()
-      pinned?.let { name.value to it }
+  private fun ownPinnedProperties(present: Set<String>): Map<String, Set<KsonValue>> =
+    ownPropertySchemas().filterKeys { it.value in present }.mapNotNull { (name, propertySchema) ->
+      (propertySchema as? JsonObjectSchema)?.pinnedValues()?.let { name.value to it }
     }.toMap()
+
+  /** The values this schema's lone validator restricts its target to, or `null` if it doesn't pin. */
+  internal fun pinnedValues(): Set<KsonValue>? = schemaValidators.singleOrNull()?.pinnedValues()
 
   private fun ownRequiredProperties(): Set<String> =
     schemaValidators.filterIsInstance<RequiredValidator>()
