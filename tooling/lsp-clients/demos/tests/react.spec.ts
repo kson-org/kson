@@ -38,12 +38,18 @@ test.describe('React demo', () => {
         await page.goto('/');
         await expect(page.locator('.monaco-editor')).toHaveCount(3, { timeout: 15000 });
 
-        const ksonModelCount = await page.evaluate(() => {
-            const m = (window as { monaco?: typeof import('monaco-editor') }).monaco;
-            if (!m) return -1;
-            return m.editor.getModels().filter((mdl) => mdl.getLanguageId() === 'kson').length;
-        });
-        expect(ksonModelCount).toBe(2);
+        // useKsonLsp registers the language from an effect that runs after onMount,
+        // so it can land after the editors are in the DOM. Count editor models only:
+        // once attached, kson #1's bundled schema adds a third kson model.
+        await expect.poll(
+            () => page.evaluate(() => {
+                const m = (window as { monaco?: typeof import('monaco-editor') }).monaco;
+                if (!m) return -1;
+                return m.editor.getEditors()
+                    .filter((ed) => ed.getModel()?.getLanguageId() === 'kson').length;
+            }),
+            { timeout: 10000 },
+        ).toBe(2);
     });
 
     test('kson #1 schema produces a diagnostic for the unknown_key sample', async ({ page }) => {

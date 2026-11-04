@@ -25,8 +25,9 @@ self.MonacoEnvironment = {
 let initializing = false;
 let editor: KsonEditor | null = null;
 
-const container = document.getElementById('editor');
-if (!container) throw new Error('Missing #editor element in iframe HTML');
+const editorElement = document.getElementById('editor');
+if (!editorElement) throw new Error('Missing #editor element in iframe HTML');
+const container: HTMLElement = editorElement;
 container.style.cssText = 'position:absolute; inset:0;';
 
 /** Handle messages from the parent window. */

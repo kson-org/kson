@@ -18,6 +18,12 @@ export default defineConfig({
             outDir: 'dist',
             include: ['src/**/*.ts'],
             exclude: ['src/**/*.test.ts', 'src/test/**'],
+            // The plugin only logs type errors; fail the build so they can't slip through.
+            afterDiagnostic(diagnostics) {
+                if (diagnostics.length > 0) {
+                    throw new Error(`${diagnostics.length} type error(s) in @kson/monaco-editor; see above`);
+                }
+            },
         }),
     ],
     build: {
