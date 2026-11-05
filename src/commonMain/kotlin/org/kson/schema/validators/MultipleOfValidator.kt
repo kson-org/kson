@@ -13,7 +13,8 @@ class MultipleOfValidator(private val multipleOf: Double) : JsonNumberValidator(
         if (multipleOf != 0.0) {
             val remainder = number % multipleOf
             val epsilon = 1e-10 * max(abs(number), abs(multipleOf))
-            if (abs(remainder) > epsilon && abs(remainder - multipleOf) > epsilon) {
+            // `%` keeps the dividend's sign, so a true multiple can leave a remainder near 0 or near ±multipleOf
+            if (abs(remainder) > epsilon && abs(abs(remainder) - abs(multipleOf)) > epsilon) {
                 messageSink.error(
                     node.location,
                     MessageType.SCHEMA_VALUE_MUST_BE_MULTIPLE_OF.create(multipleOf.toString())
