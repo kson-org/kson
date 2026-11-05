@@ -21,7 +21,7 @@ object KsonVersion {
      * Update this when preparing a new release.
      */
     // [[kson-version-num]] - This version defines the property globally.
-    const val BASE_VERSION = "0.4.0"
+    const val BASE_VERSION = "0.5.0"
 
     /**
      * Returns the short git commit SHA (8 characters) using JGit.

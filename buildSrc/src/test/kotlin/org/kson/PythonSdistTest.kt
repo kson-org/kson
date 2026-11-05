@@ -30,7 +30,6 @@ class PythonSdistTest {
             authors = [
               { name="KSON", email="kson@kson.org" },
             ]
-            # [[kson-version-num]]
             name = "kson-lang"
             version = "0.4.0.dev0"
 
