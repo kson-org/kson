@@ -1,4 +1,4 @@
-# Regular Dependency Maintenance
+# Dependency Maintenance
 
 KSON's multi-platform build and test architecture depends on a number of external dependencies, _all_ of which must be pinned to deterministic versions for build stability and reproducibility.
 
@@ -99,3 +99,40 @@ Some of our dependencies are deliberately not current: they represent our backwa
 Audit for new or missed unpinned/floating dependencies that are not yet captured in this doc, and add them where appropriate. We would ideally catch these before they get in, but historically this type of thing has a way of creeping into a project.
 
 Known floats, not yet resolved: none at the moment.
+
+## Dependabot
+
+Dependabot keeps us on top of dependency updates that patch vulnerabilities between maintenance passes. When a vulnerability is discovered mid-cycle, Dependabot alerts us and, when possible, opens a PR to bump the affected dependency.
+
+Our target for resolving a vulnerability depends on its severity and whether the affected code ships. Critical, High, and Medium fixes to shipped code aren't complete until they've been released. All other fixes only need to be merged.
+
+With the clock starting on the day an alert comes in, our targets are:
+
+| Severity | Shipped | Not shipped |
+|----------|---------|-------------|
+| Critical | Released within 14 days | Merged within 30 days |
+| High | Released within 30 days | Merged by the next maintenance pass |
+| Medium | Released within 60 days | Merged by the next maintenance pass |
+| Low | Merged by the next maintenance pass | Merged by the next maintenance pass |
+
+- **Shipped:** is included in or used to build anything we publish or deploy.
+- **Not shipped:** only runs in local development or CI, such as test runners and local-only demos.
+
+If you're unsure, treat the affected code as **shipped**.
+
+_Note: Dependabot doesn't cover our Gradle or Pixi dependencies, so for now the maintenance pass described above is our only check on those._
+
+### Reviewing Dependabot PRs
+
+A Dependabot PR isn't necessarily safe for our project, so we should still perform our due diligence before merging. This includes:
+
+- Reviewing the changelog and/or commits associated with the version bump, looking for breaking changes
+- Evaluating the branch with a frontier LLM
+- Checking that all copies of the dependency were updated - Dependabot occasionally only finds some of them. If this is the case, open a new, more complete PR and link back to the original, ensuring the original is closed once the new PR is merged
+
+### Alternatives to fixing an alert
+
+Addressing a vulnerability typically means bumping a dependency version (as outlined in this document). However, there are times when that isn't possible or doesn't make sense:
+
+- **Defer:** if the vulnerability is in a transitive package that we can't easily override, and we expect an upstream fix, we can leave the alert open. Consider opening an issue if it's something that's worth tracking.
+- **Dismiss:** if we can clearly show a vulnerability doesn't apply to us, we can dismiss the alert. The dismissal needs to provide a clear explanation of why we're comfortable doing so and a link to a public PR or issue.
