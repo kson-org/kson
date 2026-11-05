@@ -117,6 +117,10 @@ class JsonObjectSchema(
     return pins
   }
 
+  /** The properties required across every [compositionSources] schema. */
+  internal fun requiredProperties(): Set<String> =
+    compositionSources().flatMapTo(mutableSetOf()) { it.ownRequiredProperties() }
+
   /** The properties required or declared across every [compositionSources] schema. */
   internal fun knownProperties(): Set<String> =
     compositionSources().flatMapTo(mutableSetOf()) { source ->

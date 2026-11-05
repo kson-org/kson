@@ -12,8 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Elimination: a branch is dropped when the document's value falls outside its pin.  Pin selection
- * and presence only narrow among the survivors.
+ * Elimination: a branch is dropped when the document's value falls outside its narrowing pin.  Pin
+ * selection and presence only narrow among the survivors.
  */
 class OneOfEliminationTest : JsonSchemaTest {
     /**
@@ -72,11 +72,8 @@ class OneOfEliminationTest : JsonSchemaTest {
         }
     """.trimIndent()
 
-    /**
-     * One pinned branch is enough to eliminate.
-     */
     @Test
-    fun testOneOfSinglePinnedBranchMismatchEliminates() {
+    fun testOneOfLoneRequiredConstMismatchEliminates() {
         val errors = assertKsonSchemaErrors(
             """
                 kind: "B"
@@ -103,8 +100,7 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "value")
-        assertFalse(errors[0].message.toString().contains("extra_a"))
+        assertEquals("Missing required properties: value", errors[0].message.toString())
     }
 
     @Test
@@ -292,6 +288,33 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
+     * In [ValidationMode.PARTIAL] even this optional pin eliminates, yet a lone branch keeps its own errors.
+     */
+    @Test
+    fun testOneOfSingleBranchKeepsItsOwnErrorsInPartialMode() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "B"
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": { "kind": { "const": "A" } }
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_VALUE_NOT_EQUAL_TO_CONST
+            ),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
+
+        assertEquals("Value must be exactly equal to \"A\"", errors[0].message.toString())
+    }
+
+    /**
      * No survivor, yet no value every branch rejects: nothing narrows.
      */
     @Test
@@ -307,12 +330,12 @@ class OneOfEliminationTest : JsonSchemaTest {
                     {
                       "title": "BranchA",
                       "properties": { "kind": { "const": "A" }, "need_a": { "type": "string" } },
-                      "required": ["need_a"]
+                      "required": ["kind", "need_a"]
                     },
                     {
                       "title": "BranchB",
                       "properties": { "mode": { "const": "M" }, "need_b": { "type": "string" } },
-                      "required": ["need_b"]
+                      "required": ["mode", "need_b"]
                     }
                   ]
                 }
@@ -323,9 +346,16 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        val report = errors[1].message.toString()
-        assertContains(report, "BranchA")
-        assertContains(report, "BranchB")
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- BranchA:\n" +
+                "    - Value must be exactly equal to \"A\" (1:8)\n" +
+                "    - Missing required properties: need_a (1:1)\n" +
+                "- BranchB:\n" +
+                "    - Value must be exactly equal to \"M\" (2:8)\n" +
+                "    - Missing required properties: need_b (1:1)",
+            errors[1].message.toString()
+        )
     }
 
     /**
@@ -349,7 +379,7 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     @Test
-    fun testOneOfMultiValueEnumPinEliminates() {
+    fun testOneOfLoneRequiredMultiValueEnumPinEliminates() {
         val errors = assertKsonSchemaErrors(
             """
                 kind: "C"
@@ -376,8 +406,7 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "baz")
-        assertFalse(errors[0].message.toString().contains("foo"))
+        assertEquals("Missing required properties: baz", errors[0].message.toString())
     }
 
     /**
@@ -415,9 +444,7 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "need_b")
-        assertFalse(errors[0].message.toString().contains("need_a"))
-        assertFalse(errors[0].message.toString().contains("need_c"))
+        assertEquals("Missing required properties: need_b", errors[0].message.toString())
     }
 
     /**
@@ -456,17 +483,19 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        val report = errors[1].message.toString()
-        assertContains(report, "BranchB")
-        assertContains(report, "BranchC")
-        assertFalse(report.contains("BranchA"))
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- BranchB:\n    - Missing required properties: sel_b, need_b (1:1)\n" +
+                "- BranchC:\n    - Missing required properties: sel_c, need_c (1:1)",
+            errors[1].message.toString()
+        )
     }
 
     /**
      * `enum: []` admits nothing, so carrying the property at all eliminates the branch.
      */
     @Test
-    fun testOneOfEmptyEnumPinEliminatesWhenPropertyPresent() {
+    fun testOneOfLoneRequiredEmptyEnumPinEliminatesWhenPropertyPresent() {
         val errors = assertKsonSchemaErrors(
             """
                 kind: "anything"
@@ -493,8 +522,44 @@ class OneOfEliminationTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "bar")
-        assertFalse(errors[0].message.toString().contains("foo"))
+        assertEquals("Missing required properties: bar", errors[0].message.toString())
+    }
+
+    /**
+     * Not eliminating lets presence of `kind` narrow the report to this branch, though no document with
+     * `kind` can satisfy it: the known cost of not special-casing `enum: []`.
+     */
+    @Test
+    fun testOneOfLoneOptionalEmptyEnumPinDoesNotEliminate() {
+        val errors = assertKsonSchemaErrors(
+            """
+                kind: "anything"
+            """.trimIndent(),
+            """
+                {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "kind": { "enum": [] },
+                        "foo": { "type": "string" }
+                      },
+                      "required": ["foo"]
+                    },
+                    {
+                      "properties": { "bar": { "type": "boolean" } },
+                      "required": ["bar"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_REQUIRED_PROPERTY_MISSING
+            )
+        )
+
+        assertEquals("Value must be one of: ", errors[0].message.toString())
+        assertEquals("Missing required properties: foo", errors[1].message.toString())
     }
 
     @Test

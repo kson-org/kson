@@ -20,7 +20,7 @@ class AnyOfValidator(internal val anyOf: List<JsonSchema>) : JsonSchemaValidator
         if (!anyValid) {
             reportUnionMatchFailure(
                 anyOf, ksonValue, messageSink, matchAttemptMessageSinks,
-                SCHEMA_ANY_OF_VALIDATION_FAILED.create()
+                SCHEMA_ANY_OF_VALIDATION_FAILED.create(), sourceContext
             )
         }
     }

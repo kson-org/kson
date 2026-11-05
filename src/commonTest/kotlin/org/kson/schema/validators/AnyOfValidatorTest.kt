@@ -8,6 +8,7 @@ import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class AnyOfValidatorTest : JsonSchemaTest {
@@ -168,7 +169,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "alpha")
+        assertEquals("Missing required properties: alpha", errors[0].message.toString())
     }
 
     /**
@@ -213,11 +214,8 @@ class AnyOfValidatorTest : JsonSchemaTest {
         assertFalse(report.contains("BranchC"))
     }
 
-    /**
-     * A contradicted pin fails in [ValidationMode.PARTIAL] mode too, so PARTIAL narrows like FULL.
-     */
     @Test
-    fun testAnyOfPartialModeNarrowsLikeFull() {
+    fun testAnyOfPartialModeNarrowsOnDiscriminatorsLikeFull() {
         val closedUnion = """
             {
               "anyOf": [
@@ -255,5 +253,41 @@ class AnyOfValidatorTest : JsonSchemaTest {
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED),
             sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
+    }
+
+    @Test
+    fun testAnyOfLoneOptionalPinEliminatesOnlyInPartialMode() {
+        val union = """
+            {
+              "anyOf": [
+                { "title": "Pinned", "properties": { "mode": { "const": "fast" } } },
+                { "title": "Other", "properties": { "mode": { "type": "number" } } }
+              ]
+            }
+        """.trimIndent()
+        val document = """mode: "f""""
+
+        val fullErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_ANY_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Value must be exactly equal to \"fast\" (1:8)\n" +
+                "- Other:\n" +
+                "    - Property 'mode': Expected one of: number, but got: string (1:8)",
+            fullErrors[1].message.toString()
+        )
+
+        val partialErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_VALUE_TYPE_MISMATCH),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
+        assertEquals("Property 'mode': Expected one of: number, but got: string", partialErrors[0].message.toString())
+        assertEquals(Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8), partialErrors[0].location)
     }
 }

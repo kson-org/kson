@@ -1,14 +1,17 @@
 package org.kson.schema.validators
 
+import org.kson.parser.Coordinates
+import org.kson.parser.Location
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Presence narrowing: among the branches no pin rules out, those that know (declare or require) a
- * property the document carries are reported.  Pin elimination and selection take priority.
+ * Presence narrowing: among the branches no narrowing pin rules out, those that know (declare or
+ * require) a property the document carries are reported.  Pin elimination and selection take priority.
  */
 class OneOfPresenceUnionTest : JsonSchemaTest {
     private val presenceUnion = """
@@ -21,6 +24,32 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             {
               "properties": { "selector_b": { "type": "string" }, "needs_b": { "type": "string" } },
               "required": ["selector_b", "needs_b"]
+            }
+          ]
+        }
+    """.trimIndent()
+
+    private val loneOptionalPinUnion = """
+        {
+          "oneOf": [
+            {
+              "title": "ApiKeyAuth",
+              "properties": {
+                "apiKey": { "type": "string" },
+                "location": { "enum": ["header", "query"] }
+              },
+              "required": ["apiKey"],
+              "additionalProperties": false
+            },
+            {
+              "title": "OAuthAuth",
+              "properties": {
+                "clientId": { "type": "string" },
+                "clientSecret": { "type": "string" },
+                "grantType": { "enum": ["client_credentials", "authorization_code"] }
+              },
+              "required": ["clientId", "clientSecret"],
+              "additionalProperties": false
             }
           ]
         }
@@ -144,6 +173,50 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
         assertContains(report, "selector_b")
     }
 
+    @Test
+    fun testOneOfLoneOptionalPinRejectionDoesNotEliminatePresenceMatchedBranch() {
+        val errors = assertKsonSchemaErrorAtLocation(
+            """
+                { "clientId": "my-app", "clientSecret": "s3cret", "grantType": "password" }
+            """.trimIndent(),
+            loneOptionalPinUnion,
+            listOf(
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+            ),
+            // the `grantType` value `password`
+            listOf(
+                Location(Coordinates(0, 64), Coordinates(0, 72), 64, 72)
+            )
+        )
+
+        assertEquals("Value must be one of: \"client_credentials\", \"authorization_code\"", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfLoneOptionalPinMatchDoesNotSelectBranch() {
+        val errors = assertKsonSchemaErrors(
+            """
+                apiKey: abc123
+                grantType: client_credentials
+            """.trimIndent(),
+            loneOptionalPinUnion,
+            listOf(
+                SCHEMA_ONE_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
+            )
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- ApiKeyAuth:\n" +
+                "    - Additional property 'grantType' is not allowed in ApiKeyAuth (2:1)\n" +
+                "- OAuthAuth:\n" +
+                "    - Additional property 'apiKey' is not allowed in OAuthAuth (1:1)\n" +
+                "    - Missing required properties: clientId, clientSecret (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
     /**
      * Presence would pick branch B via `beta`, but only branch A's pin admits `kind: "A"`, so the pin wins.
      */
@@ -177,8 +250,7 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "alpha")
-        assertFalse(errors[0].message.toString().contains("gamma"))
+        assertEquals("Missing required properties: alpha", errors[0].message.toString())
     }
 
     /**

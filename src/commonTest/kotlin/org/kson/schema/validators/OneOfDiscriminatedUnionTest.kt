@@ -12,8 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Narrowing on pinned values, whether inline, through a lone `$ref`, or mixed.  Pins needn't be
- * disjoint.
+ * Narrowing on discriminators, whether inline, through a lone `$ref`, or mixed.
+ * They needn't be disjoint.
  */
 class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     /**
@@ -85,6 +85,27 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
           }
         }
     """.trimIndent()
+
+    private fun lonePinUnion(pinnedBranchRequired: String) = """
+        {
+          "oneOf": [
+            {
+              "title": "Pinned",
+              "properties": { "mode": { "const": "fast" } },
+              "required": $pinnedBranchRequired
+            },
+            {
+              "title": "Other",
+              "properties": { "mode": { "type": "string" } },
+              "required": ["needs_other"]
+            }
+          ]
+        }
+    """.trimIndent()
+
+    private val loneRequiredPinUnion = lonePinUnion("""["mode", "needs_pinned"]""")
+
+    private val loneOptionalPinUnion = lonePinUnion("""["needs_pinned"]""")
 
     /**
      * `kind: "A"` selects branch A, so only its deeper `params` failure is reported, not both branches' errors.
@@ -633,7 +654,131 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     }
 
     @Test
-    fun testOneOfPartialModeNarrowsLikeFull() {
+    fun testOneOfSharedOptionalPinSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "fast"""",
+            """
+                {
+                  "oneOf": [
+                    {
+                      "title": "Fast",
+                      "properties": { "mode": { "const": "fast" } },
+                      "required": ["needs_fast"]
+                    },
+                    {
+                      "title": "Slow",
+                      "properties": { "mode": { "const": "slow" } },
+                      "required": ["needs_slow"]
+                    },
+                    {
+                      "title": "Other",
+                      "properties": { "mode": { "type": "string" } },
+                      "required": ["needs_other"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+        )
+
+        assertEquals("Missing required properties: needs_fast", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfLoneRequiredPinEliminatesContradictedBranch() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "slow"""",
+            loneRequiredPinUnion,
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+        )
+
+        assertEquals("Missing required properties: needs_other", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfLoneRequiredPinSelectsMatchingBranch() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "fast"""",
+            loneRequiredPinUnion,
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+        )
+
+        assertEquals("Missing required properties: needs_pinned", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfLoneOptionalPinDoesNotEliminate() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "slow"""",
+            loneOptionalPinUnion,
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Value must be exactly equal to \"fast\" (1:8)\n" +
+                "    - Missing required properties: needs_pinned (1:1)\n" +
+                "- Other:\n" +
+                "    - Missing required properties: needs_other (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
+    @Test
+    fun testOneOfLoneOptionalPinDoesNotSelect() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "fast"""",
+            loneOptionalPinUnion,
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Missing required properties: needs_pinned (1:1)\n" +
+                "- Other:\n" +
+                "    - Missing required properties: needs_other (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
+    @Test
+    fun testOneOfLonePinRequiredOnlyByAnotherBranchDoesNotEliminate() {
+        val errors = assertKsonSchemaErrors(
+            """mode: "slow"""",
+            """
+                {
+                  "oneOf": [
+                    {
+                      "title": "Pinned",
+                      "properties": { "mode": { "const": "fast" } },
+                      "required": ["needs_pinned"]
+                    },
+                    {
+                      "title": "Other",
+                      "properties": { "mode": { "type": "string" } },
+                      "required": ["mode", "needs_other"]
+                    }
+                  ]
+                }
+            """.trimIndent(),
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Value must be exactly equal to \"fast\" (1:8)\n" +
+                "    - Missing required properties: needs_pinned (1:1)\n" +
+                "- Other:\n" +
+                "    - Missing required properties: needs_other (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
+    @Test
+    fun testOneOfPartialModeNarrowsOnDiscriminatorsLikeFull() {
         val closedUnion = """
             {
               "oneOf": [
@@ -671,5 +816,85 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED),
             sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
+    }
+
+    @Test
+    fun testOneOfLoneOptionalPinEliminatesOnlyInPartialMode() {
+        val union = """
+            {
+              "oneOf": [
+                { "title": "Pinned", "properties": { "mode": { "const": "fast" } } },
+                { "title": "Other", "properties": { "mode": { "type": "number" } } }
+              ]
+            }
+        """.trimIndent()
+        val document = """mode: "f""""
+
+        val fullErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Value must be exactly equal to \"fast\" (1:8)\n" +
+                "- Other:\n" +
+                "    - Property 'mode': Expected one of: number, but got: string (1:8)",
+            fullErrors[1].message.toString()
+        )
+
+        val partialErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_VALUE_TYPE_MISMATCH),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
+        assertEquals("Property 'mode': Expected one of: number, but got: string", partialErrors[0].message.toString())
+        assertEquals(Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8), partialErrors[0].location)
+    }
+
+    @Test
+    fun testOneOfLoneOptionalPinSelectsOnlyInPartialMode() {
+        val union = """
+            {
+              "oneOf": [
+                {
+                  "title": "Pinned",
+                  "properties": { "mode": { "const": "fast" }, "size": { "type": "number" } }
+                },
+                {
+                  "title": "Other",
+                  "properties": { "mode": { "type": "string" }, "size": { "type": "boolean" } }
+                }
+              ]
+            }
+        """.trimIndent()
+        val document = """
+            mode: "fast"
+            size: "big"
+        """.trimIndent()
+
+        val fullErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Property 'size': Expected one of: number, but got: string (2:8)\n" +
+                "- Other:\n" +
+                "    - Property 'size': Expected one of: boolean, but got: string (2:8)",
+            fullErrors[1].message.toString()
+        )
+
+        val partialErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_VALUE_TYPE_MISMATCH),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
+        assertEquals("Property 'size': Expected one of: number, but got: string", partialErrors[0].message.toString())
     }
 }

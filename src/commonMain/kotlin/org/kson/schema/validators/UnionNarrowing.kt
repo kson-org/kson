@@ -6,17 +6,26 @@ import org.kson.parser.MessageSink
 import org.kson.parser.messages.Message
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
+import org.kson.validation.SourceContext
+import org.kson.validation.ValidationMode
 
 /**
  * Reports a document that matched no branch of a `oneOf` / `anyOf`, narrowed to the branches that
- * matter.  A *pin* is a property a branch fixes by `const` or `enum`; a branch *knows* a property it
- * declares or requires.  Both are read through `$ref` and `allOf` by [JsonObjectSchema.pinnedProperties]
- * and [JsonObjectSchema.knownProperties].
+ * matter.  A *pin* is a property a branch fixes by `const` or `enum`.  A *discriminator* is a pin at
+ * least two branches share, or a lone pin its branch also requires.  A branch *knows* a property it
+ * declares or requires.  All are read through `$ref` and `allOf` by [JsonObjectSchema.pinnedProperties],
+ * [JsonObjectSchema.requiredProperties] and [JsonObjectSchema.knownProperties].
  *
- * For an object document, a branch with a pin the document contradicts is dropped.  Then:
+ * The *narrowing pins* are the discriminators in [ValidationMode.FULL], as a lone optional pin is more
+ * likely a setting than a choice of branch.  That is a heuristic: a shared optional setting qualifies
+ * too.  In [ValidationMode.PARTIAL] they are all pins, which can move the report from the object
+ * holding a half-typed value onto the value itself, where errors are forgiven.
+ *
+ * For an object document, a branch the document contradicts on a narrowing pin is dropped.  Then,
+ * counting only narrowing pins:
  *  1. If no branch survives, each property that every branch pins and rejects gets one enum error
  *     listing the pinned values.  With no such property, or only one branch, every branch is reported.
- *  2. Otherwise, survivors that alone pin a property the document has are reported.
+ *  2. Otherwise, survivors pinning a property the document has that no other survivor pins are reported.
  *  3. If there are none, the survivors reported are those that know a property the document has and
  *     not every branch knows, or all of them if none do.
  *
@@ -27,7 +36,8 @@ internal fun reportUnionMatchFailure(
     ksonValue: KsonValue,
     messageSink: MessageSink,
     matchAttemptMessageSinks: List<LabelledMessageSink>,
-    noMatchMessage: Message
+    noMatchMessage: Message,
+    sourceContext: SourceContext
 ) {
     fun report(reported: List<Int>) =
         reportNoSubSchemaMatchErrors(ksonValue, messageSink, reported.map { matchAttemptMessageSinks[it] }, noMatchMessage)
@@ -37,9 +47,10 @@ internal fun reportUnionMatchFailure(
         return
     }
     val document = ksonValue.propertyLookup
-    val pins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties() ?: emptyMap() }
+    val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties() ?: emptyMap() }
+    val narrowingPins = if (sourceContext.mode == ValidationMode.FULL) discriminators(branches, allPins) else allPins
 
-    val contradictedPropertiesByBranch = pins.map { branchPins ->
+    val contradictedPropertiesByBranch = narrowingPins.map { branchPins ->
         branchPins.filter { (property, values) -> document[property]?.let { it !in values } ?: false }.keys
     }
     val survivors = branches.indices.filter { contradictedPropertiesByBranch[it].isEmpty() }
@@ -52,13 +63,13 @@ internal fun reportUnionMatchFailure(
             report(branches.indices.toList())
         }
         rejectedEverywhere.forEach { property ->
-            val allowedValues = pins.flatMapTo(LinkedHashSet()) { it.getValue(property) }
+            val allowedValues = narrowingPins.flatMapTo(LinkedHashSet()) { it.getValue(property) }
             reportEnumValueNotAllowed(document.getValue(property), messageSink, allowedValues)
         }
         return
     }
 
-    val selected = selectedBranches(pins, document.keys, survivors)
+    val selected = selectedBranches(narrowingPins, document.keys, survivors)
     if (selected.isNotEmpty()) {
         report(selected)
         return
@@ -68,14 +79,23 @@ internal fun reportUnionMatchFailure(
     report(presenceMatchedBranches(known, document.keys).filter { it in survivors }.ifEmpty { survivors })
 }
 
+private fun discriminators(
+    branches: List<JsonSchema>,
+    pins: List<Map<String, Set<KsonValue>>>
+): List<Map<String, Set<KsonValue>>> =
+    branches.zip(pins) { branch, branchPins ->
+        val required = (branch as? JsonObjectSchema)?.requiredProperties() ?: emptySet()
+        branchPins.filterKeys { property -> property in required || pins.count { property in it } >= 2 }
+    }
+
 private fun selectedBranches(
-    pins: List<Map<String, Set<KsonValue>>>,
+    narrowingPins: List<Map<String, Set<KsonValue>>>,
     present: Set<String>,
     survivors: List<Int>
 ): List<Int> =
     survivors.filter { branchIndex ->
-        pins[branchIndex].keys.any { property ->
-            property in present && survivors.count { property in pins[it] } == 1
+        narrowingPins[branchIndex].keys.any { property ->
+            property in present && survivors.count { property in narrowingPins[it] } == 1
         }
     }
 
