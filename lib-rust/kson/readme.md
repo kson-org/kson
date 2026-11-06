@@ -59,10 +59,33 @@ the following environment variables:
 * `KSON_ROOT_SOURCE_DIR`: if set to the root of a KSON source tree, we will attempt to build and use the necessary binaries from there.
 * `KSON_PREBUILT_BIN_DIR`: use pre-built KSON binaries from the specified directory.
 
+## Shipping a binary that uses kson
+
+`kson-sys` links `kson-lib` as a shared library (`libkson.dylib`, `libkson.so` or `kson.dll`),
+which has to be found at runtime. `cargo run` and `cargo test` take care of that for you, but a
+binary you copy elsewhere or bundle into an app does not.
+
+The shared library identifies itself by name only (`@rpath/libkson.dylib` on macOS, the SONAME
+`libkson.so` on Linux), so your binary has to tell the loader where to look, through an rpath.
+Build with `KSON_COPY_SHARED_LIBRARY_TO_DIR` to get a copy of the library somewhere predictable,
+ship it with your binary, and add an rpath pointing at it, for instance in your crate's `build.rs`:
+
+```rust
+// libkson next to the executable (macOS); use `$ORIGIN` instead of `@executable_path` on Linux
+println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path");
+// or, in a macOS app bundle with the library in Contents/Frameworks
+println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/../Frameworks");
+```
+
+This has to be in the crate that builds the binary: link arguments that `kson-sys` emits don't
+reach the binaries of crates that depend on it. On Windows, place `kson.dll` next to the
+executable.
+
 ## Troubleshooting
 
-* If the KSON library is not found at runtime, build with `KSON_COPY_SHARED_LIBRARY_TO_DIR=target/debug`
-  to place it next to your binary, and add that directory to your loader path
+* If the KSON library is not found at runtime, see [Shipping a binary that uses
+  kson](#shipping-a-binary-that-uses-kson). For a quick local run you can instead build with
+  `KSON_COPY_SHARED_LIBRARY_TO_DIR=target/debug` and add that directory to your loader path
   (`DYLD_LIBRARY_PATH` on macOS, `LD_LIBRARY_PATH` on Linux).
 * If macOS reports `library load disallowed by system policy` for a library you supplied yourself,
   clear its quarantine flag: `xattr -c /path/to/libkson.dylib`.
