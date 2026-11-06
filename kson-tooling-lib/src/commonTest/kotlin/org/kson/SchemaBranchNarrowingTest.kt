@@ -640,4 +640,99 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         assertTrue("fast" in labels, "then-branch value should be offered, got: $labels")
         assertTrue("slow" in labels && "medium" in labels, "else-branch values should be offered, got: $labels")
     }
+
+    @Test
+    fun testNestedUnionDiscriminatorMidTypingKeepsOuterBranch() {
+        val schema = """
+            {
+              oneOf: [
+                {
+                  type: "object"
+                  properties: {
+                    config: {
+                      oneOf: [
+                        { properties: { kind: { const: "alpha" }, a: { type: "string" } } }
+                        { properties: { kind: { const: "beta" }, b: { type: "string" } } }
+                      ]
+                    }
+                  }
+                }
+                {
+                  type: "object"
+                  properties: { other: { type: "string" } }
+                }
+              ]
+            }
+        """
+        val completions = getCompletionsAtCaret(schema, "config:\n  kind: \"a<caret>\"")
+        assertNotNull(completions)
+        val labels = completions.map { it.label }
+        assertTrue("alpha" in labels && "beta" in labels, "nested union values should be offered, got: $labels")
+    }
+
+    private fun outerUnionWithConfig(innerUnion: String) = """
+        {
+          oneOf: [
+            {
+              type: "object"
+              properties: { config: { $innerUnion } }
+            }
+            {
+              type: "object"
+              properties: { other: { type: "string" } }
+            }
+          ]
+        }
+    """
+
+    @Test
+    fun testNestedUnionLoneConstMidTypingKeepsOuterBranch() {
+        // Partial validation reports only the branch without the const, whose error on the half-typed value is forgiven.
+        val schema = outerUnionWithConfig(
+            """
+            oneOf: [
+              { properties: { kind: { const: "alpha" }, a: { type: "string" } } }
+              { properties: { kind: { type: "number" }, b: { type: "string" } } }
+            ]
+            """
+        )
+        val completions = getCompletionsAtCaret(schema, "config:\n  kind: \"a<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("alpha"), completions.map { it.label })
+    }
+
+    @Test
+    fun testNestedUnionLoneEnumMidTypingKeepsOuterBranch() {
+        val schema = outerUnionWithConfig(
+            """
+            anyOf: [
+              { properties: { type: { enum: ["http", "https"] }, url: { type: "string" } } }
+              { properties: { type: { type: "string", pattern: "^x-" }, plugin: { type: "string" } } }
+            ]
+            """
+        )
+        val completions = getCompletionsAtCaret(schema, "config:\n  type: \"h<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("http", "https"), completions.map { it.label })
+    }
+
+    @Test
+    fun testUnionHeldDirectlyByUnionBranchKeepsItsValuesMidTyping() {
+        val schema = """
+            {
+              oneOf: [
+                {
+                  oneOf: [
+                    { properties: { setting: { enum: ["one", "two"] } } }
+                    { properties: { setting: { type: "number" } } }
+                  ]
+                }
+                { properties: { setting: { enum: ["four"] } } }
+              ]
+            }
+        """
+        val completions = getCompletionsAtCaret(schema, "setting: \"x<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("one", "two", "four"), completions.map { it.label })
+    }
 }

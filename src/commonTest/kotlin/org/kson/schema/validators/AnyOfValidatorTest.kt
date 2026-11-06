@@ -8,13 +8,13 @@ import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class AnyOfValidatorTest : JsonSchemaTest {
     /**
-     * The document carries only the *shared* `description` property (known by both branches, so not
-     * distinguishing), so presence-based narrowing declines and the full-dump machinery runs — and since
-     * `description` is wrong for every branch, its error is extracted as the single precise message.
+     * `description` is known by both branches, so presence can't narrow; its error is common to both,
+     * so it is reported alone.
      */
     @Test
     fun testAnyOfCommonValidationErrors() {
@@ -40,7 +40,6 @@ class AnyOfValidatorTest : JsonSchemaTest {
                       - required_prop
             """.trimIndent(),
             listOf(
-                // note that since `description` is wrong for ALL the sub-schemas, we get a precise error for it.
                 SCHEMA_VALUE_TYPE_MISMATCH
             )
         )
@@ -133,10 +132,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
     }
 
     /**
-     * The discriminated-union reporting is shared with `oneOf`: an `anyOf` whose branches are keyed by
-     * distinct `const`s selects the branch the document's discriminator picks.  `kind: "A"` selects
-     * branch A, surfacing only its deeper `params` failure (missing `alpha`) — proving the shared
-     * [reportUnionMatchFailure] helper is wired into `anyOf`, not just `oneOf`.
+     * Pin selection narrows `anyOf` even when the unpinned branch also survives elimination.
      */
     @Test
     fun testAnyOfDiscriminatorSelectsMatchingBranch() {
@@ -157,7 +153,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
                     },
                     {
                       "properties": {
-                        "kind": { "const": "B" },
+                        "kind": { "type": "string" },
                         "params": { "type": "object", "required": ["beta"] }
                       },
                       "required": ["kind"]
@@ -173,13 +169,11 @@ class AnyOfValidatorTest : JsonSchemaTest {
             )
         )
 
-        assertContains(errors[0].message.toString(), "alpha")
+        assertEquals("Missing required properties: alpha", errors[0].message.toString())
     }
 
     /**
-     * A multi-branch presence match under `anyOf` narrows the dump to the branches keyed by the present
-     * `shared` property (A and B), dropping branch C, and anchors it to the `anyOf`-specific no-match
-     * message — confirming the fallback threads the caller's own message through the shared helper.
+     * The narrowed report is anchored to the `anyOf` no-match message, not `oneOf`'s.
      */
     @Test
     fun testAnyOfPresenceReportsAllMatchingBranches() {
@@ -214,20 +208,14 @@ class AnyOfValidatorTest : JsonSchemaTest {
             )
         )
 
-        val dump = errors[1].message.toString()
-        assertContains(dump, "BranchA")
-        assertContains(dump, "BranchB")
-        assertFalse(dump.contains("BranchC"))
+        val report = errors[1].message.toString()
+        assertContains(report, "BranchA")
+        assertContains(report, "BranchB")
+        assertFalse(report.contains("BranchC"))
     }
 
-    /**
-     * The PARTIAL-mode guard: a *closed* discriminated `anyOf` whose discriminator matches no branch
-     * reports one hard [SCHEMA_ENUM_VALUE_NOT_ALLOWED] in FULL mode, but in [ValidationMode.PARTIAL] a
-     * half-typed discriminator shouldn't get that hard narrowing error — the guard skips union narrowing and
-     * falls back to the plain per-branch dump ([SCHEMA_ANY_OF_VALIDATION_FAILED] + sub-schema errors).
-     */
     @Test
-    fun testAnyOfPartialModeSkipsHardEnumNarrowing() {
+    fun testAnyOfPartialModeNarrowsOnDiscriminatorsLikeFull() {
         val closedUnion = """
             {
               "anyOf": [
@@ -253,19 +241,53 @@ class AnyOfValidatorTest : JsonSchemaTest {
             params: {}
         """.trimIndent()
 
-        // FULL mode: the closed union proves `kind: "Z"` out of range with one hard enum error
         assertKsonSchemaErrors(
             document,
             closedUnion,
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
         )
 
-        // PARTIAL mode: the guard skips union narrowing, so no hard enum error — just the plain per-branch dump
         assertKsonSchemaErrors(
             document,
             closedUnion,
-            listOf(SCHEMA_ANY_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS),
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED),
             sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
         )
+    }
+
+    @Test
+    fun testAnyOfLoneOptionalPinEliminatesOnlyInPartialMode() {
+        val union = """
+            {
+              "anyOf": [
+                { "title": "Pinned", "properties": { "mode": { "const": "fast" } } },
+                { "title": "Other", "properties": { "mode": { "type": "number" } } }
+              ]
+            }
+        """.trimIndent()
+        val document = """mode: "f""""
+
+        val fullErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_ANY_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Pinned:\n" +
+                "    - Value must be exactly equal to \"fast\" (1:8)\n" +
+                "- Other:\n" +
+                "    - Property 'mode': Expected one of: number, but got: string (1:8)",
+            fullErrors[1].message.toString()
+        )
+
+        val partialErrors = assertKsonSchemaErrors(
+            document,
+            union,
+            listOf(SCHEMA_VALUE_TYPE_MISMATCH),
+            sourceContext = SourceContext(mode = ValidationMode.PARTIAL)
+        )
+        assertEquals("Property 'mode': Expected one of: number, but got: string", partialErrors[0].message.toString())
+        assertEquals(Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8), partialErrors[0].location)
     }
 }
