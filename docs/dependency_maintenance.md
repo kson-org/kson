@@ -102,7 +102,7 @@ Known floats, not yet resolved: none at the moment.
 
 ## Dependabot
 
-Dependabot keeps us on top of dependency updates that patch vulnerabilities between maintenance passes. When a vulnerability is discovered mid-cycle, Dependabot alerts us and, when possible, opens a PR to bump the affected dependency.
+Dependabot keeps us on top of dependency updates that patch vulnerabilities between maintenance passes. When a vulnerability is discovered mid-cycle, Dependabot alerts maintainers and, when possible, opens a PR to bump the affected dependency.
 
 Our target for resolving a vulnerability depends on its severity and whether the affected code ships. Critical, High, and Medium fixes to shipped code aren't complete until they've been released. All other fixes only need to be merged.
 
@@ -112,7 +112,7 @@ With the clock starting on the day an alert comes in, our targets are:
 |----------|---------|-------------|
 | Critical | Released within 14 days | Merged within 30 days |
 | High | Released within 30 days | Merged by the next maintenance pass |
-| Medium | Released within 60 days | Merged by the next maintenance pass |
+| Medium | Included in the next regular release | Merged by the next maintenance pass |
 | Low | Merged by the next maintenance pass | Merged by the next maintenance pass |
 
 - **Shipped:** is included in or used to build anything we publish or deploy.
@@ -127,7 +127,7 @@ _Note: Dependabot doesn't cover our Gradle or Pixi dependencies, so for now the 
 A Dependabot PR isn't necessarily safe for our project, so we should still perform our due diligence before merging. This includes:
 
 - Reviewing the changelog and/or commits associated with the version bump, looking for breaking changes
-- Evaluating the branch with a frontier LLM
+- Evaluating the branch with a capable LLM
 - Checking that all copies of the dependency were updated - Dependabot occasionally only finds some of them. If this is the case, open a new, more complete PR and link back to the original, ensuring the original is closed once the new PR is merged
 
 ### Alternatives to fixing an alert
