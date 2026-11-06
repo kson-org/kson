@@ -255,6 +255,15 @@ mavenPublishing {
  */
 val nativeImageOutputDir = project.projectDir.resolve("build/kotlin/compileGraalVmNativeImage")
 
+/**
+ * Kept from the native build (native-image's `-H:TempDirectory`) for `libkson.o` and the list of
+ * exported symbols, from which [buildGraalVmStaticLibrary] makes the static library.
+ */
+val graalVmTempDir = project.projectDir.resolve("build/kotlin/graalVmNativeImageTemp")
+
+/** Where the static library lands, with what's needed to link it and its headers */
+val staticLibraryOutputDir = project.projectDir.resolve("build/kotlin/graalVmStaticLibrary")
+
 // Build native image using GraalVM JDK from the Gradle wrapper
 tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     group = "build"
@@ -275,6 +284,10 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
     // Declare the specific binary rather than the whole directory, since krossover's
     // generateJniBindingsJvm also writes jni_simplified.h into nativeImageOutputDir.
     outputs.file(nativeImageOutputDir.resolve(BinaryArtifactPaths.binaryFileName()))
+    outputs.dir(graalVmTempDir)
+
+    // native-image adds a fresh `SVM-<timestamp>` directory on every run; keep only this run's
+    doFirst { graalVmTempDir.deleteRecursively() }
 
     // Configure the command at configuration time using providers
     command.set(provider {
@@ -328,10 +341,35 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
             // macOS version, which would make wheels unnecessarily require the latest OS.
             if (OperatingSystem.current().isMacOsX) {
                 add("-H:NativeLinkerOption=-mmacosx-version-min=11.0")
+                // Left to itself the linker uses the output path as the install name, so anything
+                // linked against the dylib looks for it in this build directory on every machine.
+                // @rpath lets the consuming binary say where it ships the library.
+                add("-H:NativeLinkerOption=-Wl,-install_name,@rpath/libkson.dylib")
             }
+            if (OperatingSystem.current().isLinux) {
+                // Same as the install name above: record a bare name for the loader to search for
+                add("-H:NativeLinkerOption=-Wl,-soname,libkson.so")
+            }
+            // Keep the intermediate object and exported symbol list for buildGraalVmStaticLibrary
+            add("-H:TempDirectory=${graalVmTempDir.absolutePath}")
             add("-o"); add(buildArtifactPath)
         }
     })
+}
+
+tasks.register<BuildGraalVmStaticLibraryTask>("buildGraalVmStaticLibrary") {
+    group = "build"
+    description = "Builds a static libkson.a from the native-image build's intermediate object (macOS and Linux)"
+    dependsOn("buildWithGraalVmNativeImage")
+    onlyIf("a static kson-lib is built on macOS and Linux only") { !OperatingSystem.current().isWindows }
+
+    nativeImageTempDir.set(graalVmTempDir)
+    headers.from(
+        nativeImageOutputDir.resolve("jni_simplified.h"),
+        nativeImageOutputDir.resolve("graal_isolate.h"),
+        nativeImageOutputDir.resolve("graal_isolate_dynamic.h"),
+    )
+    outputDir.set(staticLibraryOutputDir)
 }
 
 /**
@@ -354,5 +392,22 @@ tasks.register<Tar>("packageReleaseArchive") {
 
     compression = Compression.GZIP
     archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("kson-lib-shared"))
+    destinationDirectory.set(ReleaseArtifactSet.NATIVE.stageInto(this))
+}
+
+/**
+ * Archives the static library for release, laid out like [packageReleaseArchive]'s: `build.rs`
+ * downloads `kson-lib-static-{arch}-{os}.tar.gz` when its `static` feature is on.
+ */
+tasks.register<Tar>("packageReleaseStaticArchive") {
+    group = "distribution"
+    description = "Archives the static kson-lib for release into the root project's release-artifacts/native directory"
+    onlyIf("a static kson-lib is built on macOS and Linux only") { !OperatingSystem.current().isWindows }
+
+    dependsOn("buildGraalVmStaticLibrary")
+    from(staticLibraryOutputDir)
+
+    compression = Compression.GZIP
+    archiveFileName.set(BinaryArtifactPaths.releaseArchiveName("kson-lib-static"))
     destinationDirectory.set(ReleaseArtifactSet.NATIVE.stageInto(this))
 }

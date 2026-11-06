@@ -8,12 +8,15 @@ use std::process::{Command, Stdio};
 static KSON_LIB_VERSION: &str = "0.5.0-dev";
 
 fn get_kson_artifacts(
+    use_static_linking: bool,
     out_dir: &Path,
 ) -> anyhow::Result<()> {
     let kson_root_env_var = "KSON_ROOT_SOURCE_DIR";
     let kson_prebuild_env_var = "KSON_PREBUILT_BIN_DIR";
+    println!("cargo:rerun-if-env-changed={kson_root_env_var}");
+    println!("cargo:rerun-if-env-changed={kson_prebuild_env_var}");
     if let Ok(kson_root) = env::var(kson_root_env_var) {
-        build_kson_from_source(Path::new(&kson_root), out_dir)
+        build_kson_from_source(use_static_linking, Path::new(&kson_root), out_dir)
     } else {
         if let Ok(prebuilt_root) = env::var(kson_prebuild_env_var) {
             for entry in fs::read_dir(&prebuilt_root)? {
@@ -26,7 +29,7 @@ fn get_kson_artifacts(
                     println!("cargo:rerun-if-changed={}", source_path.display());
                 }
             }
-        } else if let Err(e) = download_prebuilt_kson(true, out_dir) {
+        } else if let Err(e) = download_prebuilt_kson(!use_static_linking, out_dir) {
             bail!(
                 "failed to download prebuilt kson: {e}\nset the `{kson_prebuild_env_var}` variable to the path of compatible kson binaries, or the `{kson_root_env_var}` variable to the path of a compatible kson source tree (if you prefer to build kson from source)"
             );
@@ -69,9 +72,16 @@ fn download_prebuilt_kson(
 }
 
 fn build_kson_from_source(
+    use_static_linking: bool,
     kson_root: &Path,
     out_dir: &Path,
 ) -> anyhow::Result<()> {
+    let (gradle_task, release_path) = if use_static_linking {
+        (":kson-lib:buildGraalVmStaticLibrary", "kson-lib/build/kotlin/graalVmStaticLibrary")
+    } else {
+        (":kson-lib:buildWithGraalVmNativeImage", "kson-lib/build/kotlin/compileGraalVmNativeImage")
+    };
+
     // Build kotlin-native artifacts
     let gradle_script = if cfg!(target_os = "windows") {
         kson_root.join("gradlew.bat")
@@ -80,7 +90,7 @@ fn build_kson_from_source(
     };
 
     let status = Command::new(&gradle_script)
-        .arg(":kson-lib:buildWithGraalVmNativeImage")
+        .arg(gradle_task)
         .arg("--no-daemon")
         .current_dir(&kson_root)
         .stdout(Stdio::null())
@@ -92,7 +102,6 @@ fn build_kson_from_source(
     }
 
     // Copy built artifacts
-    let release_path = "kson-lib/build/kotlin/compileGraalVmNativeImage";
     let source_dir = kson_root.join(release_path);
     for entry in fs::read_dir(&source_dir)? {
         let entry = entry?;
@@ -164,11 +173,37 @@ fn alias_libclang_for_clang_sys() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Links the static `libkson.a`, plus the system libraries it needs. Those come from
+/// `libkson.link-libs`, written beside the archive when it is built: they are whatever
+/// GraalVM's native-image linked the shared library against, so the list tracks GraalVM
+/// rather than being repeated here.
+fn link_static_kson(out_dir: &Path) -> anyhow::Result<()> {
+    let link_libs_path = out_dir.join("libkson.link-libs");
+    let link_libs = fs::read_to_string(&link_libs_path).with_context(|| {
+        format!(
+            "failed to read {}; the kson binaries in use don't look like a static build",
+            link_libs_path.display()
+        )
+    })?;
+
+    println!("cargo:rustc-link-lib=static=kson");
+    for lib in link_libs.lines().map(str::trim).filter(|l| !l.is_empty()) {
+        println!("cargo:rustc-link-lib={lib}");
+    }
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
+    let use_static_linking = env::var_os("CARGO_FEATURE_STATIC").is_some();
+    if use_static_linking && env::var("CARGO_CFG_TARGET_OS")? == "windows" {
+        bail!("the `static` feature of kson-sys is not supported on Windows; use the default dynamic linking");
+    }
+
     // Obtain kotlin artifacts
-    get_kson_artifacts(&out_dir).context("Failed to copy Kotlin artifacts")?;
+    get_kson_artifacts(use_static_linking, &out_dir).context("Failed to copy Kotlin artifacts")?;
 
     alias_libclang_for_clang_sys().context("Failed to make libclang discoverable for bindgen")?;
 
@@ -187,8 +222,13 @@ fn main() -> anyhow::Result<()> {
         .write_to_file(out_dir.join("bindings.rs"))
         .context("Couldn't write bindings!")?;
 
-    // Tell the compiler where to find the dynamic library
     println!("cargo:rustc-link-search=native={}", out_dir.display());
+
+    if use_static_linking {
+        return link_static_kson(&out_dir);
+    }
+
+    // Tell the compiler where to find the dynamic library
     println!("cargo:rustc-link-lib=dylib=kson");
 
     #[cfg(not(target_os = "windows"))]
