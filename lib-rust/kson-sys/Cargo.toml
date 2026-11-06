@@ -9,6 +9,8 @@ license = "Apache-2.0"
 
 [features]
 default = []
+# Link kson-lib statically (macOS and Linux only), so binaries don't need libkson at runtime
+static = []
 
 [build-dependencies]
 anyhow = "1.0.100"

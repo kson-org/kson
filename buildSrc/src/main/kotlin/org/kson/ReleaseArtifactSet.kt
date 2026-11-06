@@ -10,7 +10,7 @@ import org.gradle.api.provider.Provider
  */
 enum class ReleaseArtifactSet(vararg stagingTaskPaths: String) {
     /** Built by GraalVM native-image, so each platform stages its own */
-    NATIVE(":kson-lib:packageReleaseArchive", ":tooling:cli:packageReleaseArchive"),
+    NATIVE(":kson-lib:packageReleaseArchive", ":kson-lib:packageReleaseStaticArchive", ":tooling:cli:packageReleaseArchive"),
 
     /** The same whichever platform stages them */
     PORTABLE(

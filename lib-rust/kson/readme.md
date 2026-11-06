@@ -57,13 +57,36 @@ binary is available for your platform, you need to manually specify how to obtai
 the following environment variables:
 
 * `KSON_ROOT_SOURCE_DIR`: if set to the root of a KSON source tree, we will attempt to build and use the necessary binaries from there.
-* `KSON_PREBUILT_BIN_DIR`: use pre-built KSON binaries from the specified directory.
+* `KSON_PREBUILT_BIN_DIR`: use pre-built KSON binaries from the specified directory (with the
+  `static` feature, a directory holding `libkson.a` and `libkson.link-libs`, as built by
+  `./gradlew :kson-lib:buildGraalVmStaticLibrary`).
 
 ## Shipping a binary that uses kson
 
-`kson-sys` links `kson-lib` as a shared library (`libkson.dylib`, `libkson.so` or `kson.dll`),
-which has to be found at runtime. `cargo run` and `cargo test` take care of that for you, but a
-binary you copy elsewhere or bundle into an app does not.
+By default `kson-sys` links `kson-lib` as a shared library (`libkson.dylib`, `libkson.so` or
+`kson.dll`), which then has to be found at runtime. `cargo run` and `cargo test` take care of that
+for you, but a binary you copy elsewhere or bundle into an app does not. You have two options.
+
+### Static linking (macOS and Linux)
+
+Turn on the `static` feature and `kson-lib` is linked into your binary, with nothing to ship
+beside it:
+
+```toml
+[dependencies]
+kson-rs = { version = "...", features = ["static"] }
+```
+
+The static library holds the same compiled code as the shared one, so it adds about as much to
+your binary as `libkson` would take on disk (around 18 MB). It needs only libraries every system
+already has (`libz`, `libdl`, `libpthread`, and the Foundation framework on macOS), which
+`kson-sys` links for you. The `static` feature is not available on Windows.
+
+The static library keeps only `kson-lib`'s API global. A few dozen C variables from the JDK's
+native code it is built from stay global too (names like `ia_class` and `IO_fd_fdID`), which
+only matters if your program also links the JDK's native libraries statically.
+
+### Shipping the shared library
 
 The shared library identifies itself by name only (`@rpath/libkson.dylib` on macOS, the SONAME
 `libkson.so` on Linux), so your binary has to tell the loader where to look, through an rpath.
@@ -84,8 +107,8 @@ executable.
 ## Troubleshooting
 
 * If the KSON library is not found at runtime, see [Shipping a binary that uses
-  kson](#shipping-a-binary-that-uses-kson). For a quick local run you can instead build with
-  `KSON_COPY_SHARED_LIBRARY_TO_DIR=target/debug` and add that directory to your loader path
-  (`DYLD_LIBRARY_PATH` on macOS, `LD_LIBRARY_PATH` on Linux).
+  kson](#shipping-a-binary-that-uses-kson). For a quick local run you can instead add the
+  directory holding it to your loader path (`DYLD_LIBRARY_PATH` on macOS, `LD_LIBRARY_PATH` on
+  Linux).
 * If macOS reports `library load disallowed by system policy` for a library you supplied yourself,
   clear its quarantine flag: `xattr -c /path/to/libkson.dylib`.

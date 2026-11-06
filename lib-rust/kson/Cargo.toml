@@ -8,6 +8,8 @@ license = "Apache-2.0"
 
 [features]
 default = []
+# Link kson-lib statically (macOS and Linux only), see the readme
+static = ["kson-sys/static"]
 
 [dependencies]
 # [[kson-version-num]]
