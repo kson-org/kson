@@ -77,7 +77,6 @@ class NumberParserTest {
         assertParsesTo("0.421e2", 42.1)
         assertParsesTo("0.421e+2", 42.1)
         assertParsesTo("42.1E+0", 42.1)
-        assertParsesTo("00042.1E0", 42.1)
         assertParsesTo("-42.1", -42.1)
         assertParsesTo("-42.1E0", -42.1)
         assertParsesTo("-42.1e0", -42.1)
@@ -87,7 +86,6 @@ class NumberParserTest {
         assertParsesTo("-0.421e2", -42.1)
         assertParsesTo("-0.421e+2", -42.1)
         assertParsesTo("-42.1E+0", -42.1)
-        assertParsesTo("-00042.1E0", -42.1)
     }
 
     @Test
@@ -120,22 +118,34 @@ class NumberParserTest {
     }
 
     @Test
+    fun testLeadingZeros() {
+        assertParserRejectsSource("00", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("0042", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("-000123456789", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("00.0", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("-042.1", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("01e2", MessageType.LEADING_ZEROS)
+        assertParserRejectsSource("-00.1e2", MessageType.LEADING_ZEROS)
+    }
+
+    @Test
+    fun testZeroFollowedByNonDigit() {
+        assertParserRejectsSource("0x10", MessageType.INVALID_DIGITS)
+        assertParserRejectsSource("0abc", MessageType.INVALID_DIGITS)
+        assertParserRejectsSource("0-1", MessageType.INVALID_DIGITS)
+    }
+
+    @Test
     fun testIntegerParsing() {
         // Basic integer parsing
         assertParsesTo("0", 0)
         assertParsesTo("42", 42)
         assertParsesTo("123456789", 123456789)
         
-        // Leading zeros
-        assertParsesTo("00", 0)
-        assertParsesTo("0042", 42)
-        assertParsesTo("000123456789", 123456789)
-        
         // Negative integers
         assertParsesTo("-0", 0)
         assertParsesTo("-42", -42)
         assertParsesTo("-123456789", -123456789)
-        assertParsesTo("-000123456789", -123456789)
     }
 
     @Test
@@ -143,10 +153,6 @@ class NumberParserTest {
         assertParsesTo("2147483648", Int.MAX_VALUE + 1L)
         assertParsesTo("9223372036854775807", Long.MAX_VALUE)
         assertParsesTo("-9223372036854775808", Long.MIN_VALUE)
-
-        // With leading zeros
-        assertParsesTo("0009223372036854775807", Long.MAX_VALUE)
-        assertParsesTo("-0009223372036854775808", Long.MIN_VALUE)
     }
     
     @Test
@@ -173,7 +179,10 @@ class NumberParserTest {
         
         // Very large decimals
         assertParsesTo("1e20", 1e20)
-        
+
+        // Leading zeros in decimal exponents
+        assertParsesTo("1e05", 1e05)
+
         // Negative exponents
         assertParsesTo("1e-5", 0.00001)
         
@@ -213,46 +222,20 @@ class NumberParserTest {
     }
 
     @Test
-    fun testNormalizedIntegerStrings() {
+    fun testIntegerStringsPreserved() {
         assertParsedNumberString("0", "0")
-        assertParsedNumberString("00", "0")
-        assertParsedNumberString("000", "0")
-        assertParsedNumberString("42", "42")
-        assertParsedNumberString("042", "42")
-        assertParsedNumberString("00042", "42")
-
         assertParsedNumberString("-0", "-0")
-        assertParsedNumberString("-00", "-0")
+        assertParsedNumberString("42", "42")
         assertParsedNumberString("-42", "-42")
-        assertParsedNumberString("-042", "-42")
-        assertParsedNumberString("-00042", "-42")
-
-        assertParsedNumberString("0002147483648", "2147483648")
-        assertParsedNumberString("000009223372036854775807", "9223372036854775807")
     }
 
     @Test
     fun testNormalizedDecimalStrings() {
-        assertParsedNumberString("0.0", "0.0")
-        assertParsedNumberString("00.0", "0.0")
-        assertParsedNumberString("0.00", "0.00")
-        assertParsedNumberString("042.1", "42.1")
-
-        assertParsedNumberString("42.10", "42.10")
         assertParsedNumberString("-0.0", "-0.0")
-        assertParsedNumberString("-00.0", "-0.0")
-        assertParsedNumberString("-042.1", "-42.1")
-
-        assertParsedNumberString("1e2", "1e2")
-        assertParsedNumberString("01e2", "1e2")
+        assertParsedNumberString("42.10", "42.10")
+        assertParsedNumberString("0.1e02", "0.1e02")
         assertParsedNumberString("1.0e2", "1.0e2")
-        assertParsedNumberString("01.0e2", "1.0e2")
-        assertParsedNumberString("0.1e2", "0.1e2")
-        assertParsedNumberString("00.1e2", "0.1e2")
-
-        assertParsedNumberString("-1e2", "-1e2")
-        assertParsedNumberString("-01e2", "-1e2")
-        assertParsedNumberString("-0.1e2", "-0.1e2")
-        assertParsedNumberString("-00.1e2", "-0.1e2")
+        assertParsedNumberString("1E2", "1e2")
+        assertParsedNumberString("1.5E+3", "1.5e+3")
     }
 }

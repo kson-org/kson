@@ -20,4 +20,14 @@ class KsonCoreTestNumberError : KsonCoreTestError {
             listOf(DANGLING_EXP_INDICATOR)
         )
     }
+
+    @Test
+    fun testLeadingZerosError() {
+        assertParserRejectsSource(
+            """
+                0420
+            """,
+            listOf(LEADING_ZEROS)
+        )
+    }
 }
