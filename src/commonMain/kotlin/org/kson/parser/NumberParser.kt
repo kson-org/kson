@@ -5,17 +5,17 @@ import org.kson.parser.messages.MessageType
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
 
 /**
- * Note that our number parsing closely follows JSON's grammar (see https://www.json.org), with one key difference:
- *  we allow leading zeros (which are ignored, value-wise) in numbers, though we do trim these leading zeros
- *  as part of our parse so that the string representation we retain is fully Json compatible (and more broadly
- *  compatible in general)—see [ParsedNumber.Integer.trimLeadingZeros] and [[ParsedNumber.Decimal.trimLeadingZeros]]
+ * Note that our number parsing exactly follows JSON's grammar (see https://www.json.org):
  *
  * number -> integer fraction exponent
- * integer -> digits
- *          | "-" digits
+ * integer -> digit
+ *          | oneToNine digits
+ *          | "-" digit
+ *          | "-" oneToNine digits
  * digits -> digit
  *         | digit digits
- * digit -> "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+ * digit -> "0" | oneToNine
+ * oneToNine -> "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
  * fraction -> ""
  *           | "." digits
  * exponent -> ""
@@ -43,53 +43,15 @@ class NumberParser(private val numberCandidate: String) {
         }
 
         class Integer(rawString: String) : ParsedNumber() {
-            override val asString = trimLeadingZeros(rawString)
-            val value = convertToLong(rawString.trimStart('0').ifEmpty { "0" })
-
-            fun trimLeadingZeros(input: String): String {
-                // Handle negative numbers separately to preserve the minus sign
-                if (input.startsWith("-")) {
-                    val trimmed = input.substring(1).trimStart('0')
-                    return "-" + (trimmed.ifEmpty { "0" })
-                }
-                
-                // For positive numbers, just trim leading zeros
-                val trimmed = input.trimStart('0')
-                return if (trimmed.isEmpty()) "0" else trimmed
-            }
+            override val asString = rawString
+            val value = convertToLong(asString)
         }
 
         class Decimal(rawString: String) : ParsedNumber() {
-            override val asString = trimLeadingZeros(rawString)
+            // normalize exponent marker `E` to `e`
+            override val asString = rawString.replace('E', 'e')
             val value: Double by lazy {
                 asString.toDouble()
-            }
-
-            /**
-             * Note this handles leading zeros both on the integer part and
-             * the exponent part
-             */
-            fun trimLeadingZeros(input: String): String {
-                val isNegative = input.startsWith("-")
-                val unsigned = if (isNegative) input.substring(1) else input
-
-                val parts = unsigned.split('E', 'e')
-                val mainPart = parts[0]
-                val exponentPart = if (parts.size > 1) "e${parts[1]}" else ""
-
-                val mainTrimmedPart = if (mainPart.contains('.')) {
-                    val (intPart, fracPart) = mainPart.split('.')
-                    val trimmedIntPart = intPart.trimStart('0').ifEmpty { "0" }
-                    if (fracPart.isEmpty()) trimmedIntPart else "$trimmedIntPart.$fracPart"
-                } else {
-                    mainPart.trimStart('0').ifEmpty { "0" }
-                }
-
-                return buildString {
-                    if (isNegative) append("-")
-                    append(mainTrimmedPart)
-                    if (exponentPart.isNotEmpty()) append(exponentPart)
-                }
             }
         }
     }
@@ -174,25 +136,36 @@ class NumberParser(private val numberCandidate: String) {
     }
 
     /**
-     * integer -> digits
-     *          | "-" digits
+     * integer -> digit
+     *          | oneToNine digits
+     *          | "-" digit
+     *          | "-" oneToNine digits
      */
     private fun integer(): Boolean {
+        val minusSignFound = scanner.peek() == '-'
+        if (minusSignFound) {
+            scanner.advanceScanner()
+        }
+
+        // We need to explicitly check for leading zeros before letting digits() do its work
+        if (scanner.peek() == '0') {
+            scanner.advanceScanner()
+            if (isDigit()) {
+                error = MessageType.LEADING_ZEROS.create()
+                return false
+            }
+            return true
+        }
+
         if (digits()) {
             return true
         }
 
-        if (scanner.peek() == '-') {
-            scanner.advanceScanner()
-            return if (digits()) {
-                true
-            } else {
-                error = MessageType.ILLEGAL_MINUS_SIGN.create()
-                false
-            }
+        error = if (minusSignFound) {
+            MessageType.ILLEGAL_MINUS_SIGN.create()
+        } else {
+            MessageType.INVALID_DIGITS.create(scanner.peek().toString())
         }
-
-        error = MessageType.INVALID_DIGITS.create(scanner.peek().toString())
         return false
     }
 
@@ -202,7 +175,7 @@ class NumberParser(private val numberCandidate: String) {
      */
     private fun digits(): Boolean {
         var digitsFound = false
-        while (digit()) {
+        while (isDigit()) {
             scanner.advanceScanner()
             digitsFound = true
         }
@@ -211,14 +184,20 @@ class NumberParser(private val numberCandidate: String) {
     }
 
     /**
-     * digit -> "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+     * digit -> "0" | oneToNine
      */
-    private fun digit(): Boolean {
-        return zeroToNine.contains(scanner.peek())
+    private fun isDigit(): Boolean {
+        return scanner.peek() == '0' || isOneToNine()
     }
 
-    private val zeroToNine = setOf(
-        '0',
+    /**
+     * oneToNine -> "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+     */
+    private fun isOneToNine(): Boolean {
+        return oneToNine.contains(scanner.peek())
+    }
+
+    private val oneToNine = setOf(
         '1',
         '2',
         '3',
