@@ -165,7 +165,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     private val loneOptionalPinUnion = lonePinUnion("[needs_pinned]")
 
     /**
-     * `kind: "A"` selects branch A, so only its deeper `params` failure is reported, not both branches' errors.
+     * `kind: "A"` selects branch A, so its deeper `params` failure leads, ahead of branch B's errors.
      */
     @Test
     fun testOneOfDiscriminatorSelectsMatchingBranch() {
@@ -204,11 +204,13 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
-            // inside `params`, the value the user must actually fix
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                // inside `params`, the value the user must actually fix
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -258,10 +260,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -321,11 +325,13 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                           - params
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
-            // inside `params`
             listOf(
-                Location(Coordinates(2, 8), Coordinates(2, 10), 36, 38)
+                // inside `params`
+                Location(Coordinates(2, 8), Coordinates(2, 10), 36, 38),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -346,7 +352,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             duplicateConstUnionWithWildcard,
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -355,7 +362,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
 
     /**
      * No enum error: the wildcard pins no `kind_job`, so it might accept `J9`.  The three contradicted
-     * branches drop out instead, leaving the wildcard alone.
+     * branches can't lead, so the wildcard does.
      */
     @Test
     fun testOneOfDiscriminatorWildcardNoMatchNarrowsToWildcardBranch() {
@@ -367,7 +374,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             duplicateConstUnionWithWildcard,
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -377,7 +385,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     /**
      * Selection never resurrects a contradicted branch: `kind_job: "J1"` is admitted by the J1 branch
      * alone and `kind: "B"` by the J3 branch alone, but each contradicts the other's pin, so the
-     * surviving wildcard is reported instead.
+     * surviving wildcard leads instead.
      */
     @Test
     fun testOneOfSelectionNeverResurrectsContradictedBranch() {
@@ -390,7 +398,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             duplicateConstUnionWithWildcard,
             listOf(
                 SCHEMA_NOT_VALIDATION_FAILED,
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -466,7 +475,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -536,7 +546,8 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -544,6 +555,13 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         assertContains(report, "p1")
         assertContains(report, "p2")
         assertFalse(report.contains("p3"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- JSON Object Schema:\n" +
+                "    - Value must be exactly equal to \"B\" (1:8)\n" +
+                "    - Missing required properties: p3 (2:9)",
+            errors[2].message.toString()
+        )
     }
 
     /**
@@ -588,10 +606,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -641,10 +661,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -695,12 +717,20 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
         assertContains(errors[0].message.toString(), "alpha")
         assertFalse(errors[0].message.toString().contains("beta"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- JSON Object Schema:\n" +
+                "    - Value must be one of: \"B\", \"C\" (1:8)\n" +
+                "    - Missing required properties: beta (2:9)",
+            errors[1].message.toString()
+        )
     }
 
     /**
@@ -744,10 +774,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -766,10 +798,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             refDiscriminatedUnion,
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -785,10 +819,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
             """.trimIndent(),
             refDiscriminatedUnion,
             listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -839,10 +875,12 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -884,7 +922,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                     required:
                       - needs_other
             """.trimIndent(),
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: needs_fast", errors[0].message.toString())
@@ -895,7 +933,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """mode: "slow"""",
             loneRequiredPinUnion,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: needs_other", errors[0].message.toString())
@@ -906,7 +944,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """mode: "fast"""",
             loneRequiredPinUnion,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: needs_pinned", errors[0].message.toString())
@@ -1028,7 +1066,7 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             document,
             closedUnion,
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
 
         assertKsonSchemaErrors(

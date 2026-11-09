@@ -63,11 +63,20 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                               action:
                                 const: store
             """.trimIndent(),
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            // `Item`'s own `oneOf`, led by the enum error, lists its branches, then the outer `anyOf` lists `Group`
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertContains(errors[0].message.toString(), "read")
         assertFalse(errors[0].message.toString().contains("members"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- Group:\n" +
+                "    - Additional property 'mode' is not allowed (1:1)\n" +
+                "    - Additional property 'action' is not allowed (2:1)\n" +
+                "    - Missing required properties: members (1:1)",
+            errors[2].message.toString()
+        )
     }
 
     @Test
@@ -75,7 +84,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """kind: "a"""",
             dualBranchAllOfUnion,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertContains(errors[0].message.toString(), "needs_a")
@@ -87,7 +96,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """kind: "c"""",
             dualBranchAllOfUnion,
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
 
         assertContains(errors[0].message.toString(), "\"a\", \"b\"")
@@ -169,7 +178,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                     required:
                       - needs_b
             """.trimIndent(),
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: needs_b", errors[0].message.toString())
@@ -256,7 +265,7 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                           - a
                           - b
             """.trimIndent(),
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: needs_c", errors[0].message.toString())
@@ -351,10 +360,14 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     }
 
     private fun assertLoneRequiredPinNarrows(union: String) {
-        val eliminated = assertKsonSchemaErrors("""kind: "B"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING))
+        val eliminated = assertKsonSchemaErrors(
+            """kind: "B"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
+        )
         assertEquals("Missing required properties: needs_plain", eliminated[0].message.toString())
 
-        val selected = assertKsonSchemaErrors("""kind: "A"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING))
+        val selected = assertKsonSchemaErrors(
+            """kind: "A"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
+        )
         assertEquals("Missing required properties: needs_pinned", selected[0].message.toString())
     }
 }

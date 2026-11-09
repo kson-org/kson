@@ -13,12 +13,12 @@ import kotlin.test.assertFalse
 
 class AnyOfValidatorTest : JsonSchemaTest {
     /**
-     * `description` is known by both branches, so presence can't narrow; its error is common to both,
-     * so it is reported alone.
+     * `description` is known by both branches, so presence can't narrow.  Its error is common to both,
+     * so it is reported once, separately, and the listing shows the first branch lacks nothing else.
      */
     @Test
     fun testAnyOfCommonValidationErrors() {
-        assertKsonSchemaErrors(
+        val errors = assertKsonSchemaErrors(
             """
                 description: 99
             """.trimIndent(),
@@ -40,8 +40,18 @@ class AnyOfValidatorTest : JsonSchemaTest {
                       - required_prop
             """.trimIndent(),
             listOf(
-                SCHEMA_VALUE_TYPE_MISMATCH
+                SCHEMA_VALUE_TYPE_MISMATCH,
+                SCHEMA_ANY_OF_VALIDATION_FAILED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             )
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- JSON Object Schema: no errors beyond those reported separately\n" +
+                "- JSON Object Schema:\n" +
+                "    - Missing required properties: required_prop (1:1)",
+            errors[2].message.toString()
         )
     }
 
@@ -76,7 +86,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
             """.trimIndent(),
             anyOfSchemaRequired,
             listOf(
-                SCHEMA_VALUE_TYPE_MISMATCH, SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_VALUE_TYPE_MISMATCH, SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ))
 
         assertKsonSchemaErrors(
@@ -171,10 +181,12 @@ class AnyOfValidatorTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
             listOf(
-                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20)
+                Location(Coordinates(1, 8), Coordinates(1, 10), 18, 20),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -231,7 +243,8 @@ class AnyOfValidatorTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ANY_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -239,6 +252,12 @@ class AnyOfValidatorTest : JsonSchemaTest {
         assertContains(report, "BranchA")
         assertContains(report, "BranchB")
         assertFalse(report.contains("BranchC"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- BranchC:\n" +
+                "    - Missing required properties: gamma (1:1)",
+            errors[2].message.toString()
+        )
     }
 
     @Test
@@ -280,7 +299,7 @@ class AnyOfValidatorTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             document,
             closedUnion,
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
 
         assertKsonSchemaErrors(

@@ -2,15 +2,19 @@ package org.kson.schema.validators
 
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
+import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.parser.messages.Message
+import org.kson.parser.messages.MessageType
+import org.kson.parser.messages.MessageType.SCHEMA_OTHER_SUB_SCHEMA_ERRORS
+import org.kson.parser.messages.MessageType.SCHEMA_SUB_SCHEMA_ERRORS
 import org.kson.schema.JsonObjectSchema
 import org.kson.schema.JsonSchema
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
 /**
- * Reports a document that matched no branch of a `oneOf` / `anyOf`, narrowed to the branches that
+ * Reports a document that matched no branch of a `oneOf` / `anyOf`, led by the branches that
  * matter.  A *pin* is a property a branch fixes by `const` or `enum`.  A *discriminator* is a pin at
  * least two branches share, or a lone pin its branch also requires.  A branch *knows* a property it
  * declares or requires.  All are read through `$ref` and `allOf` by [JsonObjectSchema.pinnedProperties],
@@ -19,17 +23,23 @@ import org.kson.validation.ValidationMode
  * The *narrowing pins* are the discriminators in [ValidationMode.FULL], as a lone optional pin is more
  * likely a setting than a choice of branch.  That is a heuristic: a shared optional setting qualifies
  * too.  In [ValidationMode.PARTIAL] they are all pins, which can move the report from the object
- * holding a half-typed value onto the value itself, where errors are forgiven.
+ * holding a half-typed value onto the value itself.
  *
- * For an object document, a branch the document contradicts on a narrowing pin is dropped.  Then,
+ * For an object document, a branch the document contradicts on a narrowing pin can't lead.  Then,
  * counting only narrowing pins:
  *  1. If no branch survives, each property that every branch pins and rejects gets one enum error
- *     listing the pinned values.  With no such property, or only one branch, every branch is reported.
- *  2. Otherwise, survivors pinning a property the document has that no other survivor pins are reported.
- *  3. If there are none, the survivors reported are those that know a property the document has and
+ *     listing the pinned values, and these lead instead of any branch.  With no such property, or
+ *     only one branch, every branch leads.
+ *  2. Otherwise, survivors pinning a property the document has that no other survivor pins lead.
+ *  3. If there are none, the survivors that lead are those that know a property the document has and
  *     not every branch knows, or all of them if none do.
  *
- * A non-object document reports every branch.  At least one error is always emitted.
+ * Every branch leads for a non-object document.
+ *
+ * Narrowing is a heuristic, so in [ValidationMode.FULL] it only orders the report: the leading
+ * branches come first and every other branch is still listed.  A [ValidationMode.PARTIAL] report
+ * stays narrow, keeping a half-typed value's error on the value.  At least one error is always
+ * emitted.
  */
 internal fun reportUnionMatchFailure(
     branches: List<JsonSchema>,
@@ -39,16 +49,63 @@ internal fun reportUnionMatchFailure(
     noMatchMessage: Message,
     sourceContext: SourceContext
 ) {
-    fun report(reported: List<Int>) =
-        reportNoSubSchemaMatchErrors(ksonValue, messageSink, reported.map { matchAttemptMessageSinks[it] }, noMatchMessage)
+    // Find the branches the document most likely meant, or an enum error when no branch accepts a
+    // pinned value
+    val enumErrors = MessageSink()
+    val leading = leadingBranches(branches, ksonValue, sourceContext.mode, enumErrors)
+        .map { matchAttemptMessageSinks[it] }
 
-    if (ksonValue !is KsonObject) {
-        report(branches.indices.toList())
+    // Errors all the likely branches agree on are reported once, right where they occur
+    val reportedSeparately = enumErrors.loggedMessages().toSet() + errorsSharedBy(leading)
+    reportedSeparately.forEach { messageSink.error(it.location, it.message) }
+
+    val anchor = ksonValue.location.trimToFirstLine()
+    fun listing(heading: MessageType, subSchemas: List<LabelledMessageSink>, omit: Set<LoggedMessage> = emptySet()) =
+        messageSink.error(anchor, heading.create(subSchemaErrorSummary(subSchemas, omit)))
+
+    // A draft report stays short
+    if (sourceContext.mode == ValidationMode.PARTIAL) {
+        if (reportedSeparately.isEmpty()) {
+            messageSink.error(anchor, noMatchMessage)
+            listing(SCHEMA_SUB_SCHEMA_ERRORS, leading)
+        }
         return
+    }
+
+    // Then whatever else the likely branches complain about.  A union without branches only gets this.
+    val leadingHaveUnreportedErrors = leading.any { (it.messageSink.loggedMessages() - reportedSeparately).isNotEmpty() }
+    if (reportedSeparately.isEmpty() || leadingHaveUnreportedErrors) {
+        messageSink.error(anchor, noMatchMessage)
+        listing(SCHEMA_SUB_SCHEMA_ERRORS, leading, reportedSeparately)
+    }
+    // And finally the remaining branches, so nothing is hidden: narrowing only decides the order
+    val others = matchAttemptMessageSinks - leading.toSet()
+    if (others.isNotEmpty()) {
+        val heading = if (leading.isEmpty()) SCHEMA_SUB_SCHEMA_ERRORS else SCHEMA_OTHER_SUB_SCHEMA_ERRORS
+        listing(heading, others)
+    }
+}
+
+private fun errorsSharedBy(subSchemas: List<LabelledMessageSink>): Set<LoggedMessage> =
+    subSchemas.map { it.messageSink.loggedMessages().toSet() }
+        .reduceOrNull { shared, next -> shared intersect next } ?: emptySet()
+
+/**
+ * The indices of the [branches] that lead the report, per [reportUnionMatchFailure]; the enum errors
+ * that lead instead are logged to [enumErrors].
+ */
+private fun leadingBranches(
+    branches: List<JsonSchema>,
+    ksonValue: KsonValue,
+    mode: ValidationMode,
+    enumErrors: MessageSink
+): List<Int> {
+    if (ksonValue !is KsonObject) {
+        return branches.indices.toList()
     }
     val document = ksonValue.propertyLookup
     val allPins = branches.map { (it as? JsonObjectSchema)?.pinnedProperties() ?: emptyMap() }
-    val narrowingPins = if (sourceContext.mode == ValidationMode.FULL) discriminators(branches, allPins) else allPins
+    val narrowingPins = if (mode == ValidationMode.FULL) discriminators(branches, allPins) else allPins
 
     val contradictedPropertiesByBranch = narrowingPins.map { branchPins ->
         branchPins.filter { (property, values) -> document[property]?.let { it !in values } ?: false }.keys
@@ -59,24 +116,20 @@ internal fun reportUnionMatchFailure(
         // `reduce` needs a branch, and a lone branch keeps its own errors, which say more
         val rejectedEverywhere =
             if (branches.size > 1) contradictedPropertiesByBranch.reduce { shared, next -> shared intersect next } else emptySet()
-        if (rejectedEverywhere.isEmpty()) {
-            report(branches.indices.toList())
-        }
         rejectedEverywhere.forEach { property ->
             val allowedValues = narrowingPins.flatMapTo(LinkedHashSet()) { it.getValue(property) }
-            reportEnumValueNotAllowed(document.getValue(property), messageSink, allowedValues)
+            reportEnumValueNotAllowed(document.getValue(property), enumErrors, allowedValues)
         }
-        return
+        return if (rejectedEverywhere.isEmpty()) branches.indices.toList() else emptyList()
     }
 
     val selected = selectedBranches(narrowingPins, document.keys, survivors)
     if (selected.isNotEmpty()) {
-        report(selected)
-        return
+        return selected
     }
 
     val known = branches.map { (it as? JsonObjectSchema)?.knownProperties() ?: emptySet() }
-    report(presenceMatchedBranches(known, document.keys).filter { it in survivors }.ifEmpty { survivors })
+    return presenceMatchedBranches(known, document.keys).filter { it in survivors }.ifEmpty { survivors }
 }
 
 private fun discriminators(

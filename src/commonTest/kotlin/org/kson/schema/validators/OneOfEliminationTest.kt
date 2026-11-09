@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Elimination: a branch is dropped when the document's value falls outside its narrowing pin.  Pin
+ * Elimination: a branch can't lead when the document's value falls outside its narrowing pin.  Pin
  * selection and presence only narrow among the survivors.
  */
 class OneOfEliminationTest : JsonSchemaTest {
@@ -134,7 +134,8 @@ class OneOfEliminationTest : JsonSchemaTest {
                       - value
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -150,7 +151,8 @@ class OneOfEliminationTest : JsonSchemaTest {
             """.trimIndent(),
             duplicateConstUnion,
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -170,7 +172,7 @@ class OneOfEliminationTest : JsonSchemaTest {
                 version: 2
             """.trimIndent(),
             unionWithEliminatedDuplicatePin,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: alpha", errors[0].message.toString())
@@ -188,7 +190,7 @@ class OneOfEliminationTest : JsonSchemaTest {
                 beta: "present"
             """.trimIndent(),
             unionWithEliminatedDuplicatePin,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertEquals("Missing required properties: alpha", errors[0].message.toString())
@@ -206,11 +208,13 @@ class OneOfEliminationTest : JsonSchemaTest {
             """.trimIndent(),
             duplicateConstUnion,
             listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             ),
-            // the enum error hangs off the `kind` value `Z`
             listOf(
-                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8)
+                // the enum error hangs off the `kind` value `Z`
+                Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -253,11 +257,13 @@ class OneOfEliminationTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED,
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             ),
             listOf(
                 Location(Coordinates(0, 7), Coordinates(0, 8), 7, 8),
-                Location(Coordinates(1, 7), Coordinates(1, 11), 17, 21)
+                Location(Coordinates(1, 7), Coordinates(1, 11), 17, 21),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -266,10 +272,10 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * `version: 2` rules out every branch, so only it is reported, not branch A's missing `alpha`.
+     * `version: 2` rules out every branch, so it leads rather than branch A's missing `alpha`.
      */
     @Test
-    fun testOneOfSharedPinRejectionIsReportedAlone() {
+    fun testOneOfSharedPinRejectionLeads() {
         val errors = assertKsonSchemaErrorAtLocation(
             """
                 version: 2
@@ -314,11 +320,13 @@ class OneOfEliminationTest : JsonSchemaTest {
                       - kind
             """.trimIndent(),
             listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_SUB_SCHEMA_ERRORS
             ),
-            // at the `version` value `2`
             listOf(
-                Location(Coordinates(0, 9), Coordinates(0, 10), 9, 10)
+                // at the `version` value `2`
+                Location(Coordinates(0, 9), Coordinates(0, 10), 9, 10),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -490,7 +498,8 @@ class OneOfEliminationTest : JsonSchemaTest {
                       - baz
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -550,7 +559,8 @@ class OneOfEliminationTest : JsonSchemaTest {
                       - need_c
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -611,7 +621,8 @@ class OneOfEliminationTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -620,6 +631,13 @@ class OneOfEliminationTest : JsonSchemaTest {
                 "- BranchB:\n    - Missing required properties: sel_b, need_b (1:1)\n" +
                 "- BranchC:\n    - Missing required properties: sel_c, need_c (1:1)",
             errors[1].message.toString()
+        )
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- BranchA:\n" +
+                "    - Value must be exactly equal to \"A\" (1:8)\n" +
+                "    - Missing required properties: need_a (1:1)",
+            errors[2].message.toString()
         )
     }
 
@@ -656,7 +674,8 @@ class OneOfEliminationTest : JsonSchemaTest {
                       - bar
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -664,7 +683,7 @@ class OneOfEliminationTest : JsonSchemaTest {
     }
 
     /**
-     * Not eliminating lets presence of `kind` narrow the report to this branch, though no document with
+     * Not eliminating lets presence of `kind` lead the report with this branch, though no document with
      * `kind` can satisfy it: the known cost of not special-casing `enum: []`.
      */
     @Test
@@ -697,7 +716,8 @@ class OneOfEliminationTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED,
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 

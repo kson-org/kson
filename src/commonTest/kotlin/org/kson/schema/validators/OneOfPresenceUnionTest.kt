@@ -11,7 +11,7 @@ import kotlin.test.assertFalse
 
 /**
  * Presence narrowing: among the branches no narrowing pin rules out, those that know (declare or
- * require) a property the document carries are reported.  Pin elimination and selection take priority.
+ * require) a property the document carries lead the report.  Pin elimination and selection take priority.
  */
 class OneOfPresenceUnionTest : JsonSchemaTest {
     private val presenceUnion = """
@@ -114,16 +114,23 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                       - child
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
         assertContains(errors[0].message.toString(), "child")
         assertFalse(errors[0].message.toString().contains("value"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- JSON Object Schema:\n" +
+                "    - Missing required properties: value (1:1)",
+            errors[1].message.toString()
+        )
     }
 
     /**
-     * A single narrowed branch reports its error directly, not grouped under the no-match message.
+     * A single leading branch reports its error directly, not grouped under the no-match message.
      */
     @Test
     fun testOneOfPresenceSelectsSingleMatchingBranch() {
@@ -133,12 +140,19 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """.trimIndent(),
             presenceUnion,
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
         assertContains(errors[0].message.toString(), "needs_a")
         assertFalse(errors[0].message.toString().contains("needs_b"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- JSON Object Schema:\n" +
+                "    - Missing required properties: selector_b, needs_b (1:1)",
+            errors[1].message.toString()
+        )
     }
 
     /**
@@ -191,7 +205,8 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -199,6 +214,12 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
         assertContains(report, "BranchA")
         assertContains(report, "BranchB")
         assertFalse(report.contains("BranchC"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- BranchC:\n" +
+                "    - Missing required properties: gamma (1:1)",
+            errors[2].message.toString()
+        )
     }
 
     @Test
@@ -227,11 +248,13 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """.trimIndent(),
             loneOptionalPinUnion,
             listOf(
-                SCHEMA_ENUM_VALUE_NOT_ALLOWED
+                SCHEMA_ENUM_VALUE_NOT_ALLOWED,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             ),
-            // the `grantType` value `password`
             listOf(
-                Location(Coordinates(0, 64), Coordinates(0, 72), 64, 72)
+                // the `grantType` value `password`
+                Location(Coordinates(0, 64), Coordinates(0, 72), 64, 72),
+                Location(Coordinates(0, 0), Coordinates(0, 5), 0, 5)
             )
         )
 
@@ -304,7 +327,8 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                       - gamma
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -353,12 +377,19 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                       - detail_b
             """.trimIndent(),
             listOf(
-                SCHEMA_REQUIRED_PROPERTY_MISSING
+                SCHEMA_REQUIRED_PROPERTY_MISSING,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
         assertContains(errors[0].message.toString(), "detail_a")
         assertFalse(errors[0].message.toString().contains("detail_b"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- B:\n" +
+                "    - Missing required properties: needs_b, detail_b (1:1)",
+            errors[1].message.toString()
+        )
     }
 
     /**
@@ -419,7 +450,8 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
-                SCHEMA_SUB_SCHEMA_ERRORS
+                SCHEMA_SUB_SCHEMA_ERRORS,
+                SCHEMA_OTHER_SUB_SCHEMA_ERRORS
             )
         )
 
@@ -427,5 +459,11 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
         assertContains(report, "Kubernetes")
         assertContains(report, "Lambda")
         assertFalse(report.contains("Static"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- Static:\n" +
+                "    - Missing required properties: kind, bucket (1:1)",
+            errors[2].message.toString()
+        )
     }
 }
