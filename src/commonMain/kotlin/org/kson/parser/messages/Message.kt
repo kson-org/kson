@@ -226,7 +226,7 @@ enum class MessageType(
             val badControlChar = badControlCharArg[0]
 
             return "Non-whitespace control characters must not be embedded directly in strings. " +
-                    "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString().padStart(4, '0')}\""
+                    "Please use the Unicode escape for this character instead: \"\\u${badControlChar.code.toString(16).uppercase().padStart(4, '0')}\""
         }
     },
     STRING_BAD_UNICODE_ESCAPE {
