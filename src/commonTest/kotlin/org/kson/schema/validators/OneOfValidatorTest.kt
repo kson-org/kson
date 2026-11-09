@@ -116,12 +116,13 @@ class OneOfValidatorTest : JsonSchemaTest {
                 value: "hello"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    { "properties": { "value": { "type": "number" } } },
-                    { "properties": { "value": { "type": "boolean" } } }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      value:
+                        type: number
+                  - properties:
+                      value:
+                        type: boolean
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,

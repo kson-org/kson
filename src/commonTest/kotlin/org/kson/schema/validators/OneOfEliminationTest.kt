@@ -20,56 +20,88 @@ class OneOfEliminationTest : JsonSchemaTest {
      * `kind` A repeats, so a value can match several branches' pins.
      */
     private val duplicateConstUnion = """
-        {
-          "oneOf": [
-            {
-              "properties": {
-                "kind": { "const": "A" },
-                "params": { "type": "object", "required": ["p1"] }
-              },
-              "required": ["kind", "params"]
-            },
-            {
-              "properties": {
-                "kind": { "const": "A" },
-                "params": { "type": "object", "required": ["p2"] }
-              },
-              "required": ["kind", "params"]
-            },
-            {
-              "properties": {
-                "kind": { "const": "B" },
-                "params": { "type": "object", "required": ["p3"] }
-              },
-              "required": ["kind", "params"]
-            }
-          ]
-        }
+        oneOf:
+          - properties:
+              kind:
+                const: A
+                .
+              params:
+                type: object
+                required:
+                  - p1
+                .
+              .
+            required:
+              - kind
+              - params
+              =
+
+          - properties:
+              kind:
+                const: A
+                .
+              params:
+                type: object
+                required:
+                  - p2
+                .
+              .
+            required:
+              - kind
+              - params
+              =
+
+          - properties:
+              kind:
+                const: B
+                .
+              params:
+                type: object
+                required:
+                  - p3
+                .
+              .
+            required:
+              - kind
+              - params
     """.trimIndent()
 
     private val unionWithEliminatedDuplicatePin = """
-        {
-          "oneOf": [
-            {
-              "properties": {
-                "kind": { "const": "A" },
-                "version": { "const": 1 }
-              },
-              "required": ["kind", "version"]
-            },
-            {
-              "properties": { "kind": { "const": "A" } },
-              "required": ["kind", "alpha"]
-            },
-            {
-              "properties": {
-                "kind": { "type": "string" },
-                "beta": { "type": "string" }
-              },
-              "required": ["kind", "gamma"]
-            }
-          ]
-        }
+        oneOf:
+          - properties:
+              kind:
+                const: A
+                .
+              version:
+                const: 1
+                .
+              .
+            required:
+              - kind
+              - version
+              =
+
+          - properties:
+              kind:
+                const: A
+                .
+              .
+            required:
+              - kind
+              - alpha
+              =
+
+          - properties:
+              kind:
+                type: string
+                .
+              beta:
+                type: string
+                .
+              .
+            required:
+              - kind
+              - gamma
     """.trimIndent()
 
     @Test
@@ -79,21 +111,27 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "B"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "extra_a": { "type": "string" }
-                      },
-                      "required": ["kind", "extra_a"]
-                    },
-                    {
-                      "properties": { "value": { "type": "boolean" } },
-                      "required": ["value"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      extra_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - extra_a
+                      =
+
+                  - properties:
+                      value:
+                        type: boolean
+                        .
+                      .
+                    required:
+                      - value
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -187,18 +225,31 @@ class OneOfEliminationTest : JsonSchemaTest {
                 mode: "sync"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": { "const": "A" }, "mode": { "const": "read" } },
-                      "required": ["kind", "mode"]
-                    },
-                    {
-                      "properties": { "kind": { "const": "B" }, "mode": { "const": "write" } },
-                      "required": ["kind", "mode"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      mode:
+                        const: read
+                        .
+                      .
+                    required:
+                      - kind
+                      - mode
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      mode:
+                        const: write
+                        .
+                      .
+                    required:
+                      - kind
+                      - mode
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED,
@@ -226,26 +277,41 @@ class OneOfEliminationTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "version": { "const": 1 },
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["version", "kind"]
-                    },
-                    {
-                      "properties": {
-                        "version": { "const": 1 },
-                        "kind": { "const": "B" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["version", "kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      version:
+                        const: 1
+                        .
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - version
+                      - kind
+                      =
+
+                  - properties:
+                      version:
+                        const: 1
+                        .
+                      kind:
+                        const: B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - version
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED
@@ -269,14 +335,18 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "B"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": { "const": "A" }, "name": { "type": "string" } },
-                      "required": ["kind", "name"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      name:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - name
             """.trimIndent(),
             listOf(
                 SCHEMA_VALUE_NOT_EQUAL_TO_CONST,
@@ -297,13 +367,10 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "B"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": { "const": "A" } }
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
             """.trimIndent(),
             listOf(
                 SCHEMA_VALUE_NOT_EQUAL_TO_CONST
@@ -325,20 +392,33 @@ class OneOfEliminationTest : JsonSchemaTest {
                 mode: "N"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "kind": { "const": "A" }, "need_a": { "type": "string" } },
-                      "required": ["kind", "need_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "mode": { "const": "M" }, "need_b": { "type": "string" } },
-                      "required": ["mode", "need_b"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: BranchA
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      need_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - need_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      mode:
+                        const: M
+                        .
+                      need_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - mode
+                      - need_b
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -369,7 +449,7 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "A"
             """.trimIndent(),
             """
-                { "oneOf": [] }
+                oneOf: []
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -385,21 +465,29 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "C"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": ["A", "B"] },
-                        "foo": { "type": "string" }
-                      },
-                      "required": ["kind", "foo"]
-                    },
-                    {
-                      "properties": { "baz": { "type": "boolean" } },
-                      "required": ["baz"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum:
+                          - A
+                          - B
+                        .
+                      foo:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - foo
+                      =
+
+                  - properties:
+                      baz:
+                        type: boolean
+                        .
+                      .
+                    required:
+                      - baz
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -419,25 +507,47 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "X"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "kind": { "const": "A" }, "need_a": { "type": "string" } },
-                      "required": ["kind", "need_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "kind": { "type": "string" }, "need_b": { "type": "string" } },
-                      "required": ["kind", "need_b"]
-                    },
-                    {
-                      "title": "BranchC",
-                      "properties": { "other": { "type": "string" }, "need_c": { "type": "string" } },
-                      "required": ["other", "need_c"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: BranchA
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      need_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - need_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      kind:
+                        type: string
+                        .
+                      need_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - need_b
+                      =
+
+                  - title: BranchC
+                    properties:
+                      other:
+                        type: string
+                        .
+                      need_c:
+                        type: string
+                        .
+                      .
+                    required:
+                      - other
+                      - need_c
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -457,25 +567,47 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "X"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "kind": { "const": "A" }, "need_a": { "type": "string" } },
-                      "required": ["kind", "need_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "sel_b": { "type": "string" }, "need_b": { "type": "string" } },
-                      "required": ["sel_b", "need_b"]
-                    },
-                    {
-                      "title": "BranchC",
-                      "properties": { "sel_c": { "type": "string" }, "need_c": { "type": "string" } },
-                      "required": ["sel_c", "need_c"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: BranchA
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      need_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - need_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      sel_b:
+                        type: string
+                        .
+                      need_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - sel_b
+                      - need_b
+                      =
+
+                  - title: BranchC
+                    properties:
+                      sel_c:
+                        type: string
+                        .
+                      need_c:
+                        type: string
+                        .
+                      .
+                    required:
+                      - sel_c
+                      - need_c
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -501,21 +633,27 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "anything"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": [] },
-                        "foo": { "type": "string" }
-                      },
-                      "required": ["kind", "foo"]
-                    },
-                    {
-                      "properties": { "bar": { "type": "boolean" } },
-                      "required": ["bar"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum: []
+                        .
+                      foo:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - foo
+                      =
+
+                  - properties:
+                      bar:
+                        type: boolean
+                        .
+                      .
+                    required:
+                      - bar
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -536,21 +674,26 @@ class OneOfEliminationTest : JsonSchemaTest {
                 kind: "anything"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": [] },
-                        "foo": { "type": "string" }
-                      },
-                      "required": ["foo"]
-                    },
-                    {
-                      "properties": { "bar": { "type": "boolean" } },
-                      "required": ["bar"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum: []
+                        .
+                      foo:
+                        type: string
+                        .
+                      .
+                    required:
+                      - foo
+                      =
+
+                  - properties:
+                      bar:
+                        type: boolean
+                        .
+                      .
+                    required:
+                      - bar
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED,
@@ -567,28 +710,37 @@ class OneOfEliminationTest : JsonSchemaTest {
         assertKsonSchemaErrors(
             """
                 kind: "A"
-                params: { alpha: 5 }
+                params:
+                  alpha: 5
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": {
-                          "type": "object",
-                          "properties": { "alpha": { "type": "string" } },
-                          "required": ["alpha"]
-                        }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": { "kind": { "const": "B" } },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        properties:
+                          alpha:
+                            type: string
+                            .
+                          .
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_VALUE_TYPE_MISMATCH

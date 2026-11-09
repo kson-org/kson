@@ -15,44 +15,68 @@ import kotlin.test.assertFalse
  */
 class OneOfPresenceUnionTest : JsonSchemaTest {
     private val presenceUnion = """
-        {
-          "oneOf": [
-            {
-              "properties": { "selector_a": { "type": "string" }, "needs_a": { "type": "string" } },
-              "required": ["selector_a", "needs_a"]
-            },
-            {
-              "properties": { "selector_b": { "type": "string" }, "needs_b": { "type": "string" } },
-              "required": ["selector_b", "needs_b"]
-            }
-          ]
-        }
+        oneOf:
+          - properties:
+              selector_a:
+                type: string
+                .
+              needs_a:
+                type: string
+                .
+              .
+            required:
+              - selector_a
+              - needs_a
+              =
+
+          - properties:
+              selector_b:
+                type: string
+                .
+              needs_b:
+                type: string
+                .
+              .
+            required:
+              - selector_b
+              - needs_b
     """.trimIndent()
 
     private val loneOptionalPinUnion = """
-        {
-          "oneOf": [
-            {
-              "title": "ApiKeyAuth",
-              "properties": {
-                "apiKey": { "type": "string" },
-                "location": { "enum": ["header", "query"] }
-              },
-              "required": ["apiKey"],
-              "additionalProperties": false
-            },
-            {
-              "title": "OAuthAuth",
-              "properties": {
-                "clientId": { "type": "string" },
-                "clientSecret": { "type": "string" },
-                "grantType": { "enum": ["client_credentials", "authorization_code"] }
-              },
-              "required": ["clientId", "clientSecret"],
-              "additionalProperties": false
-            }
-          ]
-        }
+        oneOf:
+          - title: ApiKeyAuth
+            properties:
+              apiKey:
+                type: string
+                .
+              location:
+                enum:
+                  - header
+                  - query
+                .
+              .
+            required:
+              - apiKey
+            additionalProperties: false
+
+          - title: OAuthAuth
+            properties:
+              clientId:
+                type: string
+                .
+              clientSecret:
+                type: string
+                .
+              grantType:
+                enum:
+                  - client_credentials
+                  - authorization_code
+                .
+              .
+            required:
+              - clientId
+              - clientSecret
+            additionalProperties: false
     """.trimIndent()
 
     /**
@@ -65,25 +89,29 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """
                 kind: "node"
             """.trimIndent(),
-            """
-                {
-                  "oneOf": [
-                    { "${'$'}ref": "#/${'$'}defs/node" },
-                    {
-                      "properties": { "value": { "type": "boolean" } },
-                      "required": ["value"]
-                    }
-                  ],
-                  "${'$'}defs": {
-                    "node": {
-                      "properties": {
-                        "kind": { "type": "string" },
-                        "child": { "${'$'}ref": "#/${'$'}defs/node" }
-                      },
-                      "required": ["child"]
-                    }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/node'
+                  - properties:
+                      value:
+                        type: boolean
+                        .
+                      .
+                    required:
+                      - value
+                    .
+                '$defs':
+                  node:
+                    properties:
+                      kind:
+                        type: string
+                        .
+                      child:
+                        '$ref': '#/$defs/node'
+                        .
+                      .
+                    required:
+                      - child
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -123,25 +151,43 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                 shared: "x"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "shared": { "type": "string" }, "only_a": { "type": "string" } },
-                      "required": ["shared", "only_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "shared": { "type": "string" }, "only_b": { "type": "string" } },
-                      "required": ["shared", "only_b"]
-                    },
-                    {
-                      "title": "BranchC",
-                      "properties": { "gamma": { "type": "string" } },
-                      "required": ["gamma"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: BranchA
+                    properties:
+                      shared:
+                        type: string
+                        .
+                      only_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - shared
+                      - only_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      shared:
+                        type: string
+                        .
+                      only_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - shared
+                      - only_b
+                      =
+
+                  - title: BranchC
+                    properties:
+                      gamma:
+                        type: string
+                        .
+                      .
+                    required:
+                      - gamma
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -228,22 +274,34 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                 beta: "present"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": { "const": "A" }, "alpha": { "type": "string" } },
-                      "required": ["kind", "alpha"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "type": "string" },
-                        "beta": { "type": "string" },
-                        "gamma": { "type": "string" }
-                      },
-                      "required": ["beta", "gamma"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      alpha:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - alpha
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      beta:
+                        type: string
+                        .
+                      gamma:
+                        type: string
+                        .
+                      .
+                    required:
+                      - beta
+                      - gamma
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -262,23 +320,37 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
             """
                 needs_a: "present"
             """.trimIndent(),
-            """
-                {
-                  "oneOf": [
-                    { "${'$'}ref": "#/${'$'}defs/A" },
-                    { "${'$'}ref": "#/${'$'}defs/B" }
-                  ],
-                  "${'$'}defs": {
-                    "A": {
-                      "properties": { "needs_a": { "type": "string" }, "detail_a": { "type": "string" } },
-                      "required": ["needs_a", "detail_a"]
-                    },
-                    "B": {
-                      "properties": { "needs_b": { "type": "string" }, "detail_b": { "type": "string" } },
-                      "required": ["needs_b", "detail_b"]
-                    }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/A'
+                  - '$ref': '#/$defs/B'
+                    .
+                '$defs':
+                  A:
+                    properties:
+                      needs_a:
+                        type: string
+                        .
+                      detail_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_a
+                      - detail_a
+                    .
+                  B:
+                    properties:
+                      needs_b:
+                        type: string
+                        .
+                      detail_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_b
+                      - detail_b
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -300,35 +372,50 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
                 region: "us-east"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "Kubernetes",
-                      "properties": {
-                        "kind": { "const": "kubernetes" },
-                        "cluster": { "type": "string" },
-                        "region": { "type": "string" }
-                      },
-                      "required": ["kind", "cluster"]
-                    },
-                    {
-                      "title": "Lambda",
-                      "properties": {
-                        "kind": { "const": "lambda" },
-                        "region": { "type": "string" }
-                      },
-                      "required": ["kind", "region"]
-                    },
-                    {
-                      "title": "Static",
-                      "properties": {
-                        "kind": { "const": "static" },
-                        "bucket": { "type": "string" }
-                      },
-                      "required": ["kind", "bucket"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: Kubernetes
+                    properties:
+                      kind:
+                        const: kubernetes
+                        .
+                      cluster:
+                        type: string
+                        .
+                      region:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - cluster
+                      =
+
+                  - title: Lambda
+                    properties:
+                      kind:
+                        const: lambda
+                        .
+                      region:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - region
+                      =
+
+                  - title: Static
+                    properties:
+                      kind:
+                        const: static
+                        .
+                      bucket:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - bucket
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,

@@ -142,24 +142,33 @@ class AnyOfValidatorTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "anyOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "type": "string" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                anyOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -182,25 +191,43 @@ class AnyOfValidatorTest : JsonSchemaTest {
                 shared: "x"
             """.trimIndent(),
             """
-                {
-                  "anyOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "shared": { "type": "string" }, "only_a": { "type": "string" } },
-                      "required": ["shared", "only_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "shared": { "type": "string" }, "only_b": { "type": "string" } },
-                      "required": ["shared", "only_b"]
-                    },
-                    {
-                      "title": "BranchC",
-                      "properties": { "gamma": { "type": "string" } },
-                      "required": ["gamma"]
-                    }
-                  ]
-                }
+                anyOf:
+                  - title: BranchA
+                    properties:
+                      shared:
+                        type: string
+                        .
+                      only_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - shared
+                      - only_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      shared:
+                        type: string
+                        .
+                      only_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - shared
+                      - only_b
+                      =
+
+                  - title: BranchC
+                    properties:
+                      gamma:
+                        type: string
+                        .
+                      .
+                    required:
+                      - gamma
             """.trimIndent(),
             listOf(
                 SCHEMA_ANY_OF_VALIDATION_FAILED,
@@ -217,24 +244,33 @@ class AnyOfValidatorTest : JsonSchemaTest {
     @Test
     fun testAnyOfPartialModeNarrowsOnDiscriminatorsLikeFull() {
         val closedUnion = """
-            {
-              "anyOf": [
-                {
-                  "properties": {
-                    "kind": { "const": "A" },
-                    "params": { "type": "object", "required": ["alpha"] }
-                  },
-                  "required": ["kind"]
-                },
-                {
-                  "properties": {
-                    "kind": { "const": "B" },
-                    "params": { "type": "object", "required": ["beta"] }
-                  },
-                  "required": ["kind"]
-                }
-              ]
-            }
+            anyOf:
+              - properties:
+                  kind:
+                    const: A
+                    .
+                  params:
+                    type: object
+                    required:
+                      - alpha
+                    .
+                  .
+                required:
+                  - kind
+                  =
+
+              - properties:
+                  kind:
+                    const: B
+                    .
+                  params:
+                    type: object
+                    required:
+                      - beta
+                    .
+                  .
+                required:
+                  - kind
         """.trimIndent()
         val document = """
             kind: "Z"
@@ -258,12 +294,16 @@ class AnyOfValidatorTest : JsonSchemaTest {
     @Test
     fun testAnyOfLoneOptionalPinEliminatesOnlyInPartialMode() {
         val union = """
-            {
-              "anyOf": [
-                { "title": "Pinned", "properties": { "mode": { "const": "fast" } } },
-                { "title": "Other", "properties": { "mode": { "type": "number" } } }
-              ]
-            }
+            anyOf:
+              - title: Pinned
+                properties:
+                  mode:
+                    const: fast
+
+              - title: Other
+                properties:
+                  mode:
+                    type: number
         """.trimIndent()
         val document = """mode: "f""""
 

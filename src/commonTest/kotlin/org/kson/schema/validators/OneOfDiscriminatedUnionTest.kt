@@ -20,92 +20,149 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
      * `kind` repeats (A, A, B), `kind_job` is distinct, and the wildcard pins neither.
      */
     private val duplicateConstUnionWithWildcard = """
-        {
-          "oneOf": [
-            {
-              "properties": {
-                "kind": { "const": "A" },
-                "kind_job": { "const": "J1" },
-                "params": { "type": "object", "required": ["p1"] }
-              },
-              "required": ["kind", "kind_job", "params"]
-            },
-            {
-              "properties": {
-                "kind": { "const": "A" },
-                "kind_job": { "const": "J2" },
-                "params": { "type": "object", "required": ["p2"] }
-              },
-              "required": ["kind", "kind_job", "params"]
-            },
-            {
-              "properties": {
-                "kind": { "const": "B" },
-                "kind_job": { "const": "J3" },
-                "params": { "type": "object", "required": ["p3"] }
-              },
-              "required": ["kind", "kind_job", "params"]
-            },
-            {
-              "properties": {
-                "kind": { "type": "string" },
-                "kind_job": { "not": { "enum": ["J1", "J2", "J3"] } },
-                "params": { "type": "object", "required": ["p4"] }
-              },
-              "required": ["kind", "kind_job", "params"]
-            }
-          ]
-        }
+        oneOf:
+          - properties:
+              kind:
+                const: A
+                .
+              kind_job:
+                const: J1
+                .
+              params:
+                type: object
+                required:
+                  - p1
+                .
+              .
+            required:
+              - kind
+              - kind_job
+              - params
+              =
+
+          - properties:
+              kind:
+                const: A
+                .
+              kind_job:
+                const: J2
+                .
+              params:
+                type: object
+                required:
+                  - p2
+                .
+              .
+            required:
+              - kind
+              - kind_job
+              - params
+              =
+
+          - properties:
+              kind:
+                const: B
+                .
+              kind_job:
+                const: J3
+                .
+              params:
+                type: object
+                required:
+                  - p3
+                .
+              .
+            required:
+              - kind
+              - kind_job
+              - params
+              =
+
+          - properties:
+              kind:
+                type: string
+                .
+              kind_job:
+                not:
+                  enum:
+                    - J1
+                    - J2
+                    - J3
+                  .
+                .
+              params:
+                type: object
+                required:
+                  - p4
+                .
+              .
+            required:
+              - kind
+              - kind_job
+              - params
     """.trimIndent()
 
     /**
      * Branches written as `$ref`s into `$defs`, the dominant real-world shape.
      */
-    private val refDiscriminatedUnion = """
-        {
-          "oneOf": [
-            { "${'$'}ref": "#/${'$'}defs/A" },
-            { "${'$'}ref": "#/${'$'}defs/B" }
-          ],
-          "${'$'}defs": {
-            "A": {
-              "properties": {
-                "kind": { "const": "A" },
-                "params": { "type": "object", "required": ["alpha"] }
-              },
-              "required": ["kind"]
-            },
-            "B": {
-              "properties": {
-                "kind": { "const": "B" },
-                "params": { "type": "object", "required": ["beta"] }
-              },
-              "required": ["kind"]
-            }
-          }
-        }
+    private val refDiscriminatedUnion = $$"""
+        oneOf:
+          - '$ref': '#/$defs/A'
+          - '$ref': '#/$defs/B'
+            .
+        '$defs':
+          A:
+            properties:
+              kind:
+                const: A
+                .
+              params:
+                type: object
+                required:
+                  - alpha
+                .
+              .
+            required:
+              - kind
+            .
+          B:
+            properties:
+              kind:
+                const: B
+                .
+              params:
+                type: object
+                required:
+                  - beta
+                .
+              .
+            required:
+              - kind
     """.trimIndent()
 
     private fun lonePinUnion(pinnedBranchRequired: String) = """
-        {
-          "oneOf": [
-            {
-              "title": "Pinned",
-              "properties": { "mode": { "const": "fast" } },
-              "required": $pinnedBranchRequired
-            },
-            {
-              "title": "Other",
-              "properties": { "mode": { "type": "string" } },
-              "required": ["needs_other"]
-            }
-          ]
-        }
+        oneOf:
+          - title: Pinned
+            properties:
+              mode:
+                const: fast
+                .
+              .
+            required: $pinnedBranchRequired
+
+          - title: Other
+            properties:
+              mode:
+                type: string
+                .
+              .
+            required:
+              - needs_other
     """.trimIndent()
 
-    private val loneRequiredPinUnion = lonePinUnion("""["mode", "needs_pinned"]""")
+    private val loneRequiredPinUnion = lonePinUnion("[mode, needs_pinned]")
 
-    private val loneOptionalPinUnion = lonePinUnion("""["needs_pinned"]""")
+    private val loneOptionalPinUnion = lonePinUnion("[needs_pinned]")
 
     /**
      * `kind: "A"` selects branch A, so only its deeper `params` failure is reported, not both branches' errors.
@@ -118,24 +175,33 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "const": "B" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -161,24 +227,35 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "type": "string", "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "type": "string", "const": "B" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        type: string
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        const: B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -203,31 +280,45 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "allOf": [
-                    { "type": "object" },
-                    {
-                      "oneOf": [
-                        {
-                          "properties": {
-                            "kind": { "const": "A" },
-                            "kind_job": { "const": "A_JOB" },
-                            "params": { "type": "object", "required": ["alpha"] }
-                          },
-                          "required": ["kind", "kind_job", "params"]
-                        },
-                        {
-                          "properties": {
-                            "kind": { "const": "B" },
-                            "kind_job": { "const": "B_JOB" },
-                            "params": { "type": "object", "required": ["beta"] }
-                          },
-                          "required": ["kind", "kind_job", "params"]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                allOf:
+                  - type: object
+                  - oneOf:
+                      - properties:
+                          kind:
+                            const: A
+                            .
+                          kind_job:
+                            const: A_JOB
+                            .
+                          params:
+                            type: object
+                            required:
+                              - alpha
+                            .
+                          .
+                        required:
+                          - kind
+                          - kind_job
+                          - params
+                          =
+
+                      - properties:
+                          kind:
+                            const: B
+                            .
+                          kind_job:
+                            const: B_JOB
+                            .
+                          params:
+                            type: object
+                            required:
+                              - beta
+                            .
+                          .
+                        required:
+                          - kind
+                          - kind_job
+                          - params
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -318,30 +409,60 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 version: 2
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "BranchA",
-                      "properties": { "kind": { "const": "A" }, "needs_a": { "type": "string" } },
-                      "required": ["kind", "needs_a"]
-                    },
-                    {
-                      "title": "BranchB",
-                      "properties": { "kind": { "const": "B" }, "needs_b": { "type": "string" } },
-                      "required": ["kind", "needs_b"]
-                    },
-                    {
-                      "title": "BranchW",
-                      "properties": { "version": { "const": 2 }, "needs_w": { "type": "string" } },
-                      "required": ["version", "needs_w"]
-                    },
-                    {
-                      "title": "UnpinnedBranch",
-                      "properties": { "kind": { "type": "string" }, "version": { "type": "number" } },
-                      "required": ["needs_unpinned"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: BranchA
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      needs_a:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - needs_a
+                      =
+
+                  - title: BranchB
+                    properties:
+                      kind:
+                        const: B
+                        .
+                      needs_b:
+                        type: string
+                        .
+                      .
+                    required:
+                      - kind
+                      - needs_b
+                      =
+
+                  - title: BranchW
+                    properties:
+                      version:
+                        const: 2
+                        .
+                      needs_w:
+                        type: string
+                        .
+                      .
+                    required:
+                      - version
+                      - needs_w
+                      =
+
+                  - title: UnpinnedBranch
+                    properties:
+                      kind:
+                        type: string
+                        .
+                      version:
+                        type: number
+                        .
+                      .
+                    required:
+                      - needs_unpinned
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -368,31 +489,50 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["p1"] }
-                      },
-                      "required": ["kind", "params"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["p2"] }
-                      },
-                      "required": ["kind", "params"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "const": "B" },
-                        "params": { "type": "object", "required": ["p3"] }
-                      },
-                      "required": ["kind", "params"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - p1
+                        .
+                      .
+                    required:
+                      - kind
+                      - params
+                      =
+
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - p2
+                        .
+                      .
+                    required:
+                      - kind
+                      - params
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - p3
+                        .
+                      .
+                    required:
+                      - kind
+                      - params
             """.trimIndent(),
             listOf(
                 SCHEMA_ONE_OF_VALIDATION_FAILED,
@@ -417,24 +557,35 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": ["A"] },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "enum": ["B"] },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum:
+                          - A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        enum:
+                          - B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -458,24 +609,36 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": ["A", "B"] },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "enum": ["C"] },
-                        "params": { "type": "object", "required": ["gamma"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum:
+                          - A
+                          - B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        enum:
+                          - C
+                        .
+                      params:
+                        type: object
+                        required:
+                          - gamma
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -499,24 +662,37 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": ["A", "B"] },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "enum": ["B", "C"] },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum:
+                          - A
+                          - B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        enum:
+                          - B
+                          - C
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -538,24 +714,34 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 params: {}
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "enum": ["A"] },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    {
-                      "properties": {
-                        "kind": { "enum": [] },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind:
+                        enum:
+                          - A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - properties:
+                      kind:
+                        enum: []
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_ENUM_VALUE_NOT_ALLOWED
@@ -619,28 +805,38 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
                 kind: "B"
                 params: {}
             """.trimIndent(),
-            """
-                {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "kind": { "const": "A" },
-                        "params": { "type": "object", "required": ["alpha"] }
-                      },
-                      "required": ["kind"]
-                    },
-                    { "${'$'}ref": "#/${'$'}defs/B" }
-                  ],
-                  "${'$'}defs": {
-                    "B": {
-                      "properties": {
-                        "kind": { "const": "B" },
-                        "params": { "type": "object", "required": ["beta"] }
-                      },
-                      "required": ["kind"]
-                    }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - properties:
+                      kind:
+                        const: A
+                        .
+                      params:
+                        type: object
+                        required:
+                          - alpha
+                        .
+                      .
+                    required:
+                      - kind
+                      =
+
+                  - '$ref': '#/$defs/B'
+                    .
+                '$defs':
+                  B:
+                    properties:
+                      kind:
+                        const: B
+                        .
+                      params:
+                        type: object
+                        required:
+                          - beta
+                        .
+                      .
+                    required:
+                      - kind
             """.trimIndent(),
             listOf(
                 SCHEMA_REQUIRED_PROPERTY_MISSING
@@ -658,25 +854,35 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """mode: "fast"""",
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "Fast",
-                      "properties": { "mode": { "const": "fast" } },
-                      "required": ["needs_fast"]
-                    },
-                    {
-                      "title": "Slow",
-                      "properties": { "mode": { "const": "slow" } },
-                      "required": ["needs_slow"]
-                    },
-                    {
-                      "title": "Other",
-                      "properties": { "mode": { "type": "string" } },
-                      "required": ["needs_other"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: Fast
+                    properties:
+                      mode:
+                        const: fast
+                        .
+                      .
+                    required:
+                      - needs_fast
+                      =
+
+                  - title: Slow
+                    properties:
+                      mode:
+                        const: slow
+                        .
+                      .
+                    required:
+                      - needs_slow
+                      =
+
+                  - title: Other
+                    properties:
+                      mode:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_other
             """.trimIndent(),
             listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
         )
@@ -748,20 +954,26 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
         val errors = assertKsonSchemaErrors(
             """mode: "slow"""",
             """
-                {
-                  "oneOf": [
-                    {
-                      "title": "Pinned",
-                      "properties": { "mode": { "const": "fast" } },
-                      "required": ["needs_pinned"]
-                    },
-                    {
-                      "title": "Other",
-                      "properties": { "mode": { "type": "string" } },
-                      "required": ["mode", "needs_other"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - title: Pinned
+                    properties:
+                      mode:
+                        const: fast
+                        .
+                      .
+                    required:
+                      - needs_pinned
+                      =
+
+                  - title: Other
+                    properties:
+                      mode:
+                        type: string
+                        .
+                      .
+                    required:
+                      - mode
+                      - needs_other
             """.trimIndent(),
             listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
@@ -780,24 +992,33 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     @Test
     fun testOneOfPartialModeNarrowsOnDiscriminatorsLikeFull() {
         val closedUnion = """
-            {
-              "oneOf": [
-                {
-                  "properties": {
-                    "kind": { "const": "A" },
-                    "params": { "type": "object", "required": ["alpha"] }
-                  },
-                  "required": ["kind"]
-                },
-                {
-                  "properties": {
-                    "kind": { "const": "B" },
-                    "params": { "type": "object", "required": ["beta"] }
-                  },
-                  "required": ["kind"]
-                }
-              ]
-            }
+            oneOf:
+              - properties:
+                  kind:
+                    const: A
+                    .
+                  params:
+                    type: object
+                    required:
+                      - alpha
+                    .
+                  .
+                required:
+                  - kind
+                  =
+
+              - properties:
+                  kind:
+                    const: B
+                    .
+                  params:
+                    type: object
+                    required:
+                      - beta
+                    .
+                  .
+                required:
+                  - kind
         """.trimIndent()
         val document = """
             kind: "Z"
@@ -821,12 +1042,16 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     @Test
     fun testOneOfLoneOptionalPinEliminatesOnlyInPartialMode() {
         val union = """
-            {
-              "oneOf": [
-                { "title": "Pinned", "properties": { "mode": { "const": "fast" } } },
-                { "title": "Other", "properties": { "mode": { "type": "number" } } }
-              ]
-            }
+            oneOf:
+              - title: Pinned
+                properties:
+                  mode:
+                    const: fast
+
+              - title: Other
+                properties:
+                  mode:
+                    type: number
         """.trimIndent()
         val document = """mode: "f""""
 
@@ -857,18 +1082,22 @@ class OneOfDiscriminatedUnionTest : JsonSchemaTest {
     @Test
     fun testOneOfLoneOptionalPinSelectsOnlyInPartialMode() {
         val union = """
-            {
-              "oneOf": [
-                {
-                  "title": "Pinned",
-                  "properties": { "mode": { "const": "fast" }, "size": { "type": "number" } }
-                },
-                {
-                  "title": "Other",
-                  "properties": { "mode": { "type": "string" }, "size": { "type": "boolean" } }
-                }
-              ]
-            }
+            oneOf:
+              - title: Pinned
+                properties:
+                  mode:
+                    const: fast
+                    .
+                  size:
+                    type: number
+
+              - title: Other
+                properties:
+                  mode:
+                    type: string
+                    .
+                  size:
+                    type: boolean
         """.trimIndent()
         val document = """
             mode: "fast"

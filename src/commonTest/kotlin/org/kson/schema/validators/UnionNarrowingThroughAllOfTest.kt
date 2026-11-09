@@ -23,34 +23,45 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                 mode: "sync"
                 action: "fetch"
             """.trimIndent(),
-            """
-                {
-                  "anyOf": [
-                    { "${'$'}ref": "#/${'$'}defs/Group" },
-                    { "${'$'}ref": "#/${'$'}defs/Item" }
-                  ],
-                  "${'$'}defs": {
-                    "Group": {
-                      "additionalProperties": false,
-                      "properties": { "name": {}, "members": {} },
-                      "required": ["members"]
-                    },
-                    "Base": {
-                      "properties": { "name": {}, "mode": {}, "action": {} }
-                    },
-                    "Item": {
-                      "allOf": [
-                        { "${'$'}ref": "#/${'$'}defs/Base" },
-                        {
-                          "oneOf": [
-                            { "properties": { "mode": { "const": "read" }, "action": { "const": "fetch" } } },
-                            { "properties": { "mode": { "const": "write" }, "action": { "const": "store" } } }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }
+            $$"""
+                anyOf:
+                  - '$ref': '#/$defs/Group'
+                  - '$ref': '#/$defs/Item'
+                    .
+                '$defs':
+                  Group:
+                    additionalProperties: false
+                    properties:
+                      name: {}
+                      members: {}
+                      .
+                    required:
+                      - members
+                    .
+                  Base:
+                    properties:
+                      name: {}
+                      mode: {}
+                      action: {}
+                      .
+                    .
+                  Item:
+                    allOf:
+                      - '$ref': '#/$defs/Base'
+                      - oneOf:
+                          - properties:
+                              mode:
+                                const: read
+                                .
+                              action:
+                                const: fetch
+
+                          - properties:
+                              mode:
+                                const: write
+                                .
+                              action:
+                                const: store
             """.trimIndent(),
             listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
         )
@@ -83,28 +94,36 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     }
 
     /** Two branches, each pinning `kind` to its own `const` one `allOf` hop down, over a shared base. */
-    private val dualBranchAllOfUnion = """
-        {
-          "oneOf": [
-            {
-              "allOf": [
-                { "${'$'}ref": "#/${'$'}defs/base" },
-                { "properties": { "kind": { "const": "a" } } }
-              ],
-              "required": ["needs_a"]
-            },
-            {
-              "allOf": [
-                { "${'$'}ref": "#/${'$'}defs/base" },
-                { "properties": { "kind": { "const": "b" } } }
-              ],
-              "required": ["needs_b"]
-            }
-          ],
-          "${'$'}defs": {
-            "base": { "properties": { "kind": { "type": "string" } } }
-          }
-        }
+    private val dualBranchAllOfUnion = $$"""
+        oneOf:
+          - allOf:
+              - '$ref': '#/$defs/base'
+              - properties:
+                  kind:
+                    const: a
+                    .
+                  .
+                .
+            required:
+              - needs_a
+              =
+
+          - allOf:
+              - '$ref': '#/$defs/base'
+              - properties:
+                  kind:
+                    const: b
+                    .
+                  .
+                .
+            required:
+              - needs_b
+            .
+        '$defs':
+          base:
+            properties:
+              kind:
+                type: string
     """.trimIndent()
 
     /**
@@ -120,22 +139,35 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                 other: "present"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": {}, "other": {} },
-                      "allOf": [
-                        { "properties": { "kind": { "const": "A" } } },
-                        { "properties": { "kind": { "enum": ["A", "B"] } } }
-                      ],
-                      "required": ["needs_a"]
-                    },
-                    {
-                      "properties": { "kind": { "const": "B" }, "other": {} },
-                      "required": ["needs_b"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind: {}
+                      other: {}
+                      .
+                    allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - properties:
+                          kind:
+                            enum:
+                              - A
+                              - B
+                            .
+                          .
+                        .
+                    required:
+                      - needs_a
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      other: {}
+                      .
+                    required:
+                      - needs_b
             """.trimIndent(),
             listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
         )
@@ -147,26 +179,32 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     fun testOneOfPinsComposedWithinOneBranchCountOnce() {
         val errors = assertKsonSchemaErrors(
             """kind: "B"""",
-            """
-                {
-                  "oneOf": [
-                    { "${'$'}ref": "#/${'$'}defs/Composed" },
-                    {
-                      "title": "Plain",
-                      "properties": { "kind": {} },
-                      "required": ["needs_plain"]
-                    }
-                  ],
-                  "${'$'}defs": {
-                    "Composed": {
-                      "allOf": [
-                        { "properties": { "kind": { "const": "A" } } },
-                        { "properties": { "kind": { "enum": ["A", "B"] } } }
-                      ],
-                      "required": ["needs_composed"]
-                    }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/Composed'
+                  - title: Plain
+                    properties:
+                      kind: {}
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  Composed:
+                    allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - properties:
+                          kind:
+                            enum:
+                              - A
+                              - B
+                            .
+                          .
+                        .
+                    required:
+                      - needs_composed
             """.trimIndent(),
             listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
@@ -186,17 +224,37 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     fun testOneOfPinInheritedFromSharedBaseCountsForEachBranch() {
         val errors = assertKsonSchemaErrors(
             """kind: "c"""",
-            """
-                {
-                  "oneOf": [
-                    { "allOf": [{ "${'$'}ref": "#/${'$'}defs/base" }], "required": ["needs_a"] },
-                    { "allOf": [{ "${'$'}ref": "#/${'$'}defs/base" }], "required": ["needs_b"] },
-                    { "properties": { "kind": { "type": "string" } }, "required": ["needs_c"] }
-                  ],
-                  "${'$'}defs": {
-                    "base": { "properties": { "kind": { "enum": ["a", "b"] } } }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - allOf:
+                      - '$ref': '#/$defs/base'
+                        .
+                    required:
+                      - needs_a
+                      =
+
+                  - allOf:
+                      - '$ref': '#/$defs/base'
+                        .
+                    required:
+                      - needs_b
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_c
+                    .
+                '$defs':
+                  base:
+                    properties:
+                      kind:
+                        enum:
+                          - a
+                          - b
             """.trimIndent(),
             listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
         )
@@ -208,21 +266,25 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     fun testOneOfLonePinRequiredByAnotherAllOfMemberNarrows() {
         assertLoneRequiredPinNarrows(
             """
-                {
-                  "oneOf": [
-                    {
-                      "allOf": [
-                        { "properties": { "kind": { "const": "A" } } },
-                        { "required": ["kind"] }
-                      ],
-                      "required": ["needs_pinned"]
-                    },
-                    {
-                      "properties": { "kind": { "type": "string" } },
-                      "required": ["needs_plain"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - required:
+                          - kind
+                        .
+                    required:
+                      - needs_pinned
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
             """.trimIndent()
         )
     }
@@ -230,22 +292,27 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     @Test
     fun testOneOfLonePinRequiredThroughRefNarrows() {
         assertLoneRequiredPinNarrows(
-            """
-                {
-                  "oneOf": [
-                    { "${'$'}ref": "#/${'$'}defs/Pinned" },
-                    {
-                      "properties": { "kind": { "type": "string" } },
-                      "required": ["needs_plain"]
-                    }
-                  ],
-                  "${'$'}defs": {
-                    "Pinned": {
-                      "properties": { "kind": { "const": "A" } },
-                      "required": ["kind", "needs_pinned"]
-                    }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/Pinned'
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  Pinned:
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      .
+                    required:
+                      - kind
+                      - needs_pinned
             """.trimIndent()
         )
     }
@@ -253,23 +320,32 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     @Test
     fun testOneOfLonePinRequiredThroughAllOfMemberRefNarrows() {
         assertLoneRequiredPinNarrows(
-            """
-                {
-                  "oneOf": [
-                    {
-                      "allOf": [{ "${'$'}ref": "#/${'$'}defs/RequiresKind" }],
-                      "properties": { "kind": { "const": "A" } },
-                      "required": ["needs_pinned"]
-                    },
-                    {
-                      "properties": { "kind": { "type": "string" } },
-                      "required": ["needs_plain"]
-                    }
-                  ],
-                  "${'$'}defs": {
-                    "RequiresKind": { "required": ["kind"] }
-                  }
-                }
+            $$"""
+                oneOf:
+                  - allOf:
+                      - '$ref': '#/$defs/RequiresKind'
+                        .
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      .
+                    required:
+                      - needs_pinned
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  RequiresKind:
+                    required:
+                      - kind
             """.trimIndent()
         )
     }
