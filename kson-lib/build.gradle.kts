@@ -324,10 +324,18 @@ tasks.register<PixiExecTask>("buildWithGraalVmNativeImage") {
             add("-cp"); add(classPath)
             add("-H:+UnlockExperimentalVMOptions") // Necessary to use JNIConfigurationFiles option below
             add("-H:JNIConfigurationFiles=$jniConfig")
-            // Pin the macOS deployment target so the dylib doesn't inherit the host's
-            // macOS version, which would make wheels unnecessarily require the latest OS.
             if (OperatingSystem.current().isMacOsX) {
+                // Pin the macOS deployment target so the dylib doesn't inherit the host's
+                // macOS version, which would make wheels unnecessarily require the latest OS.
                 add("-H:NativeLinkerOption=-mmacosx-version-min=11.0")
+                // Left to itself the linker uses the output path as the install name, so anything
+                // linked against the dylib looks for it in this build directory on every machine.
+                // @rpath lets the consuming binary say where it ships the library.
+                add("-H:NativeLinkerOption=-Wl,-install_name,@rpath/libkson.dylib")
+            }
+            if (OperatingSystem.current().isLinux) {
+                // Same as the install name above: record a bare name for the loader to search for
+                add("-H:NativeLinkerOption=-Wl,-soname,libkson.so")
             }
             add("-o"); add(buildArtifactPath)
         }
