@@ -3,13 +3,10 @@ package org.kson.tooling.navigation
 import org.kson.ast.AstNode
 import org.kson.ast.ObjectNode
 import org.kson.parser.Location
-import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
+import org.kson.schema.SchemaDecisions
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaIdLookup.Companion.resolveUri
-import org.kson.schema.SchemaParser
-import org.kson.validation.SourceContext
-import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
@@ -58,7 +55,7 @@ internal val KsonValue.isFalseSchema: Boolean
 /**
  * Navigates a document's [TreePointer] through a schema, returning all sub-schemas at the
  * target location fully flattened (combinators exploded, conditionals narrowed by
- * strict isValid against the document).
+ * [evaluateIf] against the document).
  *
  * The navigator is built on two primitives:
  * - [stepInto]: structural per-token descent through a single schema, no combinator
@@ -204,7 +201,7 @@ internal class SchemaNavigator(
      * schema for an index the tuple covers, `additionalItems` past it, or a single `items` schema at any index.  Null
      * when none applies, as without `items`.
      *
-     * Validation applies the same rule in [org.kson.schema.validators.ItemsValidator].
+     * Validation applies the same rule in core's `ItemsValidator`.
      */
     private fun itemSchema(arraySchema: KsonObject, index: Int): KsonValue? {
         val items = arraySchema.propertyLookup["items"]
@@ -251,7 +248,7 @@ internal class SchemaNavigator(
      *     branches are emitted (nothing to narrow against).
      *   - allOf: unconditional expansion, every branch emitted (all must hold).
      *   - if / then / else: see [evaluateIf].  A matching `if` emits `then`; a
-     *     contradicted `if` emits `else`; an undecidable `if` (no document, unparseable
+     *     failed `if` emits `else`; an undecidable `if` (no document, unparseable
      *     condition, or failing only because a required discriminator isn't present yet)
      *     emits both branches.
      *
@@ -266,20 +263,18 @@ internal class SchemaNavigator(
         ref: NavigatedSchema,
         docVal: KsonValue?,
         depth: Int,
-        inProgress: MutableList<Pair<String, KsonValue>> = mutableListOf()
+        inProgress: MutableList<KsonValue> = mutableListOf()
     ): List<NavigatedSchema> {
         if (carryDeadEnds && ref.endsAtUnresolvedRef) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
 
-        // Cycle guard: a oneOf/anyOf/allOf branch can be a `$ref` back to a node already
-        // being flattened on this path (a legal recursive grammar where one alternative is
-        // "the whole thing again").  Combinator expansion doesn't consume a pointer token the
-        // way properties/items steps do, so without this guard flatten re-enters the same node
-        // forever.  Emit the node bare and stop descending when we'd re-enter it.
-        if (inProgress.any { it.first == ref.resolvedValueBaseUri && it.second === schemaObj }) {
+        // A combinator branch can `$ref` back to a node already being flattened on this path, and
+        // expanding it consumes no pointer token, so stop at a node we're already inside.  Compare
+        // the node alone: a directory-style `$id` lengthens the base URI on every trip around a cycle.
+        if (inProgress.any { it === schemaObj }) {
             return listOf(ref)
         }
-        inProgress.add(ref.resolvedValueBaseUri to schemaObj)
+        inProgress.add(schemaObj)
 
         val baseUri = baseUriWithin(schemaObj, ref.resolvedValueBaseUri)
         val results = mutableListOf<NavigatedSchema>()
@@ -336,7 +331,7 @@ internal class SchemaNavigator(
 
     /**
      * The `then`/`else` branches an `if` conditional contributes, per [evaluateIf] against [docVal]:
-     * a matching `if` yields `then`; a contradicted `if` yields `else`; an undecidable `if` yields both.
+     * a matching `if` yields `then`; a failed `if` yields `else`; an undecidable `if` yields both.
      * Empty when there is no `if`.  Ordering (`then` before `else`) matches the flattened result order.
      *
      * Each step lists the outcomes left open, even one whose keyword the schema leaves out: the document
@@ -371,39 +366,28 @@ internal class SchemaNavigator(
         ref: ResolvedRef,
         docVal: KsonValue
     ): Boolean {
-        val schema = SchemaParser.parseSchemaElement(
-            ref.resolvedValue, MessageSink(), ref.resolvedValueBaseUri, idLookup
-        ) ?: return true
-        val sink = MessageSink()
-        schema.validate(docVal, sink, SourceContext(mode = ValidationMode.PARTIAL))
-        // compatible iff every partial-validation error comes from the value being authored
-        return sink.loggedMessages().all { logged ->
-            incompleteRegion != null && logged.location in incompleteRegion
-        }
+        val schema = SchemaDecisions.compile(ref.resolvedValue, ref.resolvedValueBaseUri, idLookup) ?: return true
+        return !SchemaDecisions.breaks(schema, docVal, forgiving = incompleteRegion)
     }
 
     /**
-     * Evaluate an `if` condition against [docVal] into three states.  A fully valid condition is
-     * [IfState.MATCH].  Otherwise the condition is re-checked under [ValidationMode.PARTIAL] and every
-     * remaining error located inside [incompleteRegion] — the span of the value being authored — is
-     * forgiven.  If nothing survives that forgiveness the `if` is only unsatisfied because the document
-     * is incomplete (e.g. a required discriminator hasn't been typed yet), so it is
-     * [IfState.UNDETERMINED] (emit both branches) rather than [IfState.NO_MATCH].  An empty error list
-     * likewise yields UNDETERMINED, matching partial validity.  This distinguishes "not decidable due
-     * to incompleteness" from "decidably false against present data" (emit `else`), without inspecting
-     * any validator message types.
+     * Evaluate an `if` condition against [docVal] into three states.  A condition that [SchemaDecisions.accepts] the
+     * document is [IfState.MATCH].  Otherwise it comes down to whether the document [SchemaDecisions.breaks] the
+     * condition, forgiving errors located inside [incompleteRegion] — the span of the value being
+     * authored.  If it doesn't, the `if` is only unsatisfied because the document is incomplete (e.g. a
+     * required discriminator hasn't been typed yet), so it is [IfState.UNDETERMINED] (emit both branches).
+     * A failed `if` is decidably false against present data, so it is [IfState.NO_MATCH] (emit `else`).
+     * This tells the two apart without inspecting any validator message types.
      */
     private fun evaluateIf(ifCondition: KsonValue, baseUri: String, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
-        val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), baseUri, idLookup)
-            ?: return IfState.UNDETERMINED
-        if (ifSchema.isValid(docVal, MessageSink())) return IfState.MATCH
-        val sink = MessageSink()
-        ifSchema.validate(docVal, sink, SourceContext(mode = ValidationMode.PARTIAL))
-        val onlyAuthoredValueErrors = sink.loggedMessages().all { logged ->
-            incompleteRegion != null && logged.location in incompleteRegion
+        val ifSchema = SchemaDecisions.compile(ifCondition, baseUri, idLookup) ?: return IfState.UNDETERMINED
+        if (SchemaDecisions.accepts(ifSchema, docVal)) return IfState.MATCH
+        return if (SchemaDecisions.breaks(ifSchema, docVal, forgiving = incompleteRegion)) {
+            IfState.NO_MATCH
+        } else {
+            IfState.UNDETERMINED
         }
-        return if (onlyAuthoredValueErrors) IfState.UNDETERMINED else IfState.NO_MATCH
     }
 
     /** Outcome of evaluating an `if` condition during [SchemaNavigator] flattening. */

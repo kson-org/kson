@@ -14,6 +14,7 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.schema.SchemaIdLookup
 import org.kson.validation.SourceContext
+import org.kson.value.KsonBoolean
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
@@ -68,7 +69,8 @@ object KsonTooling {
      *
      * Finds the KsonValue at the given position and returns its location in the
      * schema document. Filters schemas based on validation — only returns locations
-     * for schemas compatible with the existing document properties.
+     * for schemas compatible with the existing document properties.  A `true` or `false`
+     * schema is only returned when nothing else defines the property.
      *
      * @param document The pre-parsed document being edited
      * @param schema The pre-parsed schema for the document, read error-tolerantly so a localized parse error still drives results
@@ -86,7 +88,8 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
         val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
 
-        return validSchemas.map {
+        val definitions = validSchemas.filterNot { it.resolvedValue is KsonBoolean }.ifEmpty { validSchemas }
+        return definitions.map {
             Range(
                 it.resolvedValue.location.start.line,
                 it.resolvedValue.location.start.column,

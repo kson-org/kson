@@ -7,7 +7,7 @@ import org.kson.schema.JsonStringValidator
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 
-class MinLengthValidator(private val minLength: Long) : JsonStringValidator() {
+internal class MinLengthValidator(private val minLength: Long) : JsonStringValidator() {
     override fun validateString(node: KsonString, messageSink: MessageSink, sourceContext: SourceContext) {
         // a half-typed string hasn't reached its minimum yet — incompleteness, not a contradiction
         if (sourceContext.mode == ValidationMode.PARTIAL) return

@@ -6,7 +6,7 @@ import org.kson.validation.Validator
 import org.kson.value.*
 
 // schema todo capture file/location info from schema to link back to schema def?
-interface JsonSchemaValidator: Validator {
+internal interface JsonSchemaValidator: Validator {
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext)
 
     // schema todo introspection on the execution interface: this asks a validator what it *declares*,
@@ -18,7 +18,7 @@ interface JsonSchemaValidator: Validator {
     fun pinnedValues(): Set<KsonValue>? = null
 }
 
-abstract class JsonNumberValidator : JsonSchemaValidator {
+internal abstract class JsonNumberValidator : JsonSchemaValidator {
     final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue !is KsonNumber) {
             return
@@ -30,7 +30,7 @@ abstract class JsonNumberValidator : JsonSchemaValidator {
     abstract fun validateNumber(node: KsonNumber, messageSink: MessageSink)
 }
 
-abstract class JsonArrayValidator : JsonSchemaValidator {
+internal abstract class JsonArrayValidator : JsonSchemaValidator {
     final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         if (ksonValue !is KsonList) {
             return
@@ -42,7 +42,7 @@ abstract class JsonArrayValidator : JsonSchemaValidator {
     abstract fun validateArray(node: KsonList, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
-abstract class JsonObjectValidator : JsonSchemaValidator {
+internal abstract class JsonObjectValidator : JsonSchemaValidator {
     final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val ksonObject = if (ksonValue is KsonObject)
             ksonValue
@@ -58,7 +58,7 @@ abstract class JsonObjectValidator : JsonSchemaValidator {
     abstract fun validateObject(node: KsonObject, messageSink: MessageSink, sourceContext: SourceContext)
 }
 
-abstract class JsonStringValidator : JsonSchemaValidator {
+internal abstract class JsonStringValidator : JsonSchemaValidator {
     final override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val stringValue = when (ksonValue) {
             is KsonString -> ksonValue
