@@ -28,6 +28,11 @@ import org.kson.value.toKsonValue
  */
 object KsonCore {
     /**
+     * This is not real! This change is just to test the code owners capability.
+     */
+    fun destroy() {
+    }
+    /**
      * Parse the given Kson [source] to an [AstParseResult]. This is the base parse for all the [CompileTarget]s
      * we support, and may be used as a standalone parse to validate a [Kson] document or obtain a [KsonValue]
      * from [AstParseResult.ksonValue]
