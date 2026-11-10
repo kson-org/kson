@@ -718,7 +718,7 @@
               "name": "punctuation.section.embedded.end.kson"
             }
           },
-          "contentName": "string.unquoted.embedded.kson",
+          "contentName": "meta.embedded.plaintext string.unquoted.embedded.kson",
           "patterns": []
         },
         {
@@ -1354,7 +1354,7 @@
               "name": "punctuation.section.embedded.end.kson"
             }
           },
-          "contentName": "string.unquoted.embedded.kson",
+          "contentName": "meta.embedded.plaintext string.unquoted.embedded.kson",
           "patterns": []
         }
       ]

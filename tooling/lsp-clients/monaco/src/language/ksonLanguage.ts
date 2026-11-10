@@ -78,9 +78,19 @@ export function registerKsonLanguage(): void {
                 // List dash (dash followed by whitespace)
                 [/-(?=\s)/, 'delimiter'],
 
-                // Embed open/close delimiters
-                [/\$\$|\$/, 'metatag'],
-                [/%%|%/, 'metatag'],
+                // Monarch embeds only after a non-empty match: the tag, or the delimiter when untagged
+                [/\$$/, { token: 'metatag', next: '@embedDollar', nextEmbedded: 'plaintext' }],
+                [/(\$)(.+)$/, ['metatag', { token: '', next: '@embedDollar', nextEmbedded: 'plaintext' }]],
+                [/%$/, { token: 'metatag', next: '@embedPercent', nextEmbedded: 'plaintext' }],
+                [/(%)(.+)$/, ['metatag', { token: '', next: '@embedPercent', nextEmbedded: 'plaintext' }]],
+            ],
+
+            embedDollar: [
+                [/\$\$/, { token: 'metatag', next: '@pop', nextEmbedded: '@pop' }],
+            ],
+
+            embedPercent: [
+                [/%%/, { token: 'metatag', next: '@pop', nextEmbedded: '@pop' }],
             ],
 
             string_double: [

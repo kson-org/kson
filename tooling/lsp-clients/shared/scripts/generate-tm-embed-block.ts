@@ -156,9 +156,9 @@ function generateEmbedPattern(delimiter: string, lang?: LanguageConfig) {
         ? 'meta.embedded.block.generic.kson'
         : `meta.embedded.block.${lang.id}.kson`;
 
-    // Build the content name
+    // The plaintext scope keeps kson's editing rules out; the string scope stays innermost
     const contentName = isGeneric
-        ? 'string.unquoted.embedded.kson'
+        ? 'meta.embedded.plaintext string.unquoted.embedded.kson'
         : lang.contentName;
 
     // Build the patterns array
@@ -219,7 +219,7 @@ function generateTmEmbedBlock() {
     };
 
     // Write the updated file
-    writeFileSync(tmLanguagePath, JSON.stringify(tmLanguage, null, 2));
+    writeFileSync(tmLanguagePath, JSON.stringify(tmLanguage, null, 2) + '\n');
     console.log(`Generated ${embedPatterns.length} embed patterns in ${tmLanguagePath}`);
 }
 
