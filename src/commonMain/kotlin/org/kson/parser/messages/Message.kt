@@ -280,6 +280,15 @@ enum class MessageType(
             return "Dangling exponent error: `$exponentCharacter` must be followed by an exponent. $STRING_QUOTING_HINT"
         }
     },
+    LEADING_ZEROS {
+        override fun expectedArgs(): List<String> {
+            return emptyList()
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            return "Leading zeros are not allowed in numbers. $STRING_QUOTING_HINT"
+        }
+    },
 
     /**
      * Catch-all for characters we don't recognize as legal Kson that don't (yet?) have a more specific and

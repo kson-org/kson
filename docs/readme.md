@@ -38,7 +38,7 @@ true
 
 ## Numbers
 
-Numbers in KSON are identical to [numbers in JSON](https://datatracker.ietf.org/doc/html/rfc8259#section-6), with the exception that they may have leading zeros. Here is a KSON document representing a number:
+Numbers in KSON are identical to [numbers in JSON](https://datatracker.ietf.org/doc/html/rfc8259#section-6). Here is a KSON document representing a number:
 
 ```kson
 5
@@ -50,7 +50,6 @@ Here is a KSON [list](#lists) demonstrating a variety of supported numbers:
 - 5
 - 3.14
 - 2.998e8
-- 025
 - -273.15
 ```
 
