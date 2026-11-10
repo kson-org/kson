@@ -29,5 +29,11 @@ class KsonCoreTestNumberError : KsonCoreTestError {
             """,
             listOf(LEADING_ZEROS)
         )
+        assertParserRejectsSource(
+            """
+                0000000007
+            """,
+            listOf(LEADING_ZEROS)
+        )
     }
 }

@@ -232,10 +232,14 @@ class NumberParserTest {
     @Test
     fun testNormalizedDecimalStrings() {
         assertParsedNumberString("-0.0", "-0.0")
+        assertParsedNumberString("0.2", "0.2")
+        assertParsedNumberString("-0.2", "-0.2")
         assertParsedNumberString("42.10", "42.10")
         assertParsedNumberString("0.1e02", "0.1e02")
         assertParsedNumberString("1.0e2", "1.0e2")
+        assertParsedNumberString("1.0e-2", "1.0e-2")
         assertParsedNumberString("1E2", "1e2")
         assertParsedNumberString("1.5E+3", "1.5e+3")
+        assertParsedNumberString("1.5E-2", "1.5e-2")
     }
 }
