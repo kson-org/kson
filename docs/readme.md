@@ -362,8 +362,8 @@ embed_block: %
 function fibonacci(n: number): number {
   if (n <= 0) return 0;
   if (n === 1) return 1;
-    return fibonacci(n - 1) + fibonacci(n - 2);
-  }
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
 %%
 ```
 
@@ -482,12 +482,12 @@ person:
     - π
   # A KSON "embed block" containing Kotlin code
   favorite_function: %kotlin
-      /**
-       * Calculates the nth number in the Fibonacci sequence using recursion
-       */
-      fun fibonacci(n: Int): Long {
-        if (n < 0) throw IllegalArgumentException("Input must be non-negative")
-        return when (n) {
+    /**
+     * Calculates the nth number in the Fibonacci sequence using recursion
+     */
+    fun fibonacci(n: Int): Long {
+      if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+      return when (n) {
         0 -> 0
         1 -> 1
         else -> fibonacci(n - 1) + fibonacci(n - 2)
@@ -532,12 +532,12 @@ person:
       fun fibonacci(n: Int): Long {
         if (n < 0) throw IllegalArgumentException("Input must be non-negative")
         return when (n) {
-        0 -> 0
-        1 -> 1
-        else -> fibonacci(n - 1) + fibonacci(n - 2)
+          0 -> 0
+          1 -> 1
+          else -> fibonacci(n - 1) + fibonacci(n - 2)
+        }
       }
-    }
-    %%
+      %%
   }
 }
 ```
@@ -551,17 +551,17 @@ person:{
 name:'Leonardo Bonacci'nickname:Fibonacci favorite_books:[{title:Elements author:Euclid}{title:Metaphysics author:Aristotle}]favorite_numbers:[[0 1 1 2 '...']'(1 + √5)/2' π]
 # A KSON "embed block" containing Kotlin code
 favorite_function:%kotlin
-  /**
-   * Calculates the nth number in the Fibonacci sequence using recursion
-   */
-  fun fibonacci(n: Int): Long {
-    if (n < 0) throw IllegalArgumentException("Input must be non-negative")
-    return when (n) {
-      0 -> 0
-      1 -> 1
-      else -> fibonacci(n - 1) + fibonacci(n - 2)
-    }
+/**
+ * Calculates the nth number in the Fibonacci sequence using recursion
+ */
+fun fibonacci(n: Int): Long {
+  if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+  return when (n) {
+    0 -> 0
+    1 -> 1
+    else -> fibonacci(n - 1) + fibonacci(n - 2)
   }
+}
 %%}
 ```
 

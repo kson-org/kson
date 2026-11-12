@@ -32,16 +32,15 @@ person:
     /**
      * Calculates the nth number in the Fibonacci sequence using recursion
      */
-    fun fibonacci(n:
-      Int): Long {
-              if (n < 0) throw IllegalArgumentException("Input must be non-negative")
-              return when (n) {
-              0 -> 0
-              1 -> 1
-              else -> fibonacci(n - 1) + fibonacci(n - 2)
+    fun fibonacci(n: Int): Long {
+      if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+      return when (n) {
+        0 -> 0
+        1 -> 1
+        else -> fibonacci(n - 1) + fibonacci(n - 2)
       }
-  }
-  %%
+    }
+    %%
 ```
 
 ### Why KSON?
