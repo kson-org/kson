@@ -316,7 +316,7 @@ teams:
 # ERROR: the "- name: 'Team B'" element is deceptively indented
 ```
 
-This document may visually read as two teams, but KSON doesn't parse whitespace to structure: its greedy parsing parsing rule interprets `- name: 'Team B'` as the third element of the `members` list. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to make the skimmed meaning match the parsed meaning&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
+This document may visually read as two teams, but KSON doesn't parse whitespace to structure: its greedy parsing rule interprets `- name: 'Team B'` as the third element of the `members` list. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to make the skimmed meaning match the parsed meaning&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
 
 ```kson
 teams:
@@ -382,7 +382,7 @@ An [Embed Tag](#embed-tags) adds metadata to an [Embed Block](#embed-blocks). An
 %sql
 SELECT first_name, last_name, hire_date
 FROM employees
-WHERE department = 'Sales' 
+WHERE department = 'Sales'
   AND hire_date < '2020-01-01'
 ORDER BY hire_date ASC;
 %%
@@ -573,7 +573,7 @@ KSON's status as a superset of JSON is verified by [JsonSuiteTest.kt](../src/com
 
 ## JSON Schema support
 
-KSON is compatible with JsonSchema (Draft7, more to come), verified by  the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+KSON is compatible with JsonSchema (Draft7, more to come), verified by the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
 
 ## Embed Block JSON Compatibility
 
