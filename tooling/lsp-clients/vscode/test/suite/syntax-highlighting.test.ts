@@ -53,7 +53,7 @@ describe('Syntax Highlighting Tests', () => {
         // shared/scripts/generate-tm-embed-block.ts. Unescaped, the `c++` alias reads as
         // "one or more c" and swallows every tag starting with `c`. Unanchored, a tag only
         // has to *start with* a known name, so `%jsonnet` matches JavaScript. A KSON tag
-        // runs from the delimiter to the newline (docs/readme.md:354).
+        // runs from the delimiter to the newline (docs/readme.md, "Embed Tags").
         const cases: Array<{ tag: string, expected: string, why: string }> = [
             // Aliases containing regex metacharacters must be matched literally.
             {tag: '%c++', expected: 'cpp', why: 'the `c++` alias is escaped'},
@@ -78,7 +78,7 @@ describe('Syntax Highlighting Tests', () => {
             {
                 tag: '%sql "server=10.0.1.174;uid=root;database=company"',
                 expected: 'sql',
-                why: 'the tag from docs/readme.md:374 resolves'
+                why: 'the quoted-metadata tag example (docs/readme.md, "Embed Tags") resolves'
             },
             {tag: '%python:', expected: 'generic', why: 'the tag is `python:`, not `python`'},
             {tag: '%python: v3', expected: 'generic', why: 'a colon does not end the name'},
