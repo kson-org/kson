@@ -1,14 +1,17 @@
 import * as vscode from 'vscode';
 import { createTestFile, cleanUp, assertTextEqual } from './common';
 
-/**
- * Types `text` at the end of the document after forcing tokenization to catch
- * up, since VS Code ignores onEnterRules on lines it has not tokenized yet.
- */
-async function typeAtEnd(text: string): Promise<void> {
-    await vscode.commands.executeCommand('cursorBottom');
+/** VS Code ignores onEnterRules on untokenized lines, so tokenization is forced first. */
+async function typeAtEndOfLine(line: number, text: string): Promise<void> {
+    const editor = vscode.window.activeTextEditor!;
+    const end = editor.document.lineAt(line).range.end;
+    editor.selection = new vscode.Selection(end, end);
     await vscode.commands.executeCommand('editor.action.forceRetokenize');
     await vscode.commands.executeCommand('type', { text });
+}
+
+async function typeAtEnd(text: string): Promise<void> {
+    await typeAtEndOfLine(vscode.window.activeTextEditor!.document.lineCount - 1, text);
 }
 
 describe('Editing Tests', () => {
@@ -148,4 +151,29 @@ describe('Editing Tests', () => {
             '    x: 1'
         ].join('\n'));
     }).timeout(10000);
+
+    const embedBlocksWithoutKnownLanguage = [
+        { opening: '%plain', description: 'an embed block with an unrecognized tag' },
+        { opening: '%', description: 'an untagged embed block' }
+    ];
+
+    for (const { opening, description } of embedBlocksWithoutKnownLanguage) {
+        it(`Should not outdent after a sentence in ${description}`, async () => {
+            const [uri, document] = await createTestFile([
+                `text: ${opening}`,
+                '    something something.',
+                '%%'
+            ].join('\n'));
+            testFileUri = uri;
+
+            await typeAtEndOfLine(1, '\nmore');
+
+            assertTextEqual(document, [
+                `text: ${opening}`,
+                '    something something.',
+                '    more',
+                '%%'
+            ].join('\n'));
+        }).timeout(10000);
+    }
 }); 

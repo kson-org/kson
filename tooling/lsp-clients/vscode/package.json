@@ -69,7 +69,8 @@
           "meta.embedded.yaml": "yaml",
           "meta.embedded.xml": "xml",
           "meta.embedded.markdown": "markdown",
-          "meta.embedded.shell": "shellscript"
+          "meta.embedded.shell": "shellscript",
+          "meta.embedded.plaintext": "plaintext"
         }
       }
     ],

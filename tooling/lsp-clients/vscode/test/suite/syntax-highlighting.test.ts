@@ -121,6 +121,25 @@ after: %python
         }).timeout(10000);
     });
 
+    describe('Embed content without a recognized language', () => {
+        const cases: Array<{ opening: string, closing: string, why: string }> = [
+            {opening: '%plain', closing: '%%', why: 'an unknown tag falls through to the catch-all'},
+            {opening: '%', closing: '%%', why: 'an untagged block falls through to the catch-all'},
+            {opening: '$plain', closing: '$$', why: 'the `$` delimiter has its own catch-all'},
+        ];
+
+        for (const {opening, closing, why} of cases) {
+            it(`Should scope the content of \`${opening}\` as embedded plain text because ${why}`, async () => {
+                const [uri, document] = await createTestFile(`key: ${opening}\n    some text.\n    ${closing}`);
+                testFileUri = uri;
+
+                const scopes = await getTokenScopesAtPosition(document, 1, 5);
+                assert.deepStrictEqual(scopes.slice(-2), ['meta.embedded.plaintext', 'string.unquoted.embedded.kson'],
+                    `the content should be embedded plain text, with the string scope innermost; got ${JSON.stringify(scopes)}`);
+            }).timeout(10000);
+        }
+    });
+
     describe('Embed block termination', () => {
         const endsAtFirstDelimiter = 'An embed block ends at its first end-delimiter wherever that sits on the line, and an '
             + 'injected grammar must not hold the block open past it. TextMate only tests the `end` of '
