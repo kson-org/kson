@@ -68,58 +68,62 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
      * its own `required`.  A partially-filled (or empty) `params` must still narrow to the matching
      * Model's properties.
      */
-    private fun discriminatedConfigSchema(): String = """
-        {
-            "${'$'}defs": {
-                "AlphaModel": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["job_type"],
-                    "properties": {
-                        "job_type": { "type": "string" },
-                        "workspace_id": { "type": "string" }
-                    }
-                },
-                "BetaModel": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["region"],
-                    "properties": {
-                        "region": { "type": "string" }
-                    }
-                }
-            },
-            "type": "object",
-            "properties": {
-                "config": {
-                    "anyOf": [
-                        {
-                            "allOf": [
-                                { "properties": { "integration": { "type": "string" } } },
-                                {
-                                    "oneOf": [
-                                        {
-                                            "required": ["integration", "params"],
-                                            "properties": {
-                                                "integration": { "const": "ALPHA" },
-                                                "params": { "${'$'}ref": "#/${'$'}defs/AlphaModel" }
-                                            }
-                                        },
-                                        {
-                                            "required": ["integration", "params"],
-                                            "properties": {
-                                                "integration": { "const": "BETA" },
-                                                "params": { "${'$'}ref": "#/${'$'}defs/BetaModel" }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        }
+    private fun discriminatedConfigSchema(): String = $$"""
+        '$defs':
+          AlphaModel:
+            type: object
+            additionalProperties: false
+            required:
+              - job_type
+            properties:
+              job_type:
+                type: string
+                .
+              workspace_id:
+                type: string
+                .
+              .
+            .
+          BetaModel:
+            type: object
+            additionalProperties: false
+            required:
+              - region
+            properties:
+              region:
+                type: string
+                .
+              .
+            .
+          .
+        type: object
+        properties:
+          config:
+            anyOf:
+              - allOf:
+                  - properties:
+                      integration:
+                        type: string
+                  - oneOf:
+                      - required:
+                          - integration
+                          - params
+                        properties:
+                          integration:
+                            const: ALPHA
+                            .
+                          params:
+                            '$ref': '#/$defs/AlphaModel'
+
+                      - required:
+                          - integration
+                          - params
+                        properties:
+                          integration:
+                            const: BETA
+                            .
+                          params:
+                            '$ref': '#/$defs/BetaModel'
     """.trimIndent()
 
     @Test
@@ -438,48 +442,63 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
     fun testGetValidSchemas_withIfThen_filtersIncompatibleConditionalBranches() {
         // allOf with if/then blocks that select a $ref based on a sibling property.
         // params is only reachable via if/then (no anyOf), isolating the filtering.
-        val schema = """
-            {
-                "${'$'}defs": {
-                    "DogParams": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "treats": { "type": "integer" }
-                        }
-                    },
-                    "CatParams": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "naps": { "type": "integer" }
-                        }
-                    }
-                },
-                "type": "object",
-                "properties": {
-                    "kind": { "type": "string" }
-                },
-                "allOf": [
-                    {
-                        "if": { "properties": { "kind": { "const": "dog" } } },
-                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/DogParams" } } }
-                    },
-                    {
-                        "if": { "properties": { "kind": { "const": "cat" } } },
-                        "then": { "properties": { "params": { "${'$'}ref": "#/${'$'}defs/CatParams" } } }
-                    }
-                ]
-            }
+        val schema = $$"""
+            '$defs':
+              DogParams:
+                type: object
+                additionalProperties: false
+                properties:
+                  treats:
+                    type: integer
+                    .
+                  .
+                .
+              CatParams:
+                type: object
+                additionalProperties: false
+                properties:
+                  naps:
+                    type: integer
+                    .
+                  .
+                .
+              .
+            type: object
+            properties:
+              kind:
+                type: string
+                .
+              .
+            allOf:
+              - if:
+                  properties:
+                    kind:
+                      const: dog
+                      .
+                    .
+                  .
+                then:
+                  properties:
+                    params:
+                      '$ref': '#/$defs/DogParams'
+
+              - if:
+                  properties:
+                    kind:
+                      const: cat
+                      .
+                    .
+                  .
+                then:
+                  properties:
+                    params:
+                      '$ref': '#/$defs/CatParams'
         """.trimIndent()
 
         val document = """
-            {
-                "kind": "dog",
-                "params": {
-                    "treats": 5
-                }
-            }
+            kind: dog
+            params:
+              treats: 5
         """.trimIndent()
 
         val validSchemas = getValidSchemasForDocument(schema, document, JsonPointer("/params"))
@@ -587,25 +606,29 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         // Three keys are committed; the maxProperties: 2 branch is contradicted by the keys alone,
         // so its enum values must not be offered while the third value is being typed.
         val schema = """
-            {
-              oneOf: [
-                {
-                  title: "compact"
-                  type: "object"
-                  maxProperties: 2
-                  properties: { color: { enum: ["red", "green"] } }
-                }
-                {
-                  title: "full"
-                  type: "object"
-                  properties: {
-                    a: { type: "string" }
-                    b: { type: "string" }
-                    color: { enum: ["blue"] }
-                  }
-                }
-              ]
-            }
+            oneOf:
+              - title: compact
+                type: object
+                maxProperties: 2
+                properties:
+                  color:
+                    enum:
+                      - red
+                      - green
+                      =
+
+              - title: full
+                type: object
+                properties:
+                  a:
+                    type: string
+                    .
+                  b:
+                    type: string
+                    .
+                  color:
+                    enum:
+                      - blue
         """
         val document = """
             a: x
@@ -626,18 +649,168 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         // The caret is mid-typing the discriminator itself ("f" toward "fast"): neither the then
         // nor the else branch is decidable yet, so both branches' values are offered.
         val schema = """
-            {
-              type: "object"
-              properties: { mode: { type: "string" } }
-              if: { properties: { mode: { const: "fast" } }, required: ["mode"] }
-              then: { properties: { mode: { enum: ["fast"] } } }
-              else: { properties: { mode: { enum: ["slow", "medium"] } } }
-            }
+            type: object
+            properties:
+              mode:
+                type: string
+                .
+              .
+            if:
+              properties:
+                mode:
+                  const: fast
+                  .
+                .
+              required:
+                - mode
+              .
+            then:
+              properties:
+                mode:
+                  enum:
+                    - fast
+                  .
+                .
+              .
+            else:
+              properties:
+                mode:
+                  enum:
+                    - slow
+                    - medium
         """
         val completions = getCompletionsAtCaret(schema, """mode: "f<caret>"""")
         assertNotNull(completions)
         val labels = completions.map { it.label }
         assertTrue("fast" in labels, "then-branch value should be offered, got: $labels")
         assertTrue("slow" in labels && "medium" in labels, "else-branch values should be offered, got: $labels")
+    }
+
+    @Test
+    fun testNestedUnionDiscriminatorMidTypingKeepsOuterBranch() {
+        val schema = """
+            oneOf:
+              - type: object
+                properties:
+                  config:
+                    oneOf:
+                      - properties:
+                          kind:
+                            const: alpha
+                            .
+                          a:
+                            type: string
+
+                      - properties:
+                          kind:
+                            const: beta
+                            .
+                          b:
+                            type: string
+                      =
+
+              - type: object
+                properties:
+                  other:
+                    type: string
+        """
+        val completions = getCompletionsAtCaret(schema, "config:\n  kind: \"a<caret>\"")
+        assertNotNull(completions)
+        val labels = completions.map { it.label }
+        assertTrue("alpha" in labels && "beta" in labels, "nested union values should be offered, got: $labels")
+    }
+
+    /** [innerUnion] is spliced in as written, so it carries the indentation that nests it under `config`. */
+    private fun outerUnionWithConfig(innerUnion: String) = """
+        oneOf:
+          - type: object
+            properties:
+              config:
+                $innerUnion
+          - type: object
+            properties:
+              other:
+                type: string
+    """
+
+    @Test
+    fun testNestedUnionLoneConstMidTypingKeepsOuterBranch() {
+        // Partial validation reports only the branch without the const, whose error on the half-typed value is forgiven.
+        val schema = outerUnionWithConfig(
+            """
+                oneOf:
+                  - properties:
+                      kind:
+                        const: alpha
+                        .
+                      a:
+                        type: string
+
+                  - properties:
+                      kind:
+                        type: number
+                        .
+                      b:
+                        type: string
+                  =
+            """
+        )
+        val completions = getCompletionsAtCaret(schema, "config:\n  kind: \"a<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("alpha"), completions.map { it.label })
+    }
+
+    @Test
+    fun testNestedUnionLoneEnumMidTypingKeepsOuterBranch() {
+        val schema = outerUnionWithConfig(
+            """
+                anyOf:
+                  - properties:
+                      type:
+                        enum:
+                          - http
+                          - https
+                        .
+                      url:
+                        type: string
+
+                  - properties:
+                      type:
+                        type: string
+                        pattern: '^x-'
+                        .
+                      plugin:
+                        type: string
+                  =
+            """
+        )
+        val completions = getCompletionsAtCaret(schema, "config:\n  type: \"h<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("http", "https"), completions.map { it.label })
+    }
+
+    @Test
+    fun testUnionHeldDirectlyByUnionBranchKeepsItsValuesMidTyping() {
+        val schema = """
+            oneOf:
+              - oneOf:
+                  - properties:
+                      setting:
+                        enum:
+                          - one
+                          - two
+                          =
+                  - properties:
+                      setting:
+                        type: number
+                  =
+              - properties:
+                  setting:
+                    enum:
+                      - four
+        """
+        val completions = getCompletionsAtCaret(schema, "setting: \"x<caret>\"")
+        assertNotNull(completions)
+        assertEquals(listOf("one", "two", "four"), completions.map { it.label })
     }
 }

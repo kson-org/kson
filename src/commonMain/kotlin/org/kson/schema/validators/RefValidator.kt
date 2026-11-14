@@ -13,8 +13,8 @@ import org.kson.value.navigation.json_pointer.JsonPointer
  *
  * @param [resolvedRef] the [ResolvedRef] object for this $ref
  * @param [idLookup] the IdSchemaLookup for resolving nested $ref references within the referenced schema
- * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), retained so this validator
- *   can produce a short human-friendly name for the target even when the target declares no `title`.
+ * @param [refString] the original `$ref` string (e.g. `"#/$defs/TaskModel"`), kept to name the target
+ *   when it declares no `title`
  */
 class RefValidator(
     private val resolvedRef: ResolvedRef,
@@ -33,53 +33,29 @@ class RefValidator(
     }
 
     /**
-     * A short, human-recognizable name for the referenced schema, or `null` if none is available.
-     *
-     * Preference order:
-     *   1. the `title` declared on the target schema (via [targetTitle])
-     *   2. the last JSON Pointer token of [refString]'s fragment — e.g. `#/$defs/TaskModel` -> `TaskModel`
-     *
-     * Used by [JsonObjectSchema.descriptionWithDefault] to name schemas whose only validator is a `$ref`
-     * (including each branch of a `oneOf`/`anyOf`/`allOf` combinator).
+     * A short name for the referenced schema: its `title`, else the last JSON Pointer token of
+     * [refString] (`#/$defs/TaskModel` -> `TaskModel`), else `null`.
      */
     fun refShortName(): String? = targetTitle() ?: pointerTail(refString)
 
-    /**
-     * The schema this `$ref` resolves to, or `null` if the target failed to parse.  Reads through the
-     * shared lazy [refParseResult] so callers reuse [SchemaParser]'s single parse of the target rather
-     * than re-parsing it.
-     *
-     * Used by [JsonObjectSchema.pinnedProperties] to see through a combinator branch written as a lone
-     * `$ref` (e.g. `oneOf: [{ $ref: … }]`) to the target's discriminator pins.
-     */
+    /** The schema this `$ref` resolves to, or `null` if the target failed to parse. */
     internal fun resolvedSchema(): JsonSchema? = refParseResult.first
 
-    /**
-     * The `title` declared on the ref target schema, or `null` if the target is not a titled object schema.
-     * Reads through the parsed target schema so we share [SchemaParser]'s interpretation rather than
-     * re-navigating the raw [KsonValue].
-     */
     private fun targetTitle(): String? = (resolvedSchema() as? JsonObjectSchema)?.title
 
     override fun validate(ksonValue: KsonValue, messageSink: MessageSink, sourceContext: SourceContext) {
         val (schema, parseErrors) = refParseResult
 
         if (schema == null) {
-            // Schema parsing failed — forward the parse errors so callers know the $ref target is broken
             parseErrors.forEach { messageSink.error(it.location, it.message) }
             return
         }
 
-        // Validate the value against our referenced schema
         schema.validate(ksonValue, messageSink, sourceContext)
     }
 }
 
-/**
- * Extract the last JSON Pointer token from a `$ref` string's fragment.  Returns `null` when the
- * fragment is empty, blank, not a rooted JSON Pointer (i.e. doesn't start with `#/`), or fails to
- * parse — those shapes have no meaningful tail token to use as a name.
- */
+/** The last token of a `$ref` fragment that is a rooted JSON Pointer, else `null`. */
 private fun pointerTail(refString: String): String? {
     val fragment = parseUri(refString).fragment
     if (!fragment.startsWith("#/")) return null

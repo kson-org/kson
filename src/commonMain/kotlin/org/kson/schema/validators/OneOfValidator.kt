@@ -14,8 +14,7 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
         val matchAttemptMessageSinks: MutableList<LabelledMessageSink> = mutableListOf()
         val matchedSchemas: MutableList<JsonSchema> = mutableListOf()
 
-        // Unlike anyOf (which can short-circuit on the first match), oneOf must evaluate all
-        // sub-schemas to detect the multiple-match case
+        // every branch is evaluated, since more than one matching is itself a failure
         oneOf.forEach {
             val oneOfMessageSink = MessageSink()
             it.validate(ksonValue, oneOfMessageSink, sourceContext)
@@ -23,19 +22,6 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
             if (!oneOfMessageSink.hasMessages()) {
                 matchedSchemas.add(it)
             }
-        }
-
-        /**
-         * Exactly-one cardinality is itself incompleteness-sensitive: a half-typed document can
-         * match several branches before the disambiguating value is typed.  In [ValidationMode.PARTIAL] mode the
-         * branch set is viable as long as at least one branch is not contradicted; only an
-         * all-branches-contradicted document fails.
-         */
-        if (sourceContext.mode == ValidationMode.PARTIAL) {
-            if (matchedSchemas.isEmpty()) {
-                reportNoSubSchemaMatchErrors(ksonValue, messageSink, matchAttemptMessageSinks, SCHEMA_ONE_OF_VALIDATION_FAILED.create())
-            }
-            return
         }
 
         when {
@@ -47,6 +33,9 @@ class OneOfValidator(internal val oneOf: List<JsonSchema>) : JsonSchemaValidator
                     SCHEMA_ONE_OF_VALIDATION_FAILED.create(), sourceContext
                 )
             }
+
+            // a half-typed document may match several branches until the disambiguating value is typed
+            sourceContext.mode == ValidationMode.PARTIAL -> { /* viable */ }
 
             else -> {
                 val matchedDescriptions = matchedSchemas.joinToString(", ") { it.descriptionWithDefault() }

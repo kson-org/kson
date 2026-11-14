@@ -425,6 +425,16 @@ enum class MessageType(
             return "Value matches none of these sub-schemas:\n$subSchemaErrors"
         }
     },
+    SCHEMA_OTHER_SUB_SCHEMA_ERRORS(MessageSeverity.WARNING) {
+        override fun expectedArgs(): List<String> {
+            return listOf("Sub-schema error summary")
+        }
+
+        override fun doFormat(parsedArgs: ParsedErrorArgs): String {
+            val subSchemaErrors = parsedArgs.getArg("Sub-schema error summary")
+            return "Other sub-schemas tried:\n$subSchemaErrors"
+        }
+    },
     SCHEMA_ARRAY_REQUIRED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
             return listOf("Schema Property Name")

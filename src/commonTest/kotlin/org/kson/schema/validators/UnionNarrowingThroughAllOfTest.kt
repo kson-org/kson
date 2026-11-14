@@ -4,20 +4,17 @@ import org.kson.parser.messages.MessageType.*
 import org.kson.schema.JsonSchemaTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 /**
- * Union narrowing reads a branch's pins and known properties across everything the branch composes,
- * so a branch shaped `allOf: [{ $ref: Base }, { oneOf: [ … ] }]` — what code generators emit for "a
- * base type refined by variants" — narrows exactly like one declaring those properties inline.
- * Reading only a branch's own `properties` made such a branch look empty: nothing to eliminate it,
- * nothing to presence-match it, so every union containing one dumped all its branches' errors.
+ * Pins, required and known properties are read through `$ref` and `allOf`, so a branch shaped
+ * `allOf: [{ $ref: Base }, { oneOf: [ … ] }]` — what code generators emit for a base type refined by
+ * variants — narrows like one declaring those properties inline.
  */
 class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
     /**
-     * Presence narrowing picks `Item`: the document carries `mode`, declared by `Base` an `allOf` hop
-     * down and unknown to `Group`, so the bad `mode` value surfaces alone rather than alongside
-     * `Group`'s complaints about a shape the document never claimed.
+     * `mode` is declared by `Base`, an `allOf` hop down, and unknown to `Group`, so presence narrows to `Item`.
      */
     @Test
     fun testAnyOfPresenceNarrowsThroughAllOfComposedBranch() {
@@ -26,105 +23,122 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                 mode: "sync"
                 action: "fetch"
             """.trimIndent(),
-            """
-                {
-                  "anyOf": [
-                    { "${'$'}ref": "#/${'$'}defs/Group" },
-                    { "${'$'}ref": "#/${'$'}defs/Item" }
-                  ],
-                  "${'$'}defs": {
-                    "Group": {
-                      "additionalProperties": false,
-                      "properties": { "name": {}, "members": {} },
-                      "required": ["members"]
-                    },
-                    "Base": {
-                      "properties": { "name": {}, "mode": {}, "action": {} }
-                    },
-                    "Item": {
-                      "allOf": [
-                        { "${'$'}ref": "#/${'$'}defs/Base" },
-                        {
-                          "oneOf": [
-                            { "properties": { "mode": { "const": "read" }, "action": { "const": "fetch" } } },
-                            { "properties": { "mode": { "const": "write" }, "action": { "const": "store" } } }
-                          ]
-                        }
-                      ]
-                    }
-                  }
-                }
+            $$"""
+                anyOf:
+                  - '$ref': '#/$defs/Group'
+                  - '$ref': '#/$defs/Item'
+                    .
+                '$defs':
+                  Group:
+                    additionalProperties: false
+                    properties:
+                      name: {}
+                      members: {}
+                      .
+                    required:
+                      - members
+                    .
+                  Base:
+                    properties:
+                      name: {}
+                      mode: {}
+                      action: {}
+                      .
+                    .
+                  Item:
+                    allOf:
+                      - '$ref': '#/$defs/Base'
+                      - oneOf:
+                          - properties:
+                              mode:
+                                const: read
+                                .
+                              action:
+                                const: fetch
+
+                          - properties:
+                              mode:
+                                const: write
+                                .
+                              action:
+                                const: store
             """.trimIndent(),
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            // `Item`'s own `oneOf`, led by the enum error, lists its branches, then the outer `anyOf` lists `Group`
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
-        // the surviving error is about `mode`, not about Group's unmet shape
         assertContains(errors[0].message.toString(), "read")
         assertFalse(errors[0].message.toString().contains("members"))
+        assertEquals(
+            "Other sub-schemas tried:\n" +
+                "- Group:\n" +
+                "    - Additional property 'mode' is not allowed (1:1)\n" +
+                "    - Additional property 'action' is not allowed (2:1)\n" +
+                "    - Missing required properties: members (1:1)",
+            errors[2].message.toString()
+        )
     }
 
-    /**
-     * A discriminator pinned inside an `allOf` member discriminates: the document's `kind` selects its
-     * branch, so only that branch's deeper failure is reported.
-     */
     @Test
-    fun testOneOfDiscriminatorDetectedThroughAllOfComposedBranch() {
+    fun testOneOfPinSelectsThroughAllOfComposedBranch() {
         val errors = assertKsonSchemaErrors(
             """kind: "a"""",
             dualBranchAllOfUnion,
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
         assertContains(errors[0].message.toString(), "needs_a")
         assertFalse(errors[0].message.toString().contains("needs_b"))
     }
 
-    /**
-     * With every branch pinning `kind` through its `allOf`, the union is closed, so a `kind` no branch
-     * claims is reported as one out-of-range value rather than as a dump of both branches.
-     */
     @Test
-    fun testOneOfClosedUnionThroughAllOfReportsAllowedDiscriminatorValues() {
+    fun testOneOfClosedUnionThroughAllOfReportsAllowedPinnedValues() {
         val errors = assertKsonSchemaErrors(
             """kind: "c"""",
             dualBranchAllOfUnion,
-            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED)
+            listOf(SCHEMA_ENUM_VALUE_NOT_ALLOWED, SCHEMA_SUB_SCHEMA_ERRORS)
         )
 
         assertContains(errors[0].message.toString(), "\"a\", \"b\"")
     }
 
     /** Two branches, each pinning `kind` to its own `const` one `allOf` hop down, over a shared base. */
-    private val dualBranchAllOfUnion = """
-        {
-          "oneOf": [
-            {
-              "allOf": [
-                { "${'$'}ref": "#/${'$'}defs/base" },
-                { "properties": { "kind": { "const": "a" } } }
-              ],
-              "required": ["needs_a"]
-            },
-            {
-              "allOf": [
-                { "${'$'}ref": "#/${'$'}defs/base" },
-                { "properties": { "kind": { "const": "b" } } }
-              ],
-              "required": ["needs_b"]
-            }
-          ],
-          "${'$'}defs": {
-            "base": { "properties": { "kind": { "type": "string" } } }
-          }
-        }
+    private val dualBranchAllOfUnion = $$"""
+        oneOf:
+          - allOf:
+              - '$ref': '#/$defs/base'
+              - properties:
+                  kind:
+                    const: a
+                    .
+                  .
+                .
+            required:
+              - needs_a
+              =
+
+          - allOf:
+              - '$ref': '#/$defs/base'
+              - properties:
+                  kind:
+                    const: b
+                    .
+                  .
+                .
+            required:
+              - needs_b
+            .
+        '$defs':
+          base:
+            properties:
+              kind:
+                type: string
     """.trimIndent()
 
     /**
-     * Composed sources all constrain the same document, so a property pinned by more than one is
-     * pinned to the *intersection* of their sets: the base admits `"A"` or `"B"`, the refining member
-     * only `"A"`, so `kind: "B"` contradicts the composed branch and eliminates it — where the wider
-     * of the two pins alone would have kept it alive.  Both branches know `kind` and `other` and
-     * neither `needs_*` is present, so this elimination is the only thing that can narrow here.
+     * A property several composed sources pin is pinned to the intersection: the base admits `"A"` or
+     * `"B"`, the refining member only `"A"`, so `kind: "B"` eliminates the branch the wider pin alone
+     * would keep.
      */
     @Test
     fun testEliminationIntersectsPinsAcrossComposedSources() {
@@ -134,27 +148,226 @@ class UnionNarrowingThroughAllOfTest : JsonSchemaTest {
                 other: "present"
             """.trimIndent(),
             """
-                {
-                  "oneOf": [
-                    {
-                      "properties": { "kind": {}, "other": {} },
-                      "allOf": [
-                        { "properties": { "kind": { "const": "A" } } },
-                        { "properties": { "kind": { "enum": ["A", "B"] } } }
-                      ],
-                      "required": ["needs_a"]
-                    },
-                    {
-                      "properties": { "kind": {}, "other": {} },
-                      "required": ["needs_b"]
-                    }
-                  ]
-                }
+                oneOf:
+                  - properties:
+                      kind: {}
+                      other: {}
+                      .
+                    allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - properties:
+                          kind:
+                            enum:
+                              - A
+                              - B
+                            .
+                          .
+                        .
+                    required:
+                      - needs_a
+                      =
+
+                  - properties:
+                      kind:
+                        const: B
+                        .
+                      other: {}
+                      .
+                    required:
+                      - needs_b
             """.trimIndent(),
-            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING)
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
         )
 
-        assertContains(errors[0].message.toString(), "needs_b")
-        assertFalse(errors[0].message.toString().contains("needs_a"))
+        assertEquals("Missing required properties: needs_b", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfPinsComposedWithinOneBranchCountOnce() {
+        val errors = assertKsonSchemaErrors(
+            """kind: "B"""",
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/Composed'
+                  - title: Plain
+                    properties:
+                      kind: {}
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  Composed:
+                    allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - properties:
+                          kind:
+                            enum:
+                              - A
+                              - B
+                            .
+                          .
+                        .
+                    required:
+                      - needs_composed
+            """.trimIndent(),
+            listOf(SCHEMA_ONE_OF_VALIDATION_FAILED, SCHEMA_SUB_SCHEMA_ERRORS)
+        )
+
+        assertEquals(
+            "Value matches none of these sub-schemas:\n" +
+                "- Composed:\n" +
+                "    - Missing required properties: needs_composed (1:1)\n" +
+                "    - Value must be exactly equal to \"A\" (1:8)\n" +
+                "- Plain:\n" +
+                "    - Missing required properties: needs_plain (1:1)",
+            errors[1].message.toString()
+        )
+    }
+
+    @Test
+    fun testOneOfPinInheritedFromSharedBaseCountsForEachBranch() {
+        val errors = assertKsonSchemaErrors(
+            """kind: "c"""",
+            $$"""
+                oneOf:
+                  - allOf:
+                      - '$ref': '#/$defs/base'
+                        .
+                    required:
+                      - needs_a
+                      =
+
+                  - allOf:
+                      - '$ref': '#/$defs/base'
+                        .
+                    required:
+                      - needs_b
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_c
+                    .
+                '$defs':
+                  base:
+                    properties:
+                      kind:
+                        enum:
+                          - a
+                          - b
+            """.trimIndent(),
+            listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
+        )
+
+        assertEquals("Missing required properties: needs_c", errors[0].message.toString())
+    }
+
+    @Test
+    fun testOneOfLonePinRequiredByAnotherAllOfMemberNarrows() {
+        assertLoneRequiredPinNarrows(
+            """
+                oneOf:
+                  - allOf:
+                      - properties:
+                          kind:
+                            const: A
+                      - required:
+                          - kind
+                        .
+                    required:
+                      - needs_pinned
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testOneOfLonePinRequiredThroughRefNarrows() {
+        assertLoneRequiredPinNarrows(
+            $$"""
+                oneOf:
+                  - '$ref': '#/$defs/Pinned'
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  Pinned:
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      .
+                    required:
+                      - kind
+                      - needs_pinned
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testOneOfLonePinRequiredThroughAllOfMemberRefNarrows() {
+        assertLoneRequiredPinNarrows(
+            $$"""
+                oneOf:
+                  - allOf:
+                      - '$ref': '#/$defs/RequiresKind'
+                        .
+                    properties:
+                      kind:
+                        const: A
+                        .
+                      .
+                    required:
+                      - needs_pinned
+                      =
+
+                  - properties:
+                      kind:
+                        type: string
+                        .
+                      .
+                    required:
+                      - needs_plain
+                    .
+                '$defs':
+                  RequiresKind:
+                    required:
+                      - kind
+            """.trimIndent()
+        )
+    }
+
+    private fun assertLoneRequiredPinNarrows(union: String) {
+        val eliminated = assertKsonSchemaErrors(
+            """kind: "B"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals("Missing required properties: needs_plain", eliminated[0].message.toString())
+
+        val selected = assertKsonSchemaErrors(
+            """kind: "A"""", union, listOf(SCHEMA_REQUIRED_PROPERTY_MISSING, SCHEMA_OTHER_SUB_SCHEMA_ERRORS)
+        )
+        assertEquals("Missing required properties: needs_pinned", selected[0].message.toString())
     }
 }
