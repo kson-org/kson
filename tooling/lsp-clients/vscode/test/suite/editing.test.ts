@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { createTestFile, cleanUp, assertTextEqual } from './common';
 
-/** VS Code ignores onEnterRules on untokenized lines, so tokenization is forced first. */
 async function typeAtEndOfLine(line: number, text: string): Promise<void> {
     const editor = vscode.window.activeTextEditor!;
     const end = editor.document.lineAt(line).range.end;
     editor.selection = new vscode.Selection(end, end);
+    // VS Code ignores onEnterRules on untokenized lines.
     await vscode.commands.executeCommand('editor.action.forceRetokenize');
     await vscode.commands.executeCommand('type', { text });
 }

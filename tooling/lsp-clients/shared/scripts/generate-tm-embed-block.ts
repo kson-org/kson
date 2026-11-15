@@ -156,7 +156,7 @@ function generateEmbedPattern(delimiter: string, lang?: LanguageConfig) {
         ? 'meta.embedded.block.generic.kson'
         : `meta.embedded.block.${lang.id}.kson`;
 
-    // The plaintext scope keeps kson's editing rules out; the string scope stays innermost
+    // Use plaintext editing rules while preserving string highlighting.
     const contentName = isGeneric
         ? 'meta.embedded.plaintext string.unquoted.embedded.kson'
         : lang.contentName;
