@@ -2,7 +2,7 @@ import {TextDocument} from 'vscode-languageserver-textdocument';
 import {ToolingDocument} from 'kson-tooling';
 import {KsonDocument, parseTextDocument} from "./KsonDocument.js";
 import {KsonSchemaDocument} from "./KsonSchemaDocument.js";
-import {DocumentUri, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
+import {DocumentUri, Emitter, Event, TextDocuments, TextDocumentContentChangeEvent} from "vscode-languageserver";
 import {SchemaProvider, NoOpSchemaProvider} from "../schema/SchemaProvider.js";
 
 /**
@@ -49,6 +49,8 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
      * property name ever changes in a library upgrade.
      */
     private readonly syncedDocuments: Map<string, KsonDocument>;
+
+    private readonly _onDidRefreshDocumentSchemas = new Emitter<void>();
 
     constructor(schemaProvider?: SchemaProvider) {
         // Use provided schema provider or default to no-op
@@ -116,6 +118,11 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
         this.schemaProvider.reload();
     }
 
+    /** Fires after all open documents have their schemas refreshed. */
+    get onDidRefreshDocumentSchemas(): Event<void> {
+        return this._onDidRefreshDocumentSchemas.event;
+    }
+
     /**
      * Refresh all documents with updated schemas.
      * This forces all cached documents to re-fetch their schemas from the provider.
@@ -134,5 +141,7 @@ export class KsonDocumentsManager extends TextDocuments<KsonDocument> {
             // Replace in the internal document cache
             this.syncedDocuments.set(doc.uri, updatedDoc);
         }
+
+        this._onDidRefreshDocumentSchemas.fire();
     }
 }

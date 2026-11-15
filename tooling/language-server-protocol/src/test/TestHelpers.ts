@@ -1,11 +1,16 @@
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {CompletionContext, CompletionTriggerKind, DocumentUri, Position} from 'vscode-languageserver';
+import {ClientCapabilities, CompletionContext, CompletionTriggerKind, DocumentUri, Position} from 'vscode-languageserver';
 import {SchemaProvider} from '../core/schema/SchemaProvider.js';
 import {KsonDocument, parseTextDocument} from '../core/document/KsonDocument.js';
 import {KsonSchemaDocument} from '../core/document/KsonSchemaDocument.js';
 
 export const TEST_URI = 'file:///test.kson';
 export const SCHEMA_URI = 'file:///schema.kson';
+
+export const PULL_DIAGNOSTICS_CAPABILITIES: ClientCapabilities = {
+    textDocument: {diagnostic: {}},
+    workspace: {diagnostics: {refreshSupport: true}},
+};
 
 /**
  * Create a KsonDocument from raw content, optionally with a schema.

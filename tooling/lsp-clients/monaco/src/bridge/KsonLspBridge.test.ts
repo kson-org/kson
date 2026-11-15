@@ -34,17 +34,20 @@ class WorkerStub {
     }
 }
 
+interface InitializeParams {
+    capabilities: { workspace?: { diagnostics?: { refreshSupport?: boolean } } };
+    initializationOptions?: KsonLspBridgeOptions['initializationOptions'];
+}
+
 /** Run initialize() with the given options and return the params posted on the wire. */
-async function captureInitializeParams(
-    options?: KsonLspBridgeOptions,
-): Promise<{ initializationOptions?: KsonLspBridgeOptions['initializationOptions'] }> {
+async function captureInitializeParams(options?: KsonLspBridgeOptions): Promise<InitializeParams> {
     const worker = new WorkerStub();
     const bridge = new KsonLspBridge(worker as unknown as Worker);
     const promise = bridge.initialize(options);
     worker.respondToInitialize();
     await promise;
     const init = worker.posted.find((m) => m.method === 'initialize');
-    return init!.params as { initializationOptions?: KsonLspBridgeOptions['initializationOptions'] };
+    return init!.params as InitializeParams;
 }
 
 describe('KsonLspBridge.initialize — enableBundledSchemas defaulting', () => {
@@ -114,6 +117,14 @@ describe('KsonLspBridge.initialize — enableBundledSchemas defaulting', () => {
         // Inference only fires when initializationOptions is provided; treat absent
         // bundledSchemas as "no schemas" → false.
         expect(params.initializationOptions?.enableBundledSchemas).toBe(false);
+    });
+});
+
+describe('KsonLspBridge.initialize — client capabilities', () => {
+    it('declares support for the diagnostic refresh request, which it answers by pulling again', async () => {
+        const params = await captureInitializeParams();
+
+        expect(params.capabilities.workspace?.diagnostics?.refreshSupport).toBe(true);
     });
 });
 
