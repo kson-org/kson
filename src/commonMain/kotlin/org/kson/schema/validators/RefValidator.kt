@@ -5,7 +5,6 @@ import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.schema.*
 import org.kson.validation.SourceContext
-import org.kson.value.navigation.json_pointer.JsonPointer
 
 /**
  * Validator for JSON Schema `$ref` references
@@ -56,8 +55,6 @@ class RefValidator(
 
 /** The last token of a `$ref` fragment that is a rooted JSON Pointer, else `null`. */
 private fun pointerTail(refString: String): String? {
-    val fragment = UriReference.parse(refString).fragment ?: return null
-    if (!fragment.startsWith("/")) return null
-    val tokens = runCatching { JsonPointer(fragment).tokens }.getOrNull() ?: return null
-    return tokens.lastOrNull()?.ifBlank { null }
+    val pointer = (UriReference.parse(refString).fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
+    return pointer.tokens.lastOrNull()?.ifBlank { null }
 }

@@ -48,7 +48,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      *
      * @param ref The reference string (e.g., "#foo", "#/definitions/address", "bar")
      * @param currentBaseUri The current base URI context for resolving relative references
-     * @return The resolved [KsonValue] representing the referenced schema, or null if not found
+     * @return The resolved [KsonValue] representing the referenced schema, or null if not found, as when [ref]'s
+     *   fragment is a malformed JSON Pointer
      */
     fun resolveRef(ref: String, currentBaseUri: String): ResolvedRef? {
         val refUri = UriReference.parse(currentBaseUri).resolve(ref)
@@ -56,8 +57,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         val identified = idMap[refUri.withoutEmptyFragment().toString()]
         if (identified != null) return ResolvedRef(identified, currentBaseUri)
 
-        val fragment = refUri.fragment?.takeIf { it.startsWith("/") } ?: return null
-        val pointer = JsonPointer(decodeUriEncoding(fragment))
+        val pointer = (refUri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
         return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it, resourceUri) }
     }
 
@@ -138,43 +138,6 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
             }
         }
     }
-}
-
-/**
- * Decodes percent-encoded characters in a URI. According to RFC 6901, percent-encoding must be decoded
- * before JSON Pointer processing.
- *
- * @param encoded The percent-encoded string
- * @return The decoded string
- */
-private fun decodeUriEncoding(encoded: String): String {
-    if (!encoded.contains('%')) {
-        return encoded
-    }
-
-    val result = StringBuilder()
-    var i = 0
-    while (i < encoded.length) {
-        val char = encoded[i]
-        if (char == '%' && i + 2 < encoded.length) {
-            // Try to decode the next two characters as hex
-            val hex = encoded.substring(i + 1, i + 3)
-            val decoded = try {
-                hex.toInt(16).toChar()
-            } catch (_: NumberFormatException) {
-                // Invalid hex sequence, keep the % and continue
-                result.append(char)
-                i++
-                continue
-            }
-            result.append(decoded)
-            i += 3
-        } else {
-            result.append(char)
-            i++
-        }
-    }
-    return result.toString()
 }
 
 /**

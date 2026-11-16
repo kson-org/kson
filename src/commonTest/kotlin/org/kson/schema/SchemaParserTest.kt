@@ -1,5 +1,8 @@
 package org.kson.schema
 
+import org.kson.parser.Coordinates
+import org.kson.parser.Location
+import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import kotlin.test.*
 import org.kson.KsonCore
@@ -325,6 +328,38 @@ class SchemaParserTest : JsonSchemaTest {
             ksonSource,
             schema,
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
+    fun testRefWithMalformedPointerReportsError() {
+        // `~2` is no JSON Pointer escape: only `~0` and `~1` are
+        val result = KsonCore.parseSchema($$"""'$ref': '#/$defs/a~2b'""")
+        assertEquals(
+            listOf(
+                LoggedMessage(
+                    Location(Coordinates(0, 9), Coordinates(0, 21), 9, 21),
+                    MessageType.SCHEMA_REF_RESOLUTION_FAILED.create($$"#/$defs/a~2b")
+                )
+            ),
+            result.messages
+        )
+    }
+
+    @Test
+    fun testRefToRefWithMalformedPointerReportsError() {
+        // `wrapper` is only parsed once validation follows the root `$ref` to it
+        val schema = $$"""
+            '$ref': '#/$defs/wrapper'
+            '$defs':
+              wrapper:
+                '$ref': '#/$defs/a~2b'
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "key: value",
+            schema,
+            listOf(MessageType.SCHEMA_REF_RESOLUTION_FAILED),
+            listOf(Location(Coordinates(3, 13), Coordinates(3, 25), 59, 71))
         )
     }
 

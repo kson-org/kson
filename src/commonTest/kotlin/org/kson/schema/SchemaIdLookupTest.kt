@@ -101,6 +101,32 @@ class SchemaIdLookupTest {
     }
 
     @Test
+    fun stopsAtARefWithAMalformedPointer() {
+        // `~2` is no JSON Pointer escape, so `first`'s `$ref` names no schema and the chain ends at `first`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/$defs/first" } },
+              "$defs": {
+                "first": { "$ref": "#/$defs/a~2b", "title": "first" }
+              }
+            }
+        """
+        assertEquals("first" to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun resolvesAPercentEncodedUtf8Pointer() {
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/$defs/caf%C3%A9" } },
+              "$defs": { "café": { "title": "café" } }
+            }
+        """
+        assertEquals("café" to "", resolveField(schema))
+    }
+
+    @Test
     fun resolvesAPointerWithinTheSchemaItsRefNames() {
         val schema = $$"""
             {
