@@ -20,7 +20,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
     /** The root schema's base URI: its `$id` when present, otherwise the empty string. */
     val rootBaseUri: String =
-        ((schemaRootValue as? KsonObject)?.propertyLookup["\$id"] as? KsonString)?.value ?: ""
+        ((schemaRootValue as? KsonObject)?.propertyLookup["\$id"] as? KsonString)
+            ?.let { UriReference.parse(it.value).withoutEmptyFragment().toString() } ?: ""
 
     init {
         /**
@@ -42,33 +43,22 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     }
 
     /**
-     * Resolves a `$ref` reference string to the corresponding schema value.
+     * Resolves a `$ref` reference string to the schema value it refers to: the one whose `$id` is the reference's
+     * URI, or else the one its JSON Pointer fragment addresses within the schema the rest of that URI identifies.
      *
      * @param ref The reference string (e.g., "#foo", "#/definitions/address", "bar")
      * @param currentBaseUri The current base URI context for resolving relative references
      * @return The resolved [KsonValue] representing the referenced schema, or null if not found
      */
     fun resolveRef(ref: String, currentBaseUri: String): ResolvedRef? {
-        val resolvedRefUri = UriReference.parse(currentBaseUri).resolve(ref)
+        val refUri = UriReference.parse(currentBaseUri).resolve(ref)
+        val resourceUri = refUri.withoutFragment().toString()
+        val identified = idMap[refUri.withoutEmptyFragment().toString()]
+        if (identified != null) return ResolvedRef(identified, currentBaseUri)
 
-        // try a direct lookup of our resolved ref URI
-        idMap[resolvedRefUri.toString()]?.let {
-            return ResolvedRef(it, currentBaseUri)
-        }
-
-        // otherwise, see if we can interpret the fragment
-        val fragment = resolvedRefUri.fragment.orEmpty()
-        return if (fragment.startsWith("/")) {
-            val decodedPointer = JsonPointer(decodeUriEncoding(fragment))
-            if (resolvedRefUri.scheme != null) {
-                idMap[resolvedRefUri.withoutFragment().toString()]?.let { resolveJsonPointer(decodedPointer, it, resolvedRefUri.toString()) }
-            } else {
-                idMap[currentBaseUri]?.let { resolveJsonPointer(decodedPointer, it, currentBaseUri) }
-            }
-        } else {
-            idMap[resolvedRefUri.withoutFragment().toString() + fragment]
-                ?.let { ResolvedRef(it, currentBaseUri) }
-        }
+        val fragment = refUri.fragment?.takeIf { it.startsWith("/") } ?: return null
+        val pointer = JsonPointer(decodeUriEncoding(fragment))
+        return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it, resourceUri) }
     }
 
 
@@ -122,7 +112,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                             val idString = idValue.value
 
                             // Resolve the ID to its fully-qualified form
-                            val fullyQualifiedId = UriReference.parse(currentBaseUri).resolve(idString)
+                            val fullyQualifiedId =
+                                UriReference.parse(currentBaseUri).resolve(idString).withoutEmptyFragment()
                             contextBaseUri = fullyQualifiedId.toString()
                             idMap[contextBaseUri] = schemaValue
                         }
@@ -191,19 +182,22 @@ private fun decodeUriEncoding(encoded: String): String {
  *
  * @param pointer The JSON Pointer to follow (e.g., "/definitions/address")
  * @param ksonValue The [KsonValue] to traverse
- * @param currentBaseUri The base URI in effect at [ksonValue]
+ * @param currentBaseUri The base URI [ksonValue]'s keywords are read under, its own `$id` already applied
  * @return The [KsonValue] at the pointer location with its base URI, or null if not found
  */
 private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
     // a $ref fragment addresses the schema's value tree
     val nodes = KsonValueWalker.nodesAlong(ksonValue, TreePointer<KsonValue>(pointer))
     if (nodes.size < pointer.tokens.size) return null
-    val baseUri = (listOf(ksonValue) + nodes.dropLast(1)).fold(currentBaseUri) { uri, node ->
+    val baseUri = nodes.dropLast(1).fold(currentBaseUri) { uri, node ->
         val id = (node as? KsonObject)?.propertyLookup["\$id"] as? KsonString
         if (id == null) uri else UriReference.parse(uri).resolve(id.value).toString()
     }
     return ResolvedRef(nodes.lastOrNull() ?: ksonValue, baseUri)
 }
+
+/** This URI without its fragment when that is empty, as `other.json#` identifies the same schema as `other.json` */
+private fun UriReference.withoutEmptyFragment(): UriReference = if (fragment == "") withoutFragment() else this
 
 /**
  * A schema node resolved during navigation, carrying the context of how it was found.

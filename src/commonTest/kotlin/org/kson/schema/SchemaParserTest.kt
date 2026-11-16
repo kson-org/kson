@@ -329,6 +329,61 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testPointerRefUnderAPlainNameIdResolvesInItsDocument() {
+        // a plain-name `$id` names a fragment of the document, so `#/definitions/target` still addresses the
+        // document's root
+        assertValidObjectSchema(
+            $$"""
+            {
+                "properties": { "field": { "$ref": "#anchored" } },
+                "definitions": {
+                    "anchored": {
+                        "$id": "#anchored",
+                        "properties": { "x": { "$ref": "#/definitions/target" } }
+                    },
+                    "target": { "type": "number" }
+                }
+            }
+            """
+        )
+    }
+
+    @Test
+    fun testRefWithinASchemaWithARelativeIdResolvesInThatSchema() {
+        // `a` is read under `other`'s `$id`, so its `#/$defs/b` addresses `other`
+        val schema = $$"""
+            {
+                "$id": "http://example.com/root.json",
+                "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
+                "$defs": {
+                    "other": {
+                        "$id": "sub/other.json",
+                        "$defs": {
+                            "a": { "$ref": "#/$defs/b" },
+                            "b": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        """
+        assertKsonEnforcesSchema("field: ok", schema, true)
+        assertKsonSchemaErrors("field: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
+    fun testPointerRefUnderARootIdWithAnEmptyFragmentResolves() {
+        // `http://example.com/root.json#` identifies the same schema as `http://example.com/root.json`
+        val schema = $$"""
+            {
+                "$id": "http://example.com/root.json#",
+                "properties": { "x": { "$ref": "#/definitions/a" } },
+                "definitions": { "a": { "type": "string" } }
+            }
+        """
+        assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
     fun testInvalidRegexInPatternReportsError() {
         assertSchemaHasValidationErrors(
             """{"pattern": "*"}""",
