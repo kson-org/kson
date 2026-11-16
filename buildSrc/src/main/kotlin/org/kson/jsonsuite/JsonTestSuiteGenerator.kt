@@ -61,7 +61,7 @@ class JsonTestSuiteGenerator(
             testClassPackageDir.toFile().listFiles { file -> file.name.startsWith(draft.testClassPrefix + "_") }
                 ?.forEach { it.delete() }
             schemaTestDataList.forEach { schemaTestFileData ->
-                val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.testFileName.replace("-", "_")
+                val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.testFileName.replace("-", "_").replace("/", "_")
                 val testFileName = testClassPackageDir.resolve("$testClassName.kt")
                 testFileName.toFile().writeText(
                     generateSchemaSuiteTestClass(
@@ -154,6 +154,7 @@ private data class SchemaTestSpec(val description: String, val comment: String? 
  * The test data we parse out of the test files provided by [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  */
 private class SchemaTestData(
+    /** The test file's path within the suite's tests, without its extension, e.g. `optional/bignum` */
     val testFileName: String,
     val filePathFromProjectRoot: String,
     val schemaTestGroups: List<SchemaTestGroup>
@@ -405,7 +406,8 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
  * tests to facilitate writing them as native, platform-independent, Kotlin tests in [JsonTestSuiteGenerator]
  *
  * @param testDefinitionFilesDir the [Path] on disk to the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
- *        test files
+ *        test files.  We load its files and those of its `optional/` subdirectory, but not `proposals/`, which tests
+ *        keywords not yet in any release
  *
  * @param draft the draft whose compatible test groups to load from [testDefinitionFilesDir]
  *
@@ -413,12 +415,14 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
  *                      machine-independent file paths relative to the project root
  */
 private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, private val draft: SchemaDraft, private val projectRoot: Path) {
-    private val testSourceFiles = (testDefinitionFilesDir.toFile().listFiles()
-        ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
+    private val testSourceFiles = listOf(testDefinitionFilesDir, testDefinitionFilesDir.resolve("optional")).flatMap {
+        (it.toFile().listFiles()
+            ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
+            .filter { file -> !file.isDirectory }
+    }
 
     fun loadTestData(): List<SchemaTestData> {
         return testSourceFiles
-            .filter { !it.isDirectory }
             .mapNotNull {
                 val contents = it.readText(Charsets.UTF_8)
                 val testFile: SchemaTestFile = prettyPrintingJson.decodeFromString(contents)
@@ -427,7 +431,8 @@ private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, pri
                     null
                 } else {
                     SchemaTestData(
-                        it.nameWithoutExtension,
+                        testDefinitionFilesDir.relativize(it.toPath()).toString()
+                            .replace(File.separatorChar, '/').removeSuffix(".json"),
                         it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
                         draftTestGroups,
                     )

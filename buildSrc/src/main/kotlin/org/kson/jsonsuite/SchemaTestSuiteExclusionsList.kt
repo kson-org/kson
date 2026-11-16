@@ -11,7 +11,11 @@ package org.kson.jsonsuite
 fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
     SchemaDraft.DRAFT_7 to sharedExternalSchemaTests +
         draft7OnlyExternalSchemaTests +
-        sharedFormatAssertionTests,
+        sharedFormatAssertionTests +
+        ecmascriptRegexTests +
+        bignumTests +
+        contentTests +
+        draft7OnlyNonSchemaIdentifierTests,
     SchemaDraft.DRAFT_2020_12 to sharedExternalSchemaTests +
         draft2020_12OnlyExternalSchemaTests +
         sharedFormatAssertionTests +
@@ -23,7 +27,10 @@ fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
         dependentKeywordTests +
         anchorTests +
         refSiblingTests +
-        unicodePropertyEscapeTests
+        unicodePropertyEscapeTests +
+        ecmascriptRegexTests +
+        bignumTests +
+        draft2020_12OnlyNonSchemaIdentifierTests
 )
 
 /** Kson does not fetch the `externalSchemas` these need (bundled equivalents: [org.kson.schema.JsonSchemaTestBundledRemotes]) */
@@ -56,6 +63,10 @@ private val draft7OnlyExternalSchemaTests = setOf(
     "id-legacy::remote HTTP ref with different URN ${'$'}id::string is valid",
     "id-legacy::remote HTTP ref with nested absolute ref::number is invalid",
     "id-legacy::remote HTTP ref with nested absolute ref::string is valid",
+    "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid",
+    "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid",
+    "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid",
+    "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid",
     "ref-legacy::fragment within remote ref::remote fragment invalid",
     "ref-legacy::fragment within remote ref::remote fragment valid",
     "ref-legacy::ref within remote ref::ref within ref invalid",
@@ -96,6 +107,10 @@ private val draft2020_12OnlyExternalSchemaTests = setOf(
     "id::remote HTTP ref with different URN ${'$'}id::string is valid",
     "id::remote HTTP ref with nested absolute ref::number is invalid",
     "id::remote HTTP ref with nested absolute ref::string is valid",
+    "optional/cross-draft::refs to historic drafts are processed as historic drafts (2019)::first item not a string is valid",
+    "optional/cross-draft::refs to historic drafts are processed as historic drafts (7)::missing bar is valid",
+    "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string",
+    "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string",
     "ref::fragment within remote ref::remote fragment invalid",
     "ref::fragment within remote ref::remote fragment valid",
     "ref::ref within remote ref::ref within ref invalid",
@@ -537,7 +552,21 @@ private val sharedFormatAssertionTests = setOf(
     "format-uri::validation of URIs::non-numeric port is invalid",
     "format-uri::validation of URIs::scheme must start with a letter",
     "format-uri::validation of URIs::square brackets are not allowed in a path segment",
-    "format-uri::validation of URIs::unescaped non US-ASCII characters"
+    "format-uri::validation of URIs::unescaped non US-ASCII characters",
+    "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named backreference (?P=name) is not ECMA 262",
+    "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::Python named group (?P<name>...) is not ECMA 262",
+    "optional/format-regex::Python-specific regular expression syntax is not valid ECMA 262::inline comment group (?#...) is not ECMA 262",
+    "optional/format-regex::\\a is not an ECMA 262 control escape::when used as a pattern",
+    "optional/format-regex::global inline flag groups are not valid ECMA 262::a single global inline flag (?i)",
+    "optional/format-regex::global inline flag groups are not valid ECMA 262::multiple global inline flags (?ims)",
+    "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong hour)",
+    "optional/format-time::validation of time strings::invalid leap second, Zulu (wrong minute)",
+    "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong hour)",
+    "optional/format-time::validation of time strings::invalid leap second, negative time-offset (wrong minute)",
+    "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong hour)",
+    "optional/format-time::validation of time strings::invalid leap second, positive time-offset (wrong minute)",
+    "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong hour)",
+    "optional/format-time::validation of time strings::invalid leap second, zero time-offset (wrong minute)"
 )
 
 /** As [sharedFormatAssertionTests], for tests only 2020-12 has */
@@ -612,6 +641,7 @@ private val dynamicRefTests = setOf(
     "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::string matches /${'$'}defs/thingy, but the ${'$'}dynamicRef does not stop here",
     "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::number list with string values",
     "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::string list with number values",
+    "optional/dynamicRef::${'$'}dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::string property fails",
     "unevaluatedItems::unevaluatedItems with ${'$'}dynamicRef (2020-12)::with unevaluated items",
     "unevaluatedProperties::unevaluatedProperties with ${'$'}dynamicRef (2020)::with unevaluated properties"
 )
@@ -770,7 +800,11 @@ private val anchorTests = setOf(
     "anchor::same ${'$'}anchor with different base uri::${'$'}ref does not resolve to /${'$'}defs/A/allOf/0",
     "anchor::same ${'$'}anchor with different base uri::${'$'}ref resolves to /${'$'}defs/A/allOf/1",
     "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is invalid against first definition",
-    "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is valid against first definition"
+    "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is valid against first definition",
+    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::exact match to enum, and type matches",
+    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::implementations that strip ${'$'}anchor may match either definition",
+    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::match ${'$'}ref to ${'$'}anchor",
+    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::no match on enum or ${'$'}ref to ${'$'}anchor"
 )
 
 /** Kson applies `$ref` as Draft 7 does, ignoring its sibling keywords (including `$id`) where 2020-12 applies them */
@@ -784,6 +818,20 @@ private val refSiblingTests = setOf(
 
 /** Kson rejects patterns using Unicode property escapes such as `\p{Letter}` as invalid regexes */
 private val unicodePropertyEscapeTests = setOf(
+    "optional/ecmascript-regex::pattern with non-ASCII digits::ascii digits",
+    "optional/ecmascript-regex::pattern with non-ASCII digits::ascii non-digits",
+    "optional/ecmascript-regex::pattern with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+    "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii digits",
+    "optional/ecmascript-regex::patternProperties with non-ASCII digits::ascii non-digits",
+    "optional/ecmascript-regex::patternProperties with non-ASCII digits::non-ascii digits (BENGALI DIGIT FOUR, BENGALI DIGIT TWO)",
+    "optional/ecmascript-regex::patterns always use unicode semantics with pattern::ascii character in json string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with pattern::literal unicode character in json string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode character in hex format in string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with pattern::unicode matching is case-sensitive",
+    "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::ascii character in json string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::literal unicode character in json string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode character in hex format in string",
+    "optional/ecmascript-regex::patterns always use unicode semantics with patternProperties::unicode matching is case-sensitive",
     "pattern::pattern with Unicode property escape requires unicode mode::ASCII letters match",
     "pattern::pattern with Unicode property escape requires unicode mode::Digits do not match",
     "pattern::pattern with Unicode property escape requires unicode mode::Non-ASCII letters match",
@@ -793,4 +841,59 @@ private val unicodePropertyEscapeTests = setOf(
     "patternProperties::patternProperties with Unicode property escape::Non-letter property name does not match pattern",
     "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches",
     "patternProperties::patternProperties with Unicode property escape::Unicode letter property name matches but value type is incorrect"
+)
+
+/** Kson's regexes do not follow ECMA-262 for `\s`, `\S` and `\c` */
+private val ecmascriptRegexTests = setOf(
+    "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::EM SPACE does not match (Space_Separator)",
+    "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::latin-1 non-breaking-space does not match",
+    "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::paragraph separator does not match (line terminator)",
+    "optional/ecmascript-regex::ECMA 262 \\S matches everything but whitespace::zero-width whitespace does not match",
+    "optional/ecmascript-regex::ECMA 262 \\s matches whitespace::EM SPACE matches (Space_Separator)",
+    "optional/ecmascript-regex::ECMA 262 \\s matches whitespace::latin-1 non-breaking-space matches",
+    "optional/ecmascript-regex::ECMA 262 \\s matches whitespace::paragraph separator matches (line terminator)",
+    "optional/ecmascript-regex::ECMA 262 \\s matches whitespace::zero-width whitespace matches",
+    "optional/ecmascript-regex::ECMA 262 regex escapes control codes with \\c and lower letter::matches"
+)
+
+/** Kson holds numbers at 64-bit precision, so rejects larger integers and conflates decimals differing beyond it */
+private val bignumTests = setOf(
+    "optional/bignum::const comparison with high precision::a slightly larger decimal is invalid",
+    "optional/bignum::const comparison with high precision::a slightly smaller decimal is invalid",
+    "optional/bignum::enum comparison with high precision::a slightly larger decimal is invalid",
+    "optional/bignum::enum comparison with high precision::a slightly smaller decimal is invalid",
+    "optional/bignum::float comparison with high precision on negative numbers::above the exclusive minimum is valid",
+    "optional/bignum::float comparison with high precision::below the exclusive maximum is valid",
+    "optional/bignum::integer::a bignum is an integer",
+    "optional/bignum::integer::a negative bignum is an integer",
+    "optional/bignum::maximum integer comparison::comparison works for high numbers",
+    "optional/bignum::maximum integer comparison::just above the maximum is invalid",
+    "optional/bignum::minimum integer comparison::just below the minimum is invalid",
+    "optional/bignum::multipleOf with integers above 2^53::1e20 is not multiple of 3",
+    "optional/bignum::uniqueItems comparison with high precision::arrays containing distinct decimals are unique",
+    "optional/bignum::uniqueItems comparison with high precision::distinct high-precision decimals are unique",
+    "optional/bignum::uniqueItems comparison with high precision::objects containing distinct decimals are unique"
+)
+
+/** Kson does not assert `contentEncoding` or `contentMediaType`, which Draft 7 permits but does not require */
+private val contentTests = setOf(
+    "optional/content::validation of binary string-encoding::an invalid base64 string (% is not a valid character)",
+    "optional/content::validation of binary-encoded media type documents::a validly-encoded invalid JSON document",
+    "optional/content::validation of binary-encoded media type documents::an invalid base64 string that is valid JSON",
+    "optional/content::validation of string-encoded content based on media type::an invalid JSON document"
+)
+
+/** Kson treats an `$id` inside a non-schema value, such as an `enum` entry or an unknown keyword, as an identifier */
+private val draft7OnlyNonSchemaIdentifierTests = setOf(
+    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/definitions)::match ${'$'}ref to id",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier::type matches non-schema in third anyOf",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier::type matches second anyOf, which has a real schema in it",
+    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}id)::match ${'$'}ref to ${'$'}id"
+)
+
+/** As [draft7OnlyNonSchemaIdentifierTests], for the 2020-12 versions of those tests */
+private val draft2020_12OnlyNonSchemaIdentifierTests = setOf(
+    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::match ${'$'}ref to ${'$'}id",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in third anyOf",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches second anyOf, which has a real schema in it"
 )

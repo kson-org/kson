@@ -111,7 +111,11 @@ class JsonTestSuiteGeneratorTest {
         )
     }
 
-    private class SharedTestClasses(val draft7: String, val draft2020_12: String)
+    /**
+     * The result of [generateFromFixtureSuite]: the [draft7] and [draft2020_12] classes generated for `shared`, and
+     * the names of every class generated for [draft7]
+     */
+    private class GeneratedFixtureSuite(val draft7: String, val draft2020_12: String, val draft7ClassNames: Set<String>)
 
     @Test
     fun aDraftIsGeneratedOnlyTheGroupsCompatibleWithIt() {
@@ -132,14 +136,36 @@ class JsonTestSuiteGeneratorTest {
         )
     }
 
+    @Test
+    fun optionalTestsAreGeneratedUnderNamesMarkingThemOptional() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(
+            "${SchemaDraft.DRAFT_7.testClassPrefix}_optional_extra" in generated.draft7ClassNames,
+            "optional tests should get a class named for their optional origin"
+        )
+    }
+
+    @Test
+    fun optionalTestsAreExcludedByTheirOptionalPath() {
+        generateFromFixtureSuite(exclusions = mapOf(SchemaDraft.DRAFT_7 to setOf("optional/extra::group::test")))
+    }
+
+    @Test
+    fun proposalsAreNotGenerated() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertFalse(generated.draft7ClassNames.any { "proposal" in it }, "proposals should not be generated")
+    }
+
     /**
-     * Generates tests from a suite in which both drafts have the test `shared::group::test` and only Draft 7 has
-     * `shared::draft7Only group::test` and `draft7Only::group::test`, applying only the given [exclusions] and
-     * returning the classes generated for
-     * `shared`.  The suites are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in
-     * place rather than cloning), so unlike [testGenerate] this needs no network.
+     * Generates tests from a suite in which both drafts have the tests `shared::group::test` and
+     * `optional/extra::group::test`, only Draft 7 has `shared::draft7Only group::test` and `draft7Only::group::test`,
+     * and a proposal has `proposals/proposal/proposal::group::test`, applying only the given [exclusions].  The suites
+     * are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in place rather than
+     * cloning), so unlike [testGenerate] this needs no network.
      */
-    private fun generateFromFixtureSuite(exclusions: Map<SchemaDraft, Set<String>>): SharedTestClasses {
+    private fun generateFromFixtureSuite(exclusions: Map<SchemaDraft, Set<String>>): GeneratedFixtureSuite {
         val tempDirectory = createTempDirectory("JsonTestSuiteGeneratorTest")
 
         // the generator insists that the JSONTestSuite has every file named in its edit list
@@ -165,7 +191,9 @@ class JsonTestSuiteGeneratorTest {
             tempDirectory.resolve("JSON-Schema-Test-Suite"),
             mapOf(
                 "validation/tests/shared.json" to schemaTestFile("group" to null, "draft7Only group" to "=7"),
-                "validation/tests/draft7Only.json" to schemaTestFile("group" to "=7")
+                "validation/tests/draft7Only.json" to schemaTestFile("group" to "=7"),
+                "validation/tests/optional/extra.json" to schemaTestFile("group" to null),
+                "validation/tests/proposals/proposal/proposal.json" to schemaTestFile("group" to null)
             )
         )
 
@@ -179,9 +207,13 @@ class JsonTestSuiteGeneratorTest {
         )
         generator.generate()
 
-        return SharedTestClasses(
+        return GeneratedFixtureSuite(
             generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_7.testClassPrefix}_shared.kt").readText(),
-            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_2020_12.testClassPrefix}_shared.kt").readText()
+            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_2020_12.testClassPrefix}_shared.kt").readText(),
+            generator.testClassPackageDir.toFile().list()!!
+                .filter { it.startsWith(SchemaDraft.DRAFT_7.testClassPrefix) }
+                .map { it.removeSuffix(".kt") }
+                .toSet()
         )
     }
 
