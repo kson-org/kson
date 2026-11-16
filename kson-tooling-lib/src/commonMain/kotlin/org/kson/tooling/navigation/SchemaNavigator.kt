@@ -269,8 +269,9 @@ internal class SchemaNavigator(
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
 
         // A combinator branch can `$ref` back to a node already being flattened on this path, and
-        // expanding it consumes no pointer token, so stop at a node we're already inside.  Compare
-        // the node alone: a directory-style `$id` lengthens the base URI on every trip around a cycle.
+        // expanding it consumes no pointer token, so stop at a node we're already inside.  Comparing
+        // values is enough.  A schema's base URI depends only on where it sits in its document, so
+        // the same value always has the same base URI.
         if (inProgress.any { it === schemaObj }) {
             return listOf(ref)
         }
