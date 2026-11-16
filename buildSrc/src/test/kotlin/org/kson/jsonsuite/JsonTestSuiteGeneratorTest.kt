@@ -90,7 +90,7 @@ class JsonTestSuiteGeneratorTest {
         }
 
         assertEquals(
-            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+            "Invalid schema test exclusions for DRAFT_2020_12: no DRAFT_2020_12 test has these ids:\n" +
                     "\"shared::group::tset\"",
             error.message
         )
@@ -105,7 +105,7 @@ class JsonTestSuiteGeneratorTest {
         }
 
         assertEquals(
-            "Invalid schema test exclusions for DRAFT_2020_12: no draft2020-12 test has these ids:\n" +
+            "Invalid schema test exclusions for DRAFT_2020_12: no DRAFT_2020_12 test has these ids:\n" +
                     "\"draft7Only::group::test\"",
             error.message
         )
@@ -113,9 +113,29 @@ class JsonTestSuiteGeneratorTest {
 
     private class SharedTestClasses(val draft7: String, val draft2020_12: String)
 
+    @Test
+    fun aDraftIsGeneratedOnlyTheGroupsCompatibleWithIt() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(generated.draft7.contains("shared::draft7Only group::test"), "draft 7 should get the draft 7 only group")
+        assertFalse(generated.draft2020_12.contains("shared::draft7Only group::test"), "2020-12 should not get the draft 7 only group")
+    }
+
+    @Test
+    fun eachDraftDesignatesItsDialectInTheSchema() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        assertTrue(generated.draft7.contains(SchemaDraft.DRAFT_7.metaSchemaUri), "draft 7 schemas should name draft 7")
+        assertTrue(
+            generated.draft2020_12.contains(SchemaDraft.DRAFT_2020_12.metaSchemaUri),
+            "2020-12 schemas should name 2020-12"
+        )
+    }
+
     /**
      * Generates tests from a suite in which both drafts have the test `shared::group::test` and only Draft 7 has
-     * `draft7Only::group::test`, applying only the given [exclusions] and returning the classes generated for
+     * `shared::draft7Only group::test` and `draft7Only::group::test`, applying only the given [exclusions] and
+     * returning the classes generated for
      * `shared`.  The suites are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in
      * place rather than cloning), so unlike [testGenerate] this needs no network.
      */
@@ -128,19 +148,25 @@ class JsonTestSuiteGeneratorTest {
             JsonTestSuiteEditList.all().associate { "test_parsing/$it" to "[]" }
         )
 
-        val schemaTestFile = """
-            [
-                {
-                    "description": "group",
-                    "schema": { "type": "string" },
-                    "tests": [{ "description": "test", "data": "a string", "valid": true }]
-                }
-            ]
+        fun schemaTestFile(vararg groups: Pair<String, String?>) = """
+            {
+                "description": "fixture",
+                "tests": [${groups.joinToString(",") { (description, compatibility) -> """
+                    {
+                        "description": "$description",
+                        ${compatibility?.let { "\"compatibility\": \"$it\"," } ?: ""}
+                        "schema": { "type": "string" },
+                        "tests": [{ "description": "test", "data": "a string", "valid": true }]
+                    }""" }}
+                ]
+            }
         """.trimIndent()
         val schemaSuiteSHA = commitFixtureRepo(
             tempDirectory.resolve("JSON-Schema-Test-Suite"),
-            SchemaDraft.entries.associate { "tests/${it.folderName}/shared.json" to schemaTestFile } +
-                    ("tests/${SchemaDraft.DRAFT_7.folderName}/draft7Only.json" to schemaTestFile)
+            mapOf(
+                "validation/tests/shared.json" to schemaTestFile("group" to null, "draft7Only group" to "=7"),
+                "validation/tests/draft7Only.json" to schemaTestFile("group" to "=7")
+            )
         )
 
         val generator = JsonTestSuiteGenerator(

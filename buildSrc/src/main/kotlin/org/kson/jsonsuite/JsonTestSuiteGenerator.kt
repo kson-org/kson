@@ -1,9 +1,11 @@
 package org.kson.jsonsuite
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import org.kson.gitcheckout.CleanGitCheckout
 import java.io.File
 import java.nio.file.Path
@@ -18,6 +20,8 @@ import java.nio.file.Path
  *
  * See [JsonTestSuiteEditList] for info on the adjustments we make to the JSONTestSuite to suit Kson's needs as a
  * superset of JSON
+ *
+ * Each [SchemaDraft] gets the JSON-Schema-Test-Suite cases whose [SchemaTestCompatibility] admits it
  *
  * @param jsonSuiteGitCheckout the [JSONTestSuite](https://github.com/nst/JSONTestSuite) checkout (a [CleanGitCheckout])
  * @param schemaSuiteGitCheckout the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) checkout (a [CleanGitCheckout])
@@ -47,12 +51,15 @@ class JsonTestSuiteGenerator(
         generatedJsonSuiteTestPath.toFile()
             .writeText(generateJsonSuiteTestClass(this.javaClass.name, classPackage, jsonTestDataList))
 
-        val schemaTestSourceFilesDir: Path = schemaSuiteGitCheckout.checkoutDir.toPath().resolve("tests")
+        val schemaTestSourceFilesDir: Path = schemaSuiteGitCheckout.checkoutDir.toPath().resolve("validation/tests")
 
         for (draft in SchemaDraft.entries) {
             val draftExclusions = schemaTestExclusions[draft].orEmpty()
             val schemaTestDataList = SchemaTestDataLoader(schemaTestSourceFilesDir, draft, projectRoot).loadTestData()
             ensureExclusionsMatchTests(draft, draftExclusions, schemaTestDataList)
+            // the suite's files come and go between versions, so clear out classes generated from files now gone
+            testClassPackageDir.toFile().listFiles { file -> file.name.startsWith(draft.testClassPrefix + "_") }
+                ?.forEach { it.delete() }
             schemaTestDataList.forEach { schemaTestFileData ->
                 val testClassName = draft.testClassPrefix + "_" + schemaTestFileData.testFileName.replace("-", "_")
                 val testFileName = testClassPackageDir.resolve("$testClassName.kt")
@@ -62,21 +69,11 @@ class JsonTestSuiteGenerator(
                         classPackage,
                         testClassName,
                         schemaTestFileData,
+                        draft,
                         draftExclusions))
             }
         }
     }
-}
-
-/**
- * The drafts of [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) we generate tests for
- *
- * @param folderName the name of the suite's folder holding this draft's tests
- * @param testClassPrefix the name prefix of the test classes generated for this draft
- */
-enum class SchemaDraft(val folderName: String, val testClassPrefix: String) {
-    DRAFT_7("draft7", "SchemaDraft7SuiteTest"),
-    DRAFT_2020_12("draft2020-12", "SchemaDraft2020_12SuiteTest"),
 }
 
 /**
@@ -126,14 +123,28 @@ private class JsonTestData(
 }
 
 /**
+ * A [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) test file, holding the
+ * [SchemaTestGroup]s of one topic
+ */
+@Serializable
+private data class SchemaTestFile(@SerialName("\$schema") val metaSchema: String? = null,
+                                  val description: String,
+                                  val comment: String? = null,
+                                  val tests: List<SchemaTestGroup>)
+
+/**
  * The [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) tests are organized
  * into groups where [schema] provides a Json Schema, and the list of [SchemaTestSpec] specify Json data
- * to apply that schema to and whether that data should be considered valid or not
+ * to apply that schema to and whether that data should be considered valid or not.  A group applies to the
+ * dialects its [compatibility] admits
  */
 @Serializable
 private data class SchemaTestGroup(val description: String,
                                    val comment: String? = null,
+                                   val compatibility: SchemaTestCompatibility = SchemaTestCompatibility.ALL,
+                                   val tags: List<String> = emptyList(),
                                    val schema: JsonElement,
+                                   val externalSchemas: JsonObject? = null,
                                    val tests: List<SchemaTestSpec>,
                                    val specification: JsonElement? = null)
 @Serializable
@@ -268,7 +279,7 @@ private fun ensureExclusionsMatchTests(draft: SchemaDraft, draftExclusions: Set<
     val unmatchedExclusions = draftExclusions - draftTestIds
     if (unmatchedExclusions.isNotEmpty()) {
         throw RuntimeException(
-            "Invalid schema test exclusions for ${draft.name}: no ${draft.folderName} test has these ids:\n" +
+            "Invalid schema test exclusions for ${draft.name}: no ${draft.name} test has these ids:\n" +
                     unmatchedExclusions.joinToString(",\n") { "\"$it\"" })
     }
 }
@@ -278,6 +289,7 @@ private fun generateSchemaSuiteTestClass(
     testClassPackage: String,
     testClassName: String,
     tests: SchemaTestData,
+    draft: SchemaDraft,
     draftExclusions: Set<String>
 ): String {
     var testNum = 1
@@ -331,7 +343,7 @@ ${    run {
                     |                ${formatForTest(test.data, "                ")}
                     |            ${"\"\"\""},
                     |            ${"\"\"\""}
-                    |                ${formatForTest(schema.schema, "                ")}
+                    |                ${formatForTest(schemaForDraft(schema.schema, draft), "                ")}
                     |            ${"\"\"\""},
                     |            ${test.valid},
                     |            ${"\"\"\""}    schemaTestId: "${schemaTestId.replace("$", "\${'$'}")}"    ${"\"\"\""})
@@ -395,26 +407,31 @@ private class JsonTestDataLoader(private val testDefinitionFilesDir: Path, priva
  * @param testDefinitionFilesDir the [Path] on disk to the [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  *        test files
  *
- * @param draft the draft whose tests to load from [testDefinitionFilesDir]
+ * @param draft the draft whose compatible test groups to load from [testDefinitionFilesDir]
  *
  * @param projectRoot the [Path] on disk of the project containing [testDefinitionFilesDir] - used to write out
  *                      machine-independent file paths relative to the project root
  */
-private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, draft: SchemaDraft, private val projectRoot: Path) {
-    private val draftTestSourceFiles = (testDefinitionFilesDir.resolve(draft.folderName).toFile().listFiles()
+private class SchemaTestDataLoader(private val testDefinitionFilesDir: Path, private val draft: SchemaDraft, private val projectRoot: Path) {
+    private val testSourceFiles = (testDefinitionFilesDir.toFile().listFiles()
         ?: throw RuntimeException("Should have ensured these files existed before calling this loader"))
 
     fun loadTestData(): List<SchemaTestData> {
-        return draftTestSourceFiles
+        return testSourceFiles
             .filter { !it.isDirectory }
-            .map {
+            .mapNotNull {
                 val contents = it.readText(Charsets.UTF_8)
-                val schemaTestGroups: List<SchemaTestGroup> = prettyPrintingJson.decodeFromString(contents)
-                SchemaTestData(
-                    it.nameWithoutExtension,
-                    it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
-                    schemaTestGroups,
-                )
+                val testFile: SchemaTestFile = prettyPrintingJson.decodeFromString(contents)
+                val draftTestGroups = testFile.tests.filter { group -> group.compatibility.admits(draft) }
+                if (draftTestGroups.isEmpty()) {
+                    null
+                } else {
+                    SchemaTestData(
+                        it.nameWithoutExtension,
+                        it.absolutePath.replace(File.separatorChar, '/').replace("${projectRoot.toString().replace(File.separatorChar, '/')}/", ""),
+                        draftTestGroups,
+                    )
+                }
             }.sortedBy { it.filePathFromProjectRoot }
     }
 }
