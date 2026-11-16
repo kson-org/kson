@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.uri
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

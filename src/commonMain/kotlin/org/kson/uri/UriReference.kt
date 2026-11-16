@@ -1,4 +1,4 @@
-package org.kson.schema
+package org.kson.uri
 
 /**
  * A URI reference, as [RFC 3986 §4.1](https://datatracker.ietf.org/doc/html/rfc3986#section-4.1) defines it: a URI,

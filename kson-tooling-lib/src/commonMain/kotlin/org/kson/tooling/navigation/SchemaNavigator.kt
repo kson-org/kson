@@ -7,7 +7,7 @@ import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
-import org.kson.schema.UriReference
+import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean

@@ -1,6 +1,9 @@
 package org.kson.schema
 
+import org.kson.uri.UriReference
+import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString

@@ -4,7 +4,10 @@ import org.kson.value.KsonValue
 import org.kson.parser.LoggedMessage
 import org.kson.parser.MessageSink
 import org.kson.schema.*
+import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
+import org.kson.value.navigation.json_pointer.FragmentPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 
 /**
  * Validator for JSON Schema `$ref` references

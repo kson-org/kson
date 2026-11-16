@@ -3,7 +3,10 @@ package org.kson.schema
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
+import org.kson.uri.UriReference
 import org.kson.value.*
+import org.kson.value.navigation.json_pointer.FragmentPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 
 /**
  * Parses a JSON Schema string into our JsonSchema model.

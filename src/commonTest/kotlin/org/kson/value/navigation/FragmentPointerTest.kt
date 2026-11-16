@@ -1,7 +1,10 @@
-package org.kson.schema
+package org.kson.value.navigation
 
 import org.kson.parser.messages.MessageType.JSON_POINTER_INCOMPLETE_ESCAPE
 import org.kson.parser.messages.MessageType.JSON_POINTER_INVALID_ESCAPE
+import org.kson.uri.UriReference
+import org.kson.value.navigation.json_pointer.FragmentPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
