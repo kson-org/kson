@@ -3,7 +3,6 @@ package org.kson.schema
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
 import org.kson.value.*
 
 /**
@@ -69,7 +68,7 @@ object SchemaParser {
         // Check if this schema defines a new $id and update base URI accordingly
         val idString = extractId(schemaObject, messageSink)
         val updatedBaseUri = if (idString != null) {
-            resolveUri(idString, currentBaseUri).toString()
+            UriReference.parse(currentBaseUri).resolve(idString).toString()
         } else {
             currentBaseUri
         }

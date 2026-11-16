@@ -190,6 +190,11 @@ class UriReferenceTest {
     }
 
     @Test
+    fun resolvesAgainstABaseEndingInASlash() {
+        assertResolvesAgainst("http://example.com/a/b/", listOf("c" to "http://example.com/a/b/c"))
+    }
+
+    @Test
     fun dropsTheFragmentOfTheBase() {
         assertResolvesAgainst(
             "http://a/b/c/d;p?q#f",

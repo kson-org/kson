@@ -6,8 +6,8 @@ import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
 import org.kson.schema.SchemaParser
+import org.kson.schema.UriReference
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean
@@ -215,7 +215,7 @@ internal class SchemaNavigator(
     /** The base URI that `$ref`s in [schema] resolve against. */
     private fun baseUriWithin(schema: KsonObject, baseUri: String): String {
         val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
-        return resolveUri(id.value, baseUri).toString()
+        return UriReference.parse(baseUri).resolve(id.value).toString()
     }
 
     /**

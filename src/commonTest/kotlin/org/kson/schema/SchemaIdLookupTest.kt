@@ -16,7 +16,8 @@ class SchemaIdLookupTest {
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
-        return SchemaIdLookup(root).resolveRefIfPresent(field, "")
+        val lookup = SchemaIdLookup(root)
+        return lookup.resolveRefIfPresent(field, lookup.rootBaseUri)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
@@ -97,5 +98,55 @@ class SchemaIdLookupTest {
         """
         assertEquals("first" to "", resolveField(schema))
         assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun resolvesARefWithDotSegments() {
+        val schema = $$"""
+            {
+              "$id": "http://example.com/schemas/root.json",
+              "properties": { "field": { "$ref": "../shared/defs.json#/$defs/target" } },
+              "$defs": {
+                "shared": {
+                  "$id": "http://example.com/shared/defs.json",
+                  "$defs": { "target": { "title": "target" } }
+                }
+              }
+            }
+        """
+        assertEquals("target" to "http://example.com/shared/defs.json", resolveField(schema))
+    }
+
+    @Test
+    fun resolvesANetworkPathRef() {
+        // the ref names a host of its own, keeping only the base's scheme
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "//other.example/target.json" } },
+              "$defs": {
+                "target": { "$id": "http://other.example/target.json", "title": "target" }
+              }
+            }
+        """
+        assertEquals("target", resolveField(schema).first)
+    }
+
+    @Test
+    fun resolvesAUrnRefToAUrnIdReadUnderAnotherBase() {
+        // a URN takes nothing from the base it is read under, so the ref and the `$id` name the same schema
+        val schema = $$"""
+            {
+              "$id": "http://example.com/root.json",
+              "properties": { "field": { "$ref": "urn:example:target" } },
+              "$defs": {
+                "nested": {
+                  "$id": "http://example.com/nested/nested.json",
+                  "$defs": { "target": { "$id": "urn:example:target", "title": "target" } }
+                }
+              }
+            }
+        """
+        assertEquals("target", resolveField(schema).first)
     }
 }

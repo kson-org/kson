@@ -33,6 +33,8 @@ data class UriReference(
             copy(path = removeDotSegments(merge(reference.path)), query = reference.query, fragment = reference.fragment)
     }
 
+    fun withoutFragment(): UriReference = copy(fragment = null)
+
     /**
      * [relativePath] appended to this URI's path without its last segment, or to `/` when this URI has an authority
      * and an empty path ([RFC 3986 §5.2.3](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.3))
