@@ -244,7 +244,11 @@ object SchemaParser {
         }
         val resolvedValue = idLookup.resolveRef(refString.value, currentBaseUri)
         if (resolvedValue == null) {
-            messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
+            val malformedPointer = UriReference.parse(refString.value).fragmentPointer() as? FragmentPointer.Malformed
+            messageSink.error(
+                refString.location,
+                malformedPointer?.message ?: SCHEMA_REF_RESOLUTION_FAILED.create(refString.value)
+            )
             return RefOutcome.Failed
         }
         val refValidator = RefValidator(resolvedValue, idLookup, refString.value)

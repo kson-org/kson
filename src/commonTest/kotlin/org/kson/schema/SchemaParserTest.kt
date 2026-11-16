@@ -339,10 +339,14 @@ class SchemaParserTest : JsonSchemaTest {
             listOf(
                 LoggedMessage(
                     Location(Coordinates(0, 9), Coordinates(0, 21), 9, 21),
-                    MessageType.SCHEMA_REF_RESOLUTION_FAILED.create($$"#/$defs/a~2b")
+                    MessageType.JSON_POINTER_INVALID_ESCAPE.create("2")
                 )
             ),
             result.messages
+        )
+        assertEquals(
+            "Invalid escape sequence: '~2'. Valid escape sequences are '~0' for '~' and '~1' for '/'",
+            result.messages.single().message.toString()
         )
     }
 
@@ -358,7 +362,7 @@ class SchemaParserTest : JsonSchemaTest {
         assertKsonSchemaErrorAtLocation(
             "key: value",
             schema,
-            listOf(MessageType.SCHEMA_REF_RESOLUTION_FAILED),
+            listOf(MessageType.JSON_POINTER_INVALID_ESCAPE),
             listOf(Location(Coordinates(3, 13), Coordinates(3, 25), 59, 71))
         )
     }
