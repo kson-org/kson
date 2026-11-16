@@ -24,7 +24,7 @@ class SchemaIdLookupTest {
     private fun resolveField(schema: String): Pair<String?, String> {
         val resolved = resolve(schema)
         val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
-        return title?.value to resolved.resolvedValueBaseUri
+        return title?.value to resolved.resolvedValueBaseUri.toString()
     }
 
     /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
@@ -152,6 +152,21 @@ class SchemaIdLookupTest {
               "properties": { "field": { "$ref": "#target" } },
               "$defs": {
                 "target": { "$id": "target", "title": "target" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun doesNotReadAColonInARelativePathAsAScheme() {
+        // against no base, `./a:b` is the relative path `a:b`, while the `$id` `a:b` is a URI with the scheme `a`
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "./a:b" } },
+              "$defs": {
+                "target": { "$id": "a:b", "title": "target" }
               }
             }
         """

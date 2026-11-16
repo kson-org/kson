@@ -18,11 +18,9 @@ object SchemaParser {
      */
     fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
         // Determine the initial base URI from the root schema's $id if present
-        val initialBaseUri = if (schemaRootValue is KsonObject) {
-            extractId(schemaRootValue, messageSink) ?: ""
-        } else {
-            ""
-        }
+        val initialBaseUri = UriReference.parse(
+            (schemaRootValue as? KsonObject)?.let { extractId(it, messageSink) } ?: ""
+        )
 
         val idLookup = SchemaIdLookup(schemaRootValue)
         return parseSchemaElement(schemaRootValue, messageSink, initialBaseUri, idLookup)
@@ -39,7 +37,7 @@ object SchemaParser {
     fun parseSchemaElement(
         schemaValue: KsonValue,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -56,7 +54,7 @@ object SchemaParser {
     private fun parseObjectSchema(
         schemaObject: KsonObject,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -71,7 +69,7 @@ object SchemaParser {
         // Check if this schema defines a new $id and update base URI accordingly
         val idString = extractId(schemaObject, messageSink)
         val updatedBaseUri = if (idString != null) {
-            UriReference.parse(currentBaseUri).resolve(idString).toString()
+            currentBaseUri.resolve(idString)
         } else {
             currentBaseUri
         }
@@ -178,7 +176,7 @@ object SchemaParser {
     private inline fun parseSubSchemaValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (JsonSchema) -> JsonSchemaValidator,
@@ -197,7 +195,7 @@ object SchemaParser {
     private fun parseSchemaListValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (List<JsonSchema>) -> JsonSchemaValidator,
@@ -236,7 +234,7 @@ object SchemaParser {
      */
     private fun tryResolveRef(
         schemaProperties: Map<String, KsonValue>,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): RefOutcome {
@@ -279,7 +277,7 @@ object SchemaParser {
      */
     private fun parseMetadata(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): SchemaMetadata {
@@ -367,7 +365,7 @@ object SchemaParser {
     private fun parsePropertyValidators(
         schemaProperties: Map<String, KsonValue>,
         title: String?,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -474,7 +472,7 @@ object SchemaParser {
      */
     private fun parseItemsValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -526,7 +524,7 @@ object SchemaParser {
      */
     private fun parseIfThenElseValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -549,7 +547,7 @@ object SchemaParser {
      */
     private fun parseDependenciesValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -574,7 +572,7 @@ object SchemaParser {
      */
     private fun parseSingleDependency(
         value: KsonValue,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): DependencyValidator? {
@@ -597,7 +595,7 @@ object SchemaParser {
         schemaProperties: Map<String, KsonValue>,
         tupleLength: Int,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup
     ): AdditionalItemsValidator? {
         return schemaProperties["additionalItems"]?.let { additionalItems ->

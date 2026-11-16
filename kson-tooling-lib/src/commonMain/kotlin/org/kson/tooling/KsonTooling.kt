@@ -14,7 +14,6 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.schema.SchemaIdLookup
 import org.kson.validation.SourceContext
-import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
@@ -125,15 +124,9 @@ object KsonTooling {
         // TODO - Currently we lookup the whole ref string. With sublocations we might be able to find the 'sublocation' to look up.
         val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
-        // Determine the base URI for the schema root
-        val baseUri = (parsedSchema as? KsonObject)
-            ?.propertyLookup[$$"$id"]
-            ?.let { it as? KsonString }
-            ?.value ?: ""
-
         // Resolve the reference and return its location
         val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val resolvedRef = schemaIdLookup.resolveRef(refString, baseUri) ?: return emptyList()
+        val resolvedRef = schemaIdLookup.resolveRef(refString, schemaIdLookup.rootBaseUri) ?: return emptyList()
 
         return listOf(
             Range(
