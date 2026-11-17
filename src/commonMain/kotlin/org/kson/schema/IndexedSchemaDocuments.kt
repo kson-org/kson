@@ -5,7 +5,6 @@ import org.kson.uri.UriReference
 import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.JsonPointer
 import org.kson.value.navigation.json_pointer.fragmentPointer
-import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
@@ -260,12 +259,13 @@ class IndexedSchemaDocuments(
             if (isDocumentRoot) identify(enclosingBaseUri, schema)
             if (id != null) identify(subschemaBaseUri, schema)
             if (ref != null) references.add(Reference(ref.value, enclosingBaseUri))
-            keywords.forEach { (keyword, keywordValue) ->
-                subschemasOf(keyword, keywordValue).forEach { subschema ->
-                    // a subschema is the keyword's value, or one of the values it holds
-                    val subschemaDepth = if (subschema === keywordValue) depth + 1 else depth + 2
-                    addSchema(subschema, subschemaBaseUri, subschemaDepth)
-                }
+            // a schema with a string `$ref` has no subschemas, as the keywords beside it don't apply
+            val schemaObject = value as? KsonObject
+            if (schemaObject == null || ref != null) return
+            draft7Keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { declared ->
+                // a subschema is the keyword's value, or one of the values it holds
+                val subschemaDepth = if (declared.value === keywords[declared.keyword]) depth + 1 else depth + 2
+                addSchema(declared.value, subschemaBaseUri, subschemaDepth)
             }
         }
 
@@ -285,22 +285,6 @@ private fun keywordsOf(schema: KsonValue): Map<String, KsonValue> {
     val keywords = (schema as? KsonObject)?.propertyLookup.orEmpty()
     val ref = keywords[$$"$ref"]
     return if (ref is KsonString) mapOf($$"$ref" to ref) else keywords
-}
-
-/** The subschemas [keywordValue] holds, if [keyword] is one of Draft 7's subschema keywords */
-private fun subschemasOf(keyword: String, keywordValue: KsonValue): List<KsonValue> = when (keyword) {
-    "properties", "patternProperties", "definitions" ->
-        (keywordValue as? KsonObject)?.propertyLookup?.values?.toList().orEmpty()
-    // a dependency is either a schema or a list of required property names
-    "dependencies" ->
-        (keywordValue as? KsonObject)?.propertyLookup?.values?.filterNot { it is KsonList }.orEmpty()
-    "allOf", "anyOf", "oneOf" ->
-        (keywordValue as? KsonList)?.elements.orEmpty()
-    "items" ->
-        if (keywordValue is KsonList) keywordValue.elements else listOf(keywordValue)
-    "additionalItems", "additionalProperties", "contains", "propertyNames", "not", "if", "then", "else" ->
-        listOf(keywordValue)
-    else -> emptyList()
 }
 
 /**
