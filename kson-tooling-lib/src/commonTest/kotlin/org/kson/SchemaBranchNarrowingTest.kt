@@ -35,7 +35,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
         val parsedDocument = KsonTooling.parse(document)
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
         return SchemaNavigator(indexedDocuments).navigate(TreePointer(documentPointer), parsedDocument.rootAstNode)
-            .map { it.resolvedValue }
+            .map { it.value }
     }
 
     /**

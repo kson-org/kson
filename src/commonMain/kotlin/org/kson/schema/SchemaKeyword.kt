@@ -1,7 +1,6 @@
 package org.kson.schema
 
 import org.kson.parser.MessageSink
-import org.kson.uri.UriReference
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
@@ -38,17 +37,9 @@ internal class CompilableSubschema(private val declared: DeclaredSubschema, comp
     val compiled: JsonSchema? by lazy(compile)
 }
 
-/**
- * The schema object a keyword compiles for, and the [messageSink] that compiling reports errors to.  [baseUri] is the
- * base URI inside [schema], which its `$ref` resolves against.
- */
-internal class KeywordContext(
-    val schema: KsonObject,
-    val messageSink: MessageSink,
-    private val baseUri: UriReference,
-    val indexedDocuments: IndexedSchemaDocuments
-) {
-    val properties: Map<String, KsonValue> get() = schema.propertyLookup
+/** The [schema] that a keyword compiles for, and the [messageSink] that compiling reports errors to */
+internal class KeywordContext(private val schema: SchemaNode, val messageSink: MessageSink) {
+    val properties: Map<String, KsonValue> = (schema.value as KsonObject).propertyLookup
 
     val title: String? get() = (properties["title"] as? KsonString)?.value
 
@@ -56,8 +47,8 @@ internal class KeywordContext(
     var isNoSchema = false
         private set
 
-    /** Resolves [ref] against [baseUri] and returns its target, or why there is none */
-    fun resolveRef(ref: String): RefResolution = indexedDocuments.resolveRef(ref, baseUri)
+    /** Resolves [ref] against the base URI inside [schema] and returns its target, or why there is none */
+    fun resolveRef(ref: String): RefResolution = schema.indexedDocuments.resolveRef(ref, schema.innerBaseUri)
 
     /** Reports [unresolvedRef] and makes compiling [schema] return null */
     fun rejectSchema(unresolvedRef: UnresolvedRef) {

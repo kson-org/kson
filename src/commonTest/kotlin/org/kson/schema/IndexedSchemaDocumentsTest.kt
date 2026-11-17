@@ -8,10 +8,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * Tests for [IndexedSchemaDocuments.resolveRef] and [IndexedSchemaDocuments.resolveRefIfPresent].
+ * Tests for [IndexedSchemaDocuments.resolveRef], [IndexedSchemaDocuments.resolveRefIfPresent] and
+ * [IndexedSchemaDocuments.resolvedRootSchema].
  */
 class IndexedSchemaDocumentsTest {
 
@@ -22,13 +24,12 @@ class IndexedSchemaDocumentsTest {
         return indexedDocuments.resolveRef(ref, indexedDocuments.rootBaseUri)
     }
 
-    private fun resolve(schema: String): ResolvedRef {
+    private fun resolve(schema: String): SchemaNode {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val properties = root.propertyLookup.getValue("properties") as KsonObject
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
-        val field = ResolvedRef(root, indexedDocuments.rootBaseUri)
-            .descend(listOf(properties, properties.propertyLookup.getValue("field")))
-        return indexedDocuments.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
+        val field = indexedDocuments.rootSchema.descend(listOf(properties, properties.propertyLookup.getValue("field")))
+        return indexedDocuments.resolveRefIfPresent(field)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
@@ -38,14 +39,12 @@ class IndexedSchemaDocumentsTest {
     private fun resolveRoot(schema: String): Pair<String?, String> {
         val indexedDocuments =
             IndexedSchemaDocuments(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
-        return titleAndBaseUri(
-            indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, indexedDocuments.rootBaseUri)
-        )
+        return titleAndBaseUri(indexedDocuments.resolveRefIfPresent(indexedDocuments.rootSchema))
     }
 
-    private fun titleAndBaseUri(resolved: ResolvedRef): Pair<String?, String> {
-        val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
-        return title?.value to resolved.resolvedValueBaseUri.toString()
+    private fun titleAndBaseUri(resolved: SchemaNode): Pair<String?, String> {
+        val title = (resolved.value as KsonObject).propertyLookup["title"] as? KsonString
+        return title?.value to resolved.baseUri.toString()
     }
 
     /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
@@ -612,5 +611,20 @@ class IndexedSchemaDocumentsTest {
                     title: target
         """.trimIndent()
         assertEquals("target", resolveField(schema).first)
+    }
+
+    @Test
+    fun resolvedRootSchemaFollowsTheRootsRef() {
+        val root = KsonCore.parseToAst(
+            $$"""
+                '$ref': '#/$defs/target'
+                '$defs':
+                  target:
+                    title: target
+            """.trimIndent()
+        ).ksonValue as KsonObject
+        val target = (root.propertyLookup.getValue($$"$defs") as KsonObject).propertyLookup.getValue("target")
+
+        assertSame(target, IndexedSchemaDocuments(SchemaDocument(root)).resolvedRootSchema.value)
     }
 }

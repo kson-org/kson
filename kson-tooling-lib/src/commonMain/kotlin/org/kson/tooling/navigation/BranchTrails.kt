@@ -25,7 +25,7 @@ internal fun List<NavigatedSchema>.allowedAlongTrails(allowedBy: (KsonValue) -> 
                 .map { onBranch -> if (onBranch.isEmpty()) null else allowed(onBranch, trailIndex + 1) }
                 .reduce(::union)
         }
-        return (unconditional.map { allowedByOne(it.resolvedValue) } + allowedPerChoice).reduceOrNull(::intersect)
+        return (unconditional.map { allowedByOne(it.value) } + allowedPerChoice).reduceOrNull(::intersect)
     }
     return allowed(this, trailIndex = 0)
 }

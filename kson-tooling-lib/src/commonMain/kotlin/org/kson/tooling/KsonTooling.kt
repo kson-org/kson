@@ -14,9 +14,7 @@ import org.kson.parser.Coordinates
 import org.kson.parser.Location
 import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.RefResolution
-import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaDocument
-import org.kson.schema.descend
 import org.kson.validation.SourceContext
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonString
@@ -61,8 +59,8 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return null
         val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val schemaInfos = validSchemas.mapNotNull { ref ->
-            ref.resolvedValue.extractSchemaInfo()
+        val schemaInfos = validSchemas.mapNotNull { validSchema ->
+            validSchema.value.extractSchemaInfo()
         }
 
         return schemaInfos.distinct().joinToString("\n\n---\n\n")
@@ -92,13 +90,13 @@ object KsonTooling {
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
         val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
-        val definitions = validSchemas.filterNot { it.resolvedValue is KsonBoolean }.ifEmpty { validSchemas }
+        val definitions = validSchemas.filterNot { it.value is KsonBoolean }.ifEmpty { validSchemas }
         return definitions.map {
             Range(
-                it.resolvedValue.location.start.line,
-                it.resolvedValue.location.start.column,
-                it.resolvedValue.location.end.line,
-                it.resolvedValue.location.end.column
+                it.value.location.start.line,
+                it.value.location.start.column,
+                it.value.location.end.line,
+                it.value.location.end.column
             )
         }
     }
@@ -137,16 +135,16 @@ object KsonTooling {
         // a draft 7 `$ref` ignores the `$id` beside it, so it resolves against the base URI its holder is read under
         val pathToHolder = AstNodeWalker.nodesAlong(schemaAst, documentPointer).dropLast(1)
             .map { it.toKsonValueOrNull() ?: return emptyList() }
-        val baseUri = ResolvedRef(parsedSchema, indexedDocuments.rootBaseUri).descend(pathToHolder).resolvedValueBaseUri
-        val resolvedRef = (indexedDocuments.resolveRef(refString, baseUri) as? RefResolution.Found)
+        val baseUri = indexedDocuments.rootSchema.descend(pathToHolder).baseUri
+        val target = (indexedDocuments.resolveRef(refString, baseUri) as? RefResolution.Found)
             ?.target ?: return emptyList()
 
         return listOf(
             Range(
-                resolvedRef.resolvedValue.location.start.line,
-                resolvedRef.resolvedValue.location.start.column,
-                resolvedRef.resolvedValue.location.end.line,
-                resolvedRef.resolvedValue.location.end.column
+                target.value.location.start.line,
+                target.value.location.start.column,
+                target.value.location.end.line,
+                target.value.location.end.column
             )
         )
     }

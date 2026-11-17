@@ -21,8 +21,8 @@ import kotlin.test.assertSame
 class ExternalSchemaRefsTest {
     private fun value(source: String): KsonValue = assertNotNull(KsonCore.parseToAst(source).ksonValue)
 
-    private fun title(ref: ResolvedRef?): String? {
-        val schema = ref?.resolvedValue as? KsonObject
+    private fun title(node: SchemaNode?): String? {
+        val schema = node?.value as? KsonObject
         return (schema?.propertyLookup?.get("title") as? KsonString)?.value
     }
 
@@ -55,10 +55,10 @@ class ExternalSchemaRefsTest {
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/project/root.json"))
         val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        val resolved = indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)
+        val resolved = indexedDocuments.resolveRefIfPresent(indexedDocuments.rootSchema)
 
         assertEquals("Target", title(resolved))
-        assertEquals("file:///schemas/common/second.json", resolved.resolvedValueBaseUri.toString())
+        assertEquals("file:///schemas/common/second.json", resolved.baseUri.toString())
         assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
         val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
@@ -90,8 +90,8 @@ class ExternalSchemaRefsTest {
         val viaNestedBaseUri =
             assertIs<RefResolution.Found>(indexedDocuments.resolveRef("value.json", nestedBaseUri)).target
 
-        assertEquals(canonicalRootUri, viaPointer.resolvedValueBaseUri)
-        assertSame(viaPointer.resolvedValue, viaId.resolvedValue)
+        assertEquals(canonicalRootUri, viaPointer.baseUri)
+        assertSame(viaPointer.value, viaId.value)
         assertEquals("External", title(viaNestedBaseUri))
         assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
     }
@@ -160,7 +160,7 @@ class ExternalSchemaRefsTest {
         val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
         assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
-        val chainEnd = indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)
+        val chainEnd = indexedDocuments.resolveRefIfPresent(indexedDocuments.rootSchema)
         val cycle = assertIs<UnresolvedRef.Cycle>(chainEnd.unresolvedRef)
         assertSame((b as KsonObject).propertyLookup[$$"$ref"], cycle.ref)
         val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
@@ -187,8 +187,8 @@ class ExternalSchemaRefsTest {
             indexedDocuments.resolveRef("https://canonical.test/types.json$pointer", indexedDocuments.rootBaseUri)
         ).target
 
-        assertSame(viaRetrievalUri.resolvedValue, viaId.resolvedValue)
-        assertEquals("https://canonical.test/types.json", viaRetrievalUri.resolvedValueBaseUri.toString())
+        assertSame(viaRetrievalUri.value, viaId.value)
+        assertEquals("https://canonical.test/types.json", viaRetrievalUri.baseUri.toString())
     }
 
     @Test
@@ -255,7 +255,7 @@ class ExternalSchemaRefsTest {
             indexedDocuments.resolveRef("types.json#/extension/target", indexedDocuments.rootBaseUri)
         ).target
 
-        assertEquals("file:///types.json", target.resolvedValueBaseUri.toString())
+        assertEquals("file:///types.json", target.baseUri.toString())
     }
 
     @Test
@@ -280,7 +280,7 @@ class ExternalSchemaRefsTest {
         assertEquals(emptyList(), complete.missingDocumentUris)
         assertEquals("file:///schemas/root.json", complete.rootBaseUri.toString())
         assertEquals("file:///schemas/root.json", complete.rootSubschemaBaseUri.toString())
-        assertEquals("String", title(complete.resolveRefIfPresent(root, complete.rootBaseUri)))
+        assertEquals("String", title(complete.resolveRefIfPresent(complete.rootSchema)))
         val messageTypes = validationMessages(complete, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
