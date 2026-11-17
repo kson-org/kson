@@ -278,9 +278,9 @@ class OneOfPresenceUnionTest : JsonSchemaTest {
         assertEquals(
             "Value matches none of these sub-schemas:\n" +
                 "- ApiKeyAuth:\n" +
-                "    - Additional property 'grantType' is not allowed in ApiKeyAuth (2:1)\n" +
+                "    - Additional property 'grantType' is not allowed in ApiKeyAuth. Allowed properties: apiKey, location (2:1)\n" +
                 "- OAuthAuth:\n" +
-                "    - Additional property 'apiKey' is not allowed in OAuthAuth (1:1)\n" +
+                "    - Additional property 'apiKey' is not allowed in OAuthAuth. Allowed properties: clientId, clientSecret, grantType (1:1)\n" +
                 "    - Missing required properties: clientId, clientSecret (1:1)",
             errors[1].message.toString()
         )

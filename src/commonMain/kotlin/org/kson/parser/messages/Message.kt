@@ -385,14 +385,16 @@ enum class MessageType(
     },
     SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Property Name", "Schema Title")
+            return listOf("Property Name", "Schema Title", "Allowed Properties")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val propertyName = parsedArgs.getArg("Property Name")
             val schemaTitle = parsedArgs.getArg("Schema Title")
+            val allowedProperties = parsedArgs.getArg("Allowed Properties")
             val suffix = if (schemaTitle.isNullOrEmpty()) "" else " in $schemaTitle"
-            return "Additional property '$propertyName' is not allowed$suffix"
+            val allowedSuffix = if (allowedProperties.isNullOrEmpty()) "" else ". Allowed properties: $allowedProperties"
+            return "Additional property '$propertyName' is not allowed$suffix$allowedSuffix"
         }
     },
     SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH(MessageSeverity.WARNING) {
