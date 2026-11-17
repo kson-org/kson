@@ -19,12 +19,17 @@ data class SchemaDocument(val value: KsonValue, val retrievalUri: UriReference? 
  *
  * @param root the root schema document, which may have no retrieval URI
  * @param additionalDocuments the documents [root] references, directly or through each other
+ * @param draft the draft used to interpret the documents, with its meta-schemas indexed alongside them
  * @throws IllegalArgumentException if a retrieval URI in [additionalDocuments] is missing, empty or fragment-only
  */
-class IndexedSchemaDocuments(
+class IndexedSchemaDocuments internal constructor(
     val root: SchemaDocument,
-    additionalDocuments: List<SchemaDocument> = emptyList()
+    additionalDocuments: List<SchemaDocument>,
+    private val draft: SchemaDraft
 ) {
+    constructor(root: SchemaDocument, additionalDocuments: List<SchemaDocument> = emptyList()) :
+        this(root, additionalDocuments, SchemaDraft.DRAFT_7)
+
     /** A `$ref`'s value and the base URI it resolves against */
     private data class Reference(val ref: String, val baseUri: UriReference) {
         val uri: UriReference = baseUri.resolve(ref)
@@ -91,7 +96,7 @@ class IndexedSchemaDocuments(
         }
     }
 
-    /** The meta-schema, the root and the additional documents */
+    /** The meta-schemas, the root and the additional documents */
     private val documents: List<SchemaDocument>
     private val index: Index
 
@@ -99,7 +104,7 @@ class IndexedSchemaDocuments(
     val rootBaseUri: UriReference = root.initialBaseUri
 
     /** The root schema, which is [root]'s value with [rootBaseUri] as its base URI */
-    val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, this)
+    val rootSchema: SchemaNode = documentSchema(root)
 
     /** The root schema with its chain of `$ref`s followed (see [resolveRefIfPresent]) */
     val resolvedRootSchema: SchemaNode by lazy { resolveRefIfPresent(rootSchema) }
@@ -111,8 +116,7 @@ class IndexedSchemaDocuments(
         require(additionalDocuments.all { it.initialBaseUri.toString().isNotEmpty() }) {
             "Each additional schema document needs the URI it was retrieved from"
         }
-        val metaSchema = SchemaDocument(KsonDraft7MetaSchema.schemaValue, UriReference.parse(KsonDraft7MetaSchema.ID))
-        documents = listOf(metaSchema, root) + additionalDocuments
+        documents = draft.metaSchemas() + root + additionalDocuments
         index = indexUntilReferencesSettle()
     }
 
@@ -189,8 +193,7 @@ class IndexedSchemaDocuments(
 
         init {
             documents.forEachIndexed { document, schemaDocument ->
-                val schema = SchemaNode(schemaDocument.value, schemaDocument.initialBaseUri, this@IndexedSchemaDocuments)
-                addSchema(schema, Place(document, emptyList()), isDocumentRoot = true)
+                addSchema(documentSchema(schemaDocument), Place(document, emptyList()), isDocumentRoot = true)
             }
             addReferencedValues(referencedPlaces)
         }
@@ -221,7 +224,7 @@ class IndexedSchemaDocuments(
          * `$id`, and by the base URI it inherits if [isDocumentRoot].
          */
         private fun addSchema(schema: SchemaNode, place: Place, isDocumentRoot: Boolean = false) {
-            val keywords = keywordsOf(schema.value)
+            val keywords = keywordsOf(schema.value, schema.draft)
             val id = keywords[$$"$id"] as? KsonString
             val ref = keywords[$$"$ref"] as? KsonString
 
@@ -229,10 +232,9 @@ class IndexedSchemaDocuments(
             if (isDocumentRoot) identify(schema.baseUri, place)
             if (id != null) identify(schema.innerBaseUri, place)
             if (ref != null) references.add(Reference(ref.value, schema.innerBaseUri))
-            // a schema with a string `$ref` has no subschemas, as the keywords beside it don't apply
             val schemaObject = schema.value as? KsonObject
-            if (schemaObject == null || ref != null) return
-            draft7Keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { declared ->
+            if (schemaObject == null || hasHidingRef(schemaObject, schema.draft)) return
+            schema.draft.keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { declared ->
                 addSchema(schema.enter(declared.value), place.below(declared.path))
             }
         }
@@ -242,6 +244,9 @@ class IndexedSchemaDocuments(
             identifiedSinceCheck += uri
         }
     }
+
+    private fun documentSchema(document: SchemaDocument): SchemaNode =
+        SchemaNode(document.value, document.initialBaseUri, draft, this)
 
     /** Returns the value at [place], or null if there is none. */
     private fun valueAt(place: Place): KsonValue? =
@@ -258,19 +263,19 @@ class IndexedSchemaDocuments(
 private val SchemaDocument.initialBaseUri: UriReference
     get() = retrievalUri?.withoutFragment() ?: UriReference.parse("")
 
-/** The keywords of [schema] that apply: a string `$ref` alone, as Draft 7 ignores the keywords beside it */
-private fun keywordsOf(schema: KsonValue): Map<String, KsonValue> {
-    val keywords = (schema as? KsonObject)?.propertyLookup.orEmpty()
-    val ref = keywords[$$"$ref"]
-    return if (ref is KsonString) mapOf($$"$ref" to ref) else keywords
+/** The keywords of [schema] that apply in [draft]: a string `$ref` alone when it hides the keywords beside it */
+private fun keywordsOf(schema: KsonValue, draft: SchemaDraft): Map<String, KsonValue> {
+    val schemaObject = schema as? KsonObject ?: return emptyMap()
+    val keywords = schemaObject.propertyLookup
+    return if (hasHidingRef(schemaObject, draft)) mapOf($$"$ref" to keywords.getValue($$"$ref")) else keywords
 }
 
 /**
  * The base URI for [schema]'s keywords when [schema] is read under this URI: [schema]'s `$id` resolved against this
  * URI, or this URI when [schema] has no `$id` that applies
  */
-internal fun UriReference.withIdOf(schema: KsonValue): UriReference {
-    val id = keywordsOf(schema)[$$"$id"] as? KsonString ?: return this
+internal fun UriReference.withIdOf(schema: KsonValue, draft: SchemaDraft): UriReference {
+    val id = keywordsOf(schema, draft)[$$"$id"] as? KsonString ?: return this
     return resolve(id.value).withoutEmptyFragment()
 }
 

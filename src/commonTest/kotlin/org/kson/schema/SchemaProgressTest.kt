@@ -51,8 +51,9 @@ class SchemaProgressTest {
         assertTrue(underItsRetrievalUri.accepts(kson("3")))
         assertTrue(underItsRetrievalUri.rejects(kson("three")))
 
-        val elsewhere =
-            SchemaProgress(SchemaNode(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments))
+        val elsewhere = SchemaProgress(
+            indexedDocuments.rootSchema.copy(baseUri = UriReference.parse("https://example.org/elsewhere"))
+        )
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }

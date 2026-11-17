@@ -6,7 +6,8 @@ import org.kson.value.KsonString
 import org.kson.value.KsonValue
 
 /**
- * A schema together with the base URI it inherits and the indexed documents its `$ref`s resolve in.
+ * A schema together with the base URI it inherits, the draft that defines its keywords, and the indexed documents
+ * its `$ref`s resolve in.
  *
  * @param baseUri The base URI that [value] inherits from its parent schema, or from its document for a root schema.
  *   It depends only on where [value] sits in its document, so it is the same whether [value] is reached through
@@ -17,16 +18,17 @@ import org.kson.value.KsonValue
 data class SchemaNode internal constructor(
     val value: KsonValue,
     val baseUri: UriReference,
+    internal val draft: SchemaDraft,
     internal val indexedDocuments: IndexedSchemaDocuments,
     val unresolvedRef: UnresolvedRef? = null
 ) {
     val endsAtUnresolvedRef: Boolean get() = unresolvedRef != null
 
     /** The base URI inside [value], which its `$ref` resolves against and its subschemas inherit */
-    internal val innerBaseUri: UriReference by lazy { baseUri.withIdOf(value) }
+    internal val innerBaseUri: UriReference by lazy { baseUri.withIdOf(value, draft) }
 
     /** Returns a node for [child], a value inside this schema, with [innerBaseUri] as its base URI */
-    internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, indexedDocuments)
+    internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, draft, indexedDocuments)
 
     /**
      * Returns the node for the last value in [path], or this node when the path is empty.  The first value must sit
@@ -37,7 +39,7 @@ data class SchemaNode internal constructor(
     /** The direct subschemas of this schema, in the order validation applies their keywords */
     val subschemas: List<Subschema> by lazy {
         val schemaObject = value as? KsonObject ?: return@lazy emptyList()
-        draft7Keywords.flatMap { keyword ->
+        draft.keywords.flatMap { keyword ->
             val declaredSubschemas = keyword.declaredSubschemas(schemaObject)
             val alternatives = declaredSubschemas.filter { it.applies is Applies.Alternative }.map { enter(it.value) }
             val condition = declaredSubschemas.firstOrNull { it.applies == Applies.Condition }?.value

@@ -39,19 +39,21 @@ internal object SchemaParser {
         propertyName: String?
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
+        val draft = schema.draft
         val context = KeywordContext(schema, messageSink)
 
-        // `$ref` comes first, as Draft 7 ignores every keyword beside a string `$ref`
-        val refValidator = compileKeyword(RefKeyword, schema, schemaObject, context)
+        // `$ref` comes first, as it may hide every keyword beside it
+        val refKeyword = draft.keywordsByName[$$"$ref"]
+        val refValidator = refKeyword?.let { compileKeyword(it, schema, schemaObject, context) }
         if (context.isNoSchema) return null
-        if (schemaProperties[$$"$ref"] is KsonString) {
+        if (hasHidingRef(schemaObject, draft)) {
             return JsonObjectSchema(null, null, null, null, null, listOfNotNull(refValidator))
         }
 
         reportNonStringId(schemaObject, messageSink)
         val metadata = parseMetadata(schemaProperties, messageSink)
         val typeValidator = parseTypeValidator(schemaProperties, propertyName, messageSink)
-        val validators = listOfNotNull(refValidator) + draft7Keywords.filter { it !== RefKeyword }.mapNotNull {
+        val validators = listOfNotNull(refValidator) + draft.keywords.filter { it !== refKeyword }.mapNotNull {
             compileKeyword(it, schema, schemaObject, context)
         }
 

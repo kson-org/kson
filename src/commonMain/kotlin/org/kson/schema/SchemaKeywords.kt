@@ -4,38 +4,6 @@ import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
 import org.kson.value.*
 
-/** The keywords Draft 7 compiles, in the order validation applies them and reports their errors */
-internal val draft7Keywords: List<SchemaKeyword> = listOf(
-    RefKeyword,
-    DefinitionsKeyword("definitions"),
-    NumberKeyword("minimum", ::MinimumValidator),
-    NumberKeyword("maximum", ::MaximumValidator),
-    NumberKeyword("multipleOf", ::MultipleOfValidator),
-    NumberKeyword("exclusiveMinimum", ::ExclusiveMinimumValidator),
-    NumberKeyword("exclusiveMaximum", ::ExclusiveMaximumValidator),
-    IntegerKeyword("minLength", ::MinLengthValidator),
-    IntegerKeyword("maxLength", ::MaxLengthValidator),
-    PatternKeyword,
-    EnumKeyword,
-    ItemsKeyword,
-    SubschemaKeyword("contains", Applies.SomeItem, ::ContainsValidator),
-    IntegerKeyword("minItems", ::MinItemsValidator),
-    IntegerKeyword("maxItems", ::MaxItemsValidator),
-    UniqueItemsKeyword,
-    PropertiesKeyword,
-    RequiredKeyword,
-    IntegerKeyword("minProperties", ::MinPropertiesValidator),
-    IntegerKeyword("maxProperties", ::MaxPropertiesValidator),
-    ConstKeyword,
-    SchemaListKeyword("allOf", { Applies.InPlace }, ::AllOfValidator),
-    SchemaListKeyword("anyOf", Applies::Alternative, ::AnyOfValidator),
-    SchemaListKeyword("oneOf", Applies::Alternative, ::OneOfValidator),
-    SubschemaKeyword("not", Applies.Negated, ::NotValidator),
-    IfKeyword,
-    DependenciesKeyword,
-    SubschemaKeyword("propertyNames", Applies.PropertyNames, ::PropertyNamesValidator)
-)
-
 internal object RefKeyword : SchemaKeyword(setOf($$"$ref")) {
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
         val ref = context.properties.getValue($$"$ref")
