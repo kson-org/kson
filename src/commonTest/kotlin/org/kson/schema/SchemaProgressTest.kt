@@ -15,7 +15,7 @@ class SchemaProgressTest {
 
     private fun progressTowards(schema: String): SchemaProgress {
         val node = kson(schema)
-        return SchemaProgress(node, UriReference.parse(""), SchemaIdLookup(SchemaDocument(node)))
+        return SchemaProgress(node, UriReference.parse(""), IndexedSchemaDocuments(SchemaDocument(node)))
     }
 
     private fun locationOf(property: String, document: KsonValue) =
@@ -47,13 +47,13 @@ class SchemaProgressTest {
                     type: number
             """.trimIndent()
         )
-        val idLookup = SchemaIdLookup(SchemaDocument(root))
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
 
-        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), idLookup)
+        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), indexedDocuments)
         assertTrue(underItsId.accepts(kson("3")))
         assertTrue(underItsId.rejects(kson("three")))
 
-        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), idLookup)
+        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments)
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }

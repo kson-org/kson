@@ -12,8 +12,8 @@ import org.kson.value.KsonValue
  * no schema, or a `$ref` that doesn't resolve, neither accepts nor rejects anything, and a keyword inside [node]
  * that can't be read constrains nothing.
  */
-class SchemaProgress(node: KsonValue, baseUri: UriReference, idLookup: SchemaIdLookup) {
-    private val schema: JsonSchema? = SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, idLookup)
+class SchemaProgress(node: KsonValue, baseUri: UriReference, indexedDocuments: IndexedSchemaDocuments) {
+    private val schema: JsonSchema? = SchemaParser.parseSchemaElement(node, MessageSink(), baseUri, indexedDocuments)
 
     /**
      * Whether [value] already satisfies the schema.  Not the opposite of [rejects]: an unfinished value may do

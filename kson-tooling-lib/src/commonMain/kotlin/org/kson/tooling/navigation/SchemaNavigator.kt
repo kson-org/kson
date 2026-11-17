@@ -3,8 +3,8 @@ package org.kson.tooling.navigation
 import org.kson.ast.AstNode
 import org.kson.ast.ObjectNode
 import org.kson.parser.Location
+import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.ResolvedRef
-import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaProgress
 import org.kson.schema.withIdOf
 import org.kson.uri.UriReference
@@ -83,7 +83,7 @@ internal val KsonValue.isFalseSchema: Boolean
  * the `then` or `else` its `if` rules out.  Without it, every branch is kept, as for an empty document.
  */
 internal class SchemaNavigator(
-    private val idLookup: SchemaIdLookup,
+    private val indexedDocuments: IndexedSchemaDocuments,
     private val incompleteRegion: Location? = null,
     private val carryDeadEnds: Boolean = false,
     private val narrow: Boolean = true
@@ -111,8 +111,8 @@ internal class SchemaNavigator(
      * ```kotlin
      * // Document path: ["users", "0", "name"]
      * // Schema navigation: properties/users → items → properties/name
-     * val idLookup = SchemaIdLookup(SchemaDocument(schemaRoot))
-     * val schemaRefs = SchemaNavigator(idLookup).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
+     * val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(schemaRoot))
+     * val schemaRefs = SchemaNavigator(indexedDocuments).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
      * ```
      *
      * Narrowing treats the document as authoritative: a branch is dropped where the document
@@ -134,7 +134,7 @@ internal class SchemaNavigator(
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
         val rootRef = NavigatedSchema(
-            idLookup.resolveRefIfPresent(idLookup.root.value, idLookup.rootBaseUri),
+            indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, indexedDocuments.rootBaseUri),
             emptyList()
         )
 
@@ -200,7 +200,9 @@ internal class SchemaNavigator(
             }
         }
 
-        return stepped.map { NavigatedSchema(idLookup.resolveRefIfPresent(it, updatedBaseUri), ref.branchTrail) }
+        return stepped.map {
+            NavigatedSchema(indexedDocuments.resolveRefIfPresent(it, updatedBaseUri), ref.branchTrail)
+        }
     }
 
     /**
@@ -294,11 +296,11 @@ internal class SchemaNavigator(
         }
 
         (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
-            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), step = null)
+            addBranch(indexedDocuments.resolveRefIfPresent(branch, baseUri), step = null)
         }
 
         conditionalBranches(schemaObj, baseUri, docVal, depth).forEach { (branch, step) ->
-            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), step)
+            addBranch(indexedDocuments.resolveRefIfPresent(branch, baseUri), step)
         }
 
         if (addedBranches) {
@@ -322,7 +324,7 @@ internal class SchemaNavigator(
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<ResolvedRef, BranchStep>> {
-        val branches = alternatives.elements.map { idLookup.resolveRefIfPresent(it, baseUri) }
+        val branches = alternatives.elements.map { indexedDocuments.resolveRefIfPresent(it, baseUri) }
         val openBranches = branches.indices
             .filter { docVal == null || isCompatibleWithDocument(branches[it], docVal) }
             .map { Branch.Index(it) }
@@ -367,14 +369,14 @@ internal class SchemaNavigator(
         ref: ResolvedRef,
         docVal: KsonValue
     ): Boolean {
-        val progress = SchemaProgress(ref.resolvedValue, ref.resolvedValueBaseUri, idLookup)
+        val progress = SchemaProgress(ref.resolvedValue, ref.resolvedValueBaseUri, indexedDocuments)
         return !progress.rejects(docVal, forgiving = incompleteRegion)
     }
 
     /** Classify [ifCondition] against [docVal] into an [IfState]. */
     private fun evaluateIf(ifCondition: KsonValue, baseUri: UriReference, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
-        val progress = SchemaProgress(ifCondition, baseUri, idLookup)
+        val progress = SchemaProgress(ifCondition, baseUri, indexedDocuments)
         if (progress.accepts(docVal)) return IfState.MATCH
         return if (progress.rejects(docVal, forgiving = incompleteRegion)) {
             IfState.NO_MATCH

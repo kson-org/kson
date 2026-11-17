@@ -11,23 +11,24 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
- * Tests for [SchemaIdLookup.resolveRef] and [SchemaIdLookup.resolveRefIfPresent].
+ * Tests for [IndexedSchemaDocuments.resolveRef] and [IndexedSchemaDocuments.resolveRefIfPresent].
  */
-class SchemaIdLookupTest {
+class IndexedSchemaDocumentsTest {
 
     /** Resolves [ref] as [schema]'s root `$ref` would be. */
     private fun resolveRef(schema: String, ref: String): RefResolution {
-        val lookup = SchemaIdLookup(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
-        return lookup.resolveRef(ref, lookup.rootBaseUri)
+        val indexedDocuments =
+            IndexedSchemaDocuments(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
+        return indexedDocuments.resolveRef(ref, indexedDocuments.rootBaseUri)
     }
 
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val properties = root.propertyLookup.getValue("properties") as KsonObject
-        val lookup = SchemaIdLookup(SchemaDocument(root))
-        val field = ResolvedRef(root, lookup.rootBaseUri)
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
+        val field = ResolvedRef(root, indexedDocuments.rootBaseUri)
             .descend(listOf(properties, properties.propertyLookup.getValue("field")))
-        return lookup.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
+        return indexedDocuments.resolveRefIfPresent(field.resolvedValue, field.resolvedValueBaseUri)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
@@ -35,8 +36,11 @@ class SchemaIdLookupTest {
 
     /** Resolves [schema]'s root, read under the URI it was retrieved from, returning its `title` and base URI. */
     private fun resolveRoot(schema: String): Pair<String?, String> {
-        val lookup = SchemaIdLookup(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
-        return titleAndBaseUri(lookup.resolveRefIfPresent(lookup.root.value, lookup.rootBaseUri))
+        val indexedDocuments =
+            IndexedSchemaDocuments(SchemaDocument(KsonCore.parseToAst(schema).ksonValue as KsonObject))
+        return titleAndBaseUri(
+            indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, indexedDocuments.rootBaseUri)
+        )
     }
 
     private fun titleAndBaseUri(resolved: ResolvedRef): Pair<String?, String> {
