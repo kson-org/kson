@@ -6,8 +6,8 @@ import org.kson.parser.Location
 import org.kson.parser.MessageSink
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaIdLookup
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
 import org.kson.schema.SchemaParser
+import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean
@@ -26,7 +26,7 @@ import org.kson.walker.nodesAlong
  */
 internal data class NavigatedSchema(
     val resolvedValue: KsonValue,
-    val resolvedValueBaseUri: String,
+    val resolvedValueBaseUri: UriReference,
     val branchTrail: List<BranchStep> = emptyList(),
     val endsAtUnresolvedRef: Boolean = false
 ) {
@@ -44,7 +44,12 @@ internal data class BranchStep(val choice: Choice, val branch: Branch)
  * Equal choices are one choice, as a value takes the same branch of each: equal `if` conditions in two `allOf`
  * members decide alike.
  */
-internal data class Choice(val node: KsonValue, val baseUri: String, val depth: Int, val openBranches: List<Branch>)
+internal data class Choice(
+    val node: KsonValue,
+    val baseUri: UriReference,
+    val depth: Int,
+    val openBranches: List<Branch>
+)
 
 internal sealed interface Branch {
     data class Index(val index: Int) : Branch
@@ -213,9 +218,9 @@ internal class SchemaNavigator(
     }
 
     /** The base URI that `$ref`s in [schema] resolve against. */
-    private fun baseUriWithin(schema: KsonObject, baseUri: String): String {
+    private fun baseUriWithin(schema: KsonObject, baseUri: UriReference): UriReference {
         val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
-        return resolveUri(id.value, baseUri).toString()
+        return baseUri.resolve(id.value)
     }
 
     /**
@@ -266,7 +271,7 @@ internal class SchemaNavigator(
         ref: NavigatedSchema,
         docVal: KsonValue?,
         depth: Int,
-        inProgress: MutableList<Pair<String, KsonValue>> = mutableListOf()
+        inProgress: MutableList<Pair<UriReference, KsonValue>> = mutableListOf()
     ): List<NavigatedSchema> {
         if (carryDeadEnds && ref.endsAtUnresolvedRef) return listOf(ref)
         val schemaObj = ref.resolvedValue as? KsonObject ?: return listOf(ref)
@@ -322,7 +327,7 @@ internal class SchemaNavigator(
      */
     private fun narrowedBranches(
         alternatives: KsonList,
-        baseUri: String,
+        baseUri: UriReference,
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<ResolvedRef, BranchStep>> {
@@ -344,7 +349,7 @@ internal class SchemaNavigator(
      */
     private fun conditionalBranches(
         schemaObj: KsonObject,
-        baseUri: String,
+        baseUri: UriReference,
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<KsonValue, BranchStep>> {
@@ -393,7 +398,7 @@ internal class SchemaNavigator(
      * to incompleteness" from "decidably false against present data" (emit `else`), without inspecting
      * any validator message types.
      */
-    private fun evaluateIf(ifCondition: KsonValue, baseUri: String, docVal: KsonValue?): IfState {
+    private fun evaluateIf(ifCondition: KsonValue, baseUri: UriReference, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
         val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), baseUri, idLookup)
             ?: return IfState.UNDETERMINED

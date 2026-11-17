@@ -1,5 +1,8 @@
 package org.kson.schema
 
+import org.kson.parser.Coordinates
+import org.kson.parser.Location
+import org.kson.parser.LoggedMessage
 import org.kson.parser.messages.MessageType
 import kotlin.test.*
 import org.kson.KsonCore
@@ -326,6 +329,97 @@ class SchemaParserTest : JsonSchemaTest {
             schema,
             listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
         )
+    }
+
+    @Test
+    fun testRefWithMalformedPointerReportsError() {
+        // `~2` is no JSON Pointer escape: only `~0` and `~1` are
+        val result = KsonCore.parseSchema($$"""'$ref': '#/$defs/a~2b'""")
+        assertEquals(
+            listOf(
+                LoggedMessage(
+                    Location(Coordinates(0, 9), Coordinates(0, 21), 9, 21),
+                    MessageType.JSON_POINTER_INVALID_ESCAPE.create("2")
+                )
+            ),
+            result.messages
+        )
+        assertEquals(
+            "Invalid escape sequence: '~2'. Valid escape sequences are '~0' for '~' and '~1' for '/'",
+            result.messages.single().message.toString()
+        )
+    }
+
+    @Test
+    fun testRefToRefWithMalformedPointerReportsError() {
+        // `wrapper` is only parsed once validation follows the root `$ref` to it
+        val schema = $$"""
+            '$ref': '#/$defs/wrapper'
+            '$defs':
+              wrapper:
+                '$ref': '#/$defs/a~2b'
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "key: value",
+            schema,
+            listOf(MessageType.JSON_POINTER_INVALID_ESCAPE),
+            listOf(Location(Coordinates(3, 13), Coordinates(3, 25), 59, 71))
+        )
+    }
+
+    @Test
+    fun testPointerRefUnderAPlainNameIdResolvesInItsDocument() {
+        // a plain-name `$id` names a fragment of the document, so `#/definitions/target` still addresses the
+        // document's root
+        assertValidObjectSchema(
+            $$"""
+            {
+                "properties": { "field": { "$ref": "#anchored" } },
+                "definitions": {
+                    "anchored": {
+                        "$id": "#anchored",
+                        "properties": { "x": { "$ref": "#/definitions/target" } }
+                    },
+                    "target": { "type": "number" }
+                }
+            }
+            """
+        )
+    }
+
+    @Test
+    fun testRefWithinASchemaWithARelativeIdResolvesInThatSchema() {
+        // `a` is read under `other`'s `$id`, so its `#/$defs/b` addresses `other`
+        val schema = $$"""
+            {
+                "$id": "http://example.com/root.json",
+                "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
+                "$defs": {
+                    "other": {
+                        "$id": "sub/other.json",
+                        "$defs": {
+                            "a": { "$ref": "#/$defs/b" },
+                            "b": { "type": "string" }
+                        }
+                    }
+                }
+            }
+        """
+        assertKsonEnforcesSchema("field: ok", schema, true)
+        assertKsonSchemaErrors("field: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
+    }
+
+    @Test
+    fun testPointerRefUnderARootIdWithAnEmptyFragmentResolves() {
+        // `http://example.com/root.json#` identifies the same schema as `http://example.com/root.json`
+        val schema = $$"""
+            {
+                "$id": "http://example.com/root.json#",
+                "properties": { "x": { "$ref": "#/definitions/a" } },
+                "definitions": { "a": { "type": "string" } }
+            }
+        """
+        assertKsonSchemaErrors("x: 1", schema, listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH))
     }
 
     @Test

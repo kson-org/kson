@@ -219,6 +219,39 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefShortNameIsPercentDecoded() {
+        // `%7E0` is `~0` percent-encoded, which the pointer reads as `~`
+        val errors = assertKsonSchemaErrors(
+            """
+                task_a: "oops, should be an object"
+            """,
+            $$"""
+                {
+                    "additionalProperties": {
+                        "oneOf": [
+                            {"$ref": "#/$defs/a%7E0b"},
+                            {"$ref": "#/$defs/Other"}
+                        ]
+                    },
+                    "$defs": {
+                        "a~b": {"type": "object"},
+                        "Other": {"type": "object"}
+                    }
+                }
+            """,
+            listOf(
+                SCHEMA_ADDITIONAL_PROPERTY_SCHEMA_MISMATCH,
+                SCHEMA_VALUE_TYPE_MISMATCH
+            )
+        )
+
+        assertEquals(
+            "Property 'task_a' must conform to 'one of: a~b, Other'",
+            errors[0].message.toString()
+        )
+    }
+
+    @Test
     fun testLoneRefPrefersTargetTitleOverPointerTail() {
         // When the ref's target declares its own `title`, that title wins over the pointer tail —
         // a target that names itself should be trusted over a name scraped from the pointer.

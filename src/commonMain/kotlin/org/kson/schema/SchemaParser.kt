@@ -3,8 +3,10 @@ package org.kson.schema
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType.*
 import org.kson.schema.validators.*
-import org.kson.schema.SchemaIdLookup.Companion.resolveUri
+import org.kson.uri.UriReference
 import org.kson.value.*
+import org.kson.value.navigation.json_pointer.FragmentPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 
 /**
  * Parses a JSON Schema string into our JsonSchema model.
@@ -16,11 +18,9 @@ object SchemaParser {
      */
     fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
         // Determine the initial base URI from the root schema's $id if present
-        val initialBaseUri = if (schemaRootValue is KsonObject) {
-            extractId(schemaRootValue, messageSink) ?: ""
-        } else {
-            ""
-        }
+        val initialBaseUri = UriReference.parse(
+            (schemaRootValue as? KsonObject)?.let { extractId(it, messageSink) } ?: ""
+        )
 
         val idLookup = SchemaIdLookup(schemaRootValue)
         return parseSchemaElement(schemaRootValue, messageSink, initialBaseUri, idLookup)
@@ -37,7 +37,7 @@ object SchemaParser {
     fun parseSchemaElement(
         schemaValue: KsonValue,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -54,7 +54,7 @@ object SchemaParser {
     private fun parseObjectSchema(
         schemaObject: KsonObject,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         propertyName: String? = null
     ): JsonSchema? {
@@ -69,7 +69,7 @@ object SchemaParser {
         // Check if this schema defines a new $id and update base URI accordingly
         val idString = extractId(schemaObject, messageSink)
         val updatedBaseUri = if (idString != null) {
-            resolveUri(idString, currentBaseUri).toString()
+            currentBaseUri.resolve(idString)
         } else {
             currentBaseUri
         }
@@ -176,7 +176,7 @@ object SchemaParser {
     private inline fun parseSubSchemaValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (JsonSchema) -> JsonSchemaValidator,
@@ -195,7 +195,7 @@ object SchemaParser {
     private fun parseSchemaListValidator(
         schemaProperties: Map<String, KsonValue>,
         key: String,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
         factory: (List<JsonSchema>) -> JsonSchemaValidator,
@@ -234,7 +234,7 @@ object SchemaParser {
      */
     private fun tryResolveRef(
         schemaProperties: Map<String, KsonValue>,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): RefOutcome {
@@ -245,7 +245,11 @@ object SchemaParser {
         }
         val resolvedValue = idLookup.resolveRef(refString.value, currentBaseUri)
         if (resolvedValue == null) {
-            messageSink.error(refString.location, SCHEMA_REF_RESOLUTION_FAILED.create(refString.value))
+            val malformedPointer = UriReference.parse(refString.value).fragmentPointer() as? FragmentPointer.Malformed
+            messageSink.error(
+                refString.location,
+                malformedPointer?.message ?: SCHEMA_REF_RESOLUTION_FAILED.create(refString.value)
+            )
             return RefOutcome.Failed
         }
         val refValidator = RefValidator(resolvedValue, idLookup, refString.value)
@@ -273,7 +277,7 @@ object SchemaParser {
      */
     private fun parseMetadata(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): SchemaMetadata {
@@ -361,7 +365,7 @@ object SchemaParser {
     private fun parsePropertyValidators(
         schemaProperties: Map<String, KsonValue>,
         title: String?,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -468,7 +472,7 @@ object SchemaParser {
      */
     private fun parseItemsValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -520,7 +524,7 @@ object SchemaParser {
      */
     private fun parseIfThenElseValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -543,7 +547,7 @@ object SchemaParser {
      */
     private fun parseDependenciesValidator(
         schemaProperties: Map<String, KsonValue>,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): JsonSchemaValidator? {
@@ -568,7 +572,7 @@ object SchemaParser {
      */
     private fun parseSingleDependency(
         value: KsonValue,
-        updatedBaseUri: String,
+        updatedBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): DependencyValidator? {
@@ -591,7 +595,7 @@ object SchemaParser {
         schemaProperties: Map<String, KsonValue>,
         tupleLength: Int,
         messageSink: MessageSink,
-        currentBaseUri: String,
+        currentBaseUri: UriReference,
         idLookup: SchemaIdLookup
     ): AdditionalItemsValidator? {
         return schemaProperties["additionalItems"]?.let { additionalItems ->

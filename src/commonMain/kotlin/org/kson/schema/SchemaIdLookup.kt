@@ -1,6 +1,9 @@
 package org.kson.schema
 
+import org.kson.uri.UriReference
+import org.kson.value.navigation.json_pointer.FragmentPointer
 import org.kson.value.navigation.json_pointer.JsonPointer
+import org.kson.value.navigation.json_pointer.fragmentPointer
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonString
@@ -16,11 +19,12 @@ import org.kson.walker.nodesAlong
  */
 class SchemaIdLookup(val schemaRootValue: KsonValue) {
 
-    private val idMap: Map<String, KsonValue>
+    private val idMap: Map<UriReference, KsonValue>
 
-    /** The root schema's base URI: its `$id` when present, otherwise the empty string. */
-    val rootBaseUri: String =
-        ((schemaRootValue as? KsonObject)?.propertyLookup["\$id"] as? KsonString)?.value ?: ""
+    /** The root schema's base URI: its `$id` when present, otherwise the empty reference. */
+    val rootBaseUri: UriReference =
+        ((schemaRootValue as? KsonObject)?.propertyLookup["\$id"] as? KsonString)
+            ?.let { UriReference.parse(it.value).withoutEmptyFragment() } ?: UriReference.parse("")
 
     init {
         /**
@@ -30,7 +34,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
         idMap = mutableMapOf()
 
         // preload know meta-schemas
-        idMap[KsonDraft7MetaSchema.ID] = KsonDraft7MetaSchema.schemaValue
+        idMap[UriReference.parse(KsonDraft7MetaSchema.ID)] = KsonDraft7MetaSchema.schemaValue
 
         if (schemaRootValue is KsonObject) {
             // Store the root schema at its baseUri
@@ -42,32 +46,22 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
     }
 
     /**
-     * Resolves a `$ref` reference string to the corresponding schema value.
+     * Resolves a `$ref` reference string to the schema value it refers to: the one whose `$id` is the reference's
+     * URI, or else the one its JSON Pointer fragment addresses within the schema the rest of that URI identifies.
      *
      * @param ref The reference string (e.g., "#foo", "#/definitions/address", "bar")
      * @param currentBaseUri The current base URI context for resolving relative references
-     * @return The resolved [KsonValue] representing the referenced schema, or null if not found
+     * @return The resolved [KsonValue] representing the referenced schema, or null if not found, as when [ref]'s
+     *   fragment is a malformed JSON Pointer
      */
-    fun resolveRef(ref: String, currentBaseUri: String): ResolvedRef? {
-        val resolvedRefUri = resolveUri(ref, currentBaseUri)
+    fun resolveRef(ref: String, currentBaseUri: UriReference): ResolvedRef? {
+        val refUri = currentBaseUri.resolve(ref)
+        val resourceUri = refUri.withoutFragment()
+        val identified = idMap[refUri.withoutEmptyFragment()]
+        if (identified != null) return ResolvedRef(identified, currentBaseUri)
 
-        // try a direct lookup of our resolved ref URI
-        idMap[resolvedRefUri.toString()]?.let {
-            return ResolvedRef(it, currentBaseUri)
-        }
-
-        // otherwise, see if we can interpret the fragment
-        return if (resolvedRefUri.fragment.startsWith("#/")) {
-            val decodedPointer = JsonPointer(decodeUriEncoding(resolvedRefUri.fragment.substring(1)))
-            if (resolvedRefUri.origin.isNotBlank()) {
-                idMap[resolvedRefUri.toString().substringBefore("#")]?.let { resolveJsonPointer(decodedPointer, it, resolvedRefUri.toString()) }
-            } else {
-                idMap[currentBaseUri]?.let { resolveJsonPointer(decodedPointer, it, currentBaseUri) }
-            }
-        } else {
-            idMap[resolvedRefUri.toString().substringBefore("#") + resolvedRefUri.fragment.removePrefix("#")]
-                ?.let { ResolvedRef(it, currentBaseUri) }
-        }
+        val pointer = (refUri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
+        return idMap[resourceUri]?.let { resolveJsonPointer(pointer, it, resourceUri) }
     }
 
 
@@ -81,7 +75,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
      * @param currentBaseUri The base URI [value] is read under
      * @return The schema at the end of the chain, and the base URI it is read under
      */
-    fun resolveRefIfPresent(value: KsonValue, currentBaseUri: String): ResolvedRef {
+    fun resolveRefIfPresent(value: KsonValue, currentBaseUri: UriReference): ResolvedRef {
         val followed = mutableListOf<ResolvedRef>()
         var current = ResolvedRef(value, currentBaseUri)
         while (true) {
@@ -108,8 +102,8 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
          */
         private fun walkSchemaForIds(
             schemaValue: KsonValue,
-            idMap: MutableMap<String, KsonValue>,
-            currentBaseUri: String
+            idMap: MutableMap<UriReference, KsonValue>,
+            currentBaseUri: UriReference
         ) {
             when (schemaValue) {
                 is KsonObject -> {
@@ -121,8 +115,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                             val idString = idValue.value
 
                             // Resolve the ID to its fully-qualified form
-                            val fullyQualifiedId = resolveUri(idString, currentBaseUri)
-                            contextBaseUri = fullyQualifiedId.toString()
+                            contextBaseUri = currentBaseUri.resolve(idString).withoutEmptyFragment()
                             idMap[contextBaseUri] = schemaValue
                         }
                     }
@@ -145,132 +138,7 @@ class SchemaIdLookup(val schemaRootValue: KsonValue) {
                 }
             }
         }
-
-        data class RefUriParts (
-            val origin: String,
-            val path: String,
-            val fragment: String) {
-            override fun toString(): String {
-                return "$origin$path$fragment"
-            }
-        }
-
-        /**
-         * Parse the given string into [RefUriParts].  This is a simplified version of that parsing specified in
-         * [RFC 3986 Section 3](https://datatracker.ietf.org/doc/html/rfc3986#section-3) targeted towards our
-         * $ref parsing use case.
-         * TODO we likely want to consider implementing a more formal parser implementation based on that specification
-         */
-        internal fun parseUri(uri: String): RefUriParts {
-            val origin = if (uri.contains("://")) {
-                val scheme = uri.substringBefore("://")
-                val authority = uri.substringAfter("://")
-                    .substringBefore('/')
-                    .substringBefore('#')
-                "$scheme://$authority"
-            } else if (uri.substringBefore("/").contains(":")){
-                uri.substringBefore("#")
-            } else {
-                ""
-            }
-
-            val afterOrigin = uri.substringAfter(origin)
-            val path = if (origin.isBlank()) {
-                afterOrigin.substringBeforeLast('#')
-            } else if (afterOrigin.isNotBlank() && !afterOrigin.startsWith("#")) {
-                "/" + afterOrigin.removePrefix("/").substringBefore('#')
-            } else {
-                ""
-            }
-
-            val fragment = if (uri.contains('#')) {
-                "#" + uri.substringAfter('#')
-            } else {
-                ""
-            }
-
-            return RefUriParts(origin, path, fragment)
-        }
-
-        /**
-         * Resolve [uri] in the context of [baseUri].
-         *
-         * This works analogously to how url updates in a web browsers: if you are "on" [baseUri] and "click" on
-         *   and link with href="[uri]", you will be sent to the uri defined by the returned [RefUriParts]
-         *
-         * NOTE: this implements reference transformation from
-         *   [RFC 3986 §5.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.2) — including its
-         *   scheme/authority inheritance cases and the
-         *   [§5.2.3](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.3) merge-paths sub-operation.
-         *   It does not yet perform the
-         *   [§5.2.4](https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4) remove-dot-segments sub-operation;
-         *   add that when a case needs it.
-         */
-        fun resolveUri(uri: String, baseUri: String): RefUriParts {
-            val uriParts = parseUri(uri)
-            val baseUriParts = parseUri(baseUri)
-            val origin = uriParts.origin.ifBlank { baseUriParts.origin }
-            val path = when {
-                // Absolute-path reference: use as-is.
-                uriParts.path.startsWith('/') -> uriParts.path
-                // Empty reference path: inherit the base path.
-                uriParts.path.isEmpty() -> baseUriParts.path
-                // Relative reference path: merge with base path per RFC 3986 §5.2.3.
-                // If the base has an authority and an empty path, the merged path
-                // starts with "/". Otherwise, replace the last segment of the base
-                // path with the reference path; if the base path has no "/", the
-                // entire base path is discarded.
-                baseUriParts.origin.isNotEmpty() && baseUriParts.path.isEmpty() ->
-                    "/" + uriParts.path
-                else -> {
-                    val lastSlash = baseUriParts.path.lastIndexOf('/')
-                    if (lastSlash < 0) {
-                        uriParts.path
-                    } else {
-                        baseUriParts.path.substring(0, lastSlash + 1) + uriParts.path
-                    }
-                }
-            }
-            return RefUriParts(origin, path, uriParts.fragment)
-        }
     }
-}
-
-/**
- * Decodes percent-encoded characters in a URI. According to RFC 6901, percent-encoding must be decoded
- * before JSON Pointer processing.
- *
- * @param encoded The percent-encoded string
- * @return The decoded string
- */
-private fun decodeUriEncoding(encoded: String): String {
-    if (!encoded.contains('%')) {
-        return encoded
-    }
-
-    val result = StringBuilder()
-    var i = 0
-    while (i < encoded.length) {
-        val char = encoded[i]
-        if (char == '%' && i + 2 < encoded.length) {
-            // Try to decode the next two characters as hex
-            val hex = encoded.substring(i + 1, i + 3)
-            val decoded = try {
-                hex.toInt(16).toChar()
-            } catch (_: NumberFormatException) {
-                // Invalid hex sequence, keep the % and continue
-                result.append(char)
-                i++
-                continue
-            }
-            result.append(decoded)
-            i += 3
-        } else {
-            result.append(char)
-            i++
-        }
-    }
-    return result.toString()
 }
 
 /**
@@ -278,19 +146,22 @@ private fun decodeUriEncoding(encoded: String): String {
  *
  * @param pointer The JSON Pointer to follow (e.g., "/definitions/address")
  * @param ksonValue The [KsonValue] to traverse
- * @param currentBaseUri The base URI in effect at [ksonValue]
+ * @param currentBaseUri The base URI [ksonValue]'s keywords are read under, its own `$id` already applied
  * @return The [KsonValue] at the pointer location with its base URI, or null if not found
  */
-private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: String): ResolvedRef? {
+private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, currentBaseUri: UriReference): ResolvedRef? {
     // a $ref fragment addresses the schema's value tree
     val nodes = KsonValueWalker.nodesAlong(ksonValue, TreePointer<KsonValue>(pointer))
     if (nodes.size < pointer.tokens.size) return null
-    val baseUri = (listOf(ksonValue) + nodes.dropLast(1)).fold(currentBaseUri) { uri, node ->
+    val baseUri = nodes.dropLast(1).fold(currentBaseUri) { uri, node ->
         val id = (node as? KsonObject)?.propertyLookup["\$id"] as? KsonString
-        if (id == null) uri else SchemaIdLookup.resolveUri(id.value, uri).toString()
+        if (id == null) uri else uri.resolve(id.value)
     }
     return ResolvedRef(nodes.lastOrNull() ?: ksonValue, baseUri)
 }
+
+/** This URI without its fragment when that is empty, as `other.json#` identifies the same schema as `other.json` */
+private fun UriReference.withoutEmptyFragment(): UriReference = if (fragment == "") withoutFragment() else this
 
 /**
  * A schema node resolved during navigation, carrying the context of how it was found.
@@ -303,6 +174,6 @@ private fun resolveJsonPointer(pointer: JsonPointer, ksonValue: KsonValue, curre
  */
 data class ResolvedRef(
     val resolvedValue: KsonValue,
-    val resolvedValueBaseUri: String,
+    val resolvedValueBaseUri: UriReference,
     val endsAtUnresolvedRef: Boolean = false
 )
