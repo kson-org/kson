@@ -26,9 +26,9 @@ class ExternalSchemaRefsTest {
         return (schema?.propertyLookup?.get("title") as? KsonString)?.value
     }
 
-    /** The messages from validating [source] against the schema [lookup] was built for */
-    private fun validationMessages(lookup: SchemaIdLookup, source: String): List<LoggedMessage> {
-        val schema = assertNotNull(SchemaParser.parseSchemaRoot(lookup, MessageSink()))
+    /** The messages from validating [source] against the schema [indexedDocuments] was built for */
+    private fun validationMessages(indexedDocuments: IndexedSchemaDocuments, source: String): List<LoggedMessage> {
+        val schema = assertNotNull(SchemaParser.parseSchemaRoot(indexedDocuments, MessageSink()))
         val messageSink = MessageSink()
         schema.validate(value(source), messageSink, SourceContext())
         return messageSink.loggedMessages()
@@ -44,14 +44,14 @@ class ExternalSchemaRefsTest {
             SchemaDocument(second, UriReference.parse("file:///schemas/common/second.json"))
         )
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/project/root.json"))
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        val resolved = lookup.resolveRefIfPresent(root, lookup.rootBaseUri)
+        val resolved = indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)
 
         assertEquals("Target", title(resolved))
         assertEquals("file:///schemas/common/second.json", resolved.resolvedValueBaseUri.toString())
-        assertEquals(emptyList(), lookup.missingDocumentUris)
-        val messageTypes = validationMessages(lookup, "42").map { it.message.type }
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
+        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
 
@@ -68,17 +68,17 @@ class ExternalSchemaRefsTest {
             SchemaDocument(external, UriReference.parse("https://example.test/schemas/nested/value.json"))
         )
         val rootDocument = SchemaDocument(root, UriReference.parse("https://example.test/schemas/root.json"))
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
         val canonicalRootUri = UriReference.parse("https://example.test/schemas/canonical/root.json")
         val nestedBaseUri = UriReference.parse("https://example.test/schemas/nested/")
 
-        val viaPointer = assertNotNull(lookup.resolveRef("#/definitions/nested", canonicalRootUri))
-        val viaId = assertNotNull(lookup.resolveRef("../nested/", canonicalRootUri))
+        val viaPointer = assertNotNull(indexedDocuments.resolveRef("#/definitions/nested", canonicalRootUri))
+        val viaId = assertNotNull(indexedDocuments.resolveRef("../nested/", canonicalRootUri))
 
         assertEquals(canonicalRootUri, viaPointer.resolvedValueBaseUri)
         assertSame(viaPointer.resolvedValue, viaId.resolvedValue)
-        assertEquals("External", title(lookup.resolveRef("value.json", nestedBaseUri)))
-        assertEquals(emptyList(), lookup.missingDocumentUris)
+        assertEquals("External", title(indexedDocuments.resolveRef("value.json", nestedBaseUri)))
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
     }
 
     @Test
@@ -95,11 +95,11 @@ class ExternalSchemaRefsTest {
         }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
 
         assertEquals(
             listOf(UriReference.parse("file:///schemas/shared.json"), UriReference.parse("file:///schemas/other.json")),
-            lookup.missingDocumentUris
+            indexedDocuments.missingDocumentUris
         )
     }
 
@@ -114,13 +114,13 @@ class ExternalSchemaRefsTest {
         )
         val rootDocument = SchemaDocument(root, UriReference.parse("https://example.test/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        assertEquals(emptyList(), lookup.missingDocumentUris)
-        val chainEnd = lookup.resolveRefIfPresent(root, lookup.rootBaseUri)
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
+        val chainEnd = indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)
         val cycle = assertIs<UnresolvedRef.Cycle>(chainEnd.unresolvedRef)
         assertSame((b as KsonObject).propertyLookup["\$ref"], cycle.ref)
-        val messageTypes = validationMessages(lookup, "42").map { it.message.type }
+        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_REF_CYCLE), messageTypes)
     }
 
@@ -132,11 +132,15 @@ class ExternalSchemaRefsTest {
         }""")
         val documents = listOf(SchemaDocument(external, UriReference.parse("file:///types.json")))
         val rootDocument = SchemaDocument(value("{}"), UriReference.parse("file:///root.json"))
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
         val pointer = "#/definitions/str"
 
-        val viaRetrievalUri = assertNotNull(lookup.resolveRef("file:///types.json$pointer", lookup.rootBaseUri))
-        val viaId = assertNotNull(lookup.resolveRef("https://canonical.test/types.json$pointer", lookup.rootBaseUri))
+        val viaRetrievalUri = assertNotNull(
+            indexedDocuments.resolveRef("file:///types.json$pointer", indexedDocuments.rootBaseUri)
+        )
+        val viaId = assertNotNull(
+            indexedDocuments.resolveRef("https://canonical.test/types.json$pointer", indexedDocuments.rootBaseUri)
+        )
 
         assertSame(viaRetrievalUri.resolvedValue, viaId.resolvedValue)
         assertEquals("https://canonical.test/types.json", viaRetrievalUri.resolvedValueBaseUri.toString())
@@ -159,13 +163,13 @@ class ExternalSchemaRefsTest {
         )
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        assertEquals(emptyList(), lookup.missingDocumentUris)
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
         val finiteChain = """{ "value": 1, "next": { "value": 2, "next": { "value": 3 } } }"""
-        assertEquals(emptyList(), validationMessages(lookup, finiteChain))
+        assertEquals(emptyList(), validationMessages(indexedDocuments, finiteChain))
         val badThirdValue = """{ "next": { "next": { "value": "bad" } } }"""
-        val messages = validationMessages(lookup, badThirdValue)
+        val messages = validationMessages(indexedDocuments, badThirdValue)
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messages.map { it.message.type })
         assertEquals(listOf(Location(Coordinates(0, 32), Coordinates(0, 35), 32, 35)), messages.map { it.location })
     }
@@ -175,9 +179,11 @@ class ExternalSchemaRefsTest {
         val external = value($$"""{ "extension": { "$id": "ignored/", "target": { "type": "number" } } }""")
         val documents = listOf(SchemaDocument(external, UriReference.parse("file:///types.json")))
         val rootDocument = SchemaDocument(value("{}"), UriReference.parse("file:///root.json"))
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        val target = assertNotNull(lookup.resolveRef("types.json#/extension/target", lookup.rootBaseUri))
+        val target = assertNotNull(
+            indexedDocuments.resolveRef("types.json#/extension/target", indexedDocuments.rootBaseUri)
+        )
 
         assertEquals("file:///types.json", target.resolvedValueBaseUri.toString())
     }
@@ -189,13 +195,13 @@ class ExternalSchemaRefsTest {
         val documents = listOf(SchemaDocument(external, UriReference.parse("file:///schemas/canonical/types.json")))
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument, documents)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
 
-        assertEquals("file:///schemas/root.json", lookup.rootBaseUri.toString())
-        assertEquals("file:///schemas/canonical/root.json", lookup.rootSubschemaBaseUri.toString())
-        assertEquals(emptyList(), lookup.missingDocumentUris)
-        assertEquals("String", title(lookup.resolveRefIfPresent(root, lookup.rootBaseUri)))
-        val messageTypes = validationMessages(lookup, "42").map { it.message.type }
+        assertEquals("file:///schemas/root.json", indexedDocuments.rootBaseUri.toString())
+        assertEquals("file:///schemas/canonical/root.json", indexedDocuments.rootSubschemaBaseUri.toString())
+        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
+        assertEquals("String", title(indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)))
+        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
 
@@ -209,10 +215,10 @@ class ExternalSchemaRefsTest {
         }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
 
-        assertEquals("file:///schemas/canonical/root.json", lookup.rootSubschemaBaseUri.toString())
-        val messageTypes = validationMessages(lookup, "42").map { it.message.type }
+        assertEquals("file:///schemas/canonical/root.json", indexedDocuments.rootSubschemaBaseUri.toString())
+        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
 
@@ -227,8 +233,8 @@ class ExternalSchemaRefsTest {
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
         val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/canonical/types.json"))
 
-        val incomplete = SchemaIdLookup(rootDocument)
-        val complete = SchemaIdLookup(rootDocument, listOf(typesDocument))
+        val incomplete = IndexedSchemaDocuments(rootDocument)
+        val complete = IndexedSchemaDocuments(rootDocument, listOf(typesDocument))
 
         assertEquals(listOf(UriReference.parse("file:///schemas/canonical/types.json")), incomplete.missingDocumentUris)
         assertEquals(emptyList(), complete.missingDocumentUris)
@@ -249,8 +255,8 @@ class ExternalSchemaRefsTest {
         val childDocument = SchemaDocument(child, UriReference.parse("file:///schemas/child.json"))
         val nextDocument = SchemaDocument(next, UriReference.parse("file:///schemas/next.json"))
 
-        val incomplete = SchemaIdLookup(rootDocument, listOf(childDocument))
-        val complete = SchemaIdLookup(rootDocument, listOf(childDocument, nextDocument))
+        val incomplete = IndexedSchemaDocuments(rootDocument, listOf(childDocument))
+        val complete = IndexedSchemaDocuments(rootDocument, listOf(childDocument, nextDocument))
 
         assertEquals(listOf(UriReference.parse("file:///schemas/next.json")), incomplete.missingDocumentUris)
         assertEquals(emptyList(), complete.missingDocumentUris)
@@ -271,9 +277,9 @@ class ExternalSchemaRefsTest {
         }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
 
-        assertEquals(listOf(UriReference.parse("file:///schemas/used.json")), lookup.missingDocumentUris)
+        assertEquals(listOf(UriReference.parse("file:///schemas/used.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test
@@ -297,8 +303,8 @@ class ExternalSchemaRefsTest {
         val childDocument = SchemaDocument(child, UriReference.parse("file:///schemas/child.json"))
         val nextDocument = SchemaDocument(next, UriReference.parse("file:///schemas/types/next.json"))
 
-        val incomplete = SchemaIdLookup(rootDocument, listOf(childDocument))
-        val complete = SchemaIdLookup(rootDocument, listOf(childDocument, nextDocument))
+        val incomplete = IndexedSchemaDocuments(rootDocument, listOf(childDocument))
+        val complete = IndexedSchemaDocuments(rootDocument, listOf(childDocument, nextDocument))
 
         assertEquals(listOf(UriReference.parse("file:///schemas/types/next.json")), incomplete.missingDocumentUris)
         assertEquals(emptyList(), complete.missingDocumentUris)
@@ -325,8 +331,8 @@ class ExternalSchemaRefsTest {
             }""")
             val rootDocument = SchemaDocument(root, UriReference.parse("file:///s/root.json"))
 
-            val incomplete = SchemaIdLookup(rootDocument)
-            val complete = SchemaIdLookup(rootDocument, documents)
+            val incomplete = IndexedSchemaDocuments(rootDocument)
+            val complete = IndexedSchemaDocuments(rootDocument, documents)
 
             assertEquals(
                 listOf(UriReference.parse("file:///s/x/y.json")),
@@ -349,9 +355,9 @@ class ExternalSchemaRefsTest {
         }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///s/root.json"))
 
-        val lookup = SchemaIdLookup(rootDocument)
+        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
 
-        assertEquals(listOf(UriReference.parse("file:///s/x/y.json")), lookup.missingDocumentUris)
+        assertEquals(listOf(UriReference.parse("file:///s/x/y.json")), indexedDocuments.missingDocumentUris)
     }
 
     @Test
@@ -361,7 +367,7 @@ class ExternalSchemaRefsTest {
 
         for (retrievalUri in listOf(null, UriReference.parse(""), UriReference.parse("#/definitions"))) {
             assertFailsWith<IllegalArgumentException>("retrieval URI '$retrievalUri'") {
-                SchemaIdLookup(SchemaDocument(root), listOf(SchemaDocument(document, retrievalUri)))
+                IndexedSchemaDocuments(SchemaDocument(root), listOf(SchemaDocument(document, retrievalUri)))
             }
         }
     }

@@ -9,15 +9,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Tests for [SchemaIdLookup.resolveRefIfPresent].
+ * Tests for [IndexedSchemaDocuments.resolveRefIfPresent].
  */
-class SchemaIdLookupTest {
+class IndexedSchemaDocumentsTest {
 
     private fun resolve(schema: String): ResolvedRef {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
-        val lookup = SchemaIdLookup(SchemaDocument(root))
-        return lookup.resolveRefIfPresent(field, lookup.rootSubschemaBaseUri)
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
+        return indexedDocuments.resolveRefIfPresent(field, indexedDocuments.rootSubschemaBaseUri)
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */

@@ -6,9 +6,9 @@ import org.kson.ast.*
 import org.kson.parser.*
 import org.kson.parser.messages.MessageType
 import org.kson.parser.messages.MessageType.SCHEMA_EMPTY_SCHEMA
+import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.JsonSchema
 import org.kson.schema.SchemaDocument
-import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
 import org.kson.stdlibx.exceptions.FatalParseException
 import org.kson.stdlibx.exceptions.ShouldNotHappenException
@@ -112,7 +112,7 @@ object KsonCore {
             ?: return SchemaParseResult(null, astParseResult.messages)
 
         val messageSink = MessageSink()
-        val jsonSchema = SchemaParser.parseSchemaRoot(SchemaIdLookup(SchemaDocument(ksonValue)), messageSink)
+        val jsonSchema = SchemaParser.parseSchemaRoot(IndexedSchemaDocuments(SchemaDocument(ksonValue)), messageSink)
         return SchemaParseResult(jsonSchema, messageSink.loggedMessages())
     }
 

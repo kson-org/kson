@@ -110,22 +110,22 @@ interface JsonSchemaTest {
         source: String,
         message: String?,
         externalSchemaSources: Map<String, String>
-    ): SchemaIdLookup {
+    ): IndexedSchemaDocuments {
         val parsedSource = KsonCore.parseToAst(source)
         val rootValue =
             assertNotNull(parsedSource.ksonValue, "Schema should parse, got: ${parsedSource.messages} $message")
         val root = SchemaDocument(rootValue)
         val documents = mutableListOf<SchemaDocument>()
-        var lookup = SchemaIdLookup(root)
-        while (lookup.missingDocumentUris.isNotEmpty()) {
-            for (uri in lookup.missingDocumentUris) {
+        var indexedDocuments = IndexedSchemaDocuments(root)
+        while (indexedDocuments.missingDocumentUris.isNotEmpty()) {
+            for (uri in indexedDocuments.missingDocumentUris) {
                 val documentSource =
                     assertNotNull(externalSchemaSources[uri.toString()], "Missing schema fixture: $uri $message")
                 val documentValue = assertNotNull(KsonCore.parseToAst(documentSource).ksonValue, uri.toString())
                 documents.add(SchemaDocument(documentValue, uri))
             }
-            lookup = SchemaIdLookup(root, documents)
+            indexedDocuments = IndexedSchemaDocuments(root, documents)
         }
-        return lookup
+        return indexedDocuments
     }
 }

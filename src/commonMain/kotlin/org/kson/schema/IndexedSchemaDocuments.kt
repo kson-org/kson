@@ -23,7 +23,7 @@ data class SchemaDocument(val value: KsonValue, val retrievalUri: UriReference? 
  * @param additionalDocuments the documents [root] references, directly or through each other
  * @throws IllegalArgumentException if a retrieval URI in [additionalDocuments] is missing, empty or fragment-only
  */
-class SchemaIdLookup(
+class IndexedSchemaDocuments(
     val root: SchemaDocument,
     additionalDocuments: List<SchemaDocument> = emptyList()
 ) {
