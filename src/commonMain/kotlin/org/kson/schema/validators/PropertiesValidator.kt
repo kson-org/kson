@@ -1,7 +1,6 @@
 package org.kson.schema.validators
 
 import org.kson.value.KsonObject
-import org.kson.value.KsonString
 import org.kson.value.KsonObjectProperty
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
@@ -13,7 +12,7 @@ import org.kson.validation.SourceContext
 /** A pre-compiled regex from a JSON Schema `patternProperties` key, paired with its sub-schema. */
 internal data class CompiledPatternSchema(val regex: Regex, val schema: JsonSchema?)
 
-internal class PropertiesValidator(internal val propertySchemas: Map<KsonString, JsonSchema?>?,
+internal class PropertiesValidator(internal val propertySchemas: Map<String, JsonSchema?>?,
                           private val compiledPatterns: List<CompiledPatternSchema>?,
                           private val additionalPropertiesValidator: AdditionalPropertiesValidator?)
     : JsonObjectValidator() {
@@ -24,10 +23,10 @@ internal class PropertiesValidator(internal val propertySchemas: Map<KsonString,
 
         // First, validate regular properties
         propertySchemas?.forEach { (key, schema) ->
-            objectProperties[key.value]?.let { objectProperty ->
+            objectProperties[key]?.let { objectProperty ->
                 schema?.validate(objectProperty, messageSink, sourceContext)
             }
-            seenKeys.add(key.value)
+            seenKeys.add(key)
         }
 
         // Then validate pattern properties - need to check ALL patterns for each property

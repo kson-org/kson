@@ -151,7 +151,7 @@ class IndexedSchemaDocuments(
         }
     }
 
-    /** Indexes the [documents], plus the reference targets [subschemasOf] doesn't reach, such as extension data */
+    /** Indexes the [documents], plus each `$ref` target that is not one of their subschemas, such as extension data */
     private fun indexUntilReferencesSettle(): Index {
         var referencedValues = emptyList<KsonValue>()
         while (true) {
@@ -206,13 +206,11 @@ class IndexedSchemaDocuments(
             schemas.add(schema)
             if (isDocumentRoot) schemasByUri[enclosingBaseUri] = schema
             if (setsANewBaseUri) schemasByUri[subschemaBaseUri] = schema
-            val schemaObject = value as? KsonObject
-            val ref = schemaObject?.propertyLookup?.get("\$ref") as? KsonString
+            val schemaObject = value as? KsonObject ?: return
+            val ref = schemaObject.propertyLookup["\$ref"] as? KsonString
             if (ref != null) references.add(Reference(ref.value, enclosingBaseUri))
             // keywords beside a `$ref` are ignored, but the schemas they hold can still be referenced
-            schemaObject?.propertyLookup?.forEach { (keyword, keywordValue) ->
-                subschemasOf(keyword, keywordValue).forEach { addSchema(it, subschemaBaseUri) }
-            }
+            draft7Keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { addSchema(it.value, subschemaBaseUri) }
         }
     }
 
@@ -247,22 +245,6 @@ fun baseUriWithin(schema: KsonValue, baseUri: UriReference): UriReference {
     val id = schemaObject.propertyLookup["\$id"] as? KsonString
     if (holdsRef || id == null) return baseUri
     return baseUri.resolve(id.value).withoutEmptyFragment()
-}
-
-/** The subschemas [keywordValue] holds, if [keyword] is one of Draft 7's subschema keywords */
-private fun subschemasOf(keyword: String, keywordValue: KsonValue): List<KsonValue> = when (keyword) {
-    "properties", "patternProperties", "definitions" ->
-        (keywordValue as? KsonObject)?.propertyLookup?.values?.toList().orEmpty()
-    // a dependency is either a schema or a list of required property names
-    "dependencies" ->
-        (keywordValue as? KsonObject)?.propertyLookup?.values?.filterNot { it is KsonList }.orEmpty()
-    "allOf", "anyOf", "oneOf" ->
-        (keywordValue as? KsonList)?.elements.orEmpty()
-    "items" ->
-        if (keywordValue is KsonList) keywordValue.elements else listOf(keywordValue)
-    "additionalItems", "additionalProperties", "contains", "propertyNames", "not", "if", "then", "else" ->
-        listOf(keywordValue)
-    else -> emptyList()
 }
 
 /** This URI without its fragment when that is empty, as `other.json#` identifies the same schema as `other.json` */

@@ -332,6 +332,29 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testMalformedSchemaIsReportedUnderDefinitionsButNotUnderDefs() {
+        // Draft 7 has no `$defs`, so values under it are only compiled as schemas when a `$ref` points to them
+        assertSchemaHasValidationErrors(
+            """{ "definitions": { "broken": 42 } }""",
+            listOf(MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+        assertValidObjectSchema($$"""{ "$defs": { "broken": 42 } }""")
+    }
+
+    @Test
+    fun testDefinitionsThatIsNoObjectReportsError() {
+        assertSchemaHasValidationErrors("""{ "definitions": 42 }""", listOf(MessageType.SCHEMA_OBJECT_REQUIRED))
+    }
+
+    @Test
+    fun testTypeIsReportedBeforeTheDefinitions() {
+        assertSchemaHasValidationErrors(
+            """{ "type": 3, "definitions": { "a": 4 } }""",
+            listOf(MessageType.SCHEMA_TYPE_TYPE_ERROR, MessageType.SCHEMA_OBJECT_OR_BOOLEAN)
+        )
+    }
+
+    @Test
     fun testRefWithMalformedPointerReportsError() {
         // `~2` is no JSON Pointer escape: only `~0` and `~1` are
         val result = KsonCore.parseSchema($$"""'$ref': '#/$defs/a~2b'""")
