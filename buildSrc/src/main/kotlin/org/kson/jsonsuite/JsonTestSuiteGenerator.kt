@@ -347,7 +347,7 @@ ${    run {
                     |                ${formatForTest(schemaForDraft(schema.schema, draft), "                ")}
                     |            ${"\"\"\""},
                     |            ${test.valid},
-                    |            ${"\"\"\""}    schemaTestId: "${schemaTestId.replace("$", "\${'$'}")}"    ${"\"\"\""})
+                    |            ${"\"\"\""}    schemaTestId: "${schemaTestId.replace("$", "\${'$'}")}"    ${"\"\"\""}${externalSchemaSourcesArgument(schema, draft)})
                     |    }
                     """.trimMargin()
                 theTests.add(testCode)
@@ -357,6 +357,24 @@ ${    run {
     }}
 }
 """
+}
+
+/**
+ * The `externalSchemaSources` argument giving the tests of [group] its `externalSchemas` by retrieval URI, each
+ * designated [draft]'s dialect as [schemaForDraft] designates the group's schema, or nothing if it has none.  The
+ * suite scopes external schemas to their test case, as one URI may name different schemas in different cases.
+ */
+private fun externalSchemaSourcesArgument(group: SchemaTestGroup, draft: SchemaDraft): String {
+    val externalSchemas = group.externalSchemas ?: return ""
+    return externalSchemas.entries.joinToString(
+        separator = ",\n",
+        prefix = ",\n            externalSchemaSources = mapOf(\n",
+        postfix = "\n            )"
+    ) { (uri, externalSchema) ->
+        "                \"${formatForTest(uri)}\" to \"\"\"\n" +
+                "                    ${formatForTest(schemaForDraft(externalSchema, draft), "                    ")}\n" +
+                "                \"\"\""
+    }
 }
 
 /**

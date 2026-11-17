@@ -51,7 +51,19 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2019-09/dependentRequired.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2019-09/schema",
+                        "dependentRequired": {
+                            "foo": [
+                                "bar"
+                            ]
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -62,12 +74,6 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -93,7 +99,19 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2019-09/dependentRequired.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2019-09/schema",
+                        "dependentRequired": {
+                            "foo": [
+                                "bar"
+                            ]
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -127,7 +145,19 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/prefixItems.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "prefixItems": [
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -138,12 +168,6 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -162,6 +186,18 @@ class SchemaDraft7SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/prefixItems.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "prefixItems": [
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }

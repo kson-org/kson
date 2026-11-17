@@ -21,12 +21,6 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_1() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change::base URI change ref valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -49,7 +43,15 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::base URI change::base URI change ref valid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -60,12 +62,6 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::base URI change::base URI change ref invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -88,7 +84,15 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -291,12 +295,6 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::retrieved nested refs resolve relative to their URI not $id::number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -318,7 +316,26 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid"    """)
+            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "${'$'}ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -329,12 +346,6 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "id::retrieved nested refs resolve relative to their URI not $id::string is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -356,6 +367,25 @@ class SchemaDraft7SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid"    """)
+            """    schemaTestId: "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "${'$'}ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 }

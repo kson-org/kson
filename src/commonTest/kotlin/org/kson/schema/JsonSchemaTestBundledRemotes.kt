@@ -3,11 +3,9 @@ package org.kson.schema
 import kotlin.test.Test
 
 /**
- * These tests are ["bundled"/Compound Schema](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents)
- * ports of the [org.kson.parser.json.generated.SchemaSuiteTest] tests which require fetching remote schemas.  Those
- * remote fetching tests are excluded in [org.kson.jsonsuite.schemaTestSuiteExclusions] because we do not current
- * support remote fetching. These tests let us have most of that coverage while also doing the the important work
- * of ensuring our Schema $id and $ref code effectively navigates compound schemas
+ * ["Bundled"/Compound Schema](https://json-schema.org/blog/posts/bundling-json-schema-compound-documents) versions
+ * of JSON-Schema-Test-Suite's Draft 7 tests of remote references, ensuring our Schema `$id` and `$ref` code also
+ * navigates compound schemas that embed those remote schemas
  */
 class JsonSchemaTestBundledRemotes : JsonSchemaTest {
     /**

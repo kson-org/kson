@@ -114,7 +114,7 @@ internal class SchemaNavigator(
      * ```kotlin
      * // Document path: ["users", "0", "name"]
      * // Schema navigation: properties/users → items → properties/name
-     * val idLookup = SchemaIdLookup(schemaRoot)
+     * val idLookup = SchemaIdLookup(SchemaDocument(schemaRoot))
      * val schemaRefs = SchemaNavigator(idLookup).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
      * ```
      *
@@ -137,7 +137,7 @@ internal class SchemaNavigator(
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
         val rootBaseUri = idLookup.rootBaseUri
-        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri), emptyList())
+        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.root.value, rootBaseUri), emptyList())
 
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens

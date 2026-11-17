@@ -51,7 +51,19 @@ class SchemaDraft2020_12SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/cross-draft::refs to historic drafts are processed as historic drafts (7)::missing bar is valid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to historic drafts are processed as historic drafts (7)::missing bar is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft7/ignore-dependentRequired.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "dependentRequired": {
+                            "foo": [
+                                "bar"
+                            ]
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -85,6 +97,18 @@ class SchemaDraft2020_12SuiteTest_optional_cross_draft : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/cross-draft::refs to historic drafts are processed as historic drafts (2019)::first item not a string is valid"    """)
+            """    schemaTestId: "optional/cross-draft::refs to historic drafts are processed as historic drafts (2019)::first item not a string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2019-09/ignore-prefixItems.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2019-09/schema",
+                        "prefixItems": [
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }

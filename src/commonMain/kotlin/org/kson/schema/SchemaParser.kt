@@ -13,18 +13,11 @@ import org.kson.value.navigation.json_pointer.fragmentPointer
  */
 object SchemaParser {
     /**
-     * Parse [schemaRootValue] as a JSON Schema root, i.e. a complete JSON Schema, not a sub-schema.
+     * Parse the root of [idLookup] as a complete JSON Schema, not a sub-schema.
      * See [parseSchemaElement] for sub-schema parsing.
      */
-    fun parseSchemaRoot(schemaRootValue: KsonValue, messageSink: MessageSink): JsonSchema? {
-        // Determine the initial base URI from the root schema's $id if present
-        val initialBaseUri = UriReference.parse(
-            (schemaRootValue as? KsonObject)?.let { extractId(it, messageSink) } ?: ""
-        )
-
-        val idLookup = SchemaIdLookup(schemaRootValue)
-        return parseSchemaElement(schemaRootValue, messageSink, initialBaseUri, idLookup)
-    }
+    fun parseSchemaRoot(idLookup: SchemaIdLookup, messageSink: MessageSink): JsonSchema? =
+        parseSchemaElement(idLookup.root.value, messageSink, idLookup.rootBaseUri, idLookup)
 
     /**
      *  Parse [schemaValue] as a JSON sub-schema. See [parseSchemaRoot] for full schema parsing.
@@ -60,7 +53,7 @@ object SchemaParser {
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
 
-        when (val refOutcome = tryResolveRef(schemaProperties, currentBaseUri, idLookup, messageSink)) {
+        when (val refOutcome = tryResolveRef(schemaObject, currentBaseUri, idLookup, messageSink)) {
             is RefOutcome.Resolved -> return refOutcome.schema
             is RefOutcome.Failed -> return null
             is RefOutcome.NotPresent -> Unit // fall through to parse the remaining keywords
@@ -233,29 +226,38 @@ object SchemaParser {
      * for the three-way outcome.
      */
     private fun tryResolveRef(
-        schemaProperties: Map<String, KsonValue>,
+        schemaObject: KsonObject,
         currentBaseUri: UriReference,
         idLookup: SchemaIdLookup,
         messageSink: MessageSink,
     ): RefOutcome {
-        val refString = schemaProperties["\$ref"] ?: return RefOutcome.NotPresent
+        val refString = schemaObject.propertyLookup["\$ref"] ?: return RefOutcome.NotPresent
         if (refString !is KsonString) {
             messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             return RefOutcome.NotPresent
         }
-        val resolvedValue = idLookup.resolveRef(refString.value, currentBaseUri)
+        val resolvedValue = idLookup.resolveRefHeldBy(schemaObject, refString.value, currentBaseUri)
         if (resolvedValue == null) {
-            val malformedPointer = UriReference.parse(refString.value).fragmentPointer() as? FragmentPointer.Malformed
-            messageSink.error(
-                refString.location,
-                malformedPointer?.message ?: SCHEMA_REF_RESOLUTION_FAILED.create(refString.value)
-            )
+            reportUnresolvedRef(UnresolvedRef.MissingTarget(refString), messageSink)
             return RefOutcome.Failed
         }
         val refValidator = RefValidator(resolvedValue, idLookup, refString.value)
         return RefOutcome.Resolved(
             JsonObjectSchema(null, null, null, null, null, null, listOf(refValidator))
         )
+    }
+
+    /** Reports why [unresolvedRef] couldn't be followed */
+    internal fun reportUnresolvedRef(unresolvedRef: UnresolvedRef, messageSink: MessageSink) {
+        val ref = unresolvedRef.ref
+        val message = when (unresolvedRef) {
+            is UnresolvedRef.MissingTarget -> {
+                val malformedPointer = UriReference.parse(ref.value).fragmentPointer() as? FragmentPointer.Malformed
+                malformedPointer?.message ?: SCHEMA_REF_RESOLUTION_FAILED.create(ref.value)
+            }
+            is UnresolvedRef.Cycle -> SCHEMA_REF_CYCLE.create(ref.value)
+        }
+        messageSink.error(ref.location, message)
     }
 
     /**

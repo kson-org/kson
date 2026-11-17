@@ -519,7 +519,23 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor::anchor within remote ref::remote anchor valid"    """)
+            """    schemaTestId: "anchor::anchor within remote ref::remote anchor valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}anchor": "foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -548,7 +564,23 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor::anchor within remote ref::remote anchor invalid"    """)
+            """    schemaTestId: "anchor::anchor within remote ref::remote anchor invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}anchor": "foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -577,7 +609,23 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor::Location-independent identifier in remote ref::integer is valid"    """)
+            """    schemaTestId: "anchor::Location-independent identifier in remote ref::integer is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}anchor": "foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -606,7 +654,23 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor::Location-independent identifier in remote ref::string is invalid"    """)
+            """    schemaTestId: "anchor::Location-independent identifier in remote ref::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}anchor": "foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -635,7 +699,23 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """)
+            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "foo": {
+                                "${'$'}ref": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}anchor": "detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -664,6 +744,22 @@ class SchemaDraft2020_12SuiteTest_anchor : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """)
+            """    schemaTestId: "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "foo": {
+                                "${'$'}ref": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}anchor": "detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 }

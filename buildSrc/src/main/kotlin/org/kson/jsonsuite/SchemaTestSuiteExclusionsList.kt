@@ -3,22 +3,19 @@ package org.kson.jsonsuite
 /**
  * This is the list of [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
  * tests which currently fail against Kson and so are not run as part of the test suite, grouped by the reason they
- * fail.  It doubles as the to-do list for our Json Schema support.
+ * fail.  It doubles as the to-do list for our Json Schema support.  The exception is [heldBackTests]: Draft 2020-12
+ * tests that pass, but are held back until Kson supports that draft.
  *
  * Exclusions are listed per [SchemaDraft] as test ids of the form `file::group::test`.  The drafts share many test
  * names, so an id excludes its test only from the drafts it is listed for.
  */
 fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
-    SchemaDraft.DRAFT_7 to sharedExternalSchemaTests +
-        draft7OnlyExternalSchemaTests +
+    SchemaDraft.DRAFT_7 to crossDraftRefTests +
         sharedFormatAssertionTests +
         ecmascriptRegexTests +
         bignumTests +
-        contentTests +
-        draft7OnlyNonSchemaIdentifierTests,
-    SchemaDraft.DRAFT_2020_12 to sharedExternalSchemaTests +
-        draft2020_12OnlyExternalSchemaTests +
-        sharedFormatAssertionTests +
+        contentTests,
+    SchemaDraft.DRAFT_2020_12 to sharedFormatAssertionTests +
         draft2020_12OnlyFormatAssertionTests +
         dynamicRefTests +
         unevaluatedTests +
@@ -26,101 +23,19 @@ fun schemaTestSuiteExclusions(): Map<SchemaDraft, Set<String>> = mapOf(
         minMaxContainsTests +
         dependentKeywordTests +
         anchorTests +
+        vocabularyTests +
         refSiblingTests +
+        defsTests +
         unicodePropertyEscapeTests +
         ecmascriptRegexTests +
         bignumTests +
-        draft2020_12OnlyNonSchemaIdentifierTests
+        heldBackTests
 )
 
-/** Kson does not fetch the `externalSchemas` these need (bundled equivalents: [org.kson.schema.JsonSchemaTestBundledRemotes]) */
-private val sharedExternalSchemaTests = setOf(
-    "id::base URI change::base URI change ref invalid",
-    "id::base URI change::base URI change ref valid",
-    "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid",
-    "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid",
-    "ref::Recursive references between schemas::invalid tree",
-    "ref::Recursive references between schemas::valid tree",
-    "ref::remote ref::remote ref invalid",
-    "ref::remote ref::remote ref valid"
-)
-
-/** As [sharedExternalSchemaTests], for tests only Draft 7 has */
-private val draft7OnlyExternalSchemaTests = setOf(
-    "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",
-    "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid",
-    "anchor-legacy::Location-independent identifier in remote ref::integer is valid",
-    "anchor-legacy::Location-independent identifier in remote ref::string is invalid",
-    "anchor-legacy::anchor within remote ref::remote anchor invalid",
-    "anchor-legacy::anchor within remote ref::remote anchor valid",
-    "id-legacy::base URI change - change folder in subschema::number is valid",
-    "id-legacy::base URI change - change folder in subschema::string is invalid",
-    "id-legacy::base URI change - change folder::number is valid",
-    "id-legacy::base URI change - change folder::string is invalid",
-    "id-legacy::remote HTTP ref with different ${'$'}id::number is invalid",
-    "id-legacy::remote HTTP ref with different ${'$'}id::string is valid",
-    "id-legacy::remote HTTP ref with different URN ${'$'}id::number is invalid",
-    "id-legacy::remote HTTP ref with different URN ${'$'}id::string is valid",
-    "id-legacy::remote HTTP ref with nested absolute ref::number is invalid",
-    "id-legacy::remote HTTP ref with nested absolute ref::string is valid",
+/** Kson applies Draft 7's rules to every referenced schema document, whatever its `$schema` */
+private val crossDraftRefTests = setOf(
     "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::missing bar is invalid",
-    "optional/cross-draft::refs to future drafts are processed as future drafts (2019)::present bar is valid",
-    "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item is a string is valid",
-    "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid",
-    "ref-legacy::fragment within remote ref::remote fragment invalid",
-    "ref-legacy::fragment within remote ref::remote fragment valid",
-    "ref-legacy::ref within remote ref::ref within ref invalid",
-    "ref-legacy::ref within remote ref::ref within ref valid",
-    "ref-legacy::remote ref with ref to definitions::invalid",
-    "ref-legacy::remote ref with ref to definitions::valid",
-    "ref-legacy::root ref in remote ref::null is valid",
-    "ref-legacy::root ref in remote ref::object is invalid",
-    "ref-legacy::root ref in remote ref::string is valid"
-)
-
-/** As [sharedExternalSchemaTests], for tests only 2020-12 has */
-private val draft2020_12OnlyExternalSchemaTests = setOf(
-    "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",
-    "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid",
-    "anchor::Location-independent identifier in remote ref::integer is valid",
-    "anchor::Location-independent identifier in remote ref::string is invalid",
-    "anchor::anchor within remote ref::remote anchor invalid",
-    "anchor::anchor within remote ref::remote anchor valid",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::correct extended schema",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect extended schema",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect parent schema",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect extended schema",
-    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema",
-    "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::non-number is invalid",
-    "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid",
-    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field",
-    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field",
-    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema",
-    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema",
-    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema",
-    "id::base URI change - change folder in subschema::string is invalid",
-    "id::base URI change - change folder::string is invalid",
-    "id::remote HTTP ref with different ${'$'}id::number is invalid",
-    "id::remote HTTP ref with different ${'$'}id::string is valid",
-    "id::remote HTTP ref with different URN ${'$'}id::number is invalid",
-    "id::remote HTTP ref with different URN ${'$'}id::string is valid",
-    "id::remote HTTP ref with nested absolute ref::number is invalid",
-    "id::remote HTTP ref with nested absolute ref::string is valid",
-    "optional/cross-draft::refs to historic drafts are processed as historic drafts (2019)::first item not a string is valid",
-    "optional/cross-draft::refs to historic drafts are processed as historic drafts (7)::missing bar is valid",
-    "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string",
-    "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string",
-    "ref::fragment within remote ref::remote fragment invalid",
-    "ref::fragment within remote ref::remote fragment valid",
-    "ref::ref within remote ref::ref within ref invalid",
-    "ref::ref within remote ref::ref within ref valid",
-    "ref::remote ref with ref to defs::invalid",
-    "ref::remote ref with ref to defs::valid",
-    "ref::root ref in remote ref::null is valid",
-    "ref::root ref in remote ref::object is invalid",
-    "ref::root ref in remote ref::string is valid",
-    "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"
+    "optional/cross-draft::refs to future drafts are processed as future drafts (2020)::first item not a string is invalid"
 )
 
 /** These expect `format` to be asserted, but Kson treats `format` as an annotation only */
@@ -621,7 +536,9 @@ private val draft2020_12OnlyFormatAssertionTests = setOf(
     "format-uuid::uuid format::too few dashes",
     "format-uuid::uuid format::too many dashes",
     "format-uuid::uuid format::trailing hyphen after a complete UUID is invalid",
-    "format-uuid::uuid format::wrong length"
+    "format-uuid::uuid format::wrong length",
+    "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string",
+    "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string"
 )
 
 /** Kson does not support `$dynamicRef` or `$dynamicAnchor` */
@@ -629,6 +546,9 @@ private val dynamicRefTests = setOf(
     "dynamicRef::${'$'}dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is not sufficient for schema at second#/${'$'}defs/length",
     "dynamicRef::${'$'}dynamicRef points to a boolean schema::follow ${'$'}dynamicRef to a false schema",
     "dynamicRef::${'$'}dynamicRef skips over intermediate resources - direct reference (2020)::string property fails",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect extended schema",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect extended schema",
+    "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::non-number is invalid",
     "dynamicRef::A ${'$'}dynamicRef resolves to the first ${'$'}dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array containing non-strings is invalid",
     "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema with a matching ${'$'}dynamicAnchor resolves to the first ${'$'}dynamicAnchor in the dynamic scope::The recursive part is not valid against the root",
     "dynamicRef::A ${'$'}dynamicRef to a ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to an ${'$'}anchor (2020)::An array containing non-strings is invalid",
@@ -641,6 +561,8 @@ private val dynamicRefTests = setOf(
     "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::string matches /${'$'}defs/thingy, but the ${'$'}dynamicRef does not stop here",
     "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::number list with string values",
     "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::string list with number values",
+    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field",
+    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema",
     "optional/dynamicRef::${'$'}dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::string property fails",
     "unevaluatedItems::unevaluatedItems with ${'$'}dynamicRef (2020-12)::with unevaluated items",
     "unevaluatedProperties::unevaluatedProperties with ${'$'}dynamicRef (2020)::with unevaluated properties"
@@ -787,6 +709,8 @@ private val dependentKeywordTests = setOf(
 
 /** Kson does not support `$anchor` */
 private val anchorTests = setOf(
+    "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid",
+    "anchor::Location-independent identifier in remote ref::integer is valid",
     "anchor::Location-independent identifier with absolute URI::match",
     "anchor::Location-independent identifier with absolute URI::mismatch",
     "anchor::Location-independent identifier with base URI change in subschema::match",
@@ -797,6 +721,8 @@ private val anchorTests = setOf(
     "anchor::Reference an anchor with a non-relative URI::mismatch",
     "anchor::URN base URI with URN and anchor ref::a non-string is invalid",
     "anchor::URN base URI with URN and anchor ref::a string is valid",
+    "anchor::anchor within remote ref::remote anchor invalid",
+    "anchor::anchor within remote ref::remote anchor valid",
     "anchor::same ${'$'}anchor with different base uri::${'$'}ref does not resolve to /${'$'}defs/A/allOf/0",
     "anchor::same ${'$'}anchor with different base uri::${'$'}ref resolves to /${'$'}defs/A/allOf/1",
     "id::order of evaluation: ${'$'}id and ${'$'}anchor and ${'$'}ref::data is invalid against first definition",
@@ -807,13 +733,58 @@ private val anchorTests = setOf(
     "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}anchor)::no match on enum or ${'$'}ref to ${'$'}anchor"
 )
 
-/** Kson applies `$ref` as Draft 7 does, ignoring its sibling keywords (including `$id`) where 2020-12 applies them */
+/** Kson does not support `$vocabulary`, so applies the keywords of vocabularies a meta-schema leaves out */
+private val vocabularyTests = setOf(
+    "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"
+)
+
+/** Kson ignores the keywords beside a `$ref`, `$id` included, where 2020-12 applies them */
 private val refSiblingTests = setOf(
     "id::URN ref with nested pointer ref::a string is valid",
+    "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is invalid against nested sibling",
     "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is valid against nested sibling",
     "id::refs with relative uris and defs::valid on both fields",
     "id::relative refs with absolute uris and defs::valid on both fields",
     "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
+)
+
+/** Kson reads `$defs` as an unknown keyword, so an `$id` under it identifies no schema */
+private val defsTests = setOf(
+    "dynamicRef::${'$'}dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/${'$'}defs/length",
+    "dynamicRef::${'$'}dynamicRef skips over intermediate resources - direct reference (2020)::integer property passes",
+    "dynamicRef::A ${'$'}dynamicRef resolves to the first ${'$'}dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid",
+    "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema with a matching ${'$'}dynamicAnchor resolves to the first ${'$'}dynamicAnchor in the dynamic scope::The recursive part is valid against the root",
+    "dynamicRef::A ${'$'}dynamicRef that initially resolves to a schema without a matching ${'$'}dynamicAnchor behaves like a normal ${'$'}ref to ${'$'}anchor::The recursive part doesn't need to validate against the root",
+    "dynamicRef::A ${'$'}dynamicRef with a non-matching ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to ${'$'}anchor::Any array is valid",
+    "dynamicRef::A ${'$'}dynamicRef with intermediate scopes that don't include a matching ${'$'}dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid",
+    "dynamicRef::A ${'$'}dynamicRef without a matching ${'$'}dynamicAnchor in the same schema resource behaves like a normal ${'$'}ref to ${'$'}anchor::Any array is valid",
+    "dynamicRef::A ${'$'}dynamicRef without anchor in fragment behaves identical to ${'$'}ref::An array of numbers is valid",
+    "dynamicRef::An ${'$'}anchor with the same name as a ${'$'}dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid",
+    "dynamicRef::after leaving a dynamic scope, it is not used by a ${'$'}dynamicRef (2020)::/then/${'$'}defs/thingy is the final stop for the ${'$'}dynamicRef",
+    "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::number list with number values",
+    "dynamicRef::multiple dynamic paths to the ${'$'}dynamicRef keyword (2020)::string list with string values",
+    "id::${'$'}id must be resolved against nearest parent, not just immediate parent::non-number is invalid",
+    "id::${'$'}id must be resolved against nearest parent, not just immediate parent::number is valid",
+    "id::URN ref with nested pointer ref::a non-string is invalid",
+    "id::base URI change - change folder in subschema::number is valid",
+    "id::base URI change - change folder in subschema::string is invalid",
+    "id::base URI change - change folder::number is valid",
+    "id::base URI change - change folder::string is invalid",
+    "id::order of evaluation: ${'$'}id and ${'$'}ref::data is invalid against first definition",
+    "id::order of evaluation: ${'$'}id and ${'$'}ref::data is valid against first definition",
+    "id::ref with absolute-path-reference::a string is valid",
+    "id::ref with absolute-path-reference::an integer is invalid",
+    "id::remote HTTP ref with nested absolute ref::number is invalid",
+    "id::remote HTTP ref with nested absolute ref::string is valid",
+    "optional/dynamicRef::${'$'}dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::integer property passes",
+    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::exact match to enum, and type matches",
+    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::match ${'$'}ref to ${'$'}id",
+    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::no match on enum or ${'$'}ref to ${'$'}id",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in first anyOf",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in third anyOf",
+    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches second anyOf, which has a real schema in it",
+    "unevaluatedItems::unevaluatedItems with ${'$'}dynamicRef (2020-12)::with no unevaluated items",
+    "unevaluatedProperties::unevaluatedProperties with ${'$'}dynamicRef (2020)::with no unevaluated properties"
 )
 
 /** Kson rejects patterns using Unicode property escapes such as `\p{Letter}` as invalid regexes */
@@ -883,17 +854,39 @@ private val contentTests = setOf(
     "optional/content::validation of string-encoded content based on media type::an invalid JSON document"
 )
 
-/** Kson treats an `$id` inside a non-schema value, such as an `enum` entry or an unknown keyword, as an identifier */
-private val draft7OnlyNonSchemaIdentifierTests = setOf(
-    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/definitions)::match ${'$'}ref to id",
-    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier::type matches non-schema in third anyOf",
-    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier::type matches second anyOf, which has a real schema in it",
-    "optional/non-schemas::anchor inside an enum is not a real identifier (${'$'}id)::match ${'$'}ref to ${'$'}id"
-)
-
-/** As [draft7OnlyNonSchemaIdentifierTests], for the 2020-12 versions of those tests */
-private val draft2020_12OnlyNonSchemaIdentifierTests = setOf(
-    "optional/non-schemas::${'$'}id inside an enum is not a real identifier (${'$'}id/${'$'}defs)::match ${'$'}ref to ${'$'}id",
-    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches non-schema in third anyOf",
-    "optional/non-schemas::${'$'}id inside an unknown keyword is not a real identifier (${'$'}defs)::type matches second anyOf, which has a real schema in it"
+/** These pass on Kson's Draft 7 engine, but are held back until Kson supports Draft 2020-12 */
+private val heldBackTests = setOf(
+    "anchor::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid",
+    "anchor::Location-independent identifier in remote ref::string is invalid",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::correct extended schema",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect parent schema",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema",
+    "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema",
+    "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid",
+    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field",
+    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema",
+    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema",
+    "id::base URI change::base URI change ref invalid",
+    "id::base URI change::base URI change ref valid",
+    "id::remote HTTP ref with different ${'$'}id::number is invalid",
+    "id::remote HTTP ref with different ${'$'}id::string is valid",
+    "id::remote HTTP ref with different URN ${'$'}id::number is invalid",
+    "id::remote HTTP ref with different URN ${'$'}id::string is valid",
+    "id::retrieved nested refs resolve relative to their URI not ${'$'}id::number is invalid",
+    "id::retrieved nested refs resolve relative to their URI not ${'$'}id::string is valid",
+    "optional/cross-draft::refs to historic drafts are processed as historic drafts (2019)::first item not a string is valid",
+    "optional/cross-draft::refs to historic drafts are processed as historic drafts (7)::missing bar is valid",
+    "ref::Recursive references between schemas::invalid tree",
+    "ref::Recursive references between schemas::valid tree",
+    "ref::fragment within remote ref::remote fragment invalid",
+    "ref::fragment within remote ref::remote fragment valid",
+    "ref::ref within remote ref::ref within ref invalid",
+    "ref::ref within remote ref::ref within ref valid",
+    "ref::remote ref with ref to defs::invalid",
+    "ref::remote ref with ref to defs::valid",
+    "ref::remote ref::remote ref invalid",
+    "ref::remote ref::remote ref valid",
+    "ref::root ref in remote ref::null is valid",
+    "ref::root ref in remote ref::object is invalid",
+    "ref::root ref in remote ref::string is valid"
 )

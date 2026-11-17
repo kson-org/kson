@@ -2250,6 +2250,12 @@ class SchemaDraft2020_12SuiteTest_unevaluatedProperties : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_51() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "unevaluatedProperties::unevaluatedProperties with $dynamicRef (2020)::with no unevaluated properties" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

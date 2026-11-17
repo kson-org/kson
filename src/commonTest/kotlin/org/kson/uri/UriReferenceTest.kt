@@ -68,6 +68,11 @@ class UriReferenceTest {
     }
 
     @Test
+    fun endsAnAuthorityAtTheQueryFollowingIt() {
+        assertParsesAs(listOf("https://other.test?query" to UriReference("https", "other.test", "", "query", null)))
+    }
+
+    @Test
     fun parsesUrns() {
         assertParsesAs(
             listOf(
@@ -238,6 +243,10 @@ class UriReferenceTest {
             )
         )
         assertResolvesAgainst("root.schema.kson", listOf("other.schema.kson" to "other.schema.kson"))
+        assertResolvesAgainst(
+            "//example.test:8080/root.json",
+            listOf("//other.test/types.json" to "//other.test/types.json")
+        )
     }
 
     @Test

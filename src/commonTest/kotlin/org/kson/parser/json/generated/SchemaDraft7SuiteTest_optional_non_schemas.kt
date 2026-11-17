@@ -74,12 +74,6 @@ class SchemaDraft7SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_2() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/non-schemas::$id inside an enum is not a real identifier ($id/definitions)::match $ref to id" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // the implementation must not be confused by an id buried in the enum
         assertKsonEnforcesSchema(
             """
@@ -180,12 +174,6 @@ class SchemaDraft7SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_4() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/non-schemas::$id inside an unknown keyword is not a real identifier::type matches second anyOf, which has a real schema in it" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // the implementation must not be confused by an $id in locations we do not know how to parse
         assertKsonEnforcesSchema(
             """
@@ -304,12 +292,6 @@ class SchemaDraft7SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_6() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/non-schemas::$id inside an unknown keyword is not a real identifier::type matches non-schema in third anyOf" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // the implementation must not be confused by an $id in locations we do not know how to parse
         assertKsonEnforcesSchema(
             """
@@ -474,12 +456,6 @@ class SchemaDraft7SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "optional/non-schemas::anchor inside an enum is not a real identifier ($id)::match $ref to $id" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         // the implementation must not be confused by an $anchor buried in the enum
         assertKsonEnforcesSchema(
             """

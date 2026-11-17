@@ -1068,7 +1068,42 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "${'$'}ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1129,7 +1164,42 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "${'$'}ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1519,7 +1589,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::remote ref::remote ref valid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1548,7 +1626,15 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::remote ref::remote ref invalid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1577,7 +1663,19 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::fragment within remote ref::remote fragment valid"    """)
+            """    schemaTestId: "ref::fragment within remote ref::remote fragment valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1606,7 +1704,19 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::fragment within remote ref::remote fragment invalid"    """)
+            """    schemaTestId: "ref::fragment within remote ref::remote fragment invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "integer": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1635,7 +1745,22 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::ref within remote ref::ref within ref valid"    """)
+            """    schemaTestId: "ref::ref within remote ref::ref within ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "${'$'}ref": "#/${'$'}defs/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1664,7 +1789,22 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::ref within remote ref::ref within ref invalid"    """)
+            """    schemaTestId: "ref::ref within remote ref::ref within ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/subSchemas.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "integer": {
+                                "type": "integer"
+                            },
+                            "refToInteger": {
+                                "${'$'}ref": "#/${'$'}defs/integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1700,7 +1840,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::root ref in remote ref::string is valid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "${'$'}ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1736,7 +1896,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::root ref in remote ref::null is valid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::null is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "${'$'}ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1774,7 +1954,27 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::root ref in remote ref::object is invalid"    """)
+            """    schemaTestId: "ref::root ref in remote ref::object is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/name-defs.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "orNull": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "${'$'}ref": "#"
+                                    }
+                                ]
+                            }
+                        },
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1805,7 +2005,24 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::remote ref with ref to defs::invalid"    """)
+            """    schemaTestId: "ref::remote ref with ref to defs::invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-defs.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "${'$'}ref": "#/${'$'}defs/inner"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1836,6 +2053,23 @@ class SchemaDraft2020_12SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::remote ref with ref to defs::valid"    """)
+            """    schemaTestId: "ref::remote ref with ref to defs::valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/ref-and-defs.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "inner": {
+                                "properties": {
+                                    "bar": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "${'$'}ref": "#/${'$'}defs/inner"
+                    }
+                """
+            ))
     }
 }

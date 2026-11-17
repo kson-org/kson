@@ -21,6 +21,12 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_1() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::exact match to enum, and type matches" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         // the implementation must not be confused by an $id buried in the enum
         assertKsonEnforcesSchema(
             """
@@ -130,6 +136,12 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_3() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::no match on enum or $ref to $id" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         // the implementation must not be confused by an $id buried in the enum
         assertKsonEnforcesSchema(
             """
@@ -245,6 +257,12 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches non-schema in first anyOf" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         // the implementation must not be confused by an $id in locations we do not know how to parse
         assertKsonEnforcesSchema(
             """

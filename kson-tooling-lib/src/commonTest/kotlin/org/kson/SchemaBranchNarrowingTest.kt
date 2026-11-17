@@ -1,5 +1,6 @@
 package org.kson
 
+import org.kson.schema.SchemaDocument
 import org.kson.schema.SchemaIdLookup
 import org.kson.tooling.CompletionKind
 import org.kson.tooling.KsonTooling
@@ -32,7 +33,7 @@ class SchemaBranchNarrowingTest : SchemaCompletionTest {
     ): List<KsonValue> {
         val parsedSchema = KsonCore.parseToAst(schema).ksonValue ?: fail("Schema should parse")
         val parsedDocument = KsonTooling.parse(document)
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
+        val schemaIdLookup = SchemaIdLookup(SchemaDocument(parsedSchema))
         return SchemaNavigator(schemaIdLookup).navigate(TreePointer(documentPointer), parsedDocument.rootAstNode)
             .map { it.resolvedValue }
     }

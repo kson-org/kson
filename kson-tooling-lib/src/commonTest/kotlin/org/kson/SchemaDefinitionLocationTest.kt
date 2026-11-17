@@ -697,6 +697,24 @@ class SchemaDefinitionLocationTest {
     }
 
     @Test
+    fun testJumpToDefinition_besideARootRefThatDoesNotResolve() {
+        // The keywords beside a root `$ref` that resolves to no schema are read under the root's `$id`, applied once
+        assertDefinitionLocation(
+            schemaWithCaret = $$"""
+                {
+                  "$id": "schemas/root.json",
+                  "$ref": "missing.json",
+                  "properties": { "name": { "$ref": "#/definitions/name" } },
+                  "definitions": { "name": <caret>{ "type": "string" }<caret> }
+                }
+            """.trimIndent(),
+            documentWithCaret = """
+                name: <caret>hello
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun testJumpToDefinition_belowAFalseSchemaFindsNothing() {
         // `a` allows no value, and the `false` saying so isn't offered as the definition of what's below it
         assertDefinitionLocation(

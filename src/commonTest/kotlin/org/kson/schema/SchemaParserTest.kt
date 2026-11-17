@@ -368,6 +368,23 @@ class SchemaParserTest : JsonSchemaTest {
     }
 
     @Test
+    fun testRefCycleReportsError() {
+        // the root `$ref` leads to `a`, then to `b`, whose `$ref` leads back to `a`
+        val schema = $$"""
+            '$ref': '#/definitions/a'
+            definitions:
+              a: { '$ref': '#/definitions/b' }
+              b: { '$ref': '#/definitions/a' }
+        """.trimIndent()
+        assertKsonSchemaErrorAtLocation(
+            "key: value",
+            schema,
+            listOf(MessageType.SCHEMA_REF_CYCLE),
+            listOf(Location(Coordinates(3, 16), Coordinates(3, 31), 90, 105))
+        )
+    }
+
+    @Test
     fun testPointerRefUnderAPlainNameIdResolvesInItsDocument() {
         // a plain-name `$id` names a fragment of the document, so `#/definitions/target` still addresses the
         // document's root
@@ -389,16 +406,16 @@ class SchemaParserTest : JsonSchemaTest {
 
     @Test
     fun testRefWithinASchemaWithARelativeIdResolvesInThatSchema() {
-        // `a` is read under `other`'s `$id`, so its `#/$defs/b` addresses `other`
+        // `a` is read under `other`'s `$id`, so its `#/definitions/b` addresses `other`
         val schema = $$"""
             {
                 "$id": "http://example.com/root.json",
-                "properties": { "field": { "$ref": "sub/other.json#/$defs/a" } },
-                "$defs": {
+                "properties": { "field": { "$ref": "sub/other.json#/definitions/a" } },
+                "definitions": {
                     "other": {
                         "$id": "sub/other.json",
-                        "$defs": {
-                            "a": { "$ref": "#/$defs/b" },
+                        "definitions": {
+                            "a": { "$ref": "#/definitions/b" },
                             "b": { "type": "string" }
                         }
                     }

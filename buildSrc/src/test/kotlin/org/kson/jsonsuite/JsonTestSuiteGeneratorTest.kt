@@ -112,10 +112,15 @@ class JsonTestSuiteGeneratorTest {
     }
 
     /**
-     * The result of [generateFromFixtureSuite]: the [draft7] and [draft2020_12] classes generated for `shared`, and
-     * the names of every class generated for [draft7]
+     * The result of [generateFromFixtureSuite]: the [draft7] and [draft2020_12] classes generated for `shared`, the
+     * names of every class generated for [draft7], and the [draft7External] class generated for `external`
      */
-    private class GeneratedFixtureSuite(val draft7: String, val draft2020_12: String, val draft7ClassNames: Set<String>)
+    private class GeneratedFixtureSuite(
+        val draft7: String,
+        val draft2020_12: String,
+        val draft7ClassNames: Set<String>,
+        val draft7External: String
+    )
 
     @Test
     fun aDraftIsGeneratedOnlyTheGroupsCompatibleWithIt() {
@@ -133,6 +138,28 @@ class JsonTestSuiteGeneratorTest {
         assertTrue(
             generated.draft2020_12.contains(SchemaDraft.DRAFT_2020_12.metaSchemaUri),
             "2020-12 schemas should name 2020-12"
+        )
+    }
+
+    @Test
+    fun aTestCaseIsGivenItsExternalSchemasInItsDialect() {
+        val generated = generateFromFixtureSuite(exclusions = emptyMap())
+
+        val tripleQuote = "\"\"\""
+        val escapedDollar = "\${'\$'}"
+        val expectedArgument = listOf(
+            "            externalSchemaSources = mapOf(",
+            "                \"http://localhost:1234/string.json\" to $tripleQuote",
+            "                    {",
+            "                        \"${escapedDollar}schema\": \"${SchemaDraft.DRAFT_7.metaSchemaUri}\",",
+            "                        \"type\": \"string\"",
+            "                    }",
+            "                $tripleQuote",
+            "            ))"
+        ).joinToString("\n")
+        assertTrue(
+            generated.draft7External.contains(expectedArgument),
+            "the test should be given its case's external schema, designated draft 7:\n${generated.draft7External}"
         )
     }
 
@@ -159,9 +186,10 @@ class JsonTestSuiteGeneratorTest {
     }
 
     /**
-     * Generates tests from a suite in which both drafts have the tests `shared::group::test` and
-     * `optional/extra::group::test`, only Draft 7 has `shared::draft7Only group::test` and `draft7Only::group::test`,
-     * and a proposal has `proposals/proposal/proposal::group::test`, applying only the given [exclusions].  The suites
+     * Generates tests from a suite in which both drafts have the tests `shared::group::test`,
+     * `optional/extra::group::test` and `external::group::test` (whose case has an external schema), only Draft 7 has
+     * `shared::draft7Only group::test` and `draft7Only::group::test`, and a proposal has
+     * `proposals/proposal/proposal::group::test`, applying only the given [exclusions].  The suites
      * are local fixtures (a [org.kson.gitcheckout.CleanGitCheckout] adopts a repo already in place rather than
      * cloning), so unlike [testGenerate] this needs no network.
      */
@@ -193,6 +221,17 @@ class JsonTestSuiteGeneratorTest {
                 "validation/tests/shared.json" to schemaTestFile("group" to null, "draft7Only group" to "=7"),
                 "validation/tests/draft7Only.json" to schemaTestFile("group" to "=7"),
                 "validation/tests/optional/extra.json" to schemaTestFile("group" to null),
+                "validation/tests/external.json" to """
+                    {
+                        "description": "fixture",
+                        "tests": [{
+                            "description": "group",
+                            "schema": { "${'$'}ref": "http://localhost:1234/string.json" },
+                            "externalSchemas": { "http://localhost:1234/string.json": { "type": "string" } },
+                            "tests": [{ "description": "test", "data": "a string", "valid": true }]
+                        }]
+                    }
+                """.trimIndent(),
                 "validation/tests/proposals/proposal/proposal.json" to schemaTestFile("group" to null)
             )
         )
@@ -213,7 +252,8 @@ class JsonTestSuiteGeneratorTest {
             generator.testClassPackageDir.toFile().list()!!
                 .filter { it.startsWith(SchemaDraft.DRAFT_7.testClassPrefix) }
                 .map { it.removeSuffix(".kt") }
-                .toSet()
+                .toSet(),
+            generator.testClassPackageDir.resolve("${SchemaDraft.DRAFT_7.testClassPrefix}_external.kt").readText()
         )
     }
 
