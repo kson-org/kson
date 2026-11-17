@@ -16,6 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 class ExternalSchemaRefsTest {
@@ -189,41 +190,26 @@ class ExternalSchemaRefsTest {
     }
 
     @Test
-    fun rootRelativeIdEstablishesInitialRefBaseExactlyOnce() {
+    fun rootIdBesideRootRefIsIgnored() {
         val root = value($$"""{ "$id": "canonical/root.json", "$ref": "types.json#/definitions/str" }""")
-        val external = value("""{ "definitions": { "str": { "type": "string", "title": "String" } } }""")
-        val documents = listOf(SchemaDocument(external, UriReference.parse("file:///schemas/canonical/types.json")))
+        val types = value("""{ "definitions": { "str": { "type": "string", "title": "String" } } }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
+        val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/types.json"))
 
-        val indexedDocuments = IndexedSchemaDocuments(rootDocument, documents)
+        val incomplete = IndexedSchemaDocuments(rootDocument)
+        val complete = IndexedSchemaDocuments(rootDocument, listOf(typesDocument))
 
-        assertEquals("file:///schemas/root.json", indexedDocuments.rootBaseUri.toString())
-        assertEquals("file:///schemas/canonical/root.json", indexedDocuments.rootSubschemaBaseUri.toString())
-        assertEquals(emptyList(), indexedDocuments.missingDocumentUris)
-        assertEquals("String", title(indexedDocuments.resolveRefIfPresent(root, indexedDocuments.rootBaseUri)))
-        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
+        assertEquals(listOf(UriReference.parse("file:///schemas/types.json")), incomplete.missingDocumentUris)
+        assertEquals(emptyList(), complete.missingDocumentUris)
+        assertEquals("file:///schemas/root.json", complete.rootSubschemaBaseUri.toString())
+        assertNull(complete.resolveRef("canonical/root.json", complete.rootBaseUri))
+        assertEquals("String", title(complete.resolveRefIfPresent(root, complete.rootBaseUri)))
+        val messageTypes = validationMessages(complete, "42").map { it.message.type }
         assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
     }
 
     @Test
-    fun rootIdWithAnEmptyFragmentSetsTheBaseWithoutIt() {
-        // `canonical/root.json#` identifies the same schema as `canonical/root.json`
-        val root = value($$"""{
-            "$id": "canonical/root.json#",
-            "$ref": "#/definitions/str",
-            "definitions": { "str": { "type": "string" } }
-        }""")
-        val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
-
-        val indexedDocuments = IndexedSchemaDocuments(rootDocument)
-
-        assertEquals("file:///schemas/canonical/root.json", indexedDocuments.rootSubschemaBaseUri.toString())
-        val messageTypes = validationMessages(indexedDocuments, "42").map { it.message.type }
-        assertEquals(listOf(MessageType.SCHEMA_VALUE_TYPE_MISMATCH), messageTypes)
-    }
-
-    @Test
-    fun rootIdBesideRootRefAppliesOnceToReferencedExtensionData() {
+    fun rootIdBesideRootRefDoesNotApplyToReferencedExtensionData() {
         val root = value($$"""{
             "$id": "canonical/root.json",
             "$ref": "#/extension/target",
@@ -231,12 +217,12 @@ class ExternalSchemaRefsTest {
         }""")
         val types = value("""{ "type": "string" }""")
         val rootDocument = SchemaDocument(root, UriReference.parse("file:///schemas/root.json"))
-        val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/canonical/types.json"))
+        val typesDocument = SchemaDocument(types, UriReference.parse("file:///schemas/types.json"))
 
         val incomplete = IndexedSchemaDocuments(rootDocument)
         val complete = IndexedSchemaDocuments(rootDocument, listOf(typesDocument))
 
-        assertEquals(listOf(UriReference.parse("file:///schemas/canonical/types.json")), incomplete.missingDocumentUris)
+        assertEquals(listOf(UriReference.parse("file:///schemas/types.json")), incomplete.missingDocumentUris)
         assertEquals(emptyList(), complete.missingDocumentUris)
         assertEquals(emptyList(), validationMessages(complete, "'text'"))
         val messageTypes = validationMessages(complete, "42").map { it.message.type }

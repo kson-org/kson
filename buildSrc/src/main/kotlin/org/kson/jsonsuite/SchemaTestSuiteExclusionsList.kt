@@ -740,10 +740,17 @@ private val vocabularyTests = setOf(
 
 /** Kson ignores the keywords beside a `$ref`, `$id` included, where 2020-12 applies them */
 private val refSiblingTests = setOf(
+    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field",
+    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema",
+    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema",
     "id::URN ref with nested pointer ref::a string is valid",
     "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is invalid against nested sibling",
     "id::order of evaluation: ${'$'}id and ${'$'}ref on nested schema::data is valid against nested sibling",
+    "id::refs with relative uris and defs::invalid on inner field",
+    "id::refs with relative uris and defs::invalid on outer field",
     "id::refs with relative uris and defs::valid on both fields",
+    "id::relative refs with absolute uris and defs::invalid on inner field",
+    "id::relative refs with absolute uris and defs::invalid on outer field",
     "id::relative refs with absolute uris and defs::valid on both fields",
     "ref::ref applies alongside sibling keywords::ref valid, maxItems invalid"
 )
@@ -863,9 +870,6 @@ private val heldBackTests = setOf(
     "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema",
     "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema",
     "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid",
-    "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field",
-    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema",
-    "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema",
     "id::base URI change::base URI change ref invalid",
     "id::base URI change::base URI change ref valid",
     "id::remote HTTP ref with different ${'$'}id::number is invalid",

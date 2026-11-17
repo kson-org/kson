@@ -347,6 +347,12 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_7() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "id::refs with relative uris and defs::invalid on inner field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -391,6 +397,12 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_8() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "id::refs with relative uris and defs::invalid on outer field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -485,6 +497,12 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_10() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "id::relative refs with absolute uris and defs::invalid on inner field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -529,6 +547,12 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_11() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "id::relative refs with absolute uris and defs::invalid on outer field" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

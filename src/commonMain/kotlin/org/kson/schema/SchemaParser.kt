@@ -53,19 +53,14 @@ object SchemaParser {
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
 
-        when (val refOutcome = tryResolveRef(schemaObject, currentBaseUri, indexedDocuments, messageSink)) {
+        when (val refOutcome = tryResolveRef(schemaProperties, currentBaseUri, indexedDocuments, messageSink)) {
             is RefOutcome.Resolved -> return refOutcome.schema
             is RefOutcome.Failed -> return null
             is RefOutcome.NotPresent -> Unit // fall through to parse the remaining keywords
         }
 
-        // Check if this schema defines a new $id and update base URI accordingly
-        val idString = extractId(schemaObject, messageSink)
-        val updatedBaseUri = if (idString != null) {
-            currentBaseUri.resolve(idString)
-        } else {
-            currentBaseUri
-        }
+        reportNonStringId(schemaProperties, messageSink)
+        val updatedBaseUri = baseUriWithin(schemaObject, currentBaseUri)
 
         val metadata = parseMetadata(schemaProperties, updatedBaseUri, indexedDocuments, messageSink)
         val typeValidator = parseTypeValidator(schemaProperties, propertyName, messageSink)
@@ -226,17 +221,17 @@ object SchemaParser {
      * for the three-way outcome.
      */
     private fun tryResolveRef(
-        schemaObject: KsonObject,
+        schemaProperties: Map<String, KsonValue>,
         currentBaseUri: UriReference,
         indexedDocuments: IndexedSchemaDocuments,
         messageSink: MessageSink,
     ): RefOutcome {
-        val refString = schemaObject.propertyLookup["\$ref"] ?: return RefOutcome.NotPresent
+        val refString = schemaProperties["\$ref"] ?: return RefOutcome.NotPresent
         if (refString !is KsonString) {
             messageSink.error(refString.location, SCHEMA_STRING_REQUIRED.create("\$ref"))
             return RefOutcome.NotPresent
         }
-        val resolvedValue = indexedDocuments.resolveRefHeldBy(schemaObject, refString.value, currentBaseUri)
+        val resolvedValue = indexedDocuments.resolveRef(refString.value, currentBaseUri)
         if (resolvedValue == null) {
             reportUnresolvedRef(UnresolvedRef.MissingTarget(refString), messageSink)
             return RefOutcome.Failed
@@ -619,16 +614,8 @@ private fun <T : Any> MutableCollection<T>.addIfNotNull(element: T?) {
     if (element != null) add(element)
 }
 
-/**
- * Extract the `$id` property from the given [KsonObject] if it has one, ensuring it is of type string
- */
-private fun extractId(schemaObject: KsonObject, messageSink: MessageSink): String? {
-    return schemaObject.propertyLookup["\$id"]?.let { idValue ->
-        if (idValue is KsonString) {
-            idValue.value
-        } else {
-            messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
-            null
-        }
-    }
+/** Reports an `$id` that isn't a string, which [baseUriWithin] ignores */
+private fun reportNonStringId(schemaProperties: Map<String, KsonValue>, messageSink: MessageSink) {
+    val idValue = schemaProperties["\$id"] ?: return
+    if (idValue !is KsonString) messageSink.error(idValue.location, SCHEMA_STRING_REQUIRED.create("\$id"))
 }

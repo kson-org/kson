@@ -7,13 +7,13 @@ import org.kson.parser.MessageSink
 import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.ResolvedRef
 import org.kson.schema.SchemaParser
+import org.kson.schema.baseUriWithin
 import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
-import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
@@ -172,8 +172,7 @@ internal class SchemaNavigator(
      * index [arrayIndex] (see [itemSchema]).  No combinator / conditional logic — [flatten]
      * handles branching.
      *
-     * Applies `$id` on [ref] to the base URI before property lookup, and resolves `$ref`
-     * on the stepped-into schema.
+     * Resolves `$ref` on the stepped-into schema.
      */
     private fun stepInto(ref: NavigatedSchema, token: String, arrayIndex: Int?): List<NavigatedSchema> {
         if (carryDeadEnds && (ref.resolvedValue.isFalseSchema || ref.endsAtUnresolvedRef)) return listOf(ref)
@@ -220,12 +219,6 @@ internal class SchemaNavigator(
         return tuple.elements.getOrNull(index) ?: arraySchema.propertyLookup["additionalItems"]
     }
 
-    /** The base URI that `$ref`s in [schema] resolve against. */
-    private fun baseUriWithin(schema: KsonObject, baseUri: UriReference): UriReference {
-        val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
-        return baseUri.resolve(id.value)
-    }
-
     /**
      * Adds each [patternProperties] entry whose regex matches [token] to [stepped].
      * Invalid regex patterns are skipped — Throwable also catches JavaScript SyntaxError
@@ -264,8 +257,7 @@ internal class SchemaNavigator(
      *     emits both branches.
      *
      * Recurses into each branch so nested combinators/conditionals are fully flattened,
-     * each narrowed against the same [docVal].  Like [stepInto], it reads [ref]'s keywords under the
-     * base URI [ref]'s own `$id` gives (see [baseUriWithin]).
+     * each narrowed against the same [docVal].
      *
      * The parent [ref] is preserved at the head of the result so its title, description,
      * and constraints remain available.

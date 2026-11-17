@@ -69,6 +69,45 @@ class IndexedSchemaDocumentsTest {
     }
 
     @Test
+    fun doesNotResolveARefToAnIdBesideARef() {
+        // `alias`'s `$id` is ignored beside its `$ref`, so `alias.json` names no schema
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "alias.json" } },
+              "definitions": {
+                "alias": { "$id": "alias.json", "$ref": "#/definitions/target" },
+                "target": { "title": "target" }
+              }
+            }
+        """
+        assertEquals(null to "", resolveField(schema))
+        assertTrue(endsAtUnresolvedRef(schema))
+    }
+
+    @Test
+    fun readsTheSubschemasBesideARefWithoutTheIdBesideIt() {
+        // `holder`'s `$id` is ignored beside its `$ref`, so `inner` is read under the root's base URI and its
+        // `#/definitions/target` is the root's `target`, not `holder`'s
+        val schema = $$"""
+            {
+              "properties": { "field": { "$ref": "#/definitions/holder/definitions/inner" } },
+              "definitions": {
+                "holder": {
+                  "$id": "http://example.com/holder.json",
+                  "$ref": "#/definitions/target",
+                  "definitions": {
+                    "inner": { "$ref": "#/definitions/target" },
+                    "target": { "title": "holder target" }
+                  }
+                },
+                "target": { "title": "root target" }
+              }
+            }
+        """
+        assertEquals("root target" to "", resolveField(schema))
+    }
+
+    @Test
     fun stopsAtARefLeadingBackIntoTheChain() {
         // `second`'s `$ref` leads back to `first`, which the chain already holds, so the chain ends
         // at `second`
