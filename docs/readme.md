@@ -63,7 +63,7 @@ Strings in KSON are identical to [strings in JSON](https://datatracker.ietf.org/
 an_unqu0t3d_striπg
 ```
 
-One consequence of unquoted strings: a bare `true`, `false` or `null` is always its literal value, exactly as in JSON&mdash;quote it (`'true'`) when the string is intended. Likewise, a string that is not 'simple' must be quoted: `The Great Gatsby` (spaces), `v1.2` (a dot) and `2020-01-01` (a leading number) all require quotes&mdash;unlike in YAML, `title: The Great Gatsby` is not valid.
+One consequence of unquoted strings: a bare `true`, `false` or `null` is always its literal value, exactly as in JSON&mdash;quote it (`'true'`) when the string is intended. Likewise, a string that is not 'simple' must be quoted: `Golden Ratio` (spaces), `v1.2` (a dot) and `2020-01-01` (a leading number) all require quotes&mdash;unlike in YAML, `proportion: Golden Ratio` is not valid.
 
 - KSON strings may be quoted using a single quote rather than a double quote. Here is a [list](#lists) of strings demonstrating the difference:
 
@@ -275,10 +275,12 @@ Stated concretely for each structure:
 This rule means plain structures often end naturally with no terminator needed. For instance, a dash list given as a property value ends on its own, since a `key:` cannot be a list element:
 
 ```kson
-lucky_numbers:
-  - 7
-  - 13
-lucky_color: blue
+favorite_numbers:
+  - 0
+  - 1
+  - 1
+  - 2
+favorite_constant: π
 ```
 
 A terminator is needed exactly when the greedy parse would otherwise absorb something meant for an enclosing structure. A common case: an object inside a dash list, followed by a property meant for an enclosing object. Here, the first book object ends naturally at the `- ` (a dash cannot be a property), but the second book needs an end-dot `.` to keep `favorite_movie:` out of the book object:
@@ -290,7 +292,7 @@ favorite_books:
   - title: Metaphysics
     author: Aristotle
     .
-favorite_movie: 'The Rock'
+favorite_movie: 'The Matrix'
 ```
 
 Explicitly closing a plain object or list is always legal, even when not required. The formatter cleans up unneeded end-dots and end-dashes.
@@ -313,7 +315,7 @@ teams:
 # ERROR: the "- name: 'Team B'" element is deceptively indented
 ```
 
-This document may visually read as two teams, but KSON doesn't parse whitespace to structure: its greedy parsing parsing rule interprets `- name: 'Team B'` as the third element of the `members` list. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to make the skimmed meaning match the parsed meaning&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
+This document may visually read as two teams, but KSON doesn't parse whitespace to structure: its greedy parsing rule interprets `- name: 'Team B'` as the third element of the `members` list. Rather than quietly deliver one team where the document strongly implies two, KSON rejects the document. The fix is to make the skimmed meaning match the parsed meaning&mdash;here, an [end-dash `=`](#the-end-dash-) makes the structure match the picture:
 
 ```kson
 teams:
@@ -359,8 +361,8 @@ embed_block: %
 function fibonacci(n: number): number {
   if (n <= 0) return 0;
   if (n === 1) return 1;
-    return fibonacci(n - 1) + fibonacci(n - 2);
-  }
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
 %%
 ```
 
@@ -379,7 +381,7 @@ An [Embed Tag](#embed-tags) adds metadata to an [Embed Block](#embed-blocks). An
 %sql
 SELECT first_name, last_name, hire_date
 FROM employees
-WHERE department = 'Sales' 
+WHERE department = 'Sales'
   AND hire_date < '2020-01-01'
 ORDER BY hire_date ASC;
 %%
@@ -479,12 +481,12 @@ person:
     - π
   # A KSON "embed block" containing Kotlin code
   favorite_function: %kotlin
-      /**
-       * Calculates the nth number in the Fibonacci sequence using recursion
-       */
-      fun fibonacci(n: Int): Long {
-        if (n < 0) throw IllegalArgumentException("Input must be non-negative")
-        return when (n) {
+    /**
+     * Calculates the nth number in the Fibonacci sequence using recursion
+     */
+    fun fibonacci(n: Int): Long {
+      if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+      return when (n) {
         0 -> 0
         1 -> 1
         else -> fibonacci(n - 1) + fibonacci(n - 2)
@@ -529,12 +531,12 @@ person:
       fun fibonacci(n: Int): Long {
         if (n < 0) throw IllegalArgumentException("Input must be non-negative")
         return when (n) {
-        0 -> 0
-        1 -> 1
-        else -> fibonacci(n - 1) + fibonacci(n - 2)
+          0 -> 0
+          1 -> 1
+          else -> fibonacci(n - 1) + fibonacci(n - 2)
+        }
       }
-    }
-    %%
+      %%
   }
 }
 ```
@@ -548,17 +550,17 @@ person:{
 name:'Leonardo Bonacci'nickname:Fibonacci favorite_books:[{title:Elements author:Euclid}{title:Metaphysics author:Aristotle}]favorite_numbers:[[0 1 1 2 '...']'(1 + √5)/2' π]
 # A KSON "embed block" containing Kotlin code
 favorite_function:%kotlin
-  /**
-   * Calculates the nth number in the Fibonacci sequence using recursion
-   */
-  fun fibonacci(n: Int): Long {
-    if (n < 0) throw IllegalArgumentException("Input must be non-negative")
-    return when (n) {
-      0 -> 0
-      1 -> 1
-      else -> fibonacci(n - 1) + fibonacci(n - 2)
-    }
+/**
+ * Calculates the nth number in the Fibonacci sequence using recursion
+ */
+fun fibonacci(n: Int): Long {
+  if (n < 0) throw IllegalArgumentException("Input must be non-negative")
+  return when (n) {
+    0 -> 0
+    1 -> 1
+    else -> fibonacci(n - 1) + fibonacci(n - 2)
   }
+}
 %%}
 ```
 
@@ -570,7 +572,7 @@ KSON's status as a superset of JSON is verified by [JsonSuiteTest.kt](../src/com
 
 ## JSON Schema support
 
-KSON is compatible with JsonSchema (Draft7, more to come), verified by  the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
+KSON is compatible with JsonSchema (Draft7, more to come), verified by the [SchemaDraft7SuiteTest*.kt files here](../src/commonTest/kotlin/org/kson/parser/json/generated), generated from [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
 
 ## Embed Block JSON Compatibility
 
