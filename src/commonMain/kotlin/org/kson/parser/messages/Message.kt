@@ -33,9 +33,7 @@ interface Message {
 
     companion object {
         /**
-         * Returns true if this message results in a fatal parse error. If so it can be marked during
-         * [org.kson.parser.AstMarker.error], otherwise the message is annotated in
-         * [org.kson.jetbrains.parser.KsonValidationAnnotator.apply].
+         * Returns true if this message results in a fatal parse error during the core parse in [org.kson.parser.Parser]
          */
         fun isFatalParseError(message: Message): Boolean =
             message is CoreParseMessage && message.type.severity == MessageSeverity.ERROR
