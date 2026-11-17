@@ -8,8 +8,12 @@ import org.kson.validation.SourceContext
 
 class MaxItemsValidator(private val maxItems: Long) : JsonArrayValidator() {
     override fun validateArray(node: KsonList, messageSink: MessageSink, sourceContext: SourceContext) {
-        if (node.elements.size > maxItems) {
-            messageSink.error(node.location, MessageType.SCHEMA_ARRAY_TOO_LONG.create(maxItems.toString()))
+        val actualNumItems = node.elements.size
+        if (actualNumItems > maxItems) {
+            messageSink.error(
+                node.location,
+                MessageType.SCHEMA_ARRAY_TOO_LONG.create(maxItems.toString(), actualNumItems.toString())
+            )
         }
     }
 }
