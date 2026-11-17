@@ -59,8 +59,8 @@ internal object RefKeyword : SchemaKeyword(setOf($$"$ref")) {
  */
 internal class DefinitionsKeyword(private val name: String) : SchemaKeyword(setOf(name)) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> =
-        (schema.propertyLookup[name] as? KsonObject)?.propertyLookup?.values.orEmpty()
-            .map { DeclaredSubschema(name, it, Applies.NotApplied) }
+        (schema.propertyLookup[name] as? KsonObject)?.propertyLookup.orEmpty()
+            .map { (key, definition) -> DeclaredSubschema(listOf(name, key), definition, Applies.NotApplied) }
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
         val definitions = context.properties.getValue(name)
@@ -180,7 +180,7 @@ internal class SubschemaKeyword(
     private val factory: (JsonSchema) -> JsonSchemaValidator
 ) : SchemaKeyword(setOf(name)) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> =
-        listOfNotNull(schema.propertyLookup[name]?.let { DeclaredSubschema(name, it, applies) })
+        listOfNotNull(schema.propertyLookup[name]?.let { DeclaredSubschema(listOf(name), it, applies) })
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? =
         subschemas.single().compiled?.let(factory)
@@ -197,7 +197,7 @@ internal class SchemaListKeyword(
 ) : SchemaKeyword(setOf(name)) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> =
         (schema.propertyLookup[name] as? KsonList)?.elements.orEmpty()
-            .mapIndexed { index, element -> DeclaredSubschema(name, element, applies(index)) }
+            .mapIndexed { index, element -> DeclaredSubschema(listOf(name, "$index"), element, applies(index)) }
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
         val value = context.properties.getValue(name)
@@ -219,12 +219,14 @@ internal object ItemsKeyword : SchemaKeyword(setOf("items", "additionalItems")) 
         val items = schema.propertyLookup["items"]
         val itemSubschemas = when (items) {
             null -> emptyList()
-            is KsonList -> items.elements.mapIndexed { index, item -> DeclaredSubschema("items", item, Applies.Item(index)) }
-            else -> listOf(DeclaredSubschema("items", items, Applies.ItemsFrom(0)))
+            is KsonList -> items.elements.mapIndexed { index, item ->
+                DeclaredSubschema(listOf("items", "$index"), item, Applies.Item(index))
+            }
+            else -> listOf(DeclaredSubschema(listOf("items"), items, Applies.ItemsFrom(0)))
         }
         val additionalItems = schema.propertyLookup["additionalItems"]?.let {
             val applies = if (items is KsonList) Applies.ItemsFrom(items.elements.size) else Applies.NotApplied
-            DeclaredSubschema("additionalItems", it, applies)
+            DeclaredSubschema(listOf("additionalItems"), it, applies)
         }
         return itemSubschemas + listOfNotNull(additionalItems)
     }
@@ -257,11 +259,13 @@ internal object ItemsKeyword : SchemaKeyword(setOf("items", "additionalItems")) 
 internal object PropertiesKeyword : SchemaKeyword(setOf("properties", "patternProperties", "additionalProperties")) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> {
         val properties = (schema.propertyLookup["properties"] as? KsonObject)?.propertyLookup.orEmpty()
-            .map { (name, value) -> DeclaredSubschema("properties", value, Applies.Property(name)) }
+            .map { (name, value) -> DeclaredSubschema(listOf("properties", name), value, Applies.Property(name)) }
         val patternProperties = (schema.propertyLookup["patternProperties"] as? KsonObject)?.propertyLookup.orEmpty()
-            .map { (pattern, value) -> DeclaredSubschema("patternProperties", value, Applies.PatternProperty(pattern)) }
+            .map { (pattern, value) ->
+                DeclaredSubschema(listOf("patternProperties", pattern), value, Applies.PatternProperty(pattern))
+            }
         val additionalProperties = schema.propertyLookup["additionalProperties"]
-            ?.let { DeclaredSubschema("additionalProperties", it, Applies.OtherProperties) }
+            ?.let { DeclaredSubschema(listOf("additionalProperties"), it, Applies.OtherProperties) }
         return properties + patternProperties + listOfNotNull(additionalProperties)
     }
 
@@ -312,9 +316,9 @@ internal object PropertiesKeyword : SchemaKeyword(setOf("properties", "patternPr
 /** `if`, `then` and `else`.  Without an `if` that compiles, neither `then` nor `else` applies. */
 internal object IfKeyword : SchemaKeyword(setOf("if", "then", "else")) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> = listOfNotNull(
-        schema.propertyLookup["if"]?.let { DeclaredSubschema("if", it, Applies.Condition) },
-        schema.propertyLookup["then"]?.let { DeclaredSubschema("then", it, Applies.Then) },
-        schema.propertyLookup["else"]?.let { DeclaredSubschema("else", it, Applies.Else) }
+        schema.propertyLookup["if"]?.let { DeclaredSubschema(listOf("if"), it, Applies.Condition) },
+        schema.propertyLookup["then"]?.let { DeclaredSubschema(listOf("then"), it, Applies.Then) },
+        schema.propertyLookup["else"]?.let { DeclaredSubschema(listOf("else"), it, Applies.Else) }
     )
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
@@ -333,7 +337,7 @@ internal object DependenciesKeyword : SchemaKeyword(setOf("dependencies")) {
     override fun declaredSubschemas(schema: KsonObject): List<DeclaredSubschema> =
         (schema.propertyLookup["dependencies"] as? KsonObject)?.propertyLookup.orEmpty()
             .filterValues { it !is KsonList }
-            .map { (property, value) -> DeclaredSubschema("dependencies", value, Applies.IfPresent(property)) }
+            .map { (property, value) -> DeclaredSubschema(listOf("dependencies", property), value, Applies.IfPresent(property)) }
 
     override fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator? {
         val dependencies = context.properties.getValue("dependencies")

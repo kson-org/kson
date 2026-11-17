@@ -21,8 +21,13 @@ internal abstract class SchemaKeyword(val names: Set<String>) {
     abstract fun compile(context: KeywordContext, subschemas: List<CompilableSubschema>): JsonSchemaValidator?
 }
 
-/** A subschema [value] that a schema has under [keyword], and the part of the instance it [applies] to */
-internal class DeclaredSubschema(val keyword: String, val value: KsonValue, val applies: Applies)
+/**
+ * A subschema [value] that a schema has, and the part of the instance it [applies] to.  [path] lists the JSON
+ * Pointer tokens from the schema to [value], starting with its [keyword].
+ */
+internal class DeclaredSubschema(val path: List<String>, val value: KsonValue, val applies: Applies) {
+    val keyword: String get() = path.first()
+}
 
 /**
  * A [declared] subschema that compiles when [compiled] is first read.  This lets its keyword decide which of its
