@@ -2,7 +2,7 @@ package org.kson.tooling
 
 import org.kson.parser.Coordinates
 import org.kson.parser.behavior.StringUnquoted
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
 import org.kson.tooling.navigation.KsonValuePathBuilder
 import org.kson.tooling.navigation.NavigatedSchema
 import org.kson.tooling.navigation.SchemaNavigator
@@ -19,12 +19,12 @@ internal object PropertySnippetBuilder {
         completions: List<CompletionItem>,
         document: ToolingDocument,
         caret: Coordinates,
-        idLookup: SchemaIdLookup
+        indexedDocuments: IndexedSchemaDocuments
     ): List<CompletionItem> {
         if (completions.none { it.kind == CompletionKind.PROPERTY }) return completions
         val site = KsonValuePathBuilder(document, caret).newKeySite() ?: return completions
         // Not narrowed: adding the property may change which branches the document fits
-        val navigator = SchemaNavigator(idLookup, carryDeadEnds = true, narrow = false)
+        val navigator = SchemaNavigator(indexedDocuments, carryDeadEnds = true, narrow = false)
         return completions.map { item ->
             val openedValue = item
                 .takeIf { it.kind == CompletionKind.PROPERTY && StringUnquoted.isUnquotable(it.label) }

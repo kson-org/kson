@@ -1,6 +1,7 @@
 package org.kson
 
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.SchemaDocument
 import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.NavigatedSchema
@@ -30,7 +31,7 @@ class SchemaNavigationTest {
      */
     private fun navigateSchemaFull(schema: String, path: List<String>, document: String? = null): List<NavigatedSchema> {
         return KsonCore.parseToAst(schema).ksonValue?.let {
-            SchemaNavigator(SchemaIdLookup(it))
+            SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(it)))
                 .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { doc -> KsonTooling.parse(doc).rootAstNode })
         } ?: emptyList()
     }
@@ -345,11 +346,11 @@ class SchemaNavigationTest {
             {
                 type: "object"
                 properties: { p: { '$ref': "http://example.com/a.json" } }
-                '$defs': {
+                definitions: {
                     a: {
                         '$id': "http://example.com/a.json"
-                        anyOf: [ { '$ref': "#/$defs/x" } ]
-                        '$defs': { x: { title: "x under a.json" } }
+                        anyOf: [ { '$ref': "#/definitions/x" } ]
+                        definitions: { x: { title: "x under a.json" } }
                     }
                     x: { title: "x under the root" }
                 }
@@ -577,7 +578,7 @@ class SchemaNavigationTest {
         val document = """{ "config": { "mode": "a" } }"""
         val documentAst = KsonTooling.parse(document).rootAstNode
         val results = KsonCore.parseToAst(schema).ksonValue!!.let {
-            SchemaNavigator(SchemaIdLookup(it)).navigate(TreePointer(JsonPointer.fromTokens(listOf("config"))), documentAst)
+            SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(it))).navigate(TreePointer(JsonPointer.fromTokens(listOf("config"))), documentAst)
         }
 
         // [configParent, InnerA] — InnerB is dropped because mode: "a" contradicts its const.

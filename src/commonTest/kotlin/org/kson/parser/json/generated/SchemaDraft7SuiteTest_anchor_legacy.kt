@@ -305,12 +305,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_9() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::anchor within remote ref::remote anchor valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -323,7 +317,23 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor-legacy::anchor within remote ref::remote anchor valid"    """)
+            """    schemaTestId: "anchor-legacy::anchor within remote ref::remote anchor valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}id": "#foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -334,12 +344,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_10() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::anchor within remote ref::remote anchor invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -352,7 +356,23 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor-legacy::anchor within remote ref::remote anchor invalid"    """)
+            """    schemaTestId: "anchor-legacy::anchor within remote ref::remote anchor invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}id": "#foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -363,12 +383,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_11() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::Location-independent identifier in remote ref::integer is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -381,7 +395,23 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor-legacy::Location-independent identifier in remote ref::integer is valid"    """)
+            """    schemaTestId: "anchor-legacy::Location-independent identifier in remote ref::integer is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}id": "#foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -392,12 +422,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_12() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::Location-independent identifier in remote ref::string is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -410,7 +434,23 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor-legacy::Location-independent identifier in remote ref::string is invalid"    """)
+            """    schemaTestId: "anchor-legacy::Location-independent identifier in remote ref::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/locationIndependentIdentifier.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "refToInteger": {
+                                "${'$'}ref": "#foo"
+                            },
+                            "A": {
+                                "${'$'}id": "#foo",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -421,12 +461,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_13() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::$ref to $ref finds detached $anchor::number is valid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -439,7 +473,23 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """)
+            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-ref.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "foo": {
+                                "${'$'}ref": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}id": "#detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -450,12 +500,6 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_14() {
-       /**
-        * TODO implement the schema functionality under test here and remove the exclusion entry
-        * "anchor-legacy::$ref to $ref finds detached $anchor::non-number is invalid" from 
-        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
-        */
-        return
         
         assertKsonEnforcesSchema(
             """
@@ -468,6 +512,22 @@ class SchemaDraft7SuiteTest_anchor_legacy : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """)
+            """    schemaTestId: "anchor-legacy::${'$'}ref to ${'$'}ref finds detached ${'$'}anchor::non-number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-ref.json" to """
+                    {
+                        "${'$'}schema": "http://json-schema.org/draft-07/schema#",
+                        "definitions": {
+                            "foo": {
+                                "${'$'}ref": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}id": "#detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 }

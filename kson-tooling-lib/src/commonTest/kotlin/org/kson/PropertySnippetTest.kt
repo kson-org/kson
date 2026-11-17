@@ -271,11 +271,11 @@ class PropertySnippetTest {
             {
                 "type": "object",
                 "properties": { "p": { "$ref": "http://example.com/a.json" } },
-                "$defs": {
+                "definitions": {
                     "a": {
                         "$id": "http://example.com/a.json",
-                        "allOf": [ { "$ref": "#/$defs/x" } ],
-                        "$defs": { "x": { "type": "object" } }
+                        "allOf": [ { "$ref": "#/definitions/x" } ],
+                        "definitions": { "x": { "type": "object" } }
                     },
                     "x": { "type": "string" }
                 }
@@ -290,11 +290,11 @@ class PropertySnippetTest {
             {
                 "type": "object",
                 "properties": { "p": { "$ref": "http://example.com/a.json" } },
-                "$defs": {
+                "definitions": {
                     "a": {
                         "$id": "http://example.com/a.json",
-                        "anyOf": [ { "$ref": "#/$defs/x" } ],
-                        "$defs": { "x": { "type": "object" } }
+                        "anyOf": [ { "$ref": "#/definitions/x" } ],
+                        "definitions": { "x": { "type": "object" } }
                     },
                     "x": { "type": "string" }
                 }
@@ -524,20 +524,20 @@ class PropertySnippetTest {
         val schema = $$"""
             {
                 "type": "object",
-                "allOf": [ { "$ref": "#/$defs/a/$defs/shape" }, { "$ref": "#/$defs/b/$defs/shape" } ],
-                "$defs": {
+                "allOf": [ { "$ref": "#/definitions/a/definitions/shape" }, { "$ref": "#/definitions/b/definitions/shape" } ],
+                "definitions": {
                     "a": {
                         "$id": "http://example.com/a.json",
-                        "$defs": {
-                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/$defs/first" }, { "$ref": "#/$defs/second" } ] } } },
+                        "definitions": {
+                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/definitions/first" }, { "$ref": "#/definitions/second" } ] } } },
                             "first": { "type": ["string", "object"] },
                             "second": { "type": "array" }
                         }
                     },
                     "b": {
                         "$id": "http://example.com/b.json",
-                        "$defs": {
-                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/$defs/first" }, { "$ref": "#/$defs/second" } ] } } },
+                        "definitions": {
+                            "shape": { "properties": { "p": { "anyOf": [ { "$ref": "#/definitions/first" }, { "$ref": "#/definitions/second" } ] } } },
                             "first": { "type": "string" },
                             "second": { "type": "object" }
                         }

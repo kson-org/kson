@@ -1,6 +1,7 @@
 package org.kson
 
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.SchemaDocument
 import org.kson.tooling.KsonTooling
 import org.kson.tooling.navigation.Branch
 import org.kson.tooling.navigation.BranchStep
@@ -26,7 +27,7 @@ class SchemaBranchTrailTest {
         carryDeadEnds: Boolean = false,
         narrow: Boolean = true
     ): List<NavigatedSchema> =
-        SchemaNavigator(SchemaIdLookup(schemaValue), carryDeadEnds = carryDeadEnds, narrow = narrow)
+        SchemaNavigator(IndexedSchemaDocuments(SchemaDocument(schemaValue)), carryDeadEnds = carryDeadEnds, narrow = narrow)
             .navigate(TreePointer(JsonPointer.fromTokens(path)), document?.let { KsonTooling.parse(it).rootAstNode })
 
     private fun trails(

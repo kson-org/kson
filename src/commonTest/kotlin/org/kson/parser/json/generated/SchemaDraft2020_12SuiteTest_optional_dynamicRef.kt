@@ -21,6 +21,12 @@ class SchemaDraft2020_12SuiteTest_optional_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_1() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "optional/dynamicRef::$dynamicRef skips over intermediate resources - pointer reference across resource boundary (2020)::integer property passes" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """

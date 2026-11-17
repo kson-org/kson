@@ -40,7 +40,28 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::applicator vocabulary still works"    """)
+            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::applicator vocabulary still works"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/metaschema-no-validation.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}id": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                        "${'$'}vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/applicator": true
+                        },
+                        "${'$'}dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/applicator"
+                            },
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -70,7 +91,28 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: valid number"    """)
+            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: valid number"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/metaschema-no-validation.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}id": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                        "${'$'}vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/applicator": true
+                        },
+                        "${'$'}dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/applicator"
+                            },
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -106,7 +148,28 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"    """)
+            """    schemaTestId: "vocabulary::schema that uses custom metaschema with no validation vocabulary::no validation: invalid number, but it still validates"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/metaschema-no-validation.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}id": "http://localhost:1234/draft2020-12/metaschema-no-validation.json",
+                        "${'$'}vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/applicator": true
+                        },
+                        "${'$'}dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/applicator"
+                            },
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -129,7 +192,29 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "vocabulary::ignore unrecognized optional vocabulary (dynamic anchor)::string value"    """)
+            """    schemaTestId: "vocabulary::ignore unrecognized optional vocabulary (dynamic anchor)::string value"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}id": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+                        "${'$'}vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/validation": true,
+                            "http://localhost:1234/draft/2020-12/vocab/custom": false
+                        },
+                        "${'$'}dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/validation"
+                            },
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -152,6 +237,28 @@ class SchemaDraft2020_12SuiteTest_vocabulary : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "vocabulary::ignore unrecognized optional vocabulary (dynamic anchor)::number value"    """)
+            """    schemaTestId: "vocabulary::ignore unrecognized optional vocabulary (dynamic anchor)::number value"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}id": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+                        "${'$'}vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/validation": true,
+                            "http://localhost:1234/draft/2020-12/vocab/custom": false
+                        },
+                        "${'$'}dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/validation"
+                            },
+                            {
+                                "${'$'}ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }

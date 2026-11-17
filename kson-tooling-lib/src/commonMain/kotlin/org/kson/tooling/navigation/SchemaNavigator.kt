@@ -4,16 +4,16 @@ import org.kson.ast.AstNode
 import org.kson.ast.ObjectNode
 import org.kson.parser.Location
 import org.kson.parser.MessageSink
+import org.kson.schema.IndexedSchemaDocuments
 import org.kson.schema.ResolvedRef
-import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaParser
+import org.kson.schema.baseUriWithin
 import org.kson.uri.UriReference
 import org.kson.validation.SourceContext
 import org.kson.validation.ValidationMode
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
-import org.kson.value.KsonString
 import org.kson.value.KsonValue
 import org.kson.value.toKsonValueOrNull
 import org.kson.walker.AstNodeWalker
@@ -86,7 +86,7 @@ internal val KsonValue.isFalseSchema: Boolean
  * the `then` or `else` its `if` rules out.  Without it, every branch is kept, as for an empty document.
  */
 internal class SchemaNavigator(
-    private val idLookup: SchemaIdLookup,
+    private val indexedDocuments: IndexedSchemaDocuments,
     private val incompleteRegion: Location? = null,
     private val carryDeadEnds: Boolean = false,
     private val narrow: Boolean = true
@@ -114,8 +114,8 @@ internal class SchemaNavigator(
      * ```kotlin
      * // Document path: ["users", "0", "name"]
      * // Schema navigation: properties/users → items → properties/name
-     * val idLookup = SchemaIdLookup(schemaRoot)
-     * val schemaRefs = SchemaNavigator(idLookup).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
+     * val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(schemaRoot))
+     * val schemaRefs = SchemaNavigator(indexedDocuments).navigate(TreePointer(JsonPointer.fromTokens(listOf("users", "0", "name"))))
      * ```
      *
      * Narrowing treats the document as authoritative: a branch is dropped where the document
@@ -136,8 +136,9 @@ internal class SchemaNavigator(
         documentPointer: TreePointer<AstNode>,
         documentAst: AstNode? = null
     ): List<NavigatedSchema> {
-        val rootBaseUri = idLookup.rootBaseUri
-        val rootRef = NavigatedSchema(idLookup.resolveRefIfPresent(idLookup.schemaRootValue, rootBaseUri), emptyList())
+        val rootBaseUri = indexedDocuments.rootBaseUri
+        val rootRef =
+            NavigatedSchema(indexedDocuments.resolveRefIfPresent(indexedDocuments.root.value, rootBaseUri), emptyList())
 
         // the bare tokens step the schema by name; the document is walked along the tagged pointer
         val tokens = documentPointer.pointer.tokens
@@ -171,8 +172,7 @@ internal class SchemaNavigator(
      * index [arrayIndex] (see [itemSchema]).  No combinator / conditional logic — [flatten]
      * handles branching.
      *
-     * Applies `$id` on [ref] to the base URI before property lookup, and resolves `$ref`
-     * on the stepped-into schema.
+     * Resolves `$ref` on the stepped-into schema.
      */
     private fun stepInto(ref: NavigatedSchema, token: String, arrayIndex: Int?): List<NavigatedSchema> {
         if (carryDeadEnds && (ref.resolvedValue.isFalseSchema || ref.endsAtUnresolvedRef)) return listOf(ref)
@@ -201,7 +201,9 @@ internal class SchemaNavigator(
             }
         }
 
-        return stepped.map { NavigatedSchema(idLookup.resolveRefIfPresent(it, updatedBaseUri), ref.branchTrail) }
+        return stepped.map {
+            NavigatedSchema(indexedDocuments.resolveRefIfPresent(it, updatedBaseUri), ref.branchTrail)
+        }
     }
 
     /**
@@ -215,12 +217,6 @@ internal class SchemaNavigator(
         val items = arraySchema.propertyLookup["items"]
         val tuple = items as? KsonList ?: return items
         return tuple.elements.getOrNull(index) ?: arraySchema.propertyLookup["additionalItems"]
-    }
-
-    /** The base URI that `$ref`s in [schema] resolve against. */
-    private fun baseUriWithin(schema: KsonObject, baseUri: UriReference): UriReference {
-        val id = schema.propertyLookup[$$"$id"] as? KsonString ?: return baseUri
-        return baseUri.resolve(id.value)
     }
 
     /**
@@ -261,8 +257,7 @@ internal class SchemaNavigator(
      *     emits both branches.
      *
      * Recurses into each branch so nested combinators/conditionals are fully flattened,
-     * each narrowed against the same [docVal].  Like [stepInto], it reads [ref]'s keywords under the
-     * base URI [ref]'s own `$id` gives (see [baseUriWithin]).
+     * each narrowed against the same [docVal].
      *
      * The parent [ref] is preserved at the head of the result so its title, description,
      * and constraints remain available.
@@ -303,11 +298,11 @@ internal class SchemaNavigator(
         }
 
         (schemaObj.propertyLookup["allOf"] as? KsonList)?.elements?.forEach { branch ->
-            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), step = null)
+            addBranch(indexedDocuments.resolveRefIfPresent(branch, baseUri), step = null)
         }
 
         conditionalBranches(schemaObj, baseUri, docVal, depth).forEach { (branch, step) ->
-            addBranch(idLookup.resolveRefIfPresent(branch, baseUri), step)
+            addBranch(indexedDocuments.resolveRefIfPresent(branch, baseUri), step)
         }
 
         if (addedBranches) {
@@ -331,7 +326,7 @@ internal class SchemaNavigator(
         docVal: KsonValue?,
         depth: Int
     ): List<Pair<ResolvedRef, BranchStep>> {
-        val branches = alternatives.elements.map { idLookup.resolveRefIfPresent(it, baseUri) }
+        val branches = alternatives.elements.map { indexedDocuments.resolveRefIfPresent(it, baseUri) }
         val openBranches = branches.indices
             .filter { docVal == null || isCompatibleWithDocument(branches[it], docVal) }
             .map { Branch.Index(it) }
@@ -377,7 +372,7 @@ internal class SchemaNavigator(
         docVal: KsonValue
     ): Boolean {
         val schema = SchemaParser.parseSchemaElement(
-            ref.resolvedValue, MessageSink(), ref.resolvedValueBaseUri, idLookup
+            ref.resolvedValue, MessageSink(), ref.resolvedValueBaseUri, indexedDocuments
         ) ?: return true
         val sink = MessageSink()
         schema.validate(docVal, sink, SourceContext(mode = ValidationMode.PARTIAL))
@@ -400,7 +395,7 @@ internal class SchemaNavigator(
      */
     private fun evaluateIf(ifCondition: KsonValue, baseUri: UriReference, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
-        val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), baseUri, idLookup)
+        val ifSchema = SchemaParser.parseSchemaElement(ifCondition, MessageSink(), baseUri, indexedDocuments)
             ?: return IfState.UNDETERMINED
         if (ifSchema.isValid(docVal, MessageSink())) return IfState.MATCH
         val sink = MessageSink()

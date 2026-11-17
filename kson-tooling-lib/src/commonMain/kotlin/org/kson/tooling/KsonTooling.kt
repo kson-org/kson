@@ -12,7 +12,8 @@ import org.kson.tooling.navigation.extractSchemaInfo
 import org.kson.ast.AstNode
 import org.kson.parser.Coordinates
 import org.kson.parser.Location
-import org.kson.schema.SchemaIdLookup
+import org.kson.schema.IndexedSchemaDocuments
+import org.kson.schema.SchemaDocument
 import org.kson.validation.SourceContext
 import org.kson.value.KsonString
 import org.kson.value.KsonValue
@@ -53,7 +54,7 @@ object KsonTooling {
     ): String? {
         val parsedSchema = schema.partialKsonValue ?: return null
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return null
-        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
+        val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
         val schemaInfos = validSchemas.mapNotNull { ref ->
             ref.resolvedValue.extractSchemaInfo()
@@ -83,7 +84,7 @@ object KsonTooling {
     ): List<Range> {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val documentPointer = KsonValuePathBuilder(document, Coordinates(line, column)).buildTreePointerToPosition() ?: return emptyList()
-        val validSchemas = resolveSchemas(SchemaIdLookup(parsedSchema), document, documentPointer)
+        val validSchemas = resolveSchemas(IndexedSchemaDocuments(SchemaDocument(parsedSchema)), document, documentPointer)
 
         return validSchemas.map {
             Range(
@@ -125,8 +126,8 @@ object KsonTooling {
         val refString = (nodeAtPosition.toKsonValueOrNull() as? KsonString)?.value ?: return emptyList()
 
         // Resolve the reference and return its location
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val resolvedRef = schemaIdLookup.resolveRef(refString, schemaIdLookup.rootBaseUri) ?: return emptyList()
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
+        val resolvedRef = indexedDocuments.resolveRef(refString, indexedDocuments.rootSubschemaBaseUri) ?: return emptyList()
 
         return listOf(
             Range(
@@ -159,8 +160,8 @@ object KsonTooling {
         val parsedSchema = schema.partialKsonValue ?: return emptyList()
         val caret = Coordinates(line, column)
         val caretPath = KsonValuePathBuilder(document, caret).buildCaretPath(includePropertyKeys = false) ?: return emptyList()
-        val schemaIdLookup = SchemaIdLookup(parsedSchema)
-        val validSchemas = resolveSchemas(schemaIdLookup, document, caretPath.pointer, caretPath.placeholderLocation)
+        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(parsedSchema))
+        val validSchemas = resolveSchemas(indexedDocuments, document, caretPath.pointer, caretPath.placeholderLocation)
 
         val completions = SchemaInformation.getCompletions(caretPath.pointer, validSchemas, document.rootAstNode)
 
@@ -173,7 +174,7 @@ object KsonTooling {
         } else {
             completions
         }
-        return PropertySnippetBuilder.addSnippetEdits(offered, document, caret, schemaIdLookup)
+        return PropertySnippetBuilder.addSnippetEdits(offered, document, caret, indexedDocuments)
     }
 
     /**
@@ -322,12 +323,12 @@ object KsonTooling {
      * null so the committed leaf narrows.
      */
     private fun resolveSchemas(
-        schemaIdLookup: SchemaIdLookup,
+        indexedDocuments: IndexedSchemaDocuments,
         document: ToolingDocument,
         documentPointer: TreePointer<AstNode>,
         placeholderLocation: Location? = null
     ): List<NavigatedSchema> {
-        return SchemaNavigator(schemaIdLookup, placeholderLocation)
+        return SchemaNavigator(indexedDocuments, placeholderLocation)
             .navigate(documentPointer, document.rootAstNode)
     }
 }

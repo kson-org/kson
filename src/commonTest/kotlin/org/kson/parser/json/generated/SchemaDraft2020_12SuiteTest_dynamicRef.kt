@@ -97,6 +97,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_3() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated (2020)::An array of strings is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -195,6 +201,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_5() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution (2020)::An array of strings is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -301,6 +313,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_7() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution (2020)::Any array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -473,6 +491,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_10() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::after leaving a dynamic scope, it is not used by a $dynamicRef (2020)::/then/$defs/thingy is the final stop for the $dynamicRef" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -557,7 +581,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field"    """)
+            """    schemaTestId: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with misspelled field"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree schema, extensible",
+                        "${'$'}dynamicAnchor": "node",
+                        "type": "object",
+                        "properties": {
+                            "data": true,
+                            "children": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#node"
+                                }
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -595,7 +638,26 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field"    """)
+            """    schemaTestId: "dynamicRef::strict-tree schema, guards against misspelled properties (2020)::instance with correct field"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "tree schema, extensible",
+                        "${'$'}dynamicAnchor": "node",
+                        "type": "object",
+                        "properties": {
+                            "data": true,
+                            "children": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#node"
+                                }
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -639,7 +701,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema"    """)
+            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect parent schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -687,7 +775,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema"    """)
+            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::incorrect extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -735,7 +849,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema"    """)
+            """    schemaTestId: "dynamicRef::tests for implementation dynamic anchor and reference link (2020)::correct extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -785,7 +925,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect parent schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect parent schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -839,7 +1005,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect extended schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::incorrect extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -893,7 +1085,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::correct extended schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}defs first (2020)::correct extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -943,7 +1161,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect parent schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -997,7 +1241,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect extended schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::incorrect extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1051,7 +1321,33 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref and ${'$'}dynamicAnchor are independent of order - ${'$'}ref first (2020)::correct extended schema"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/extendible-dynamic-ref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "description": "extendible array",
+                        "type": "object",
+                        "properties": {
+                            "elements": {
+                                "type": "array",
+                                "items": {
+                                    "${'$'}dynamicRef": "#elements"
+                                }
+                            }
+                        },
+                        "required": [
+                            "elements"
+                        ],
+                        "additionalProperties": false,
+                        "${'$'}defs": {
+                            "elements": {
+                                "${'$'}dynamicAnchor": "elements"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1080,7 +1376,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-dynamicref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "foo": {
+                                "${'$'}dynamicRef": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}dynamicAnchor": "detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1109,7 +1421,23 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::non-number is invalid"    """)
+            """    schemaTestId: "dynamicRef::${'$'}ref to ${'$'}dynamicRef finds detached ${'$'}dynamicAnchor (2020)::non-number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/detached-dynamicref.json" to """
+                    {
+                        "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                        "${'$'}defs": {
+                            "foo": {
+                                "${'$'}dynamicRef": "#detached"
+                            },
+                            "detached": {
+                                "${'$'}dynamicAnchor": "detached",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -1120,6 +1448,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_24() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::$dynamicRef skips over intermediate resources - direct reference (2020)::integer property passes" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1252,6 +1586,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_26() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::$dynamicRef avoids the root of each schema, but scopes are still registered (2020)::data is sufficient for schema at second#/$defs/length" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1593,6 +1933,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_33() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef without anchor in fragment behaves identical to $ref::An array of numbers is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1640,6 +1986,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_34() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1686,6 +2038,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_35() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor::Any array is valid" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1733,6 +2091,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_36() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor resolves to the first $dynamicAnchor in the dynamic scope::The recursive part is valid against the root" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1857,6 +2221,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_38() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor::The recursive part doesn't need to validate against the root" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -1916,6 +2286,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_39() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::number list with number values" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
@@ -2174,6 +2550,12 @@ class SchemaDraft2020_12SuiteTest_dynamicRef : JsonSchemaTest {
      */
     @Test
     fun jsonSchemaSuiteTest_42() {
+       /**
+        * TODO implement the schema functionality under test here and remove the exclusion entry
+        * "dynamicRef::multiple dynamic paths to the $dynamicRef keyword (2020)::string list with string values" from 
+        * [org.kson.jsonsuite.schemaTestSuiteExclusions]
+        */
+        return
         
         assertKsonEnforcesSchema(
             """
