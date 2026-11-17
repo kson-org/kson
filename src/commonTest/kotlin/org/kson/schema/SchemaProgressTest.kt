@@ -13,10 +13,8 @@ class SchemaProgressTest {
     private fun kson(source: String): KsonValue =
         assertNotNull(KsonCore.parseToAst(source).ksonValue, "should parse: $source")
 
-    private fun progressTowards(schema: String): SchemaProgress {
-        val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(kson(schema)))
-        return SchemaProgress(indexedDocuments.root.value, indexedDocuments.rootBaseUri, indexedDocuments)
-    }
+    private fun progressTowards(schema: String): SchemaProgress =
+        SchemaProgress(IndexedSchemaDocuments(SchemaDocument(kson(schema))).rootSchema)
 
     private fun locationOf(property: String, document: KsonValue) =
         (document as KsonObject).propertyLookup.getValue(property).location
@@ -49,11 +47,12 @@ class SchemaProgressTest {
         val indexedDocuments =
             IndexedSchemaDocuments(SchemaDocument(root, UriReference.parse("https://example.org/root")))
 
-        val underItsId = SchemaProgress(root, UriReference.parse("https://example.org/root"), indexedDocuments)
+        val underItsId = SchemaProgress(indexedDocuments.rootSchema)
         assertTrue(underItsId.accepts(kson("3")))
         assertTrue(underItsId.rejects(kson("three")))
 
-        val elsewhere = SchemaProgress(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments)
+        val elsewhere =
+            SchemaProgress(SchemaNode(root, UriReference.parse("https://example.org/elsewhere"), indexedDocuments))
         assertFalse(elsewhere.accepts(kson("3")))
         assertFalse(elsewhere.rejects(kson("three")))
     }

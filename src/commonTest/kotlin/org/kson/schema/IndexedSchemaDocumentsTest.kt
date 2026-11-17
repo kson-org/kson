@@ -6,25 +6,26 @@ import org.kson.value.KsonString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
- * Tests for [IndexedSchemaDocuments.resolveRefIfPresent].
+ * Tests for [IndexedSchemaDocuments.resolveRefIfPresent] and [IndexedSchemaDocuments.resolvedRootSchema].
  */
 class IndexedSchemaDocumentsTest {
 
-    private fun resolve(schema: String): ResolvedRef {
+    private fun resolve(schema: String): SchemaNode {
         val root = KsonCore.parseToAst(schema).ksonValue as KsonObject
         val field = (root.propertyLookup["properties"] as KsonObject).propertyLookup.getValue("field")
         val indexedDocuments = IndexedSchemaDocuments(SchemaDocument(root))
-        return indexedDocuments.resolveRefIfPresent(field, indexedDocuments.rootSubschemaBaseUri)
+        return indexedDocuments.resolveRefIfPresent(indexedDocuments.rootSchema.enter(field))
     }
 
     /** Resolves [schema]'s property `field`, returning its `title` and base URI. */
     private fun resolveField(schema: String): Pair<String?, String> {
         val resolved = resolve(schema)
-        val title = (resolved.resolvedValue as KsonObject).propertyLookup["title"] as? KsonString
-        return title?.value to resolved.resolvedValueBaseUri.toString()
+        val title = (resolved.value as KsonObject).propertyLookup["title"] as? KsonString
+        return title?.value to resolved.baseUri.toString()
     }
 
     /** Whether resolving [schema]'s property `field` ends at a `$ref` it couldn't follow. */
@@ -359,5 +360,20 @@ class IndexedSchemaDocumentsTest {
             }
         """
         assertEquals("target", resolveField(schema).first)
+    }
+
+    @Test
+    fun resolvedRootSchemaFollowsTheRootsRef() {
+        val root = KsonCore.parseToAst(
+            $$"""
+                {
+                  "$ref": "#/$defs/target",
+                  "$defs": { "target": { "title": "target" } }
+                }
+            """
+        ).ksonValue as KsonObject
+        val target = (root.propertyLookup.getValue("\$defs") as KsonObject).propertyLookup.getValue("target")
+
+        assertSame(target, IndexedSchemaDocuments(SchemaDocument(root)).resolvedRootSchema.value)
     }
 }

@@ -17,26 +17,19 @@ internal object SchemaParser {
      * See [parseSchemaElement] for sub-schema parsing.
      */
     fun parseSchemaRoot(indexedDocuments: IndexedSchemaDocuments, messageSink: MessageSink): JsonSchema? =
-        parseSchemaElement(indexedDocuments.root.value, messageSink, indexedDocuments.rootBaseUri, indexedDocuments)
+        parseSchemaElement(indexedDocuments.rootSchema, messageSink)
 
     /**
-     *  Parse [schemaValue] as a JSON sub-schema. See [parseSchemaRoot] for full schema parsing.
+     *  Parse [schema] as a JSON sub-schema. See [parseSchemaRoot] for full schema parsing.
      *
-     *  @param schemaValue The schema value to parse
+     *  @param schema The schema to parse
      *  @param messageSink The message sink for errors
-     *  @param currentBaseUri The current base URI context for resolving references
-     *  @param indexedDocuments The indexed documents for resolving $id and $ref references
+     *  @param propertyName The name of the property that [schema] validates, if any.  Its `type` errors mention it.
      */
-    fun parseSchemaElement(
-        schemaValue: KsonValue,
-        messageSink: MessageSink,
-        currentBaseUri: UriReference,
-        indexedDocuments: IndexedSchemaDocuments,
-        propertyName: String? = null
-    ): JsonSchema? {
-        return when (schemaValue) {
+    fun parseSchemaElement(schema: SchemaNode, messageSink: MessageSink, propertyName: String? = null): JsonSchema? {
+        return when (val schemaValue = schema.value) {
             is KsonBoolean -> JsonBooleanSchema(schemaValue.value)
-            is KsonObject -> parseObjectSchema(schemaValue, messageSink, currentBaseUri, indexedDocuments, propertyName = propertyName)
+            is KsonObject -> parseObjectSchema(schema, schemaValue, messageSink, propertyName)
             else -> {
                 messageSink.error(schemaValue.location, SCHEMA_OBJECT_OR_BOOLEAN.create())
                 null
@@ -45,18 +38,16 @@ internal object SchemaParser {
     }
 
     private fun parseObjectSchema(
+        schema: SchemaNode,
         schemaObject: KsonObject,
         messageSink: MessageSink,
-        currentBaseUri: UriReference,
-        indexedDocuments: IndexedSchemaDocuments,
-        propertyName: String? = null
+        propertyName: String?
     ): JsonSchema? {
         val schemaProperties = schemaObject.propertyLookup
-        val updatedBaseUri = baseUriWithin(schemaObject, currentBaseUri)
-        val context = KeywordContext(schemaObject, messageSink, updatedBaseUri, indexedDocuments)
+        val context = KeywordContext(schema, messageSink)
 
         // `$ref` comes first, as Draft 7 ignores every keyword beside a string `$ref`
-        val refValidator = compileKeyword(RefKeyword, context, updatedBaseUri, indexedDocuments)
+        val refValidator = compileKeyword(RefKeyword, schema, schemaObject, context)
         if (context.isNoSchema) return null
         if (schemaProperties["\$ref"] is KsonString) {
             return JsonObjectSchema(null, null, null, null, null, listOfNotNull(refValidator))
@@ -66,7 +57,7 @@ internal object SchemaParser {
         val metadata = parseMetadata(schemaProperties, messageSink)
         val typeValidator = parseTypeValidator(schemaProperties, propertyName, messageSink)
         val validators = listOfNotNull(refValidator) + draft7Keywords.filter { it !== RefKeyword }.mapNotNull {
-            compileKeyword(it, context, updatedBaseUri, indexedDocuments)
+            compileKeyword(it, schema, schemaObject, context)
         }
 
         return JsonObjectSchema(
@@ -76,21 +67,21 @@ internal object SchemaParser {
     }
 
     /**
-     * Compiles [keyword]'s validator for the schema in [context], or returns null when that schema has none of the
-     * keyword's properties or the keyword adds no validator.  Its subschemas are compiled lazily, each with [baseUri],
-     * the base URI inside that schema.
+     * Compiles [keyword]'s validator for [schema], or returns null when [schemaObject] has none of the keyword's
+     * properties or the keyword adds no validator.  Its subschemas are compiled lazily, each with the base URI inside
+     * [schema].
      */
     private fun compileKeyword(
         keyword: SchemaKeyword,
-        context: KeywordContext,
-        baseUri: UriReference,
-        indexedDocuments: IndexedSchemaDocuments
+        schema: SchemaNode,
+        schemaObject: KsonObject,
+        context: KeywordContext
     ): JsonSchemaValidator? {
-        if (keyword.names.none { it in context.properties }) return null
-        val compilableSubschemas = keyword.declaredSubschemas(context.schema).map { declared ->
+        if (keyword.names.none { it in schemaObject.propertyLookup }) return null
+        val compilableSubschemas = keyword.declaredSubschemas(schemaObject).map { declared ->
             val propertyName = (declared.applies as? Applies.Property)?.name
             CompilableSubschema(declared) {
-                parseSchemaElement(declared.value, context.messageSink, baseUri, indexedDocuments, propertyName)
+                parseSchemaElement(schema.enter(declared.value), context.messageSink, propertyName)
             }
         }
         return keyword.compile(context, compilableSubschemas)

@@ -4,7 +4,7 @@ package org.kson.schema
  * Which part of the instance a subschema validates, relative to the instance its parent schema validates.  For
  * example, a subschema under `properties/name` validates the parent instance's `name` property.
  */
-internal sealed interface Applies {
+sealed interface Applies {
     /** The same instance, as for an `allOf` member */
     data object InPlace : Applies
 

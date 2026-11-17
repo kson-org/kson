@@ -27,18 +27,6 @@ class IndexedSchemaDocuments(
     val root: SchemaDocument,
     additionalDocuments: List<SchemaDocument> = emptyList()
 ) {
-    /**
-     * A schema value found while indexing
-     *
-     * @param baseUri The base URI [value] is read under, before its own `$id` applies
-     * @param subschemaBaseUri The base URI everything inside [value] is read under
-     */
-    private data class IndexedSchema(
-        val value: KsonValue,
-        val baseUri: UriReference,
-        val subschemaBaseUri: UriReference
-    )
-
     /** A `$ref`'s value and the base URI it resolves against */
     private data class Reference(val ref: String, val baseUri: UriReference)
 
@@ -48,16 +36,16 @@ class IndexedSchemaDocuments(
      * @param schemasByUri The schemas a retrieval URI or an `$id` identifies, by that URI
      */
     private class Index(
-        val schemasByUri: Map<UriReference, IndexedSchema>,
-        val schemas: List<IndexedSchema>,
+        val schemasByUri: Map<UriReference, SchemaNode>,
+        val schemas: List<SchemaNode>,
         val references: List<Reference>
     ) {
         /** Resolves [ref] within this index */
-        fun resolveRef(ref: String, currentBaseUri: UriReference): ResolvedRef? {
+        fun resolveRef(ref: String, currentBaseUri: UriReference): SchemaNode? {
             val refUri = currentBaseUri.resolve(ref)
             val resourceUri = refUri.withoutFragment()
             val identified = schemasByUri[refUri.withoutEmptyFragment()]
-            if (identified != null) return ResolvedRef(identified.value, identified.baseUri)
+            if (identified != null) return identified
 
             val pointer = (refUri.fragmentPointer() as? FragmentPointer.Valid)?.pointer ?: return null
             return schemasByUri[resourceUri]?.let { resolveJsonPointer(pointer, it) }
@@ -65,26 +53,24 @@ class IndexedSchemaDocuments(
 
         /** The values the [references] lead to that are not indexed */
         fun unindexedReferenceTargets(): List<KsonValue> = references.mapNotNull { reference ->
-            resolveRef(reference.ref, reference.baseUri)?.resolvedValue?.takeIf { schemaOf(it) == null }
+            resolveRef(reference.ref, reference.baseUri)?.value?.takeIf { schemaOf(it) == null }
         }
 
-        fun schemaOf(value: KsonValue): IndexedSchema? = schemas.firstOrNull { it.value === value }
+        fun schemaOf(value: KsonValue): SchemaNode? = schemas.firstOrNull { it.value === value }
 
         /** The innermost indexed schema enclosing the last value of [path], which must start at an indexed schema */
-        fun enclosingSchemaOf(path: List<KsonValue>): IndexedSchema =
+        fun enclosingSchemaOf(path: List<KsonValue>): SchemaNode =
             path.dropLast(1).asReversed().firstNotNullOf(::schemaOf)
 
-        /** The value [pointer] addresses within [resource], and the base URI that value is read under */
-        private fun resolveJsonPointer(pointer: JsonPointer, resource: IndexedSchema): ResolvedRef? {
+        /** Returns the schema [pointer] points to within [resource], or null if nothing is there */
+        private fun resolveJsonPointer(pointer: JsonPointer, resource: SchemaNode): SchemaNode? {
             val pathToTarget = KsonValueWalker.nodesAlong(resource.value, TreePointer<KsonValue>(pointer))
             if (pathToTarget.size < pointer.tokens.size) return null
             val target = pathToTarget.lastOrNull() ?: resource.value
-            val indexedTarget = schemaOf(target)
-            if (indexedTarget != null) return ResolvedRef(target, indexedTarget.baseUri)
+            schemaOf(target)?.let { return it }
 
             // extension data gets its base URI from the schemas enclosing it
-            val enclosingSchema = enclosingSchemaOf(listOf(resource.value) + pathToTarget)
-            return ResolvedRef(target, enclosingSchema.subschemaBaseUri)
+            return enclosingSchemaOf(listOf(resource.value) + pathToTarget).enter(target)
         }
     }
 
@@ -95,8 +81,14 @@ class IndexedSchemaDocuments(
     /** The base URI [root]'s value is read under: its retrieval URI without a fragment, or else empty */
     val rootBaseUri: UriReference = root.initialBaseUri
 
+    /** The root schema, which is [root]'s value with [rootBaseUri] as its base URI */
+    internal val rootSchema: SchemaNode = SchemaNode(root.value, rootBaseUri, this)
+
+    /** The root schema with its chain of `$ref`s followed (see [resolveRefIfPresent]) */
+    val resolvedRootSchema: SchemaNode by lazy { resolveRefIfPresent(rootSchema) }
+
     /** The base URI everything inside [root]'s value is read under */
-    val rootSubschemaBaseUri: UriReference = baseUriWithin(root.value, rootBaseUri)
+    val rootSubschemaBaseUri: UriReference = rootSchema.innerBaseUri
 
     init {
         require(additionalDocuments.all { it.initialBaseUri.toString().isNotEmpty() }) {
@@ -122,30 +114,27 @@ class IndexedSchemaDocuments(
      *
      * @param ref The reference string (e.g., "#foo", "#/definitions/address", "other.json#/definitions/address")
      * @param currentBaseUri The current base URI context for resolving relative references
-     * @return The referenced value and the base URI it is read under, or null if not found, as when [ref]'s fragment
-     *   is a malformed JSON Pointer
+     * @return The schema [ref] points to, or null if none is found, as when [ref]'s fragment is a malformed JSON
+     *   Pointer
      */
-    fun resolveRef(ref: String, currentBaseUri: UriReference): ResolvedRef? = index.resolveRef(ref, currentBaseUri)
+    fun resolveRef(ref: String, currentBaseUri: UriReference): SchemaNode? = index.resolveRef(ref, currentBaseUri)
 
     /**
-     * Resolves the `$ref` in [value], if any, following a chain of `$ref`s to the schema it ultimately
-     * refers to.  Keywords beside a `$ref`, `$id` included, are ignored.  A `$ref` that doesn't resolve or leads back
-     * into the chain ends it, and becomes the result's [unresolvedRef][ResolvedRef.unresolvedRef].
-     *
-     * @param value The schema value that might contain a `$ref`
-     * @param currentBaseUri The base URI [value] is read under
-     * @return The schema at the end of the chain, and the base URI it is read under
+     * Follows the chain of `$ref`s from [schema] and returns the schema at its end, which is [schema] itself if it has
+     * no `$ref`.  Each `$ref` resolves against the base URI inside the schema that contains it.  If a `$ref` doesn't
+     * resolve, or leads back into the chain, the chain ends at the schema containing it, with that `$ref` as the
+     * result's [unresolvedRef][SchemaNode.unresolvedRef].
      */
-    fun resolveRefIfPresent(value: KsonValue, currentBaseUri: UriReference): ResolvedRef {
+    internal fun resolveRefIfPresent(schema: SchemaNode): SchemaNode {
         val followed = mutableListOf<KsonValue>()
-        var current = ResolvedRef(value, currentBaseUri)
+        var current = schema
         while (true) {
-            val ref = (current.resolvedValue as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
+            val ref = (current.value as? KsonObject)?.propertyLookup?.get("\$ref") as? KsonString
                 ?: return current
-            followed.add(current.resolvedValue)
-            val target = resolveRef(ref.value, current.resolvedValueBaseUri)
+            followed.add(current.value)
+            val target = resolveRef(ref.value, current.innerBaseUri)
                 ?: return current.copy(unresolvedRef = UnresolvedRef.MissingTarget(ref))
-            val leadsBack = followed.any { it === target.resolvedValue }
+            val leadsBack = followed.any { it === target.value }
             if (leadsBack) return current.copy(unresolvedRef = UnresolvedRef.Cycle(ref))
             current = target
         }
@@ -163,54 +152,47 @@ class IndexedSchemaDocuments(
         }
     }
 
-    /** Indexes the [documents], and the [referencedValues] under the base URI of the schemas enclosing them */
+    /**
+     * Indexes the [documents], and each of the [referencedValues] as if it were a subschema of the innermost schema
+     * around it
+     */
     private fun buildIndex(referencedValues: List<KsonValue>): Index {
         val builder = IndexBuilder()
         for (document in documents) {
-            builder.addSchema(document.value, document.initialBaseUri, isDocumentRoot = true)
+            builder.addSchema(SchemaNode(document.value, document.initialBaseUri, this), isDocumentRoot = true)
         }
         // outermost first, so a value inside another gets the base URI the outer one gives it
         val pathsToReferencedValues = referencedValues.mapNotNull(::pathTo).sortedBy { it.size }
         for (pathToValue in pathsToReferencedValues) {
             val value = pathToValue.last()
             if (builder.index.schemaOf(value) != null) continue
-            val enclosingSchema = builder.index.enclosingSchemaOf(pathToValue)
-            builder.addSchema(value, enclosingSchema.subschemaBaseUri)
+            builder.addSchema(builder.index.enclosingSchemaOf(pathToValue).enter(value))
         }
         return builder.index
     }
 
     /** Collects schemas into its [index], which holds each one as soon as it is added */
     private class IndexBuilder {
-        private val schemasByUri = mutableMapOf<UriReference, IndexedSchema>()
-        private val schemas = mutableListOf<IndexedSchema>()
+        private val schemasByUri = mutableMapOf<UriReference, SchemaNode>()
+        private val schemas = mutableListOf<SchemaNode>()
         private val references = mutableListOf<Reference>()
         val index = Index(schemasByUri, schemas, references)
 
         /**
-         * Adds [value] and its subschemas, and records their `$ref`s.  [value] is keyed by any new base URI its `$id`
-         * sets, and by [enclosingBaseUri] if [isDocumentRoot].
-         *
-         * @param enclosingBaseUri The base URI [value] is read under: its document's initial base URI if
-         *   [isDocumentRoot]
+         * Adds [schema] and its subschemas, and records their `$ref`s.  [schema] is indexed under the base URI its
+         * `$id` sets, if that differs from the one it inherits, and under the one it inherits if [isDocumentRoot].
          */
-        fun addSchema(
-            value: KsonValue,
-            enclosingBaseUri: UriReference,
-            isDocumentRoot: Boolean = false
-        ) {
-            val subschemaBaseUri = baseUriWithin(value, enclosingBaseUri)
-            val setsANewBaseUri = subschemaBaseUri != enclosingBaseUri
-            val schema = IndexedSchema(value, enclosingBaseUri, subschemaBaseUri)
+        fun addSchema(schema: SchemaNode, isDocumentRoot: Boolean = false) {
+            val subschemaBaseUri = schema.innerBaseUri
 
             schemas.add(schema)
-            if (isDocumentRoot) schemasByUri[enclosingBaseUri] = schema
-            if (setsANewBaseUri) schemasByUri[subschemaBaseUri] = schema
-            val schemaObject = value as? KsonObject ?: return
+            if (isDocumentRoot) schemasByUri[schema.baseUri] = schema
+            if (subschemaBaseUri != schema.baseUri) schemasByUri[subschemaBaseUri] = schema
+            val schemaObject = schema.value as? KsonObject ?: return
             val ref = schemaObject.propertyLookup["\$ref"] as? KsonString
-            if (ref != null) references.add(Reference(ref.value, enclosingBaseUri))
+            if (ref != null) references.add(Reference(ref.value, subschemaBaseUri))
             // keywords beside a `$ref` are ignored, but the schemas they hold can still be referenced
-            draft7Keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { addSchema(it.value, subschemaBaseUri) }
+            draft7Keywords.flatMap { it.declaredSubschemas(schemaObject) }.forEach { addSchema(schema.enter(it.value)) }
         }
     }
 
@@ -239,7 +221,7 @@ private val SchemaDocument.initialBaseUri: UriReference
  * The base URI everything inside [schema] is read under, [schema] itself being read under [baseUri]: the URI
  * [schema]'s `$id` resolves to against [baseUri], or [baseUri] when it has none or holds a `$ref`.
  */
-fun baseUriWithin(schema: KsonValue, baseUri: UriReference): UriReference {
+internal fun baseUriWithin(schema: KsonValue, baseUri: UriReference): UriReference {
     val schemaObject = schema as? KsonObject ?: return baseUri
     val holdsRef = schemaObject.propertyLookup["\$ref"] is KsonString
     val id = schemaObject.propertyLookup["\$id"] as? KsonString
@@ -249,31 +231,3 @@ fun baseUriWithin(schema: KsonValue, baseUri: UriReference): UriReference {
 
 /** This URI without its fragment when that is empty, as `other.json#` identifies the same schema as `other.json` */
 private fun UriReference.withoutEmptyFragment(): UriReference = if (fragment == "") withoutFragment() else this
-
-/**
- * A schema node resolved during navigation, carrying the context of how it was found.
- *
- * @param resolvedValue The schema value at this location
- * @param resolvedValueBaseUri The base URI [resolvedValue] is read under, before its own `$id` applies
- * @param unresolvedRef The `$ref` [resolvedValue] holds that couldn't be followed, if any
- */
-data class ResolvedRef(
-    val resolvedValue: KsonValue,
-    val resolvedValueBaseUri: UriReference,
-    val unresolvedRef: UnresolvedRef? = null
-) {
-    /** True when [resolvedValue] holds an [unresolvedRef] */
-    val endsAtUnresolvedRef: Boolean get() = unresolvedRef != null
-}
-
-/** A `$ref` that couldn't be followed to a schema, and why */
-sealed interface UnresolvedRef {
-    /** The `$ref`'s value */
-    val ref: KsonString
-
-    /** [ref] addresses no schema */
-    data class MissingTarget(override val ref: KsonString) : UnresolvedRef
-
-    /** [ref] leads back to a schema earlier in its chain of `$ref`s */
-    data class Cycle(override val ref: KsonString) : UnresolvedRef
-}

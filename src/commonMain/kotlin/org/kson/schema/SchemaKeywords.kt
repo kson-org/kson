@@ -49,7 +49,7 @@ internal object RefKeyword : SchemaKeyword(setOf($$"$ref")) {
             context.rejectSchema(UnresolvedRef.MissingTarget(ref))
             return null
         }
-        return RefValidator(target, context.indexedDocuments, ref.value)
+        return RefValidator(target, ref.value)
     }
 }
 
