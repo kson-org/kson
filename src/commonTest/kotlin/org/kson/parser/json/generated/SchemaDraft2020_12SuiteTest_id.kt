@@ -48,7 +48,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::base URI change::base URI change ref valid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -85,7 +93,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """)
+            """    schemaTestId: "id::base URI change::base URI change ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChange/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -93,7 +109,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change - change folder -> number is valid"
      *
      * Test ID: "id::base URI change - change folder::number is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
         
@@ -127,7 +147,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::base URI change - change folder::number is valid"    """)
+            """    schemaTestId: "id::base URI change - change folder::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolder/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -173,7 +201,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::base URI change - change folder::string is invalid"    """)
+            """    schemaTestId: "id::base URI change - change folder::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolder/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -181,7 +217,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "base URI change - change folder in subschema -> number is valid"
      *
      * Test ID: "id::base URI change - change folder in subschema::number is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
         
@@ -219,7 +259,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::base URI change - change folder in subschema::number is valid"    """)
+            """    schemaTestId: "id::base URI change - change folder in subschema::number is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -269,7 +317,15 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::base URI change - change folder in subschema::string is invalid"    """)
+            """    schemaTestId: "id::base URI change - change folder in subschema::string is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -565,7 +621,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "$id must be resolved against nearest parent, not just immediate parent -> number is valid"
      *
      * Test ID: "id::$id must be resolved against nearest parent, not just immediate parent::number is valid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_13() {
         
@@ -606,7 +666,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "$id must be resolved against nearest parent, not just immediate parent -> non-number is invalid"
      *
      * Test ID: "id::$id must be resolved against nearest parent, not just immediate parent::non-number is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_14() {
         
@@ -1675,7 +1739,11 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
      *     "URN ref with nested pointer ref -> a non-string is invalid"
      *
      * Test ID: "id::URN ref with nested pointer ref::a non-string is invalid"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_44() {
         
@@ -1737,7 +1805,26 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "$ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1773,7 +1860,26 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """)
+            $$"""    schemaTestId: "id::retrieved nested refs resolve relative to their URI not $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested/foo-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "object",
+                        "properties": {
+                            "foo": {
+                                "$ref": "string.json"
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/nested/string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "string"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1800,7 +1906,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id::remote HTTP ref with different $id::number is invalid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/different-id-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/real-id-ref-string.json",
+                        "$defs": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "#/$defs/bar"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1827,7 +1947,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id::remote HTTP ref with different $id::string is valid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/different-id-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/real-id-ref-string.json",
+                        "$defs": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "#/$defs/bar"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1854,7 +1988,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::number is invalid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/urn-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "urn:uuid:feebdaed-ffff-0000-2020-1200deadbeef",
+                        "$defs": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "#/$defs/bar"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1881,7 +2029,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::string is valid"    """)
+            $$"""    schemaTestId: "id::remote HTTP ref with different URN $id::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/urn-ref-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "urn:uuid:feebdaed-ffff-0000-2020-1200deadbeef",
+                        "$defs": {
+                            "bar": {
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "#/$defs/bar"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1908,7 +2070,21 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "id::remote HTTP ref with nested absolute ref::number is invalid"    """)
+            """    schemaTestId: "id::remote HTTP ref with nested absolute ref::number is invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested-absolute-ref-to-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "bar": {
+                                "$id": "http://localhost:1234/the-nested-id.json",
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "http://localhost:1234/the-nested-id.json"
+                    }
+                """
+            ))
     }
 
     /**
@@ -1935,6 +2111,20 @@ class SchemaDraft2020_12SuiteTest_id : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "id::remote HTTP ref with nested absolute ref::string is valid"    """)
+            """    schemaTestId: "id::remote HTTP ref with nested absolute ref::string is valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/nested-absolute-ref-to-string.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$defs": {
+                            "bar": {
+                                "$id": "http://localhost:1234/the-nested-id.json",
+                                "type": "string"
+                            }
+                        },
+                        "$ref": "http://localhost:1234/the-nested-id.json"
+                    }
+                """
+            ))
     }
 }

@@ -1,7 +1,6 @@
 package org.kson.parser.json.generated
 
 import org.kson.schema.JsonSchemaTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 /**
@@ -265,11 +264,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> valid tree"
      *
      * Test ID: "ref::Recursive references between schemas::valid tree"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_9() {
         
@@ -316,7 +311,42 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::valid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "$ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -324,11 +354,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      *     "Recursive references between schemas -> invalid tree"
      *
      * Test ID: "ref::Recursive references between schemas::invalid tree"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_10() {
         
@@ -375,7 +401,42 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """)
+            """    schemaTestId: "ref::Recursive references between schemas::invalid tree"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/tree" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "description": "tree of nodes",
+                        "type": "object",
+                        "properties": {
+                            "meta": {
+                                "type": "string"
+                            },
+                            "nodes": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "node"
+                                }
+                            }
+                        }
+                    }
+                """,
+                "http://localhost:1234/node" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "description": "node",
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "subtree": {
+                                "$ref": "tree"
+                            }
+                        }
+                    }
+                """
+            ))
     }
 
     /**
@@ -563,11 +624,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref valid"
      *
      * Test ID: "ref::remote ref::remote ref valid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_17() {
         
@@ -582,7 +639,15 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "ref::remote ref::remote ref valid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref valid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 
     /**
@@ -590,11 +655,7 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
      *     "remote ref -> remote ref invalid"
      *
      * Test ID: "ref::remote ref::remote ref invalid"
-     *
-     * TODO implement the schema functionality under test, then run this test by removing its
-     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
-    @Ignore
     @Test
     fun jsonSchemaSuiteTest_18() {
         
@@ -609,6 +670,14 @@ class SchemaDraft7SuiteTest_ref : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "ref::remote ref::remote ref invalid"    """)
+            """    schemaTestId: "ref::remote ref::remote ref invalid"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/integer.json" to $$"""
+                    {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "integer"
+                    }
+                """
+            ))
     }
 }

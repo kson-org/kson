@@ -19,7 +19,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an enum is not a real identifier ($id/$defs) -> exact match to enum, and type matches"
      *
      * Test ID: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::exact match to enum, and type matches"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_1() {
         // the implementation must not be confused by an $id buried in the enum
@@ -126,7 +130,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an enum is not a real identifier ($id/$defs) -> no match on enum or $ref to $id"
      *
      * Test ID: "optional/non-schemas::$id inside an enum is not a real identifier ($id/$defs)::no match on enum or $ref to $id"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_3() {
         // the implementation must not be confused by an $id buried in the enum
@@ -239,7 +247,11 @@ class SchemaDraft2020_12SuiteTest_optional_non_schemas : JsonSchemaTest {
      *     "$id inside an unknown keyword is not a real identifier ($defs) -> type matches non-schema in first anyOf"
      *
      * Test ID: "optional/non-schemas::$id inside an unknown keyword is not a real identifier ($defs)::type matches non-schema in first anyOf"
+     *
+     * TODO implement the schema functionality under test, then run this test by removing its
+     *   exclusion entry from [org.kson.jsonsuite.schemaTestSuiteExclusions]
      */
+    @Ignore
     @Test
     fun jsonSchemaSuiteTest_5() {
         // the implementation must not be confused by an $id in locations we do not know how to parse

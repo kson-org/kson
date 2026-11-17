@@ -646,7 +646,7 @@ class SchemaInfoLocationTest {
                 description: N
                 .
               .
-            '$defs':
+            definitions:
               N:
                 '$id': 'sub/'
                 allOf:

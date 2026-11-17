@@ -20,15 +20,18 @@ class PinsTest {
 
     private fun compiled(schema: String): JsonSchema {
         val node = kson(schema)
-        return assertNotNull(compile(node, UriReference.parse(""), SchemaIdLookup(node)), "should compile: $schema")
+        return assertNotNull(
+            compile(node, UriReference.parse(""), SchemaIdLookup(SchemaDocument(node))),
+            "should compile: $schema"
+        )
     }
 
     private fun branchesOf(union: String): List<JsonSchema> {
         val root = kson(union) as KsonObject
-        val idLookup = SchemaIdLookup(root)
+        val idLookup = SchemaIdLookup(SchemaDocument(root))
         val oneOf = root.propertyLookup.getValue("oneOf") as KsonList
         return oneOf.elements.map {
-            val baseUri = idLookup.root.descend(listOf(oneOf, it)).resolvedValueBaseUri
+            val baseUri = ResolvedRef(root, idLookup.rootBaseUri).descend(listOf(oneOf, it)).resolvedValueBaseUri
             assertNotNull(compile(it, baseUri, idLookup), "should compile: $it")
         }
     }
@@ -748,7 +751,7 @@ class PinsTest {
                         .
                       .
                     .
-                '$defs':
+                definitions:
                   N:
                     '$id': 'sub/'
                     type: array

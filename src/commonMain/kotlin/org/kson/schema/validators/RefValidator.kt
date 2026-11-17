@@ -25,11 +25,18 @@ internal class RefValidator(
     private val refParseResult: Pair<JsonSchema?, List<LoggedMessage>> by lazy {
         val parseMessageSink = MessageSink()
         // TODO these parsed $ref schemas should be cached for efficiency
-        val schema = SchemaParser.parseSchemaElement(
-            resolvedRef.resolvedValue,
-            parseMessageSink,
-            resolvedRef.resolvedValueBaseUri,
-            idLookup)
+        val chainEnd = idLookup.resolveRefIfPresent(resolvedRef.resolvedValue, resolvedRef.resolvedValueBaseUri)
+        val unresolvedRef = chainEnd.unresolvedRef
+        val schema = if (unresolvedRef != null) {
+            SchemaParser.reportUnresolvedRef(unresolvedRef, parseMessageSink)
+            null
+        } else {
+            SchemaParser.parseSchemaElement(
+                chainEnd.resolvedValue,
+                parseMessageSink,
+                chainEnd.resolvedValueBaseUri,
+                idLookup)
+        }
         schema to parseMessageSink.loggedMessages()
     }
 

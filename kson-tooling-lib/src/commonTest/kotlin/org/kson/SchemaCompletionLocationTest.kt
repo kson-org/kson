@@ -2922,7 +2922,7 @@ class SchemaCompletionLocationTest {
                     .
                   .
                 .
-            '$defs':
+            definitions:
               N:
                 '$id': 'sub/'
                 type: array

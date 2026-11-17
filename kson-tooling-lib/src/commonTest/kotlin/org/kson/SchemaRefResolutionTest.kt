@@ -311,6 +311,27 @@ class SchemaRefResolutionTest {
     }
 
     @Test
+    fun testResolveRef_relativeToSchemaId() {
+        // `other.json` resolves against the root's $id to the $id of `Other`
+        assertRefResolution($$"""
+            {
+              "$id": "https://example.com/root.json",
+              "properties": {
+                "data": {
+                  "$ref": "other.json<cursor>"
+                }
+              },
+              "definitions": {
+                "Other": <target>{
+                  "$id": "other.json",
+                  "type": "string"
+                }</target>
+              }
+            }
+        """.trimIndent())
+    }
+
+    @Test
     fun testResolveRef_withNonUriSchemaId() {
         // Schema with a non-URI $id (e.g. a filename) should still resolve refs
         assertRefResolution($$"""

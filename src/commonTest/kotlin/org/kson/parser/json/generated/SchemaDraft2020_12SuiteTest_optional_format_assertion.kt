@@ -35,7 +35,28 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: valid string"    """)
+            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: valid string"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/format-assertion-false.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/draft2020-12/format-assertion-false.json",
+                        "$vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/format-assertion": false
+                        },
+                        "$dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            },
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/format-assertion"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -63,7 +84,28 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string"    """)
+            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: false::format-assertion: false: invalid string"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/format-assertion-false.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/draft2020-12/format-assertion-false.json",
+                        "$vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/format-assertion": false
+                        },
+                        "$dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            },
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/format-assertion"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -87,7 +129,28 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
                 }
             """,
             true,
-            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: valid string"    """)
+            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: valid string"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/format-assertion-true.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/draft2020-12/format-assertion-true.json",
+                        "$vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/format-assertion": true
+                        },
+                        "$dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            },
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/format-assertion"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 
     /**
@@ -115,6 +178,27 @@ class SchemaDraft2020_12SuiteTest_optional_format_assertion : JsonSchemaTest {
                 }
             """,
             false,
-            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string"    """)
+            """    schemaTestId: "optional/format-assertion::schema that uses custom metaschema with format-assertion: true::format-assertion: true: invalid string"    """,
+            externalSchemaSources = mapOf(
+                "http://localhost:1234/draft2020-12/format-assertion-true.json" to $$"""
+                    {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "$id": "http://localhost:1234/draft2020-12/format-assertion-true.json",
+                        "$vocabulary": {
+                            "https://json-schema.org/draft/2020-12/vocab/core": true,
+                            "https://json-schema.org/draft/2020-12/vocab/format-assertion": true
+                        },
+                        "$dynamicAnchor": "meta",
+                        "allOf": [
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/core"
+                            },
+                            {
+                                "$ref": "https://json-schema.org/draft/2020-12/meta/format-assertion"
+                            }
+                        ]
+                    }
+                """
+            ))
     }
 }
