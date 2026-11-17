@@ -650,22 +650,24 @@ enum class MessageType(
     },
     SCHEMA_STRING_LENGTH_TOO_SHORT(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Length")
+            return listOf("Minimum Length", "Actual Length")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val minLength = parsedArgs.getArg("Minimum Length")
-            return "String length must be >= $minLength"
+            val actualLength = parsedArgs.getArg("Actual Length")
+            return "String length must be >= $minLength, but is $actualLength"
         }
     },
     SCHEMA_STRING_LENGTH_TOO_LONG(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Length")
+            return listOf("Maximum Length", "Actual Length")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
             val maxLength = parsedArgs.getArg("Maximum Length")
-            return "String length must be <= $maxLength"
+            val actualLength = parsedArgs.getArg("Actual Length")
+            return "String length must be <= $maxLength, but is $actualLength"
         }
     },
     SCHEMA_VALUE_TYPE_MISMATCH(MessageSeverity.WARNING) {
@@ -742,42 +744,46 @@ enum class MessageType(
     },
     SCHEMA_ARRAY_TOO_LONG(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Items")
+            return listOf("Maximum Number Of Items", "Actual Number Of Items")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val maxItems = parsedArgs.getArg("Maximum Items")
-            return "Array length must be <= $maxItems"
+            val maxItems = parsedArgs.getArg("Maximum Number Of Items")
+            val actualItems = parsedArgs.getArg("Actual Number Of Items")
+            return "Array length must be <= $maxItems, but is $actualItems"
         }
     },
     SCHEMA_ARRAY_TOO_SHORT(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Items")
+            return listOf("Minimum Number Of Items", "Actual Number Of Items")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val minItems = parsedArgs.getArg("Minimum Items")
-            return "Array length must be >= $minItems"
+            val minItems = parsedArgs.getArg("Minimum Number Of Items")
+            val actualItems = parsedArgs.getArg("Actual Number Of Items")
+            return "Array length must be >= $minItems, but is $actualItems"
         }
     },
     SCHEMA_OBJECT_TOO_MANY_PROPERTIES(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Maximum Properties")
+            return listOf("Maximum Number Of Properties", "Actual Number Of Properties")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val maxProperties = parsedArgs.getArg("Maximum Properties")
-            return "Object must have <= $maxProperties properties"
+            val maxProperties = parsedArgs.getArg("Maximum Number Of Properties")
+            val actualProperties = parsedArgs.getArg("Actual Number Of Properties")
+            return "Object must have <= $maxProperties properties, but has $actualProperties"
         }
     },
     SCHEMA_OBJECT_TOO_FEW_PROPERTIES(MessageSeverity.WARNING) {
         override fun expectedArgs(): List<String> {
-            return listOf("Minimum Properties")
+            return listOf("Minimum Number Of Properties", "Actual Number Of Properties")
         }
 
         override fun doFormat(parsedArgs: ParsedErrorArgs): String {
-            val minProperties = parsedArgs.getArg("Minimum Properties")
-            return "Object must have >= $minProperties properties"
+            val minProperties = parsedArgs.getArg("Minimum Number Of Properties")
+            val actualProperties = parsedArgs.getArg("Actual Number Of Properties")
+            return "Object must have >= $minProperties properties, but has $actualProperties"
         }
     },
     SCHEMA_STRING_PATTERN_MISMATCH(MessageSeverity.WARNING) {
