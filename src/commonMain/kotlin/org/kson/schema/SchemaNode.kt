@@ -6,9 +6,9 @@ import org.kson.value.KsonString
 import org.kson.value.KsonValue
 
 /**
- * A schema together with what it takes to interpret it: the base URI it inherits, and the documents its `$ref`s can
- * point into.  Only core creates these, for each document's root and for the subschemas and `$ref` targets reached
- * from one.
+ * A schema together with what it takes to interpret it: the base URI it inherits, the draft that decides which
+ * keywords it has, and the documents its `$ref`s can point into.  Only core creates these, for each document's root
+ * and for the subschemas and `$ref` targets reached from one.
  *
  * @param baseUri The base URI that [value] inherits.  For a subschema, this is its parent's [innerBaseUri].  For a
  *   root schema, it is the document's base URI.  [value]'s own `$id` resolves against it.  A value has the same base
@@ -19,16 +19,17 @@ import org.kson.value.KsonValue
 data class SchemaNode internal constructor(
     val value: KsonValue,
     val baseUri: UriReference,
+    internal val draft: SchemaDraft,
     internal val indexedDocuments: IndexedSchemaDocuments,
     val unresolvedRef: UnresolvedRef? = null
 ) {
     val endsAtUnresolvedRef: Boolean get() = unresolvedRef != null
 
     /** The base URI inside [value], which its `$ref` resolves against and its subschemas inherit */
-    internal val innerBaseUri: UriReference by lazy { baseUriWithin(value, baseUri) }
+    internal val innerBaseUri: UriReference by lazy { baseUriWithin(value, baseUri, draft) }
 
     /** Returns a node for [child], a subschema or other value inside [value], with [innerBaseUri] as its base URI */
-    internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, indexedDocuments)
+    internal fun enter(child: KsonValue): SchemaNode = SchemaNode(child, innerBaseUri, draft, indexedDocuments)
 
     /**
      * The direct subschemas of this schema, in the order validation applies their keywords.  Each has its `$ref`s
@@ -36,7 +37,7 @@ data class SchemaNode internal constructor(
      */
     val subschemas: List<Subschema> by lazy {
         val schemaObject = value as? KsonObject ?: return@lazy emptyList()
-        draft7Keywords.flatMap { keyword ->
+        draft.keywords.flatMap { keyword ->
             val declaredSubschemas = keyword.declaredSubschemas(schemaObject)
             val alternatives = declaredSubschemas.filter { it.applies is Applies.Alternative }.map { enter(it.value) }
             val condition = declaredSubschemas.firstOrNull { it.applies == Applies.Condition }?.value
