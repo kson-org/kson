@@ -3,8 +3,8 @@ package org.kson.schema
 import org.kson.KsonCore
 import org.kson.schema.SchemaDecisions.accepts
 import org.kson.schema.SchemaDecisions.breaks
-import org.kson.schema.SchemaDecisions.narrowBranches
-import org.kson.schema.SchemaDecisions.narrowOnDiscriminators
+import org.kson.schema.SchemaDecisions.narrowByAllPins
+import org.kson.schema.SchemaDecisions.narrowByDiscriminators
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
 import org.kson.value.KsonValue
@@ -277,7 +277,7 @@ class SchemaDecisionsTest {
 
     @Test
     fun aMatchingPinDropsTheOthersAndSelectsItsBranch() {
-        assertSelected(narrowBranches(shapes, kson("kind: square")), chosen = listOf(1))
+        assertSelected(narrowByAllPins(shapes, kson("kind: square")), chosen = listOf(1))
     }
 
     @Test
@@ -297,7 +297,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, kson("kind: ellipse")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, kson("kind: ellipse")), chosen = listOf(0))
     }
 
     @Test
@@ -314,7 +314,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, kson("kind: Z")), "kind" to listOf("square"))
+        assertNoBranchFits(narrowByAllPins(branches, kson("kind: Z")), "kind" to listOf("square"))
     }
 
     @Test
@@ -339,8 +339,8 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
-        assertSelected(narrowBranches(branches, kson("kind: square")), chosen = listOf(1))
+        assertSelected(narrowByAllPins(branches, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, kson("kind: square")), chosen = listOf(1))
     }
 
     @Test
@@ -352,7 +352,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(shapes, wrongRadius), chosen = listOf(0))
+        assertSelected(narrowByAllPins(shapes, wrongRadius), chosen = listOf(0))
     }
 
     @Test
@@ -369,7 +369,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, kson("kind: circle")), chosen = listOf(0))
     }
 
     @Test
@@ -389,7 +389,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("kind: A")), survivors = listOf(0, 1))
+        assertOpen(narrowByAllPins(branches, kson("kind: A")), survivors = listOf(0, 1))
     }
 
     @Test
@@ -416,7 +416,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, document), chosen = listOf(1))
+        assertSelected(narrowByAllPins(branches, document), chosen = listOf(1))
     }
 
     @Test
@@ -443,7 +443,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, document), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, document), chosen = listOf(0))
     }
 
     @Test
@@ -466,7 +466,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, document), chosen = listOf(0, 1))
+        assertSelected(narrowByAllPins(branches, document), chosen = listOf(0, 1))
     }
 
     @Test
@@ -489,9 +489,9 @@ class SchemaDecisionsTest {
         )
         val document = kson("kind: square")
 
-        assertOpen(narrowBranches(branches, document), survivors = listOf(1))
-        assertOpen(narrowOnDiscriminators(branches, document), survivors = listOf(0, 1))
-        assertOpen(narrowOnDiscriminators(branches, kson("kind: circle")), survivors = listOf(0, 1))
+        assertOpen(narrowByAllPins(branches, document), survivors = listOf(1))
+        assertOpen(narrowByDiscriminators(branches, document), survivors = listOf(0, 1))
+        assertOpen(narrowByDiscriminators(branches, kson("kind: circle")), survivors = listOf(0, 1))
     }
 
     @Test
@@ -514,8 +514,8 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowOnDiscriminators(branches, kson("kind: circle")), chosen = listOf(0))
-        assertOpen(narrowOnDiscriminators(branches, kson("kind: square")), survivors = listOf(1))
+        assertSelected(narrowByDiscriminators(branches, kson("kind: circle")), chosen = listOf(0))
+        assertOpen(narrowByDiscriminators(branches, kson("kind: square")), survivors = listOf(1))
     }
 
     @Test
@@ -535,13 +535,13 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowOnDiscriminators(branches, kson("kind: square")), chosen = listOf(1))
-        assertOpen(narrowOnDiscriminators(branches, kson("kind: circel")), survivors = listOf(2))
+        assertSelected(narrowByDiscriminators(branches, kson("kind: square")), chosen = listOf(1))
+        assertOpen(narrowByDiscriminators(branches, kson("kind: circel")), survivors = listOf(2))
     }
 
     @Test
     fun aPinTheDocumentLacksDecidesNothing() {
-        assertOpen(narrowBranches(shapes, kson("radius: 3")), survivors = listOf(0, 1, 2))
+        assertOpen(narrowByAllPins(shapes, kson("radius: 3")), survivors = listOf(0, 1, 2))
 
         val branches = branchesOf(
             """
@@ -554,7 +554,7 @@ class SchemaDecisionsTest {
                         type: string
             """.trimIndent()
         )
-        assertOpen(narrowBranches(branches, kson("name: disc")), survivors = listOf(0, 1))
+        assertOpen(narrowByAllPins(branches, kson("name: disc")), survivors = listOf(0, 1))
     }
 
     @Test
@@ -570,13 +570,13 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("radius: 3")), survivors = listOf(0, 1, 2, 3))
+        assertOpen(narrowByAllPins(branches, kson("radius: 3")), survivors = listOf(0, 1, 2, 3))
     }
 
     @Test
     fun aValueNoBranchAdmitsListsEveryPinnedValue() {
         assertNoBranchFits(
-            narrowBranches(shapes, kson("kind: circel")),
+            narrowByAllPins(shapes, kson("kind: circel")),
             "kind" to listOf("circle", "square", "triangle")
         )
     }
@@ -600,7 +600,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, kson("kind: Z")), "kind" to listOf("A", "B", "C"))
+        assertNoBranchFits(narrowByAllPins(branches, kson("kind: Z")), "kind" to listOf("A", "B", "C"))
     }
 
     @Test
@@ -632,7 +632,7 @@ class SchemaDecisionsTest {
         )
 
         assertNoBranchFits(
-            narrowBranches(
+            narrowByAllPins(
                 branches,
                 kson(
                     """
@@ -645,7 +645,7 @@ class SchemaDecisionsTest {
             "mode" to listOf("read", "write", "sync")
         )
         assertNoBranchFits(
-            narrowBranches(
+            narrowByAllPins(
                 branches,
                 kson(
                     """
@@ -686,7 +686,7 @@ class SchemaDecisionsTest {
         )
 
         assertNoBranchFits(
-            narrowBranches(branches, modeWrittenFirst),
+            narrowByAllPins(branches, modeWrittenFirst),
             "kind" to listOf("A", "B"),
             "mode" to listOf("read", "write")
         )
@@ -712,7 +712,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, document))
+        assertNoBranchFits(narrowByAllPins(branches, document))
     }
 
     @Test
@@ -732,7 +732,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("kind: circel")), survivors = listOf(2))
+        assertOpen(narrowByAllPins(branches, kson("kind: circel")), survivors = listOf(2))
     }
 
     @Test
@@ -746,12 +746,12 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, kson("kind: circel")))
+        assertNoBranchFits(narrowByAllPins(branches, kson("kind: circel")))
     }
 
     @Test
     fun noBranchesDecideNothing() {
-        assertOpen(narrowBranches(emptyList(), kson("kind: circle")), survivors = emptyList())
+        assertOpen(narrowByAllPins(emptyList(), kson("kind: circle")), survivors = emptyList())
     }
 
     /** A union whose first branch has `kind` as a lone `$ref` to the definition `A` in [definitions]. */
@@ -774,26 +774,26 @@ class SchemaDecisionsTest {
     @Test
     fun aPropertyThatIsARefToAConstOrEnumPins() {
         val toConst = unionWithKindRef("A: { const: circle }")
-        assertSelected(narrowBranches(toConst, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(toConst, kson("kind: circle")), chosen = listOf(0))
 
         val toEnum = unionWithKindRef("A: { enum: [circle, ellipse] }")
-        assertNoBranchFits(narrowBranches(toEnum, kson("kind: Z")), "kind" to listOf("circle", "ellipse", "square"))
+        assertNoBranchFits(narrowByAllPins(toEnum, kson("kind: Z")), "kind" to listOf("circle", "ellipse", "square"))
     }
 
     @Test
     fun aPinIsReadThroughARefChain() {
         val branches = unionWithKindRef($$"A: { '$ref': '#/$defs/B' }, B: { const: circle }")
 
-        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, kson("kind: circle")), chosen = listOf(0))
     }
 
     @Test
     fun aRefTargetPinsByTheSameRuleAsAnInlineSchema() {
         val typeIsNoValidator = unionWithKindRef("A: { type: string, const: circle }")
-        assertSelected(narrowBranches(typeIsNoValidator, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(typeIsNoValidator, kson("kind: circle")), chosen = listOf(0))
 
         val twoValidators = unionWithKindRef("A: { enum: [circle], minLength: 1 }")
-        assertOpen(narrowBranches(twoValidators, kson("kind: circle")), survivors = listOf(0))
+        assertOpen(narrowByAllPins(twoValidators, kson("kind: circle")), survivors = listOf(0))
     }
 
     @Test
@@ -803,7 +803,7 @@ class SchemaDecisionsTest {
             $$"A: { '$ref': '#/$defs/A' }"
         )
         for (cycle in cycles) {
-            assertOpen(narrowBranches(unionWithKindRef(cycle), kson("kind: Z")), survivors = listOf(0))
+            assertOpen(narrowByAllPins(unionWithKindRef(cycle), kson("kind: Z")), survivors = listOf(0))
         }
     }
 
@@ -827,7 +827,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("child: Z")), survivors = listOf(0))
+        assertOpen(narrowByAllPins(branches, kson("child: Z")), survivors = listOf(0))
     }
 
     @Test
@@ -877,7 +877,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertNoBranchFits(narrowBranches(branches, document), "kind" to listOf("A", "B"))
+        assertNoBranchFits(narrowByAllPins(branches, document), "kind" to listOf("A", "B"))
     }
 
     @Test
@@ -902,7 +902,7 @@ class SchemaDecisionsTest {
                 """.trimIndent()
             )
 
-            assertOpen(narrowBranches(branches, kson("kind: Z")), survivors = listOf(0))
+            assertOpen(narrowByAllPins(branches, kson("kind: Z")), survivors = listOf(0))
         }
     }
 
@@ -928,7 +928,7 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertSelected(narrowBranches(branches, kson("kind: circle")), chosen = listOf(0))
+        assertSelected(narrowByAllPins(branches, kson("kind: circle")), chosen = listOf(0))
     }
 
     /** Each trip around this cycle applies the `$id` again, so it never returns under the same base URI. */
@@ -954,17 +954,17 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("kind: Z")), survivors = listOf(0))
+        assertOpen(narrowByAllPins(branches, kson("kind: Z")), survivors = listOf(0))
     }
 
     @Test
     fun aValueThatIsNotAnObjectRulesOutNoBranch() {
         val everyBranch = listOf(0, 1, 2)
 
-        assertOpen(narrowBranches(shapes, kson("3")), survivors = everyBranch)
-        assertOpen(narrowBranches(shapes, kson("circel")), survivors = everyBranch)
-        assertOpen(narrowBranches(shapes, kson("[1, 2]")), survivors = everyBranch)
-        assertOpen(narrowBranches(shapes, kson("%kind\n  circel\n%%")), survivors = everyBranch)
+        assertOpen(narrowByAllPins(shapes, kson("3")), survivors = everyBranch)
+        assertOpen(narrowByAllPins(shapes, kson("circel")), survivors = everyBranch)
+        assertOpen(narrowByAllPins(shapes, kson("[1, 2]")), survivors = everyBranch)
+        assertOpen(narrowByAllPins(shapes, kson("%kind\n  circel\n%%")), survivors = everyBranch)
     }
 
     @Test
@@ -981,15 +981,15 @@ class SchemaDecisionsTest {
             """.trimIndent()
         )
 
-        assertOpen(narrowBranches(branches, kson("3")), survivors = listOf(0, 1))
+        assertOpen(narrowByAllPins(branches, kson("3")), survivors = listOf(0, 1))
     }
 
     @Test
     fun aBranchThatDidNotCompilePinsNothingAndStaysOpen() {
         val circle = shapes.first()
 
-        assertOpen(narrowBranches(listOf(null, circle), kson("kind: square")), survivors = listOf(0))
-        assertSelected(narrowBranches(listOf(null, circle), kson("kind: circle")), chosen = listOf(1))
-        assertOpen(narrowBranches(listOf(null, null), kson("kind: circle")), survivors = listOf(0, 1))
+        assertOpen(narrowByAllPins(listOf(null, circle), kson("kind: square")), survivors = listOf(0))
+        assertSelected(narrowByAllPins(listOf(null, circle), kson("kind: circle")), chosen = listOf(1))
+        assertOpen(narrowByAllPins(listOf(null, null), kson("kind: circle")), survivors = listOf(0, 1))
     }
 }

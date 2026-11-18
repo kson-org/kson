@@ -54,21 +54,12 @@ object SchemaDecisions {
         return sink.loggedMessages().any { logged -> forgiving == null || logged.location !in forgiving }
     }
 
-    /**
-     * What the pins of [branches] alone say about [value].  A branch that [compile] couldn't build (`null`) pins
-     * nothing and stays open, and a [value] that isn't an object rules out no branch.
-     *
-     * @throws InvalidJsonPointerException when [value] is an object and a branch's own `$ref` or `allOf` reaches a
-     *   `$ref` whose JSON Pointer is malformed
-     */
-    internal fun narrowBranches(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
+    /** What the pins in [value] decide among [branches].  Every pin counts. */
+    internal fun narrowByAllPins(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
         narrow(branches, value, onlyDiscriminators = false)
 
-    /**
-     * [narrowBranches] where only discriminators count as pins.  A *discriminator* is a pin at least two
-     * branches share, or a lone pin its branch also requires (see [JsonObjectSchema.requiredProperties]).
-     */
-    internal fun narrowOnDiscriminators(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
+    /** What the pins in [value] decide among [branches].  Only [discriminators] count. */
+    internal fun narrowByDiscriminators(branches: List<JsonSchema?>, value: KsonValue): PinDecision =
         narrow(branches, value, onlyDiscriminators = true)
 
     private fun narrow(branches: List<JsonSchema?>, value: KsonValue, onlyDiscriminators: Boolean): PinDecision {
@@ -102,6 +93,7 @@ object SchemaDecisions {
         }
     }
 
+    /** Keeps the pins that choose a branch: a property several branches pin, or one its branch requires. */
     private fun discriminators(
         branches: List<JsonSchema?>,
         pins: List<Map<String, Set<KsonValue>>>

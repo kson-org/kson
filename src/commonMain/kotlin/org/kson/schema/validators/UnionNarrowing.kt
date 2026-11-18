@@ -25,10 +25,10 @@ import org.kson.validation.ValidationMode
  *    not every branch knows, or all of them if none do.  A branch *knows* a property it declares or
  *    requires, read through `$ref` and `allOf` by [JsonObjectSchema.knownProperties].
  *
- * Only discriminators decide in [ValidationMode.FULL] ([SchemaDecisions.narrowOnDiscriminators]), as a
+ * Only discriminators decide in [ValidationMode.FULL] ([SchemaDecisions.narrowByDiscriminators]), as a
  * lone optional pin is more likely a setting than a choice of branch.  That is a heuristic: a shared
  * optional setting qualifies too.  In [ValidationMode.PARTIAL] all pins decide
- * ([SchemaDecisions.narrowBranches]), which can move the report from the object holding a half-typed
+ * ([SchemaDecisions.narrowByAllPins]), which can move the report from the object holding a half-typed
  * value onto the value itself.
  *
  * Every branch leads for a non-object document.
@@ -102,9 +102,9 @@ private fun leadingBranches(
     }
     val document = ksonValue.propertyLookup
     val decision = if (mode == ValidationMode.FULL) {
-        SchemaDecisions.narrowOnDiscriminators(branches, ksonValue)
+        SchemaDecisions.narrowByDiscriminators(branches, ksonValue)
     } else {
-        SchemaDecisions.narrowBranches(branches, ksonValue)
+        SchemaDecisions.narrowByAllPins(branches, ksonValue)
     }
     return when (decision) {
         is PinDecision.NoBranchFits -> {
