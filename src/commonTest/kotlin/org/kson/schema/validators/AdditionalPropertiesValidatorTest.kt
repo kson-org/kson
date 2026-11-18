@@ -80,7 +80,26 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
     }
 
     @Test
-    fun testErrorMessageSkipsAllowedPropertiesWhenNoNamedProperties() {
+    fun testErrorMessageOmitsAllowedPropertiesWhenNoneDeclared() {
+        val errors = assertKsonSchemaErrors(
+            """
+                {
+                    "unknownProp": 1
+                }
+            """,
+            """
+                {
+                    "additionalProperties": false
+                }
+            """,
+            listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
+        )
+
+        assertEquals("Additional property 'unknownProp' is not allowed", errors[0].message.toString())
+    }
+
+    @Test
+    fun testErrorMessageListsPatternsWhenNoNamedProperties() {
         val errors = assertKsonSchemaErrors(
             """
                 {
@@ -100,11 +119,11 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
             listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
         )
 
-        assertEquals("Additional property 'unknownProp' is not allowed in TaskModel", errors[0].message.toString())
+        assertEquals("Additional property 'unknownProp' is not allowed in TaskModel. Property names must match '^x-'", errors[0].message.toString())
     }
 
     @Test
-    fun testErrorMessageSkipsPatternsWhenShowingAllowedProperties() {
+    fun testErrorMessageListsNamesAndPatterns() {
         val errors = assertKsonSchemaErrors(
             """
                 {
@@ -119,7 +138,8 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
                         "foo": {}
                     },
                     "patternProperties": {
-                        "^x-": {}
+                        "^x-": {},
+                        "^y-": {}
                     },
                     "additionalProperties": false
                 }
@@ -127,7 +147,7 @@ class AdditionalPropertiesValidatorTest : JsonSchemaTest {
             listOf(SCHEMA_ADDITIONAL_PROPERTIES_NOT_ALLOWED)
         )
 
-        assertEquals("Additional property 'unknownProp' is not allowed. Allowed properties: foo", errors[0].message.toString())
+        assertEquals("Additional property 'unknownProp' is not allowed. Allowed properties: foo, or names matching '^x-' or '^y-'", errors[0].message.toString())
     }
 
     @Test
