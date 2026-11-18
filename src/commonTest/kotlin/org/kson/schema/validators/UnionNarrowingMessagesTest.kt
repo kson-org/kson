@@ -263,7 +263,7 @@ class UnionNarrowingMessagesTest : JsonSchemaTest {
     }
 
     @Test
-    fun testMalformedPropertyRefDoesNotThrowAndTheEnumErrorIsReported() {
+    fun testMalformedRefOnAnAbsentPropertyStillReportsTheEnumError() {
         assertReportedInFullAndPartial(
             $$"""
                 oneOf:
