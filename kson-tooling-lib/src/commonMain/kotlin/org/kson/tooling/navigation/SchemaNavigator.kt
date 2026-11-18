@@ -4,9 +4,9 @@ import org.kson.ast.AstNode
 import org.kson.ast.ObjectNode
 import org.kson.parser.Location
 import org.kson.schema.ResolvedRef
-import org.kson.schema.SchemaDecisions
 import org.kson.schema.SchemaIdLookup
 import org.kson.schema.SchemaIdLookup.Companion.resolveUri
+import org.kson.schema.SchemaProgress
 import org.kson.value.KsonBoolean
 import org.kson.value.KsonList
 import org.kson.value.KsonObject
@@ -366,16 +366,16 @@ internal class SchemaNavigator(
         ref: ResolvedRef,
         docVal: KsonValue
     ): Boolean {
-        val schema = SchemaDecisions.compile(ref.resolvedValue, ref.resolvedValueBaseUri, idLookup) ?: return true
-        return !SchemaDecisions.breaks(schema, docVal, forgiving = incompleteRegion)
+        val progress = SchemaProgress(ref.resolvedValue, ref.resolvedValueBaseUri, idLookup)
+        return !progress.rejects(docVal, forgiving = incompleteRegion)
     }
 
     /** Classify [ifCondition] against [docVal] into an [IfState]. */
     private fun evaluateIf(ifCondition: KsonValue, baseUri: String, docVal: KsonValue?): IfState {
         if (docVal == null) return IfState.UNDETERMINED
-        val ifSchema = SchemaDecisions.compile(ifCondition, baseUri, idLookup) ?: return IfState.UNDETERMINED
-        if (SchemaDecisions.accepts(ifSchema, docVal)) return IfState.MATCH
-        return if (SchemaDecisions.breaks(ifSchema, docVal, forgiving = incompleteRegion)) {
+        val progress = SchemaProgress(ifCondition, baseUri, idLookup)
+        if (progress.accepts(docVal)) return IfState.MATCH
+        return if (progress.rejects(docVal, forgiving = incompleteRegion)) {
             IfState.NO_MATCH
         } else {
             IfState.UNDETERMINED
